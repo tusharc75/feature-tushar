@@ -714,6 +714,12 @@ const routes = {
   serializedPackagesDetail: {
     path: '/serialized-packages/detail'
   },
+  serializedPackagesInspection: {
+    path: '/serialized-packages-inspection'
+  },
+  serializedPackagesInspectionDetail: {
+    path: '/serialized-packages-inspection/detail'
+  },
   integration: {
     path: '/integration'
   },
