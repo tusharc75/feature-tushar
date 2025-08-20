@@ -80,8 +80,15 @@ const ManageSerializedAsset = ({
 
   const fetchFields = async () => {
     try {
-      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.serializedAsset, [
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.serializedAsset, [
         'currentOwnerType', 'currentOwner', 'purchaseOrder', 'bulkAssetCreation']);
+
+      if (assetLogFields && assetLogFields?.length) {
+        fieldsDataForUpdate = fieldsDataForUpdate.filter((d) => [...assetLogFields].includes(d.fieldName));
+        fieldsDataForUpdate.forEach((d) => {
+          d.disableOnEdit = false;
+        });
+      }
 
       const categoryOptions = fieldsDataAll.find((obj) => obj?.fieldName === 'productCategory')?.option || [];
       const plantsOptions = fieldsDataAll.find((obj) => obj?.fieldName === 'warehouse')?.option || [];
@@ -133,7 +140,7 @@ const ManageSerializedAsset = ({
               });
               setInitialData({
                 fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
-                values: getObjKeysWithValues(data, fieldsDataAll)
+                values: getObjKeysWithValues(data, assetLogFields && assetLogFields?.length ? fieldsDataForUpdate : fieldsDataAll)
               });
             }
           })
@@ -203,8 +210,7 @@ const ManageSerializedAsset = ({
     if (productInventoryId && isClone === false) {
       values._id = productInventoryId;
       if (assetLogFields) {
-        axiosInstance()
-          .put(`${serializedAsset.api}/update-with-log`, values)
+        axiosInstance().put(`${serializedAsset.api}/update-with-log`, values)
           .then(({ data: { data } }) => {
             setSubmitting(false);
             onSuccess();
