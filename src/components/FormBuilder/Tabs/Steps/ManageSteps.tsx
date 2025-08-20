@@ -22,7 +22,7 @@ const stepSchema = object().shape({
 
 const MATERIAL_TYPE = ['product', 'service', 'package'];
 
-const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource, openField = false, setOpenField = (value: boolean) => {} }) => {
+const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [initialValues, setInitialValues] = useState({});
@@ -31,6 +31,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource, openFie
   const [resourceOption, setResourceOption] = useState([]);
   const [resourceFieldOption, setResourceFieldOption] = useState([]);
   const [resourceFieldsLoading, setResourceFieldsLoading] = React.useState(false);
+  const [openField, setOpenField] = useState(false);
   const [openStepActions, setOpenStepActions] = useState(false);
 
   useEffect(() => {

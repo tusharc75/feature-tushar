@@ -14,8 +14,8 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { sidebarResource } from 'src/constants/helpers';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
-import OnboardingSteps from './OnboardingSteps';
 import ManageOnboardingTemplate from 'src/pages/OnboardingTemplate/ManageOnboardingTemplate';
+import DynamicTabs from 'src/components/FormBuilder/Tabs';
 
 const OnboardingTemplateDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -56,7 +56,6 @@ const OnboardingTemplateDetail = () => {
       const { data: { data } } = await axiosInstance().get(`${routes.onboardingTemplate.path}/${id}`);
       setAllowedToEdit(permissions?.onboardingTemplate?.isUpdate);
       setAllowedToDelete(permissions?.onboardingTemplate?.isDelete);
-      console.log("Data : - ", data)
       setOnboardingTemplateData(data);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -132,10 +131,9 @@ const OnboardingTemplateDetail = () => {
         </TabPanel>
         
         <TabPanel value={tabValue} index={1}>
-          <OnboardingSteps 
-            resourceData={onboardingTemplateData}
-            allSteps={onboardingTemplateData?.steps || []}
-            fetchData={fetchData}
+          <DynamicTabs
+            onboardingTemplateId={id} 
+            resource={sidebarResource.onboardingTemplate} 
           />
         </TabPanel>
       </Box>
