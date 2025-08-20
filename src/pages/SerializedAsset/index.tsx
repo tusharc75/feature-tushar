@@ -30,6 +30,7 @@ import {
   COLOUR_MASTER,
   INVENTORY_HISTORY_TYPE,
   INVENTORY_OWNER_TYPE,
+  SYSTEM_ASSET_STATUS,
   gridLoadingTimeout,
   prepareDataForGrid,
   serializedAsset,
@@ -418,16 +419,7 @@ const SerializedAsset = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['canDelete'] = [
-            ASSET_STATUS.new,
-            ASSET_STATUS.available,
-            ASSET_STATUS.lost,
-            ASSET_STATUS.customerPossession,
-            ASSET_STATUS.onPO,
-            ASSET_STATUS.scrap
-          ]?.includes(u?.status)
-            ? permissions?.serializedAsset?.isDelete
-            : false;
+          finalObject['canDelete'] = SYSTEM_ASSET_STATUS?.includes(u?.status) ? false : permissions?.serializedAsset?.isDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -860,12 +852,11 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.assetNumber : ''}`
-              : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
