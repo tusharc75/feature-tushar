@@ -844,6 +844,7 @@ const SerializedAsset = () => {
           onClose={() => setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {
             setShowManageProductInventoryDialog({ open: false, isClone: false, idToClone: null });
+            dispatch({ type: 'selection', selectedRecords: [] });
             fetchData();
           }}
         />
@@ -898,6 +899,7 @@ const SerializedAsset = () => {
           assetData={selectedRecords?.map((s) => ({ _id: s?._id, assetNumber: s?.assetNumber, status: s?.status }))}
           onSuccess={() => {
             setStatusChangeRequestDialog(false);
+            dispatch({ type: 'selection', selectedRecords: [] });
             fetchData();
           }}
         />
