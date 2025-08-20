@@ -22,11 +22,11 @@ import ManageSerializedPackages from 'src/pages/SerializedPackages/ManageSeriali
 import SerializedPackagesView from 'src/pages/SerializedPackages/View';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
-const SerializedPackagesDetail = ({ fromInspection = false }) => {
+const SerializedPackagesDetail = ({ resourceRendered = '' }) => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([fromInspection ? routes.serializedPackagesInspection : routes.serializedPackages]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([resourceRendered === sidebarResource.serializedPackagesInspection ? routes.serializedPackagesInspection : routes.serializedPackages]);
   const [serializedPackagesData, setSerializedPackagesData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
@@ -64,7 +64,7 @@ const SerializedPackagesDetail = ({ fromInspection = false }) => {
       } = await axiosInstance().get(`${routes.serializedPackages.path}/${id}`);
       setSerializedPackagesData({ ...data, currentOwner: data?.currentOwner?.optionLabel });
       setCustomizedRoutes([
-        fromInspection ?
+        resourceRendered === sidebarResource.serializedPackagesInspection ?
           { ...routes.serializedPackagesInspection, title: resources?.serializedPackagesInspection?.titlePlural } :
           { ...routes.serializedPackages, title: resources?.serializedPackages?.titlePlural },
         { title: data?.serializedPackageNumber }
@@ -142,7 +142,7 @@ const SerializedPackagesDetail = ({ fromInspection = false }) => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {fromInspection && permissions?.serializedPackages?.isUpdate && serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.available && (
+              {resourceRendered === sidebarResource.serializedPackagesInspection && permissions?.serializedPackages?.isUpdate && serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.available && (
                 <ThemeButton
                   id={'serialized-package-disassemble'}
                   onClick={() => setShowConfirmBoxDisassembled(true)}
@@ -150,12 +150,12 @@ const SerializedPackagesDetail = ({ fromInspection = false }) => {
                   Disassemble
                 </ThemeButton>
               )}
-              {permissions?.serializedPackages?.isUpdate && !fromInspection && (
+              {permissions?.serializedPackages?.isUpdate && resourceRendered != sidebarResource.serializedPackagesInspection && (
                 <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'} disabled={serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.disassembled}>
                   {'Edit'}
                 </ThemeButton>
               )}
-              {permissions?.serializedPackages?.isDelete && serializedPackagesData?.canDelete && !fromInspection && (
+              {permissions?.serializedPackages?.isDelete && serializedPackagesData?.canDelete && resourceRendered != sidebarResource.serializedPackagesInspection && (
                 <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
               <ActivityButton
@@ -192,7 +192,7 @@ const SerializedPackagesDetail = ({ fromInspection = false }) => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Assign serializedPackagesData={serializedPackagesData} fetchSerializedPackagesData={fetchData} disAssembled={serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.disassembled} fromInspection={fromInspection} />
+          <Assign serializedPackagesData={serializedPackagesData} fetchSerializedPackagesData={fetchData} disAssembled={serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.disassembled} fromInspection={resourceRendered === sidebarResource.serializedPackagesInspection} />
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
           <History id={serializedPackagesData?._id} />

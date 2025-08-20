@@ -58,7 +58,7 @@ import routes from './components/Helpers/Routes';
 import PrivateRoute from './components/PrivateRoute';
 import ScreenOrientationOverlay from './components/ScreenMessages/ScreenOrientationOverlay';
 import ColorModeProvider from './constants/AppConfig';
-import { compareVersions, customerAccount, customerContact, handleHardReload, supplierAccount, supplierContact } from './constants/helpers';
+import { compareVersions, customerAccount, customerContact, handleHardReload, sidebarResource, supplierAccount, supplierContact } from './constants/helpers';
 import ErrorBoundaryComponent from './ErrorBoundary';
 import { firebaseConfig } from './firebase';
 import { useLiveLocationTracking } from './hooks/useLiveLocationTracking';
@@ -302,8 +302,6 @@ import ShowFileUploader from 'src/components/ShowFileUploader';
 import OnboardingTemplate from 'src/pages/OnboardingTemplate';
 import OnboardingTemplateDetail from 'src/pages/OnboardingTemplate/OnboardingTemplateDetail';
 import QuickBookProxy from 'src/pages/Integration/QuickBookProxy';
-import SerializedPackagesInspection from 'src/pages/SerializedPackagesInspection';
-import SerializedPackagesInspectionDetail from 'src/pages/SerializedPackagesInspection/SerializedPackagesInspectionDetail';
 
 var notificationInterval: any = null;
 
@@ -1250,10 +1248,10 @@ function App() {
               <SerializedPackagesDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.serializedPackagesInspection.path}>
-              <SerializedPackagesInspection />
+              <SerializedPackages resourceRendered={sidebarResource.serializedPackagesInspection} />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.serializedPackagesInspectionDetail.path}/:id`}>
-              <SerializedPackagesInspectionDetail />
+              <SerializedPackagesDetail resourceRendered={sidebarResource.serializedPackagesInspection} />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.integration.path}`}>
               <Integration />

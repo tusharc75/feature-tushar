@@ -21,10 +21,10 @@ import ManageSerializedPackages from 'src/pages/SerializedPackages/ManageSeriali
 import { deleteDisable } from 'src/constants/messageHelpers';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
-const SerializedPackages = ({ fromInspection = false }) => {
+const SerializedPackages = ({ resourceRendered = '' }) => {
   const toastConfig = useContext(CustomToastContext);
 
-  const renderedFrom = fromInspection ? camelCase(sidebarResource?.serializedPackagesInspection) : camelCase(sidebarResource?.serializedPackages);
+  const renderedFrom = resourceRendered === sidebarResource.serializedPackagesInspection ? camelCase(sidebarResource?.serializedPackagesInspection) : camelCase(sidebarResource?.serializedPackages);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -67,7 +67,7 @@ const SerializedPackages = ({ fromInspection = false }) => {
 
   const fetchGridColumns = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serializedPackages, permissions?.serializedPackages?.isUpdate);
-    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, fromInspection ? routes.serializedPackagesInspectionDetail.path : routes.serializedPackagesDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, resourceRendered === sidebarResource.serializedPackagesInspection ? routes.serializedPackagesInspectionDetail.path : routes.serializedPackagesDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
@@ -285,8 +285,8 @@ const SerializedPackages = ({ fromInspection = false }) => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[fromInspection ? { ...routes.serializedPackagesInspection, title: resources?.serializedPackagesInspection?.titlePlural } : { ...routes.serializedPackages, title: resources?.serializedPackages?.titlePlural }]} />
-        {!fromInspection && (
+        <CustomBreadCrumbs routes={[resourceRendered === sidebarResource.serializedPackagesInspection ? { ...routes.serializedPackagesInspection, title: resources?.serializedPackagesInspection?.titlePlural } : { ...routes.serializedPackages, title: resources?.serializedPackages?.titlePlural }]} />
+        {resourceRendered != sidebarResource.serializedPackagesInspection && (
           <ImportExportLinks
             permissions={permissions?.serializedPackages}
             module={resources?.serializedPackages?.titlePlural}
@@ -309,8 +309,8 @@ const SerializedPackages = ({ fromInspection = false }) => {
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
-          isActionButtonVisible={!fromInspection}
-          isAddButtonVisible={!fromInspection}
+          isActionButtonVisible={resourceRendered != sidebarResource.serializedPackagesInspection}
+          isAddButtonVisible={resourceRendered != sidebarResource.serializedPackagesInspection}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
@@ -329,7 +329,7 @@ const SerializedPackages = ({ fromInspection = false }) => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.serializedPackages}
-            hideAction={fromInspection}
+            hideAction={resourceRendered === sidebarResource.serializedPackagesInspection}
           />
         ) : (
           <Box p={2} height={500}>
