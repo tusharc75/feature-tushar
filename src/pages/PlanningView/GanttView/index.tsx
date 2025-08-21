@@ -57,6 +57,7 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
   const hasMoreVerticalRef = useRef<boolean>(true);
   const pagerRef = useRef(new VisibleWindowPager({ limit: LIMIT }));
   const currentWindowKeyRef = useRef<string | null>(null);
+  const searchValueRef = useRef('');
 
   const scrollThrottleRef = useRef<number | null>(null);
 
@@ -73,7 +74,6 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
 
       const inflightKey = pager.crateKey(params);
       currentWindowKeyRef.current = inflightKey;
-      if (inflightRef.current.has(inflightKey)) return;
 
       const source = axios.CancelToken.source();
       inflightRef.current.set(inflightKey, source);
@@ -82,7 +82,7 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
         const resp = await axiosInstance().get('/planning-view/products-planning', {
           cancelToken: source.token,
           params: {
-            search,
+            ...(search?.trim() ? { search: search?.trim() } : {}),
             ...params,
             date: {
               from: dayjs(params.date.from).format('MM/DD/YYYY'),
@@ -106,16 +106,16 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
         setLoading(false);
         setMoreDataLoading(false);
         pager.onRequestResult({ date: params.date, skip: params.skip, limit: params.limit, ok: true });
+        queueMicrotask(() => {
+          inflightRef.current.get(inflightKey)?.cancel?.();
+          inflightRef.current.delete(inflightKey);
+        });
       } catch (error) {
         if (!axios.isCancel(error)) {
           toastConfig.setToastConfig(error);
         }
         pager.onRequestResult({ date: params.date, skip: params.skip, limit: params.limit, ok: false });
-      } finally {
-        queueMicrotask(() => {
-          inflightRef.current.get(inflightKey)?.cancel?.();
-          inflightRef.current.delete(inflightKey);
-        });
+        inflightRef.current.delete(inflightKey);
       }
     },
     [buildFromRows, resourcePolicy, selectedResource]
@@ -196,7 +196,7 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
           const initial: TimeRange = { start: win.start, end: win.end };
           currentRangeRef.current = initial;
           // only fetch the visible window, first page
-          fetchVisible({ params: pagerRef.current.getParamsForVisible(initial), initial: true });
+          fetchVisible({ params: pagerRef.current.getParamsForVisible(initial), initial: true, search: searchValueRef.current || undefined });
 
           const { start, end } = getWindow(timelineContainer.current);
           timelineRef.current?.setWindow(start, end);
@@ -228,12 +228,13 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
         const newKey = pagerRef.current.crateKey(params);
         if (newKey !== currentWindowKeyRef.current && params) {
           // cancel inflight
+          console.log('range change');
           inflightRef.current.forEach((src) => src.cancel?.('window changed'));
           inflightRef.current.clear();
 
           // pagerRef.current.reset(visible); // resets skip for this window
           hasMoreVerticalRef.current = true;
-          fetchVisible({ params, hasMore: true });
+          fetchVisible({ params, hasMore: true, search: searchValueRef.current || '' });
         }
 
         // re-bind header click handlers
@@ -257,6 +258,7 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
         hasMoreVerticalRef.current = true;
         groupsDSRef.current.clear();
         itemsDSRef.current.clear();
+        console.log('cleanup');
         inflightRef.current.forEach((src) => src.cancel?.('Resource switched'));
         inflightRef.current.clear();
       };
@@ -295,19 +297,25 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
           if (!win) return;
 
           const fromBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
-
+          const token = axios.CancelToken.source();
           if (fromBottom > 45) {
+            console.log('scroll');
+            inflightRef.current.forEach((e) => e.cancel());
             const params = pagerRef.current.getParamsForVisible({ start: win.start, end: win.end });
             if (params && !moreDataLoading && hasMoreVerticalRef.current) {
-              fetchVisible({ params });
+              const key = pagerRef.current.crateKey(params);
+              inflightRef.current.set(key, token);
+              fetchVisible({ params, search: searchValueRef.current || '' });
             }
           } else {
             const params = pagerRef.current.getParamsForNextPage({ start: win.start, end: win.end });
             if (params && !moreDataLoading && hasMoreVerticalRef.current) {
-              fetchVisible({ params, hasMore: true });
+              const key = pagerRef.current.crateKey(params);
+              inflightRef.current.set(key, token);
+              fetchVisible({ params, hasMore: true, search: searchValueRef.current || '' });
             }
           }
-        }, 120);
+        }, 500);
       };
 
       setGroupHeights();
@@ -325,13 +333,17 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
 
   useImperativeHandle(ref, () => ({
     fetchData: async () => {
-      const win = timelineRef.current?.getWindow();
+      const win = timelineRef.current?.getWindow() || getWindow(timelineContainer.current);
       if (!win) return;
       pagerRef.current.reset({ clearLoaded: true, clearPending: true, resetScroll: true });
       hasMoreVerticalRef.current = true;
       groupsDSRef.current.clear();
       itemsDSRef.current.clear();
-      await fetchVisible({ params: pagerRef.current.getParamsForVisible({ start: win.start, end: win.end }), initial: true });
+      await fetchVisible({
+        params: pagerRef.current.getParamsForVisible({ start: win.start, end: win.end }),
+        initial: true,
+        search: searchValueRef.current || undefined
+      });
     }
   }));
 
@@ -354,21 +366,35 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
   }, []);
 
   const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchedValue(e.target.value);
-    const truncatedValue = e.target.value.trim();
-    const win = timelineRef.current?.getWindow();
-    if (!win) return;
-    inflightRef.current.forEach((src) => src.cancel?.('window changed'));
-    inflightRef.current.clear();
-    pagerRef.current.reset({ clearLoaded: true, clearPending: true, resetScroll: true });
-    hasMoreVerticalRef.current = true;
-    groupsDSRef.current.clear();
-    itemsDSRef.current.clear();
-    await fetchVisible({
-      params: pagerRef.current.getParamsForVisible({ start: win.start, end: win.end }),
-      initial: true,
-      search: truncatedValue || undefined
-    });
+    try {
+      inflightRef.current.forEach((src) => src.cancel?.('Search changed'));
+      inflightRef.current.clear();
+
+      setSearchedValue(e.target.value);
+      searchValueRef.current = e.target.value;
+      const win = timelineRef.current?.getWindow();
+
+      if (!win) return;
+
+      queueMicrotask(async () => {
+        pagerRef.current.reset({ clearLoaded: true, clearPending: true, resetScroll: true });
+        hasMoreVerticalRef.current = true;
+        groupsDSRef.current.clear();
+        itemsDSRef.current.clear();
+        const params = pagerRef.current.getParamsForVisible({ start: win.start, end: win.end });
+        const key = pagerRef.current.crateKey(params);
+        const token = axios.CancelToken.source();
+
+        inflightRef.current.set(key, token);
+        await fetchVisible({
+          params: params,
+          initial: true,
+          search: e.target.value || undefined
+        });
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
