@@ -116,45 +116,18 @@ const NumberFilter: React.FC<Props> = ({ fieldData, deepFilters, setDeepFilters,
                     {sidebarIcon}
                     <p className="text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
                 </div>
-
-                <div className="ml-auto flex items-center space-x-2 border border-gray-300 pl-2">
-                    <Tooltip title="Add another condition (max 2)">
-                        <span>
-                            <IconButton
-                                onClick={() => setShowSecondRow(true)}
-                                aria-label="Add condition"
-                                disabled={showSecondRow}
-                            >
-                                <AddIcon />
-                            </IconButton>
-                        </span>
-                    </Tooltip>
-                    <span className="text-sm font-medium">operator</span>
-
-                    <Tooltip title="Remove condition (min 1)">
-                        <span>
-                            <IconButton
-                                onClick={() => setShowSecondRow(false)}
-                                aria-label="Remove condition"
-                                disabled={!showSecondRow}
-                            >
-                                <RemoveIcon />
-                            </IconButton>
-                        </span>
-                    </Tooltip>
-                </div>
             </div>
             <div className="mt-5 w-full">
                 <div className="flex gap-2 items-center">
                     <FormControl fullWidth size="small" variant="outlined" >
-                        <InputLabel id={`opA-${fieldName}`}>Select operator</InputLabel>
+                        <InputLabel id={`opA-${fieldName}`}>Filter</InputLabel>
                         <Select
                             fullWidth
                             size="small"
                             labelId={`opA-${fieldName}`}
                             id={`opA-${fieldName}-select`}
                             value={opA}
-                            label="Select operator"
+                            label="Filter"
                             onChange={(e) => setOpA(e.target.value as Op)}
                         >
                             {operators.map((o) => (
@@ -174,18 +147,29 @@ const NumberFilter: React.FC<Props> = ({ fieldData, deepFilters, setDeepFilters,
                         value={valA}
                         onChange={(e) => setValA(e.target.value)}
                     />
+                    <Tooltip title="Add another condition (max 2)">
+                        <span>
+                            <IconButton
+                                onClick={() => setShowSecondRow(true)}
+                                aria-label="Add condition"
+                                disabled={showSecondRow}
+                            >
+                                <AddIcon />
+                            </IconButton>
+                        </span>
+                    </Tooltip>
                 </div>
 
                 {showSecondRow && (
                     <div className="flex gap-2 mt-3 items-center">
                         <FormControl fullWidth size="small" variant="outlined">
-                            <InputLabel id={`opB-${fieldName}`}>Select operator</InputLabel>
+                            <InputLabel id={`opB-${fieldName}`}>Filter</InputLabel>
                             <Select
                                 size="small"
                                 labelId={`opB-${fieldName}`}
                                 id={`opB-${fieldName}-select`}
                                 value={opB}
-                                label="Select operator"
+                                label="Filter"
                                 onChange={(e) => setOpB(e.target.value as Op)}
                             >
                                 {operators.map((o) => (
@@ -205,6 +189,17 @@ const NumberFilter: React.FC<Props> = ({ fieldData, deepFilters, setDeepFilters,
                             value={valB}
                             onChange={(e) => setValB(e.target.value)}
                         />
+                        <Tooltip title="Remove condition (min 1)">
+                            <span>
+                                <IconButton
+                                    onClick={() => setShowSecondRow(false)}
+                                    aria-label="Remove condition"
+                                    disabled={!showSecondRow}
+                                >
+                                    <RemoveIcon />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
                     </div>
                 )}
 
