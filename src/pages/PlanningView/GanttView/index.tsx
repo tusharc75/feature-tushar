@@ -5,6 +5,7 @@ import moment from 'moment-timezone';
 import React, { useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import axiosInstance from 'src/axios/axiosInstance';
+import SearchBox from 'src/components/Helpers/SearchBox';
 import { DEFAULT_TIME_ZONE, sidebarResource } from 'src/constants/helpers';
 import ResourcePopover from 'src/pages/PlanningView/Calendar/ResourcePopover';
 import PlanningGroupTemplate from 'src/pages/PlanningView/GanttView/Templates/PlanningGroupTemplate';
@@ -40,6 +41,8 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
     eventData: null
   });
 
+  const [searchedValue, setSearchedValue] = useState('');
+
   const [resourcePolicy, setResourcePolicy] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [moreDataLoading, setMoreDataLoading] = useState<boolean>(false);
@@ -58,7 +61,7 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
   const scrollThrottleRef = useRef<number | null>(null);
 
   const fetchVisible = useCallback(
-    async ({ params, initial = false, hasMore }: { params: Params; initial?: boolean; hasMore?: boolean }) => {
+    async ({ params, initial = false, hasMore, search }: { params: Params; initial?: boolean; hasMore?: boolean; search?: string }) => {
       if (initial) {
         setLoading(true);
       } else {
@@ -79,6 +82,7 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
         const resp = await axiosInstance().get('/planning-view/products-planning', {
           cancelToken: source.token,
           params: {
+            search,
             ...params,
             date: {
               from: dayjs(params.date.from).format('MM/DD/YYYY'),
@@ -349,10 +353,28 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchedValue(e.target.value);
+    const truncatedValue = e.target.value.trim();
+    const win = timelineRef.current?.getWindow();
+    if (!win) return;
+    inflightRef.current.forEach((src) => src.cancel?.('window changed'));
+    inflightRef.current.clear();
+    pagerRef.current.reset({ clearLoaded: true, clearPending: true, resetScroll: true });
+    hasMoreVerticalRef.current = true;
+    groupsDSRef.current.clear();
+    itemsDSRef.current.clear();
+    await fetchVisible({
+      params: pagerRef.current.getParamsForVisible({ start: win.start, end: win.end }),
+      initial: true,
+      search: truncatedValue || undefined
+    });
+  };
+
   return (
     <>
       <div className="flex items-center justify-between gap-2 max-md:flex-wrap">
-        <div className="flex gap-2">
+        <div className="flex flex-grow items-center gap-2">
           <Autocomplete
             options={resourceList}
             getOptionLabel={(option) => (option && option?.title) || ''}
@@ -364,6 +386,9 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
             size="small"
             renderInput={(params) => <TextField {...params} label="Select Resource" size="small" variant="outlined" />}
           />
+          <div className="ml-auto">
+            <SearchBox value={searchedValue} onChange={handleSearch} />
+          </div>
         </div>
         {topRightSlot}
       </div>
