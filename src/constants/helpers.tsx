@@ -4025,6 +4025,11 @@ export const getEmailsFromContacts = (data, field = 'customerContact') => {
   return emails;
 };
 
+export const getCustomInvoiceFileName = (customDownloadFileName, data) => {
+  const status = data?.status === INVOICE_STATUS.proforma ? data?.status : 'Invoice'
+  return customDownloadFileName.replace("{status}", status).replace("{invoiceNumber}", data?.invoiceNumber);
+}
+
 export const EQUIPT_BE_CONNECTED_WINDOW = 'equipt-beConnected-window';
 export const handleClearLocalStore = () => {
   const beConnectedWindowData = localStorage.getItem(EQUIPT_BE_CONNECTED_WINDOW);
