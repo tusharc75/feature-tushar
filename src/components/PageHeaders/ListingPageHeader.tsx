@@ -109,7 +109,7 @@ const ListingPageHeader = ({
 
   useEffect(() => {
     const { type }: any = queryString.parse(locationSearch);
-    const selectedTypeExist = toggleButtonList.find((d) => d.value === parseInt(type));
+    const selectedTypeExist = toggleButtonList?.find((d) => d.value === parseInt(type));
     if (type && setSelectedType && selectedTypeExist) setSelectedType(parseInt(type));
   }, [locationSearch, toggleButtonList]);
 
