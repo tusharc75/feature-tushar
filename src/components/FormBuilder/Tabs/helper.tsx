@@ -362,6 +362,12 @@ export const resourcePolicy = [
         fieldLabel: 'Hide Field Ticket Invoice Create Dialog',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'customDownloadFileName',
+        fieldLabel: 'Custom Download File Name',
+        type: 'singleLine',
+        defaultValue: ''
       }
     ]
   },

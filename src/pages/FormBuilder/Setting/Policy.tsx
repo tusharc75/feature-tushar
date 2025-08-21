@@ -171,6 +171,25 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
         </Grid>
       </Grid>
     );
+  } else if (type === 'singleLine') {
+    return (
+      <Grid container spacing={2}>
+        <Grid size={{ lg: 6, md: 6, sm: 6, xs: 12 }}>
+          <TextField
+            name={data?.fieldName}
+            variant="outlined"
+            value={data?.data}
+            label={data?.fieldLabel}
+            size="small"
+            fullWidth
+            type="text"
+            onChange={(event: any) => {
+              onChange(null, event.target.value);
+            }}
+          />
+        </Grid>
+      </Grid>
+    );
   }
   return null;
 };
