@@ -39,8 +39,10 @@ const RenderSingleGroup = ({
         <div
           className={cn(
             'flex items-center gap-2 rounded-[inherit] bg-[#F3F4F6] dark:bg-[--dark-secondary]',
-            'data-[selected=true]:!bg-theme data-[selected=true]:text-white',
-            group?.serviceSteps?.length === 1 ? 'cursor-pointer transition-all data-[selected=false]:hover:bg-theme/50' : '',
+            'data-[selected=true]:![outline:2px_solid_var(--new-theme-color)] ',
+            group?.serviceSteps?.length === 1
+              ? 'cursor-pointer transition-colors data-[selected=false]:outline-theme/50 data-[selected=false]:hover:outline'
+              : '',
             isColapsed ? 'justify-center py-4' : 'justify-between p-4 '
           )}
           data-selected={isSelected}
@@ -66,10 +68,7 @@ const RenderSingleGroup = ({
                     setExpanded((prev) => !prev);
                     e.preventDefault();
                   }}
-                  className={cn(
-                    'rounded-[inherit] text-inherit ',
-                    isSelected ? 'hover:bg-[white] hover:!text-[black]' : 'hover:bg-gray-300 dark:hover:bg-gray-700'
-                  )}
+                  className={cn('rounded-[inherit] text-inherit ', 'hover:bg-gray-300 dark:hover:bg-gray-700')}
                 >
                   {expanded ? <KeyboardArrowUp color="inherit" /> : <KeyboardArrowDown color="inherit" />}
                 </RippleButton>
