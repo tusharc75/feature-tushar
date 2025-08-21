@@ -138,7 +138,7 @@ const CreateWorkFlow = () => {
               <Box>
                 <CustomTabs value={tabValue} onChange={handleMainTabChange}>
                   <CustomTab value={0} label={'Activation Condition'} />
-                  <CustomTab value={1} label={'Steps'} />
+                  <CustomTab value={1} label={'Tabs'} />
                   <CustomTab value={2} label={'Notifications'} />
                 </CustomTabs>
                 <TabPanel value={tabValue} index={0}>

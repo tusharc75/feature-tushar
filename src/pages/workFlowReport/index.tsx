@@ -213,7 +213,7 @@ const WorkFlowReport = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ ...routes.workflowReport, title: resources?.workFlowReport?.titlePlural }]} />
+        <CustomBreadCrumbs routes={[{ ...routes.workflowReport, title: resources?.workflowReport?.titlePlural }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
