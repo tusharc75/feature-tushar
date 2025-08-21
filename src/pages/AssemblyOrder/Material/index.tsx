@@ -549,7 +549,6 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGES_STATUS.available, SERIALIZED_PACKAGES_STATUS.underReview] }]}
           referenceData={{ warehouse: assemblyOrderData?.warehouse }}
           isSubmitting={isSubmitting}
-          ids={dataRows?.filter(d => d?.type === MATERIAL_TYPE.serializedPackage)?.map(d => d?.materialId)}
         />
       )}
       {materialEdit.open && (
