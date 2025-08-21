@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from 'react';
+import React, { forwardRef, useRef, useState } from 'react';
 import { cn } from 'src/constants/helpers';
 
 type Component = React.ElementType;
@@ -12,28 +12,46 @@ type RippleButtonProps<T extends Component> = {
   children: React.ReactNode | Element[];
 } & Omit<ElementTypeProps<T>, 'component' | 'children'>;
 
+const createRipple = (event: React.MouseEvent<HTMLElement>, container: HTMLDivElement) => {
+  const button = event.currentTarget;
+  const rect = button.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const x = event.clientX - rect.left - size / 2;
+  const y = event.clientY - rect.top - size / 2;
+  const ripple = document.createElement('span');
+  ripple.classList.add('ripple');
+  Object.assign(ripple.style, {
+    width: `${size}px`,
+    height: `${size}px`,
+    top: `${y}px`,
+    left: `${x}px`
+  });
+
+  container?.appendChild(ripple);
+
+  setTimeout(() => {
+    try {
+      container?.removeChild(ripple);
+    } catch (error) {
+      console.error('Error removing ripple: ', error);
+    }
+  }, 600);
+};
+
 const RippleButton = forwardRef(<T extends Component = 'button'>(props: RippleButtonProps<T>, ref: PolymorphicRef<T>) => {
-  const { component = 'button', children, className, onClick = () => {}, ...rest } = props;
-  const [ripples, setRipples] = useState<JSX.Element[]>([]);
-
-  const createRipple = (event: React.MouseEvent<HTMLElement>) => {
-    const button = event.currentTarget;
-    const rect = button.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
-    const x = event.clientX - rect.left - size / 2;
-    const y = event.clientY - rect.top - size / 2;
-
-    const ripple = <span key={Date.now()} className="ripple" style={{ width: size, height: size, top: y, left: x }} />;
-
-    setRipples((prev) => [...prev, ripple]);
-    setTimeout(() => setRipples((prev) => prev.slice(1)), 600);
-  };
+  const { component = 'button', children, className, onClick = () => {}, onClickCapture, ...rest } = props;
+  const rippleContainerRef = useRef<HTMLDivElement>(null);
 
   return React.createElement(
     component,
     {
+      onClickCapture: (e: any) => {
+        createRipple(e, rippleContainerRef.current);
+        if (typeof onClickCapture === 'function') {
+          (onClickCapture as any)(e);
+        }
+      },
       onClick: (e: any) => {
-        createRipple(e);
         if (typeof onClick === 'function') {
           (onClick as any)(e);
         }
@@ -47,7 +65,7 @@ const RippleButton = forwardRef(<T extends Component = 'button'>(props: RippleBu
     },
     <>
       {children}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">{ripples}</div>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]" ref={rippleContainerRef}></div>
     </>
   );
 }) as <T extends React.ElementType = 'button'>(props: RippleButtonProps<T> & { ref?: PolymorphicRef<T> }) => React.ReactElement | null;
