@@ -273,7 +273,7 @@ const RenderTabs = ({
         className="flex items-center gap-1 rounded-[6px] bg-theme p-[4px_5px_4px_10px] text-[13px] font-medium leading-[22.4px] text-[white] outline-transparent focus-within:outline-transparent focus-visible:outline-transparent "
         onClick={handleClick}
       >
-        {toggleButtonList[selectedType - 1]?.key || toggleButtonList[0].key}
+        {toggleButtonList[selectedType - 1]?.key || toggleButtonList[0]?.key}
         <BiChevronDown size={22} className={cn('transition-transform', open ? '[transform:rotate(180deg)]' : '')} />
       </RippleButton>
       <Popover
