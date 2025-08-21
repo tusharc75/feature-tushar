@@ -18,7 +18,7 @@ import { AddOutlined } from '@mui/icons-material';
 import routes from 'src/components/Helpers/Routes';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
+const Steps = ({ resourceData, tab, fetchData, workflowId = null, onboardingTemplateId = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [steps, setSteps] = useState(null);
@@ -36,6 +36,7 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
     setIsSubmitting(true);
     let api = `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}`;
     if (workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}`;
+    if (onboardingTemplateId) api = `${routes.onboardingTemplate.path}/tabs/steps/${onboardingTemplateId}/${tab?._id}`;
     if (values?.stepId) {
       axiosInstance()
         .put(api, values)
@@ -77,6 +78,7 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
     setDeleting(true);
     let api = `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}/delete`;
     if (workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}/delete`;
+    if (onboardingTemplateId) api = `${routes.onboardingTemplate.path}/tabs/steps/${onboardingTemplateId}/${tab?._id}/delete`;
     axiosInstance()
       .put(api, { stepId: step?._id })
       .then(() => {
@@ -94,6 +96,7 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
   const handleUpdateOrder = (steps) => {
     let api = `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}/order`;
     if (workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}/order`;
+    if (onboardingTemplateId) api = `${routes.onboardingTemplate.path}/tabs/steps/${onboardingTemplateId}/${tab?._id}/order`;
     axiosInstance()
       .put(
         api,

@@ -21,10 +21,10 @@ import ManageSerializedPackages from 'src/pages/SerializedPackages/ManageSeriali
 import { deleteDisable } from 'src/constants/messageHelpers';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
-const renderedFrom = camelCase(sidebarResource?.serializedPackages);
-
-const SerializedPackages = () => {
+const SerializedPackages = ({ resourceRendered = '' }) => {
   const toastConfig = useContext(CustomToastContext);
+
+  const renderedFrom = resourceRendered === sidebarResource.serializedPackagesInspection ? camelCase(sidebarResource?.serializedPackagesInspection) : camelCase(sidebarResource?.serializedPackages);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -67,7 +67,7 @@ const SerializedPackages = () => {
 
   const fetchGridColumns = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serializedPackages, permissions?.serializedPackages?.isUpdate);
-    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serializedPackagesDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, resourceRendered === sidebarResource.serializedPackagesInspection ? routes.serializedPackagesInspectionDetail.path : routes.serializedPackagesDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
@@ -285,30 +285,32 @@ const SerializedPackages = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ ...routes.serializedPackages, title: resources?.serializedPackages?.titlePlural }]} />
-        <ImportExportLinks
-          permissions={permissions?.serializedPackages}
-          module={resources?.serializedPackages?.titlePlural}
-          api={routes.serializedPackages.path}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
-          isExportAllOrSomeFeature={true}
-          total={rowCount}
-          recordsToExport={selectedRecords?.length}
-          ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={() => {
-            fetchData();
-          }}
-          additionalParams={getQueryString(true)}
-        />
+        <CustomBreadCrumbs routes={[resourceRendered === sidebarResource.serializedPackagesInspection ? { ...routes.serializedPackagesInspection, title: resources?.serializedPackagesInspection?.titlePlural } : { ...routes.serializedPackages, title: resources?.serializedPackages?.titlePlural }]} />
+        {resourceRendered != sidebarResource.serializedPackagesInspection && (
+          <ImportExportLinks
+            permissions={permissions?.serializedPackages}
+            module={resources?.serializedPackages?.titlePlural}
+            api={routes.serializedPackages.path}
+            afterImportCompleted={() => {
+              fetchData();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords?.length}
+            ids={selectedRecords?.map((obj) => obj._id)}
+            onExportToExcelSuccess={() => {
+              fetchData();
+            }}
+            additionalParams={getQueryString(true)}
+          />
+        )}
       </div>
       <CustomContainer>
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
-          isActionButtonVisible={true}
-          isAddButtonVisible={true}
+          isActionButtonVisible={resourceRendered != sidebarResource.serializedPackagesInspection}
+          isAddButtonVisible={resourceRendered != sidebarResource.serializedPackagesInspection}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
@@ -327,6 +329,7 @@ const SerializedPackages = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.serializedPackages}
+            hideAction={resourceRendered === sidebarResource.serializedPackagesInspection}
           />
         ) : (
           <Box p={2} height={500}>
