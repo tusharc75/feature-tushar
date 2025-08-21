@@ -559,6 +559,7 @@ const CreateFormBuilder = () => {
                   resource={resource}
                   resourceData={resourceData}
                   permissions={permissions}
+                  fields={section[0]?.field}
                 />
               )}
             </Fragment>
