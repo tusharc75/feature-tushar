@@ -13,8 +13,9 @@ import Autocomplete from '@mui/material/Autocomplete';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import axiosInstance from 'src/axios/axiosInstance';
+import { CancelTokenSource } from 'axios';
 
-export default function Notifications({ onClose, onSuccess, resource, resourceData }) {
+export default function Notifications({ onClose, onSuccess, resource, resourceData, permissions }) {
   const toastConfig = useContext(CustomToastContext);
 
   const [initialValues, setInitialValues] = useState({ notifications: [] });
@@ -23,9 +24,11 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   const [fields, setFields] = useState([]);
   const [notificationUserField, setNotificationUserField] = useState([]);
   const [users, setUsers] = useState([]);
+  const [groups, setGroups] = useState([]);
 
   const [createRecordNotifications, setCreateRecordNotifications] = useState({
     users: [],
+    groups: [],
     message: '',
     email: true,
     portal: true
@@ -33,6 +36,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
 
   const [updateRecordNotifications, setUpdateRecordNotifications] = useState({
     users: [],
+    groups: [],
     message: '',
     email: true,
     portal: true
@@ -64,7 +68,9 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
         email: true,
         portal: true,
         notificationUserField: '',
-        message: ''
+        message: '',
+        users: [],
+        groups: []
       });
     } else {
       data.splice(index, 1);
@@ -75,6 +81,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   useEffect(() => {
     getFieldList(resource);
     getUserList();
+    getGroupList();
   }, []);
 
   const getUserList = async () => {
@@ -83,6 +90,21 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
       setUsers(data?.User || []);
     } catch (e) {
       console.error('Error fetching users:', e);
+    }
+  };
+
+  const getGroupList = async () => {
+    try {
+      const { data: { data } } = await axiosInstance()
+        .get(`dynamic-form`, {
+          headers: {
+            Resource: "User Group"
+          },
+          // cancelToken: cancelTokenSource?.token
+        })
+      setGroups(data || []);
+    } catch (e) {
+      console.error('Error fetching groups:', e);
     }
   };
 
@@ -207,7 +229,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                     <Divider sx={{ mb: 2 }} />
 
                     <Grid container spacing={2}>
-                      <Grid size={12}>
+                      <Grid size={permissions?.userGroup?.isRead ? 6 : 12}>
                         <Autocomplete
                           multiple
                           options={users}
@@ -229,6 +251,31 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                           )}
                         />
                       </Grid>
+                      {permissions?.userGroup?.isRead && (
+                        <Grid size={6}>
+                          <Autocomplete
+                            multiple
+                            options={groups}
+                            getOptionLabel={(option) => option.userGroupName || ''}
+                            value={groups.filter(group => createRecordNotifications.groups?.includes(group._id)) || []}
+                            onChange={(e, newValue) => {
+                              setCreateRecordNotifications(prev => ({
+                                ...prev,
+                                groups: newValue.map(group => group._id)
+                              }));
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Select Groups"
+                                variant="outlined"
+                                size="small"
+                              />
+                            )}
+                          />
+                        </Grid>
+                      )}
+
                       <Grid size={12}>
                         <TextField
                           fullWidth
@@ -294,7 +341,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                     <Divider sx={{ mb: 2 }} />
 
                     <Grid container spacing={2}>
-                      <Grid size={12}>
+                      <Grid size={permissions?.userGroup?.isRead ? 6 : 12}>
                         <Autocomplete
                           multiple
                           options={users}
@@ -316,6 +363,32 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                           )}
                         />
                       </Grid>
+                      {permissions?.userGroup?.isRead && (
+                        <Grid size={6}>
+                          <Autocomplete
+                            multiple
+                            options={groups}
+                            getOptionLabel={(option) => option.userGroupName || ''}
+                            value={groups.filter(group => updateRecordNotifications.groups?.includes(group._id)) || []}
+                            onChange={(e, newValue) => {
+                              setUpdateRecordNotifications(prev => ({
+                                ...prev,
+                                groups: newValue.map(group => group._id)
+                              }));
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Select Groups"
+                                variant="outlined"
+                                size="small"
+                              />
+                            )}
+                          />
+                        </Grid>
+                      )}
+
+
                       <Grid size={12}>
                         <TextField
                           fullWidth
@@ -407,6 +480,56 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                 </Box>
 
                                 <Grid container spacing={2}>
+                                  <Grid size={permissions?.userGroup?.isRead ? 6 : 12}>
+                                    <Autocomplete
+                                      multiple
+                                      options={users}
+                                      getOptionLabel={(option) => option.optionLabel || ''}
+                                      value={users.filter(user => data?.users?.includes(user.optionValue)) || []}
+                                      onChange={(e, newValue) => {
+                                        arrayHelpers.replace(index, {
+                                          ...values?.notifications[index],
+                                          ['users']: newValue.map(user => user.optionValue)
+                                        });
+                                      }}
+                                      renderInput={(params) => (
+                                        <TextField
+                                          {...params}
+                                          margin="dense"
+                                          size="small"
+                                          variant="outlined"
+                                          label="Select Users"
+                                          placeholder="Select Users"
+                                        />
+                                      )}
+                                    />
+                                  </Grid>
+                                  {permissions?.userGroup?.isRead && (
+                                    <Grid size={6}>
+                                      <Autocomplete
+                                        multiple
+                                        options={groups}
+                                        getOptionLabel={(option) => option.userGroupName || ''}
+                                        value={groups.filter(group => data?.groups?.includes(group._id)) || []}
+                                        onChange={(e, newValue) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values?.notifications[index],
+                                            ['groups']: newValue.map(group => group._id)
+                                          });
+                                        }}
+                                        renderInput={(params) => (
+                                          <TextField
+                                            {...params}
+                                            margin="dense"
+                                            size="small"
+                                            variant="outlined"
+                                            label="Select Groups"
+                                            placeholder="Select Groups"
+                                          />
+                                        )}
+                                      />
+                                    </Grid>
+                                  )}
                                   <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
                                     <Autocomplete
                                       options={fields}
