@@ -1,4 +1,4 @@
-import React, { forwardRef, useRef, useState } from 'react';
+import React, { forwardRef, useRef } from 'react';
 import { cn } from 'src/constants/helpers';
 
 type Component = React.ElementType;
@@ -39,7 +39,7 @@ const createRipple = (event: React.MouseEvent<HTMLElement>, container: HTMLDivEl
 };
 
 const RippleButton = forwardRef(<T extends Component = 'button'>(props: RippleButtonProps<T>, ref: PolymorphicRef<T>) => {
-  const { component = 'button', children, className, onClick = () => {}, onClickCapture, ...rest } = props;
+  const { component = 'button', children, className, onClick = () => {}, onClickCapture = () => {}, ...rest } = props;
   const rippleContainerRef = useRef<HTMLDivElement>(null);
 
   return React.createElement(
