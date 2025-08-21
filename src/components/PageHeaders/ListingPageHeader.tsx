@@ -14,6 +14,7 @@ import { cn } from 'src/constants/helpers';
 import HtmlTooltip from '../CustomTooltipTitle';
 import SearchBox from '../Helpers/SearchBox';
 import HideWhenOffline from '../HideWhenOffline';
+import { useLocation } from 'react-router-dom';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -77,8 +78,8 @@ const ListingPageHeader = ({
   // const walkmeInstance = useGetWalkmeInstance();
   const isMobile = useMediaQuery('(max-width:600px)');
   const history = useHistory();
+  const { search: locationSearch } = useLocation();
 
-  const [locationKeys, setLocationKeys] = useState([]);
   const { setGlobalSearch } = useSearch();
 
   const {
@@ -107,27 +108,10 @@ const ListingPageHeader = ({
   };
 
   useEffect(() => {
-    const { type }: any = queryString.parse(history.location.search);
-
-    if (type && setSelectedType && toggleButtonList.find((d) => d.value === parseInt(type))) setSelectedType(parseInt(type));
-
-    return history.listen((location) => {
-      if (history.action === 'PUSH') {
-        setLocationKeys([location.key]);
-      }
-      if (history.action === 'POP') {
-        if (locationKeys[1] === location.key) {
-          setLocationKeys(([_, ...keys]) => keys);
-          // Handle forward event
-          setSelectedType && setSelectedType(type ? parseInt(type) : 1);
-        } else {
-          setLocationKeys((keys) => [location.key, ...keys]);
-          // Handle back event
-          setSelectedType && setSelectedType(type ? parseInt(type) : 1);
-        }
-      }
-    });
-  }, [locationKeys, toggleButtonList]);
+    const { type }: any = queryString.parse(locationSearch);
+    const selectedTypeExist = toggleButtonList.find((d) => d.value === parseInt(type));
+    if (type && setSelectedType && selectedTypeExist) setSelectedType(parseInt(type));
+  }, [locationSearch, toggleButtonList]);
 
   const renderButtonText = ({ text, startIcon = null, loading, iconText = null, endIcon = null, mobileIcon = null }) => {
     if (isMobile) {
@@ -289,7 +273,7 @@ const RenderTabs = ({
         className="flex items-center gap-1 rounded-[6px] bg-theme p-[4px_5px_4px_10px] text-[13px] font-medium leading-[22.4px] text-[white] outline-transparent focus-within:outline-transparent focus-visible:outline-transparent "
         onClick={handleClick}
       >
-        {toggleButtonList[selectedType - 1]?.key}
+        {toggleButtonList[selectedType - 1]?.key || toggleButtonList[0].key}
         <BiChevronDown size={22} className={cn('transition-transform', open ? '[transform:rotate(180deg)]' : '')} />
       </RippleButton>
       <Popover
