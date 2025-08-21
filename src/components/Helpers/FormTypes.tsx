@@ -1754,17 +1754,17 @@ const FormTypes = (props) => {
                         onChange
                           ? onChange
                           : (e) => {
-                            if (e.target.value === '' || e.target.value === '-' || /^[0-9.,-]+$/.test(e.target.value)) {
+                            if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
                               if (fieldData?.displayCurrency?.length > 1) {
                                 handleCurrencyChange(name, _currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
                               } else {
-                                handleChange(name + '_' + _currency.toLowerCase(), e.target.value === '' ? 0 : e.target.value === '0-' ? '-' : e.target.value.replace(/,/g, ''));
+                                handleChange(name + '_' + _currency.toLowerCase(), e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
                               }
                             }
                           }
                       }
                       onBlur={(e) => {
-                        if (e.target.value === '' || e.target.value === '-' || /^[0-9.,-]+$/.test(e.target.value)) {
+                        if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
                           if (fieldData?.displayCurrency?.length > 1) {
                             handleCurrencyChange(
                               name,
@@ -1774,7 +1774,7 @@ const FormTypes = (props) => {
                           } else {
                             handleChange(
                               name + '_' + _currency.toLowerCase(),
-                              e.target.value === '' ? 0 : e.target.value === '0-' ? '-' : parseFloat(parseFloat(e.target.value.replace(/,/g, ''))?.toFixed(fieldData?.decimalPlaces))
+                              e.target.value === '' ? 0 : parseFloat(parseFloat(e.target.value.replace(/,/g, ''))?.toFixed(fieldData?.decimalPlaces))
                             );
                           }
                         }
@@ -1791,7 +1791,7 @@ const FormTypes = (props) => {
                               )}
                             </InputAdornment>
                           ),
-                          //inputProps: { min: 0 },
+                          inputProps: { min: 0 },
                           readOnly: fieldData && fieldData?.isUneditable ? true : false
                         }
                       }}
