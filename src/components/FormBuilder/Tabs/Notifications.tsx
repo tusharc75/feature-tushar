@@ -60,7 +60,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
     let data = values?.notifications || [];
     if (type === 'add') {
       data.splice(index, 0, {
-        field: '',
+        fieldName: '',
         fieldValue: '',
         email: true,
         portal: true,
@@ -130,14 +130,48 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
     } catch (e) { }
   }, [fields]);
 
+  // Helper function to check if a value is meaningful
+  const hasValue = (value) => {
+    if (value === null || value === undefined || value === '') return false;
+    if (Array.isArray(value) && value.length === 0) return false;
+    if (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) return false;
+    return true;
+  };
+
+  // Helper function to remove empty fields from objects
+  const cleanEmptyFields = (obj) => {
+    if (!obj || typeof obj !== 'object') return obj;
+
+    const cleaned = {};
+
+    Object.entries(obj).forEach(([key, value]) => {
+      if (hasValue(value)) {
+        cleaned[key] = value;
+      }
+    });
+
+    return cleaned;
+  };
+
   const handleSubmit = async (values) => {
     setSubmitting(true);
 
-    const submitData = {
-      createRecordNotifications: [createRecordNotifications],
-      updateRecordNotifications: [updateRecordNotifications],
-      conditionNotifications: values?.notifications || [],
-    };
+    const cleanedCreateRecord = cleanEmptyFields(createRecordNotifications);
+
+    const cleanedUpdateRecord = cleanEmptyFields(updateRecordNotifications);
+
+    const cleanedConditionNotifications = values?.notifications?.map(notification =>
+      cleanEmptyFields(notification)
+    ).filter(notification => Object.keys(notification).length > 0) || [];
+
+    const submitData: any = {};
+
+    submitData.createRecordNotifications = [cleanedCreateRecord];
+
+    submitData.updateRecordNotifications = [cleanedUpdateRecord];
+
+    submitData.conditionNotifications = cleanedConditionNotifications;
+
 
     axiosInstance()
       .put(`/sa-formbuilder/tabs/notifications/${resource}`, submitData)
@@ -160,11 +194,11 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
     const errors: any = {};
     if (values?.notifications?.length > 0) {
       values?.notifications?.forEach((d, i) => {
-        if (!d.field) {
+        if (!d.fieldName) {
           if (!errors?.notifications) {
             errors['notifications'] = [];
           }
-          errors.notifications[i] = { field: 'Field is required' };
+          errors.notifications[i] = { fieldName: 'Field is required' };
         }
       });
     }
@@ -237,8 +271,8 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
 
         for (let i = 0; i < initialValues.notifications.length; i++) {
           const notification = initialValues.notifications[i];
-          if (notification.field) {
-            const field = fields?.find(f => f?.fieldName === notification.field);
+          if (notification.fieldName) {
+            const field = fields?.find(f => f?.fieldName === notification.fieldName);
             if (field) {
               fieldsMap[i] = field;
               const options = await getFieldValueOptions(field);
@@ -602,8 +636,8 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                       getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
                                       isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
                                       value={
-                                        fieldOptions && fieldOptions.filter((f) => f?.fieldName === data?.field).length
-                                          ? fieldOptions && fieldOptions.filter((f) => f?.fieldName === data?.field)[0]
+                                        fieldOptions && fieldOptions.filter((f) => f?.fieldName === data?.fieldName).length
+                                          ? fieldOptions && fieldOptions.filter((f) => f?.fieldName === data?.fieldName)[0]
                                           : ''
                                       }
                                       onChange={async (e, val) => {
@@ -623,7 +657,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
 
                                         arrayHelpers.replace(index, {
                                           ...values?.notifications[index],
-                                          ['field']: val && val?.fieldName ? val?.fieldName : '',
+                                          ['fieldName']: val && val?.fieldName ? val?.fieldName : '',
                                           ['fieldValue']: ''
                                         });
                                       }}
@@ -633,21 +667,21 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                           margin="dense"
                                           size="small"
                                           variant="outlined"
-                                          label="Field"
+                                          label="Field Name"
                                           placeholder="Field"
-                                          name="field"
+                                          name="fieldName"
                                           required
                                           error={
                                             touched?.notifications &&
-                                            touched?.notifications[index]?.field &&
+                                            touched?.notifications[index]?.fieldName &&
                                             errors?.notifications &&
-                                            Boolean(errors?.notifications[index]?.field)
+                                            Boolean(errors?.notifications[index]?.fieldName)
                                           }
                                           helperText={
                                             touched?.notifications &&
-                                            touched?.notifications[index]?.field &&
+                                            touched?.notifications[index]?.fieldName &&
                                             errors?.notifications &&
-                                            errors?.notifications[index]?.field
+                                            errors?.notifications[index]?.fieldName
                                           }
                                         />
                                       )}
