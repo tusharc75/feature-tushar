@@ -494,8 +494,10 @@ const CreateFormBuilder = () => {
                         onClick={() => {
                           setOpenNotifications(true);
                         }}
+                        color="primary"
+                        size="small"
                       >
-                        <AddAlertIcon fontSize="small" color={'primary'} />
+                        <AddAlertIcon fontSize="small" />
                       </IconButton>
                     </HtmlTooltip>
                   </Grid>
