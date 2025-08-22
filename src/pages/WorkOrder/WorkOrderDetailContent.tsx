@@ -655,7 +655,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               {!user?.user?.brandPolicy?.workOrderConsumableHide && workOrderData?.status !== WORK_ORDER_STATUS.deleted && (
                 <CustomTab value={2}>Consumables</CustomTab>
               )}
-              {[WORK_ORDER_TYPE.productionOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) &&
+              {![WORK_ORDER_TYPE.repairOrder]?.includes(workOrderData?.type) &&
                 workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={3}>Child Items</CustomTab>}
               {workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={4}>Drawings</CustomTab>}
               {!(isMobile && !isTablet) && resource === sidebarResource.workOrder && workOrderData?.status !== WORK_ORDER_STATUS.deleted && (

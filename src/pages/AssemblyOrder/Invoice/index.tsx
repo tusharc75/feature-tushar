@@ -72,6 +72,8 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === MATERIAL_TYPE.service) {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.serializedPackage) {
+                    window.open(`${routes.serializedPackagesDetail.path}/${row.original.materialId}`);
                   }
                 }}
               >
@@ -162,7 +164,7 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent?.detail || parent?.packageDetail?.packageName;
+      parent.detail = parent?.type === MATERIAL_TYPE.serializedPackage ? parent?.serializedPackageDetail?.serializedPackageNumber : parent?.detail || parent?.packageDetail?.packageName;
       parent.description = parent?.description || parent?.packageDetail?.packageDescription || '';
       parent.qty = parent.qty;
       parent.serializedPackageId = parent?.serializedPackage?.optionValue;
