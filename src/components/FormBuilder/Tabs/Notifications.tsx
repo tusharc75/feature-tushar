@@ -188,16 +188,16 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   const handleSubmit = async (values) => {
     setSubmitting(true);
 
-    const cleanedCreateRecord = cleanEmptyFields(createRecordNotifications);
-    const cleanedUpdateRecord = cleanEmptyFields(updateRecordNotifications);
-    const cleanedConditionNotifications = values?.notifications?.map(notification =>
+    const createRecord = cleanEmptyFields(createRecordNotifications);
+    const updateRecord = cleanEmptyFields(updateRecordNotifications);
+    const conditionNotifications = values?.notifications?.map(notification =>
       cleanEmptyFields(notification)
     ).filter(notification => Object.keys(notification).length > 0) || [];
 
     const submitData: any = {};
-    submitData.createRecordNotifications = [cleanedCreateRecord];
-    submitData.updateRecordNotifications = [cleanedUpdateRecord];
-    submitData.conditionNotifications = cleanedConditionNotifications;
+    submitData.createRecordNotifications = [createRecord];
+    submitData.updateRecordNotifications = [updateRecord];
+    submitData.conditionNotifications = conditionNotifications;
 
 
     axiosInstance()
@@ -248,7 +248,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
         }
       });
     }
-    console.log('Validation Errors:', errors);
     return errors;
   };
 
@@ -294,7 +293,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
         for (let i = 0; i < initialValues.notifications.length; i++) {
           const notification = initialValues.notifications[i];
 
-          // Handle new checkFields structure
           if (notification.checkFields?.length > 0) {
             for (let j = 0; j < notification.checkFields.length; j++) {
               const checkField = notification.checkFields[j];
