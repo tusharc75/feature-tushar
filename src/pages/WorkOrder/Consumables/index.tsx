@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box/Box';
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useMemo } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
@@ -81,6 +81,8 @@ const Consumables = ({
   const [serviceOption, setServiceOption] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
+
+  const isDisassemblyChildItem = useMemo(() => workOrderData?.type === WORK_ORDER_TYPE.disassemblyOrder && materialSubType === MATERIAL_SUB_TYPE.childItem, [workOrderData, materialSubType])
 
   const {
     state: { user, permissions, resources }
@@ -302,7 +304,7 @@ const Consumables = ({
       Cell: ({ row }: any) => (
         <div style={{ display: 'flex', justifyContent: 'right' }}>
           <>
-            {!row?.original?.serializedProduct &&
+            {!isDisassemblyChildItem && !row?.original?.serializedProduct &&
               ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && (
                 <>
                   {row.original?.isqtyRequestLog && (
@@ -339,7 +341,7 @@ const Consumables = ({
                 </>
               )}
           </>
-          {allowedToEdit && hasChildFields && ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && (
+          {allowedToEdit && hasChildFields && ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && !isDisassemblyChildItem && (
             <HtmlTooltip title="Edit">
               <IconButton
                 size="small"
@@ -366,7 +368,7 @@ const Consumables = ({
               <DescriptionIcon fontSize="small" color={'primary'} />
             </IconButton>
           </HtmlTooltip>
-          {allowedToEdit && (
+          {allowedToEdit && !isDisassemblyChildItem && (
             <HtmlTooltip title="Delete">
               <IconButton
                 size="small"
@@ -723,11 +725,11 @@ const Consumables = ({
   return (
     <>
       <DetailsPageHeader
-        isAddButtonVisible={isCreate}
+        isAddButtonVisible={isDisassemblyChildItem ? false : isCreate}
         addButtonMenuItems={addButtonMenuItems()}
         leftSideContents={!hideServiceFilter ? leftSideContents() : null}
-        rightSideContents={rightSideContents()}
-        isActionButtonVisible={allowedToEdit}
+        rightSideContents={isDisassemblyChildItem ? null : rightSideContents()}
+        isActionButtonVisible={isDisassemblyChildItem ? false : allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
         hasXpadding

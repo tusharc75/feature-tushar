@@ -216,7 +216,7 @@ const ScheduleMaintenance = () => {
         </>
       )
     });
-    if(selectedType === 2) {
+    if (selectedType === 2) {
       coloum.push({
         accessor: 'status',
         Header: 'Status',
@@ -592,6 +592,7 @@ const ScheduleMaintenance = () => {
               setOpenAssignProductDialog(false);
             }}
             isSubmitting={isSubmitting}
+            extraDeepFilter={[{ field: 'serializedProduct', term: 'Yes' }]}
           />
         )}
         {openAssignSerializedAssetDialog && (
