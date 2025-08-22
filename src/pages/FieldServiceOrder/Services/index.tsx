@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { camelCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -38,13 +38,14 @@ import { getPricingConditions, getPricingValue, getTaxList } from 'src/component
 import MaterialQtyDialog from 'src/pages/FieldServiceOrder/Technicians/MaterialQtyDialog';
 import AddQuotationDataDialog from 'src/pages/FieldTicket/material/AddQuotationDataDialog';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
-const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowedToEdit, handleChangeStatus, fetchData, setNextStep }) => {
+const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowedToEdit, handleChangeStatus, fetchData, setNextStep, resourcePolicy }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Services`;
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
-  const [materialDialog, setMaterialDialog] = useState(false);
+  const [materialDialog, setMaterialDialog] = useState({ open: false, type: '' });
   const [allFields, setAllFields] = useState([]);
   const [isServiceEdit, setIsServiceEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
@@ -98,6 +99,17 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
         Footer: () => {
           return <>Total</>;
         }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        width: 100,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <div>
+            <p>{`${startCase(row.original?.type)}`}</p>
+          </div>
+        )
       },
       {
         accessor: 'detail',
@@ -407,7 +419,7 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
         fetchMaterial();
         fetchData();
         setAddQuotationDataDialog(false);
-        setMaterialDialog(false);
+        setMaterialDialog({ open: false, type: '' });
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -484,12 +496,22 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
       <>
         <MenuItem
           onClick={() => {
-            setMaterialDialog(true);
+            setMaterialDialog({ open: true, type: MATERIAL_TYPE.service });
           }}
           id={'add-existing-service-menu-item'}
         >
           Add Existing Services
         </MenuItem>
+        {permissions?.packages?.isRead && resourcePolicy?.showAddPackages && (
+          <MenuItem
+            onClick={() => {
+              setMaterialDialog({ open: true, type: MATERIAL_TYPE.package });
+            }}
+            id={'add-existing-package-menu-item'}
+          >
+            Add Existing Package
+          </MenuItem>
+        )}
         {serviceOrderData?.quotation?.optionValue && serviceOrderData?.quotationVersion?.optionValue && (
           <>
             <MenuItem
@@ -568,6 +590,7 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             refreshGrid={fetchMaterial}
+            expander={true}
           />
         </Box>
       ) : (
@@ -575,18 +598,30 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
           <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
         </Box>
       )}
-      {materialDialog && (
+      {materialDialog.open && materialDialog.type === MATERIAL_TYPE.service && (
         <AssignServiceDialog
           onSuccess={(rows) => {
             handleAdd(rows, MATERIAL_TYPE.service);
           }}
           handleClose={() => {
-            setMaterialDialog(false);
+            setMaterialDialog({ open: false, type: '' });
           }}
           extraStaticFilter={[{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]}
           isSubmitting={isSubmitting}
           pricingCondition={serviceOrderData?.pricingCondition?.optionValue || null}
           currency={serviceOrderData.currency}
+        />
+      )}
+      {materialDialog?.open && materialDialog?.type === MATERIAL_TYPE.package && (
+        <AssignPackageDialog
+          onSuccess={(rows) => {
+            handleAdd(rows, MATERIAL_TYPE.package);
+          }}
+          handleClose={() => {
+            setMaterialDialog({ open: false, type: '' });
+          }}
+          ids={[]}
+          isSubmitting={isSubmitting}
         />
       )}
       {isServiceEdit.open && (
