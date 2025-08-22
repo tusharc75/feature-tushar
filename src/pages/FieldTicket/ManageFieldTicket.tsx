@@ -361,8 +361,7 @@ const ManageFieldTicket = ({
                     size="small"
                     fullWidth
                     resource={sidebarResource.fieldTicket}
-                    referenceId={id || null}
-                    isClone={isClone}
+                    referenceId={!isClone && id ? id : null}
                   />
                 </Form>
                 {initialData?.fields?.find((f) => f?.fieldName === 'service' && f?.lookupResource === sidebarResource.serviceMaster) && (
