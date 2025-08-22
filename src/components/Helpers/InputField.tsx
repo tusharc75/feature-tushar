@@ -19,8 +19,11 @@ const InputField = (props) => {
     resource = null,
     referenceId = null,
     collaborateTools = false,
+    isClone = false,
     ...rest
   } = props;
+
+  console.log('rrrrrrr', referenceId)
 
   const [formsData, setFormsData] = useState([]);
   const [currencySymbol, setCurrencySymbol] = useState(null);
@@ -77,7 +80,7 @@ const InputField = (props) => {
                           tooltipMessage={field.tooltipMessage}
                           fields={fieldsData}
                           fieldData={field}
-                          disabled={Boolean(referenceId) && field.disableOnEdit}
+                          disabled={Boolean(referenceId) && field.disableOnEdit && !isClone}
                         />
                       ) : isFieldVisible(field, fieldsData, values) ? (
                         <Grid
@@ -134,7 +137,7 @@ const InputField = (props) => {
                             }
                             fields={fieldsData}
                             fieldData={field}
-                            disabled={Boolean(referenceId) && field.disableOnEdit}
+                            disabled={Boolean(referenceId) && field.disableOnEdit && !isClone}
                           />
                         </Grid>
                       ) : null

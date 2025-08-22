@@ -362,6 +362,7 @@ const ManageFieldTicket = ({
                     fullWidth
                     resource={sidebarResource.fieldTicket}
                     referenceId={id || null}
+                    isClone={isClone}
                   />
                 </Form>
                 {initialData?.fields?.find((f) => f?.fieldName === 'service' && f?.lookupResource === sidebarResource.serviceMaster) && (
