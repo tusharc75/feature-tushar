@@ -1,7 +1,6 @@
 import { Box, Collapse, IconButton } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import AddAlertIcon from '@mui/icons-material/AddAlert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -20,7 +19,6 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import Steps from './Steps';
 import Actions from 'src/components/FormBuilder/Tabs/Actions';
-import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
 import { AddOutlined, ElectricBolt, ExpandLess, ExpandMore } from '@mui/icons-material';
 import UpdateIcon from '@mui/icons-material/Update';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
@@ -41,7 +39,6 @@ const DynamicTabs = ({ workflowId = null, onboardingTemplateId = null, resource 
   const [activeItem, setActiveItem] = useState(null);
   const [openAction, setOpenAction] = useState(false);
   const [openUpdateResourceActions, setOpenUpdateResourceActions] = useState({ open: false, type: '' });
-  const [openNotifications, setOpenNotifications] = useState(false);
 
   const fetchData = useCallback(
     async (cancelTokenSource?: CancelTokenSource) => {
@@ -178,16 +175,6 @@ const DynamicTabs = ({ workflowId = null, onboardingTemplateId = null, resource 
                 </IconButton>
               </HtmlTooltip>
             )}
-            <HtmlTooltip title={'Notifications'}>
-              <IconButton
-                aria-label="Notifications"
-                onClick={() => {
-                  setOpenNotifications(true);
-                }}
-              >
-                <AddAlertIcon fontSize="small" color={'primary'} />
-              </IconButton>
-            </HtmlTooltip>
           </Box>
         )}
       </Box>
@@ -255,19 +242,6 @@ const DynamicTabs = ({ workflowId = null, onboardingTemplateId = null, resource 
             resource={resource}
             resourceData={resourceData}
             type={openUpdateResourceActions.type}
-          />
-        )}
-        {openNotifications && (
-          <Notifications
-            onClose={() => {
-              setOpenNotifications(false);
-            }}
-            onSuccess={() => {
-              fetchData();
-              setOpenNotifications(false);
-            }}
-            resource={resource}
-            resourceData={resourceData}
           />
         )}
       </>
@@ -359,7 +333,7 @@ const SingleTab = ({ tab, setOpen, resourceData, setDeleteData, fetchData, index
           </div>
           <Collapse in={isExpanded}>
             <div className="p-3 [border-top:1px_solid_var(--common-border-color)]">
-              <Steps resourceData={resourceData} tab={tab} fetchData={fetchData} workflowId={workflowId} onboardingTemplateId={onboardingTemplateId}/>
+              <Steps resourceData={resourceData} tab={tab} fetchData={fetchData} workflowId={workflowId} onboardingTemplateId={onboardingTemplateId} />
             </div>
           </Collapse>
         </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment, useContext } from 'react';
+import React, { useState, useEffect, Fragment, useContext, useCallback } from 'react';
 import Grid from '@mui/material/Grid2';
 import { Box, Menu, MenuItem, IconButton, useMediaQuery, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
@@ -27,6 +27,9 @@ import Setting from './Setting';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import EditIcon from '@mui/icons-material/Edit';
+import AddAlertIcon from '@mui/icons-material/AddAlert';
+import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
+import { CancelTokenSource } from 'axios';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -95,6 +98,8 @@ const CreateFormBuilder = () => {
   const [steppers, setSteppers] = useState([]);
   const [sectionNameList, setSectionNameList] = useState([]);
   const [settingDialog, setSettingDialog] = useState(false);
+  const [openNotifications, setOpenNotifications] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   const [isNew, setIsNew] = useState(resource === '0' ? true : false);
 
@@ -138,6 +143,7 @@ const CreateFormBuilder = () => {
   useEffect(() => {
     fetchBrandResourceData();
     fetchSectionList();
+    fetchData();
   }, []);
 
   const fetchBrandResourceData = async () => {
@@ -312,6 +318,21 @@ const CreateFormBuilder = () => {
     reader.readAsBinaryString(f);
   };
 
+  const fetchData = useCallback(
+    async (cancelTokenSource?: CancelTokenSource) => {
+      let api = `/sa-formbuilder/tabs/${resource}`;
+      axiosInstance()
+        .get(api, { cancelToken: cancelTokenSource?.token })
+        .then(({ data: { data } }) => {
+          setResourceData(data);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    },
+    [resource]
+  );
+
   return (
     <Fragment>
       <DeviceMessage />
@@ -467,6 +488,16 @@ const CreateFormBuilder = () => {
                         <Settings fontSize="small" />
                       </IconButton>
                     </HtmlTooltip>
+                    <HtmlTooltip title={'Notifications'}>
+                      <IconButton
+                        aria-label="Notifications"
+                        onClick={() => {
+                          setOpenNotifications(true);
+                        }}
+                      >
+                        <AddAlertIcon fontSize="small" color={'primary'} />
+                      </IconButton>
+                    </HtmlTooltip>
                   </Grid>
                 </Grid>
               </Box>
@@ -514,6 +545,21 @@ const CreateFormBuilder = () => {
                   entities={user?.entity}
                   resource={isNew ? startCase(toLower(resourceLabel)) : resource}
                   onClose={() => setSettingDialog(false)}
+                />
+              )}
+              {openNotifications && (
+                <Notifications
+                  onClose={() => {
+                    setOpenNotifications(false);
+                  }}
+                  onSuccess={() => {
+                    fetchData();
+                    setOpenNotifications(false);
+                  }}
+                  resource={resource}
+                  resourceData={resourceData}
+                  permissions={permissions}
+                  fields={section[0]?.field}
                 />
               )}
             </Fragment>
