@@ -23,7 +23,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   const [initialValues, setInitialValues] = useState({ notifications: [] });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
-  const [notificationUserField, setNotificationUserField] = useState([]);
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [fieldOptions, setFieldOptions] = useState([]);
@@ -47,13 +46,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
     portal: true
   });
 
-  const RULE = [
-    {
-      optionLabel: 'Less Then Current Date',
-      optionValue: 'lessThenCurrentDate'
-    }
-  ];
-
   useEffect(() => {
     setInitialValues({ notifications: [...(resourceData?.conditionNotifications || [])] });
     if (resourceData?.createRecordNotifications) {
@@ -70,10 +62,8 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
       data.splice(index, 0, {
         field: '',
         fieldValue: '',
-        rule: '',
         email: true,
         portal: true,
-        notificationUserField: '',
         message: '',
         users: [],
         groups: []
@@ -137,13 +127,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
       });
       setFieldOptions(options);
 
-      setNotificationUserField(
-        fields
-          ?.filter((d) => d?.lookup && d?.lookupResource === 'User')
-          ?.map((e) => {
-            return { fieldName: e.fieldName, fieldLabel: e.fieldLabel };
-          })
-      );
     } catch (e) { }
   }, [fields]);
 
@@ -182,24 +165,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
             errors['notifications'] = [];
           }
           errors.notifications[i] = { field: 'Field is required' };
-        }
-        if (!d.rule) {
-          if (!errors?.notifications) {
-            errors['notifications'] = [];
-          }
-          errors.notifications[i] = { ...errors.notifications[i], rule: 'Rule is required' };
-        }
-        if (!d.notificationUserField) {
-          if (!errors?.notifications) {
-            errors['notifications'] = [];
-          }
-          errors.notifications[i] = { ...errors.notifications[i], notificationUserField: 'Notification User Field is required' };
-        }
-        if (!d.message) {
-          if (!errors?.notifications) {
-            errors['notifications'] = [];
-          }
-          errors.notifications[i] = { ...errors.notifications[i], message: 'Message is required' };
         }
       });
     }
@@ -602,7 +567,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                           size="small"
                                           variant="outlined"
                                           label="Select Users"
-                                          placeholder="Select Users"
                                         />
                                       )}
                                     />
@@ -627,7 +591,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                             size="small"
                                             variant="outlined"
                                             label="Select Groups"
-                                            placeholder="Select Groups"
                                           />
                                         )}
                                       />
@@ -807,27 +770,16 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                           <Autocomplete
                                             id={`fieldValue-${index}`}
                                             options={fieldOptions}
-                                            disableCloseOnSelect={['multiSelect'].includes(currentField?.type)}
+                                            disableCloseOnSelect={true}
                                             getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
-                                            multiple={['multiSelect'].includes(currentField?.type)}
+                                            multiple={true}
                                             value={
-                                              data?.fieldValue && ['checkBox', 'switch', 'radio'].includes(currentField?.type)
-                                                ? fieldOptions?.filter((opt) => opt?.optionValue === data?.fieldValue)?.length > 0
-                                                  ? fieldOptions?.filter((opt) => opt?.optionValue === data?.fieldValue)[0]
-                                                  : ''
-                                                : ['multiSelect'].includes(currentField?.type)
-                                                  ? fieldOptions?.filter((opt) => data?.fieldValue?.split(',')?.includes(opt?.optionValue)) || []
-                                                  : fieldOptions?.filter((opt) => opt?.optionValue === data?.fieldValue)?.length > 0
-                                                    ? fieldOptions?.filter((opt) => opt?.optionValue === data?.fieldValue)[0]
-                                                    : ''
+                                              data?.fieldValue
+                                                ? fieldOptions?.filter((opt) => data?.fieldValue?.split(',')?.includes(opt?.optionValue)) || []
+                                                : []
                                             }
                                             onChange={(e, val) => {
-                                              let newValue = '';
-                                              if (['multiSelect'].includes(currentField?.type)) {
-                                                newValue = val?.map((v) => v?.optionValue)?.join(',') || '';
-                                              } else {
-                                                newValue = val && val?.optionValue ? val?.optionValue : '';
-                                              }
+                                              const newValue = val?.map((v) => v?.optionValue)?.join(',') || '';
                                               arrayHelpers.replace(index, {
                                                 ...values?.notifications[index],
                                                 ['fieldValue']: newValue
@@ -897,95 +849,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                         />
                                       );
                                     })()}
-                                  </Grid>
-
-                                  <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
-                                    <Autocomplete
-                                      id="rule"
-                                      options={RULE}
-                                      getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
-                                      isOptionEqualToValue={(option: any, val) => option.optionValue === val}
-                                      value={
-                                        RULE && RULE?.filter((d) => d?.optionValue === data?.rule)?.length
-                                          ? RULE && RULE?.filter((d) => d?.optionValue === data?.rule)[0]
-                                          : ''
-                                      }
-                                      onChange={(e: any, val) => {
-                                        arrayHelpers.replace(index, {
-                                          ...values?.notifications[index],
-                                          ['rule']: val && val?.optionValue ? val?.optionValue : ''
-                                        });
-                                      }}
-                                      renderInput={(params) => (
-                                        <TextField
-                                          {...params}
-                                          margin="dense"
-                                          size="small"
-                                          variant="outlined"
-                                          label="Rule"
-                                          placeholder="Rule"
-                                          name="rule"
-                                          required
-                                          error={
-                                            touched?.notifications &&
-                                            touched?.notifications[index]?.rule &&
-                                            errors?.notifications &&
-                                            Boolean(errors?.notifications[index]?.rule)
-                                          }
-                                          helperText={
-                                            touched?.notifications &&
-                                            touched?.notifications[index]?.rule &&
-                                            errors?.notifications &&
-                                            errors?.notifications[index]?.rule
-                                          }
-                                        />
-                                      )}
-                                    />
-                                  </Grid>
-                                  <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
-                                    <Autocomplete
-                                      id="notificationUserField"
-                                      options={notificationUserField}
-                                      getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
-                                      isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
-                                      value={
-                                        notificationUserField &&
-                                          notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField).length
-                                          ? notificationUserField &&
-                                          notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField)[0]
-                                          : ''
-                                      }
-                                      onChange={(e, val) => {
-                                        arrayHelpers.replace(index, {
-                                          ...values?.notifications[index],
-                                          ['notificationUserField']: val && val?.fieldName ? val?.fieldName : ''
-                                        });
-                                      }}
-                                      renderInput={(params) => (
-                                        <TextField
-                                          {...params}
-                                          margin="dense"
-                                          size="small"
-                                          variant="outlined"
-                                          label="Notification User Field"
-                                          placeholder="Notification User Field"
-                                          name="notificationUserField"
-                                          required
-                                          error={
-                                            touched?.notifications &&
-                                            touched?.notifications[index]?.notificationUserField &&
-                                            errors?.notifications &&
-                                            Boolean(errors?.notifications[index]?.notificationUserField)
-                                          }
-                                          helperText={
-                                            touched?.notifications &&
-                                            touched?.notifications[index]?.notificationUserField &&
-                                            errors?.notifications &&
-                                            errors?.notifications[index]?.notificationUserField
-                                          }
-                                        />
-                                      )}
-                                    />
                                   </Grid>
                                   <Grid size={12}>
                                     <TextField
