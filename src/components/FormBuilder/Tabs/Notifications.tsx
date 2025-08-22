@@ -4,13 +4,14 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Grid from '@mui/material/Grid2';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, getUniqueCurrencies, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, getUniqueCurrencies, sidebarResource, cn } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 import { FieldArray, Formik } from 'formik';
 import Autocomplete from '@mui/material/Autocomplete';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import axiosInstance from 'src/axios/axiosInstance';
 import { checkBoxOptions, getLookupOption } from 'src/components/FormBuilder/helper';
@@ -19,6 +20,29 @@ import routes from 'src/components/Helpers/Routes';
 import MuiPhoneInput from 'material-ui-phone-number';
 
 export default function Notifications({ onClose, onSuccess, resource, resourceData, permissions, fields }) {
+  const OPERATOR = [
+    {
+      optionLabel: 'Less than',
+      optionValue: 'lessThan'
+    },
+    {
+      optionLabel: 'Less than or equals',
+      optionValue: 'lessThanOrEquals'
+    },
+    {
+      optionLabel: 'Equals To',
+      optionValue: 'equalsTo'
+    },
+    {
+      optionLabel: 'Greater than',
+      optionValue: 'greaterThan'
+    },
+    {
+      optionLabel: 'Greater than or equals',
+      optionValue: 'greaterThanOrEquals'
+    }
+  ];
+
   const toastConfig = useContext(CustomToastContext);
   const [initialValues, setInitialValues] = useState({ notifications: [] });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -60,8 +84,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
     let data = values?.notifications || [];
     if (type === 'add') {
       data.splice(index, 0, {
-        fieldName: '',
-        fieldValue: '',
+        checkFields: [{ fieldName: '', operator: '', value: '' }],
         email: true,
         portal: true,
         message: '',
@@ -193,15 +216,35 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   const validate = (values) => {
     const errors: any = {};
     if (values?.notifications?.length > 0) {
-      values?.notifications?.forEach((d, i) => {
-        if (!d.fieldName) {
-          if (!errors?.notifications) {
-            errors['notifications'] = [];
-          }
-          errors.notifications[i] = { fieldName: 'Field is required' };
+      values?.notifications?.forEach((notification, index) => {
+        if (notification?.checkFields?.length > 0) {
+          notification?.checkFields?.forEach((checkField, i) => {
+            if (!checkField?.fieldName) {
+              if (!errors.notifications) errors.notifications = [];
+              if (!errors.notifications[index]) errors.notifications[index] = {};
+              if (!errors.notifications[index].checkFields) errors.notifications[index].checkFields = [];
+              if (!errors.notifications[index].checkFields[i]) errors.notifications[index].checkFields[i] = {};
+              errors.notifications[index].checkFields[i].fieldName = 'Field name is required';
+            }
+            if (!checkField?.operator) {
+              if (!errors.notifications) errors.notifications = [];
+              if (!errors.notifications[index]) errors.notifications[index] = {};
+              if (!errors.notifications[index].checkFields) errors.notifications[index].checkFields = [];
+              if (!errors.notifications[index].checkFields[i]) errors.notifications[index].checkFields[i] = {};
+              errors.notifications[index].checkFields[i].operator = 'Operator is required';
+            }
+            if (!checkField?.value || (Array.isArray(checkField.value) && !checkField?.value?.length)) {
+              if (!errors.notifications) errors.notifications = [];
+              if (!errors.notifications[index]) errors.notifications[index] = {};
+              if (!errors.notifications[index].checkFields) errors.notifications[index].checkFields = [];
+              if (!errors.notifications[index].checkFields[i]) errors.notifications[index].checkFields[i] = {};
+              errors.notifications[index].checkFields[i].value = 'Value is required';
+            }
+          });
         }
       });
     }
+    console.log('Validation Errors:', errors);
     return errors;
   };
 
@@ -271,6 +314,23 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
 
         for (let i = 0; i < initialValues.notifications.length; i++) {
           const notification = initialValues.notifications[i];
+
+          // Handle new checkFields structure
+          if (notification.checkFields?.length > 0) {
+            for (let j = 0; j < notification.checkFields.length; j++) {
+              const checkField = notification.checkFields[j];
+              if (checkField.fieldName) {
+                const field = fields?.find(f => f?.fieldName === checkField.fieldName);
+                if (field) {
+                  fieldsMap[`${i}-${j}`] = field;
+                  const options = await getFieldValueOptions(field);
+                  optionsMap[`${i}-${j}`] = options;
+                }
+              }
+            }
+          }
+
+          // Handle old single field structure (backward compatibility)
           if (notification.fieldName) {
             const field = fields?.find(f => f?.fieldName === notification.fieldName);
             if (field) {
@@ -569,329 +629,262 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                     <FieldArray
                       name="notifications"
                       render={(arrayHelpers) => (
-                        <>
+                        <ul className="list-none space-y-4">
                           {values?.notifications?.map((data, index) => (
-                            <Card variant="outlined" sx={{ mb: 2 }} key={index}>
-                              <CardContent>
-                                <Box textAlign={'right'} sx={{ mb: 1 }}>
-                                  <HtmlTooltip title="Remove">
-                                    <IconButton size="small" aria-label="remove" onClick={() => addRemove(values, 'remove', index)}>
-                                      <RemoveCircleOutlineIcon fontSize="small" color="primary" />
+                            <li className="flex list-none items-center gap-2" key={index}>
+                              <fieldset className="flex-grow space-y-2 rounded-md border px-3 pb-3">
+                                <legend className="text-right">
+                                  <HtmlTooltip title={'Remove'}>
+                                    <IconButton size="small" aria-label="close" onClick={() => addRemove(values, 'remove', index)}>
+                                      <RemoveCircleOutline fontSize="small" color={'error'} />
                                     </IconButton>
                                   </HtmlTooltip>
-                                </Box>
+                                </legend>
 
-                                <Grid container spacing={2}>
-                                  <Grid size={permissions?.userGroup?.isRead ? 6 : 12}>
-                                    <Autocomplete
-                                      multiple
-                                      options={users}
-                                      getOptionLabel={(option) => option.optionLabel || ''}
-                                      value={users.filter(user => data?.users?.includes(user.optionValue)) || []}
-                                      onChange={(e, newValue) => {
-                                        arrayHelpers.replace(index, {
-                                          ...values?.notifications[index],
-                                          ['users']: newValue.map(user => user.optionValue)
-                                        });
-                                      }}
-                                      renderInput={(params) => (
-                                        <TextField
-                                          {...params}
-                                          margin="dense"
-                                          size="small"
-                                          variant="outlined"
-                                          label="Select Users"
-                                        />
-                                      )}
-                                    />
-                                  </Grid>
-                                  {permissions?.userGroup?.isRead && (
-                                    <Grid size={6}>
-                                      <Autocomplete
-                                        multiple
-                                        options={groups}
-                                        getOptionLabel={(option) => option.userGroupName || ''}
-                                        value={groups.filter(group => data?.groups?.includes(group._id)) || []}
-                                        onChange={(e, newValue) => {
-                                          arrayHelpers.replace(index, {
-                                            ...values?.notifications[index],
-                                            ['groups']: newValue.map(group => group._id)
-                                          });
-                                        }}
-                                        renderInput={(params) => (
-                                          <TextField
-                                            {...params}
-                                            margin="dense"
-                                            size="small"
-                                            variant="outlined"
-                                            label="Select Groups"
-                                          />
-                                        )}
-                                      />
-                                    </Grid>
-                                  )}
-                                  <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
-                                    <Autocomplete
-                                      options={fieldOptions}
-                                      getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
-                                      isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
-                                      value={
-                                        fieldOptions && fieldOptions.filter((f) => f?.fieldName === data?.fieldName).length
-                                          ? fieldOptions && fieldOptions.filter((f) => f?.fieldName === data?.fieldName)[0]
-                                          : ''
-                                      }
-                                      onChange={async (e, val) => {
-                                        const field = fields?.filter((f) => f?.fieldName === val?.fieldName)[0];
-                                        setSelectedFields(prev => ({
-                                          ...prev,
-                                          [index]: field
-                                        }));
+                                {/* Conditions Section */}
+                                <fieldset className="rounded-md border border-dashed border-gray-200 p-3 dark:border-gray-800">
+                                  <legend className="px-1 text-sm font-semibold">Conditions</legend>
+                                  <div className="space-y-4">
+                                    <FieldArray name={`notifications.${index}.checkFields`}>
+                                      {({ push, remove }) => (
+                                        <>
+                                          {data?.checkFields?.map((checkField, i, arr) => (
+                                            <div
+                                              key={i}
+                                              className={cn(
+                                                'grid grid-cols-1 gap-2',
+                                                checkField?.fieldName
+                                                  ? 'md:grid-cols-[1fr_1fr_1fr_auto]'
+                                                  : 'md:grid-cols-[1fr_1fr_auto]'
+                                              )}
+                                            >
+                                              {/* Field Name */}
+                                              <Autocomplete
+                                                options={fieldOptions}
+                                                getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
+                                                isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
+                                                value={
+                                                  fieldOptions && fieldOptions.filter((f) => f?.fieldName === checkField?.fieldName).length
+                                                    ? fieldOptions && fieldOptions.filter((f) => f?.fieldName === checkField?.fieldName)[0]
+                                                    : ''
+                                                }
+                                                onChange={async (e, val) => {
+                                                  const field = fields?.filter((f) => f?.fieldName === val?.fieldName)[0];
+                                                  setSelectedFields(prev => ({
+                                                    ...prev,
+                                                    [`${index}-${i}`]: field
+                                                  }));
 
-                                        if (field) {
-                                          const options = await getFieldValueOptions(field);
-                                          setFieldValueOptions(prev => ({
-                                            ...prev,
-                                            [index]: options
-                                          }));
-                                        }
-
-                                        arrayHelpers.replace(index, {
-                                          ...values?.notifications[index],
-                                          ['fieldName']: val && val?.fieldName ? val?.fieldName : '',
-                                          ['fieldValue']: ''
-                                        });
-                                      }}
-                                      renderInput={(params) => (
-                                        <TextField
-                                          {...params}
-                                          margin="dense"
-                                          size="small"
-                                          variant="outlined"
-                                          label="Field Name"
-                                          placeholder="Field"
-                                          name="fieldName"
-                                          required
-                                          error={
-                                            touched?.notifications &&
-                                            touched?.notifications[index]?.fieldName &&
-                                            errors?.notifications &&
-                                            Boolean(errors?.notifications[index]?.fieldName)
-                                          }
-                                          helperText={
-                                            touched?.notifications &&
-                                            touched?.notifications[index]?.fieldName &&
-                                            errors?.notifications &&
-                                            errors?.notifications[index]?.fieldName
-                                          }
-                                        />
-                                      )}
-                                    />
-                                  </Grid>
-                                  {/* field values field */}
-                                  <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
-                                    {(() => {
-                                      const currentField = selectedFields[index];
-                                      const fieldOptions = fieldValueOptions[index] || [];
-
-                                      // For dataList fields
-                                      if (currentField?.dataList) {
-                                        return (
-                                          <Autocomplete
-                                            onOpen={() => {
-                                              setLoadingStates(prev => ({ ...prev, [index]: true }));
-                                              fetchDataListOptions(currentField, '', index);
-                                            }}
-                                            loading={loadingStates[index] || false}
-                                            limitTags={2}
-                                            multiple
-                                            fullWidth
-                                            disableCloseOnSelect={true}
-                                            options={uniqBy(fieldOptions, 'optionValue')}
-                                            getOptionLabel={(option: any) => option ? option?.optionLabel || '' : ''}
-                                            value={
-                                              data?.fieldValue
-                                                ? uniqBy(fieldOptions, 'optionValue')?.filter((opt: any) =>
-                                                  data?.fieldValue?.split(',')?.includes(opt.optionValue)
-                                                )
-                                                : []
-                                            }
-                                            isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
-                                            onChange={(e, val: any) => {
-                                              const newValue = val ? val.map((v) => v?.optionValue)?.join(',') : '';
-                                              arrayHelpers.replace(index, {
-                                                ...values?.notifications[index],
-                                                ['fieldValue']: newValue
-                                              });
-                                            }}
-                                            renderInput={(params) => (
-                                              <TextField
-                                                {...params}
-                                                variant="outlined"
-                                                margin="dense"
-                                                size="small"
-                                                label="Field Value"
-                                                name="fieldValue"
-                                                style={{ whiteSpace: 'nowrap' }}
-                                                slotProps={{
-                                                  input: {
-                                                    ...params.InputProps,
-                                                    endAdornment: (
-                                                      <>
-                                                        {loadingStates[index] ? <CircularProgress color="inherit" size={20} /> : null}
-                                                        {params.InputProps.endAdornment}
-                                                      </>
-                                                    )
+                                                  if (field) {
+                                                    const options = await getFieldValueOptions(field);
+                                                    setFieldValueOptions(prev => ({
+                                                      ...prev,
+                                                      [`${index}-${i}`]: options
+                                                    }));
                                                   }
+
+                                                  arrayHelpers.replace(index, {
+                                                    ...values?.notifications[index],
+                                                    checkFields: values?.notifications[index]?.checkFields?.map((cf, cfIndex) =>
+                                                      cfIndex === i
+                                                        ? { ...cf, fieldName: val?.fieldName || '', value: '' }
+                                                        : cf
+                                                    )
+                                                  });
                                                 }}
-                                                error={
-                                                  touched?.notifications &&
-                                                  touched?.notifications[index]?.fieldValue &&
-                                                  errors?.notifications &&
-                                                  Boolean(errors?.notifications[index]?.fieldValue)
-                                                }
-                                                helperText={
-                                                  touched?.notifications &&
-                                                  touched?.notifications[index]?.fieldValue &&
-                                                  errors?.notifications &&
-                                                  errors?.notifications[index]?.fieldValue
-                                                }
-                                              />
-                                            )}
-                                          />
-                                        );
-                                      }
-
-                                      // For mobile number fields
-                                      if (currentField?.type === 'mobileNumber') {
-                                        return (
-                                          <MuiPhoneInput
-                                            defaultCountry={'us'}
-                                            disableAreaCodes
-                                            countryCodeEditable
-                                            variant="outlined"
-                                            fullWidth
-                                            label={'Field Value'}
-                                            name={'fieldValue'}
-                                            margin="dense"
-                                            size="small"
-                                            value={data?.fieldValue || ''}
-                                            onChange={(val) => {
-                                              const value = val?.length < 5 ? '' : val;
-                                              arrayHelpers.replace(index, {
-                                                ...values?.notifications[index],
-                                                ['fieldValue']: value
-                                              });
-                                            }}
-                                            error={
-                                              touched?.notifications &&
-                                              touched?.notifications[index]?.fieldValue &&
-                                              errors?.notifications &&
-                                              Boolean(errors?.notifications[index]?.fieldValue)
-                                            }
-                                            helperText={
-                                              touched?.notifications &&
-                                              touched?.notifications[index]?.fieldValue &&
-                                              errors?.notifications &&
-                                              errors?.notifications[index]?.fieldValue
-                                            }
-                                          />
-                                        );
-                                      }
-
-                                      // For fields with options (dropdown, multiSelect, checkBox, switch, currency, radio)
-                                      if (['dropDown', 'multiSelect', 'checkBox', 'switch', 'currency', 'radio'].includes(currentField?.type)) {
-                                        return (
-                                          <Autocomplete
-                                            id={`fieldValue-${index}`}
-                                            options={fieldOptions}
-                                            disableCloseOnSelect={true}
-                                            getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
-                                            multiple={true}
-                                            value={
-                                              data?.fieldValue
-                                                ? fieldOptions?.filter((opt) => data?.fieldValue?.split(',')?.includes(opt?.optionValue)) || []
-                                                : []
-                                            }
-                                            onChange={(e, val) => {
-                                              const newValue = val?.map((v) => v?.optionValue)?.join(',') || '';
-                                              arrayHelpers.replace(index, {
-                                                ...values?.notifications[index],
-                                                ['fieldValue']: newValue
-                                              });
-                                            }}
-                                            renderInput={(params) => (
-                                              <TextField
-                                                {...params}
-                                                margin="dense"
                                                 size="small"
-                                                variant="outlined"
-                                                label="Field Value"
-                                                placeholder="Field Value"
-                                                name="fieldValue"
-                                                error={
-                                                  touched?.notifications &&
-                                                  touched?.notifications[index]?.fieldValue &&
-                                                  errors?.notifications &&
-                                                  Boolean(errors?.notifications[index]?.fieldValue)
-                                                }
-                                                helperText={
-                                                  touched?.notifications &&
-                                                  touched?.notifications[index]?.fieldValue &&
-                                                  errors?.notifications &&
-                                                  errors?.notifications[index]?.fieldValue
-                                                }
+                                                renderInput={(params) => (
+                                                  <TextField
+                                                    {...params}
+                                                    label="Field Name"
+                                                    margin="none"
+                                                    size="small"
+                                                    variant="outlined"
+                                                    placeholder="Field"
+                                                    name="fieldName"
+                                                    required
+                                                    error={
+                                                      touched?.notifications &&
+                                                      touched?.notifications[index]?.checkFields &&
+                                                      touched?.notifications[index]?.checkFields[i]?.fieldName &&
+                                                      errors?.notifications &&
+                                                      errors?.notifications[index]?.checkFields &&
+                                                      Boolean(errors?.notifications[index]?.checkFields[i]?.fieldName)
+                                                    }
+                                                    helperText={
+                                                      touched?.notifications &&
+                                                      touched?.notifications[index]?.checkFields &&
+                                                      touched?.notifications[index]?.checkFields[i]?.fieldName &&
+                                                      errors?.notifications &&
+                                                      errors?.notifications[index]?.checkFields &&
+                                                      errors?.notifications[index]?.checkFields[i]?.fieldName
+                                                    }
+                                                  />
+                                                )}
                                               />
-                                            )}
-                                          />
-                                        );
-                                      }
 
-                                      return (
-                                        <TextField
-                                          variant="outlined"
-                                          type={
-                                            ['number', 'decimal', 'percent', 'formula'].includes(currentField?.type)
-                                              ? 'number'
-                                              : currentField?.type === 'date'
-                                                ? 'date'
-                                                : 'text'
-                                          }
-                                          label="Field Value"
-                                          name="fieldValue"
-                                          fullWidth
-                                          margin="dense"
-                                          size="small"
-                                          value={data?.fieldValue || ''}
-                                          onChange={(e) => {
+                                              {/* Operator */}
+                                              <Autocomplete
+                                                options={OPERATOR}
+                                                getOptionLabel={(option) => option?.optionLabel || ''}
+                                                value={
+                                                  OPERATOR?.find((op) => op?.optionValue === checkField?.operator) ?? null
+                                                }
+                                                onChange={(event, newValue) => {
+                                                  arrayHelpers.replace(index, {
+                                                    ...values?.notifications[index],
+                                                    checkFields: values?.notifications[index]?.checkFields?.map((cf, cfIndex) =>
+                                                      cfIndex === i
+                                                        ? { ...cf, operator: newValue?.optionValue || '' }
+                                                        : cf
+                                                    )
+                                                  });
+                                                }}
+                                                size="small"
+                                                renderInput={(params) => (
+                                                  <TextField
+                                                    {...params}
+                                                    label="Operator"
+                                                    margin="none"
+                                                    size="small"
+                                                    variant="outlined"
+                                                    error={
+                                                      touched?.notifications &&
+                                                      touched?.notifications[index]?.checkFields &&
+                                                      touched?.notifications[index]?.checkFields[i]?.operator &&
+                                                      errors?.notifications &&
+                                                      errors?.notifications[index]?.checkFields &&
+                                                      Boolean(errors?.notifications[index]?.checkFields[i]?.operator)
+                                                    }
+                                                    helperText={
+                                                      touched?.notifications &&
+                                                      touched?.notifications[index]?.checkFields &&
+                                                      touched?.notifications[index]?.checkFields[i]?.operator &&
+                                                      errors?.notifications &&
+                                                      errors?.notifications[index]?.checkFields &&
+                                                      errors?.notifications[index]?.checkFields[i]?.operator
+                                                    }
+                                                  />
+                                                )}
+                                              />
+
+                                              {/* Value - Dynamic based on field type */}
+                                              {checkField?.fieldName ? (
+                                                <DynamicValueField
+                                                  currentField={selectedFields[`${index}-${i}`]}
+                                                  fieldOptions={fieldValueOptions[`${index}-${i}`] || []}
+                                                  value={checkField?.value}
+                                                  index={index}
+                                                  checkFieldIndex={i}
+                                                  arrayHelpers={arrayHelpers}
+                                                  values={values}
+                                                  touched={touched}
+                                                  errors={errors}
+                                                  setLoadingStates={setLoadingStates}
+                                                  loadingStates={loadingStates}
+                                                  fetchDataListOptions={fetchDataListOptions}
+                                                  uniqBy={uniqBy}
+                                                />
+                                              ) : null}
+
+                                              {/* Add/Remove Buttons */}
+                                              <div className="mt-1 flex">
+                                                <HtmlTooltip title={'Remove'}>
+                                                  <IconButton
+                                                    size="small"
+                                                    aria-label="close"
+                                                    onClick={() => remove(i)}
+                                                    disabled={arr.length === 1}
+                                                  >
+                                                    <RemoveCircleOutline fontSize="small" color={arr.length === 1 ? 'disabled' : 'error'} />
+                                                  </IconButton>
+                                                </HtmlTooltip>
+                                                <HtmlTooltip title={'Add'}>
+                                                  <IconButton
+                                                    size="small"
+                                                    aria-label="add"
+                                                    onClick={() => push({ fieldName: '', operator: '', value: '' })}
+                                                  >
+                                                    <AddCircleOutline fontSize="small" color={'primary'} />
+                                                  </IconButton>
+                                                </HtmlTooltip>
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </>
+                                      )}
+                                    </FieldArray>
+                                  </div>
+                                </fieldset>
+
+                                {/* Actions Section */}
+                                <fieldset className="rounded-md border border-dashed border-gray-200 p-3 dark:border-gray-800">
+                                  <legend className="px-1 text-sm font-semibold">Actions</legend>
+                                  <div className="space-y-2">
+                                    {/* Users and Groups */}
+                                    <Grid container spacing={2}>
+                                      <Grid size={permissions?.userGroup?.isRead ? 6 : 12}>
+                                        <Autocomplete
+                                          multiple
+                                          options={users}
+                                          getOptionLabel={(option) => option.optionLabel || ''}
+                                          value={users.filter(user => data?.users?.includes(user.optionValue)) || []}
+                                          onChange={(e, newValue) => {
                                             arrayHelpers.replace(index, {
                                               ...values?.notifications[index],
-                                              ['fieldValue']: e.target.value
+                                              ['users']: newValue.map(user => user.optionValue)
                                             });
                                           }}
-                                          error={
-                                            touched?.notifications &&
-                                            touched?.notifications[index]?.fieldValue &&
-                                            errors?.notifications &&
-                                            Boolean(errors?.notifications[index]?.fieldValue)
-                                          }
-                                          helperText={
-                                            touched?.notifications &&
-                                            touched?.notifications[index]?.fieldValue &&
-                                            errors?.notifications &&
-                                            errors?.notifications[index]?.fieldValue
-                                          }
+                                          size="small"
+                                          renderInput={(params) => (
+                                            <TextField
+                                              {...params}
+                                              margin="none"
+                                              size="small"
+                                              variant="outlined"
+                                              label="Select Users"
+                                            />
+                                          )}
                                         />
-                                      );
-                                    })()}
-                                  </Grid>
-                                  <Grid size={12}>
+                                      </Grid>
+                                      {permissions?.userGroup?.isRead && (
+                                        <Grid size={6}>
+                                          <Autocomplete
+                                            multiple
+                                            options={groups}
+                                            getOptionLabel={(option) => option.userGroupName || ''}
+                                            value={groups.filter(group => data?.groups?.includes(group._id)) || []}
+                                            onChange={(e, newValue) => {
+                                              arrayHelpers.replace(index, {
+                                                ...values?.notifications[index],
+                                                ['groups']: newValue.map(group => group._id)
+                                              });
+                                            }}
+                                            size="small"
+                                            renderInput={(params) => (
+                                              <TextField
+                                                {...params}
+                                                margin="none"
+                                                size="small"
+                                                variant="outlined"
+                                                label="Select Groups"
+                                              />
+                                            )}
+                                          />
+                                        </Grid>
+                                      )}
+                                    </Grid>
+
+                                    {/* Message */}
                                     <TextField
                                       fullWidth
                                       label="Message"
                                       variant="outlined"
+                                      type="text"
                                       size="small"
+                                      name="message"
                                       placeholder="Message"
-                                      value={data.message}
+                                      value={data?.message || ''}
                                       onChange={(e) => {
                                         arrayHelpers.replace(index, {
                                           ...values?.notifications[index],
@@ -911,46 +904,50 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                         errors?.notifications[index]?.message
                                       }
                                     />
-                                  </Grid>
-                                  <Grid size={6}>
-                                    <FormControlLabel
-                                      control={
-                                        <Checkbox
-                                          checked={data?.email}
-                                          onChange={(e) => {
-                                            arrayHelpers.replace(index, {
-                                              ...values?.notifications[index],
-                                              ['email']: e.target.checked
-                                            });
-                                          }}
-                                          color="primary"
+
+                                    {/* Email and Portal Checkboxes */}
+                                    <Grid container spacing={2}>
+                                      <Grid size={6}>
+                                        <FormControlLabel
+                                          control={
+                                            <Checkbox
+                                              checked={data?.email}
+                                              onChange={(e) => {
+                                                arrayHelpers.replace(index, {
+                                                  ...values?.notifications[index],
+                                                  ['email']: e.target.checked
+                                                });
+                                              }}
+                                              color="primary"
+                                            />
+                                          }
+                                          label="Email"
                                         />
-                                      }
-                                      label="Email"
-                                    />
-                                  </Grid>
-                                  <Grid size={6}>
-                                    <FormControlLabel
-                                      control={
-                                        <Checkbox
-                                          checked={data?.portal}
-                                          onChange={(e) => {
-                                            arrayHelpers.replace(index, {
-                                              ...values?.notifications[index],
-                                              ['portal']: e.target.checked
-                                            });
-                                          }}
-                                          color="primary"
+                                      </Grid>
+                                      <Grid size={6}>
+                                        <FormControlLabel
+                                          control={
+                                            <Checkbox
+                                              checked={data?.portal}
+                                              onChange={(e) => {
+                                                arrayHelpers.replace(index, {
+                                                  ...values?.notifications[index],
+                                                  ['portal']: e.target.checked
+                                                });
+                                              }}
+                                              color="primary"
+                                            />
+                                          }
+                                          label="Portal"
                                         />
-                                      }
-                                      label="Portal"
-                                    />
-                                  </Grid>
-                                </Grid>
-                              </CardContent>
-                            </Card>
+                                      </Grid>
+                                    </Grid>
+                                  </div>
+                                </fieldset>
+                              </fieldset>
+                            </li>
                           ))}
-                        </>
+                        </ul>
                       )}
                     />
                   </CardContent>
@@ -976,3 +973,271 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
     </Dialog>
   );
 }
+
+// Dynamic Value Field Component
+const DynamicValueField = ({
+  currentField,
+  fieldOptions,
+  value,
+  index,
+  checkFieldIndex,
+  arrayHelpers,
+  values,
+  touched,
+  errors,
+  setLoadingStates,
+  loadingStates,
+  fetchDataListOptions,
+  uniqBy
+}) => {
+  const updateValue = (newValue) => {
+    if (checkFieldIndex !== undefined) {
+      // For checkFields structure
+      arrayHelpers.replace(index, {
+        ...values?.notifications[index],
+        checkFields: values?.notifications[index]?.checkFields?.map((cf, cfIndex) =>
+          cfIndex === checkFieldIndex
+            ? { ...cf, value: newValue }
+            : cf
+        )
+      });
+    } else {
+      // For simple structure (backward compatibility)
+      arrayHelpers.replace(index, {
+        ...values?.notifications[index],
+        ['value']: newValue
+      });
+    }
+  };
+
+  // For dataList fields
+  if (currentField?.dataList) {
+    return (
+      <Autocomplete
+        onOpen={() => {
+          const loadingKey = checkFieldIndex !== undefined ? `${index}-${checkFieldIndex}` : index;
+          setLoadingStates(prev => ({ ...prev, [loadingKey]: true }));
+          fetchDataListOptions(currentField, '', loadingKey);
+        }}
+        loading={loadingStates[checkFieldIndex !== undefined ? `${index}-${checkFieldIndex}` : index] || false}
+        limitTags={2}
+        multiple
+        fullWidth
+        disableCloseOnSelect={true}
+        options={uniqBy(fieldOptions, 'optionValue')}
+        getOptionLabel={(option: any) => option ? option?.optionLabel || '' : ''}
+        value={
+          value
+            ? uniqBy(fieldOptions, 'optionValue')?.filter((opt: any) =>
+              value?.split(',')?.includes(opt.optionValue)
+            )
+            : []
+        }
+        isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
+        onChange={(e, val: any) => {
+          const newValue = val ? val.map((v) => v?.optionValue)?.join(',') : '';
+          updateValue(newValue);
+        }}
+        size="small"
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            variant="outlined"
+            margin="none"
+            size="small"
+            label="Value"
+            name="value"
+            style={{ whiteSpace: 'nowrap' }}
+            slotProps={{
+              input: {
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {loadingStates[checkFieldIndex !== undefined ? `${index}-${checkFieldIndex}` : index] ? <CircularProgress color="inherit" size={20} /> : null}
+                    {params.InputProps.endAdornment}
+                  </>
+                )
+              }
+            }}
+            error={
+              checkFieldIndex !== undefined
+                ? touched?.notifications &&
+                touched?.notifications[index]?.checkFields &&
+                touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
+                errors?.notifications &&
+                errors?.notifications[index]?.checkFields &&
+                Boolean(errors?.notifications[index]?.checkFields[checkFieldIndex]?.value)
+                : touched?.notifications &&
+                touched?.notifications[index]?.value &&
+                errors?.notifications &&
+                Boolean(errors?.notifications[index]?.value)
+            }
+            helperText={
+              checkFieldIndex !== undefined
+                ? touched?.notifications &&
+                touched?.notifications[index]?.checkFields &&
+                touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
+                errors?.notifications &&
+                errors?.notifications[index]?.checkFields &&
+                errors?.notifications[index]?.checkFields[checkFieldIndex]?.value
+                : touched?.notifications &&
+                touched?.notifications[index]?.value &&
+                errors?.notifications &&
+                errors?.notifications[index]?.value
+            }
+          />
+        )}
+      />
+    );
+  }
+
+  // For mobile number fields
+  if (currentField?.type === 'mobileNumber') {
+    return (
+      <MuiPhoneInput
+        defaultCountry={'us'}
+        value={value}
+        onChange={(newValue) => {
+          updateValue(newValue);
+        }}
+        variant="outlined"
+        size="small"
+        label="Value"
+        fullWidth
+        error={
+          checkFieldIndex !== undefined
+            ? touched?.notifications &&
+            touched?.notifications[index]?.checkFields &&
+            touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
+            errors?.notifications &&
+            errors?.notifications[index]?.checkFields &&
+            Boolean(errors?.notifications[index]?.checkFields[checkFieldIndex]?.value)
+            : touched?.notifications &&
+            touched?.notifications[index]?.value &&
+            errors?.notifications &&
+            Boolean(errors?.notifications[index]?.value)
+        }
+        helperText={
+          checkFieldIndex !== undefined
+            ? touched?.notifications &&
+            touched?.notifications[index]?.checkFields &&
+            touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
+            errors?.notifications &&
+            errors?.notifications[index]?.checkFields &&
+            errors?.notifications[index]?.checkFields[checkFieldIndex]?.value
+            : touched?.notifications &&
+            touched?.notifications[index]?.value &&
+            errors?.notifications &&
+            errors?.notifications[index]?.value
+        }
+      />
+    );
+  }
+
+  // For other field types with options (dropdown, multiSelect, radio, checkbox, switch, currency)
+  if (fieldOptions.length > 0) {
+    return (
+      <Autocomplete
+        limitTags={2}
+        multiple
+        fullWidth
+        disableCloseOnSelect={true}
+        options={uniqBy(fieldOptions, 'optionValue')}
+        getOptionLabel={(option: any) => option ? option?.optionLabel || '' : ''}
+        value={
+          value
+            ? uniqBy(fieldOptions, 'optionValue')?.filter((opt: any) =>
+              value?.split(',')?.includes(opt.optionValue)
+            )
+            : []
+        }
+        isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
+        onChange={(e, val: any) => {
+          const newValue = val ? val.map((v) => v?.optionValue)?.join(',') : '';
+          updateValue(newValue);
+        }}
+        size="small"
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            variant="outlined"
+            margin="none"
+            size="small"
+            label="Value"
+            name="value"
+            style={{ whiteSpace: 'nowrap' }}
+            error={
+              checkFieldIndex !== undefined
+                ? touched?.notifications &&
+                touched?.notifications[index]?.checkFields &&
+                touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
+                errors?.notifications &&
+                errors?.notifications[index]?.checkFields &&
+                Boolean(errors?.notifications[index]?.checkFields[checkFieldIndex]?.value)
+                : touched?.notifications &&
+                touched?.notifications[index]?.value &&
+                errors?.notifications &&
+                Boolean(errors?.notifications[index]?.value)
+            }
+            helperText={
+              checkFieldIndex !== undefined
+                ? touched?.notifications &&
+                touched?.notifications[index]?.checkFields &&
+                touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
+                errors?.notifications &&
+                errors?.notifications[index]?.checkFields &&
+                errors?.notifications[index]?.checkFields[checkFieldIndex]?.value
+                : touched?.notifications &&
+                touched?.notifications[index]?.value &&
+                errors?.notifications &&
+                errors?.notifications[index]?.value
+            }
+          />
+        )}
+      />
+    );
+  }
+
+  // For text, number, date fields - simple text input
+  return (
+    <TextField
+      fullWidth
+      variant="outlined"
+      margin="none"
+      size="small"
+      label="Value"
+      name="value"
+      type={currentField?.type === 'number' ? 'number' : currentField?.type === 'date' ? 'date' : 'text'}
+      value={value || ''}
+      onChange={(e) => {
+        updateValue(e.target.value);
+      }}
+      error={
+        checkFieldIndex !== undefined
+          ? touched?.notifications &&
+          touched?.notifications[index]?.checkFields &&
+          touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
+          errors?.notifications &&
+          errors?.notifications[index]?.checkFields &&
+          Boolean(errors?.notifications[index]?.checkFields[checkFieldIndex]?.value)
+          : touched?.notifications &&
+          touched?.notifications[index]?.value &&
+          errors?.notifications &&
+          Boolean(errors?.notifications[index]?.value)
+      }
+      helperText={
+        checkFieldIndex !== undefined
+          ? touched?.notifications &&
+          touched?.notifications[index]?.checkFields &&
+          touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
+          errors?.notifications &&
+          errors?.notifications[index]?.checkFields &&
+          errors?.notifications[index]?.checkFields[checkFieldIndex]?.value
+          : touched?.notifications &&
+          touched?.notifications[index]?.value &&
+          errors?.notifications &&
+          errors?.notifications[index]?.value
+      }
+    />
+  );
+};
