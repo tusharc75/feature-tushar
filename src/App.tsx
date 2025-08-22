@@ -302,6 +302,8 @@ import ShowFileUploader from 'src/components/ShowFileUploader';
 import OnboardingTemplate from 'src/pages/OnboardingTemplate';
 import OnboardingTemplateDetail from 'src/pages/OnboardingTemplate/OnboardingTemplateDetail';
 import QuickBookProxy from 'src/pages/Integration/QuickBookProxy';
+import Onboarding from 'src/pages/Onboarding';
+import OnboardingDetail from 'src/pages/Onboarding/OnboardingDetail';
 
 var notificationInterval: any = null;
 
@@ -1330,6 +1332,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldView.path}/:padId/:wellId`}>
               <FieldView />
+            </PrivateRoute>
+             <PrivateRoute exact path={`${routes.onboarding.path}`}>
+              <Onboarding />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.onboardingDetail.path}/:id`}>
+              <OnboardingDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.onboardingTemplate.path}`}>
               <OnboardingTemplate />
