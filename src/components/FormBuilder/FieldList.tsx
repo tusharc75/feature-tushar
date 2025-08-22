@@ -1,7 +1,7 @@
 import { generateId } from './NewDnd/helper';
 import { FieldListType } from './NewDnd/types';
 
-const FieldList = {
+export const FieldList = {
   SINGLELINE: {
     label: 'Single Line',
     type: 'singleLine',

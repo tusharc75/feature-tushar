@@ -325,6 +325,7 @@ const ServiceOrderDetailsPage = () => {
                   stepFullScreen={stepFullScreen}
                   fetchData={fetchServiceOrderData}
                   setNextStep={setNextStep}
+                  resourcePolicy={resourcePolicyData?.policy}
                 />
               ) : (
                 <Technicians
