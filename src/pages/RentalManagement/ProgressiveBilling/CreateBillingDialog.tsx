@@ -475,10 +475,12 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           if (product) {
             const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
             materialData.actualStartDate = actualEndDate;
-          } else {
+          } else if (e?.type != MATERIAL_TYPE.manualEntry) {
             materialData.actualStartDate = materialData.manualStartDate ? materialData.manualStartDate : materialData?.actualStartDate ? materialData?.actualStartDate : new Date().setDate(new Date().getDate() + 1);
           }
-          materialData.actualStartDate = new Date(materialData.actualStartDate)?.toISOString();
+          if (materialData.actualStartDate) {
+            materialData.actualStartDate = new Date(materialData.actualStartDate)?.toISOString();
+          }
 
           const row: any = invoiceData[0]?.material?.find((m) => m._id === e._id);
           if (row) {
