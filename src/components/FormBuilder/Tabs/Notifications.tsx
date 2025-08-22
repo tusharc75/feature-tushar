@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Checkbox, Dialog, FormControlLabel, IconButton, TextField, Divider, Typography, Card, CardContent, CircularProgress } from '@mui/material';
+import { Box, Checkbox, Dialog, FormControlLabel, IconButton, TextField, Divider, Typography, Card, CardContent } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Grid from '@mui/material/Grid2';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -12,14 +12,15 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 import { FieldArray, Formik } from 'formik';
 import Autocomplete from '@mui/material/Autocomplete';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import axiosInstance from 'src/axios/axiosInstance';
 import { checkBoxOptions, getLookupOption } from 'src/components/FormBuilder/helper';
-import { isEmpty, uniqBy } from 'lodash';
-import routes from 'src/components/Helpers/Routes';
-import MuiPhoneInput from 'material-ui-phone-number';
+import { isEmpty } from 'lodash';
+import FieldList from 'src/components/FormBuilder/FieldList';
+import { DATE_VALUE } from 'src/components/FormBuilder/Tabs/helper';
+import FormTypes from 'src/components/Helpers/FormTypes';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-export default function Notifications({ onClose, onSuccess, resource, resourceData, permissions, fields }) {
+export default function Notifications({ onClose, onSuccess, resource, resourceData, permissions }) {
   const OPERATOR = [
     {
       optionLabel: 'Less than',
@@ -50,9 +51,18 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   const [users, setUsers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [fieldOptions, setFieldOptions] = useState([]);
-  const [fieldValueOptions, setFieldValueOptions] = useState({});
   const [selectedFields, setSelectedFields] = useState({});
-  const [loadingStates, setLoadingStates] = useState({});
+  const [fields, setFields] = useState([]);
+
+  const getResourceFieldList = async (resource) => {
+    try {
+      let {
+        data: { data }
+      } = await axiosInstance().get(`/field?resource=${resource}`);
+      data = data?.filter((obj) => obj?.isCreate).map((d: any) => d.fieldData);
+      setFields(data);
+    } catch (e) { }
+  };
 
   const [createRecordNotifications, setCreateRecordNotifications] = useState({
     users: [],
@@ -98,6 +108,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   };
 
   useEffect(() => {
+    getResourceFieldList(resource);
     getUserList();
     getGroupList();
   }, []);
@@ -153,7 +164,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
     } catch (e) { }
   }, [fields]);
 
-  // Helper function to check if a value is meaningful
   const hasValue = (value) => {
     if (value === null || value === undefined || value === '') return false;
     if (Array.isArray(value) && value.length === 0) return false;
@@ -161,7 +171,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
     return true;
   };
 
-  // Helper function to remove empty fields from objects
   const cleanEmptyFields = (obj) => {
     if (!obj || typeof obj !== 'object') return obj;
 
@@ -180,19 +189,14 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
     setSubmitting(true);
 
     const cleanedCreateRecord = cleanEmptyFields(createRecordNotifications);
-
     const cleanedUpdateRecord = cleanEmptyFields(updateRecordNotifications);
-
     const cleanedConditionNotifications = values?.notifications?.map(notification =>
       cleanEmptyFields(notification)
     ).filter(notification => Object.keys(notification).length > 0) || [];
 
     const submitData: any = {};
-
     submitData.createRecordNotifications = [cleanedCreateRecord];
-
     submitData.updateRecordNotifications = [cleanedUpdateRecord];
-
     submitData.conditionNotifications = cleanedConditionNotifications;
 
 
@@ -248,7 +252,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
     return errors;
   };
 
-  // Function to get field value options for a specific field
   const getFieldValueOptions = async (field) => {
     if (!field) return [];
 
@@ -282,30 +285,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
     return [];
   };
 
-  const fetchDataListOptions = async (field, searchKey = '', notificationIndex) => {
-    if (!field?.dataList) return [];
-
-    try {
-      setLoadingStates(prev => ({ ...prev, [notificationIndex]: true }));
-
-      const query = `${routes?.dataList?.path}/data-list-items/${field?.dataListId}?search=${encodeURIComponent(searchKey)}`;
-      const { data: { data: { data } } } = await axiosInstance().get(query);
-      const options = data?.map((d) => ({ optionLabel: d?.title, optionValue: d?._id }));
-
-      setFieldValueOptions(prev => ({
-        ...prev,
-        [notificationIndex]: options
-      }));
-
-      setLoadingStates(prev => ({ ...prev, [notificationIndex]: false }));
-      return options;
-    } catch (error) {
-      console.error('Error fetching dataList options:', error);
-      setLoadingStates(prev => ({ ...prev, [notificationIndex]: false }));
-      return [];
-    }
-  };
-
   useEffect(() => {
     const loadExistingFieldOptions = async () => {
       if (initialValues?.notifications?.length > 0) {
@@ -330,7 +309,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
             }
           }
 
-          // Handle old single field structure (backward compatibility)
           if (notification.fieldName) {
             const field = fields?.find(f => f?.fieldName === notification.fieldName);
             if (field) {
@@ -342,7 +320,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
         }
 
         setSelectedFields(fieldsMap);
-        setFieldValueOptions(optionsMap);
       }
     };
 
@@ -364,7 +341,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
         }
       }}
     >
-      <Formik initialValues={initialValues} enableReinitialize={true} validate={validate} onSubmit={handleSubmit}>
+      {fields.length ? (<Formik initialValues={initialValues} enableReinitialize={true} validate={validate} onSubmit={handleSubmit}>
         {({ values, submitForm, touched, errors }) => (
           <>
             <CustomDialogHeader
@@ -675,13 +652,9 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                                     [`${index}-${i}`]: field
                                                   }));
 
-                                                  if (field) {
-                                                    const options = await getFieldValueOptions(field);
-                                                    setFieldValueOptions(prev => ({
-                                                      ...prev,
-                                                      [`${index}-${i}`]: options
-                                                    }));
-                                                  }
+                                                  // if (field) {
+                                                  //   const options = await getFieldValueOptions(field);
+                                                  // }
 
                                                   arrayHelpers.replace(index, {
                                                     ...values?.notifications[index],
@@ -770,20 +743,32 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
 
                                               {/* Value - Dynamic based on field type */}
                                               {checkField?.fieldName ? (
-                                                <DynamicValueField
-                                                  currentField={selectedFields[`${index}-${i}`]}
-                                                  fieldOptions={fieldValueOptions[`${index}-${i}`] || []}
+                                                <DynamicFormField
+                                                  field={selectedFields[`${index}-${i}`]}
+                                                  fieldName={checkField?.fieldName}
                                                   value={checkField?.value}
-                                                  index={index}
-                                                  checkFieldIndex={i}
-                                                  arrayHelpers={arrayHelpers}
-                                                  values={values}
-                                                  touched={touched}
-                                                  errors={errors}
-                                                  setLoadingStates={setLoadingStates}
-                                                  loadingStates={loadingStates}
-                                                  fetchDataListOptions={fetchDataListOptions}
-                                                  uniqBy={uniqBy}
+                                                  setFieldValue={(formikField, newValue) => {
+                                                    arrayHelpers.replace(index, {
+                                                      ...values?.notifications[index],
+                                                      checkFields: values?.notifications[index]?.checkFields?.map((cf, cfIndex) =>
+                                                        cfIndex === i
+                                                          ? { ...cf, value: newValue }
+                                                          : cf
+                                                      )
+                                                    });
+                                                  }}
+                                                  formikField={`notifications.${index}.checkFields.${i}.value`}
+                                                  error={
+                                                    errors?.notifications &&
+                                                    errors?.notifications[index]?.checkFields &&
+                                                    errors?.notifications[index]?.checkFields[i]?.value
+                                                  }
+                                                  touched={
+                                                    touched?.notifications &&
+                                                    touched?.notifications[index]?.checkFields &&
+                                                    touched?.notifications[index]?.checkFields[i]?.value
+                                                  }
+                                                  label="Value"
                                                 />
                                               ) : null}
 
@@ -875,7 +860,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                       )}
                                     </Grid>
 
-                                    {/* Message */}
                                     <TextField
                                       fullWidth
                                       label="Message"
@@ -905,7 +889,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                       }
                                     />
 
-                                    {/* Email and Portal Checkboxes */}
                                     <Grid container spacing={2}>
                                       <Grid size={6}>
                                         <FormControlLabel
@@ -969,275 +952,128 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
             </CustomDialogFooter>
           </>
         )}
-      </Formik>
+      </Formik>) :
+        ((
+          <Box height={'h-fit'} padding={2}>
+            <CommonSkeleton lenArray={[...Array(6).keys()]} />
+          </Box>
+        ))}
     </Dialog>
   );
 }
 
-// Dynamic Value Field Component
-const DynamicValueField = ({
-  currentField,
-  fieldOptions,
-  value,
-  index,
-  checkFieldIndex,
-  arrayHelpers,
-  values,
-  touched,
-  errors,
-  setLoadingStates,
-  loadingStates,
-  fetchDataListOptions,
-  uniqBy
-}) => {
-  const updateValue = (newValue) => {
-    if (checkFieldIndex !== undefined) {
-      // For checkFields structure
-      arrayHelpers.replace(index, {
-        ...values?.notifications[index],
-        checkFields: values?.notifications[index]?.checkFields?.map((cf, cfIndex) =>
-          cfIndex === checkFieldIndex
-            ? { ...cf, value: newValue }
-            : cf
-        )
-      });
-    } else {
-      // For simple structure (backward compatibility)
-      arrayHelpers.replace(index, {
-        ...values?.notifications[index],
-        ['value']: newValue
-      });
-    }
-  };
+const DynamicFormField = ({ fieldName, value, field, setFieldValue, formikField, error, touched, label }) => {
 
-  // For dataList fields
-  if (currentField?.dataList) {
+  if (!field) {
     return (
-      <Autocomplete
-        onOpen={() => {
-          const loadingKey = checkFieldIndex !== undefined ? `${index}-${checkFieldIndex}` : index;
-          setLoadingStates(prev => ({ ...prev, [loadingKey]: true }));
-          fetchDataListOptions(currentField, '', loadingKey);
-        }}
-        loading={loadingStates[checkFieldIndex !== undefined ? `${index}-${checkFieldIndex}` : index] || false}
-        limitTags={2}
-        multiple
+      <TextField
         fullWidth
-        disableCloseOnSelect={true}
-        options={uniqBy(fieldOptions, 'optionValue')}
-        getOptionLabel={(option: any) => option ? option?.optionLabel || '' : ''}
-        value={
-          value
-            ? uniqBy(fieldOptions, 'optionValue')?.filter((opt: any) =>
-              value?.split(',')?.includes(opt.optionValue)
-            )
-            : []
-        }
-        isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
-        onChange={(e, val: any) => {
-          const newValue = val ? val.map((v) => v?.optionValue)?.join(',') : '';
-          updateValue(newValue);
-        }}
-        size="small"
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            variant="outlined"
-            margin="none"
-            size="small"
-            label="Value"
-            name="value"
-            style={{ whiteSpace: 'nowrap' }}
-            slotProps={{
-              input: {
-                ...params.InputProps,
-                endAdornment: (
-                  <>
-                    {loadingStates[checkFieldIndex !== undefined ? `${index}-${checkFieldIndex}` : index] ? <CircularProgress color="inherit" size={20} /> : null}
-                    {params.InputProps.endAdornment}
-                  </>
-                )
-              }
-            }}
-            error={
-              checkFieldIndex !== undefined
-                ? touched?.notifications &&
-                touched?.notifications[index]?.checkFields &&
-                touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
-                errors?.notifications &&
-                errors?.notifications[index]?.checkFields &&
-                Boolean(errors?.notifications[index]?.checkFields[checkFieldIndex]?.value)
-                : touched?.notifications &&
-                touched?.notifications[index]?.value &&
-                errors?.notifications &&
-                Boolean(errors?.notifications[index]?.value)
-            }
-            helperText={
-              checkFieldIndex !== undefined
-                ? touched?.notifications &&
-                touched?.notifications[index]?.checkFields &&
-                touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
-                errors?.notifications &&
-                errors?.notifications[index]?.checkFields &&
-                errors?.notifications[index]?.checkFields[checkFieldIndex]?.value
-                : touched?.notifications &&
-                touched?.notifications[index]?.value &&
-                errors?.notifications &&
-                errors?.notifications[index]?.value
-            }
-          />
-        )}
-      />
-    );
-  }
-
-  // For mobile number fields
-  if (currentField?.type === 'mobileNumber') {
-    return (
-      <MuiPhoneInput
-        defaultCountry={'us'}
-        value={value}
-        onChange={(newValue) => {
-          updateValue(newValue);
-        }}
         variant="outlined"
+        margin="none"
         size="small"
-        label="Value"
-        fullWidth
-        error={
-          checkFieldIndex !== undefined
-            ? touched?.notifications &&
-            touched?.notifications[index]?.checkFields &&
-            touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
-            errors?.notifications &&
-            errors?.notifications[index]?.checkFields &&
-            Boolean(errors?.notifications[index]?.checkFields[checkFieldIndex]?.value)
-            : touched?.notifications &&
-            touched?.notifications[index]?.value &&
-            errors?.notifications &&
-            Boolean(errors?.notifications[index]?.value)
-        }
-        helperText={
-          checkFieldIndex !== undefined
-            ? touched?.notifications &&
-            touched?.notifications[index]?.checkFields &&
-            touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
-            errors?.notifications &&
-            errors?.notifications[index]?.checkFields &&
-            errors?.notifications[index]?.checkFields[checkFieldIndex]?.value
-            : touched?.notifications &&
-            touched?.notifications[index]?.value &&
-            errors?.notifications &&
-            errors?.notifications[index]?.value
-        }
+        label={label || "Value"}
+        value={value || ''}
+        onChange={(e) => {
+          setFieldValue(formikField, e.target.value);
+        }}
+        error={Boolean(error)}
+        helperText={error}
       />
     );
   }
 
-  // For other field types with options (dropdown, multiSelect, radio, checkbox, switch, currency)
-  if (fieldOptions.length > 0) {
-    return (
+  return (field?.type === FieldList.DATE.type ? (
+    <>
       <Autocomplete
-        limitTags={2}
-        multiple
+        options={Object.values(DATE_VALUE)}
+        getOptionLabel={(option) => option || ''}
+        value={value}
         fullWidth
-        disableCloseOnSelect={true}
-        options={uniqBy(fieldOptions, 'optionValue')}
-        getOptionLabel={(option: any) => option ? option?.optionLabel || '' : ''}
-        value={
-          value
-            ? uniqBy(fieldOptions, 'optionValue')?.filter((opt: any) =>
-              value?.split(',')?.includes(opt.optionValue)
-            )
-            : []
-        }
-        isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
-        onChange={(e, val: any) => {
-          const newValue = val ? val.map((v) => v?.optionValue)?.join(',') : '';
-          updateValue(newValue);
+        onChange={(event, newValue) => {
+          setFieldValue(formikField, newValue);
         }}
         size="small"
         renderInput={(params) => (
           <TextField
             {...params}
-            variant="outlined"
+            label="Value"
             margin="none"
             size="small"
-            label="Value"
-            name="value"
-            style={{ whiteSpace: 'nowrap' }}
-            error={
-              checkFieldIndex !== undefined
-                ? touched?.notifications &&
-                touched?.notifications[index]?.checkFields &&
-                touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
-                errors?.notifications &&
-                errors?.notifications[index]?.checkFields &&
-                Boolean(errors?.notifications[index]?.checkFields[checkFieldIndex]?.value)
-                : touched?.notifications &&
-                touched?.notifications[index]?.value &&
-                errors?.notifications &&
-                Boolean(errors?.notifications[index]?.value)
-            }
-            helperText={
-              checkFieldIndex !== undefined
-                ? touched?.notifications &&
-                touched?.notifications[index]?.checkFields &&
-                touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
-                errors?.notifications &&
-                errors?.notifications[index]?.checkFields &&
-                errors?.notifications[index]?.checkFields[checkFieldIndex]?.value
-                : touched?.notifications &&
-                touched?.notifications[index]?.value &&
-                errors?.notifications &&
-                errors?.notifications[index]?.value
-            }
+            variant="outlined"
           />
         )}
       />
-    );
-  }
-
-  // For text, number, date fields - simple text input
-  return (
-    <TextField
+      {value === DATE_VALUE.custom && (
+        <FormTypes
+          {...field}
+          values={{ [fieldName]: value }}
+          errors={{ [fieldName]: error }}
+          touched={{ [fieldName]: touched }}
+          fieldData={{ ...field, required: false, isUneditable: false, disableOnEdit: false }}
+          label={label}
+          name={field.fieldName}
+          type={field.type}
+          options={field.option || []}
+          disabled={false}
+          setFieldValue={(name, value) => {
+            setFieldValue(formikField, value);
+          }}
+          required={false}
+          fullWidth
+          isTooltip={field?.isTooltip || false}
+          tooltipMessage={field?.tooltipMessage || ''}
+          size="small"
+        />
+      )}
+    </>
+  ) : ((['dropDown', 'multiSelect', 'checkBox', 'switch', 'currency', 'radio']?.includes(field?.type)) ?
+    (<Autocomplete
+      options={field.option || []}
+      getOptionLabel={(option) => option.optionLabel || ''}
+      multiple
       fullWidth
-      variant="outlined"
-      margin="none"
-      size="small"
-      label="Value"
-      name="value"
-      type={currentField?.type === 'number' ? 'number' : currentField?.type === 'date' ? 'date' : 'text'}
-      value={value || ''}
-      onChange={(e) => {
-        updateValue(e.target.value);
+      value={
+        Array.isArray(value)
+          ? (field?.option || []).filter((opt: any) => value.includes(opt.optionValue))
+          : []
+      }
+      onChange={(_event, selectedOptions: any[]) => {
+        const newValue = selectedOptions.map((opt: any) => opt.optionValue);
+        setFieldValue(formikField, newValue);
       }}
-      error={
-        checkFieldIndex !== undefined
-          ? touched?.notifications &&
-          touched?.notifications[index]?.checkFields &&
-          touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
-          errors?.notifications &&
-          errors?.notifications[index]?.checkFields &&
-          Boolean(errors?.notifications[index]?.checkFields[checkFieldIndex]?.value)
-          : touched?.notifications &&
-          touched?.notifications[index]?.value &&
-          errors?.notifications &&
-          Boolean(errors?.notifications[index]?.value)
-      }
-      helperText={
-        checkFieldIndex !== undefined
-          ? touched?.notifications &&
-          touched?.notifications[index]?.checkFields &&
-          touched?.notifications[index]?.checkFields[checkFieldIndex]?.value &&
-          errors?.notifications &&
-          errors?.notifications[index]?.checkFields &&
-          errors?.notifications[index]?.checkFields[checkFieldIndex]?.value
-          : touched?.notifications &&
-          touched?.notifications[index]?.value &&
-          errors?.notifications &&
-          errors?.notifications[index]?.value
-      }
-    />
-  );
+      size="small"
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label="Value"
+          margin="none"
+          name="fieldValue"
+          size="small"
+          variant="outlined"
+        />
+      )}
+    />) : (
+      <FormTypes
+        {...field}
+        values={{ [fieldName]: value }}
+        errors={{ [fieldName]: error }}
+        touched={{ [fieldName]: touched }}
+        fieldData={{ ...field, required: false, isUneditable: false, disableOnEdit: false }}
+        label={label}
+        name={field.fieldName}
+        type={field.type}
+        options={field.option || []}
+        disabled={false}
+        setFieldValue={(name, value) => {
+          setFieldValue(formikField, value);
+        }}
+        required={false}
+        fullWidth
+        isTooltip={field?.isTooltip || false}
+        tooltipMessage={field?.tooltipMessage || ''}
+        size="small"
+      />
+    )
+  ))
+
 };
