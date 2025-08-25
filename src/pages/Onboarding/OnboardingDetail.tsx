@@ -116,7 +116,6 @@ const OnboardingDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleTabChange}>
           <CustomTab value={0}>Header</CustomTab>
-          <CustomTab value={1}>Tabs</CustomTab>
         </CustomTabs>
         
         <TabPanel value={tabValue} index={0}>
@@ -128,13 +127,6 @@ const OnboardingDetail = () => {
               fields={fields} 
             />
           )}
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={1}>
-          <DynamicTabs
-            onboardingId={id} 
-            resource={sidebarResource.onboardingTemplate} 
-          />
         </TabPanel>
       </Box>
 
