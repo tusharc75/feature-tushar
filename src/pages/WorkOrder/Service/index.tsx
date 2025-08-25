@@ -1133,13 +1133,15 @@ const Service = ({
         <ArrangeView
           data={
             allServices
-              ?.filter((e) => e.type === 'service' && arrangeView?.tabId ? e?.parentId === arrangeView?.tabId : !e?.parentId)
+              ?.filter((e) => e.type === 'service' && (arrangeView?.tabId ? e?.parentId === arrangeView?.tabId : !e?.parentId))
               ?.map((d) => {
                 return { _id: d?.uniqueId, name: d?.serviceName, order: d?.order, preWork: d?.preWork };
               }) || []
           }
           title={'Arrange'}
-          handleClose={() => setArrangeView({ open: false, tabId: null })}
+          handleClose={() => {
+            setArrangeView({ open: false, tabId: null })
+          }}
           handleSubmit={handleArrangeUpdate}
           loading={false}
         />
