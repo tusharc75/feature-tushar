@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Autocomplete, Box, IconButton, MenuItem, TextField } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
@@ -21,10 +21,10 @@ import ManageSerializedPackages from 'src/pages/SerializedPackages/ManageSeriali
 import { deleteDisable } from 'src/constants/messageHelpers';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
-const renderedFrom = camelCase(sidebarResource?.serializedPackages);
-
-const SerializedPackages = () => {
+const SerializedPackages = ({ resourceRendered = '' }) => {
   const toastConfig = useContext(CustomToastContext);
+
+  const renderedFrom = resourceRendered === sidebarResource.serializedPackagesInspection ? camelCase(sidebarResource?.serializedPackagesInspection) : camelCase(sidebarResource?.serializedPackages);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -38,8 +38,22 @@ const SerializedPackages = () => {
   const [showSerializedPackageDialog, setShowSerializedPackageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-
   const [columns, setColumns] = useState(null);
+  const [lookupResourceOptions, setLookupResourceOptions] = useState(null)
+  const [selectedLookupResource, setSelectedLookupResource] = useState({
+    [sidebarResource.warehouse]: null,
+    [sidebarResource.packages]: null
+  })
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.warehouse},${sidebarResource.packages}`)
+      .then(({ data: { data } }) => {
+        if (data) {
+          setLookupResourceOptions(data)
+        }
+      });
+  }, []);
 
   useEffect(() => {
     fetchGridColumns();
@@ -49,11 +63,11 @@ const SerializedPackages = () => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, selectedLookupResource]);
 
   const fetchGridColumns = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serializedPackages, permissions?.serializedPackages?.isUpdate);
-    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serializedPackagesDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, resourceRendered === sidebarResource.serializedPackagesInspection ? routes.serializedPackagesInspectionDetail.path : routes.serializedPackagesDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
@@ -111,7 +125,15 @@ const SerializedPackages = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    let { filterByIds, deepFilters } = gridFilterParser(filters);
+    if (selectedLookupResource[sidebarResource.warehouse]) {
+      filterByIds = filterByIds?.filter(f => f?.field != 'warehouse')
+      filterByIds.push({ field: 'warehouse', term: { $in: [selectedLookupResource[sidebarResource.warehouse]?.optionValue] } })
+    }
+    if (selectedLookupResource[sidebarResource.packages]) {
+      filterByIds = filterByIds?.filter(f => f?.field != 'package')
+      filterByIds.push({ field: 'package', term: { $in: [selectedLookupResource[sidebarResource.packages]?.optionValue] } })
+    }
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -209,38 +231,92 @@ const SerializedPackages = () => {
     );
   };
 
+  const leftSideContents = () => {
+    return (
+      <div className='flex items-center gap-2 w-100'>
+        <Autocomplete
+          fullWidth
+          className="max-w-[300px]"
+          options={lookupResourceOptions && lookupResourceOptions[sidebarResource.warehouse]?.length > 0 ? lookupResourceOptions[sidebarResource.warehouse] : []}
+          getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+          value={selectedLookupResource[sidebarResource.warehouse]}
+          onChange={(e, val) => {
+            setSelectedLookupResource(prev => ({ ...prev, [sidebarResource.warehouse]: val }))
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              margin="dense"
+              size="small"
+              name="warehouse"
+              placeholder={`${resources?.warehouse?.titleSingular}`}
+              label={`${resources?.warehouse?.titleSingular}`}
+              variant="outlined"
+              fullWidth
+            />
+          )}
+        />
+        <Autocomplete
+          fullWidth
+          className="max-w-[300px]"
+          options={lookupResourceOptions && lookupResourceOptions[sidebarResource.packages]?.length > 0 ? lookupResourceOptions[sidebarResource.packages] : []}
+          getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+          value={selectedLookupResource[sidebarResource.packages]}
+          onChange={(e, val) => {
+            setSelectedLookupResource(prev => ({ ...prev, [sidebarResource.packages]: val }))
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              margin="dense"
+              size="small"
+              name="package"
+              placeholder={`${resources?.packages?.titleSingular}`}
+              label={`${resources?.packages?.titleSingular}`}
+              variant="outlined"
+              fullWidth
+            />
+          )}
+        />
+      </div>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ ...routes.serializedPackages, title: resources?.serializedPackages?.titlePlural }]} />
-        <ImportExportLinks
-          permissions={permissions?.serializedPackages}
-          module={resources?.serializedPackages?.titlePlural}
-          api={routes.serializedPackages.path}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
-          isExportAllOrSomeFeature={true}
-          total={rowCount}
-          recordsToExport={selectedRecords?.length}
-          ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={() => {
-            fetchData();
-          }}
-          additionalParams={getQueryString(true)}
-        />
+        <CustomBreadCrumbs routes={[resourceRendered === sidebarResource.serializedPackagesInspection ? { ...routes.serializedPackagesInspection, title: resources?.serializedPackagesInspection?.titlePlural } : { ...routes.serializedPackages, title: resources?.serializedPackages?.titlePlural }]} />
+        {resourceRendered != sidebarResource.serializedPackagesInspection && (
+          <ImportExportLinks
+            permissions={permissions?.serializedPackages}
+            module={resources?.serializedPackages?.titlePlural}
+            api={routes.serializedPackages.path}
+            afterImportCompleted={() => {
+              fetchData();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords?.length}
+            ids={selectedRecords?.map((obj) => obj._id)}
+            onExportToExcelSuccess={() => {
+              fetchData();
+            }}
+            additionalParams={getQueryString(true)}
+          />
+        )}
       </div>
       <CustomContainer>
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
-          isActionButtonVisible={true}
-          isAddButtonVisible={true}
+          isActionButtonVisible={resourceRendered != sidebarResource.serializedPackagesInspection}
+          isAddButtonVisible={resourceRendered != sidebarResource.serializedPackagesInspection}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
             setShowSerializedPackageDialog({ open: true, isClone: false, idToClone: null });
           }}
+          leftSideContents={leftSideContents()}
         />
         {columns ? (
           <CustomReactTable
@@ -253,6 +329,7 @@ const SerializedPackages = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.serializedPackages}
+            hideAction={resourceRendered === sidebarResource.serializedPackagesInspection}
           />
         ) : (
           <Box p={2} height={500}>

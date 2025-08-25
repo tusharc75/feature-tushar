@@ -399,6 +399,7 @@ export const sidebarResource = {
   workOrderPlanning: 'Work Order Planning',
   subcontractAssembly: 'Subcontract Assembly',
   serializedPackages: 'Serialized Packages',
+  serializedPackagesInspection: 'Serialized Packages Inspection',
   trainAiModel: 'Train Ai Model',
   assemblyOrder: 'Assembly Order',
   disassemblyOrder: 'Disassembly Order',
@@ -425,7 +426,8 @@ export const sidebarResource = {
   fieldView: 'Field View',
   customPdfTemplate: 'Custom Pdf Template',
   contentPostPlanning: 'Content Post Planning',
-  onboardingTemplate: 'Onboarding Template'
+  onboardingTemplate: 'Onboarding Template',
+  onboarding: 'Onboarding'
 } as const;
 
 export const primaryFields = {
@@ -4023,6 +4025,11 @@ export const getEmailsFromContacts = (data, field = 'customerContact') => {
   }
   return emails;
 };
+
+export const getCustomInvoiceFileName = (customDownloadFileName, data) => {
+  const status = data?.status === INVOICE_STATUS.proforma ? data?.status : 'Invoice'
+  return customDownloadFileName.replace("{status}", status).replace("{invoiceNumber}", data?.invoiceNumber);
+}
 
 export const EQUIPT_BE_CONNECTED_WINDOW = 'equipt-beConnected-window';
 export const handleClearLocalStore = () => {

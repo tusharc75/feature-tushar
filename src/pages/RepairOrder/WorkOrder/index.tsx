@@ -167,9 +167,12 @@ const WorkOrder = ({
 
   useEffect(() => {
     fetchFields();
-    fetchData();
     fetchPolicy();
   }, [repairOrderData]);
+
+  useEffect(() => {
+    fetchData();
+  }, [currentStepName, repairOrderData])
 
   useEffect(() => {
     const assignedUsersArrays = selectedRecords?.filter((product) => product?.assignedUsers).map((product) => product?.assignedUsers);

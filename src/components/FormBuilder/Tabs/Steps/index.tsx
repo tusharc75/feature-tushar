@@ -17,8 +17,10 @@ import { useDndSensors } from 'src/hooks';
 import { AddOutlined } from '@mui/icons-material';
 import routes from 'src/components/Helpers/Routes';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import SettingsIcon from '@mui/icons-material/Settings';
+import SettingsDialog from 'src/pages/Onboarding/SettingsDialog';
 
-const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
+const Steps = ({ resourceData, tab, fetchData, workflowId = null, onboardingTemplateId = null, onboardingId = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [steps, setSteps] = useState(null);
@@ -27,6 +29,7 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
   const [isDeleting, setDeleting] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState({ open: false, data: null });
 
   useEffect(() => {
     setSteps(sortBy(tab?.steps || [], 'order'));
@@ -36,6 +39,8 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
     setIsSubmitting(true);
     let api = `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}`;
     if (workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}`;
+    if (onboardingTemplateId) api = `${routes.onboardingTemplate.path}/tabs/steps/${onboardingTemplateId}/${tab?._id}`;
+    if (onboardingId) api = `${routes.onboarding.path}/tabs/steps/${onboardingId}/${tab?._id}`;
     if (values?.stepId) {
       axiosInstance()
         .put(api, values)
@@ -77,6 +82,8 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
     setDeleting(true);
     let api = `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}/delete`;
     if (workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}/delete`;
+    if (onboardingTemplateId) api = `${routes.onboardingTemplate.path}/tabs/steps/${onboardingTemplateId}/${tab?._id}/delete`;
+    if (onboardingId) api = `${routes.onboarding.path}/tabs/steps/${onboardingId}/${tab?._id}/delete`;
     axiosInstance()
       .put(api, { stepId: step?._id })
       .then(() => {
@@ -94,6 +101,8 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
   const handleUpdateOrder = (steps) => {
     let api = `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}/order`;
     if (workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}/order`;
+    if (onboardingTemplateId) api = `${routes.onboardingTemplate.path}/tabs/steps/${onboardingTemplateId}/${tab?._id}/order`;
+    if (onboardingId) api = `${routes.onboarding.path}/tabs/steps/${onboardingId}/${tab?._id}/order`;
     axiosInstance()
       .put(
         api,
@@ -145,7 +154,7 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
       </Box>
       <Box pt={2}>
         <DndContext onDragEnd={handleOnDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>
-          <RenderStepItems {...{ steps, setSteps, setOpen, setDeleteData }} />
+          <RenderStepItems {...{ steps, setSteps, setOpen, setDeleteData, onboardingId, setSettingsOpen }} />
           <DragOverlay>
             {activeItem && (
               <span className="[&_.drag-handle]:!cursor-grabbing">
@@ -171,6 +180,17 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
           />
         )}
 
+        {settingsOpen?.open && (
+          <SettingsDialog
+            open={settingsOpen.open}
+            onClose={() => setSettingsOpen({ open: false, data: null })}
+            step={settingsOpen.data}
+            onboardingId={onboardingId}
+            tabId={tab?._id}
+            fetchData={fetchData}
+          />
+        )}
+
         {deleteData && (
           <ConfirmationDialog
             open={true}
@@ -187,14 +207,14 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null }) => {
 
 export default Steps;
 
-const RenderStepItems = ({ steps, setSteps, setOpen, setDeleteData }) => {
+const RenderStepItems = ({ steps, setSteps, setOpen, setDeleteData, onboardingId, setSettingsOpen }) => {
   return (
     <div className="grid grid-cols-1 gap-2">
       {steps && steps?.length ? (
         <ul className="grid list-none items-start gap-2">
           <SortableContext items={steps.map((d) => d._id)}>
             {steps?.map((step, index) => {
-              return <SingleStep key={step._id} {...{ step, setSteps, setOpen, setDeleteData, index }} />;
+              return <SingleStep key={step._id} {...{ step, setSteps, setOpen, setDeleteData, index, onboardingId, setSettingsOpen  }} />;
             })}
           </SortableContext>
         </ul>
@@ -207,12 +227,12 @@ const RenderStepItems = ({ steps, setSteps, setOpen, setDeleteData }) => {
   );
 };
 
-const SingleStep = ({ step, setOpen, setDeleteData, index }) => {
+const SingleStep = ({ step, setOpen, setDeleteData, index, onboardingId, setSettingsOpen }) => {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: step._id,
     data: {
       index,
-      props: { step, setOpen, setDeleteData, index }
+      props: { step, setOpen, setDeleteData, index, setSettingsOpen }
     }
   });
 
@@ -235,6 +255,19 @@ const SingleStep = ({ step, setOpen, setDeleteData, index }) => {
               <h4 className="line-clamp-2 font-normal	md:line-clamp-1">{step?.stepName}</h4>
             </div>
             <div className="min-w-fit">
+              {onboardingId && (
+                <HtmlTooltip title={'Settings'}>
+                <IconButton
+                  size="small"
+                  aria-label="Settings"
+                  onClick={() => {
+                    setSettingsOpen({ open: true, data: step });
+                  }}
+                >
+                  <SettingsIcon fontSize="small" color={'action'} />
+                </IconButton>
+              </HtmlTooltip>
+              )}
               <HtmlTooltip title={'Edit'}>
                 <IconButton
                   size="small"

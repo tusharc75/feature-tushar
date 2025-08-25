@@ -58,7 +58,7 @@ import routes from './components/Helpers/Routes';
 import PrivateRoute from './components/PrivateRoute';
 import ScreenOrientationOverlay from './components/ScreenMessages/ScreenOrientationOverlay';
 import ColorModeProvider from './constants/AppConfig';
-import { compareVersions, customerAccount, customerContact, handleHardReload, supplierAccount, supplierContact } from './constants/helpers';
+import { compareVersions, customerAccount, customerContact, handleHardReload, sidebarResource, supplierAccount, supplierContact } from './constants/helpers';
 import ErrorBoundaryComponent from './ErrorBoundary';
 import { firebaseConfig } from './firebase';
 import { useLiveLocationTracking } from './hooks/useLiveLocationTracking';
@@ -301,6 +301,9 @@ import { useData } from './StateProvider/Provider';
 import ShowFileUploader from 'src/components/ShowFileUploader';
 import OnboardingTemplate from 'src/pages/OnboardingTemplate';
 import OnboardingTemplateDetail from 'src/pages/OnboardingTemplate/OnboardingTemplateDetail';
+import QuickBookProxy from 'src/pages/Integration/QuickBookProxy';
+import Onboarding from 'src/pages/Onboarding';
+import OnboardingDetail from 'src/pages/Onboarding/OnboardingDetail';
 
 var notificationInterval: any = null;
 
@@ -475,6 +478,7 @@ function App() {
       <AnimatePresence initial={false} exitBeforeEnter>
         <ErrorBoundaryComponent>
           <Switch>
+
             <Route exact path="/login/mfa" render={({ location }) => conditionalRedirect(LoginMFA, location)} />
             <Route
               // exact
@@ -499,7 +503,7 @@ function App() {
             <Route exact path="/create-password" render={({ location }) => conditionalRedirect(PasswordSetup, location)} />
             <Route exact path="/forget-password" render={({ location }) => conditionalRedirect(ForgetPassword, location)} />
             <Route exact path="/reset-password" render={({ location }) => conditionalRedirect(ResetPassword, location)} />
-
+            <Route exact path="/integration/quick-books/callback" render={() => <QuickBookProxy />} />
             <PrivateRoute exact path="/">
               <Home />
             </PrivateRoute>
@@ -1245,6 +1249,12 @@ function App() {
             <PrivateRoute exact path={`${routes.serializedPackagesDetail.path}/:id`}>
               <SerializedPackagesDetail />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.serializedPackagesInspection.path}>
+              <SerializedPackages resourceRendered={sidebarResource.serializedPackagesInspection} />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.serializedPackagesInspectionDetail.path}/:id`}>
+              <SerializedPackagesDetail resourceRendered={sidebarResource.serializedPackagesInspection} />
+            </PrivateRoute>
             <PrivateRoute exact path={`${routes.integration.path}`}>
               <Integration />
             </PrivateRoute>
@@ -1322,6 +1332,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldView.path}/:padId/:wellId`}>
               <FieldView />
+            </PrivateRoute>
+             <PrivateRoute exact path={`${routes.onboarding.path}`}>
+              <Onboarding />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.onboardingDetail.path}/:id`}>
+              <OnboardingDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.onboardingTemplate.path}`}>
               <OnboardingTemplate />

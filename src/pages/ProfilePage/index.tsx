@@ -92,7 +92,7 @@ export default function ProfilePage(props) {
         toastConfig.setToastConfig(error);
       });
   };
-
+  
   const getUserFields = async () => {
     let data;
     setLoading(true);

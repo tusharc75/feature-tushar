@@ -108,6 +108,32 @@ export default function ManageProfile(props) {
     }
   };
 
+
+  const handleProfilePictureUpdate = (values) => {
+    if (userData?._id) {
+      setUpdating(true);
+      let clonedValues = cloneDeep(values);
+      axiosInstance()
+        .put(`/user/me/update-profile-picture`, clonedValues)
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          onFetchUserData();
+          let updatedUserDetails = { ...user, user: { ...user.user, ...values } };
+          dispatch({ type: SET_USER, payload: updatedUserDetails });
+          setUpdating(false);
+          closeUpdateDialog();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setUpdating(false);
+        });
+    }
+  };
+
   const getImageUrl = (file) => {
     let formData = new FormData();
     formData.append('file', file);
@@ -117,12 +143,7 @@ export default function ManageProfile(props) {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       .then(({ data }) => {
-        let values = {
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          avatar: data.fileUrl
-        };
-        handleUpdateUser({ ...values });
+        handleProfilePictureUpdate({  avatar: data.fileUrl });
         setUploading(false);
       })
       .catch((err) => {
@@ -155,12 +176,7 @@ export default function ManageProfile(props) {
 
 
   const handleDeleteProfilePic = () => {
-    let values = {
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      avatar: ''
-    };
-    handleUpdateUser({ ...values });
+    handleProfilePictureUpdate({   avatar: '' });
     setShowDeleteConfirmBox(false);
   };
 

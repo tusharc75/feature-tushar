@@ -14,10 +14,10 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { sidebarResource } from 'src/constants/helpers';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
-import ManageOnboardingTemplate from 'src/pages/OnboardingTemplate/ManageOnboardingTemplate';
+import ManageOnboarding from './ManageOnboarding';
 import DynamicTabs from 'src/components/FormBuilder/Tabs';
 
-const OnboardingTemplateDetail = () => {
+const OnboardingDetail = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
@@ -26,7 +26,7 @@ const OnboardingTemplateDetail = () => {
     state: { user, permissions, resources }
   }: any = useData();
 
-  const [onboardingTemplateData, setOnboardingTemplateData] = useState(null);
+  const [onboardingData, setOnboardingData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -44,8 +44,8 @@ const OnboardingTemplateDetail = () => {
 
   const fetchFields = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(
-      sidebarResource.onboardingTemplate, 
-      permissions?.onboardingTemplate?.isUpdate
+      sidebarResource.onboarding, 
+      permissions?.onboarding?.isUpdate
     );
     setFields(fieldsDataForRead);
   };
@@ -53,10 +53,10 @@ const OnboardingTemplateDetail = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const { data: { data } } = await axiosInstance().get(`${routes.onboardingTemplate.path}/${id}`);
-      setAllowedToEdit(permissions?.onboardingTemplate?.isUpdate);
-      setAllowedToDelete(permissions?.onboardingTemplate?.isDelete);
-      setOnboardingTemplateData(data);
+      const { data: { data } } = await axiosInstance().get(`${routes.onboarding.path}/${id}`);
+      setAllowedToEdit(permissions?.onboarding?.isUpdate);
+      setAllowedToDelete(permissions?.onboarding?.isDelete);
+      setOnboardingData(data);
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
@@ -66,10 +66,10 @@ const OnboardingTemplateDetail = () => {
 
   const handleDelete = () => {
     axiosInstance()
-      .put(`${routes.onboardingTemplate.path}/remove`, { ids: [id] })
+      .put(`${routes.onboarding.path}/remove`, { ids: [id] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes?.onboardingTemplate?.path}`);
+        history.push(`${routes?.onboarding?.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -87,8 +87,8 @@ const OnboardingTemplateDetail = () => {
         <Box className="nav-v1">
           <CustomBreadCrumbs
             routes={[
-              { ...routes?.onboardingTemplate, title: resources?.onboardingTemplate?.titlePlural },
-              { title: `${onboardingTemplateData ? onboardingTemplateData?.templateName : ''}` }
+              { ...routes?.onboarding, title: resources?.onboarding?.titlePlural },
+              { title: `${onboardingData ? onboardingData?.onboardingNumber : ''}` }
             ]}
           />
         </Box>
@@ -124,15 +124,15 @@ const OnboardingTemplateDetail = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           ) : (
             <DetailsPage 
-              data={onboardingTemplateData} 
+              data={onboardingData} 
               fields={fields} 
             />
           )}
         </TabPanel>
-        
+
         <TabPanel value={tabValue} index={1}>
           <DynamicTabs
-            onboardingTemplateId={id} 
+            onboardingId={id} 
             resource={sidebarResource.onboardingTemplate} 
           />
         </TabPanel>
@@ -141,14 +141,14 @@ const OnboardingTemplateDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.onboardingTemplate?.titleSingular?.toLowerCase()}: ${onboardingTemplateData?.templateName}?`}
+          message={`Are you sure you want to delete ${resources?.onboarding?.titleSingular?.toLowerCase()}: ${onboardingData?.componentName}?`}
           onClose={() => setShowConfirmBox(false)}
           onOk={handleDelete}
         />
       )}
       
       {openUpdateDialog && (
-        <ManageOnboardingTemplate
+        <ManageOnboarding
           id={id}
           isClone={false}
           onClose={() => setOpenUpdateDialog(false)}
@@ -162,4 +162,4 @@ const OnboardingTemplateDetail = () => {
   );
 };
 
-export default OnboardingTemplateDetail;
+export default OnboardingDetail;

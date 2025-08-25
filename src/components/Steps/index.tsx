@@ -83,7 +83,7 @@ const Steps = ({
         document.body.classList.remove('has-mobile-step');
       };
     } else {
-      return () => {};
+      return () => { };
     }
   }, [isMobile && !isTablet]);
 
@@ -112,11 +112,10 @@ const Steps = ({
       {isMobile && !isTablet ? (
         <MobileSteps
           id={`mobile-step-${kebabCase(steps[currentStep]?.name)}`}
-          stepName={`${
-            activeStep + 1 > steps.length || isStepEnded
+          stepName={`${activeStep + 1 > steps.length || isStepEnded
               ? 'Completed'
               : `${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep]?.title : ''}`
-          }`}
+            }`}
           nextButton={
             <Button
               size="small"

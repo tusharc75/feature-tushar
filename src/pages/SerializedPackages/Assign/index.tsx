@@ -18,9 +18,9 @@ import { Delete } from '@mui/icons-material';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
 
-const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssembled = false }) => {
+const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssembled = false, fromInspection = false }) => {
 
-  const renderedFrom = `${camelCase(sidebarResource?.serializedPackages)}_Assign`;
+  const renderedFrom = `${fromInspection ? camelCase(sidebarResource?.serializedPackagesInspection) : camelCase(sidebarResource?.serializedPackages)}_Assign`;
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
@@ -414,7 +414,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
   const actionButtonMenuItems = () => {
     return (
       <>
-        {isVisible() && (
+        {isVisible() && !fromInspection && (
           <MenuItem
             onClick={() => {
               setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: false, products: getProducts() });
@@ -423,7 +423,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
             {`Assign ${resources?.serializedAsset?.titlePlural}`}
           </MenuItem>
         )}
-        {isVisible('replaceAsset') && (
+        {isVisible('replaceAsset') && fromInspection && (
           <MenuItem
             onClick={() => {
               setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: true, products: getProducts(MATERIAL_TYPE.serializedAsset, 'replaceAsset') });
@@ -432,7 +432,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
             {`Replace ${resources?.serializedAsset?.titlePlural}`}
           </MenuItem>
         )}
-        {isVisible() && (
+        {isVisible() && !fromInspection && (
           <MenuItem
             onClick={() => {
               setAssignDialog({ open: true, type: OTHER_MATERIAL_TYPE.serialNumber, replaceAsset: false, products: getProducts(OTHER_MATERIAL_TYPE.serialNumber) });
@@ -441,7 +441,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
             Assign Serial Numbers
           </MenuItem>
         )}
-        {permissions?.serializedPackages?.isUpdate && (
+        {permissions?.serializedPackages?.isUpdate && !fromInspection && (
           <MenuItem
             disabled={selectedRecords?.some((e) => e?.canDelete && [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(e.type)) ? false : true}
             onClick={() => {
@@ -474,7 +474,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           expander={true}
-          hideAction={disAssembled}
+          hideAction={disAssembled || fromInspection}
           hideSelection={disAssembled}
         />
       ) : (

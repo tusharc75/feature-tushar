@@ -362,6 +362,12 @@ export const resourcePolicy = [
         fieldLabel: 'Hide Field Ticket Invoice Create Dialog',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'customDownloadFileName',
+        fieldLabel: 'Custom Download File Name',
+        type: 'singleLine',
+        defaultValue: ''
       }
     ]
   },
@@ -413,6 +419,17 @@ export const resourcePolicy = [
         fieldLabel: 'Show Add Packages',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'packageMaterialAdd',
+        fieldLabel: 'Package Material Add',
+        type: 'multiSelect',
+        option: [
+          { optionValue: MATERIAL_TYPE.package, optionLabel: 'Package', order: 0 },
+          { optionValue: MATERIAL_TYPE.product, optionLabel: 'Product', order: 1 },
+          { optionValue: MATERIAL_TYPE.service, optionLabel: 'Service', order: 2 }
+        ],
+        defaultValue: []
       }
     ]
   },

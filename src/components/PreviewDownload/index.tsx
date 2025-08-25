@@ -32,7 +32,8 @@ function PreviewDownload({
   referenceLabel = '',
   hideDialog = false,
   isMenuItem = false,
-  ids = null
+  ids = null,
+  onlyfileNameAsDownload = false
 }) {
   const toastConfig = useContext(CustomToastContext);
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -133,6 +134,9 @@ function PreviewDownload({
           let newFileName = fileName;
           if (subType !== '' && !hideDetailButton) {
             newFileName = `${newFileName}-${subType === 'Regular' ? button1Title : button2Title}`;
+          }
+          if (onlyfileNameAsDownload) {
+            newFileName = fileName;
           }
           const contentType = type === 'PDF' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
           const extension = type === 'PDF' ? 'pdf' : 'xlsx';

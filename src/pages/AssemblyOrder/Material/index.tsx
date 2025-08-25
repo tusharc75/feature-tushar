@@ -43,7 +43,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
 
   const [isUpdating, setUpdating] = useState(false);
   const [oriMaterial, setOriMaterial] = useState([]);
-  const [addDialog, setAddDialog] = useState({ open: false, parentId: null });
+  const [addDialog, setAddDialog] = useState({ open: false, type: '', parentId: null });
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [materialEdit, setMaterialEdit] = useState({ open: false, data: null });
@@ -119,7 +119,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
                     <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
                       <IconButton
                         onClick={() => {
-                          setAddDialog({ open: true, parentId: row.original?._id });
+                          setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: row.original?._id });
                         }}
                         size="small"
                       >
@@ -135,7 +135,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
                 size="small"
                 onClick={() => {
                   if (row?.original?.type === MATERIAL_TYPE.serializedPackage) {
-                    window.open(`${routes.serializedPackagesDetail.path}/${row.original.serializedPackageId}`);
+                    window.open(`${routes.serializedPackagesDetail.path}/${row?.original?.materialId || row.original.serializedPackageId}`);
                   } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                   }
@@ -169,33 +169,31 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       Cell: ({ row, table }) => (
         <>
           {row?.original?.type != MATERIAL_TYPE.serializedPackage && (
-            <>
-              <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  disabled={allowedToEdit ? false : true}
-                  onClick={() => {
-                    setMaterialEdit({ open: true, data: row?.original });
-                  }}
-                >
-                  <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                </IconButton>
-              </HtmlTooltip>
-              <HtmlTooltip title={row.original?.canDelete ? 'Delete' : 'Work Order is already assigned'}>
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    setDeleteData([row.original._id]);
-                  }}
-                  disabled={row.original?.canDelete ? false : true}
-                >
-                  <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
-                </IconButton>
-              </HtmlTooltip>
-            </>
+            <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                disabled={allowedToEdit ? false : true}
+                onClick={() => {
+                  setMaterialEdit({ open: true, data: row?.original });
+                }}
+              >
+                <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+              </IconButton>
+            </HtmlTooltip>
           )}
+          <HtmlTooltip title={row.original?.canDelete ? 'Delete' : 'Work Order is already assigned'}>
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteData([row.original._id]);
+              }}
+              disabled={row.original?.canDelete ? false : true}
+            >
+              <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
+            </IconButton>
+          </HtmlTooltip>
         </>
       )
     });
@@ -224,7 +222,8 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent?.detail || parent.packageDetail?.packageName || '';
+      parent.detail =
+        parent?.type === MATERIAL_TYPE.serializedPackage ? parent?.serializedPackagesDetail?.serializedPackageNumber : parent?.detail || parent.packageDetail?.packageName || ''
       parent.description = parent?.description || parent?.packageDetail?.packageDescription || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
@@ -290,6 +289,16 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       if (element.type === MATERIAL_TYPE.package && onlyAddChildren) {
         element.onlyAddChildren = true;
       }
+
+      if (addDialog.type === MATERIAL_TYPE.serializedPackage) {
+        element.type = MATERIAL_TYPE.serializedPackage
+        if (allFields?.some((f) => f?.fieldName === 'warehouse')) {
+          element.warehouse = d?.warehouseId || assemblyOrderData?.warehouse?.optionValue
+        }
+        if (allFields?.some((f) => f?.fieldName === 'workOrderType')) {
+          element.workOrderType = WORK_ORDER_TYPE.disassemblyOrder;
+        }
+      }
       material.push(element);
     });
 
@@ -298,7 +307,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       .then(({ data }) => {
         dispatch({ type: 'selection', selectedRecords: [] });
         setChildPackageWithoutParentDialog({ open: false, data: null });
-        setAddDialog({ open: false, parentId: null });
+        setAddDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -375,16 +384,33 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       });
   };
 
+  const isWorkOrderTypeDisAssemblyOrderExist = () => {
+    const workOrderTypeField = allFields?.find((f) => f?.fieldName === 'workOrderType')
+    if (!workOrderTypeField) {
+      return false
+    }
+    return workOrderTypeField?.option?.some(o => o?.optionValue === WORK_ORDER_TYPE.disassemblyOrder)
+  }
+
   const addButtonMenuItems = () => {
     return (
       <>
         <MenuItem
           onClick={() => {
-            setAddDialog({ open: true, parentId: null });
+            setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
           }}
         >
           {`Add Existing ${resources?.packages?.titlePlural}`}
         </MenuItem>
+        {isWorkOrderTypeDisAssemblyOrderExist() && (
+          <MenuItem
+            onClick={() => {
+              setAddDialog({ open: true, type: MATERIAL_TYPE.serializedPackage, parentId: null });
+            }}
+          >
+            {`Add Existing ${resources?.serializedPackages?.titlePlural}`}
+          </MenuItem>
+        )}
       </>
     );
   };
@@ -499,9 +525,9 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           okBtnLoading={isDeleting}
         />
       )}
-      {addDialog.open && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.package && (
         <AssignPackageDialog
-          handleClose={() => setAddDialog({ open: false, parentId: null })}
+          handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {
             if (rows?.find((e) => e?.packages?.filter((e) => e.packageType === PACKAGE_TYPE.product)?.length)) {
               setChildPackageWithoutParentDialog({ open: true, data: rows });
@@ -514,6 +540,15 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           forceSplitQuantity={true}
           showWarehouseSelectDialog={allFields?.some((f) => f?.fieldName === 'warehouse')}
           warehouse={assemblyOrderData?.warehouse?.optionValue}
+        />
+      )}
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.serializedPackage && (
+        <AssignSerializedPackagesDialog
+          onSuccess={handleAdd}
+          handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
+          extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGES_STATUS.available, SERIALIZED_PACKAGES_STATUS.underReview] }]}
+          referenceData={{ warehouse: assemblyOrderData?.warehouse }}
+          isSubmitting={isSubmitting}
         />
       )}
       {materialEdit.open && (

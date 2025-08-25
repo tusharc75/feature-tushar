@@ -11,13 +11,13 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CHILD_RESOURCE, INVOICE_STATUS, MATERIAL_TYPE, getEmailsFromContacts, invoice, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, INVOICE_STATUS, MATERIAL_TYPE, getCustomInvoiceFileName, getEmailsFromContacts, invoice, sidebarResource } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
 import FinalPriceBox from 'src/components/FinalPriceBox';
 
-const Invoice = ({ invoiceData, invoiceFields, setPrevStep, handleChangeStatus, statusOptions, stepFullScreen }) => {
+const Invoice = ({ invoiceData, invoiceFields, setPrevStep, handleChangeStatus, statusOptions, stepFullScreen, resourcePolicyData }) => {
   const renderedFrom = `${camelCase(sidebarResource.invoice)}`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -188,7 +188,8 @@ const Invoice = ({ invoiceData, invoiceFields, setPrevStep, handleChangeStatus, 
   };
 
   const previewDownloadProps = {
-    fileName: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
+    fileName: resourcePolicyData?.policy?.customDownloadFileName ? getCustomInvoiceFileName(resourcePolicyData?.policy?.customDownloadFileName, invoiceData)
+      : `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
     subject: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
     resource: sidebarResource.invoice,
     referenceId: invoiceData?._id,
@@ -209,7 +210,8 @@ const Invoice = ({ invoiceData, invoiceFields, setPrevStep, handleChangeStatus, 
       `taxPercentage`,
       `tax_${invoiceData?.currency?.toLowerCase()}`,
       `finalPrice_${invoiceData?.currency?.toLowerCase()}`
-    ]
+    ],
+    onlyfileNameAsDownload: resourcePolicyData?.policy?.customDownloadFileName ? true : false
   };
 
   return (

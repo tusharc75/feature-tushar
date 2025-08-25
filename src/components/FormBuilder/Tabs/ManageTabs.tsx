@@ -19,7 +19,7 @@ const tabSchema = object().shape({
   tabName: string().required('Please enter Tab name')
 });
 
-const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId = null }) => {
+const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId = null, onboardingTemplateId = null, onboardingId = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [initialValues, setInitialValues] = useState({});
@@ -42,9 +42,11 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId
   }, [data]);
 
   const handleSubmit = (values) => {
-    if (data && (resourceId || workflowId)) {
+    if (data && (resourceId || workflowId || onboardingTemplateId || onboardingId)) {
       let api = `/sa-formbuilder/tabs/${resourceId}`;
       if (workflowId) api = `${routes.workflow.path}/tabs/${workflowId}`;
+      if (onboardingTemplateId) api = `${routes.onboardingTemplate.path}/tabs/${onboardingTemplateId}`;
+      if (onboardingId) api = `${routes.onboarding.path}/tabs/${onboardingId}`;
       axiosInstance()
         .put(api, { ...values, tabId: data?._id })
         .then(({ data }) => {
@@ -63,6 +65,8 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId
     } else {
       let api = `/sa-formbuilder/tabs/${resource}`;
       if (workflowId) api = `${routes.workflow.path}/tabs/${workflowId}`;
+      if (onboardingTemplateId) api = `${routes.onboardingTemplate.path}/tabs/${onboardingTemplateId}`;
+      if (onboardingId) api = `${routes.onboarding.path}/tabs/${onboardingId}`;
       axiosInstance()
         .post(api, values)
         .then(({ data }) => {
@@ -191,7 +195,6 @@ const ManageTabs = ({ onClose, data, onSuccess, resource, resourceId, workflowId
 
             {showConfirmDialog ? (
               <ConfirmationCancelDialog
-                close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
                   setShowConfirmDialog(false);
