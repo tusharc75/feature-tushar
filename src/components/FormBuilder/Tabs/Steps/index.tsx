@@ -18,9 +18,9 @@ import { AddOutlined } from '@mui/icons-material';
 import routes from 'src/components/Helpers/Routes';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import SettingsIcon from '@mui/icons-material/Settings';
-import SettingsDialog from 'src/pages/Onboarding/SettingsDialog';
+import SettingsDialog from 'src/pages/OnboardingTemplate/SettingsDialog';
 
-const Steps = ({ resourceData, tab, fetchData, workflowId = null, onboardingTemplateId = null, onboardingId = null }) => {
+const Steps = ({ resourceData, tab, fetchData, workflowId = null, onboardingTemplateId = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [steps, setSteps] = useState(null);
@@ -40,7 +40,6 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null, onboardingTemp
     let api = `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}`;
     if (workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}`;
     if (onboardingTemplateId) api = `${routes.onboardingTemplate.path}/tabs/steps/${onboardingTemplateId}/${tab?._id}`;
-    if (onboardingId) api = `${routes.onboarding.path}/tabs/steps/${onboardingId}/${tab?._id}`;
     if (values?.stepId) {
       axiosInstance()
         .put(api, values)
@@ -83,7 +82,6 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null, onboardingTemp
     let api = `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}/delete`;
     if (workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}/delete`;
     if (onboardingTemplateId) api = `${routes.onboardingTemplate.path}/tabs/steps/${onboardingTemplateId}/${tab?._id}/delete`;
-    if (onboardingId) api = `${routes.onboarding.path}/tabs/steps/${onboardingId}/${tab?._id}/delete`;
     axiosInstance()
       .put(api, { stepId: step?._id })
       .then(() => {
@@ -102,7 +100,6 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null, onboardingTemp
     let api = `/sa-formbuilder/tabs/steps/${resourceData?._id}/${tab?._id}/order`;
     if (workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}/order`;
     if (onboardingTemplateId) api = `${routes.onboardingTemplate.path}/tabs/steps/${onboardingTemplateId}/${tab?._id}/order`;
-    if (onboardingId) api = `${routes.onboarding.path}/tabs/steps/${onboardingId}/${tab?._id}/order`;
     axiosInstance()
       .put(
         api,
@@ -154,7 +151,7 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null, onboardingTemp
       </Box>
       <Box pt={2}>
         <DndContext onDragEnd={handleOnDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>
-          <RenderStepItems {...{ steps, setSteps, setOpen, setDeleteData, onboardingId, setSettingsOpen }} />
+          <RenderStepItems {...{ steps, setSteps, setOpen, setDeleteData, onboardingTemplateId, setSettingsOpen }} />
           <DragOverlay>
             {activeItem && (
               <span className="[&_.drag-handle]:!cursor-grabbing">
@@ -185,7 +182,7 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null, onboardingTemp
             open={settingsOpen.open}
             onClose={() => setSettingsOpen({ open: false, data: null })}
             step={settingsOpen.data}
-            onboardingId={onboardingId}
+            onboardingTemplateId={onboardingTemplateId}
             tabId={tab?._id}
             fetchData={fetchData}
           />
@@ -207,14 +204,14 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null, onboardingTemp
 
 export default Steps;
 
-const RenderStepItems = ({ steps, setSteps, setOpen, setDeleteData, onboardingId, setSettingsOpen }) => {
+const RenderStepItems = ({ steps, setSteps, setOpen, setDeleteData, onboardingTemplateId, setSettingsOpen }) => {
   return (
     <div className="grid grid-cols-1 gap-2">
       {steps && steps?.length ? (
         <ul className="grid list-none items-start gap-2">
           <SortableContext items={steps.map((d) => d._id)}>
             {steps?.map((step, index) => {
-              return <SingleStep key={step._id} {...{ step, setSteps, setOpen, setDeleteData, index, onboardingId, setSettingsOpen  }} />;
+              return <SingleStep key={step._id} {...{ step, setSteps, setOpen, setDeleteData, index, onboardingTemplateId, setSettingsOpen  }} />;
             })}
           </SortableContext>
         </ul>
@@ -227,7 +224,7 @@ const RenderStepItems = ({ steps, setSteps, setOpen, setDeleteData, onboardingId
   );
 };
 
-const SingleStep = ({ step, setOpen, setDeleteData, index, onboardingId, setSettingsOpen }) => {
+const SingleStep = ({ step, setOpen, setDeleteData, index, onboardingTemplateId, setSettingsOpen }) => {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: step._id,
     data: {
@@ -255,7 +252,7 @@ const SingleStep = ({ step, setOpen, setDeleteData, index, onboardingId, setSett
               <h4 className="line-clamp-2 font-normal	md:line-clamp-1">{step?.stepName}</h4>
             </div>
             <div className="min-w-fit">
-              {onboardingId && (
+              {onboardingTemplateId && (
                 <HtmlTooltip title={'Settings'}>
                 <IconButton
                   size="small"

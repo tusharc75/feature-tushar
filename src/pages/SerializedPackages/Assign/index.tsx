@@ -173,10 +173,10 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
         Cell: ({ row }) => (
           <>
             {permissions?.serializedPackages?.isUpdate && [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && (
-              <HtmlTooltip title="Delete">
+              <HtmlTooltip title="Unassign">
                 <IconButton
                   size="small"
-                  aria-label="Delete"
+                  aria-label="Unassign"
                   onClick={() => {
                     setDeleteRecord(row.original);
                     setShowDeleteConfirmBox(true);
@@ -448,7 +448,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
               setShowDeleteConfirmBox(true);
             }}
           >
-            Delete
+            Unassign
           </MenuItem>
         )}
       </>
