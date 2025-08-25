@@ -14,7 +14,7 @@ interface SettingsDialogProps {
   open: boolean;
   onClose: () => void;
   step: any;
-  onboardingId?: string;
+  onboardingTemplateId?: string;
   tabId?: string;
   fetchData?: () => void;
 }
@@ -23,7 +23,7 @@ const SettingsDialog = ({
   open, 
   onClose, 
   step, 
-  onboardingId, 
+  onboardingTemplateId, 
   tabId, 
   fetchData 
 }: SettingsDialogProps) => {
@@ -64,7 +64,7 @@ const SettingsDialog = ({
   };
 
   const handleSettingsSave = async (Properties: { users: string[]; roles: string[] }) => {
-    if (!onboardingId || !tabId) {
+    if (!onboardingTemplateId || !tabId) {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
@@ -74,7 +74,7 @@ const SettingsDialog = ({
     }
     setIsSubmitting(true);
     try {
-      const api = `${routes.onboarding.path}/tabs/steps/${onboardingId}/${tabId}/settings`;
+      const api = `${routes.onboardingTemplate.path}/tabs/steps/${onboardingTemplateId}/${tabId}/settings`;
       await axiosInstance().put(api, {
         stepId: step?._id,
         properties: Properties

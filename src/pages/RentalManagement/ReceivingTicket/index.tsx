@@ -724,7 +724,7 @@ const ReceivingTicket = ({
         }
       });
 
-      productAssets = processAssets(productAssets, loadingTicketAssets, receiveTicketAssets, returnTicketAssets, transactionData, invoiceData);
+      productAssets = processAssets(productAssets, material, loadingTicketAssets, receiveTicketAssets, returnTicketAssets, transactionData, invoiceData);
 
       let newRows: any = [];
 
@@ -732,23 +732,22 @@ const ReceivingTicket = ({
         newRows = [...productAssets];
         material?.filter((ele) => ele.type === MATERIAL_TYPE.product &&
           ele?.consumableType !== 'Internal' && (!ele?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === ele?._id)?.length)
-        )
-          ?.forEach((element) => {
-            const subProductRows = processProduct(
-              '',
-              newRows?.length,
-              element,
-              material,
-              nonSerializedInventory,
-              loadingTicketProducts,
-              receiveTicketProducts,
-              returnTicketProducts,
-              consumeProducts,
-              productSerialNumbers,
-              invoiceData
-            );
-            newRows = [...newRows, ...subProductRows];
-          });
+        )?.forEach((element) => {
+          const subProductRows = processProduct(
+            '',
+            newRows?.length,
+            element,
+            material,
+            nonSerializedInventory,
+            loadingTicketProducts,
+            receiveTicketProducts,
+            returnTicketProducts,
+            consumeProducts,
+            productSerialNumbers,
+            invoiceData
+          );
+          newRows = [...newRows, ...subProductRows];
+        });
 
         newRows = [...newRows?.filter((e) => !e.isReplaced), ...newRows?.filter((e) => e.isReplaced)];
 
@@ -768,11 +767,6 @@ const ReceivingTicket = ({
             if (parent) {
               ele['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
             }
-          }
-          const serializedPackage = material?.find(m => m?._id === ele?.uniqueId && m?.materialId === ele?.productId)?.serializedPackage
-          if (serializedPackage) {
-            ele.serializedPackage = serializedPackage?.optionLabel;
-            ele.serializedPackageId = serializedPackage?.optionValue
           }
         });
       } else {
@@ -859,6 +853,8 @@ const ReceivingTicket = ({
             );
             newRows.push(parent);
           }
+          parent.serializedPackageId = parent?.serializedPackage?.optionValue
+          parent.serializedPackage = parent?.serializedPackage?.optionLabel;
         });
       }
 
@@ -1002,6 +998,8 @@ const ReceivingTicket = ({
             _subRow.status = ASSET_STATUS.notApplied;
             _subRow.rentalAssetStatus = '';
           }
+          _subRow.serializedPackageId = _subRow?.serializedPackage?.optionValue
+          _subRow.serializedPackage = _subRow?.serializedPackage?.optionLabel;
           _subRow.subRows = generateNestedData(
             _subRow,
             material,
@@ -1020,7 +1018,7 @@ const ReceivingTicket = ({
     return subRows;
   };
 
-  const processAssets = (assets, loadingTicketAssets, receiveTicketAssets, returnTicketAssets, transactionData, invoiceData) => {
+  const processAssets = (assets, material, loadingTicketAssets, receiveTicketAssets, returnTicketAssets, transactionData, invoiceData) => {
     const rows: any = [];
     assets.forEach((_subRow) => {
       const obj: any = {};
@@ -1099,6 +1097,12 @@ const ReceivingTicket = ({
       obj.isAllowedEndDate = obj?.manualEndDate ? true : false;
       if (obj?.isAllowedEndDate && invoiceMaterial) {
         obj.minEndDate = new Date(invoiceMaterial?.endDate);
+      }
+
+      const serializedPackage = material?.find(m => m?._id === obj?.uniqueId && m?.materialId === obj?.materialId)?.serializedPackage
+      if (serializedPackage) {
+        obj.serializedPackage = serializedPackage?.optionLabel;
+        obj.serializedPackageId = serializedPackage?.optionValue
       }
 
       rows.push({ ..._subRow?.inventory, ...obj });
@@ -1354,6 +1358,8 @@ const ReceivingTicket = ({
       if (element?.isAllowedEndDate && invoiceMaterial) {
         element.minEndDate = new Date(invoiceMaterial?.endDate);
       }
+      element.serializedPackageId = element?.serializedPackage?.optionValue
+      element.serializedPackage = element?.serializedPackage?.optionLabel;
     });
 
     return productRows;
@@ -1683,6 +1689,27 @@ const ReceivingTicket = ({
             <NoDataCell />
           )
       }] : []),
+      ...(permissions?.serializedPackages?.isRead
+        ? [{
+          accessor: 'serializedPackage',
+          Header: resources?.serializedPackages?.titleSingular,
+          cell: ({ row }) =>
+            row?.original?.serializedPackage ? (
+              <div className="flex items-center gap-2">
+                <h5 className="text-truncate" title={row?.original?.serializedPackage}>{row?.original?.serializedPackage}</h5>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.serializedPackagesDetail.path}/${row?.original?.serializedPackageId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        }] : []),
       {
         accessor: 'loadingTicket',
         Header: 'Loading Ticket',
@@ -1883,28 +1910,6 @@ const ReceivingTicket = ({
         Header: 'Consumed Qty',
         cell: ({ row }) => (row?.original?.consumeQty ? <h5 className="text-truncate">{row?.original?.consumeQty}</h5> : <NoDataCell />)
       });
-    }
-    if (permissions?.serializedPackages?.isRead) {
-      column.push({
-        accessor: 'serializedPackage',
-        Header: resources?.serializedPackages?.titleSingular,
-        cell: ({ row }) =>
-          row?.original?.serializedPackage ? (
-            <div className="flex items-center gap-2">
-              <h5 className="text-truncate">{row?.original?.serializedPackage}</h5>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.serializedPackagesDetail.path}/${row?.original?.serializedPackageId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )
-      })
     }
     column.push({
       accessor: 'action',

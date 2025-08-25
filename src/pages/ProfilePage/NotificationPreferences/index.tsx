@@ -6,6 +6,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn, UnCamelCase } from 'src/constants/helpers';
+import SearchBox from 'src/components/Helpers/SearchBox';
 
 const PreferenceOptions = ({ icon, heading, subtitle }) => (
   <div className="flex items-center gap-4 ">
@@ -24,6 +25,7 @@ export default function NotificationPreference() {
 
   const [notificationPreferenceData, setNotificationPreferenceData] = useState([]);
   const [expanded, setExpanded] = useState({});
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [isEdit, setIsEdit] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -148,6 +150,10 @@ export default function NotificationPreference() {
     setExpanded((prev) => ({ ...prev, [resource]: !prev[resource] }));
   };
 
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
   return (
     <Box >
       <div className="grid grid-cols-1 gap-4 rounded-md border px-2 py-2 sm:grid-cols-2 md:px-4">
@@ -159,7 +165,13 @@ export default function NotificationPreference() {
         ))}
       </div>
       <Box className="mt-2">
-        <Box mb={1} display="flex" justifyContent="flex-end" gap={1}>
+        <Box mb={1} display="flex" justifyContent="space-between" alignItems="center" gap={1}>
+          <SearchBox
+            onChange={handleSearch}
+            className="terms_header_search_bar"
+            width="300px"
+            value={searchQuery}
+          />
           {isEdit ? (
             <ThemeButton onClick={handleUpdate} disabled={isSaving || isLoading} isLoading={isSaving} buttonType="theme">
               {isSaving ? 'Updating...' : 'Update'}
@@ -211,50 +223,52 @@ export default function NotificationPreference() {
                   </TableCell>
                 </TableRow>
               ) : (
-                notificationPreferenceData?.map((element) => (
-                  <React.Fragment key={element.resource}>
-                    <TableRow>
-                      <TableCell style={{ paddingLeft: 14 }}>
-                        <Box display="flex" alignItems="center">
-                          <span>{element.resourceLabel}</span>
-                          <IconButton size="small" onClick={() => handleExpand(element.resource)}>
-                            {expanded[element.resource] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-                          </IconButton>
-                        </Box>
-                      </TableCell>
-                      {NOTIFY_TYPES.map((notifyType) => {
-                        const { checked, indeterminate } = getParentCheckboxState(element, notifyType);
-                        return (
-                          <TableCell key={notifyType}>
-                            <Checkbox
-                              checked={checked}
-                              indeterminate={indeterminate}
-                              disabled={!isEdit || isLoading}
-                              onChange={(e) => handleParentCheckbox(element.resource, notifyType, e.target.checked)}
-                            />
-                          </TableCell>
-                        );
-                      })}
-                      <TableCell />
-                    </TableRow>
-                    {expanded[element.resource] &&
-                      Object.keys(element?.actions)?.map((key) => (
-                        <TableRow key={element.resource + '-' + key}>
-                          <TableCell style={{ paddingLeft: 50 }}>{UnCamelCase(key)}</TableCell>
-                          {NOTIFY_TYPES.map((notifyType) => (
+                notificationPreferenceData
+                  ?.filter((element) => element.resourceLabel.toLowerCase().includes(searchQuery.toLowerCase()))
+                  ?.map((element) => (
+                    <React.Fragment key={element.resource}>
+                      <TableRow>
+                        <TableCell style={{ paddingLeft: 14 }}>
+                          <Box display="flex" alignItems="center">
+                            <span>{element.resourceLabel}</span>
+                            <IconButton size="small" onClick={() => handleExpand(element.resource)}>
+                              {expanded[element.resource] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                            </IconButton>
+                          </Box>
+                        </TableCell>
+                        {NOTIFY_TYPES.map((notifyType) => {
+                          const { checked, indeterminate } = getParentCheckboxState(element, notifyType);
+                          return (
                             <TableCell key={notifyType}>
                               <Checkbox
-                                checked={!!element?.actions[key][notifyType]}
+                                checked={checked}
+                                indeterminate={indeterminate}
                                 disabled={!isEdit || isLoading}
-                                onChange={(e) => handleCheckbox(element.resource, key, notifyType, e.target.checked)}
+                                onChange={(e) => handleParentCheckbox(element.resource, notifyType, e.target.checked)}
                               />
                             </TableCell>
-                          ))}
-                          <TableCell />
-                        </TableRow>
-                      ))}
-                  </React.Fragment>
-                ))
+                          );
+                        })}
+                        <TableCell />
+                      </TableRow>
+                      {expanded[element.resource] &&
+                        Object.keys(element?.actions)?.map((key) => (
+                          <TableRow key={element.resource + '-' + key}>
+                            <TableCell style={{ paddingLeft: 50 }}>{UnCamelCase(key)}</TableCell>
+                            {NOTIFY_TYPES.map((notifyType) => (
+                              <TableCell key={notifyType}>
+                                <Checkbox
+                                  checked={!!element?.actions[key][notifyType]}
+                                  disabled={!isEdit || isLoading}
+                                  onChange={(e) => handleCheckbox(element.resource, key, notifyType, e.target.checked)}
+                                />
+                              </TableCell>
+                            ))}
+                            <TableCell />
+                          </TableRow>
+                        ))}
+                    </React.Fragment>
+                  ))
               )}
             </TableBody>
           </Table>
