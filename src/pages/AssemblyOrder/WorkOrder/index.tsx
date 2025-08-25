@@ -155,10 +155,12 @@ const WorkOrder = ({
         Header: 'Type',
         width: 100,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type)}
+        Cell: ({ row }) => (row.original['type'] ? <div>
+          <h5>{`${getMaterialLabel(row.original?.type)}
           ${row.original?.type === MATERIAL_TYPE.product ? row.original?.productDetail?.serializedProduct ? ' (Serialized)' : ' (Non-Serialized)' :
-            row.original.type === MATERIAL_TYPE.service ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-              : ''}`}</h5> : <NoDataCell />),
+              row.original.type === MATERIAL_TYPE.service ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}`}</h5>
+        </div> : <NoDataCell />),
         accessorFn: (original) => {
           return getMaterialLabel(original?.type);
         }
@@ -302,7 +304,7 @@ const WorkOrder = ({
       Cell: ({ row }) => {
         return (
           <>
-            {row.original.type === MATERIAL_TYPE.package && row.original?.workOrderId && (
+            {[MATERIAL_TYPE.package, MATERIAL_TYPE.serializedPackage]?.includes(row.original.type) && row.original?.workOrderId && (
               <HtmlTooltip title="Auto Complete Work Order">
                 <IconButton
                   size="small"
@@ -425,7 +427,8 @@ const WorkOrder = ({
     let rows = data?.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent?.type === MATERIAL_TYPE.serializedPackage ? parent?.serializedPackageDetail?.serializedPackageNumber : parent?.detail || parent.packageDetail?.packageName || '';
+      parent.detail = parent?.type === MATERIAL_TYPE.serializedPackage ?
+        parent?.serializedPackageDetail?.serializedPackageNumber : parent?.detail || parent.packageDetail?.packageName || '';
       parent.description = parent?.description || parent?.packageDetail?.packageDescription || '';
       parent.qty = parent.qty;
       if (parent?.workOrder) {

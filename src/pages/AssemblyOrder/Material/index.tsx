@@ -80,7 +80,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         Header: 'Type',
         width: 100,
         sticky: isMobile || isTablet ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type)}`}</h5> : <NoDataCell />),
+        Cell: ({ row }) => (row.original['type'] ? <div><h5>{`${getMaterialLabel(row.original?.type)}`}</h5></div> : <NoDataCell />),
         accessorFn: (original) => {
           return getMaterialLabel(original?.type);
         }
