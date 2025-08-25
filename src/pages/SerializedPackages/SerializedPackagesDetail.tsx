@@ -116,7 +116,7 @@ const SerializedPackagesDetail = ({ resourceRendered = '' }) => {
   const handleDisassemble = () => {
     setIsOkButtonLoading(true)
     axiosInstance()
-      .put(`${routes.serializedPackages?.path}/disassemble/${serializedPackagesData?._id}`)
+      .put(`${routes.serializedPackages?.path}/disassemble`, { ids: [serializedPackagesData?._id] })
       .then(({ data }: any) => {
         fetchData()
         setIsOkButtonLoading(false)

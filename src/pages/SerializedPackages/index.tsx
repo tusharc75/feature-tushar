@@ -12,7 +12,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { ASSET_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -24,7 +24,10 @@ import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 const SerializedPackages = ({ resourceRendered = '' }) => {
   const toastConfig = useContext(CustomToastContext);
 
-  const renderedFrom = resourceRendered === sidebarResource.serializedPackagesInspection ? camelCase(sidebarResource?.serializedPackagesInspection) : camelCase(sidebarResource?.serializedPackages);
+  const renderedFrom =
+    resourceRendered === sidebarResource.serializedPackagesInspection
+      ? camelCase(sidebarResource?.serializedPackagesInspection)
+      : camelCase(sidebarResource?.serializedPackages);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -39,18 +42,19 @@ const SerializedPackages = ({ resourceRendered = '' }) => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [columns, setColumns] = useState(null);
-  const [lookupResourceOptions, setLookupResourceOptions] = useState(null)
+  const [lookupResourceOptions, setLookupResourceOptions] = useState(null);
   const [selectedLookupResource, setSelectedLookupResource] = useState({
     [sidebarResource.warehouse]: null,
     [sidebarResource.packages]: null
-  })
+  });
+  const [showConfirmBoxDisassembled, setShowConfirmBoxDisassembled] = useState(false);
 
   useEffect(() => {
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.warehouse},${sidebarResource.packages}`)
       .then(({ data: { data } }) => {
         if (data) {
-          setLookupResourceOptions(data)
+          setLookupResourceOptions(data);
         }
       });
   }, []);
@@ -67,7 +71,14 @@ const SerializedPackages = ({ resourceRendered = '' }) => {
 
   const fetchGridColumns = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serializedPackages, permissions?.serializedPackages?.isUpdate);
-    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, resourceRendered === sidebarResource.serializedPackagesInspection ? routes.serializedPackagesInspectionDetail.path : routes.serializedPackagesDetail.path, true);
+    let newColumns = generateColumns(
+      renderedFrom,
+      fieldsDataForRead,
+      resourceRendered === sidebarResource.serializedPackagesInspection
+        ? routes.serializedPackagesInspectionDetail.path
+        : routes.serializedPackagesDetail.path,
+      true
+    );
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
@@ -127,12 +138,12 @@ const SerializedPackages = ({ resourceRendered = '' }) => {
     }
     let { filterByIds, deepFilters } = gridFilterParser(filters);
     if (selectedLookupResource[sidebarResource.warehouse]) {
-      filterByIds = filterByIds?.filter(f => f?.field != 'warehouse')
-      filterByIds.push({ field: 'warehouse', term: { $in: [selectedLookupResource[sidebarResource.warehouse]?.optionValue] } })
+      filterByIds = filterByIds?.filter((f) => f?.field != 'warehouse');
+      filterByIds.push({ field: 'warehouse', term: { $in: [selectedLookupResource[sidebarResource.warehouse]?.optionValue] } });
     }
     if (selectedLookupResource[sidebarResource.packages]) {
-      filterByIds = filterByIds?.filter(f => f?.field != 'package')
-      filterByIds.push({ field: 'package', term: { $in: [selectedLookupResource[sidebarResource.packages]?.optionValue] } })
+      filterByIds = filterByIds?.filter((f) => f?.field != 'package');
+      filterByIds.push({ field: 'package', term: { $in: [selectedLookupResource[sidebarResource.packages]?.optionValue] } });
     }
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -209,10 +220,43 @@ const SerializedPackages = ({ resourceRendered = '' }) => {
       });
   };
 
+  const handleDisassemble = () => {
+    setIsSubmitting(true);
+    const ids = selectedRecords?.map((d) => d._id);
+    axiosInstance()
+      .put(`${routes.serializedPackages?.path}/disassemble`, { ids: ids })
+      .then(({ data }: any) => {
+        fetchData();
+        setIsSubmitting(false);
+        setShowConfirmBoxDisassembled(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const ActionMenuItems = () => {
     return (
       <>
-        {selectedRecords?.length > 0 && (
+        {resourceRendered === sidebarResource.serializedPackagesInspection ? (
+          permissions?.serializedPackages?.isUpdate && (
+            <MenuItem
+              key={'serialized-package-disassemble'}
+              onClick={() => {
+                setShowConfirmBoxDisassembled(true);
+              }}
+              disabled={selectedRecords?.some((e) => e?.status !== ASSET_STATUS.available)}
+            >
+              Disassemble
+            </MenuItem>
+          )
+        ) : (
           <MenuItem
             disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
             onClick={() => {
@@ -233,15 +277,19 @@ const SerializedPackages = ({ resourceRendered = '' }) => {
 
   const leftSideContents = () => {
     return (
-      <div className='flex items-center gap-2 w-100'>
+      <div className="w-100 flex items-center gap-2">
         <Autocomplete
           fullWidth
           className="max-w-[300px]"
-          options={lookupResourceOptions && lookupResourceOptions[sidebarResource.warehouse]?.length > 0 ? lookupResourceOptions[sidebarResource.warehouse] : []}
+          options={
+            lookupResourceOptions && lookupResourceOptions[sidebarResource.warehouse]?.length > 0
+              ? lookupResourceOptions[sidebarResource.warehouse]
+              : []
+          }
           getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
           value={selectedLookupResource[sidebarResource.warehouse]}
           onChange={(e, val) => {
-            setSelectedLookupResource(prev => ({ ...prev, [sidebarResource.warehouse]: val }))
+            setSelectedLookupResource((prev) => ({ ...prev, [sidebarResource.warehouse]: val }));
           }}
           renderInput={(params) => (
             <TextField
@@ -259,11 +307,15 @@ const SerializedPackages = ({ resourceRendered = '' }) => {
         <Autocomplete
           fullWidth
           className="max-w-[300px]"
-          options={lookupResourceOptions && lookupResourceOptions[sidebarResource.packages]?.length > 0 ? lookupResourceOptions[sidebarResource.packages] : []}
+          options={
+            lookupResourceOptions && lookupResourceOptions[sidebarResource.packages]?.length > 0
+              ? lookupResourceOptions[sidebarResource.packages]
+              : []
+          }
           getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
           value={selectedLookupResource[sidebarResource.packages]}
           onChange={(e, val) => {
-            setSelectedLookupResource(prev => ({ ...prev, [sidebarResource.packages]: val }))
+            setSelectedLookupResource((prev) => ({ ...prev, [sidebarResource.packages]: val }));
           }}
           renderInput={(params) => (
             <TextField
@@ -285,7 +337,13 @@ const SerializedPackages = ({ resourceRendered = '' }) => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[resourceRendered === sidebarResource.serializedPackagesInspection ? { ...routes.serializedPackagesInspection, title: resources?.serializedPackagesInspection?.titlePlural } : { ...routes.serializedPackages, title: resources?.serializedPackages?.titlePlural }]} />
+        <CustomBreadCrumbs
+          routes={[
+            resourceRendered === sidebarResource.serializedPackagesInspection
+              ? { ...routes.serializedPackagesInspection, title: resources?.serializedPackagesInspection?.titlePlural }
+              : { ...routes.serializedPackages, title: resources?.serializedPackages?.titlePlural }
+          ]}
+        />
         {resourceRendered != sidebarResource.serializedPackagesInspection && (
           <ImportExportLinks
             permissions={permissions?.serializedPackages}
@@ -309,8 +367,8 @@ const SerializedPackages = ({ resourceRendered = '' }) => {
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
-          isActionButtonVisible={resourceRendered != sidebarResource.serializedPackagesInspection}
-          isAddButtonVisible={resourceRendered != sidebarResource.serializedPackagesInspection}
+          isActionButtonVisible={true}
+          isAddButtonVisible={resourceRendered !== sidebarResource.serializedPackagesInspection}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
@@ -358,6 +416,15 @@ const SerializedPackages = ({ resourceRendered = '' }) => {
             fetchData();
             setShowSerializedPackageDialog({ open: false, isClone: false, idToClone: null });
           }}
+        />
+      )}
+      {showConfirmBoxDisassembled && (
+        <ConfirmationDialog
+          open={showConfirmBoxDisassembled}
+          message={`Are you sure you want to disassemble selected ${resources?.serializedPackages?.titlePlural?.toLowerCase()} ?`}
+          onClose={() => setShowConfirmBoxDisassembled(false)}
+          onOk={handleDisassemble}
+          okBtnLoading={isSubmitting}
         />
       )}
     </section>
