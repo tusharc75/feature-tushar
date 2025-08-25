@@ -1140,7 +1140,6 @@ const Service = ({
           }
           title={'Arrange'}
           handleClose={() => {
-            console.log('allServices', allServices, arrangeView)
             setArrangeView({ open: false, tabId: null })
           }}
           handleSubmit={handleArrangeUpdate}
