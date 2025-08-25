@@ -789,6 +789,12 @@ const routes = {
   fieldView: {
     path: '/field-view'
   },
+  onboarding: {
+    path: '/onboarding'
+  },
+  onboardingDetail: {
+    path: '/onboarding/detail'
+  },
   onboardingTemplate: {
     path: '/onboarding-template'
   },
