@@ -67,26 +67,30 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   const [createRecordNotifications, setCreateRecordNotifications] = useState({
     users: [],
     groups: [],
-    message: '',
-    email: true,
-    portal: true
+    message: ''
   });
 
   const [updateRecordNotifications, setUpdateRecordNotifications] = useState({
     users: [],
     groups: [],
-    message: '',
-    email: true,
-    portal: true
+    message: ''
   });
 
   useEffect(() => {
-    setInitialValues({ notifications: [...(resourceData?.conditionNotifications || [])] });
+    const initialConditionalNotifications = (resourceData?.conditionNotifications || []).map(notification => {
+      const { users = [], groups = [], message = '', checkFields = [] } = notification;
+      return { users, groups, message, checkFields };
+    });
+
+    setInitialValues({ notifications: [...initialConditionalNotifications] });
+
     if (resourceData?.createRecordNotifications) {
-      setCreateRecordNotifications(resourceData.createRecordNotifications[0]);
+      const { users = [], groups = [], message = '' } = resourceData.createRecordNotifications[0] || {};
+      setCreateRecordNotifications({ users, groups, message });
     }
     if (resourceData?.updateRecordNotifications) {
-      setUpdateRecordNotifications(resourceData.updateRecordNotifications[0]);
+      const { users = [], groups = [], message = '' } = resourceData.updateRecordNotifications[0] || {};
+      setUpdateRecordNotifications({ users, groups, message });
     }
   }, [resourceData]);
 
@@ -95,8 +99,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
     if (type === 'add') {
       data.splice(index, 0, {
         checkFields: [{ fieldName: '', operator: '', value: '' }],
-        email: true,
-        portal: true,
         message: '',
         users: [],
         groups: []
@@ -431,40 +433,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                           }}
                         />
                       </Grid>
-                      <Grid size={6}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={createRecordNotifications.email}
-                              onChange={(e) => {
-                                setCreateRecordNotifications(prev => ({
-                                  ...prev,
-                                  email: e.target.checked
-                                }));
-                              }}
-                              color="primary"
-                            />
-                          }
-                          label="Email"
-                        />
-                      </Grid>
-                      <Grid size={6}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={createRecordNotifications.portal}
-                              onChange={(e) => {
-                                setCreateRecordNotifications(prev => ({
-                                  ...prev,
-                                  portal: e.target.checked
-                                }));
-                              }}
-                              color="primary"
-                            />
-                          }
-                          label="Portal"
-                        />
-                      </Grid>
                     </Grid>
                   </CardContent>
                 </Card>
@@ -542,40 +510,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                               message: e.target.value
                             }));
                           }}
-                        />
-                      </Grid>
-                      <Grid size={6}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={updateRecordNotifications.email}
-                              onChange={(e) => {
-                                setUpdateRecordNotifications(prev => ({
-                                  ...prev,
-                                  email: e.target.checked
-                                }));
-                              }}
-                              color="primary"
-                            />
-                          }
-                          label="Email"
-                        />
-                      </Grid>
-                      <Grid size={6}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={updateRecordNotifications.portal}
-                              onChange={(e) => {
-                                setUpdateRecordNotifications(prev => ({
-                                  ...prev,
-                                  portal: e.target.checked
-                                }));
-                              }}
-                              color="primary"
-                            />
-                          }
-                          label="Portal"
                         />
                       </Grid>
                     </Grid>
@@ -886,43 +820,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                         errors?.notifications[index]?.message
                                       }
                                     />
-
-                                    <Grid container spacing={2}>
-                                      <Grid size={6}>
-                                        <FormControlLabel
-                                          control={
-                                            <Checkbox
-                                              checked={data?.email}
-                                              onChange={(e) => {
-                                                arrayHelpers.replace(index, {
-                                                  ...values?.notifications[index],
-                                                  ['email']: e.target.checked
-                                                });
-                                              }}
-                                              color="primary"
-                                            />
-                                          }
-                                          label="Email"
-                                        />
-                                      </Grid>
-                                      <Grid size={6}>
-                                        <FormControlLabel
-                                          control={
-                                            <Checkbox
-                                              checked={data?.portal}
-                                              onChange={(e) => {
-                                                arrayHelpers.replace(index, {
-                                                  ...values?.notifications[index],
-                                                  ['portal']: e.target.checked
-                                                });
-                                              }}
-                                              color="primary"
-                                            />
-                                          }
-                                          label="Portal"
-                                        />
-                                      </Grid>
-                                    </Grid>
                                   </div>
                                 </fieldset>
                               </fieldset>
