@@ -426,7 +426,8 @@ export const sidebarResource = {
   fieldView: 'Field View',
   customPdfTemplate: 'Custom Pdf Template',
   contentPostPlanning: 'Content Post Planning',
-  onboardingTemplate: 'Onboarding Template'
+  onboardingTemplate: 'Onboarding Template',
+  onboarding: 'Onboarding'
 } as const;
 
 export const primaryFields = {
