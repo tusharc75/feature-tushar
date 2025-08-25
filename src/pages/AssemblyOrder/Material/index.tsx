@@ -21,7 +21,7 @@ import {
   CHILD_RESOURCE,
   MATERIAL_TYPE,
   PACKAGE_TYPE,
-  SERIALIZED_PACKAGES_STATUS,
+  SERIALIZED_PACKAGE_STATUS,
   sidebarResource,
   WORK_ORDER_TYPE
 } from '../../../constants/helpers';
@@ -546,7 +546,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         <AssignSerializedPackagesDialog
           onSuccess={handleAdd}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGES_STATUS.available, SERIALIZED_PACKAGES_STATUS.underReview] }]}
+          extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGE_STATUS.available, SERIALIZED_PACKAGE_STATUS.underReview] }]}
           referenceData={{ warehouse: assemblyOrderData?.warehouse }}
           isSubmitting={isSubmitting}
         />
@@ -571,7 +571,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             setOpenSerializedPackagesDialog(false);
           }}
           referenceData={{ warehouse: assemblyOrderData?.warehouse }}
-          extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGES_STATUS.available, SERIALIZED_PACKAGES_STATUS.underReview] }]}
+          extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGE_STATUS.available, SERIALIZED_PACKAGE_STATUS.underReview] }]}
           isSubmitting={isSubmitting}
           ids={dataRows?.map((d) => d?.serializedPackageId)}
           selectedPackages={selectedRecords

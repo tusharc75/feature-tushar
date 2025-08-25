@@ -12,7 +12,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { ASSET_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, SERIALIZED_PACKAGE_STATUS, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -223,40 +223,37 @@ const SerializedPackages = ({ resourceRendered = '' }) => {
   const handleDisassemble = () => {
     setIsSubmitting(true);
     const ids = selectedRecords?.map((d) => d._id);
-    axiosInstance()
-      .put(`${routes.serializedPackages?.path}/disassemble`, { ids: ids })
-      .then(({ data }: any) => {
-        fetchData();
-        setIsSubmitting(false);
-        setShowConfirmBoxDisassembled(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((error) => {
-        setIsSubmitting(false);
-        toastConfig.setToastConfig(error);
+    axiosInstance().put(`${routes.serializedPackages?.path}/disassemble`, { ids: ids }).then(({ data }: any) => {
+      dispatch({ type: 'selection', selectedRecords: [] });
+      fetchData();
+      setIsSubmitting(false);
+      setShowConfirmBoxDisassembled(false);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
       });
+    }).catch((error) => {
+      setIsSubmitting(false);
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const ActionMenuItems = () => {
     return (
       <>
-        {resourceRendered === sidebarResource.serializedPackagesInspection ? (
-          permissions?.serializedPackages?.isUpdate && (
-            <MenuItem
-              key={'serialized-package-disassemble'}
-              onClick={() => {
-                setShowConfirmBoxDisassembled(true);
-              }}
-              disabled={selectedRecords?.some((e) => e?.status !== ASSET_STATUS.available)}
-            >
-              Disassemble
-            </MenuItem>
-          )
-        ) : (
+        {resourceRendered === sidebarResource.serializedPackagesInspection ? (permissions?.serializedPackagesInspection?.isUpdate && (
+          <MenuItem
+            key={'serialized-package-disassemble'}
+            onClick={() => {
+              setShowConfirmBoxDisassembled(true);
+            }}
+            disabled={selectedRecords?.length && selectedRecords?.every((e) =>
+              [SERIALIZED_PACKAGE_STATUS.available, SERIALIZED_PACKAGE_STATUS.underReview]?.includes(e?.status)) ? false : true}
+          >
+            Disassemble
+          </MenuItem>
+        )) : (
           <MenuItem
             disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
             onClick={() => {
