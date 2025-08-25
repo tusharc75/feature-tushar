@@ -356,7 +356,7 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
           } else {
             const params = pagerRef.current.getParamsForNextPage({ start: win.start, end: win.end });
             if (params && !moreDataLoading && hasMoreVerticalRef.current) {
-              await fetchVisible({ params, hasMore: true, search: searchValueRef.current || '', from: 'scroll' });
+              await fetchVisible({ params, hasMore: true, search: searchValueRef.current || '', from: 'search' });
               isScrolling.current = false;
             }
           }
