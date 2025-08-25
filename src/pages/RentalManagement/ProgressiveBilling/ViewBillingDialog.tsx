@@ -487,6 +487,17 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                 renderedFrom={renderedFrom}
                 isClientSideGrid={true}
                 expander={true}
+                resource={sidebarResource.invoice}
+                arrangeRowField={{
+                  keys: [
+                    {
+                      key: 'material',
+                      filterType: [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset]
+                    },
+                    { key: 'additionalCost', filterType: [MATERIAL_TYPE.manualEntry] }
+                  ],
+                  _id: invoiceData?._id
+                }}
               />
             ) : (
               <Box p={2} height={500}>
