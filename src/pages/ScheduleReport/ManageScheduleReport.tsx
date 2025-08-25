@@ -20,6 +20,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 type ValueTypes = {
   scheduleName: string;
+  emailSubject?: string;
   resource: any;
   column: any[];
   subscribeUsers?: any[];
@@ -116,6 +117,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
           await fetchGridColumns(resource);
           let newData: any = {
             scheduleName: data?.scheduleName,
+            emailSubject: data?.emailSubject || '',
             resource,
             frequency: data?.frequency,
             day: data?.day,
@@ -139,6 +141,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     } else {
       setFormData({
         scheduleName: '',
+        emailSubject: '',
         resource: null,
         column: [],
         subscribeUsers: [],
@@ -515,6 +518,19 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                               name="resource"
                             />
                           )}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <TextField
+                          value={values.emailSubject}
+                          onChange={(e) => setFieldValue('emailSubject', e.target.value)}
+                          fullWidth
+                          name="emailSubject"
+                          size="small"
+                          label="Email Subject"
+                          variant="outlined"
+                          error={touched['emailSubject'] && Boolean(errors['emailSubject'])}
+                          helperText={touched['emailSubject'] && errors['emailSubject']}
                         />
                       </Grid>
                     </Grid>
