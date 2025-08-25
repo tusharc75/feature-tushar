@@ -3141,7 +3141,7 @@ export const QUOTE_STATUS = {
   rejectedbyDOA: 'Rejected by DOA'
 };
 
-export const SERIALIZED_PACKAGES_STATUS = {
+export const SERIALIZED_PACKAGE_STATUS = {
   available: 'Available',
   reserved: 'Reserved',
   underReview: 'Under Review',

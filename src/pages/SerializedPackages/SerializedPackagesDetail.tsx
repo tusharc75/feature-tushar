@@ -8,7 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, SERIALIZED_PACKAGES_STATUS, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, SERIALIZED_PACKAGE_STATUS, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -142,16 +142,21 @@ const SerializedPackagesDetail = ({ resourceRendered = '' }) => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {resourceRendered === sidebarResource.serializedPackagesInspection && permissions?.serializedPackages?.isUpdate && serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.available && (
-                <ThemeButton
-                  id={'serialized-package-disassemble'}
-                  onClick={() => setShowConfirmBoxDisassembled(true)}
-                >
-                  Disassemble
-                </ThemeButton>
-              )}
+              {resourceRendered === sidebarResource.serializedPackagesInspection
+                && permissions?.serializedPackagesInspection?.isUpdate &&
+                [SERIALIZED_PACKAGE_STATUS.available, SERIALIZED_PACKAGE_STATUS.underReview]?.includes(serializedPackagesData?.status) && (
+                  <ThemeButton
+                    id={'serialized-package-disassemble'}
+                    onClick={() => setShowConfirmBoxDisassembled(true)}
+                  >
+                    Disassemble
+                  </ThemeButton>
+                )}
               {permissions?.serializedPackages?.isUpdate && resourceRendered != sidebarResource.serializedPackagesInspection && (
-                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'} disabled={serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.disassembled}>
+                <ThemeButton
+                  iconForMobile={<EditIcon />}
+                  onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}
+                  disabled={serializedPackagesData?.status === SERIALIZED_PACKAGE_STATUS.disassembled}>
                   {'Edit'}
                 </ThemeButton>
               )}
@@ -192,7 +197,11 @@ const SerializedPackagesDetail = ({ resourceRendered = '' }) => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Assign serializedPackagesData={serializedPackagesData} fetchSerializedPackagesData={fetchData} disAssembled={serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.disassembled} fromInspection={resourceRendered === sidebarResource.serializedPackagesInspection} />
+          <Assign
+            serializedPackagesData={serializedPackagesData}
+            fetchSerializedPackagesData={fetchData}
+            fromInspection={resourceRendered === sidebarResource.serializedPackagesInspection}
+          />
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
           <History id={serializedPackagesData?._id} />

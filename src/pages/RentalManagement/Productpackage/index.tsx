@@ -37,7 +37,7 @@ import {
   PRICING_SETUP_TYPE,
   RENTAL_STATUS,
   rentalManagement,
-  SERIALIZED_PACKAGES_STATUS,
+  SERIALIZED_PACKAGE_STATUS,
   sidebarResource
 } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
@@ -1163,7 +1163,7 @@ const Productpackage = ({
           handleClose={() => {
             setAddExistingSerializedPackages(false);
           }}
-          extraDeepFilter={[{ field: 'status', term: SERIALIZED_PACKAGES_STATUS.available }]}
+          extraDeepFilter={[{ field: 'status', term: SERIALIZED_PACKAGE_STATUS.available }]}
           referenceData={{ warehouse: rentalManagementData?.warehouse }}
           isSubmitting={isSubmitting}
         />
