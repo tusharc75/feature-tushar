@@ -83,7 +83,7 @@ const ScheduleReport = () => {
         accessor: 'emailSubject',
         Header: 'Email Subject',
         Cell: ({ row }) => (row?.original?.emailSubject ? <div>
-          <p className="text-truncate" title={row.original.emailSubject}>{row.original.emailSubject}</p>
+          <p className="text-truncate">{row.original.emailSubject}</p>
         </div> : <NoDataCell />)
       },
       {
