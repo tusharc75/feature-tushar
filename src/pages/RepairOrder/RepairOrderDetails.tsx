@@ -430,13 +430,13 @@ const RepairOrderDetails = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handlePrev={
                 stepNames[currentStep] === 'Quotation' &&
-                allowedToEdit &&
-                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                  quotationVersionData?.status
-                )
+                  allowedToEdit &&
+                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                    quotationVersionData?.status
+                  )
                   ? () => {
-                      setShowQuotationConfirmBox(true);
-                    }
+                    setShowQuotationConfirmBox(true);
+                  }
                   : null
               }
               updateStatus={(step: number) => {
@@ -457,8 +457,8 @@ const RepairOrderDetails = () => {
                     !allowedToEdit
                       ? allowedToEdit
                       : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                            quotationVersionData?.status
-                          ) && isQuotationStep
+                        quotationVersionData?.status
+                      ) && isQuotationStep
                         ? false
                         : true
                   }
@@ -478,8 +478,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                          quotationVersionData?.status
-                        ) && isQuotationStep
+                      quotationVersionData?.status
+                    ) && isQuotationStep
                       ? false
                       : allowedToEdit
                 }
