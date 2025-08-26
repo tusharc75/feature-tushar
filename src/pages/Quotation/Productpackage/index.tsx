@@ -212,13 +212,14 @@ const Productpackage = ({
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${row.original.type === MATERIAL_TYPE.serializedAsset
-                      ? routes.serializedAssetDetail.path
-                      : row.original.type === MATERIAL_TYPE.product
-                        ? routes.productDetail.path
-                        : row.original.type === MATERIAL_TYPE.package
-                          ? routes.packagesDetail.path
-                          : routes.serviceMasterDetail.path
+                    `${
+                      row.original.type === MATERIAL_TYPE.serializedAsset
+                        ? routes.serializedAssetDetail.path
+                        : row.original.type === MATERIAL_TYPE.product
+                          ? routes.productDetail.path
+                          : row.original.type === MATERIAL_TYPE.package
+                            ? routes.packagesDetail.path
+                            : routes.serviceMasterDetail.path
                     }/${row.original.materialId}`
                   );
                 }}
@@ -231,19 +232,19 @@ const Productpackage = ({
       },
       ...(user?.user?.brandPolicy?.leadTime
         ? [
-          {
-            accessor: 'leadTime',
-            Header: 'Lead Time (Days)',
-            Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
-            Footer: (info) => {
-              let rows = info.table.getExpandedRowModel().rows;
-              const total = rows
-                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-              return <>{total}</>;
+            {
+              accessor: 'leadTime',
+              Header: 'Lead Time (Days)',
+              Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+              Footer: (info) => {
+                let rows = info.table.getExpandedRowModel().rows;
+                const total = rows
+                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+                return <>{total}</>;
+              }
             }
-          }
-        ]
+          ]
         : []),
       {
         accessor: 'description',
@@ -340,16 +341,17 @@ const Productpackage = ({
     let rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.service
-            ? parent.serviceDetail?.serviceName
-            : parent.type === MATERIAL_TYPE.package
-              ? parent.packageDetail?.packageName
-              : parent.detail
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.serializedAsset
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.service
+              ? parent.serviceDetail?.serviceName
+              : parent.type === MATERIAL_TYPE.package
+                ? parent.packageDetail?.packageName
+                : parent.detail
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -379,16 +381,17 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.service
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.type === MATERIAL_TYPE.package
-              ? _subRow.packageDetail?.packageName
-              : _subRow?.detail || ''
-        }`;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.serializedAsset
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : _subRow.type === MATERIAL_TYPE.service
+              ? _subRow.serviceDetail?.serviceName
+              : _subRow.type === MATERIAL_TYPE.package
+                ? _subRow.packageDetail?.packageName
+                : _subRow?.detail || ''
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -706,36 +709,41 @@ const Productpackage = ({
   const addButtonMenuItems = () => {
     return (
       <>
-        {quotationData?.type === QUOTATION_TYPE.assemblyOrder ? null : (
-          permissions?.product &&
-          <MenuItem
-            onClick={() => {
-              setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
-            }}
-          >
-            Add Existing Products
-          </MenuItem>
-        )}
-        {quotationData?.type === QUOTATION_TYPE.fieldJob && !fieldTicketPolicyData?.policy?.showAddPackages ? null : (
-          permissions?.packages && <MenuItem
-            onClick={() => {
-              setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
-            }}
-          >
-            {`Add Existing ${resources?.packages?.titlePlural}`}
-          </MenuItem>
-        )}
+        {quotationData?.type === QUOTATION_TYPE.assemblyOrder
+          ? null
+          : permissions?.product && (
+              <MenuItem
+                onClick={() => {
+                  setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
+                }}
+              >
+                Add Existing Products
+              </MenuItem>
+            )}
+        {quotationData?.type === QUOTATION_TYPE.fieldJob && !fieldTicketPolicyData?.policy?.showAddPackages
+          ? null
+          : permissions?.packages && (
+              <MenuItem
+                onClick={() => {
+                  setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
+                }}
+              >
+                {`Add Existing ${resources?.packages?.titlePlural}`}
+              </MenuItem>
+            )}
         {(quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService) ||
-          quotationData?.type === QUOTATION_TYPE.assemblyOrder ||
-          quotationData?.type === QUOTATION_TYPE.repairOrder ? null : (
-          permissions?.serviceMaster && <MenuItem
-            onClick={() => {
-              setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
-            }}
-          >
-            Add Existing Services
-          </MenuItem>
-        )}
+        quotationData?.type === QUOTATION_TYPE.assemblyOrder ||
+        quotationData?.type === QUOTATION_TYPE.repairOrder
+          ? null
+          : permissions?.serviceMaster && (
+              <MenuItem
+                onClick={() => {
+                  setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
+                }}
+              >
+                Add Existing Services
+              </MenuItem>
+            )}
         {costFields?.length > 0 && quotationData?.type != QUOTATION_TYPE.repairOrder && (
           <MenuItem
             onClick={() => {
@@ -762,7 +770,7 @@ const Productpackage = ({
             {`Assign ${resources?.serializedAsset?.titlePlural}`}
           </MenuItem>
         )}
-        {permissions?.supplierAccount &&
+        {permissions?.supplierAccount && (
           <MenuItem
             disabled={selectedRecords.length === 0 || selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
             onClick={() => {
@@ -791,8 +799,8 @@ const Productpackage = ({
           >
             Ask Supplier to Quote
           </MenuItem>
-        }
-        {permissions?.supplierAccount &&
+        )}
+        {permissions?.supplierAccount && (
           <MenuItem
             onClick={() => {
               setSelectedType('Supplier');
@@ -801,13 +809,13 @@ const Productpackage = ({
           >
             View Supplier Quote
           </MenuItem>
-        }
+        )}
         <MenuItem
           disabled={
             !Boolean(
               selectedRecords &&
-              selectedRecords.filter((e) => !e.hideSelection).length &&
-              !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
+                selectedRecords.filter((e) => !e.hideSelection).length &&
+                !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
             )
           }
           onClick={() => {
@@ -1016,7 +1024,7 @@ const Productpackage = ({
           }}
           extraStaticFilter={quotationData?.type === QUOTATION_TYPE.fieldJob ? [{ field: 'serviceType', term: SERVICE_TYPE.fieldService }] : []}
           isSubmitting={isSubmitting}
-          pricingCondition={quotationData?.pricingCondition?.optionValue || null}
+          pricingCondition={quotationData?.type === QUOTATION_TYPE.salesOrder ? null : quotationData?.pricingCondition?.optionValue || null}
           currency={quotationData?.currency}
         />
       )}
@@ -1109,7 +1117,7 @@ const Productpackage = ({
           }}
         >
           <MenuList>
-            {permissions?.product &&
+            {permissions?.product && (
               <MenuItem
                 onClick={() => {
                   setAddDialog({ open: true, type: 'product', parentId: addchildDialog.parentId });
@@ -1118,32 +1126,35 @@ const Productpackage = ({
               >
                 Add Existing Products
               </MenuItem>
-            }
-            {quotationData?.type === QUOTATION_TYPE.fieldJob && !fieldTicketPolicyData?.policy?.showAddPackages ? null : [
-              QUOTATION_TYPE.repairOrder
-            ]?.includes(quotationData?.type) ? null : (
-              permissions?.packages && <MenuItem
-                onClick={() => {
-                  setAddDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
-                  setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
-                }}
-              >
-                {`Add Existing ${resources?.packages?.titlePlural}`}
-              </MenuItem>
             )}
-            {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null : [
-              QUOTATION_TYPE.fieldJob,
-              QUOTATION_TYPE.repairOrder
-            ]?.includes(quotationData?.type) ? null : (
-              permissions?.serviceMaster && <MenuItem
-                onClick={() => {
-                  setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
-                  setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
-                }}
-              >
-                Add Existing Services
-              </MenuItem>
-            )}
+            {quotationData?.type === QUOTATION_TYPE.fieldJob && !fieldTicketPolicyData?.policy?.showAddPackages
+              ? null
+              : [QUOTATION_TYPE.repairOrder]?.includes(quotationData?.type)
+                ? null
+                : permissions?.packages && (
+                    <MenuItem
+                      onClick={() => {
+                        setAddDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
+                        setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
+                      }}
+                    >
+                      {`Add Existing ${resources?.packages?.titlePlural}`}
+                    </MenuItem>
+                  )}
+            {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService
+              ? null
+              : [QUOTATION_TYPE.fieldJob, QUOTATION_TYPE.repairOrder]?.includes(quotationData?.type)
+                ? null
+                : permissions?.serviceMaster && (
+                    <MenuItem
+                      onClick={() => {
+                        setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
+                        setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
+                      }}
+                    >
+                      Add Existing Services
+                    </MenuItem>
+                  )}
           </MenuList>
         </Popover>
       )}
