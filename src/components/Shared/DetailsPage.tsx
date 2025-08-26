@@ -238,54 +238,85 @@ const Details = (props: DetailProps) => {
 
   const renderData = (val: any, fieldData: any) => {
     const value: any = normalizeValues(val, fieldData);
-    if (fieldData?.hasOwnProperty('lookup') && fieldData?.lookup && permissions && permissions[camelCase(fieldData?.lookupResource)]?.isRead) {
+    if (fieldData?.hasOwnProperty('lookup') && fieldData?.lookup) {
       if (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') {
-        return (
-          <Typography
-            className={`${classes.fieldText} ${classes.withMultichild} min-h-[35px] w-full items-center gap-1 px-[10px] py-[7px]`}
-            variant="body2"
-          >
-            {Array.isArray(data[fieldData.fieldName]) ? (
-              data[fieldData.fieldName].length ? (
-                data[fieldData.fieldName].map((_val: any, i) => (
-                  <React.Fragment key={_val.optionValue}>
-                    <Link
-                      to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="link"
-                      title={_val.optionLabel}
-                    >
-                      <span className={`link p-0`}>
-                        {_val.optionLabel}
-                        {i < data[fieldData.fieldName].length - 1 ? ',' : ''}
-                      </span>
-                    </Link>
-                  </React.Fragment>
-                ))
+        if (permissions && permissions[camelCase(fieldData?.lookupResource)]?.isRead) {
+          return (
+            <Typography
+              className={`${classes.fieldText} ${classes.withMultichild} min-h-[35px] w-full items-center gap-1 px-[10px] py-[7px]`}
+              variant="body2"
+            >
+              {Array.isArray(data[fieldData.fieldName]) ? (
+                data[fieldData.fieldName].length ? (
+                  data[fieldData.fieldName].map((_val: any, i) => (
+                    <React.Fragment key={_val.optionValue}>
+                      <Link
+                        to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="link"
+                        title={_val.optionLabel}
+                      >
+                        <span className={`link p-0`}>
+                          {_val.optionLabel}
+                          {i < data[fieldData.fieldName].length - 1 ? ',' : ''}
+                        </span>
+                      </Link>
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <span className="p-0">-</span>
+                )
+              ) : data[fieldData.fieldName] ? (
+                <Link
+                  to={`/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="link"
+                  title={data[fieldData.fieldName].optionLabel || value}
+                >
+                  <span className={`link block break-all p-0 md:truncate md:text-ellipsis`}>
+                    {data[fieldData.fieldName].optionLabel || value}
+                    {data[fieldData.fieldName]?.staticData?.approved && data[fieldData.fieldName]?.staticData?.approved === true ? (
+                      <FcApproval className={classes.approvalIcon} title="Approved" size={20} />
+                    ) : null}
+                  </span>
+                </Link>
               ) : (
                 <span className="p-0">-</span>
-              )
-            ) : data[fieldData.fieldName] ? (
-              <Link
-                to={`/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="link"
-                title={data[fieldData.fieldName].optionLabel || value}
-              >
-                <span className={`link block break-all p-0 md:truncate md:text-ellipsis`}>
+              )}
+            </Typography>
+          );
+        } else {
+          return (
+            <Typography
+              className={`${classes.fieldText} ${classes.withMultichild} min-h-[35px] w-full items-center gap-1 px-[10px] py-[7px]`}
+              variant="body2"
+            >
+              {Array.isArray(data[fieldData.fieldName]) ? (
+                data[fieldData.fieldName].length ? (
+                  data[fieldData.fieldName].map((_val: any, i) => (
+                    <React.Fragment key={_val.optionValue}>
+                      {_val.optionLabel}
+                      {i < data[fieldData.fieldName].length - 1 ? ',' : ''}
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <span className="p-0">-</span>
+                )
+              ) : data[fieldData.fieldName] ? (
+                <>
                   {data[fieldData.fieldName].optionLabel || value}
                   {data[fieldData.fieldName]?.staticData?.approved && data[fieldData.fieldName]?.staticData?.approved === true ? (
                     <FcApproval className={classes.approvalIcon} title="Approved" size={20} />
                   ) : null}
-                </span>
-              </Link>
-            ) : (
-              <span className="p-0">-</span>
-            )}
-          </Typography>
-        );
+                </>
+              ) : (
+                <span className="p-0">-</span>
+              )}
+            </Typography>
+          );
+        }
       }
     } else {
       if (fieldData.type === 'multiImageUpload' && val[fieldData.fieldName]) {
