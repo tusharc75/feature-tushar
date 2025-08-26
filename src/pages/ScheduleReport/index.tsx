@@ -80,6 +80,13 @@ const ScheduleReport = () => {
         </div> : <NoDataCell />)
       },
       {
+        accessor: 'emailSubject',
+        Header: 'Email Subject',
+        Cell: ({ row }) => (row?.original?.emailSubject ? <div>
+          <p className="text-truncate">{row.original.emailSubject}</p>
+        </div> : <NoDataCell />)
+      },
+      {
         accessor: 'subscribeUsers',
         Header: 'Subscribe Users',
         Cell: ({ row }) => (row?.original?.subscribeUsers?.length ? <div> <p
@@ -115,6 +122,11 @@ const ScheduleReport = () => {
         Header: 'Report Action',
         Cell: ({ row }) =>
           row?.original?.reportAction ? <p className="text-truncate">{row.original.reportAction}</p> : <p className="text-truncate">{'Email'}</p>
+      },
+      {
+        accessor: 'fileType',
+        Header: 'File Type',
+        Cell: ({ row }) => (row?.original?.fileType ? <p className="text-truncate">{row.original.fileType}</p> : <NoDataCell />)
       },
       {
         accessor: 'time',
@@ -265,13 +277,15 @@ const ScheduleReport = () => {
         <ListingPageHeader
           isActionButtonVisible={permissions?.scheduleReport?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          addButtonProps={{
+            textAddShow: true
+          }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, id: null });
           }}
           isAddButtonVisible={permissions?.scheduleReport?.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

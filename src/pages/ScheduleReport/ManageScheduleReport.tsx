@@ -1,9 +1,9 @@
 import { useEffect, useState, useContext, useRef, Fragment } from 'react';
-import { Dialog, Box, TextField, Typography, FormControlLabel, Checkbox, Chip } from '@mui/material';
+import { Dialog, Box, TextField, Typography, Chip } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { Form, Formik, FormikProps } from 'formik';
-import { REPORT_LIST, SCHEDULE_FREQUENCY, FREQUENCY_WEEKS, CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
+import { SCHEDULE_FREQUENCY, FREQUENCY_WEEKS, CustomDialogTransition, sidebarResource, getResourceLabel } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -12,7 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import { useData } from '../../StateProvider/Provider';
-import { capitalize, kebabCase, startCase } from 'lodash';
+import { camelCase, kebabCase, startCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Filters from 'src/components/Filter/Filters';
 import dayjs from 'dayjs';
@@ -20,6 +20,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 type ValueTypes = {
   scheduleName: string;
+  emailSubject?: string;
   resource: any;
   column: any[];
   subscribeUsers?: any[];
@@ -35,7 +36,7 @@ type ValueTypes = {
   sharepointclientSecret?: string;
   fileType?: string;
   status: string;
-  emails: string[]
+  emails: string[];
 };
 
 const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
@@ -50,27 +51,41 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   const [filterByIds, setFilterByIds] = useState([]);
   const [usersList, setUsersList] = useState([]);
   const [isSubmitting, setSubmitting] = useState(false);
+  const [reportList, setReportList] = useState([]);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const {
-    state: { permissions, resources }
+    state: { permissions, resources, user }
   }: any = useData();
   const [resourceOption, setResourceOption] = useState(null);
   const [sharepointOptions, setSharepointOptions] = useState(null);
 
+  const fetchReportList = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get('/report/list');
+      const options = [];
+      data?.forEach((item) => {
+        if (permissions?.[camelCase(item?.resource)]?.isRead === true) {
+          options.push({
+            title: item.type === 'dynamic' ? resources[item.key]?.titleSingular : item.title,
+            value: item.title,
+            key: item.key,
+            type: item?.type
+          });
+        }
+      });
+      setResourceOption(options);
+      setReportList(data || []);
+    } catch (error) {
+      setResourceOption([]);
+      setReportList([]);
+    }
+  };
+
   useEffect(() => {
-    const options = [];
-    REPORT_LIST?.forEach((item) => {
-      if (permissions[item.permission] && permissions[item.permission]?.isRead === true) {
-        options.push({
-          title: item.type === 'dynamic' ? resources[item.key]?.titleSingular : item.title,
-          value: item.title,
-          key: item.key,
-          type: item?.type
-        });
-      }
-    });
-    setResourceOption(options);
+    fetchReportList();
   }, []);
 
   useEffect(() => {
@@ -78,16 +93,22 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   }, []);
 
   useEffect(() => {
-    if (id) {
+    if (id && reportList?.length > 0) {
       (async () => {
         try {
           let {
             data: { data }
           } = await axiosInstance().get(`/schedule-report/${id}`);
 
-          let resource: any = REPORT_LIST.find((item) => item.title === data.resource);
+          let resource: any = reportList?.find((item) => item?.title === data?.resource);
+          const title =
+            resource?.type === 'dynamicForm'
+              ? getResourceLabel(resource?.resource, user)?.titleSingular
+              : resource.type === 'dynamic'
+                ? resources?.[resource?.key]?.titleSingular
+                : resource.title;
           resource = {
-            title: resource.type === 'dynamic' ? resources[resource.key]?.titleSingular : resource.title,
+            title,
             value: resource.title,
             key: resource.key,
             type: resource.type
@@ -96,6 +117,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
           await fetchGridColumns(resource);
           let newData: any = {
             scheduleName: data?.scheduleName,
+            emailSubject: data?.emailSubject || '',
             resource,
             frequency: data?.frequency,
             day: data?.day,
@@ -109,7 +131,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             sharepointSite: data?.sharepointSite,
             fileType: data?.fileType || 'xslx',
             status: data?.status,
-            emails: data?.emails || [],
+            emails: data?.emails || []
           };
           setScheduleData(newData);
         } catch (err) {
@@ -119,6 +141,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     } else {
       setFormData({
         scheduleName: '',
+        emailSubject: '',
         resource: null,
         column: [],
         subscribeUsers: [],
@@ -134,7 +157,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         emails: []
       });
     }
-  }, [id]);
+  }, [id, reportList?.length]);
 
   useEffect(() => {
     if (scheduleData && resourceColumns?.length > 0) {
@@ -161,7 +184,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       }
 
       if (scheduleData?.column?.length > 0) {
-        scheduleData?.column?.map((c) => {
+        scheduleData?.column?.forEach((c) => {
           const fieldData = resourceColumns?.find((r) => r?.fieldData?.fieldName === c)?.fieldData;
           if (fieldData) {
             column.push(fieldData);
@@ -210,12 +233,14 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         filterColumns = filterFields;
         setResourceColumns(columnFields);
       } else {
-        const {
-          data: { data }
-        }: any = await axiosInstance().get(`/field?resource=${resource.value}`);
+        let {
+          data: {
+            data: { columnFields, filterFields }
+          }
+        } = await axiosInstance().get(`/report/columns?resource=${resource.value}`);
 
         if (resource.value === sidebarResource.serializedAsset) {
-          const currentOwner: any = data?.find((e) => e?.fieldData?.fieldName === 'currentOwner');
+          const currentOwner: any = filterFields?.find((e) => e?.fieldData?.fieldName === 'currentOwner');
           if (currentOwner) {
             const {
               data: { data: lookupResource }
@@ -231,37 +256,10 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
               ];
             }
           }
-          if (data?.some((r) => r?.fieldData?.fieldName === 'status')) {
-            const index = data?.findIndex((r) => r?.fieldData?.fieldName === 'status');
-            if (index !== -1) {
-              data?.splice(index + 1, 0, {
-                fieldData: {
-                  _id: '630dz2429ec44869056955b1',
-                  fieldLabel: 'Status Period',
-                  type: 'date',
-                  option: [],
-                  required: false,
-                  isTooltip: false,
-                  tooltipMessage: '',
-                  editAble: true,
-                  deletAble: true,
-                  order: 71,
-                  fieldName: 'statusPeriod',
-                  sectionName: 'Filter Section',
-                  resource: 'Serialized Asset',
-                  brand: data[0]?.fieldData?.brand,
-                  timeFrame: 'custom'
-                },
-                isCreate: true,
-                isRead: true,
-                isUpdate: true
-              });
-            }
-          }
         }
 
-        filterColumns = data;
-        setResourceColumns(data);
+        filterColumns = filterFields;
+        setResourceColumns(columnFields);
       }
       setFilterColumns([...filterColumns]);
     } catch (err) {
@@ -300,9 +298,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       errors['fileType'] = 'File Type is required';
     }
     if (values.emails && values.emails.length > 0) {
-      const invalidEmails = values.emails.filter(
-        (email: string) => !emailRegex.test(email)
-      );
+      const invalidEmails = values.emails.filter((email: string) => !emailRegex.test(email));
       if (invalidEmails.length > 0) {
         errors['emails'] = 'Enter valid emails';
       }
@@ -325,18 +321,14 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
 
     if (!values.frequency) {
       errors['frequency'] = 'Frequency is required';
-    }
-    else {
+    } else {
       if (values.frequency === 'Daily' && !values.time) {
         errors['time'] = 'Time is required';
-      }
-      else if (values.frequency === 'Weekly' && !values.week) {
+      } else if (values.frequency === 'Weekly' && !values.week) {
         errors['week'] = 'Day is required';
-      }
-      else if (values.frequency === 'Monthly' && !values.day) {
+      } else if (values.frequency === 'Monthly' && !values.day) {
         errors['day'] = 'Date is required';
-      }
-      else if (values.frequency === 'Hourly' && !values.hour) {
+      } else if (values.frequency === 'Hourly' && !values.hour) {
         errors['hour'] = 'Hour is required';
       }
     }
@@ -361,7 +353,11 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
 
     deepFilters?.forEach((d) => {
       if (d?.type === 'date') {
-        if (dayjs(d?.term?.from).isValid() && dayjs(d?.term?.from).toDate() instanceof Date && (d?.term?.to === '' || dayjs(d?.term?.to).isValid() && dayjs(d?.term?.to).toDate() instanceof Date)) {
+        if (
+          dayjs(d?.term?.from).isValid() &&
+          dayjs(d?.term?.from).toDate() instanceof Date &&
+          (d?.term?.to === '' || (dayjs(d?.term?.to).isValid() && dayjs(d?.term?.to).toDate() instanceof Date))
+        ) {
           filters.push({
             term: d?.field,
             value: d?.term,
@@ -456,6 +452,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
           onSubmit={handleSubmit}
           validate={validate}
           validateOnMount
+          enableReinitialize
         >
           {({ values, errors, submitForm, setFieldValue, setValues, touched }) => (
             <Fragment>
@@ -502,7 +499,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                             const result = { resource: newVal, filters: [], column: [] };
                             setValues({ ...values, ...result });
                             if (newVal?.value === sidebarResource?.serializedAsset) {
-                              setFieldValue('fileType', 'csv')
+                              setFieldValue('fileType', 'csv');
                             }
                             if (newVal) {
                               fetchGridColumns(newVal);
@@ -523,6 +520,19 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           )}
                         />
                       </Grid>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <TextField
+                          value={values.emailSubject}
+                          onChange={(e) => setFieldValue('emailSubject', e.target.value)}
+                          fullWidth
+                          name="emailSubject"
+                          size="small"
+                          label="Email Subject"
+                          variant="outlined"
+                          error={touched['emailSubject'] && Boolean(errors['emailSubject'])}
+                          helperText={touched['emailSubject'] && errors['emailSubject']}
+                        />
+                      </Grid>
                     </Grid>
                   </Box>
                   <div className={'detail-box-content'}>
@@ -540,9 +550,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           setFilterByIds={setFilterByIds}
                         />
                       </div>
-                    ) : (
-                      null
-                    )
+                    ) : null
                   ) : null}
                   <Box my={2}>
                     <Grid container spacing={2}>
@@ -661,9 +669,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                                 setFieldValue('emails', uniqueEmails);
                               }}
                               renderTags={(value: string[], getTagProps) =>
-                                value.map((option: string, index: number) => (
-                                  <Chip size='small' label={option} {...getTagProps({ index })} />
-                                ))
+                                value.map((option: string, index: number) => <Chip size="small" label={option} {...getTagProps({ index })} />)
                               }
                               renderInput={(params) => (
                                 <TextField
@@ -672,9 +678,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                                   helperText={touched['emails'] && errors['emails']}
                                   label="Emails"
                                   name="emails"
-                                  type='email'
+                                  type="email"
                                   variant="outlined"
-                                  placeholder='Add email & press enter'
+                                  placeholder="Add email & press enter"
                                 />
                               )}
                             />
@@ -711,7 +717,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                             fullWidth
                             size="small"
                             getOptionLabel={(option) => option.optionLabel}
-                            isOptionEqualToValue={(option, value) => option.optionValue == value}
+                            isOptionEqualToValue={(option, value) => option.optionValue === value}
                             value={sharepointOptions?.find((ops) => ops?.optionValue === values?.sharepointSite) || {}}
                             onChange={(_, newVal) => setFieldValue('sharepointSite', newVal?.optionValue || '')}
                             renderInput={(params) => (

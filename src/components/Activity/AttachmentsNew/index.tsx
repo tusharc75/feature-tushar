@@ -296,10 +296,6 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
         {open?.type === 'file' && (
           <ManageFile
             onClose={() => {
-              setOpen({ open: false, type: '', data: null, isUpdate: false });
-              setFullScreen(false);
-            }}
-            onSuccess={() => {
               fetchData()
               setOpen({ open: false, type: '', data: null, isUpdate: false });
               setFullScreen(false);

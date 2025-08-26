@@ -236,12 +236,6 @@ export const resourcePolicy = [
     resource: sidebarResource.workOrder,
     policy: [
       {
-        fieldName: 'showBom',
-        fieldLabel: 'Show BOM',
-        type: 'checkBox',
-        defaultValue: false
-      },
-      {
         fieldName: 'consumablesSerialNumberRequired',
         fieldLabel: 'Consumables Serial Number Required',
         type: 'checkBox',
@@ -368,6 +362,12 @@ export const resourcePolicy = [
         fieldLabel: 'Hide Field Ticket Invoice Create Dialog',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'customDownloadFileName',
+        fieldLabel: 'Custom Download File Name',
+        type: 'singleLine',
+        defaultValue: ''
       }
     ]
   },
@@ -419,6 +419,17 @@ export const resourcePolicy = [
         fieldLabel: 'Show Add Packages',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'packageMaterialAdd',
+        fieldLabel: 'Package Material Add',
+        type: 'multiSelect',
+        option: [
+          { optionValue: MATERIAL_TYPE.package, optionLabel: 'Package', order: 0 },
+          { optionValue: MATERIAL_TYPE.product, optionLabel: 'Product', order: 1 },
+          { optionValue: MATERIAL_TYPE.service, optionLabel: 'Service', order: 2 }
+        ],
+        defaultValue: []
       }
     ]
   },
@@ -513,6 +524,12 @@ export const resourcePolicy = [
         fieldLabel: 'Planned Available Count From Current Date',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'showInUsePlanned',
+        fieldLabel: 'Show In-Use (Planned)',
+        type: 'checkBox',
+        defaultValue: false
       }
     ]
   },
@@ -551,6 +568,12 @@ export const resourcePolicy = [
       {
         fieldName: 'autoCreateFolderInDMS',
         fieldLabel: 'Auto Create Folder In DMS',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'splitQuantity',
+        fieldLabel: 'Split Quantity',
         type: 'checkBox',
         defaultValue: false
       },

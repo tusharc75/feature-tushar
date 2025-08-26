@@ -189,6 +189,7 @@ const CustomReport = () => {
               <div className="flex flex-wrap items-center gap-[8px]">
                 <ThemeButton
                   mobileTooltip="Add"
+                  buttonType='theme'
                   iconForMobile={<AddOutlined />}
                   onClick={() => {
                     setShowManageDialog({ open: true, id: null });

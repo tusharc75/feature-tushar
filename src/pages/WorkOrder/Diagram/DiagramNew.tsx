@@ -79,7 +79,7 @@ const DiagramNew = ({
   }, [resource, referenceId, currentVersion, selectedService, uniqueId]);
 
   const fetchData = async () => {
-    let query = `/attachment-new/?resource=${resource}&referenceId=${referenceId}`;
+    let query = `/attachment-new?resource=${resource}&referenceId=${referenceId}`;
     if (attachmentType) {
       query = `${query}&attachmentType=${attachmentType}`;
     }
@@ -394,11 +394,7 @@ const DiagramNew = ({
                 setAttachemntDialog({ open: false, type: '', data: null, isUpdate: false });
                 setFullScreen(false);
               }}
-              onSuccess={() => {
-                fetchData()
-                setAttachemntDialog({ open: false, type: '', data: null, isUpdate: false });
-                setFullScreen(false);
-              }}
+              fetchData={fetchData}
               relatedTo={getRelatedTo()}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {

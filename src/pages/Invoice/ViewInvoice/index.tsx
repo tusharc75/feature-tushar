@@ -17,6 +17,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
+  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   CustomDialogTransition,
   INVOICE_STATUS,
@@ -32,6 +33,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CreditMemo from '../CreditMemo';
 import { FiExternalLink } from 'react-icons/fi';
 import FinalPriceBox from 'src/components/FinalPriceBox';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -82,9 +84,8 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
 
   const fetchFields = async () => {
     try {
-
       const response = await axiosInstance().get(`/field?resource=${sidebarResource.invoice}&view=true`);
-      setResourceFields(response?.data?.data)
+      setResourceFields(response?.data?.data);
 
       let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
 
@@ -202,19 +203,26 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = _subRow?.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productName
-        : _subRow?.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName
-          : _subRow?.type === MATERIAL_TYPE.serializedAsset ? _subRow?.serializedAssetDetail?.assetNumber
-            : _subRow?.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName : _subRow?.detail || ''
-      _subRow.description = _subRow.type === MATERIAL_TYPE.service
-        ? _subRow?.serviceDetail?.serviceDescription || ''
-        : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow?.packageDetail?.packageDescription || ''
-            : _subRow.type === MATERIAL_TYPE.serializedAsset
-              ? _subRow.serializedAssetDetail?.product?.productDescription || ''
-              : _subRow?.description || '';
+      _subRow.detail =
+        _subRow?.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageName
+            : _subRow?.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow?.serializedAssetDetail?.assetNumber
+              : _subRow?.type === MATERIAL_TYPE.service
+                ? _subRow?.serviceDetail?.serviceName
+                : _subRow?.detail || '';
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.service
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow.type === MATERIAL_TYPE.serializedAsset
+                ? _subRow.serializedAssetDetail?.product?.productDescription || ''
+                : _subRow?.description || '';
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -265,18 +273,20 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   };
 
   const handleCancelInvoice = async (data) => {
-    axiosInstance().patch(`${routes?.generateInvoice.path}/cancel`, {
-      invoice: invoiceData?._id,
-      comment: data,
-      resource: resource
-    }).then(({ data }) => {
-      onSuccess();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
-      });
-    })
+    axiosInstance()
+      .patch(`${routes?.generateInvoice.path}/cancel`, {
+        invoice: invoiceData?._id,
+        comment: data,
+        resource: resource
+      })
+      .then(({ data }) => {
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -288,7 +298,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     resource: sidebarResource.invoice,
     referenceId: invoiceData?._id,
     columns: columns,
-    hideDetailButton: resource === sidebarResource.fieldTicket ? dataRows?.find((e) => e?.subRows?.length) ? false : true : false,
+    hideDetailButton: resource === sidebarResource.fieldTicket ? (dataRows?.find((e) => e?.subRows?.length) ? false : true) : false,
     isSendEmail: true,
     toEmails: getEmailsFromContacts(invoiceData),
     defaultColumns: [
@@ -307,7 +317,6 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       `finalPrice_${invoiceData?.currency?.toLowerCase()}`
     ]
   };
-
 
   const leftSideContents = () => {
     return (
@@ -362,6 +371,13 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
               Cancel Invoice
             </ThemeButton>
           )}
+        <ActivityButton
+          referenceId={invoiceData?._id}
+          resource={ACTIVITY_RESOURCE.invoice}
+          resourceLabel={invoiceData?.invoiceNumber}
+          resourceData={invoiceData}
+          fromDialog={true}
+        />
       </>
     );
   };
@@ -402,6 +418,17 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                             refreshGrid={fetchData}
                             isClientSideGrid={true}
                             expander={true}
+                            resource={sidebarResource.invoice}
+                            arrangeRowField={{
+                              keys: [
+                                {
+                                  key: 'material',
+                                  filterType: [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset]
+                                },
+                                { key: 'additionalCost', filterType: [MATERIAL_TYPE.manualEntry] }
+                              ],
+                              _id: invoiceData?._id
+                            }}
                           />
                         </Box>
                       ) : (
@@ -410,8 +437,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                         </Box>
                       )}
                     </Fragment>
-                    {(invoiceData && resourceFields) &&
-                      <FinalPriceBox allFields={resourceFields} data={invoiceData} />}
+                    {invoiceData && resourceFields && <FinalPriceBox allFields={resourceFields} data={invoiceData} />}
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
                     <CreditMemo

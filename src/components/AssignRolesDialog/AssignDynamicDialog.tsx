@@ -118,11 +118,11 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
       deepFilter = `${deepFilter}&ignoreIds=${JSON.stringify(ids)}`;
     }
 
-    if(fromResource){
+    if (fromResource) {
       deepFilter = `${deepFilter}&fromResource=${fromResource}`;
     }
-    
-    if(fromResourceId){
+
+    if (fromResourceId) {
       deepFilter = `${deepFilter}&fromResourceId=${fromResourceId}`;
     }
 
@@ -130,11 +130,12 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
 
-    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    let { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (extraDeepFilter?.length > 0) {
-      extraDeepFilter?.map((e) => {
-        deepFilters.push(e);
+      extraDeepFilter?.map((ele) => {
+        deepFilters = deepFilters?.filter((e) => e?.field !== ele?.field)
+        deepFilters.push(ele);
       });
     }
 

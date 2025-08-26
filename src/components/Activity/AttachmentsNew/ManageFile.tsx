@@ -14,6 +14,8 @@ import { ThemeButton } from "src/components/Helpers/Buttons";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import InputField from "src/components/Helpers/InputField";
 import MultiFileUpload from "src/components/Activity/AttachmentsNew/MultiFileUpload";
+import { useData } from "src/StateProvider/Provider";
+import { SET_FILES_UPLOAD_PROGRESS } from "src/StateProvider/actionTypes";
 
 const ManageFile = ({
   relatedTo,
@@ -21,17 +23,20 @@ const ManageFile = ({
   onMinimizeMaximize,
   showManimizeMaximize,
   onClose,
-  onSuccess,
   parentId = null,
-  attachmentType = null
+  attachmentType = null,
+  fetchData = null
 }) => {
 
   const toastConfig = useContext(CustomToastContext);
 
+  const {
+    dispatch
+  }: any = useData();
+
   const [loading, setLoading] = useState(false)
   const [initialData, setInitialData] = useState({ fields: [], values: null });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     fetchFields()
@@ -40,7 +45,7 @@ const ManageFile = ({
   const fetchFields = async () => {
     try {
       setLoading(true)
-      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.attachment);
+      let { fieldsDataForCreate } = await fetch_resource_fields(sidebarResource.attachment);
       const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
       if (attachmentType) {
         tempInitialData.attachmentType = attachmentType
@@ -56,44 +61,63 @@ const ManageFile = ({
     }
   }
 
-  const handleSubmit = (values) => {
-    setSubmitting(true)
-    const formData = new FormData();
+  const handleSubmit = async (values) => {
     const { files, ...rest } = values
-    for (const file of files) {
-      formData.append('files', file);
-    }
-    formData.append('data', JSON.stringify(rest))
-    formData.append('relatedTo', JSON.stringify(relatedTo))
-    if (parentId) {
-      formData.append('parentId', parentId)
-    }
-    axiosInstance()
-      .post(`/attachment-new`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+
+    onClose()
+    if (files?.length) {
+      const newUploads = files?.map(file => {
+        const obj = { file, progress: 0, status: 'uploading', _id: Math.random().toString(36).substring(7) }
+        dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: obj })
+        return obj;
       })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        setSubmitting(false);
-        onSuccess();
-      })
-      .catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
+      await Promise.allSettled(
+        newUploads.map(({ file, _id }) => {
+          return new Promise(async (resolve, reject) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('data', JSON.stringify(rest))
+            if (parentId) {
+              formData.append('parentId', parentId);
+            }
+            formData.append('relatedTo', JSON.stringify(relatedTo))
+            let fake = 0;
+            const fakeInterval = setInterval(() => {
+              fake = Math.min(fake + Math.random() * 15, 90);
+              dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: { _id, progress: Math.round(fake) } })
+            }, 200);
+            axiosInstance().post(`/attachment-new`, formData, {
+              headers: { 'Content-Type': 'multipart/form-data' }
+            }).then(({ data }) => {
+              clearInterval(fakeInterval);
+              dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: { _id, status: 'completed', progress: 100 } })
+              toastConfig.setToastConfig({
+                open: true,
+                type: 'success',
+                message: data.message
+              });
+              resolve('success');
+            })
+              .catch((error) => {
+                clearInterval(fakeInterval);
+                dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: { _id, status: 'failed' } })
+                toastConfig.setToastConfig(error);
+                reject('failed');
+              });
+          });
+        })
+      );
+    }
+    if (fetchData) {
+      fetchData()
+    }
   }
 
   const validate = (values) => {
     const errors: any = {}
-
     if (!values?.files?.length) {
       errors['files'] = 'Select at least one file'
     }
-
     return errors;
   }
 
@@ -155,8 +179,7 @@ const ManageFile = ({
                 </ThemeButton>
                 <ThemeButton
                   buttonType="theme"
-                  disabled={submitting || isEqual(initialData?.values, values)}
-                  isLoading={submitting}
+                  disabled={isEqual(initialData?.values, values)}
                   onClick={submitForm}
                 >
                   Upload

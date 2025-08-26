@@ -415,6 +415,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
         } else if (obj?.type === 'assetStatusTotal') {
           backgroundColor = '#89CFF0';
+        } else if (obj?.type === 'inUseByPlanning') {
+          backgroundColor = '#FFD580';
         }
       }
 
@@ -522,7 +524,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   }
                 } else if (property === 'availableByPlanning') {
                   otherData.push({
-                    title: `Planned Available ${d?.availableByPlanning || 0}`,
+                    title: `Available (Planned) ${d?.availableByPlanning || 0}`,
                     start: dayjs.utc(d['date']).tz().toDate(),
                     end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                     allDay: true,
@@ -531,6 +533,18 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     isRedAlert: d?.availableByPlanning < 0 ? true : false,
                     order: 3
                   });
+                } else if (property === 'inUseByPlanning') {
+                  if (!ledgerDate.isBefore(today, 'day') && resourcePolicy?.showInUsePlanned) {
+                    otherData.push({
+                      title: `In-Use (Planned) ${d?.inUseByPlanning || 0}`,
+                      start: dayjs.utc(d['date']).tz().toDate(),
+                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
+                      allDay: true,
+                      type: 'inUseByPlanning',
+                      resource: selectedResource.resource,
+                      order: 4
+                    });
+                  }
                 } else if (property === 'inventory') {
                   if (d?.inventory) {
                     otherData.push({
@@ -539,7 +553,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
                       resource: selectedResource.resource,
-                      order: 4
+                      order: 5
                     });
                   }
                 } else if (['date', 'softhold']?.includes(property)) {
@@ -555,7 +569,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                         type: 'assetStatusTotal',
                         status: null,
                         resource: selectedResource.resource,
-                        order: 6
+                        order: 7
                       });
                     }
                   }
@@ -570,7 +584,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       type: 'assetStatus',
                       status: property,
                       resource: selectedResource.resource,
-                      order: 5
+                      order: 6
                     });
                   }
                 }
@@ -657,6 +671,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       Object.keys(selectedLookUpResourceData).forEach((o) => {
         if (!selectedFilters.some((f) => f.key === o)) {
           const { [o]: _, ...remainObj } = selectedLookUpResourceData;
+
           setSelectedLookUpResourceData(remainObj);
         }
       });
@@ -688,7 +703,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             )}`;
           }
           window.open(`${routes.serializedAsset.path}${query}`);
-        } else if (data?.type === 'availableByPlanning') {
+        } else if (data?.type === 'availableByPlanning' || data?.type === 'inUseByPlanning') {
         } else if (data?.type) {
           setAnchor(args.el);
           const newData: OnSelectDataType[] = data.data;

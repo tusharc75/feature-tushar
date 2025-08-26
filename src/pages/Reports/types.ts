@@ -39,7 +39,7 @@ export const isCustomReport = (item: any): item is CustomReport => {
   return (item as CustomReport)._id !== undefined;
 };
 
-export type ReportType = 'standard-report' | 'custom-report' | 'report';
+export type ReportType = 'standard-report' | 'custom-report' | 'report' | 'dynamicForm';
 export type SelectedReport = {
   title: string;
   route: string;
@@ -59,6 +59,7 @@ export type ReportState = {
   isColumnsLoading: boolean;
   favouriteReports: FavouriteReport[];
   favouritList: string[];
+  reportList: any[];
 };
 
 export type UseReportActions =
@@ -71,7 +72,8 @@ export type UseReportActions =
   | { type: 'setResourceColumns'; payload: any }
   | { type: 'setColumns'; payload: TColType[] | null }
   | { type: 'setFavouritList'; payload: string[] }
-  | { type: 'setIsColumnsLoading'; payload: boolean };
+  | { type: 'setIsColumnsLoading'; payload: boolean }
+  | { type: 'setReportList'; payload: any[] };
 
 export type UseReport = ReturnType<typeof useReport>;
 
@@ -79,6 +81,7 @@ export type TableCommonProps = {
   state: UseReport;
   isSidebarOpen: boolean;
   isMobile: boolean;
+  dynamicForm?: boolean;
 };
 
 export type ResourceColumn = {

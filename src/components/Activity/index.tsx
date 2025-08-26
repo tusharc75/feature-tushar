@@ -438,10 +438,6 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              onSuccess={() => {
-                handleClose()
-                setFullScreen(false);
-              }}
               relatedTo={[{ resource: sidebarResource[resource] || startCase(resource), referenceId: resourceId, label: resourceLabel }]}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {

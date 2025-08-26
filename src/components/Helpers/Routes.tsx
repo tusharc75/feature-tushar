@@ -714,6 +714,12 @@ const routes = {
   serializedPackagesDetail: {
     path: '/serialized-packages/detail'
   },
+  serializedPackagesInspection: {
+    path: '/serialized-packages-inspection'
+  },
+  serializedPackagesInspectionDetail: {
+    path: '/serialized-packages-inspection/detail'
+  },
   integration: {
     path: '/integration'
   },
@@ -783,11 +789,29 @@ const routes = {
   fieldView: {
     path: '/field-view'
   },
+  onboarding: {
+    path: '/onboarding'
+  },
+  onboardingDetail: {
+    path: '/onboarding/detail'
+  },
+  onboardingTemplate: {
+    path: '/onboarding-template'
+  },
+  onboardingTemplateDetail: {
+    path: '/onboarding-template/detail'
+  },
   customPdfTemplate: {
     path: '/custom-pdf-template'
   },
   customPdfTemplateDetail: {
     path: '/custom-pdf-template/detail'
+  },
+  contentPostPlanning: {
+    path: '/content-post-planning'
+  },
+  contentPostPlanningDetail: {
+    path: '/content-post-planning/detail'
   },
 };
 

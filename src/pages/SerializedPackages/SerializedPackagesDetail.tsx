@@ -8,7 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, SERIALIZED_PACKAGE_STATUS, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -22,17 +22,19 @@ import ManageSerializedPackages from 'src/pages/SerializedPackages/ManageSeriali
 import SerializedPackagesView from 'src/pages/SerializedPackages/View';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
-const SerializedPackagesDetail = () => {
+const SerializedPackagesDetail = ({ resourceRendered = '' }) => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.serializedPackages]);
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([resourceRendered === sidebarResource.serializedPackagesInspection ? routes.serializedPackagesInspection : routes.serializedPackages]);
   const [serializedPackagesData, setSerializedPackagesData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showConfirmBoxDisassembled, setShowConfirmBoxDisassembled] = useState(false)
   const [tabValue, setTabValue] = useState(0);
+  const [isOkButtonLoading, setIsOkButtonLoading] = useState(false)
   const {
     state: { permissions, resources }
   }: any = useData();
@@ -62,7 +64,9 @@ const SerializedPackagesDetail = () => {
       } = await axiosInstance().get(`${routes.serializedPackages.path}/${id}`);
       setSerializedPackagesData({ ...data, currentOwner: data?.currentOwner?.optionLabel });
       setCustomizedRoutes([
-        { ...routes.serializedPackages, title: resources?.serializedPackages?.titlePlural },
+        resourceRendered === sidebarResource.serializedPackagesInspection ?
+          { ...routes.serializedPackagesInspection, title: resources?.serializedPackagesInspection?.titlePlural } :
+          { ...routes.serializedPackages, title: resources?.serializedPackages?.titlePlural },
         { title: data?.serializedPackageNumber }
       ]);
       setLoading(false);
@@ -74,10 +78,12 @@ const SerializedPackagesDetail = () => {
   const handleDelete = () => {
     if (id) {
       if (permissions?.serializedPackages?.isDelete) {
+        setIsOkButtonLoading(true)
         axiosInstance()
           .put(`${routes.serializedPackages.path}/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
+            setIsOkButtonLoading(false)
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -86,6 +92,7 @@ const SerializedPackagesDetail = () => {
             history.push(`${routes.serializedPackages.path}`);
           })
           .catch((err) => {
+            setIsOkButtonLoading(false)
             setShowConfirmBox(false);
           });
       }
@@ -106,6 +113,26 @@ const SerializedPackagesDetail = () => {
     setTabValue(newValue);
   };
 
+  const handleDisassemble = () => {
+    setIsOkButtonLoading(true)
+    axiosInstance()
+      .put(`${routes.serializedPackages?.path}/disassemble`, { ids: [serializedPackagesData?._id] })
+      .then(({ data }: any) => {
+        fetchData()
+        setIsOkButtonLoading(false)
+        setShowConfirmBoxDisassembled(false)
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setIsOkButtonLoading(false)
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -115,12 +142,25 @@ const SerializedPackagesDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.serializedPackages?.isUpdate && (
-                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+              {resourceRendered === sidebarResource.serializedPackagesInspection
+                && permissions?.serializedPackagesInspection?.isUpdate &&
+                [SERIALIZED_PACKAGE_STATUS.available, SERIALIZED_PACKAGE_STATUS.underReview]?.includes(serializedPackagesData?.status) && (
+                  <ThemeButton
+                    id={'serialized-package-disassemble'}
+                    onClick={() => setShowConfirmBoxDisassembled(true)}
+                  >
+                    Disassemble
+                  </ThemeButton>
+                )}
+              {permissions?.serializedPackages?.isUpdate && resourceRendered != sidebarResource.serializedPackagesInspection && (
+                <ThemeButton
+                  iconForMobile={<EditIcon />}
+                  onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}
+                  disabled={serializedPackagesData?.status === SERIALIZED_PACKAGE_STATUS.disassembled}>
                   {'Edit'}
                 </ThemeButton>
               )}
-              {permissions?.serializedPackages?.isDelete && serializedPackagesData?.canDelete && (
+              {permissions?.serializedPackages?.isDelete && serializedPackagesData?.canDelete && resourceRendered != sidebarResource.serializedPackagesInspection && (
                 <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
               <ActivityButton
@@ -157,7 +197,11 @@ const SerializedPackagesDetail = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Assign serializedPackagesData={serializedPackagesData} fetchSerializedPackagesData={fetchData} />
+          <Assign
+            serializedPackagesData={serializedPackagesData}
+            fetchSerializedPackagesData={fetchData}
+            fromInspection={resourceRendered === sidebarResource.serializedPackagesInspection}
+          />
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
           <History id={serializedPackagesData?._id} />
@@ -170,10 +214,18 @@ const SerializedPackagesDetail = () => {
         <ConfirmationDialog
           open={showConfirmBox}
           message={`Are you sure you want to delete ${resources?.serializedPackages?.titleSingular?.toLowerCase()} : ${serializedPackagesData?.serializedPackageNumber} ?`}
-          onClose={() => {
-            setShowConfirmBox(false);
-          }}
+          onClose={() => setShowConfirmBox(false)}
           onOk={handleDelete}
+          okBtnLoading={isOkButtonLoading}
+        />
+      )}
+      {showConfirmBoxDisassembled && (
+        <ConfirmationDialog
+          open={showConfirmBoxDisassembled}
+          message={`Are you sure you want to disassemble ${resources?.serializedPackages?.titleSingular?.toLowerCase()} : ${serializedPackagesData?.serializedPackageNumber} ?`}
+          onClose={() => setShowConfirmBoxDisassembled(false)}
+          onOk={handleDisassemble}
+          okBtnLoading={isOkButtonLoading}
         />
       )}
       {openUpdateDialog && (

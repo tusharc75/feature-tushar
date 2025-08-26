@@ -352,6 +352,27 @@ const LoadingTicket = ({
         ]
         : []),
       ...newColumns,
+      ...(permissions?.serializedPackages?.isRead
+        ? [{
+          accessor: 'serializedPackage',
+          Header: resources?.serializedPackages?.titleSingular,
+          cell: ({ row }) =>
+            row?.original?.serializedPackage ? (
+              <div className="flex items-center gap-2">
+                <h5 className="text-truncate" title={row?.original?.serializedPackage}>{row?.original?.serializedPackage}</h5>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.serializedPackagesDetail.path}/${row?.original?.serializedPackageId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        }] : []),
       {
         accessor: 'loadingTicket',
         Header: 'Loading Ticket',
@@ -736,31 +757,26 @@ const LoadingTicket = ({
         }
       });
 
-      productAssets = processAssets(productAssets, loadingTicketAssets);
+      productAssets = processAssets(productAssets, material, loadingTicketAssets);
 
       if (view === 'flat') {
         newRows = [...productAssets];
 
-        material
-          ?.filter(
-            (ele) =>
-              ele.type === MATERIAL_TYPE.product &&
-              ele?.consumableType !== 'Internal' &&
-              (!ele?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === ele?._id)?.length)
-          )
-          ?.forEach((element) => {
-            const subProductRows = processProduct(
-              '',
-              newRows?.length,
-              element,
-              material,
-              nonSerializedInventory,
-              loadingTicketProducts,
-              consumeProducts,
-              productSerialNumbers
-            );
-            newRows = [...newRows, ...subProductRows];
-          });
+        material?.filter((ele) => ele.type === MATERIAL_TYPE.product && ele?.consumableType !== 'Internal' &&
+          (!ele?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === ele?._id)?.length)
+        )?.forEach((element) => {
+          const subProductRows = processProduct(
+            '',
+            newRows?.length,
+            element,
+            material,
+            nonSerializedInventory,
+            loadingTicketProducts,
+            consumeProducts,
+            productSerialNumbers
+          );
+          newRows = [...newRows, ...subProductRows];
+        });
 
         newRows = [...newRows?.filter((e) => !e.isReplaced), ...newRows?.filter((e) => e.isReplaced)];
 
@@ -854,6 +870,9 @@ const LoadingTicket = ({
             );
             newRows.push(parent);
           }
+
+          parent.serializedPackageId = parent?.serializedPackage?.optionValue
+          parent.serializedPackage = parent?.serializedPackage?.optionLabel;
         });
       }
 
@@ -916,10 +935,7 @@ const LoadingTicket = ({
 
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
     childProduct.forEach((_subRow, j) => {
-      if (
-        _subRow.type === MATERIAL_TYPE.product &&
-        (!_subRow?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === parent?._id)?.length)
-      ) {
+      if (_subRow.type === MATERIAL_TYPE.product && (!_subRow?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === parent?._id)?.length)) {
         const subProductRows = processProduct(
           parent.index,
           subRows?.length,
@@ -956,6 +972,8 @@ const LoadingTicket = ({
             _subRow.status = ASSET_STATUS.notApplied;
             _subRow.rentalAssetStatus = '';
           }
+          _subRow.serializedPackageId = _subRow?.serializedPackage?.optionValue
+          _subRow.serializedPackage = _subRow?.serializedPackage?.optionLabel;
           _subRow.subRows = generateNestedData(
             _subRow,
             material,
@@ -972,7 +990,7 @@ const LoadingTicket = ({
     return subRows;
   };
 
-  const processAssets = (assets, loadingTicketAssets) => {
+  const processAssets = (assets, material, loadingTicketAssets) => {
     const rows: any = [];
     assets.forEach((_subRow) => {
       const obj: any = {};
@@ -1013,6 +1031,12 @@ const LoadingTicket = ({
         obj?.isReplaced;
 
       obj.mtrAttachedView = _subRow?.inventory?.mtrAttached ? 'Yes' : 'No';
+
+      const serializedPackage = material?.find(m => m?._id === obj?.uniqueId && m?.materialId === obj?.materialId)?.serializedPackage
+      if (serializedPackage) {
+        obj.serializedPackage = serializedPackage?.optionLabel;
+        obj.serializedPackageId = serializedPackage?.optionValue
+      }
       rows.push({ ..._subRow?.inventory, ...obj });
     });
     return rows;
@@ -1170,6 +1194,8 @@ const LoadingTicket = ({
     productRows?.forEach((element, index) => {
       element.index = parentIndex ? `${parentIndex}.${subRowsCount + index + 1}` : `${subRowsCount + index + 1}`;
       element.hideSelection = [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(element.rentalAssetStatus);
+      element.serializedPackageId = element?.serializedPackage?.optionValue
+      element.serializedPackage = element?.serializedPackage?.optionLabel;
     });
 
     return productRows;

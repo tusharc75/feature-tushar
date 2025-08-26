@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box/Box';
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useMemo } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
@@ -81,6 +81,8 @@ const Consumables = ({
   const [serviceOption, setServiceOption] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
+
+  const isDisassemblyChildItem = useMemo(() => workOrderData?.type === WORK_ORDER_TYPE.disassemblyOrder && materialSubType === MATERIAL_SUB_TYPE.childItem, [workOrderData, materialSubType])
 
   const {
     state: { user, permissions, resources }
@@ -302,7 +304,7 @@ const Consumables = ({
       Cell: ({ row }: any) => (
         <div style={{ display: 'flex', justifyContent: 'right' }}>
           <>
-            {!row?.original?.serializedProduct &&
+            {!isDisassemblyChildItem && !row?.original?.serializedProduct &&
               ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && (
                 <>
                   {row.original?.isqtyRequestLog && (
@@ -339,7 +341,7 @@ const Consumables = ({
                 </>
               )}
           </>
-          {allowedToEdit && hasChildFields && ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && (
+          {allowedToEdit && hasChildFields && ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && !isDisassemblyChildItem && (
             <HtmlTooltip title="Edit">
               <IconButton
                 size="small"
@@ -366,7 +368,7 @@ const Consumables = ({
               <DescriptionIcon fontSize="small" color={'primary'} />
             </IconButton>
           </HtmlTooltip>
-          {allowedToEdit && (
+          {allowedToEdit && !isDisassemblyChildItem && (
             <HtmlTooltip title="Delete">
               <IconButton
                 size="small"
@@ -416,12 +418,12 @@ const Consumables = ({
       .get(`${workOrder.api}/${workOrderId}/consumable${query}`)
       .then(({ data: { data } }) => {
         setSerialNumbers(data?.filter((d) => d?.type === OTHER_MATERIAL_TYPE.serialNumber));
-        if (materialSubType === MATERIAL_SUB_TYPE.bom) {
-          data = data?.filter((e) => e?.subType === materialSubType);
+        if (materialSubType === MATERIAL_SUB_TYPE.childItem) {
+          data = data?.filter((e) => e?.subType === materialSubType || e?.type === MATERIAL_TYPE.serializedAsset
+            || e?.type === OTHER_MATERIAL_TYPE.serialNumber);
         } else {
-          data = data?.filter((e) => e?.subType !== MATERIAL_SUB_TYPE.bom || e?.product?.serializedProduct);
+          data = data?.filter(e => !('subType' in e) || !e?.subType || e?.subType === materialSubType)
         }
-
         let rows = orderBy(data, 'product.serializedProduct')
           ?.filter((d) => !([MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(d?.type) && d?.parentId))
           ?.map((u, i) => {
@@ -605,7 +607,7 @@ const Consumables = ({
             setConsumablesDialog(true);
           }}
         >
-          {materialSubType === MATERIAL_SUB_TYPE.bom ? `Add BOM` : `Add Products/Consumables`}
+          {materialSubType === MATERIAL_SUB_TYPE.childItem ? `Add Existing ${resources?.product?.titlePlural}` : `Add Products/Consumables`}
         </MenuItem>
       </>
     );
@@ -624,7 +626,7 @@ const Consumables = ({
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`workOrderIds=${JSON.stringify([workOrderId])}`}
+            additionalParams={`workOrderIds=${JSON.stringify([workOrderId])}&subType=${materialSubType}`}
           />
         )}
         {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && allowedToEdit && (
@@ -723,11 +725,11 @@ const Consumables = ({
   return (
     <>
       <DetailsPageHeader
-        isAddButtonVisible={isCreate}
+        isAddButtonVisible={isDisassemblyChildItem ? false : isCreate}
         addButtonMenuItems={addButtonMenuItems()}
         leftSideContents={!hideServiceFilter ? leftSideContents() : null}
-        rightSideContents={rightSideContents()}
-        isActionButtonVisible={allowedToEdit}
+        rightSideContents={isDisassemblyChildItem ? null : rightSideContents()}
+        isActionButtonVisible={isDisassemblyChildItem ? false : allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
         hasXpadding

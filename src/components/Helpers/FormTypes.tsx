@@ -1144,13 +1144,11 @@ const FormTypes = (props) => {
           required={required}
           label={getLabel(label)}
           name={name}
-          value={values[name]}
+          value={values[name] ? values[name]?.toString() : values[name]}
           onChange={
             onChange
               ? onChange
               : (val) => {
-                // check to see if the value has only country code
-                // 5 is choosen here because some country code has 4 digit and "+"
                 if (val?.length < 5) {
                   handleChange(name, '');
                 } else {
@@ -2152,7 +2150,9 @@ const FormTypes = (props) => {
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
         <FormControlLabel
-          control={<Switch name={name} checked={values[name]} onChange={onChange ? onChange : (e) => handleChange(name, e.target.checked)} />}
+          control={
+            <Switch {...rest} name={name} checked={values[name]} onChange={onChange ? onChange : (e) => handleChange(name, e.target.checked)} />
+          }
           label={getLabel(label)}
         />
       </InfoLabel>
@@ -2193,7 +2193,13 @@ const FormTypes = (props) => {
             onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
           >
             {options.map((opt) => (
-              <FormControlLabel key={opt.order} value={opt.optionLabel} disabled={rest?.disabled} control={<Radio />} label={opt.optionLabel} />
+              <FormControlLabel
+                key={opt.order}
+                value={opt.optionLabel}
+                disabled={rest?.disabled}
+                control={<Radio {...rest} />}
+                label={opt.optionLabel}
+              />
             ))}
           </RadioGroup>
           {touched[name] && errors[name] && <FormHelperText error={true}>{errors[name]}</FormHelperText>}

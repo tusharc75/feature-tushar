@@ -161,7 +161,7 @@ const FleetDispatchBox = ({ data, id, index, cardType }) => {
                 <strong>{resources?.serializedAsset?.titleSingular}  :</strong> {data?.asset?.assetNumber}
               </Typography>
               <Typography className={classes.secondaryText}>
-                <strong>Customer :</strong> {data?.customerContact?.optionLabel}
+                <strong>Customer :</strong> {data?.customerAccount?.optionLabel}
               </Typography>
               <Typography className={classes.secondaryText}>
                 <strong>Location :</strong> {data?.shippingAddress?.optionLabel}

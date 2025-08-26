@@ -71,7 +71,7 @@ const AiSuggestionsDialog = ({ handleClose, productIds, dateRange }) => {
       >
         {!loading ? (
           data ? (
-            <Box>
+            <Box ml={2}>
               <Markdown remarkPlugins={[remarkGfm]}>{data}</Markdown>
             </Box>
           ) : (
