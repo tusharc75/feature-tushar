@@ -309,7 +309,7 @@ const FieldTicket = ({
           onClick={() => {
             setOpenDialog({ open: true, isClone: false, id: null });
           }}
-          disabled={!columns?.length}
+          disabled={!allFields?.length}
         >
           {`Create ${resources?.fieldTicket?.titleSingular}`}
         </MenuItem>
