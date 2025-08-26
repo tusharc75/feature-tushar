@@ -309,6 +309,7 @@ const FieldTicket = ({
           onClick={() => {
             setOpenDialog({ open: true, isClone: false, id: null });
           }}
+          disabled={!columns?.length}
         >
           {`Create ${resources?.fieldTicket?.titleSingular}`}
         </MenuItem>
@@ -340,6 +341,7 @@ const FieldTicket = ({
       serviceOrderData,
       user.user?.brandCurrency
     );
+    console.log('referenceData', referenceData);
     referenceData['fieldServiceOrder'] = serviceOrderData?._id;
     return referenceData;
   };
