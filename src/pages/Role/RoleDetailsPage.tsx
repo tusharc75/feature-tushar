@@ -252,18 +252,12 @@ const RoleDetailsPage = () => {
   const handlePolicyResourceCheckBox = async (field) => {
     const resources = Object.keys(resourceCheckbox);
     resources.map((key) => {
-      const childFields = policyResources
+      const isAllFieldChecked = policyResources
         ?.filter((item) => item.resource === startCase(key))
-        ?.map((obj) => obj.fieldName);
-
-      const allTrue =
-        childFields.length > 0 &&
-        childFields.every(
-          (fieldName) =>
-            field.hasOwnProperty(fieldName) && field[fieldName] === true
-        );
-
-      setResourceCheckBox((prevState) => ({ ...prevState, [key]: allTrue }));
+        ?.some((obj) => !field.hasOwnProperty(obj.fieldName) || field[obj.fieldName] === false);
+      if (!isAllFieldChecked) {
+        setResourceCheckBox((prevState) => ({ ...prevState, [key]: true }));
+      }
     });
   };
 
