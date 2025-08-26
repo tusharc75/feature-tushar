@@ -54,7 +54,7 @@ const PolicyResources = ({
         <TableBody>
           {[...new Set(policyResources.map((m) => m.resource).flat())]
             ?.filter((item: string) => {
-              if (item === "QR Code") {
+              if (item === "Qr Code") {
                 return !!brandPolicy?.qRCodeLogin;
               }
               return permissions[camelCase(item)]?.isRead;

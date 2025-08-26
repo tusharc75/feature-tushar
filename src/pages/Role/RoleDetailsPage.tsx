@@ -146,7 +146,7 @@ const RoleDetailsPage = () => {
       fieldName: 'isConvertLeadToOpportunity'
     },
     {
-      resource: "QR Code",
+      resource: "Qr Code",
       fieldLabel: 'QR Code Login',
       fieldName: 'isQRCodeLogin'
     }
@@ -252,10 +252,18 @@ const RoleDetailsPage = () => {
   const handlePolicyResourceCheckBox = async (field) => {
     const resources = Object.keys(resourceCheckbox);
     resources.map((key) => {
-      const isAllFieldChecked = policyResources?.filter((item) => item.resource === startCase(key))?.some((obj) => field[obj.fieldName] === false);
-      if (!isAllFieldChecked) {
-        setResourceCheckBox((prevState) => ({ ...prevState, [key]: true }));
-      }
+      const childFields = policyResources
+        ?.filter((item) => item.resource === startCase(key))
+        ?.map((obj) => obj.fieldName);
+
+      const allTrue =
+        childFields.length > 0 &&
+        childFields.every(
+          (fieldName) =>
+            field.hasOwnProperty(fieldName) && field[fieldName] === true
+        );
+
+      setResourceCheckBox((prevState) => ({ ...prevState, [key]: allTrue }));
     });
   };
 
