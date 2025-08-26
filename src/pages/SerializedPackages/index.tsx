@@ -223,37 +223,78 @@ const SerializedPackages = ({ resourceRendered = '' }) => {
   const handleDisassemble = () => {
     setIsSubmitting(true);
     const ids = selectedRecords?.map((d) => d._id);
-    axiosInstance().put(`${routes.serializedPackages?.path}/disassemble`, { ids: ids }).then(({ data }: any) => {
-      dispatch({ type: 'selection', selectedRecords: [] });
-      fetchData();
-      setIsSubmitting(false);
-      setShowConfirmBoxDisassembled(false);
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    axiosInstance()
+      .put(`${routes.serializedPackages?.path}/disassemble`, { ids: ids })
+      .then(({ data }: any) => {
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setIsSubmitting(false);
+        setShowConfirmBoxDisassembled(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      setIsSubmitting(false);
-      toastConfig.setToastConfig(error);
-    });
+  };
+
+  const handleStatusUpdate = (status) => {
+    axiosInstance()
+      .put(`${routes.serializedPackages?.path}/update-status`, {
+        _ids: selectedRecords?.map((d) => d._id),
+        status: status,
+      })
+      .then(() => {
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${status}`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const ActionMenuItems = () => {
     return (
       <>
-        {resourceRendered === sidebarResource.serializedPackagesInspection ? (permissions?.serializedPackagesInspection?.isUpdate && (
-          <MenuItem
-            key={'serialized-package-disassemble'}
-            onClick={() => {
-              setShowConfirmBoxDisassembled(true);
-            }}
-            disabled={selectedRecords?.length && selectedRecords?.every((e) =>
-              [SERIALIZED_PACKAGE_STATUS.available, SERIALIZED_PACKAGE_STATUS.underReview]?.includes(e?.status)) ? false : true}
-          >
-            Disassemble
-          </MenuItem>
-        )) : (
+        {resourceRendered === sidebarResource.serializedPackagesInspection ? (
+          permissions?.serializedPackagesInspection?.isUpdate && (
+            <>
+              <MenuItem
+                key={'serialized-package-disassemble'}
+                onClick={() => {
+                  setShowConfirmBoxDisassembled(true);
+                }}
+                disabled={
+                  selectedRecords?.length &&
+                  selectedRecords?.every((e) => [SERIALIZED_PACKAGE_STATUS.available, SERIALIZED_PACKAGE_STATUS.underReview]?.includes(e?.status))
+                    ? false
+                    : true
+                }
+              >
+                Disassemble
+              </MenuItem>
+              {selectedRecords?.every((s) => s?.status === SERIALIZED_PACKAGE_STATUS.underReview) && (
+                <MenuItem
+                  key={'serialized-package-status-change'}
+                  onClick={() => {
+                    handleStatusUpdate(SERIALIZED_PACKAGE_STATUS.available)
+                  }}
+                >
+                  {`Status Change - ${SERIALIZED_PACKAGE_STATUS.available}`}
+                </MenuItem>
+              )}
+            </>
+          )
+        ) : (
           <MenuItem
             disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
             onClick={() => {
