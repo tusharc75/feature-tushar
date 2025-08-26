@@ -13,7 +13,7 @@ import FaceLiveNess from 'src/components/FacialLogin/FaceLiveNess';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import ManageUpdateEmailPasswordDialog from '../components/ManageUpdateEmailAndPassword';
 
-const SecurityLogin = ({ userData, dispatch, onFetchUserData, toastConfig, permissions }) => {
+const SecurityLogin = ({ user, userData, dispatch, onFetchUserData, toastConfig, permissions }) => {
   const history = useHistory();
   const [isPasswordUpdate, setPasswordUpdate] = useState(false);
   const [removeFaceConfirmBox, setRemoveFaceConfirmBox] = useState(false);
@@ -151,7 +151,7 @@ const SecurityLogin = ({ userData, dispatch, onFetchUserData, toastConfig, permi
       </Box>
 
       {/* QR Code Login */}
-      {userData?.brandPolicy?.qRCodeLogin && (
+      {userData?.brandPolicy?.qRCodeLogin && user?.role?.selectedEntity?.policy?.isQRCodeLogin && (
         <Box mb={4} border={1} borderColor="grey.300" borderRadius={2}>
           <div className={'form-head-v1'}>
             <h3 className="form-label-style-v1" title="QR Code Login">

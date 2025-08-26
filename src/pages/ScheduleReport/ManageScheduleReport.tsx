@@ -51,7 +51,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   const [filterByIds, setFilterByIds] = useState([]);
   const [usersList, setUsersList] = useState([]);
   const [isSubmitting, setSubmitting] = useState(false);
-  const [reportList, setReportList] = useState([]);
+  const [reportList, setReportList] = useState(null);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const {
@@ -93,51 +93,46 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   }, []);
 
   useEffect(() => {
-    if (id && reportList?.length > 0) {
-      (async () => {
-        try {
-          let {
-            data: { data }
-          } = await axiosInstance().get(`/schedule-report/${id}`);
+    if (reportList) {
+      fetchData()
+    }
+  }, [id, reportList]);
 
-          let resource: any = reportList?.find((item) => item?.title === data?.resource);
-          const title =
-            resource?.type === 'dynamicForm'
-              ? getResourceLabel(resource?.resource, user)?.titleSingular
-              : resource.type === 'dynamic'
-                ? resources?.[resource?.key]?.titleSingular
-                : resource.title;
-          resource = {
-            title,
-            value: resource.title,
-            key: resource.key,
-            type: resource.type
-          };
+  const fetchData = async () => {
+    if (id) {
+      let {
+        data: { data }
+      } = await axiosInstance().get(`/schedule-report/${id}`);
 
-          await fetchGridColumns(resource);
-          let newData: any = {
-            scheduleName: data?.scheduleName,
-            emailSubject: data?.emailSubject || '',
-            resource,
-            frequency: data?.frequency,
-            day: data?.day,
-            hour: data?.hour,
-            time: data?.time,
-            week: data?.week,
-            filters: data?.filters,
-            column: data?.column,
-            subscribeUsers: data?.subscribeUsers || [],
-            reportAction: data?.reportAction,
-            sharepointSite: data?.sharepointSite,
-            fileType: data?.fileType || 'xslx',
-            status: data?.status,
-            emails: data?.emails || []
-          };
-          setScheduleData(newData);
-        } catch (err) {
-          setToastConfig(err);
-        }
-      })();
+      let resource: any = reportList?.find((item) => item?.title === data?.resource);
+      const title = resource?.type === 'dynamicForm' ? getResourceLabel(resource?.resource, user)?.titleSingular
+        : resource.type === 'dynamic' ? resources?.[resource?.key]?.titleSingular : resource.title;
+      resource = {
+        title,
+        value: resource.title,
+        key: resource.key,
+        type: resource.type
+      };
+      await fetchGridColumns(resource);
+      let newData: any = {
+        scheduleName: data?.scheduleName,
+        emailSubject: data?.emailSubject || '',
+        resource,
+        frequency: data?.frequency,
+        day: data?.day,
+        hour: data?.hour,
+        time: data?.time,
+        week: data?.week,
+        filters: data?.filters,
+        column: data?.column,
+        subscribeUsers: data?.subscribeUsers || [],
+        reportAction: data?.reportAction,
+        sharepointSite: data?.sharepointSite,
+        fileType: data?.fileType || 'xslx',
+        status: data?.status,
+        emails: data?.emails || []
+      };
+      setScheduleData(newData);
     } else {
       setFormData({
         scheduleName: '',
@@ -157,7 +152,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         emails: []
       });
     }
-  }, [id, reportList?.length]);
+  }
 
   useEffect(() => {
     if (scheduleData && resourceColumns?.length > 0) {
