@@ -92,7 +92,7 @@ export default function ProfilePage(props) {
         toastConfig.setToastConfig(error);
       });
   };
-  
+
   const getUserFields = async () => {
     let data;
     setLoading(true);
@@ -150,6 +150,7 @@ export default function ProfilePage(props) {
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
         <SecurityLogin
+          user={user}
           userData={userData}
           dispatch={dispatch}
           onFetchUserData={fetchUserData}
