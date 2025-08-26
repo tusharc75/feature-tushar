@@ -57,7 +57,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { GrRevert } from "react-icons/gr";
 import { GoListUnordered } from "react-icons/go";
 import { MdEdit } from "react-icons/md";
-import { repairJobMessage, repairOrderMessage } from 'src/constants/messageHelpers';
+import { repairOrderMessage } from 'src/constants/messageHelpers';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -1033,12 +1033,17 @@ const WorkOrder = ({
         }
       }
       if (!disabled) {
-        if (
-          dataRows
-            ?.find((d) => d?._id === record?.parentId)
-            ?.subRows?.filter((s) => s?.order < record?.order)
-            ?.every((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status))
-        ) {
+        if (user?.user?.brandPolicy?.workOrderServiceSequence) {
+          if (
+            dataRows
+              ?.find((d) => d?._id === record?.parentId)
+              ?.subRows?.filter((s) => s?.order < record?.order)
+              ?.every((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status))
+          ) {
+            data.push(record);
+          }
+        }
+        else {
           data.push(record);
         }
       }
