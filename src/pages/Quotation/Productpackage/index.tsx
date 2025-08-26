@@ -1016,6 +1016,8 @@ const Productpackage = ({
           }}
           extraStaticFilter={quotationData?.type === QUOTATION_TYPE.fieldJob ? [{ field: 'serviceType', term: SERVICE_TYPE.fieldService }] : []}
           isSubmitting={isSubmitting}
+          pricingCondition={quotationData?.pricingCondition?.optionValue || null}
+          currency={quotationData?.currency}
         />
       )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.package && (
