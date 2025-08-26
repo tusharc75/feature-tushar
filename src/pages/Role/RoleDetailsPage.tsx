@@ -146,7 +146,7 @@ const RoleDetailsPage = () => {
       fieldName: 'isConvertLeadToOpportunity'
     },
     {
-      resource: "QR Code",
+      resource: 'Login',
       fieldLabel: 'QR Code Login',
       fieldName: 'isQRCodeLogin'
     }
