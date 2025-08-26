@@ -341,7 +341,6 @@ const FieldTicket = ({
       serviceOrderData,
       user.user?.brandCurrency
     );
-    console.log('referenceData', referenceData);
     referenceData['fieldServiceOrder'] = serviceOrderData?._id;
     return referenceData;
   };
