@@ -13,7 +13,6 @@ import {
 } from '@mui/material';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { camelCase } from 'lodash';
-import React from 'react';
 import routes from 'src/components/Helpers/Routes';
 
 const PolicyResources = ({
@@ -26,7 +25,8 @@ const PolicyResources = ({
   open,
   setOpen,
   permissions,
-  isEdit
+  isEdit,
+  brandPolicy,
 }) => {
   return (
     <TableContainer className="mt-[50px] rounded-[4px] border border-[var(--common-border-color)] shadow-[0px_20.3165px_40.6331px_rgba(0,0,0,0.03)]">
@@ -53,7 +53,12 @@ const PolicyResources = ({
         </TableHead>
         <TableBody>
           {[...new Set(policyResources.map((m) => m.resource).flat())]
-            ?.filter((item: string) => permissions[camelCase(item)]?.isRead)
+            ?.filter((item: string) => {
+              if (item === "QR Code") {
+                return !!brandPolicy?.qRCodeLogin;
+              }
+              return permissions[camelCase(item)]?.isRead;
+            })
             .map((resource: string, outerIndex) => (
               <>
                 <TableRow>
