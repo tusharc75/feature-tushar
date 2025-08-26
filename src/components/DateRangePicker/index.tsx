@@ -52,8 +52,8 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
   const handleApply = () => {
     const newDate = { from: internalDate.from, to: internalDate.to };
     if (timeFrame?.label === 'Custom') {
-      newDate['from'] = dayjs(newDate.from).tz().toDate();
-      newDate['to'] = dayjs(newDate.to).tz().toDate();
+      newDate['from'] = dayjs(newDate.from).toDate();
+      newDate['to'] = dayjs(newDate.to).toDate();
     }
     setDate(newDate);
     handleClose();
