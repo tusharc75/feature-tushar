@@ -89,7 +89,7 @@ const RoleDetailsPage = () => {
     productInventory: false,
     customerAccount: false,
     lead: false,
-    qrCode: false
+    login: false
   });
 
   const [isPolicyCheckBoxChecked, setIsPolicyCheckBoxChecked] = useState(false);
@@ -215,7 +215,7 @@ const RoleDetailsPage = () => {
         productInventory: e.target.checked,
         customerAccount: e.target.checked,
         lead: e.target.checked,
-        qrCode: e.target.checked
+        login: e.target.checked
       });
 
       SetPolicyFieldCheckBox({
