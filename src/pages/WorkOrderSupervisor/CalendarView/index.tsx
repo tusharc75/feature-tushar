@@ -24,7 +24,7 @@ import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, sidebarResource, workOrderSupervisor } from 'src/constants/helpers';
 
-function CalendarView({ filterQuery, reference, setOpen }, ref) {
+function CalendarView({ filterQuery, reference, setOpen, setOnClickData }, ref) {
   const {
     state: { resources }
   }: any = useData();
@@ -140,26 +140,29 @@ function CalendarView({ filterQuery, reference, setOpen }, ref) {
       <div className={cn('relative min-h-[400px] [&_.rbc-toolbar]:pt-0')}>
         <CustomCalendar
           events={events}
-          // ref={calendarRef}
           getEventStyle={() => {
             return eventStyle;
           }}
-          // components={{
-          //   agenda: {
-          //     event: ({ event }) => <EventAgenda event={event} setOpen={setOpen} />
-          //   }
-          // }}
           onNavigate={onNavigate}
           eventClick={(arg) => {
             if ([sidebarResource.repairOrder, sidebarResource.productionOrder, sidebarResource.assemblyOrder]?.includes(reference)) {
-              fetchCompetencies(arg.event.id);
-              setAnchor(arg.el);
+              if (reference === sidebarResource.repairOrder) {
+                window.open(`${routes.repairOrderDetail.path}/${arg.event.id}`)
+              }
+              else if (reference === sidebarResource.productionOrder) {
+                window.open(`${routes.productionOrderDetail.path}/${arg.event.id}`)
+              }
+              else if (reference === sidebarResource.assemblyOrder) {
+                window.open(`${routes.assemblyOrderDetail.path}/${arg.event.id}`)
+              }
+              // fetchCompetencies(arg.event.id);
+              // setAnchor(arg.el);
             } else {
-              setOpen({ open: true, id: arg.event.id });
+              setOnClickData({ workOrderId: arg.event.id });
+              setOpen(true);
             }
           }}
         />
-
         {isDataFetching && (
           <span className={cn('absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50')}>
             <CircularProgress />
