@@ -143,7 +143,17 @@ const useSearchHistory = (items?: Item[]) => {
         try {
           await itemDb.open();
           const data: SearchKeyword = { keyword, frequency: 1, timeStamp: Date.now(), pathName: pathname, userAndBrandId: userAndBrandId };
-          const isInDatabase = (await itemDb.table<SearchKeyword>(tables.KEYWORDS_TABLE).where('keyword').equals(data.keyword).toArray())[0];
+          const isInDatabase = (
+            await itemDb
+              .table<SearchKeyword>(tables.KEYWORDS_TABLE)
+              .where('keyword')
+              .equals(data.keyword)
+              .where('pathName')
+              .equals(pathname)
+              .where('userAndBrandId')
+              .equals(userAndBrandId)
+              .toArray()
+          )[0];
 
           // if already exist in history update the timestamp and frequency only
           if (isInDatabase) {
@@ -163,11 +173,11 @@ const useSearchHistory = (items?: Item[]) => {
         } catch (error) {
           console.error(error);
         } finally {
-          fetchAllKeywordData();
+          // fetchAllKeywordData();
         }
       }, 1000);
     },
-    [depth, pathname, searchedKeywords, fetchAllKeywordData, userAndBrandId]
+    [depth, pathname, searchedKeywords, userAndBrandId]
   );
 
   const handleRemoveKeywordFromHistory = useCallback(async (item: SearchKeyword) => {
@@ -186,7 +196,8 @@ const useSearchHistory = (items?: Item[]) => {
     handleRemoveItemFromHistory,
     historyKeywords: searchedKeywords,
     handleSetHistoryKeyword,
-    handleRemoveKeywordFromHistory
+    handleRemoveKeywordFromHistory,
+    fetchAllKeywordData
   };
 };
 

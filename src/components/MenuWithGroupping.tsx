@@ -168,6 +168,7 @@ const MenuWithGroupping = ({
                   node.focus();
                 }
               }}
+              turnOffHistory={true}
               onChange={handleSearch}
             />
           </div>
