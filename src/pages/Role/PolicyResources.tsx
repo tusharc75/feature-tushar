@@ -14,6 +14,7 @@ import {
 import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { camelCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
+import { sidebarResource } from 'src/constants/helpers';
 
 const PolicyResources = ({
   policyResources,
@@ -54,7 +55,7 @@ const PolicyResources = ({
         <TableBody>
           {[...new Set(policyResources.map((m) => m.resource).flat())]
             ?.filter((item: string) => {
-              if (item === "Qr Code") {
+              if (item === 'Login') {
                 return !!brandPolicy?.qRCodeLogin;
               }
               return permissions[camelCase(item)]?.isRead;

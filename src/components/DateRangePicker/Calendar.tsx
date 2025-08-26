@@ -2,14 +2,20 @@ import { IconButton } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 import * as React from 'react';
 import { DayPicker } from 'react-day-picker';
-import { cn } from 'src/constants/helpers';
+import { cn, DEFAULT_TIME_ZONE } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
 
 export type CalendarProps = { showBorder?: boolean } & React.ComponentProps<typeof DayPicker>;
 
 function Calendar({ className, classNames, showOutsideDays = true, showBorder = true, ...props }: CalendarProps) {
+  const {
+    state: { user }
+  }: any = useData();
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
+      timeZone={user?.user?.timezone || DEFAULT_TIME_ZONE}
       className={cn('rdp-calendar-main relative w-fit rounded-md p-3 ', showBorder && '[border:1px_solid_var(--common-border-color)]', className)}
       classNames={{
         months: 'flex flex-col md:flex-row gap-4',
