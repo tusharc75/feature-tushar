@@ -89,7 +89,7 @@ const RoleDetailsPage = () => {
     productInventory: false,
     customerAccount: false,
     lead: false,
-    qrCode: false
+    login: false
   });
 
   const [isPolicyCheckBoxChecked, setIsPolicyCheckBoxChecked] = useState(false);
@@ -215,7 +215,7 @@ const RoleDetailsPage = () => {
         productInventory: e.target.checked,
         customerAccount: e.target.checked,
         lead: e.target.checked,
-        qrCode: e.target.checked
+        login: e.target.checked
       });
 
       SetPolicyFieldCheckBox({
@@ -252,7 +252,9 @@ const RoleDetailsPage = () => {
   const handlePolicyResourceCheckBox = async (field) => {
     const resources = Object.keys(resourceCheckbox);
     resources.map((key) => {
-      const isAllFieldChecked = policyResources?.filter((item) => item.resource === startCase(key))?.some((obj) => field[obj.fieldName] === false);
+      const isAllFieldChecked = policyResources
+        ?.filter((item) => item.resource === startCase(key))
+        ?.some((obj) => !field.hasOwnProperty(obj.fieldName) || field[obj.fieldName] === false);
       if (!isAllFieldChecked) {
         setResourceCheckBox((prevState) => ({ ...prevState, [key]: true }));
       }
