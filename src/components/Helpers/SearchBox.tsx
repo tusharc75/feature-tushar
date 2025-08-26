@@ -11,10 +11,23 @@ type SerachBoxProps = React.InputHTMLAttributes<HTMLInputElement> & {
   containerProps?: React.HTMLAttributes<HTMLDivElement>;
   fullWidth?: boolean;
   debounceTime?: number;
+  turnOffHistory?: boolean;
 };
 
 function SearchBox(
-  { onChange, value, size, width, placeholder, className, containerProps = {}, fullWidth, debounceTime = 400, ...otherProps }: SerachBoxProps,
+  {
+    onChange,
+    value,
+    size,
+    width,
+    placeholder,
+    className,
+    containerProps = {},
+    fullWidth,
+    turnOffHistory,
+    debounceTime = 400,
+    ...otherProps
+  }: SerachBoxProps,
   ref: any
 ) {
   const [inputvalue, setInputValue] = useState<string>('');
@@ -52,7 +65,7 @@ function SearchBox(
         {...restOfContainerProps}
       >
         <FiSearch style={{ color: '#737373' }} className="absolute left-[10px] top-1/2 [transform:translateY(-50%)]" />
-        <SearchDropDownList>
+        <SearchDropDownList turnOffHistory={turnOffHistory}>
           {({ ref: dropDownRef, onChange, ...rest }) => (
             <>
               <input

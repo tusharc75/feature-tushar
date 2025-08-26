@@ -15,6 +15,7 @@ const SidebarHead = ({ state }: SidebarHeadProps) => {
           const value = e.target.value;
           setSearchedValue(value);
         }}
+        turnOffHistory={true}
         value={searchedValue}
       />
     </div>
