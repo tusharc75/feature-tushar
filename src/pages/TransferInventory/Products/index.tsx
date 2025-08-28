@@ -250,7 +250,7 @@ const Products = ({
           finalObject['inventory'] = u.inventoryDetail?.inventory || 0;
           finalObject['isChecked'] = false;
           finalObject['allowedToEdit'] = false;
-          finalObject['canDelete'] = !data?.assets?.some((e) => e._id === u._id) && !deliveryTicketProduct?.some((e) => e.product === u?.product);
+          finalObject['canDelete'] = u?.transferQty ? false : !data?.assets?.some((e) => e._id === u._id) && !deliveryTicketProduct?.some((e) => e.product === u?.product);
           finalObject['serialNumber'] = data?.serialNumber?.filter((e) => e.product === u?.product);
           finalObject['loadingTicketStatus'] = deliveryTicketProduct?.find((d) => d?.product === u?.product)
             ? deliveryTicketProduct?.find((d) => d?.product === u?.product)?.status
@@ -355,7 +355,7 @@ const Products = ({
 
   const onSaveEdit = (data, row) => {
     if (!data || !data?.qty || row?.type !== MATERIAL_TYPE.product) return;
-    if (row.canDelete === false && row?.loadingTicketStatus) {
+    if (row.canDelete === false && (row?.loadingTicketStatus || row?.transferQty)) {
       toastConfig.setToastConfig({
         type: 'error',
         message: "Qty can't be updated",
