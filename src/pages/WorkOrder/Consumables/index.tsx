@@ -953,6 +953,7 @@ const Consumables = ({
             }}
             isAssigning={isSubmitting}
             selectedProducts={assignDialog.products}
+            checkCertificateExpiry={true}
           />
         )}
 
