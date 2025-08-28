@@ -11,7 +11,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, SERIALIZED_PACKAGE_STATUS, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
@@ -61,6 +61,7 @@ const ManageSerializedPackages = ({ onClose, onSuccess, isClone = false, id = nu
               const { ...rest } = data;
               setCloneHeading(rest.serializedPackageNumber);
               tempData = rest;
+              tempData.status = SERIALIZED_PACKAGE_STATUS.available
             }
             setInitialData({
               fields: fields,
@@ -160,13 +161,12 @@ const ManageSerializedPackages = ({ onClose, onSuccess, isClone = false, id = nu
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update - ${initialData.values?.serializedPackageNumber ? `${initialData.values?.serializedPackageNumber}` : ''}`
-                    : `Create ${resources?.serializedPackages?.titleSingular}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update - ${initialData.values?.serializedPackageNumber ? `${initialData.values?.serializedPackageNumber}` : ''}`
+                  : `Create ${resources?.serializedPackages?.titleSingular}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

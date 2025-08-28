@@ -128,7 +128,7 @@ const PackageDetails = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Services</CustomTab>
-          <CustomTab value={2}>Child Items</CustomTab>
+          {permissions?.serializedPackages && <CustomTab value={2}>Child Items</CustomTab>}
           <CustomTab value={3}>Consumables</CustomTab>
           <CustomTab value={4}>{`Sub ${resources?.packages?.titlePlural}`}</CustomTab>
           <CustomTab value={5}>Drawings</CustomTab>
