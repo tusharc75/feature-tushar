@@ -482,7 +482,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       id: 'Disassemble',
       type: 'button',
       tooltip: 'Disassemble',
-      isVisible: Boolean(allowedToEdit) && workOrderData?.type === WORK_ORDER_TYPE.disassemblyOrder && workOrderData?.serializedPackage?.status != SERIALIZED_PACKAGE_STATUS.disassembled,
+      isVisible: Boolean(allowedToEdit) && workOrderData?.type === WORK_ORDER_TYPE.disassemblyOrder &&
+        workOrderData?.serializedPackage?.status != SERIALIZED_PACKAGE_STATUS.disassembled &&
+        ![WORK_ORDER_STATUS.deleted, WORK_ORDER_STATUS.draft, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.completed]?.includes(workOrderData?.status),
       name: `Disassemble`,
       onClick: () => setShowConfirmBoxDisassembled(true)
     },
