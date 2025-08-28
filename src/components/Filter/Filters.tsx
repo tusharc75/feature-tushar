@@ -45,20 +45,18 @@ const Filters = ({
 
   const options = useMemo(() => {
     if (!columns || columns?.length === 0 || !Array.isArray(columns)) return [];
-    const colum = columns
-      ?.filter(
-        (c) =>
-          c?.isRead &&
-          (c.fieldData.type === 'dropDown' ||
-            c.fieldData.type === 'multiSelect' ||
-            c.fieldData.type === 'date' ||
-            c.fieldData.type === 'checkBox' ||
-            c.fieldData.type === 'singleLine' ||
-            c.fieldData.type === 'number' ||
-            c.fieldData.type === 'decimal' ||
-            c.fieldData.type === 'lookUpDisplay')
-      )
-      ?.map((d) => ({ ...d?.fieldData }));
+    const colum = columns?.filter((c) =>
+      c?.isRead &&
+      (c.fieldData.type === 'dropDown' ||
+        c.fieldData.type === 'multiSelect' ||
+        c.fieldData.type === 'date' ||
+        c.fieldData.type === 'checkBox' ||
+        c.fieldData.type === 'singleLine' ||
+        c.fieldData.type === 'number' ||
+        c.fieldData.type === 'decimal' ||
+        (c.fieldData.type === 'formula' && c.fieldData.returnType === 'string') ||
+        c.fieldData.type === 'lookUpDisplay')
+    )?.map((d) => ({ ...d?.fieldData }));
     return [...colum?.filter((f) => f?.required), ...colum?.filter((f) => !f?.required)];
   }, [columns]);
 
@@ -153,7 +151,7 @@ const Filters = ({
           isMobile && isSidebarOpen ? 'overflow-hidden' : 'overflow-y-auto'
         )}
       >
-        {selectedField && ['singleLine', 'lookUpDisplay']?.includes(selectedField?.type) ? (
+        {selectedField && ['singleLine', 'lookUpDisplay', 'formula']?.includes(selectedField?.type) ? (
           <SingleLine
             key={selectedField._id || selectedField.fieldName}
             fieldData={selectedField}
