@@ -312,7 +312,7 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
       };
     }
 
-    return () => {};
+    return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options]);
 
