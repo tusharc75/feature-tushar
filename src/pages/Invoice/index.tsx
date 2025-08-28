@@ -18,6 +18,7 @@ import {
   checkIsAllowedToDelete,
   CHILD_RESOURCE,
   customerAccount,
+  getCustomInvoiceFileName,
   getDefaultMyRecordType,
   gridLoadingTimeout,
   invoice,
@@ -37,6 +38,7 @@ import OpenInvoiceErrorDialog from 'src/pages/Invoice/OpenInvoiceErrorDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 let invoiceTimeout;
 
@@ -66,6 +68,7 @@ const Invoice = () => {
   const [openOpenInvoiceError, setOpenOpenInvoiceError] = useState({ open: false, data: null });
 
   const [pdfColumns, setPdfColumns] = useState([]);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   const types = [
     {
@@ -93,6 +96,16 @@ const Invoice = () => {
   useEffect(() => {
     fetchChildColumn();
   }, []);
+
+  useEffect(() => {
+    fetchPolicy();
+  }, []);
+
+
+  const fetchPolicy = async () => {
+    const data = await getResourcePolicy(user, permissions, sidebarResource.invoice)
+    setResourcePolicyData(data)
+  };
 
   const fetchChildColumn = async () => {
     const invoiceFieldData = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, null, false);
@@ -388,12 +401,14 @@ const Invoice = () => {
         {selectedRecords?.length > 0 && (
           <PreviewDownload
             resource={sidebarResource.invoice}
-            fileName={`${resources?.invoice?.titlePlural}`}
+            fileName={selectedRecords?.length === 1 && resourcePolicyData?.policy?.customDownloadFileName ?
+              getCustomInvoiceFileName(resourcePolicyData?.policy?.customDownloadFileName, selectedRecords[0]) : `${resources?.invoice?.titlePlural}`}
             referenceId={null}
             defaultColumns={[]}
             columns={pdfColumns}
             isMenuItem={true}
             ids={selectedRecords.map((s) => s._id)}
+            onlyfileNameAsDownload={selectedRecords?.length === 1 && resourcePolicyData?.policy?.customDownloadFileName ? true : false}
           />
         )}
       </>
@@ -507,12 +522,11 @@ const Invoice = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.invoiceNumber}`
-                : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

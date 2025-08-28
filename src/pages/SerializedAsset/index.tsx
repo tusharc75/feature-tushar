@@ -30,7 +30,6 @@ import {
   COLOUR_MASTER,
   INVENTORY_HISTORY_TYPE,
   INVENTORY_OWNER_TYPE,
-  SYSTEM_ASSET_STATUS,
   gridLoadingTimeout,
   prepareDataForGrid,
   serializedAsset,
@@ -419,7 +418,7 @@ const SerializedAsset = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['canDelete'] = SYSTEM_ASSET_STATUS?.includes(u?.status) ? false : permissions?.serializedAsset?.isDelete;
+          finalObject['canDelete'] = permissions?.serializedAsset?.isDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
