@@ -207,7 +207,12 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                 <Checkbox
                   name="isColumnEditable"
                   checked={values['isColumnEditable']}
-                  disabled={NOT_ALLOW_INLINE_EDIT_FIELD_TYPE.includes(values?.type) || values?.isUneditable || values?.disableOnEdit || values?.isSystemGenerate}
+                  disabled={
+                    NOT_ALLOW_INLINE_EDIT_FIELD_TYPE.includes(values?.type) ||
+                    values?.isUneditable ||
+                    values?.disableOnEdit ||
+                    values?.isSystemGenerate
+                  }
                   onChange={(e) => {
                     setFieldValue('isColumnEditable', e.target.checked);
                   }}
@@ -527,7 +532,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
           <Grid item xs={12} md={6}></Grid>
         </Grid>
       </Box>
-      {fieldData.type === 'currencyAmount' &&
+      {fieldData.type === 'currencyAmount' && (
         <Box>
           <Grid container>
             <Grid item xs={12} md={6}>
@@ -548,7 +553,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
             <Grid item xs={12} md={6}></Grid>
           </Grid>
         </Box>
-      }
+      )}
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
@@ -595,9 +600,13 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
         </Grid>
       </Box>
       <Box>
+        {console.log(fieldData)}
         <Grid container>
           <Grid item xs={12} md={6}>
-            {(fieldData.type === 'number' || fieldData.type === 'decimal') && (
+            {(fieldData.type === 'number' ||
+              fieldData.type === 'decimal' ||
+              fieldData.type === 'currencyAmount' ||
+              fieldData.type === 'currencyNumber') && (
               <FormControlLabel
                 control={
                   <Checkbox
