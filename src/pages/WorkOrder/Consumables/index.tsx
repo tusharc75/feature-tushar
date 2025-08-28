@@ -520,12 +520,24 @@ const Consumables = ({
   };
 
   const handleReplace = async (rows) => {
+    const records = selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)
+
+    const data = []
+
+    rows?.forEach(r => {
+      const obj: any = {
+        parentId: r?._id,
+        asset: r?.asset
+      }
+      const record = records?.find(_r => _r?.parentId === obj.parentId && !_r?.isCounted)
+      record.isCounted = true
+      obj.oldAsset = record?.serializedAssetId
+      data.push(obj)
+    });
+
     setIsSubmitting(true);
     await axiosInstance()
-      .put(`${workOrder.api}/${workOrderId}/consumable/replace`, {
-        assets: selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)?.map(r => r?.serializedAssetId),
-        newAssets: rows?.map(r => ({ parentId: r?._id, asset: r?.asset }))
-      })
+      .put(`${workOrder.api}/${workOrderId}/consumable/replace`, data)
       .then(({ data }) => {
         fetchData();
         setIsSubmitting(false);
