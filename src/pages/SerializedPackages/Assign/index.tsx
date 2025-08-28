@@ -45,7 +45,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
       setAllowedToEdit(false)
     }
     else if (fromInspection && permissions?.serializedPackagesInspection?.isUpdate) {
-      setAllowedToEdit(true)
+      setAllowedToEdit(serializedPackagesData?.status === SERIALIZED_PACKAGE_STATUS.reserved ? false : true)
     }
     else if (permissions?.serializedPackages?.isUpdate) {
       setAllowedToEdit(true)
@@ -517,6 +517,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
           isAssigning={isSubmitting}
           selectedProducts={assignDialog.products}
           referenceData={{ warehouse: serializedPackagesData?.warehouse?.optionValue }}
+          checkCertificateExpiry={true}
         />
       )}
       {assignDialog.open && assignDialog.type === OTHER_MATERIAL_TYPE.serialNumber && (

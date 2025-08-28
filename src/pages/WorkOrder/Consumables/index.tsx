@@ -12,6 +12,7 @@ import {
   MATERIAL_TYPE,
   OTHER_MATERIAL_TYPE,
   QUOTATION_STATUS,
+  SERIALIZED_PACKAGE_STATUS,
   WORK_ORDER_TYPE,
   sidebarResource,
   workOrder
@@ -81,7 +82,9 @@ const Consumables = ({
   const [selectedService, setSelectedService] = useState(null);
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
 
-  const isDisassemblyChildItem = useMemo(() => workOrderData?.type === WORK_ORDER_TYPE.disassemblyOrder && materialSubType === MATERIAL_SUB_TYPE.childItem, [workOrderData, materialSubType])
+
+  const isDisassemblyChildItem = useMemo(() => workOrderData?.type === WORK_ORDER_TYPE.disassemblyOrder
+    && materialSubType === MATERIAL_SUB_TYPE.childItem, [workOrderData, materialSubType])
 
   const {
     state: { user, permissions, resources }
@@ -953,6 +956,7 @@ const Consumables = ({
             }}
             isAssigning={isSubmitting}
             selectedProducts={assignDialog.products}
+            checkCertificateExpiry={true}
           />
         )}
 

@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FormControl, InputLabel, MenuItem, Select, TextField, IconButton, Tooltip } from '@mui/material';
+import React, { useCallback, useEffect, useState } from 'react';
+import { FormControl, InputLabel, MenuItem, Select, TextField, IconButton } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 type Op = 'gte' | 'lte' | 'gt' | 'lt' | 'eq' | 'ne';
 
@@ -33,12 +34,6 @@ const NumberFilter: React.FC<Props> = ({ fieldData, deepFilters, setDeepFilters,
     const [valB, setValB] = useState<string>('');
     const [showSecondRow, setShowSecondRow] = useState(false);
 
-    const isPresent = useMemo(() => {
-        return Boolean(
-            deepFilters?.find((d) => d?.field === fieldName && (d?.type === 'number' || d?.type === 'decimal'))
-        );
-    }, [deepFilters, fieldName]);
-
     useEffect(() => {
         const d = deepFilters?.find((dd) => dd?.field === fieldName && (dd?.type === 'number' || dd?.type === 'decimal'));
         if (d && Array.isArray(d.term)) {
@@ -67,17 +62,15 @@ const NumberFilter: React.FC<Props> = ({ fieldData, deepFilters, setDeepFilters,
     }, [selectedUserFilter]);
 
     const buildTerms = useCallback(() => {
-        const terms: { operation: Op; value: number }[] = [];
+        const terms: any = [];
         const nA = valA !== '' && !isNaN(Number(valA)) ? Number(valA) : undefined;
         const nB = valB !== '' && !isNaN(Number(valB)) ? Number(valB) : undefined;
-
         if (nA !== undefined) {
             terms.push({ operation: opA, value: nA });
         }
         if (nB !== undefined) {
             terms.push({ operation: opB, value: nB });
         }
-
         return terms.length ? terms : null;
     }, [opA, valA, opB, valB, showSecondRow]);
 
@@ -137,7 +130,6 @@ const NumberFilter: React.FC<Props> = ({ fieldData, deepFilters, setDeepFilters,
                             ))}
                         </Select>
                     </FormControl>
-
                     <TextField
                         fullWidth
                         size="small"
@@ -147,19 +139,19 @@ const NumberFilter: React.FC<Props> = ({ fieldData, deepFilters, setDeepFilters,
                         value={valA}
                         onChange={(e) => setValA(e.target.value)}
                     />
-                    <Tooltip title="Add another condition (max 2)">
+                    <HtmlTooltip title="Add another condition (max 2)">
                         <span>
                             <IconButton
                                 onClick={() => setShowSecondRow(true)}
                                 aria-label="Add condition"
                                 disabled={showSecondRow}
+                                size='small'
                             >
-                                <AddIcon />
+                                <AddIcon fontSize='small' color='primary' />
                             </IconButton>
                         </span>
-                    </Tooltip>
+                    </HtmlTooltip>
                 </div>
-
                 {showSecondRow && (
                     <div className="flex gap-2 mt-3 items-center">
                         <FormControl fullWidth size="small" variant="outlined">
@@ -179,7 +171,6 @@ const NumberFilter: React.FC<Props> = ({ fieldData, deepFilters, setDeepFilters,
                                 ))}
                             </Select>
                         </FormControl>
-
                         <TextField
                             fullWidth
                             size="small"
@@ -189,20 +180,20 @@ const NumberFilter: React.FC<Props> = ({ fieldData, deepFilters, setDeepFilters,
                             value={valB}
                             onChange={(e) => setValB(e.target.value)}
                         />
-                        <Tooltip title="Remove condition (min 1)">
+                        <HtmlTooltip title="Remove">
                             <span>
                                 <IconButton
                                     onClick={() => setShowSecondRow(false)}
                                     aria-label="Remove condition"
+                                    size='small'
                                     disabled={!showSecondRow}
                                 >
-                                    <RemoveIcon />
+                                    <RemoveIcon fontSize='small' color='error' />
                                 </IconButton>
                             </span>
-                        </Tooltip>
+                        </HtmlTooltip>
                     </div>
                 )}
-
                 <div className="mt-4 flex gap-2">
                     <ThemeButton onClick={handleClear} iconForMobile={false}>
                         Clear
