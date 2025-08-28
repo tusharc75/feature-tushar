@@ -219,6 +219,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
           let values: any = {};
           values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
           values['manualEndDate'] = element?.actualEndDate;
+          values.qty = data?.assets?.length || element?.qty
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           newMaterial.push({ ...element, ...calValues });
         });
@@ -421,6 +422,17 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
     }
   };
 
+  const isDisabledApply = () => {
+    if (!selectedRecords?.length) return true
+    if (!dayjs(endDate)?.isValid()) return true
+
+    if (resource === sidebarResource.sublease && !selectedRecords?.some(r => r?.type === MATERIAL_TYPE.product)) {
+      return true
+    }
+
+    return isDateApplying
+  }
+
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
@@ -445,12 +457,12 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                         margin="dense"
                       />
                       <Box>
-                        <HtmlTooltip title={selectedRecords?.length ? '' : 'Please select items to apply'}>
+                        <HtmlTooltip title={selectedRecords?.length ? resource === sidebarResource.sublease && !selectedRecords?.some(r => r?.type === MATERIAL_TYPE.product) ? 'Please Select atleast one product to apply' : '' : 'Please select items to apply'}>
                           <span>
                             <ThemeButton
                               id="dialog-apply-button"
                               isLoading={isDateApplying}
-                              disabled={selectedRecords?.length && dayjs(endDate)?.isValid() ? isDateApplying : true}
+                              disabled={isDisabledApply()}
                               buttonType="theme"
                               onClick={() => {
                                 handleApplyDate();
