@@ -15,7 +15,8 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { sidebarResource } from 'src/constants/helpers';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import ManageOnboarding from './ManageOnboarding';
-import DynamicTabs from 'src/components/FormBuilder/Tabs';
+import Step from 'src/pages/DynamicForm/Step';
+import { camelCase, startCase } from 'lodash';
 
 const OnboardingDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -26,7 +27,11 @@ const OnboardingDetail = () => {
     state: { user, permissions, resources }
   }: any = useData();
 
+  const resource = startCase(sidebarResource.onboarding);
+  const renderedFrom = camelCase(resource);
+
   const [onboardingData, setOnboardingData] = useState(null);
+  const [onboardingTemplateData, setOnboardingTemplateData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -53,10 +58,15 @@ const OnboardingDetail = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const { data: { data } } = await axiosInstance().get(`${routes.onboarding.path}/${id}`);
+      const { data: { data: onboardingData } } = await axiosInstance().get(`${routes.onboarding.path}/${id}`);
+      const templateId = onboardingData.onboardingTemplate.optionValue;
+      if (templateId) {
+        const { data: { data: templateData } } = await axiosInstance().get(`${routes.onboardingTemplate.path}/${templateId}`);
+        setOnboardingTemplateData(templateData);
+      }
       setAllowedToEdit(permissions?.onboarding?.isUpdate);
       setAllowedToDelete(permissions?.onboarding?.isDelete);
-      setOnboardingData(data);
+      setOnboardingData(onboardingData);
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
@@ -116,6 +126,7 @@ const OnboardingDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleTabChange}>
           <CustomTab value={0}>Header</CustomTab>
+          {onboardingTemplateData && onboardingTemplateData?.tabs?.length > 0 && onboardingTemplateData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         
         <TabPanel value={tabValue} index={0}>
@@ -128,6 +139,23 @@ const OnboardingDetail = () => {
             />
           )}
         </TabPanel>
+        {onboardingTemplateData &&
+          onboardingTemplateData?.tabs?.length > 0 &&
+          onboardingTemplateData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 1}>
+                <Step
+                  tab={tab}
+                  onboardingTemplateId={onboardingTemplateData._id}
+                  resourceId={id}
+                  resource={resource}
+                  data={onboardingTemplateData}
+                  allowedToEdit={permissions[renderedFrom]?.isUpdate ? allowedToEdit : false}
+                />
+              </TabPanel>
+            );
+          })
+        }
       </Box>
 
       {showConfirmBox && (
