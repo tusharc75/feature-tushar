@@ -975,7 +975,8 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
   return obj;
 };
 
-export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false, user: any = null) => {
+
+export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false, user: any = null, resetDateOnClone: any = true) => {
   const obj = {};
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data?.optionValue : '');
@@ -1063,7 +1064,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
     } else if (key.type === 'decimal' || key.type === 'percent') {
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
     } else if (key.type === 'dateTime') {
-      if (isClone) {
+      if (isClone && resetDateOnClone) {
         obj[key.fieldName] = key?.restrictCurrentDateAutoSelect ? '' : new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
@@ -1071,7 +1072,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
         obj[key.fieldName] = '';
       }
     } else if (key.type === 'date') {
-      if (isClone) {
+      if (isClone && resetDateOnClone) {
         obj[key.fieldName] = key?.restrictCurrentDateAutoSelect ? '' : new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];

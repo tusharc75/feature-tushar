@@ -152,7 +152,7 @@ const ManageFieldTicket = ({
         setCompleteSteps(tempData?.steps || []);
         setInitialData({
           fields: fields,
-          values: getObjKeysWithValues(tempData, fields)
+          values: getObjKeysWithValues(tempData, fields, isClone, user, false)
         });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
