@@ -18,8 +18,9 @@ import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import axios, { CancelTokenSource } from 'axios';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
 
-const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleClose, handleSucess, ids, isAssigning, selectedProducts = [] }) => {
+const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleClose, handleSucess, ids, isAssigning, selectedProducts = [], checkCertificateExpiry = false }) => {
   const renderedFrom = `${sidebarResource?.serializedAsset}`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -28,7 +29,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity, resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [disableSaveButton, setDisableSaveButton] = useState(false);
@@ -38,6 +39,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
   const [checkMTRValidation, setCheckMTRValidation] = useState(false);
   const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [certificateExpireAlert, setCertificateExpireAlert] = useState({ open: false, asset: '' });
 
   useEffect(() => {
     fetchGridColumns();
@@ -201,6 +203,17 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
   }, [selectedRecords]);
 
   const handleAdd = () => {
+    if (checkCertificateExpiry && user?.user?.brandPolicy?.serializedAssetCertification && selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())) {
+      setCertificateExpireAlert({
+        open: true,
+        asset: selectedRecords
+          ?.filter((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+          ?.map((e) => e.assetNumber)
+          ?.toString()
+      });
+      return
+    }
+
     if (selectedProducts?.length) {
       const data = [];
       selectedProducts?.forEach((ele) => {
@@ -339,6 +352,14 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
             handleAdd();
             setMtrConfirmBox(false);
           }}
+        />
+      )}
+      {certificateExpireAlert.open && (
+        <MessageDialog
+          open={true}
+          header="Certification Information"
+          message={`Certification has expired for asset(s) - ${certificateExpireAlert.asset}`}
+          onClose={() => setCertificateExpireAlert({ open: false, asset: '' })}
         />
       )}
     </Dialog>
