@@ -232,6 +232,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
         obj['type'] = 'Product';
         obj['isChecked'] = false;
         obj['serialNumber'] = serialNumber?.filter((e) => e.product === product?.product);
+        obj['hideSelection'] = product?.transferQty ? true : false
         rows.push(obj);
       });
 
@@ -299,27 +300,24 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
 
   const handleInterPlantTransfer = () => {
     setLoadingInterPlantTransfer(true);
-    axiosInstance()
-      .put(
-        `${routes.transferInventory.path}/${transferInventoryData._id}/transfer-inter-plant`,
-        dataRows?.map((e) => {
-          return { product: e.productId, qty: e.qty };
-        })
-      )
-      .then(({ data: { data } }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Inventory Received Successfully`
-        });
-        setShowConfirmInterPlantTransfer(false);
-        setLoadingInterPlantTransfer(false);
-        fetchTransferInventoryData();
+    axiosInstance().put(`${routes.transferInventory.path}/${transferInventoryData._id}/transfer-inter-plant`,
+      dataRows?.map((e) => {
+        return { product: e.productId, qty: e.qty };
       })
-      .catch((error) => {
-        setLoadingInterPlantTransfer(false);
-        toastConfig.setToastConfig(error);
+    ).then(({ data: { data } }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: `Inventory Received Successfully`
       });
+      fetchData()
+      setShowConfirmInterPlantTransfer(false);
+      setLoadingInterPlantTransfer(false);
+      fetchTransferInventoryData();
+    }).catch((error) => {
+      setLoadingInterPlantTransfer(false);
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const handelCancelDeliveredTicket = () => {
@@ -401,7 +399,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
                   }}
                   disabled={
                     selectedRecords.length &&
-                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length
+                      selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length
                       ? false
                       : true
                   }
