@@ -28,14 +28,18 @@ const BrandSupportTicket = () => {
     const {
         state: { user, selectedEntity, permissions }
     }: any = useData();
-    const [selectedBrand, setSelectedBrand] = useState({ id: user?.user?.brand, name: user?.user?.brandName });
+    const [selectedBrand, setSelectedBrand] = useState({ optionValue: user?.user?.brand, optionLabel: user?.user?.brandName });
     const [brandList, setBrandList] = useState([]);
     const [renderCount, setRenderCount] = useState(0);
     const [columns, setColumns] = useState(null);
 
     useEffect(() => {
+        fetchBrand();
+    }, []);
+
+    useEffect(() => {
         if (!selectedBrand) {
-            setSelectedBrand({ id: user?.user?.brand, name: user?.user?.brandName });
+            setSelectedBrand({ optionValue: user?.user?.brand, optionLabel: user?.user?.brandName });
         }
         fetchGridColumns();
     }, [selectedBrand]);
@@ -43,32 +47,27 @@ const BrandSupportTicket = () => {
     useEffect(() => {
         if (renderCount > 0) {
             const cancelTokenSource = axios.CancelToken.source();
-            fetchBrand(cancelTokenSource);
             fetchData(cancelTokenSource);
             return () => cancelTokenSource.cancel();
         } else setRenderCount((preCount) => preCount + 1);
     }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, selectedBrand]);
 
-    const fetchBrand = (cancelTokenSource?: CancelTokenSource) => {
+    const fetchBrand = () => {
         axiosInstance()
-            .get(`${routes.supportTicket.path}/brand-information/all`, { cancelToken: cancelTokenSource?.token })
+            .get(`${routes.supportTicket.path}/brand-information/all`)
             .then(({ data: { data } }) => {
-                const list = data.map((item: any) => ({
-                    id: item._id,
-                    name: item.companyName,
-                }));
-                setBrandList(list);
+                setBrandList(data);
             })
     };
 
     const fetchGridColumns = async () => {
-        const brand = selectedBrand ? selectedBrand?.id : user?.user?.brand;
+        const brand = selectedBrand ? selectedBrand?.optionValue : user?.user?.brand;
         axiosInstance()
             .get(`${routes.supportTicket.path}/fields?brand=${brand}`)
             .then(({ data: { data } }) => {
                 const newColumns = generateColumns(
                     renderedFrom,
-                    data?.filter((field) => field?.fieldData?.sectionName !== 'Internal Information'),
+                    data,
                 ).map((col) => ({
                     ...col,
                     isColumnEditable: false,
@@ -83,7 +82,7 @@ const BrandSupportTicket = () => {
     };
 
     const getQueryString = (isExport = false) => {
-        let deepFilter = `?page=${page}&limit=${limit}&brand=${selectedBrand?.id || user?.user?.brand}`;
+        let deepFilter = `?page=${page}&limit=${limit}&brand=${selectedBrand?.optionValue || user?.user?.brand}`;
         if (isExport) {
             deepFilter = `?`;
         }
@@ -119,8 +118,6 @@ const BrandSupportTicket = () => {
                 let rows = data?.data?.map((u) => {
                     let finalObject: any = prepareDataForGrid(u, user);
                     finalObject['originalData'] = u;
-                    finalObject['canDelete'] =
-                        checkIsAllowedToDelete(user, sidebarResource.supportTicket, finalObject?.ownerId) && finalObject?.status === 'Pending';
                     finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
                     finalObject['canEdit'] = false;
                     return finalObject;
@@ -157,7 +154,7 @@ const BrandSupportTicket = () => {
                     onExportToExcelSuccess={() => {
                         fetchData();
                     }}
-                    additionalParams={`${getQueryString(true)}&ignoreInternalFields=${true}&brand=${selectedBrand?.id}`}
+                    additionalParams={`${getQueryString(true)}&ignoreInternalFields=${true}&brand=${selectedBrand?.optionValue}`}
                     onlyExport={true}
                 />
             </div>
@@ -176,7 +173,7 @@ const BrandSupportTicket = () => {
                                     setSelectedBrand(value);
                                 }}
                                 options={brandList}
-                                getOptionLabel={(option) => option.name}
+                                getOptionLabel={(option) => option.optionLabel}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
