@@ -141,7 +141,7 @@ const RoleDetailsPage = () => {
       fieldName: 'isApproveAccount'
     },
     {
-      resource: sidebarResource.customerAccount,
+      resource: sidebarResource.contentPostPlanning,
       fieldLabel: 'Approve Content',
       fieldName: 'isApproveContent'
     },
