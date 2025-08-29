@@ -3710,7 +3710,7 @@ const ActionButtonMenuItems = ({
           </MenuItem>
         </HtmlTooltip>
       )}
-      {!isOffline &&
+      {!isOffline && !getFilterSelectedRecords()?.some(r => r?.serializedPackageId) &&
         ((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
           (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
           <MenuItem
