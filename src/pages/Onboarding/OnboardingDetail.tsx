@@ -17,6 +17,7 @@ import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import ManageOnboarding from './ManageOnboarding';
 import Step from 'src/pages/DynamicForm/Step';
 import { camelCase, startCase } from 'lodash';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const OnboardingDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -39,6 +40,7 @@ const OnboardingDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   useEffect(() => {
     fetchFields();
@@ -59,10 +61,8 @@ const OnboardingDetail = () => {
     setLoading(true);
     try {
       const { data: { data: onboardingData } } = await axiosInstance().get(`${routes.onboarding.path}/${id}`);
-      const templateId = onboardingData.onboardingTemplate.optionValue;
-      if (templateId) {
-        const { data: { data: templateData } } = await axiosInstance().get(`${routes.onboardingTemplate.path}/${templateId}`);
-        setOnboardingTemplateData(templateData);
+      if (onboardingData.onboardingTemplateData) {
+        setOnboardingTemplateData(onboardingData.onboardingTemplateData);
       }
       setAllowedToEdit(permissions?.onboarding?.isUpdate);
       setAllowedToDelete(permissions?.onboarding?.isDelete);
@@ -72,6 +72,15 @@ const OnboardingDetail = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchPolicy();
+  }, [resource]);
+
+  const fetchPolicy = async () => {
+    const data = await getResourcePolicy(user, permissions, resource)
+    setResourcePolicyData(data)
   };
 
   const handleDelete = () => {
@@ -90,6 +99,9 @@ const OnboardingDetail = () => {
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
+
+  const onboardingTabsCount = onboardingTemplateData?.tabs?.length || 0;
+  const resourcePolicyStartIndex = 1 + onboardingTabsCount;
 
   return (
     <Box className="main-container-v1">
@@ -126,7 +138,16 @@ const OnboardingDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleTabChange}>
           <CustomTab value={0}>Header</CustomTab>
-          {onboardingTemplateData && onboardingTemplateData?.tabs?.length > 0 && onboardingTemplateData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
+          {onboardingTemplateData?.tabs?.map((tab, i) => (
+            <CustomTab key={`onboarding-${i}`} value={i + 1}>
+              {tab?.tabName}
+            </CustomTab>
+          ))}
+          {resourcePolicyData?.tabs?.map((tab, i) => (
+            <CustomTab key={`policy-${i}`} value={resourcePolicyStartIndex + i}>
+              {tab?.tabName}
+            </CustomTab>
+          ))}
         </CustomTabs>
         
         <TabPanel value={tabValue} index={0}>
@@ -139,22 +160,37 @@ const OnboardingDetail = () => {
             />
           )}
         </TabPanel>
+
         {onboardingTemplateData &&
           onboardingTemplateData?.tabs?.length > 0 &&
-          onboardingTemplateData?.tabs?.map((tab, i) => {
-            return (
-              <TabPanel value={tabValue} index={i + 1}>
-                <Step
-                  tab={tab}
-                  onboardingTemplateId={onboardingTemplateData._id}
-                  resourceId={id}
-                  resource={resource}
-                  data={onboardingTemplateData}
-                  allowedToEdit={permissions[renderedFrom]?.isUpdate ? allowedToEdit : false}
-                />
-              </TabPanel>
-            );
-          })
+          onboardingTemplateData?.tabs?.map((tab, i) => (
+            <TabPanel key={`onboarding-panel-${i}`} value={tabValue} index={i + 1}>
+              <Step
+                tab={tab}
+                onboardingTemplateId={onboardingTemplateData._id}
+                resourceId={id}
+                resource={resource}
+                data={onboardingTemplateData}
+                allowedToEdit={permissions[renderedFrom]?.isUpdate ? allowedToEdit : false}
+              />
+            </TabPanel>
+          ))
+        }
+
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => (
+            <TabPanel key={`policy-panel-${i}`} value={tabValue} index={resourcePolicyStartIndex + i}>
+              <Step
+                tab={tab}
+                resourcePolicyId={resourcePolicyData?._id}
+                resourceId={id}
+                resource={resource}
+                data={onboardingTemplateData}
+                allowedToEdit={permissions[renderedFrom]?.isUpdate ? allowedToEdit : false}
+              />
+            </TabPanel>
+          ))
         }
       </Box>
 
