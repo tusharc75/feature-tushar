@@ -148,15 +148,27 @@ const ContentPostPlanningDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.contentPostPlanning?.isUpdate && postData?.status !== CONTENT_POST_PLANNING_STATUS.published && (
-                <ThemeButton
-                  onClick={() => handleChangeStatus(postData?.status === CONTENT_POST_PLANNING_STATUS.pendingApproval ? CONTENT_POST_PLANNING_STATUS.scheduled : CONTENT_POST_PLANNING_STATUS.published)}
-                  mobileTooltip={postData?.status === CONTENT_POST_PLANNING_STATUS.pendingApproval ? 'Approve' : 'Publish'}
-                  iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
-                  disabled={!(postData?.owner?.optionValue === user?.user?._id || postData?.collaborators.some(c => c.optionValue === user?.user?._id))}
-                >
-                  {postData?.status === CONTENT_POST_PLANNING_STATUS.pendingApproval ? 'Approve' : 'Published'}
-                </ThemeButton>
-              )}
+                () => {
+                  const userId = user?.user?._id;
+                  const isAuthorized = postData?.owner?.optionValue === userId || postData?.collaborator?.some(c => c.optionValue === userId);
+                  const isPendingApproval = postData?.status === CONTENT_POST_PLANNING_STATUS.pendingApproval;
+
+                  const isDisabled = isPendingApproval ? !user?.role?.selectedEntity?.policy?.isApproveContent : !isAuthorized;
+
+                  return (
+                    <ThemeButton
+                      onClick={() =>
+                        handleChangeStatus(isPendingApproval ? CONTENT_POST_PLANNING_STATUS.scheduled : CONTENT_POST_PLANNING_STATUS.published)
+                      }
+                      mobileTooltip={isPendingApproval ? "Approve" : "Published"}
+                      iconForMobile={<RiExchange2Line size={24} style={{ color: "var(--primary-text)" }} />}
+                      disabled={isDisabled}
+                    >
+                      {isPendingApproval ? "Approve" : "Published"}
+                    </ThemeButton>
+                  );
+                })()}
+
               {permissions?.contentPostPlanning?.isUpdate && postData?.status !== CONTENT_POST_PLANNING_STATUS.published && (
                 <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}

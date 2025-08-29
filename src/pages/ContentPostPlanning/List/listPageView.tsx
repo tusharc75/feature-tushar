@@ -137,12 +137,12 @@ const ListView = ({ topRightSlot }) => {
               <IconButton
                 size="small"
                 aria-label="Approve"
-                disabled={!user?.role?.selectedEntity?.policy?.isApproveAccount}
+                disabled={!user?.role?.selectedEntity?.policy?.isApproveContent}
                 onClick={() => {
                   setShowConfirmDialog({ open: true, status: CONTENT_POST_PLANNING_STATUS.scheduled, data: row?.original });
                 }}
               >
-                <CheckCircle fontSize="small" color={!user?.role?.selectedEntity?.policy?.isApproveAccount ? 'disabled' : 'primary'} />
+                <CheckCircle fontSize="small" color={!user?.role?.selectedEntity?.policy?.isApproveContent ? 'disabled' : 'primary'} />
               </IconButton>
             </span>
           </HtmlTooltip>
