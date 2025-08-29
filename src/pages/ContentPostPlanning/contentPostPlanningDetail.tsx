@@ -31,7 +31,7 @@ const ContentPostPlanningDetail = () => {
   const [statusOptions, setStatusOptions] = useState([]);
 
   const {
-    state: { permissions, resources }
+    state: { user, permissions, resources }
   }: any = useData();
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
     { ...routes.contentPostPlanning, title: resources?.contentPostPlanning?.titlePlural }
@@ -148,42 +148,27 @@ const ContentPostPlanningDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.contentPostPlanning?.isUpdate && postData?.status !== CONTENT_POST_PLANNING_STATUS.published && (
-                <ThemeButton
-                  onClick={openActions}
-                  endIcon={<ExpandMore />}
-                  mobileTooltip="Change Status"
-                  iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
-                >
-                  {'Change Status'}
-                </ThemeButton>
-              )}
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                {statusOptions?.map((o) => {
+                () => {
+                  const userId = user?.user?._id;
+                  const isAuthorized = postData?.owner?.optionValue === userId || postData?.collaborator?.some(c => c.optionValue === userId);
+                  const isPendingApproval = postData?.status === CONTENT_POST_PLANNING_STATUS.pendingApproval;
+
+                  const isDisabled = isPendingApproval ? !user?.role?.selectedEntity?.policy?.isApproveContent : !isAuthorized;
+
                   return (
-                    <MenuItem
-                      key={o?.optionValue}
-                      disabled={validateStatus(o?.optionValue)}
-                      onClick={() => {
-                        closeActions();
-                        handleChangeStatus(o?.optionValue);
-                      }}
-                      value={o}
+                    <ThemeButton
+                      onClick={() =>
+                        handleChangeStatus(isPendingApproval ? CONTENT_POST_PLANNING_STATUS.scheduled : CONTENT_POST_PLANNING_STATUS.published)
+                      }
+                      mobileTooltip={isPendingApproval ? "Approve" : "Published"}
+                      iconForMobile={<RiExchange2Line size={24} style={{ color: "var(--primary-text)" }} />}
+                      disabled={isDisabled}
                     >
-                      {o?.optionLabel}
-                    </MenuItem>
+                      {isPendingApproval ? "Approve" : "Published"}
+                    </ThemeButton>
                   );
-                })}
-              </Menu>
+                })()}
+
               {permissions?.contentPostPlanning?.isUpdate && postData?.status !== CONTENT_POST_PLANNING_STATUS.published && (
                 <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}

@@ -22,6 +22,7 @@ import routes from 'src/components/Helpers/Routes';
 import ButtonMenu from 'src/components/ButtonMenu';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 import { HourglassEmpty, CheckCircle, Schedule } from '@mui/icons-material';
+import OutboxIcon from '@mui/icons-material/Outbox';
 
 const ListView = ({ topRightSlot }) => {
   const renderedFrom = camelCase(sidebarResource?.contentPostPlanning);
@@ -43,8 +44,7 @@ const ListView = ({ topRightSlot }) => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isEdit: false, idToEdit: null });
   const [selectedStatus, setSelectedStatus] = useState(CONTENT_POST_PLANNING_STATUS.pendingApproval);
   const [statusOptions, setStatusOptions] = useState(null);
-  const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null });
-  const [approvetRecord, setApproveRecord] = useState(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null, data: null });
 
   const types = [
     {
@@ -137,16 +137,42 @@ const ListView = ({ topRightSlot }) => {
               <IconButton
                 size="small"
                 aria-label="Approve"
+                disabled={!user?.role?.selectedEntity?.policy?.isApproveContent}
                 onClick={() => {
-                  setApproveRecord(row?.original);
-                  setShowConfirmDialog({ open: true, status: CONTENT_POST_PLANNING_STATUS.scheduled });
+                  setShowConfirmDialog({ open: true, status: CONTENT_POST_PLANNING_STATUS.scheduled, data: row?.original });
                 }}
               >
-                <CheckCircle fontSize="small" color="primary" />
+                <CheckCircle fontSize="small" color={!user?.role?.selectedEntity?.policy?.isApproveContent ? 'disabled' : 'primary'} />
               </IconButton>
             </span>
           </HtmlTooltip>
         )}
+
+        {row?.original?.status === CONTENT_POST_PLANNING_STATUS.scheduled && (() => {
+          const isAuthorized =
+            row?.original?.ownerId === user?.user?._id ||
+            row?.original?.collaboratorId === user?.user?._id ||
+            row?.original?.restcollaborator?.some(c => c.optionValue === user?.user?._id);
+
+          return (
+            <HtmlTooltip title="Published">
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Published"
+                  disabled={!isAuthorized}
+                  onClick={() => {
+                    setShowConfirmDialog({ open: true, status: CONTENT_POST_PLANNING_STATUS.published, data: row?.original });
+                  }}
+                >
+                  <OutboxIcon fontSize="small" color={isAuthorized ? "primary" : "disabled"} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          );
+        })()}
+
+
         <HtmlTooltip title={row?.original?.canDelete && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
@@ -274,8 +300,8 @@ const ListView = ({ topRightSlot }) => {
 
   const handleChangeStatus = (status) => {
     let _ids = [];
-    if (approvetRecord) {
-      _ids.push(approvetRecord?._id);
+    if (showConfirmDialog.data) {
+      _ids.push(showConfirmDialog.data?._id);
     } else {
       const isSameStatus = selectedRecords?.every((e) => e.status === selectedRecords[0].status);
       if (!isSameStatus) {
@@ -293,7 +319,7 @@ const ListView = ({ topRightSlot }) => {
     axiosInstance()
       .put('content-post-planning/update-status', { _id: _ids, status: status })
       .then(({ data: { data } }) => {
-        setShowConfirmDialog({ open: false, status: null });
+        setShowConfirmDialog({ open: false, status: null, data: null });
         fetchData();
         toastConfig.setToastConfig({
           open: true,
@@ -438,9 +464,9 @@ const ListView = ({ topRightSlot }) => {
       {showConfirmDialog.open && (
         <ConfirmationDialog
           open={showConfirmDialog.open}
-          message={`Are you sure you want to approve this post ?`}
+          message={`${showConfirmDialog.status === CONTENT_POST_PLANNING_STATUS.published ? 'Are you sure you want to publish this post?' : 'Are you sure you want to approve this post?'}`}
           onClose={() => {
-            setShowConfirmDialog({ open: false, status: null });
+            setShowConfirmDialog({ open: false, status: null, data: null });
           }}
           onOk={() => {
             handleChangeStatus(showConfirmDialog.status);
