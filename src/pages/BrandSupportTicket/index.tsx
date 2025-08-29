@@ -144,7 +144,7 @@ const BrandSupportTicket = () => {
     return (
         <section className="main-container-v1">
             <div className="headerbox-v1">
-                <CustomBreadCrumbs routes={[{ title: 'Brand Support Tickets' }]} />
+                <CustomBreadCrumbs routes={[{ title: routes.brandSupportTicket.title }]} />
                 <ImportExportLinks
                     permissions={{ isCreate: true, isUpdate: true, isRead: true }}
                     module={'Brand Support Tickets'}
