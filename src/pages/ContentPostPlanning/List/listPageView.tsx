@@ -44,9 +44,7 @@ const ListView = ({ topRightSlot }) => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isEdit: false, idToEdit: null });
   const [selectedStatus, setSelectedStatus] = useState(CONTENT_POST_PLANNING_STATUS.pendingApproval);
   const [statusOptions, setStatusOptions] = useState(null);
-  const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null });
-  const [approvetRecord, setApproveRecord] = useState(null);
-  const [scheduleRecord, setScheduleRecord] = useState(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null, data: null });
 
   const types = [
     {
@@ -141,8 +139,7 @@ const ListView = ({ topRightSlot }) => {
                 aria-label="Approve"
                 disabled={!user?.role?.selectedEntity?.policy?.isApproveAccount}
                 onClick={() => {
-                  setApproveRecord(row?.original);
-                  setShowConfirmDialog({ open: true, status: CONTENT_POST_PLANNING_STATUS.scheduled });
+                  setShowConfirmDialog({ open: true, status: CONTENT_POST_PLANNING_STATUS.scheduled, data: row?.original });
                 }}
               >
                 <CheckCircle fontSize="small" color={!user?.role?.selectedEntity?.policy?.isApproveAccount ? 'disabled' : 'primary'} />
@@ -165,11 +162,7 @@ const ListView = ({ topRightSlot }) => {
                   aria-label="Published"
                   disabled={!isAuthorized}
                   onClick={() => {
-                    setScheduleRecord(row?.original);
-                    setShowConfirmDialog({
-                      open: true,
-                      status: CONTENT_POST_PLANNING_STATUS.published,
-                    });
+                    setShowConfirmDialog({ open: true, status: CONTENT_POST_PLANNING_STATUS.published, data: row?.original });
                   }}
                 >
                   <OutboxIcon fontSize="small" color={isAuthorized ? "primary" : "disabled"} />
@@ -307,11 +300,8 @@ const ListView = ({ topRightSlot }) => {
 
   const handleChangeStatus = (status) => {
     let _ids = [];
-    if (approvetRecord) {
-      _ids.push(approvetRecord?._id);
-    }
-    else if (scheduleRecord) {
-      _ids.push(scheduleRecord?._id);
+    if (showConfirmDialog.data) {
+      _ids.push(showConfirmDialog.data?._id);
     } else {
       const isSameStatus = selectedRecords?.every((e) => e.status === selectedRecords[0].status);
       if (!isSameStatus) {
@@ -329,7 +319,7 @@ const ListView = ({ topRightSlot }) => {
     axiosInstance()
       .put('content-post-planning/update-status', { _id: _ids, status: status })
       .then(({ data: { data } }) => {
-        setShowConfirmDialog({ open: false, status: null });
+        setShowConfirmDialog({ open: false, status: null, data: null });
         fetchData();
         toastConfig.setToastConfig({
           open: true,
@@ -476,7 +466,7 @@ const ListView = ({ topRightSlot }) => {
           open={showConfirmDialog.open}
           message={`${showConfirmDialog.status === CONTENT_POST_PLANNING_STATUS.published ? 'Are you sure you want to publish this post?' : 'Are you sure you want to approve this post?'}`}
           onClose={() => {
-            setShowConfirmDialog({ open: false, status: null });
+            setShowConfirmDialog({ open: false, status: null, data: null });
           }}
           onOk={() => {
             handleChangeStatus(showConfirmDialog.status);
