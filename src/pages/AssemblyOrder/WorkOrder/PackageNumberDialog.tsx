@@ -46,7 +46,7 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
         .get(`${routes.assemblyOrder.path}/material/${assemblyOrderData?._id}`)
         .then(({ data: { data } }) => {
           let material = [];
-          material = data?.material?.filter((m) => m?.type === MATERIAL_TYPE.package);
+          material = data?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.serializedPackage);
           if (workOrderIds?.length) {
             material = material?.filter((m) => [...workOrderIds].includes(m?.workOrder?.optionValue));
           } else {
