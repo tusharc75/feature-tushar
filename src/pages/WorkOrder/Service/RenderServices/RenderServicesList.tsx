@@ -47,9 +47,13 @@ const RenderServicesList = ({
         return (
           <div
             key={data.uniqueId}
-            className={`transition-all duration-300 ${
-              isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
-            } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
+            className={cn(
+              'bg-[var(--dark-primary,white)]',
+              `transition-all duration-300`,
+              isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]',
+              `min-w-[var(--tab-size)] max-w-[var(--tab-size)]`,
+              isColapsed ? 'p-1' : ''
+            )}
             style={{
               ...style
             }}
