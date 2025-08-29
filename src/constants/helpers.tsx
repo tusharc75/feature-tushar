@@ -427,8 +427,7 @@ export const sidebarResource = {
   customPdfTemplate: 'Custom Pdf Template',
   contentPostPlanning: 'Content Post Planning',
   onboardingTemplate: 'Onboarding Template',
-  onboarding: 'Onboarding',
-  brandSupportTicket: 'Brand Support Tickets'
+  onboarding: 'Onboarding'
 } as const;
 
 export const primaryFields = {

@@ -20,7 +20,7 @@ import routes from './../../components/Helpers/Routes';
 import axios, { CancelTokenSource } from 'axios';
 
 const BrandSupportTicket = () => {
-    const renderedFrom = camelCase(sidebarResource.brandSupportTicket);
+    const renderedFrom = camelCase("Brand Support Tickets");
     const toastConfig = useContext(CustomToastContext);
     const { state, dispatch } = useTableReducer({ renderedFrom });
     const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
@@ -147,7 +147,7 @@ const BrandSupportTicket = () => {
                 <CustomBreadCrumbs routes={[{ title: 'Brand Support Tickets' }]} />
                 <ImportExportLinks
                     permissions={{ isCreate: true, isUpdate: true, isRead: true }}
-                    module={'Support Tickets'}
+                    module={'Brand Support Tickets'}
                     api={routes.supportTicket.path}
                     afterImportCompleted={() => { }}
                     isExportAllOrSomeFeature={true}
