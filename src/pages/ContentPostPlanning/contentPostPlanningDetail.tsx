@@ -13,12 +13,14 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import ManageContentPostPlanning from './ManageContentPostPlanning';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
-import { ACTIVITY_RESOURCE, CONTENT_POST_PLANNING_STATUS, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, checkIsAllowedToDelete, checkIsAllowedToEdit, CONTENT_POST_PLANNING_STATUS, sidebarResource } from 'src/constants/helpers';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { ExpandMore } from '@mui/icons-material';
 import { RiExchange2Line } from 'react-icons/ri';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { approveDisable } from 'src/constants/messageHelpers';
 
 const ContentPostPlanningDetail = () => {
+
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -27,9 +29,8 @@ const ContentPostPlanningDetail = () => {
   const [fields, setFields] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [statusOptions, setStatusOptions] = useState([]);
-
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const {
     state: { user, permissions, resources }
   }: any = useData();
@@ -47,16 +48,7 @@ const ContentPostPlanningDetail = () => {
 
   const fetchFields = async () => {
     try {
-      const { fieldsDataForRead } = await fetch_resource_view_fields(
-        sidebarResource?.contentPostPlanning,
-        permissions?.contentPostPlanning?.isUpdate
-      );
-      fieldsDataForRead?.some((o) => {
-        if (o?.fieldData?.fieldName === 'status') {
-          setStatusOptions([...o.fieldData.option?.filter((e) => e.optionValue)]);
-          return true;
-        }
-      });
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.contentPostPlanning, permissions?.contentPostPlanning?.isUpdate);
       setFields(fieldsDataForRead);
     } catch (err) {
       toastConfig.setToastConfig(err);
@@ -70,30 +62,14 @@ const ContentPostPlanningDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.contentPostPlanning.path}/${id}`);
       setPostData(data);
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.contentPostPlanning, data));
+      setAllowedToDelete(permissions?.contentPostPlanning?.isDelete && checkIsAllowedToDelete(user, sidebarResource.contentPostPlanning, data?.owner?.optionValue));
       setCustomizedRoutes([{ ...routes.contentPostPlanning, title: resources?.contentPostPlanning?.titlePlural }, { title: data?.title }]);
       setLoading(false);
     } catch (error: any) {
       setLoading(false);
       toastConfig.setToastConfig(error);
     }
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-  const validateStatus = (status) => {
-    if (!postData?.status || !statusOptions?.length) return true;
-
-    const nextAllowedStatus =
-      postData.status === CONTENT_POST_PLANNING_STATUS.pendingApproval
-        ? CONTENT_POST_PLANNING_STATUS.scheduled
-        : CONTENT_POST_PLANNING_STATUS.published;
-
-    return nextAllowedStatus !== status;
   };
 
   const handleChangeStatus = (status) => {
@@ -148,33 +124,37 @@ const ContentPostPlanningDetail = () => {
           <Box className="control-buttons-v1">
             <>
               {permissions?.contentPostPlanning?.isUpdate && postData?.status !== CONTENT_POST_PLANNING_STATUS.published && (
-                () => {
-                  const userId = user?.user?._id;
-                  const isAuthorized = postData?.owner?.optionValue === userId || postData?.collaborator?.some(c => c.optionValue === userId);
-                  const isPendingApproval = postData?.status === CONTENT_POST_PLANNING_STATUS.pendingApproval;
-
-                  const isDisabled = isPendingApproval ? !user?.role?.selectedEntity?.policy?.isApproveContent : !isAuthorized;
-
-                  return (
+                <>
+                  {postData?.status === CONTENT_POST_PLANNING_STATUS.pendingApproval &&
+                    <HtmlTooltip title={user?.role?.selectedEntity?.policy?.isApproveContent ? "Approve" : approveDisable}>
+                      <ThemeButton
+                        onClick={() =>
+                          handleChangeStatus(CONTENT_POST_PLANNING_STATUS.scheduled)
+                        }
+                        disabled={!user?.role?.selectedEntity?.policy?.isApproveContent}
+                      >
+                        {"Approve"}
+                      </ThemeButton>
+                    </HtmlTooltip>
+                  }
+                  {postData?.status === CONTENT_POST_PLANNING_STATUS.scheduled && allowedToEdit &&
                     <ThemeButton
                       onClick={() =>
-                        handleChangeStatus(isPendingApproval ? CONTENT_POST_PLANNING_STATUS.scheduled : CONTENT_POST_PLANNING_STATUS.published)
+                        handleChangeStatus(CONTENT_POST_PLANNING_STATUS.published)
                       }
-                      mobileTooltip={isPendingApproval ? "Approve" : "Published"}
-                      iconForMobile={<RiExchange2Line size={24} style={{ color: "var(--primary-text)" }} />}
-                      disabled={isDisabled}
+                      disabled={!user?.role?.selectedEntity?.policy?.isApproveContent}
                     >
-                      {isPendingApproval ? "Approve" : "Published"}
+                      {"Publish"}
                     </ThemeButton>
-                  );
-                })()}
-
-              {permissions?.contentPostPlanning?.isUpdate && postData?.status !== CONTENT_POST_PLANNING_STATUS.published && (
-                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
-                  {'Edit'}
-                </ThemeButton>
+                  }
+                  {allowedToEdit &&
+                    <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                      {'Edit'}
+                    </ThemeButton>
+                  }
+                </>
               )}
-              {permissions?.contentPostPlanning?.isDelete && postData?.status !== CONTENT_POST_PLANNING_STATUS.published && (
+              {permissions?.contentPostPlanning?.isDelete && allowedToDelete && postData?.status !== CONTENT_POST_PLANNING_STATUS.published && (
                 <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
               <ActivityButton
