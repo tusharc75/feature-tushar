@@ -376,8 +376,6 @@ const FormTypes = (props) => {
   const [fileUploadProgress, setFileUploadProgress] = React.useState(0);
   const [imageUploadProgress, setImageUploadProgress] = React.useState(0);
   const { setToastConfig } = useContext(CustomToastContext);
-  const [draft, setDraft] = React.useState('');
-  const [isEditing, setIsEditing] = React.useState(false);
 
   const [isExtraDispayType, setIsExtraDispayType] = React.useState(false);
   const [displayType, setDisplayType] = React.useState(null);
@@ -995,48 +993,20 @@ const FormTypes = (props) => {
           label={getLabel(label)}
           name={name}
           required={required}
-          value={isEditing ? draft : values[name]}
+          value={values[name]}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
           ref={inputNumberRef}
-          onChange={(e) => {
-            setIsEditing(true);
-            setDraft(e.target.value);
-          }}
-          onBlur={(e) => {
-            setIsEditing(false);
-            const cleaned = draft.replace(/,/g, '');
-
-            if (typeof onChange === 'function') {
-              onChange(e);
-            }
-            const isValid = isValidNumberString(fieldData?.isAllowedMinus, cleaned);
-            const parsed = parseFloat(cleaned);
-            if (cleaned.trim() === '') {
-              handleChange(name, '');
-              return;
-            }
-            if (isValid && !isNaN(parsed)) {
-              const hasDecimal = cleaned.includes('.');
-              const finalValue = hasDecimal ? parseFloat(parsed.toFixed(fieldData?.decimalPlaces)) : parseInt(`${parsed}`, 10);
-              handleChange(name, finalValue);
-            }
-          }}
+          onChange={
+            onChange
+              ? onChange
+              : (e) => {
+                  if (isValidNumberString(fieldData?.isAllowedMinus, e.target.value)) handleChange(name, e.target.value);
+                }
+          }
           slotProps={{
             input: {
-              inputProps: {
-                ...(fieldData?.isAllowedMinus ? {} : { min: 0 }),
-                onFocus: (e) => e.target.select(),
-                onKeyDown: (e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    e.currentTarget.blur();
-                  }
-                  if ((e.key === '-' || e.key === 'Minus') && !fieldData?.isAllowedMinus) {
-                    e.preventDefault();
-                  }
-                }
-              },
+              inputProps: fieldData?.isAllowedMinus ? {} : { min: 0 },
               readOnly: fieldData?.isUneditable ? true : false
             }
           }}
@@ -1055,50 +1025,20 @@ const FormTypes = (props) => {
           label={getLabel(label)}
           name={name}
           required={required}
-          value={isEditing ? draft : getFormattedNumberValue({ key: name, values, decimalPlaces: fieldData.decimalPlaces ?? 0 })}
+          value={values[name]}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
           ref={inputNumberRef}
-          onChange={(e) => {
-            setIsEditing(true);
-            setDraft(e.target.value);
-          }}
-          onBlur={(e) => {
-            setIsEditing(false);
-            const cleaned = draft.replace(/,/g, '');
-
-            if (typeof onChange === 'function') {
-              onChange(e);
-            } else {
-              const isValid = isValidNumberString(fieldData?.isAllowedMinus, cleaned);
-              const parsed = parseFloat(cleaned);
-              if (cleaned.trim() === '') {
-                handleChange(name, 0);
-                return;
-              }
-              if (isValid && !isNaN(parsed)) {
-                const hasDecimal = cleaned.includes('.');
-                const finalValue = hasDecimal ? parseFloat(parsed.toFixed(fieldData?.decimalPlaces)) : parseInt(`${parsed}`, 10);
-                handleChange(name, finalValue);
-              }
-            }
-          }}
+          onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
           slotProps={{
             input: {
               inputProps: {
                 allowNegative: false,
-                onKeyDown: (e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    e.currentTarget.blur();
-                  }
-                  if ((e.key === '-' || e.key === 'Minus') && !fieldData?.isAllowedMinus) {
-                    e.preventDefault();
-                  }
+                onValueChange: (values) => {
+                  handleChange(name, values.value);
                 },
                 selectedCurrencyCode: selectedCurrencyCode
               },
-              onFocus: (e) => e.target.select(),
               startAdornment: startAdornment ? (
                 startAdornment
               ) : (
@@ -1661,52 +1601,44 @@ const FormTypes = (props) => {
                       <TextField
                         {...rest}
                         variant="outlined"
+                        //type="number"
                         label={label + ' ' + _currency + '/' + _unit}
-                        name={`${name}_${_currency.toLowerCase()}_${_unit.toLowerCase()}`}
+                        name={name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()}
                         required={required}
                         value={
-                          isEditing
-                            ? draft
-                            : getFormattedNumberValue({
-                                key: values[`${name}_${_currency.toLowerCase()}_${_unit.toLowerCase()}`],
-                                values,
-                                decimalPlaces: fieldData.decimalPlaces ?? 0
+                          values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
+                            ? values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()].toLocaleString(undefined, {
+                                maximumFractionDigits: fieldData?.decimalPlaces
                               })
+                            : values[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
                         }
                         error={
-                          touched[`${name}_${_currency.toLowerCase()}_${_unit.toLowerCase()}`] &&
-                          Boolean(errors[`${name}_${_currency.toLowerCase()}_${_unit.toLowerCase()}`])
+                          touched[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] &&
+                          Boolean(errors[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()])
                         }
                         helperText={
-                          touched[`${name}_${_currency.toLowerCase()}_${_unit.toLowerCase()}`] &&
-                          errors[`${name}_${_currency.toLowerCase()}_${_unit.toLowerCase()}`]
+                          touched[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()] &&
+                          errors[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
                         }
                         ref={inputNumberRef}
-                        onChange={(e) => {
-                          setIsEditing(true);
-                          setDraft(e.target.value);
-                        }}
-                        onBlur={(e) => {
-                          setIsEditing(false);
-                          if (typeof onChange === 'function') {
-                            onChange(e);
-                          } else {
-                            const cleaned = draft.replace(/,/g, '');
-                            const isValid = isValidNumberString(fieldData?.isAllowedMinus, cleaned);
-                            const parsed = parseFloat(cleaned);
-
-                            if (cleaned.trim() === '') {
-                              handleCurrencyChangeWithConverterChange(name, _currency, _unit, 0);
-                              return;
-                            }
-
-                            if (isValid && !isNaN(parsed)) {
-                              const hasDecimal = cleaned.includes('.');
-                              const finalValue = hasDecimal ? parseFloat(parsed.toFixed(fieldData?.decimalPlaces)) : parseInt(`${parsed}`, 10);
-                              handleCurrencyChangeWithConverterChange(name, _currency, _unit, finalValue);
-                            }
-                          }
-                        }}
+                        onChange={
+                          onChange
+                            ? onChange
+                            : (e) => {
+                                if (e.target.value === '' || isValidNumberString(fieldData?.isAllowedMinus, e.target.value)) {
+                                  handleCurrencyChangeWithConverterChange(
+                                    name,
+                                    _currency,
+                                    _unit,
+                                    e.target.value === ''
+                                      ? 0
+                                      : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
+                                        ? e.target.value.replace(/,/g, '')
+                                        : parseFloat(e.target.value.replace(/,/g, ''))
+                                  );
+                                }
+                              }
+                        }
                         slotProps={{
                           input: {
                             startAdornment: (
@@ -1719,19 +1651,7 @@ const FormTypes = (props) => {
                                 )}
                               </InputAdornment>
                             ),
-                            inputProps: {
-                              ...(fieldData?.isAllowedMinus ? { max: 9999999999 } : { min: 0, max: 9999999999 }),
-                              onFocus: (e) => e.target.select(),
-                              onKeyDown: (e) => {
-                                if (e.key === 'Enter') {
-                                  e.preventDefault();
-                                  e.currentTarget.blur();
-                                }
-                                if ((e.key === '-' || e.key === 'Minus') && !fieldData?.isAllowedMinus) {
-                                  e.preventDefault();
-                                }
-                              }
-                            },
+                            inputProps: { min: 0, max: 9999999999 },
                             readOnly: fieldData && fieldData?.isUneditable ? true : false
                           }
                         }}
@@ -1829,49 +1749,47 @@ const FormTypes = (props) => {
                     <TextField
                       {...rest}
                       variant="outlined"
+                      //type="number"
                       label={label + ' ' + _currency}
                       name={name + '_' + _currency.toLowerCase()}
                       required={required}
                       value={
-                        isEditing
-                          ? draft
-                          : getFormattedNumberValue({
-                              key: `${name}_${_currency.toLowerCase()}`,
-                              values,
-                              decimalPlaces: fieldData.decimalPlaces ?? 0
+                        values[name + '_' + _currency.toLowerCase()]
+                          ? values[name + '_' + _currency.toLowerCase()].toLocaleString(undefined, {
+                              maximumFractionDigits: fieldData?.decimalPlaces
                             })
+                          : values[name + '_' + _currency.toLowerCase()]
                       }
                       error={touched[name + '_' + _currency.toLowerCase()] && Boolean(errors[name + '_' + _currency.toLowerCase()])}
                       helperText={touched[name + '_' + _currency.toLowerCase()] && errors[name + '_' + _currency.toLowerCase()]}
                       ref={inputNumberRef}
-                      onChange={(e) => {
-                        setIsEditing(true);
-                        setDraft(e.target.value);
-                      }}
-                      onBlur={() => {
-                        const cleaned = draft.replace(/,/g, '');
-                        const isValid = isValidNumberString(fieldData?.isAllowedMinus, cleaned);
-                        const parsed = parseFloat(cleaned);
-                        setIsEditing(false);
-
-                        const setInputValue = (finalValue) => {
+                      onChange={
+                        onChange
+                          ? onChange
+                          : (e) => {
+                              if (e.target.value === '' || isValidNumberString(fieldData?.isAllowedMinus, e.target.value)) {
+                                if (fieldData?.displayCurrency?.length > 1) {
+                                  handleCurrencyChange(name, _currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+                                } else {
+                                  handleChange(name + '_' + _currency.toLowerCase(), e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+                                }
+                              }
+                            }
+                      }
+                      onBlur={(e) => {
+                        if (e.target.value === '' || isValidNumberString(fieldData?.isAllowedMinus, e.target.value)) {
                           if (fieldData?.displayCurrency?.length > 1) {
-                            handleCurrencyChange(name, _currency, finalValue);
+                            handleCurrencyChange(
+                              name,
+                              _currency,
+                              e.target.value === '' ? 0 : parseFloat(parseFloat(e.target.value.replace(/,/g, ''))?.toFixed(fieldData?.decimalPlaces))
+                            );
                           } else {
-                            handleChange(name + '_' + _currency.toLowerCase(), finalValue);
+                            handleChange(
+                              name + '_' + _currency.toLowerCase(),
+                              e.target.value === '' ? 0 : parseFloat(parseFloat(e.target.value.replace(/,/g, ''))?.toFixed(fieldData?.decimalPlaces))
+                            );
                           }
-                        };
-
-                        if (cleaned.trim() === '') {
-                          setInputValue(0);
-                          return;
-                        }
-
-                        if (isValid && !isNaN(parsed)) {
-                          const hasDecimal = cleaned.includes('.');
-                          const finalValue = hasDecimal ? parseFloat(parsed.toFixed(fieldData?.decimalPlaces)) : parseInt(`${parsed}`, 10);
-
-                          setInputValue(finalValue);
                         }
                       }}
                       slotProps={{
@@ -1886,19 +1804,7 @@ const FormTypes = (props) => {
                               )}
                             </InputAdornment>
                           ),
-                          inputProps: {
-                            ...(fieldData?.isAllowedMinus ? {} : { min: 0 }),
-                            onFocus: (e) => e.target.select(),
-                            onKeyDown: (e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                e.currentTarget.blur();
-                              }
-                              if ((e.key === '-' || e.key === 'Minus') && !fieldData?.isAllowedMinus) {
-                                e.preventDefault();
-                              }
-                            }
-                          },
+                          inputProps: { min: 0 },
                           readOnly: fieldData && fieldData?.isUneditable ? true : false
                         }
                       }}
@@ -1969,50 +1875,22 @@ const FormTypes = (props) => {
           label={label}
           required={required}
           name={name}
-          value={isEditing ? draft : values[name]}
+          value={values[name]}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
           ref={inputNumberRef}
-          onChange={(e) => {
-            setIsEditing(true);
-            setDraft(e.target.value);
-          }}
-          onBlur={(e) => {
-            setIsEditing(false);
-            const cleaned = draft.replace(/,/g, '');
-
-            if (typeof onChange === 'function') {
-              onChange(e);
-            }
-            const isValid = isValidNumberString(fieldData?.isAllowedMinus, cleaned);
-            const parsed = parseFloat(cleaned);
-
-            if (cleaned.trim() === '') {
-              handleChange(name, '');
-              return;
-            }
-            if (isValid && !isNaN(parsed)) {
-              const hasDecimal = cleaned.includes('.');
-              const finalValue = hasDecimal ? parseFloat(parsed.toFixed(fieldData?.decimalPlaces)) : parseInt(`${parsed}`, 10);
-              handleChange(name, finalValue);
-            }
-          }}
-          inputMode="decimal"
-          slotProps={{
-            input: {
-              inputProps: {
-                ...(fieldData?.isAllowedMinus ? {} : { min: 0 }),
-                onFocus: (e) => e.target.select(),
-                onKeyDown: (e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    e.currentTarget.blur();
-                  }
-                  if ((e.key === '-' || e.key === 'Minus') && !fieldData?.isAllowedMinus) {
-                    e.preventDefault();
+          onChange={
+            onChange
+              ? onChange
+              : (e) => {
+                  if (isValidNumberString(fieldData?.isAllowedMinus, e.target.value)) {
+                    handleChange(name, e.target.value === '' ? '' : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
                   }
                 }
-              },
+          }
+          slotProps={{
+            input: {
+              inputProps: fieldData?.isAllowedMinus ? {} : { min: 0 },
               readOnly: fieldData && fieldData?.isUneditable ? true : false
             }
           }}
@@ -2933,28 +2811,3 @@ const FormTypes = (props) => {
 };
 
 export default FormTypes;
-
-const getFormattedNumberValue = ({ key, values, decimalPlaces, returnZero = true }) => {
-  const value = values[key];
-  if (!value) return returnZero ? '0' : '';
-  const hasDecimal = String(value).includes('.');
-
-  if (returnZero) {
-    return value != null && value !== ''
-      ? hasDecimal
-        ? Number(value).toLocaleString(undefined, {
-            minimumFractionDigits: decimalPlaces,
-            maximumFractionDigits: decimalPlaces
-          })
-        : Number(value).toLocaleString()
-      : '0';
-  }
-  return value != null && value !== ''
-    ? hasDecimal
-      ? Number(value).toLocaleString(undefined, {
-          minimumFractionDigits: decimalPlaces,
-          maximumFractionDigits: decimalPlaces
-        })
-      : Number(value).toLocaleString()
-    : '';
-};
