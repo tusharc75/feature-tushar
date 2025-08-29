@@ -10,10 +10,8 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import {
-    checkIsAllowedToDelete,
     gridLoadingTimeout,
     prepareDataForGrid,
-    sidebarResource
 } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
