@@ -405,7 +405,7 @@ const AssignServiceDialog = ({
                       <p>
                         {formatAmountWithCurrency(
                           currency,
-                          openConditionDetails?.materialCondition[`rent_${camelCase(method)}_${currency.toLowerCase()}_${unit.toLowerCase()}`]
+                          openConditionDetails?.materialCondition[`rent_${camelCase(method)}_${currency?.toLowerCase()}_${unit?.toLowerCase()}`]
                         )?.fullFormatAmount || ''}
                       </p>
                     </td>

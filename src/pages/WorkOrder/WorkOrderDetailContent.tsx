@@ -26,6 +26,7 @@ import {
   ATTACHMENT_TYPE,
   CHILD_RESOURCE,
   MATERIAL_SUB_TYPE,
+  SERIALIZED_PACKAGE_STATUS,
   WORK_ORDER_STATUS,
   WORK_ORDER_TYPE,
   checkIsAllowedToDelete,
@@ -127,6 +128,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null });
   const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState(false);
   const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
+  const [showConfirmBoxDisassembled, setShowConfirmBoxDisassembled] = useState(false)
 
   useEffect(() => {
     return history.listen((location) => {
@@ -389,6 +391,26 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
     return result;
   };
 
+  const handleDisassemble = () => {
+    setIsSubmitting(true)
+    axiosInstance()
+      .put(`${routes.serializedPackages?.path}/disassemble`, { ids: [workOrderData?.serializedPackage?.optionValue] })
+      .then(({ data }: any) => {
+        fetchWorkOrderData()
+        setIsSubmitting(false)
+        setShowConfirmBoxDisassembled(false)
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setIsSubmitting(false)
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   const toolbarButtons: ToolbarComponents<ThemeButtonProps | MenuItemProps>[] = [
     {
       id: `Repair Job`,
@@ -455,6 +477,16 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       onClick: () => updateStatus(WORK_ORDER_STATUS.onHold),
       tooltip: `Change Status ${WORK_ORDER_STATUS.onHold}`,
       children: WORK_ORDER_STATUS.onHold
+    },
+    {
+      id: 'Disassemble',
+      type: 'button',
+      tooltip: 'Disassemble',
+      isVisible: Boolean(allowedToEdit) && workOrderData?.type === WORK_ORDER_TYPE.disassemblyOrder &&
+        workOrderData?.serializedPackage?.status != SERIALIZED_PACKAGE_STATUS.disassembled &&
+        ![WORK_ORDER_STATUS.deleted, WORK_ORDER_STATUS.draft, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.completed]?.includes(workOrderData?.status),
+      name: `Disassemble`,
+      onClick: () => setShowConfirmBoxDisassembled(true)
     },
     {
       id: 'Close',
@@ -655,7 +687,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               {!user?.user?.brandPolicy?.workOrderConsumableHide && workOrderData?.status !== WORK_ORDER_STATUS.deleted && (
                 <CustomTab value={2}>Consumables</CustomTab>
               )}
-              {[WORK_ORDER_TYPE.productionOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) &&
+              {![WORK_ORDER_TYPE.repairOrder]?.includes(workOrderData?.type) &&
                 workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={3}>Child Items</CustomTab>}
               {workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={4}>Drawings</CustomTab>}
               {!(isMobile && !isTablet) && resource === sidebarResource.workOrder && workOrderData?.status !== WORK_ORDER_STATUS.deleted && (
@@ -940,6 +972,15 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
             setShowReopenConfirmation(false);
           }}
           onOk={reOpenWorkOrder}
+          okBtnLoading={isSubmitting}
+        />
+      )}
+      {showConfirmBoxDisassembled && (
+        <ConfirmationDialog
+          open={showConfirmBoxDisassembled}
+          message={`Are you sure you want to disassemble ${resources?.serializedPackages?.titleSingular?.toLowerCase()} : ${workOrderData?.serializedPackage?.optionLabel} ?`}
+          onClose={() => setShowConfirmBoxDisassembled(false)}
+          onOk={handleDisassemble}
           okBtnLoading={isSubmitting}
         />
       )}

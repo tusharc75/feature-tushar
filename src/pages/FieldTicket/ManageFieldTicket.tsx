@@ -152,7 +152,7 @@ const ManageFieldTicket = ({
         setCompleteSteps(tempData?.steps || []);
         setInitialData({
           fields: fields,
-          values: getObjKeysWithValues(tempData, fields)
+          values: getObjKeysWithValues(tempData, fields, isClone, user, false)
         });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
@@ -361,7 +361,7 @@ const ManageFieldTicket = ({
                     size="small"
                     fullWidth
                     resource={sidebarResource.fieldTicket}
-                    referenceId={id || null}
+                    referenceId={!isClone && id ? id : null}
                   />
                 </Form>
                 {initialData?.fields?.find((f) => f?.fieldName === 'service' && f?.lookupResource === sidebarResource.serviceMaster) && (

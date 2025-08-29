@@ -399,6 +399,7 @@ export const sidebarResource = {
   workOrderPlanning: 'Work Order Planning',
   subcontractAssembly: 'Subcontract Assembly',
   serializedPackages: 'Serialized Packages',
+  serializedPackagesInspection: 'Serialized Packages Inspection',
   trainAiModel: 'Train Ai Model',
   assemblyOrder: 'Assembly Order',
   disassemblyOrder: 'Disassembly Order',
@@ -425,7 +426,8 @@ export const sidebarResource = {
   fieldView: 'Field View',
   customPdfTemplate: 'Custom Pdf Template',
   contentPostPlanning: 'Content Post Planning',
-  onboardingTemplate: 'Onboarding Template'
+  onboardingTemplate: 'Onboarding Template',
+  onboarding: 'Onboarding'
 } as const;
 
 export const primaryFields = {
@@ -973,7 +975,8 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
   return obj;
 };
 
-export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false, user: any = null) => {
+
+export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false, user: any = null, resetDateOnClone: any = true) => {
   const obj = {};
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data?.optionValue : '');
@@ -1061,7 +1064,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
     } else if (key.type === 'decimal' || key.type === 'percent') {
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
     } else if (key.type === 'dateTime') {
-      if (isClone) {
+      if (isClone && resetDateOnClone) {
         obj[key.fieldName] = key?.restrictCurrentDateAutoSelect ? '' : new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
@@ -1069,7 +1072,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
         obj[key.fieldName] = '';
       }
     } else if (key.type === 'date') {
-      if (isClone) {
+      if (isClone && resetDateOnClone) {
         obj[key.fieldName] = key?.restrictCurrentDateAutoSelect ? '' : new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
@@ -1270,7 +1273,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length; ) {
+        for (let i = 0; i < validationFields?.length;) {
           const field = validationFields[i];
           const condition =
             field?.type === 'section'
@@ -1677,7 +1680,7 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
         });
       }
       return { permissions, resources };
-    } catch (e) {}
+    } catch (e) { }
   }
 };
 
@@ -3139,10 +3142,11 @@ export const QUOTE_STATUS = {
   rejectedbyDOA: 'Rejected by DOA'
 };
 
-export const SERIALIZED_PACKAGES_STATUS = {
+export const SERIALIZED_PACKAGE_STATUS = {
   available: 'Available',
   reserved: 'Reserved',
   underReview: 'Under Review',
+  inUse: 'In-Use',
   customerPossession: 'Customer Possession',
   disassembled: 'Disassembled'
 };
@@ -3723,8 +3727,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
-  if (typeof callBack !== 'function') callBack = (text) => {};
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
+  if (typeof callBack !== 'function') callBack = (text) => { };
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
@@ -4022,6 +4026,11 @@ export const getEmailsFromContacts = (data, field = 'customerContact') => {
   }
   return emails;
 };
+
+export const getCustomInvoiceFileName = (customDownloadFileName, data) => {
+  const status = data?.status === INVOICE_STATUS.proforma ? data?.status : 'Invoice'
+  return customDownloadFileName.replace("{status}", status).replace("{invoiceNumber}", data?.invoiceNumber);
+}
 
 export const EQUIPT_BE_CONNECTED_WINDOW = 'equipt-beConnected-window';
 export const handleClearLocalStore = () => {

@@ -221,12 +221,25 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.assemblyOrder}&referenceId=${assemblyOrderData?._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
     );
 
-    const loadingTickets = [];
+    const loadingTicketsPackages = [];
+    const loadingTicketsProducts = [];
+
     deliveryTicketList?.forEach((element) => {
       if (element.ticketType === DELIVERY_TICKET_TYPE.loading) {
         if (element?.serializedPackages?.length) {
           element?.serializedPackages?.forEach((ele) => {
-            loadingTickets.push({
+            loadingTicketsPackages.push({
+              ...ele,
+              loadingTicketId: element._id,
+              loadingTicket: element?.ticketName,
+              loadingTicketStatus: element?.status,
+              warehouse: element?.pickupFrom,
+            });
+          });
+        }
+        if (element?.products?.length) {
+          element?.products?.forEach((ele) => {
+            loadingTicketsProducts.push({
               ...ele,
               loadingTicketId: element._id,
               loadingTicket: element?.ticketName,
@@ -250,15 +263,14 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       parent.serializedPackageId = parent?.serializedPackageDetail?._id;
       parent.serializedPackageNumber = parent?.serializedPackageDetail?.serializedPackageNumber;
       parent.status = parent?.serializedPackageDetail?.status;
-      const loading = loadingTickets?.find((e) =>
-        e?.serializedPackage === parent?.serializedPackageId
-        && e?.uniqueId === parent?._id);
+      const loading = loadingTicketsPackages?.find((e) => e?.serializedPackage === parent?.serializedPackageId && e?.uniqueId === parent?._id)
+        || loadingTicketsProducts?.find((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId);
       if (loading) {
         parent.loadingTicket = loading?.loadingTicket;
         parent.loadingTicketId = loading?.loadingTicketId;
         parent.loadingTicketStatus = loading?.loadingTicketStatus;
       }
-      parent.subRows = generateNestedData(data, parent, loadingTickets);
+      parent.subRows = generateNestedData(data, parent, loadingTicketsPackages, loadingTicketsProducts);
     });
 
     if (flattenArray(rows)?.filter((r) => r?.serializedPackageId)?.length ===
@@ -270,7 +282,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     dispatch({ type: 'loading', loading: false });
   };
 
-  const generateNestedData = (material, parent, loadingTickets) => {
+  const generateNestedData = (material, parent, loadingTicketsPackages, loadingTicketsProducts) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
@@ -293,17 +305,15 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       }
       _subRow.qty = _subRow.qty || 1;
       _subRow.qtyDisplay = _subRow.qty || 1;
-      const loading = loadingTickets?.find((e) =>
-        e?.serializedPackage === _subRow?.serializedPackageId
-        && e?.uniqueId === _subRow?._id);
+      const loading = loadingTicketsPackages?.find((e) => e?.serializedPackage === _subRow?.serializedPackageId && e?.uniqueId === _subRow?._id)
+        || loadingTicketsProducts?.find((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId);
       if (loading) {
         _subRow.loadingTicket = loading?.loadingTicket;
         _subRow.loadingTicketId = loading?.loadingTicketId;
         _subRow.loadingTicketStatus = loading?.loadingTicketStatus;
       }
-      _subRow.subRows = generateNestedData(material, _subRow, loadingTickets);
+      _subRow.subRows = generateNestedData(material, _subRow, loadingTicketsPackages, loadingTicketsProducts);
     });
-    const subPackages = subRows?.filter((s) => s.type === MATERIAL_TYPE.package);
     return subRows;
   };
 
@@ -336,38 +346,33 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
   };
 
   const handleDeliveryTicketDialog = () => {
-    const records = selectedRecords?.filter(r => r?.serializedPackageId)
+    const records = selectedRecords?.filter(e => e?.serializedPackageId || e?.type === MATERIAL_TYPE.product)
     if (records.length) {
       const data = {};
       data['ticketName'] = assemblyOrderData?.assemblyOrderNumber;
       data['referenceId'] = assemblyOrderData._id;
-
       if (records[0]?.serializedPackageDetail?.warehouse) {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
         data['pickupFrom'] = records[0]?.serializedPackageDetail?.warehouse;
-      } else if (records[0]?.serializedPackageDetail?.currentOwnerType === SERIALIZED_PACKAGE_OWNER_TYPE.customerAccount) {
-        data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.customer;
-        data['pickupFrom'] = records[0]?.serializedPackageDetail?.currentOwner;
-      } else if (records[0]?.serializedPackageDetail?.currentOwnerType === SERIALIZED_PACKAGE_OWNER_TYPE.supplierAccount) {
-        data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.supplier;
-        data['pickupFrom'] = records[0]?.serializedPackageDetail?.currentOwner;
       }
-
+      else {
+        data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
+        data['pickupFrom'] = assemblyOrderData?.warehouse?.optionValue;
+      }
       if (records[0]?.serializedPackageDetail?.currentLocation) {
         data['pickupFromAddress'] = records[0]?.serializedPackageDetail?.currentLocation;
+      }
+      else {
+        data['pickupFromAddress'] = assemblyOrderData?.warehouse?.address;
       }
 
       data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.customer;
       data['deliveryTo'] = assemblyOrderData?.customerAccount?.optionValue;
       data['deliveryToAddress'] = assemblyOrderData.shippingAddress?.optionValue;
-
       data['startDate'] = assemblyOrderData?.createDate;
       data['endDate'] = assemblyOrderData?.estimateCompleteDate;
       data['isPickupFromDisable'] = true;
-      data['pickupDisableMessage'] = `Changes to the ${resources.warehouse.titleSingular} are not allowed because inventory or asset assignments.`;
-
       data['isDeliveryToDisable'] = true;
-
       setShowTicketDialog({ open: true, data: data });
     }
   };
@@ -417,7 +422,8 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
         )}
         <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
           <MenuItem
-            disabled={!permissions?.deliveryTicket?.isCreate || selectedRecords?.filter((r) => r?.serializedPackageId)?.length === 0}
+            disabled={!permissions?.deliveryTicket?.isCreate
+              || selectedRecords?.filter((r) => r?.serializedPackageId || r?.type === MATERIAL_TYPE.product)?.length === 0}
             onClick={() => {
               if (!validateAction(assemblyOrderActions.createLoadingTicket)) {
                 handleDeliveryTicketDialog()
@@ -496,12 +502,10 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
           }}
           referenceData={assemblyOrderData}
           serializedPackageIds={selectedRecords?.filter((r) => r?.serializedPackageId)?.map((m) => m?.serializedPackageId)}
-          inventory={selectedRecords
-            ?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)
-            ?.map((a) => ({
-              _id: a?.materialId,
-              productId: a?.assetDetail?.product
-            }))}
+          inventory={selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)?.map((a) => ({
+            _id: a?.materialId,
+            productId: a?.assetDetail?.product
+          }))}
           assetPolicyData={assetPolicyData}
         />
       )}
@@ -512,6 +516,9 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
           referenceData={showTicketDialog.data}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           serializedPackages={selectedRecords?.filter(r => r?.serializedPackageId)}
+          products={selectedRecords?.filter(e => e?.type === MATERIAL_TYPE.product)?.map((e) => {
+            return { _id: e.materialId, qty: e?.qty, uniqueId: e?._id };
+          })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchData();

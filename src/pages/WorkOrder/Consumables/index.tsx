@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box/Box';
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext, useMemo } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
@@ -12,6 +12,7 @@ import {
   MATERIAL_TYPE,
   OTHER_MATERIAL_TYPE,
   QUOTATION_STATUS,
+  SERIALIZED_PACKAGE_STATUS,
   WORK_ORDER_TYPE,
   sidebarResource,
   workOrder
@@ -75,12 +76,15 @@ const Consumables = ({
   const [isUpdating, setUpdating] = useState(false);
   const [repairOrderData, setRepairOrderData] = useState(null);
   const [reviseQuotation, setReviseQuotation] = useState(false);
-  const [assignAssetDialog, setAssignAssetDialog] = useState(false);
-  const [assignSerialNumbersDialog, setAssignSerialNumbersDialog] = useState(false);
+  const [assignDialog, setAssignDialog] = useState({ open: false, type: '', replaceAsset: false, products: [] });
   const [serialNumbers, setSerialNumbers] = useState([]);
   const [serviceOption, setServiceOption] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
+
+
+  const isDisassemblyChildItem = useMemo(() => workOrderData?.type === WORK_ORDER_TYPE.disassemblyOrder
+    && materialSubType === MATERIAL_SUB_TYPE.childItem, [workOrderData, materialSubType])
 
   const {
     state: { user, permissions, resources }
@@ -302,7 +306,7 @@ const Consumables = ({
       Cell: ({ row }: any) => (
         <div style={{ display: 'flex', justifyContent: 'right' }}>
           <>
-            {!row?.original?.serializedProduct &&
+            {!isDisassemblyChildItem && !row?.original?.serializedProduct &&
               ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && (
                 <>
                   {row.original?.isqtyRequestLog && (
@@ -339,7 +343,7 @@ const Consumables = ({
                 </>
               )}
           </>
-          {allowedToEdit && hasChildFields && ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && (
+          {allowedToEdit && hasChildFields && ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && !isDisassemblyChildItem && (
             <HtmlTooltip title="Edit">
               <IconButton
                 size="small"
@@ -366,7 +370,7 @@ const Consumables = ({
               <DescriptionIcon fontSize="small" color={'primary'} />
             </IconButton>
           </HtmlTooltip>
-          {allowedToEdit && (
+          {allowedToEdit && !isDisassemblyChildItem && (
             <HtmlTooltip title="Delete">
               <IconButton
                 size="small"
@@ -505,8 +509,42 @@ const Consumables = ({
         fetchData();
         setIsSubmitting(false);
         setConsumablesDialog(false);
-        setAssignAssetDialog(false);
-        setAssignSerialNumbersDialog(false);
+        setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleReplace = async (rows) => {
+    const records = selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)
+
+    const data = []
+
+    rows?.forEach(r => {
+      const obj: any = {
+        parentId: r?._id,
+        asset: r?.asset
+      }
+      const record = records?.find(_r => _r?.parentId === obj.parentId && !_r?.isCounted)
+      record.isCounted = true
+      obj.oldAsset = record?.serializedAssetId
+      data.push(obj)
+    });
+
+    setIsSubmitting(true);
+    await axiosInstance()
+      .put(`${workOrder.api}/${workOrderId}/consumable/replace`, data)
+      .then(({ data }) => {
+        fetchData();
+        setIsSubmitting(false);
+        setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -679,54 +717,99 @@ const Consumables = ({
     );
   };
 
+  const getProducts = (type = MATERIAL_TYPE.serializedAsset, action = '') => {
+    const productsMap = new Map();
+    if (action === 'replaceAsset') {
+      selectedRecords?.forEach(ele => {
+        if (ele?.type === MATERIAL_TYPE.serializedAsset) {
+          const product = dataRows?.find(d => d?.type === MATERIAL_TYPE.product && d?.serializedProduct && d?._id === ele?.parentId)
+          if (product) {
+            if (productsMap.has(product?._id)) {
+              const existingProduct = productsMap.get(product?._id);
+              existingProduct.qty += 1;
+            } else {
+              productsMap.set(product?._id, { product: product?.productId, qty: 1, productName: product?.productName, _id: product?._id })
+            }
+          }
+        }
+      });
+    } else {
+      selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.product && r?.serializedProduct && r?.qty - r?.assignedAssetQty > 0)?.forEach((e) => {
+        const productDetail = {
+          ...(type === OTHER_MATERIAL_TYPE.serialNumber ? { id: e?.productId } : { product: e?.productId }),
+          qty: e?.qty - (e?.assignedAssetQty || 0),
+          productName: e?.productName,
+          _id: e?._id
+        };
+        productsMap.set(e.productId, productDetail);
+      });
+    }
+
+    return Array.from(productsMap.values())
+  }
+
   const actionButtonMenuItems = () => {
     return (
-      <>
+      isDisassemblyChildItem ? <>
         <MenuItem
-          disabled={
-            selectedRecords?.filter((s) => s?.serializedProduct && s?.type === MATERIAL_TYPE.product && s?.qty - (s?.assignedAssetQty || 0) > 0)
-              ?.length > 0
-              ? false
-              : true
-          }
           onClick={() => {
-            setAssignAssetDialog(true);
+            setAssignDialog({
+              open: true,
+              type: MATERIAL_TYPE.serializedAsset,
+              replaceAsset: true,
+              products: getProducts(MATERIAL_TYPE.serializedAsset, 'replaceAsset')
+            });
           }}
         >
-          Assign {resources?.serializedAsset?.titlePlural}
+          {`Replace ${resources?.serializedAsset?.titlePlural}`}
         </MenuItem>
-        <MenuItem
-          disabled={
-            selectedRecords?.filter((s) => s?.serializedProduct && s?.type === MATERIAL_TYPE.product && s?.qty - (s?.assignedAssetQty || 0) > 0)
-              ?.length > 0
-              ? false
-              : true
-          }
-          onClick={() => {
-            setAssignSerialNumbersDialog(true);
-          }}
-        >
-          Assign Serial Numbers
-        </MenuItem>
-        <MenuItem
-          disabled={!selectedRecords?.some((s) => s?.canDelete)}
-          onClick={() => {
-            handleDelete(selectedRecords?.filter((s) => s?.canDelete));
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
+      </> :
+        <>
+          <MenuItem
+            disabled={
+              selectedRecords?.filter((s) => s?.serializedProduct && s?.type === MATERIAL_TYPE.product && s?.qty - (s?.assignedAssetQty || 0) > 0)
+                ?.length > 0
+                ? false
+                : true
+            }
+            onClick={() => {
+              setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: false, products: getProducts() });
+            }}
+          >
+            Assign {resources?.serializedAsset?.titlePlural}
+          </MenuItem>
+          <MenuItem
+            disabled={
+              selectedRecords?.filter((s) => s?.serializedProduct && s?.type === MATERIAL_TYPE.product && s?.qty - (s?.assignedAssetQty || 0) > 0)
+                ?.length > 0
+                ? false
+                : true
+            }
+            onClick={() => {
+              setAssignDialog({ open: true, type: OTHER_MATERIAL_TYPE.serialNumber, replaceAsset: false, products: getProducts(OTHER_MATERIAL_TYPE.serialNumber) })
+            }}
+          >
+            Assign Serial Numbers
+          </MenuItem>
+          <MenuItem
+            disabled={!selectedRecords?.some((s) => s?.canDelete)}
+            onClick={() => {
+              handleDelete(selectedRecords?.filter((s) => s?.canDelete));
+            }}
+          >
+            Delete
+          </MenuItem>
+        </>
     );
   };
 
   return (
     <>
       <DetailsPageHeader
-        isAddButtonVisible={isCreate}
+        isAddButtonVisible={isDisassemblyChildItem ? false : isCreate}
         addButtonMenuItems={addButtonMenuItems()}
         leftSideContents={!hideServiceFilter ? leftSideContents() : null}
-        rightSideContents={rightSideContents()}
+        rightSideContents={isDisassemblyChildItem ? null : rightSideContents()}
         isActionButtonVisible={allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
@@ -847,39 +930,37 @@ const Consumables = ({
             }}
           />
         )}
-        {assignAssetDialog && (
+        {assignDialog.open && assignDialog.type === MATERIAL_TYPE.serializedAsset && (
           <AssignSerializedAssetDialog
             reference={'workOrder'}
             referenceData={{ warehouse: warehouse?.optionValue }}
             ids={[]}
-            handleClose={() => setAssignAssetDialog(false)}
+            handleClose={() => setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] })}
             handleSucess={(rows) => {
-              handleSubmit(
-                rows?.map((r) => ({
-                  product: r?.asset,
-                  qty: 1,
-                  service: null,
-                  uniqueId: null,
-                  stepId: null,
-                  type: MATERIAL_TYPE.serializedAsset,
-                  subType: '',
-                  parentId: r?._id
-                }))
-              );
+              if (assignDialog.replaceAsset) {
+                handleReplace(rows)
+              } else {
+                handleSubmit(
+                  rows?.map((r) => ({
+                    product: r?.asset,
+                    qty: 1,
+                    service: null,
+                    uniqueId: null,
+                    stepId: null,
+                    type: MATERIAL_TYPE.serializedAsset,
+                    subType: '',
+                    parentId: r?._id
+                  }))
+                );
+              }
             }}
             isAssigning={isSubmitting}
-            selectedProducts={selectedRecords
-              ?.filter((r) => r?.type === MATERIAL_TYPE.product && r?.serializedProduct && r?.qty - r?.assignedAssetQty > 0)
-              ?.map((r) => ({
-                _id: r?._id,
-                product: r.productId,
-                qty: r?.qty - (r?.assignedAssetQty || 0),
-                productName: r.productName
-              }))}
+            selectedProducts={assignDialog.products}
+            checkCertificateExpiry={true}
           />
         )}
 
-        {assignSerialNumbersDialog && (
+        {assignDialog.open && assignDialog.type === OTHER_MATERIAL_TYPE.serialNumber && (
           <AssignSerialNumbersDialog
             selectedProducts={selectedRecords
               ?.filter((r) => r?.type === MATERIAL_TYPE.product && r?.serializedProduct && r?.qty - r?.assignedAssetQty > 0)
@@ -889,9 +970,7 @@ const Consumables = ({
                 qty: r?.qty - (r?.assignedAssetQty || 0),
                 productName: r.productName
               }))}
-            handleClose={() => {
-              setAssignSerialNumbersDialog(false);
-            }}
+            handleClose={() => setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] })}
             handleSucess={(rows) => {
               handleSubmit(
                 rows?.map((r) => ({

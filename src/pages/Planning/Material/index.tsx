@@ -28,6 +28,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData, setReserveAssetWarning }) => {
   const {
@@ -50,6 +51,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
   const [material, setMaterial] = useState([]);
   const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
+  const [serialzedAssetPolicyData, setSerialzedAssetPolicyData] = useState(null);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -57,6 +59,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
 
   useEffect(() => {
     fetchFields();
+    fetchPolicy();
   }, [planningData]);
 
   const fetchFields = async () => {
@@ -565,6 +568,11 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
     handleSaveData(rows);
   };
 
+  const fetchPolicy = async () => {
+    const data = await getResourcePolicy(user, permissions, sidebarResource.serializedAsset);
+    setSerialzedAssetPolicyData(data)
+  };
+
   return (
     <Fragment>
       <DetailsPageHeader
@@ -621,6 +629,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
           dataRows={flattenArray(dataRows)}
           isBulkedit={materialEdit.bulkedit}
           showSaveAndNext={materialEdit.showSaveAndNext}
+          subStatusOptions={serialzedAssetPolicyData?.policy?.inUseSubStatus}
         />
       )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (

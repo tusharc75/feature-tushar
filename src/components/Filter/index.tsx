@@ -1,6 +1,6 @@
 import { Autocomplete, Box, Dialog, FormControl, IconButton, MenuItem, Select, TextField, useMediaQuery } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { isEmpty, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { BsFillFunnelFill } from 'react-icons/bs';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -15,7 +15,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { createFilterSetData } from 'src/components/CustomReactTable';
 import Filters from 'src/components/Filter/Filters';
-import dayjs from 'dayjs';
 
 const Filter = ({
   onClose,
@@ -143,8 +142,6 @@ const Filter = ({
       setDeepFilters([]);
       setFilterTerm({});
     }
-    console.log(val);
-    console.log(filterByIds, deepFilters, val?.filterTerm);
   };
 
   const handleDeleteUserFilter = () => {

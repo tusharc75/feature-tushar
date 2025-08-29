@@ -4,7 +4,6 @@ import { ControlPoint } from '@mui/icons-material';
 import { Autocomplete, Skeleton } from '@mui/material';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { FaEye } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
@@ -78,7 +77,8 @@ const RoleDetailsPage = () => {
     isProductInventorySettings: false,
     isApproveAccount: false,
     isConvertLeadToOpportunity: false,
-    isAllowServicePerformRentalManagement: false
+    isAllowServicePerformRentalManagement: false,
+    isQRCodeLogin: false
   });
 
   const [resourceCheckbox, setResourceCheckBox] = useState({
@@ -88,7 +88,8 @@ const RoleDetailsPage = () => {
     quoteBuilder: false,
     productInventory: false,
     customerAccount: false,
-    lead: false
+    lead: false,
+    login: false
   });
 
   const [isPolicyCheckBoxChecked, setIsPolicyCheckBoxChecked] = useState(false);
@@ -140,9 +141,19 @@ const RoleDetailsPage = () => {
       fieldName: 'isApproveAccount'
     },
     {
+      resource: sidebarResource.contentPostPlanning,
+      fieldLabel: 'Approve Content',
+      fieldName: 'isApproveContent'
+    },
+    {
       resource: sidebarResource.lead,
       fieldLabel: 'Convert Lead To Opportunity',
       fieldName: 'isConvertLeadToOpportunity'
+    },
+    {
+      resource: 'Login',
+      fieldLabel: 'QR Code Login',
+      fieldName: 'isQRCodeLogin'
     }
   ];
 
@@ -208,7 +219,8 @@ const RoleDetailsPage = () => {
         quoteBuilder: e.target.checked,
         productInventory: e.target.checked,
         customerAccount: e.target.checked,
-        lead: e.target.checked
+        lead: e.target.checked,
+        login: e.target.checked
       });
 
       SetPolicyFieldCheckBox({
@@ -220,7 +232,8 @@ const RoleDetailsPage = () => {
         isProductInventorySettings: e.target.checked,
         isApproveAccount: e.target.checked,
         isConvertLeadToOpportunity: e.target.checked,
-        isAllowServicePerformRentalManagement: e.target.checked
+        isAllowServicePerformRentalManagement: e.target.checked,
+        isQRCodeLogin: e.target.checked
       });
     }
     if (checkBoxType === 'Policy-CheckBox') {
@@ -244,7 +257,9 @@ const RoleDetailsPage = () => {
   const handlePolicyResourceCheckBox = async (field) => {
     const resources = Object.keys(resourceCheckbox);
     resources.map((key) => {
-      const isAllFieldChecked = policyResources?.filter((item) => item.resource === startCase(key))?.some((obj) => field[obj.fieldName] === false);
+      const isAllFieldChecked = policyResources
+        ?.filter((item) => item.resource === startCase(key))
+        ?.some((obj) => !field.hasOwnProperty(obj.fieldName) || field[obj.fieldName] === false);
       if (!isAllFieldChecked) {
         setResourceCheckBox((prevState) => ({ ...prevState, [key]: true }));
       }
@@ -679,6 +694,7 @@ const RoleDetailsPage = () => {
                           setOpen={setOpen}
                           permissions={permissions}
                           isEdit={isEdit}
+                          brandPolicy={user?.user?.brandPolicy}
                         />
                       )}
                       {dashBoardOption?.length > 0 && (

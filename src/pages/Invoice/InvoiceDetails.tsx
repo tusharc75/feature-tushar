@@ -465,6 +465,7 @@ const InvoiceDetails = () => {
                         handleChangeStatus={handleChangeStatus}
                         stepFullScreen={stepFullScreen}
                         statusOptions={statusOptions}
+                        resourcePolicyData={resourcePolicyData}
                       />
                     )}
                   </Grid>

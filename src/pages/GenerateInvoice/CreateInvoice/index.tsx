@@ -219,6 +219,12 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
           let values: any = {};
           values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
           values['manualEndDate'] = element?.actualEndDate;
+          if (resource === sidebarResource.sublease) {
+            values.qty = data?.assets?.length || element?.qty
+          }
+          else {
+            values.qty = element?.qty
+          }
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           newMaterial.push({ ...element, ...calValues });
         });
@@ -421,6 +427,19 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
     }
   };
 
+  const isDisabledApply = () => {
+
+    if (!selectedRecords?.length) return true
+
+    if (!dayjs(endDate)?.isValid()) return true
+
+    if (resource === sidebarResource.sublease && selectedRecords?.every(r => r?.type === MATERIAL_TYPE.serializedAsset)) {
+      return true
+    }
+
+    return isDateApplying
+  }
+
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
@@ -450,7 +469,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                             <ThemeButton
                               id="dialog-apply-button"
                               isLoading={isDateApplying}
-                              disabled={selectedRecords?.length && dayjs(endDate)?.isValid() ? isDateApplying : true}
+                              disabled={isDisabledApply()}
                               buttonType="theme"
                               onClick={() => {
                                 handleApplyDate();

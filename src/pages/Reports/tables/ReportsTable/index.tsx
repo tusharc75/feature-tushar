@@ -57,7 +57,7 @@ const ReportsTable = ({ state: reportState, isSidebarOpen, dynamicForm = false }
     setIsColumnsLoading(true);
     const {
       data: { data }
-    }: any = await axiosInstance().get(`/report/columns?resource=${resourceStartCase}&view=true`);
+    }: any = await axiosInstance().get(`/report/columns?resource=${resourceStartCase}`);
 
     if (resourceStartCase === sidebarResource.serializedAsset) {
       const {

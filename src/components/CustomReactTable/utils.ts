@@ -529,7 +529,6 @@ export const createFilterModel = (formValues, coloums) => {
       case 'number':
       case 'decimal':
         if (formValues[fieldName]) {
-          // formValues[fieldName] may already be an array of {operation,value} or a simple value
           filterModel.set(fieldName, { filter: formValues[fieldName] });
         }
         break;
@@ -626,7 +625,6 @@ export const createFilterData = (filterByIds, deepFilters, filterTerm) => {
             return (isoFromDate.isValid() && d?.term?.from instanceof Date) || (isoToDate.isValid() && d?.term?.to instanceof Date);
           else return isoFromDate.isValid() && d?.term?.from instanceof Date && isoToDate.isValid() && d?.term?.to instanceof Date;
         }
-        // For number/decimal, ensure term array exists
         if (d?.type === 'number' || d?.type === 'decimal') {
           return Array.isArray(d?.term) && d.term.length > 0;
         }
@@ -640,16 +638,12 @@ export const createFilterData = (filterByIds, deepFilters, filterTerm) => {
               to: d?.term?.to ? dateFormatToSend(d?.term?.to) : null
             }
           });
-          return;
-        }
-
-        // For numbers/decimals: d.term is expected to be an array of { operation, value }
-        if (d?.type === 'number' || d?.type === 'decimal') {
+        } if (d?.type === 'number' || d?.type === 'decimal') {
           filterModel.set(d?.field, { filter: d?.term });
           return;
+        } else {
+          filterModel.set(d?.field, { filter: d?.term, ['$nin']: filterTerm[d?.field] === '$nin' ? true : false });
         }
-
-        filterModel.set(d?.field, { filter: d?.term, ['$nin']: filterTerm[d?.field] === '$nin' ? true : false });
       });
   }
 
@@ -712,17 +706,14 @@ export const createFilterSetData = (val, columns) => {
 export const filtermodelToFormValue = (filtermodel: FilterModel) => {
   const formValues = {};
   for (const [key, value] of Object.entries(filtermodel)) {
-    if (value.filter && (value.filter['from'] || value.filter['to'])) {
-      formValues[`from_${snakeCase(key)}`] = value.filter['from'] ? new Date(value.filter['from']) : null;
-      formValues[`to_${snakeCase(key)}`] = value.filter['to'] ? new Date(value.filter['to']) : null;
-    }
-    else if (value.operator === 'OR' && value.condition1) {
-      formValues[key] = value.condition1.filter.map((e) => e.optionValue);
-    }
-    else if (Array.isArray(value.filter)) {
+    if (value.filter?.['from'] || value.filter?.['to']) {
+      formValues[`from_${snakeCase(key)}`] = new Date(value.filter['from']);
+      formValues[`to_${snakeCase(key)}`] = new Date(value.filter['to']);
+    } else if (value['operator'] === 'OR') {
+      formValues[key] = value.condition1?.filter.map((e) => e.optionValue);
+    } else if (Array.isArray(value.filter)) {
       formValues[key] = value.filter;
-    }
-    else if (value.filter) {
+    } else if (value.filter) {
       formValues[key] = value.filter;
     }
   }

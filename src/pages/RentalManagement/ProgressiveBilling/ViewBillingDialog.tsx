@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import Grid from '@mui/material/Grid2';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box, Dialog, IconButton, Menu, MenuItem } from '@mui/material';
@@ -7,12 +6,14 @@ import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import {
+  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   CustomDialogTransition,
   MATERIAL_TYPE,
   PACKAGE_TYPE,
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
+  getCustomInvoiceFileName,
   invoice,
   rentalManagement,
   sidebarResource
@@ -35,6 +36,8 @@ import { useData } from 'src/StateProvider/Provider';
 import { FiExternalLink } from 'react-icons/fi';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess, allowCreateInvoice, isLatestInvoice }) => {
   const renderedFrom = `${camelCase(sidebarResource.rentalManagementInvoice)}_view_invoice`;
@@ -62,6 +65,11 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
+
+  useEffect(() => {
+    fetchPolicy();
+  }, []);
 
   useEffect(() => {
     fetchInvoiceData();
@@ -95,6 +103,11 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
+  };
+
+  const fetchPolicy = async () => {
+    const data = await getResourcePolicy(user, permissions, sidebarResource.invoice)
+    setResourcePolicyData(data)
   };
 
   const fetchFields = async () => {
@@ -136,7 +149,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                     : '(Non-Serialized)'
                   : row.original?.type === MATERIAL_TYPE.package
                     ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
-                      ? '(Product)' : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service ? '(Service)' : ''
+                      ? '(Product)'
+                      : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service
+                        ? '(Service)'
+                        : ''
                     : row.original.type === MATERIAL_TYPE.service
                       ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                       : ''}
@@ -392,12 +408,14 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
             <Box display="flex" justifyContent="space-between" p={1}>
               {invoiceData && (
                 <PreviewDownload
-                  fileName={`${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`}
+                  fileName={resourcePolicyData?.policy?.customDownloadFileName ? getCustomInvoiceFileName(resourcePolicyData?.policy?.customDownloadFileName, invoiceData)
+                    : `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`}
                   resource={sidebarResource.invoice}
                   referenceId={invoiceData?._id}
                   columns={columns}
                   isSendEmail={true}
                   hideDetailButton={dataRows?.find((e) => e?.subRows?.length) ? false : true}
+                  onlyfileNameAsDownload={resourcePolicyData?.policy?.customDownloadFileName ? true : false}
                 />
               )}
               <Box display="flex" alignItems="center">
@@ -447,6 +465,14 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                     Delete
                   </MenuItem>
                 </Menu>
+                <Box ml={1} />
+                <ActivityButton
+                  referenceId={invoiceData?._id}
+                  resource={ACTIVITY_RESOURCE.invoice}
+                  resourceLabel={invoiceData?.invoiceNumber}
+                  resourceData={invoiceData}
+                  fromDialog={true}
+                />
               </Box>
             </Box>
             {columns ? (
@@ -461,6 +487,17 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                 renderedFrom={renderedFrom}
                 isClientSideGrid={true}
                 expander={true}
+                resource={sidebarResource.invoice}
+                arrangeRowField={{
+                  keys: [
+                    {
+                      key: 'material',
+                      filterType: [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset]
+                    },
+                    { key: 'additionalCost', filterType: [MATERIAL_TYPE.manualEntry] }
+                  ],
+                  _id: invoiceData?._id
+                }}
               />
             ) : (
               <Box p={2} height={500}>

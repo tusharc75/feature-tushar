@@ -1,5 +1,5 @@
 import { Schedule } from '@mui/icons-material';
-import { Popover } from '@mui/material';
+import { Popper } from '@mui/material';
 import React, { FocusEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import RemoveFromHistoryButton from 'src/components/Header/SearchBar/RemoveFromHistoryButton';
 import { SearchKeyword } from 'src/components/Header/SearchBar/types';
@@ -12,27 +12,55 @@ type ChildrenProps = {
 
 type SearchDropDownListProps = {
   children: (props: ChildrenProps) => React.ReactNode;
+  turnOffHistory?: boolean;
 };
 
-const SearchDropDownList = ({ children }: SearchDropDownListProps) => {
+const SearchDropDownList = ({ children, turnOffHistory = false }: SearchDropDownListProps) => {
   const inputRef = useRef<HTMLElement | HTMLTextAreaElement | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [inputValue, setInputValue] = useState('');
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  const handleFocus = useCallback((e: FocusEvent<HTMLInputElement>) => {
-    setAnchorEl(e.currentTarget);
-  }, []);
+  const handleFocus = useCallback(
+    (e: FocusEvent<HTMLInputElement>) => {
+      if (turnOffHistory) return;
+      setAnchorEl(e.currentTarget);
+    },
+    [turnOffHistory]
+  );
 
-  const handleBlur = useCallback((e: FocusEvent<HTMLInputElement>) => {
-    const to = (e.relatedTarget as HTMLElement) || document.activeElement;
-    if (popoverRef.current?.contains(to) || to.contains(popoverRef.current)) return;
-    setTimeout(() => setAnchorEl(null), 100);
-  }, []);
+  const handleBlur = useCallback(
+    (e: FocusEvent<HTMLInputElement>) => {
+      if (turnOffHistory) return;
+      const to = (e.relatedTarget as HTMLElement) || document.activeElement;
+      if (popoverRef.current?.contains(to) || to.contains(popoverRef.current)) return;
+      setTimeout(() => setAnchorEl(null), 100);
+    },
+    [turnOffHistory]
+  );
 
-  const handleChange = useCallback((e?: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, value?: string) => {
-    const newValue = e?.target.value || value || '';
-    setInputValue(newValue);
+  const handleChange = useCallback(
+    (e?: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, value?: string) => {
+      if (turnOffHistory) return;
+      const newValue = e?.target.value || value || '';
+      setInputValue(newValue);
+    },
+    [turnOffHistory]
+  );
+
+  useEffect(() => {
+    function isClickInsideElements(event: PointerEvent): boolean {
+      if (!popoverRef.current || !inputRef.current) return;
+      if (![inputRef.current, popoverRef.current].some((el) => el.contains(event.target as Node))) {
+        setAnchorEl(null);
+      }
+    }
+
+    document.addEventListener('click', isClickInsideElements);
+
+    return () => {
+      document.removeEventListener('click', isClickInsideElements);
+    };
   }, []);
 
   return (
@@ -43,7 +71,7 @@ const SearchDropDownList = ({ children }: SearchDropDownListProps) => {
         onBlur: handleBlur,
         onChange: handleChange
       })}
-      <RenderList anchorEl={anchorEl} setAnchorEl={setAnchorEl} inputValue={inputValue} ref={popoverRef} />
+      {!turnOffHistory && <RenderList anchorEl={anchorEl} setAnchorEl={setAnchorEl} inputValue={inputValue} ref={popoverRef} />}
     </>
   );
 };
@@ -57,7 +85,8 @@ type RenderListProps = {
 };
 
 const RenderList = React.forwardRef<HTMLDivElement, RenderListProps>(({ anchorEl, setAnchorEl, inputValue }, ref) => {
-  const { historyKeywords, handleSetHistoryKeyword, handleRemoveItemFromHistory, handleRemoveKeywordFromHistory } = useSearchHistory();
+  const { historyKeywords, handleSetHistoryKeyword, fetchAllKeywordData, handleRemoveItemFromHistory, handleRemoveKeywordFromHistory } =
+    useSearchHistory();
   const [activeIndex, setActiveIndex] = useState(-1);
   const activeIndexRef = useRef(0);
   const filteredKeywords = useMemo(() => {
@@ -152,19 +181,17 @@ const RenderList = React.forwardRef<HTMLDivElement, RenderListProps>(({ anchorEl
     };
   }, [handleClick, anchorEl, historyKeywords]);
 
+  const open = Boolean(anchorEl) && filteredKeywords.length > 0 && !(filteredKeywords.length === 1 && filteredKeywords[0].keyword === inputValue);
+
+  useEffect(() => {
+    fetchAllKeywordData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [anchorEl, filteredKeywords.length]);
+
   return (
     <>
-      <Popover
-        open={Boolean(anchorEl) && filteredKeywords.length > 0}
-        anchorEl={filteredKeywords.length > 0 ? anchorEl : null}
-        onClose={() => setAnchorEl(null)}
-        disableRestoreFocus
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        disableAutoFocus
-        disableEnforceFocus
-        disableScrollLock
-      >
-        <div ref={ref}>
+      <Popper open={open} anchorEl={filteredKeywords.length > 0 ? anchorEl : null}>
+        <div ref={ref} className="rounded-b border bg-[var(--dark-primary,white)]">
           <p className="mt-4 px-4 text-[14px] font-medium leading-[20px] text-gray-500">History</p>
           <ul className="list-none py-2" style={rect.width ? { minWidth: rect.width } : {}}>
             {filteredKeywords.map((d, i) => (
@@ -198,7 +225,7 @@ const RenderList = React.forwardRef<HTMLDivElement, RenderListProps>(({ anchorEl
             ))}
           </ul>
         </div>
-      </Popover>
+      </Popper>
     </>
   );
 });
