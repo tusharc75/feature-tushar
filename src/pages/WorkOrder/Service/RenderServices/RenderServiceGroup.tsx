@@ -33,7 +33,7 @@ const RenderServiceGroup = ({
         className={cn(
           'flex cursor-pointer items-center gap-2  bg-[white] dark:bg-[--dark-primary]',
           isColapsed ? 'justify-center py-4' : 'justify-between p-4 ',
-          expanded ? 'rounded-t-[8px] border-b bg-[rgb(242,245,254)] dark:bg-[--dark-secondary]' : 'rounded-[8px] '
+          expanded ? 'rounded-t-[8px] border-b bg-[rgb(242,245,254)] dark:bg-[#1E293B]' : 'rounded-[8px] '
         )}
         onClick={() => {
           if (!isColapsed) setExpanded((prev) => !prev);
@@ -54,7 +54,7 @@ const RenderServiceGroup = ({
       </div>
 
       <Collapse in={expanded}>
-        <div className={cn('rounded-b-[8px] bg-[rgb(248,250,255)] p-4 transition-all dark:bg-[hsl(223,50%,10%)]', isColapsed ? 'p-2' : '')}>
+        <div className={cn('rounded-b-[8px] bg-[rgb(248,250,255)] p-4 transition-all dark:bg-[#111827]', isColapsed ? 'p-2' : '')}>
           {!isColapsed && (
             <div className="mb-2 mt-2 flex items-center justify-end gap-2">
               {servicesButtons.map(({ id, children, visible, ...rest }) => {
