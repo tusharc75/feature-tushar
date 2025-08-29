@@ -219,7 +219,12 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
           let values: any = {};
           values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
           values['manualEndDate'] = element?.actualEndDate;
-          values.qty = data?.assets?.length || element?.qty
+          if (resource === sidebarResource.sublease) {
+            values.qty = data?.assets?.length || element?.qty
+          }
+          else {
+            values.qty = element?.qty
+          }
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           newMaterial.push({ ...element, ...calValues });
         });
@@ -423,10 +428,12 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
   };
 
   const isDisabledApply = () => {
+
     if (!selectedRecords?.length) return true
+
     if (!dayjs(endDate)?.isValid()) return true
 
-    if (resource === sidebarResource.sublease && !selectedRecords?.some(r => r?.type === MATERIAL_TYPE.product)) {
+    if (resource === sidebarResource.sublease && selectedRecords?.every(r => r?.type === MATERIAL_TYPE.serializedAsset)) {
       return true
     }
 
@@ -457,7 +464,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                         margin="dense"
                       />
                       <Box>
-                        <HtmlTooltip title={selectedRecords?.length ? resource === sidebarResource.sublease && !selectedRecords?.some(r => r?.type === MATERIAL_TYPE.product) ? 'Please Select atleast one product to apply' : '' : 'Please select items to apply'}>
+                        <HtmlTooltip title={selectedRecords?.length ? '' : 'Please select items to apply'}>
                           <span>
                             <ThemeButton
                               id="dialog-apply-button"
