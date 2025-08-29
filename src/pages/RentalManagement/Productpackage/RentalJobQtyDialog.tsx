@@ -28,7 +28,7 @@ interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
   rentalManagementData: any;
-  rentalManagementFields: any;
+  rentalManagementFields: any
   rowData?: object | any;
   material: any[];
   selectedProducts: any[];
@@ -37,8 +37,8 @@ interface EditDialogProps {
   from?: any;
   isQtyOnly?: Boolean;
   showSaveAndNext?: Boolean;
-  dataRows?: any;
-  assetPolicyData?: any;
+  dataRows?: any
+  assetPolicyData?: any
 }
 
 const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
@@ -184,29 +184,17 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
 
-    const taxApplicableField =
-      user?.user?.brandPolicy?.rentalTaxAppliedOn && user?.user?.brandPolicy?.rentalTaxAppliedOn !== ''
-        ? fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn)
-        : 'billingAddress';
+    const taxApplicableField = user?.user?.brandPolicy?.rentalTaxAppliedOn && user?.user?.brandPolicy?.rentalTaxAppliedOn !== ''
+      ? fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn)
+      : 'billingAddress';
 
-    const taxCodeOptions = await getTaxList(
-      user,
-      rentalManagementData,
-      rentalManagementFields,
-      isBulkedit ? rowData[0]?.type : rowData?.type,
-      taxApplicableField
-    );
+    const taxCodeOptions = await getTaxList(user, rentalManagementData, rentalManagementFields, isBulkedit ? rowData[0]?.type : rowData?.type, taxApplicableField);
     fields?.forEach((e: any) => {
       if (e?.fieldName === 'taxCode') {
         e.option = taxCodeOptions;
       }
     });
-    const sections = uniq(
-      map(
-        fields?.filter((f) => f?.isRead),
-        'sectionName'
-      )
-    );
+    const sections = uniq(map(fields?.filter((f) => f?.isRead), 'sectionName'));
     const customData = sections.map((name) => {
       let sectionFields = fields.filter((field) => field.sectionName === name && field?.isRead);
       sectionFields = orderBy(sectionFields, 'order', 'asc');
@@ -231,23 +219,18 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   };
 
   const handleSubmit = async (values) => {
-    setSubmitState({ open: true, values: values });
+    setSubmitState({ open: true, values: values })
   };
 
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
-      let priceData: any = await getPricingConditions(
-        sidebarResource.rentalManagement,
-        rentalManagementData,
-        [
-          {
-            materialId: rowData.materialId,
-            type: rowData.type,
-            qty: 1
-          }
-        ],
-        PRICING_SETUP_TYPE.rent
-      );
+      let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, [
+        {
+          materialId: rowData.materialId,
+          type: rowData.type,
+          qty: 1,
+        }
+      ], PRICING_SETUP_TYPE.rent);
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }
@@ -295,9 +278,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     let estimateStartDate = dayjs(values?.estimateStartDate);
     let estimateEndDate = dayjs(values?.estimateEndDate);
     if (isBulkedit) {
-      const maxEstimateStartDate = selectedProducts
-        ?.map((r) => r?.estimateStartDate)
-        ?.reduce((max, current) => (dayjs(current).isAfter(dayjs(max)) ? current : max));
+      const maxEstimateStartDate = selectedProducts?.map((r) => r?.estimateStartDate)?.reduce((max, current) => (dayjs(current).isAfter(dayjs(max)) ? current : max));
       const estimateStartDateE = dayjs(maxEstimateStartDate);
       if (estimateEndDate.diff(estimateStartDateE, 'day') < 0) {
         errors['estimateEndDate'] = 'Please enter valid estimate end date';
@@ -319,15 +300,16 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       const child: any = dataRows?.filter((e) => e.parentId === rowData?._id);
       if (child?.length) {
         child?.forEach((e) => {
-          let qty = values.qty * e?.qty;
+          let qty = values.qty * e?.qty
           if (qty < e?.assetQty || qty < e?.nonSerializedQty) {
             isValid = false;
             return;
           }
-        });
-      } else {
-        const qty = getParentMultiplier(material, rowData) * values.qty;
-        if (qty < rowData?.assetQty || qty < rowData?.nonSerializedQty) {
+        })
+      }
+      else {
+        const qty = getParentMultiplier(material, rowData) * values.qty
+        if ((qty < rowData?.assetQty || qty < rowData?.nonSerializedQty)) {
           isValid = false;
         }
       }
@@ -486,19 +468,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             }
                                             let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
 
-                                            const durationPrice = getDurationBasedPrice(
-                                              {
-                                                ...values,
-                                                ...(field.fieldName === 'pricingCondition'
-                                                  ? { pricingCondition: value }
-                                                  : field.fieldName === 'pricingMethod'
-                                                    ? { pricingMethod: value }
-                                                    : { unit: value }),
-                                                materialId: rowData.materialId,
-                                                type: rowData?.type
-                                              },
-                                              priceConditionListConst
-                                            );
+                                            const durationPrice = getDurationBasedPrice({ ...values, ...(field.fieldName === 'pricingCondition' ? { pricingCondition: value } : field.fieldName === 'pricingMethod' ? { pricingMethod: value } : { unit: value }), materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst)
                                             const result = autoCalculateSpecificFields(
                                               { [priceFieldName]: durationPrice || priceValue?.mrp || 0, [field.fieldName]: value },
                                               values,
@@ -506,11 +476,10 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             );
 
                                             if (assetPolicyData?.inUseSubStatus?.length > 0) {
-                                              assetPolicyData?.inUseSubStatus?.forEach((sf) => {
-                                                const field = initialData.fields?.find((f) => f?.fieldName === `${camelCase(sf)}Price`);
+                                              assetPolicyData?.inUseSubStatus?.forEach(sf => {
+                                                const field = initialData.fields?.find(f => f?.fieldName === `${camelCase(sf)}Price`)
                                                 if (field) {
-                                                  result[`${field?.fieldName}_${rentalManagementData?.currency?.toLowerCase()}`] =
-                                                    priceValue?.assetSubStatusPrice?.[`${camelCase(sf)}`] || 0;
+                                                  result[`${field?.fieldName}_${rentalManagementData?.currency?.toLowerCase()}`] = priceValue?.assetSubStatusPrice?.[`${camelCase(sf)}`] || 0
                                                 }
                                               });
                                             }
@@ -552,10 +521,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             });
                                             if (!isBulkedit && name === 'estimateJobDuration') {
                                               let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
-                                              const durationPrice = getDurationBasedPrice(
-                                                { ...values, estimateJobDuration: value, materialId: rowData.materialId, type: rowData?.type },
-                                                priceConditionListConst
-                                              );
+                                              const durationPrice = getDurationBasedPrice({ ...values, estimateJobDuration: value, materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst)
                                               if (durationPrice) {
                                                 const result = autoCalculateSpecificFields(
                                                   { [priceFieldName]: durationPrice },
@@ -710,7 +676,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                   }}
                 />
               ) : null}
-              {submitState.open && (
+              {submitState.open &&
                 <MaterialUpdateActions
                   resource={sidebarResource.rentalManagement}
                   referenceData={rentalManagementData}
@@ -722,18 +688,19 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                   handleUpdateData={(rows) => {
                     if (isBulkedit) {
                       handleSaveData(rows);
-                    } else {
+                    }
+                    else {
                       handleSaveData(rows, saveAndNext);
                     }
-                    setSubmitState({ open: false, values: null });
+                    setSubmitState({ open: false, values: null })
                   }}
                   values={submitState.values}
                   handleClose={() => {
-                    setSubmitState({ open: false, values: null });
+                    setSubmitState({ open: false, values: null })
                   }}
                   needCalculate={false}
                 />
-              )}
+              }
             </Fragment>
           )}
         </Formik>
