@@ -995,11 +995,6 @@ const FormTypes = (props) => {
           label={getLabel(label)}
           name={name}
           required={required}
-          onKeyDown={(e) => {
-            if ((e.key === '-' || e.key === 'Minus') && !fieldData?.isAllowedMinus) {
-              e.preventDefault();
-            }
-          }}
           value={isEditing ? draft : values[name]}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
@@ -1029,7 +1024,19 @@ const FormTypes = (props) => {
           }}
           slotProps={{
             input: {
-              inputProps: { ...(fieldData?.isAllowedMinus ? {} : { min: 0 }), onFocus: (e) => e.target.select() },
+              inputProps: {
+                ...(fieldData?.isAllowedMinus ? {} : { min: 0 }),
+                onFocus: (e) => e.target.select(),
+                onKeyDown: (e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.currentTarget.blur();
+                  }
+                  if ((e.key === '-' || e.key === 'Minus') && !fieldData?.isAllowedMinus) {
+                    e.preventDefault();
+                  }
+                }
+              },
               readOnly: fieldData?.isUneditable ? true : false
             }
           }}
@@ -1052,11 +1059,6 @@ const FormTypes = (props) => {
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
           ref={inputNumberRef}
-          onKeyDown={(e) => {
-            if ((e.key === '-' || e.key === 'Minus') && !fieldData?.isAllowedMinus) {
-              e.preventDefault();
-            }
-          }}
           onChange={(e) => {
             setIsEditing(true);
             setDraft(e.target.value);
@@ -1085,8 +1087,14 @@ const FormTypes = (props) => {
             input: {
               inputProps: {
                 allowNegative: false,
-                onValueChange: (values) => {
-                  handleChange(name, values.value);
+                onKeyDown: (e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.currentTarget.blur();
+                  }
+                  if ((e.key === '-' || e.key === 'Minus') && !fieldData?.isAllowedMinus) {
+                    e.preventDefault();
+                  }
                 },
                 selectedCurrencyCode: selectedCurrencyCode
               },
@@ -1656,11 +1664,6 @@ const FormTypes = (props) => {
                         label={label + ' ' + _currency + '/' + _unit}
                         name={`${name}_${_currency.toLowerCase()}_${_unit.toLowerCase()}`}
                         required={required}
-                        onKeyDown={(e) => {
-                          if ((e.key === '-' || e.key === 'Minus') && !fieldData?.isAllowedMinus) {
-                            e.preventDefault();
-                          }
-                        }}
                         value={
                           isEditing
                             ? draft
@@ -1718,7 +1721,16 @@ const FormTypes = (props) => {
                             ),
                             inputProps: {
                               ...(fieldData?.isAllowedMinus ? { max: 9999999999 } : { min: 0, max: 9999999999 }),
-                              onFocus: (e) => e.target.select()
+                              onFocus: (e) => e.target.select(),
+                              onKeyDown: (e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  e.currentTarget.blur();
+                                }
+                                if ((e.key === '-' || e.key === 'Minus') && !fieldData?.isAllowedMinus) {
+                                  e.preventDefault();
+                                }
+                              }
                             },
                             readOnly: fieldData && fieldData?.isUneditable ? true : false
                           }
@@ -1820,11 +1832,6 @@ const FormTypes = (props) => {
                       label={label + ' ' + _currency}
                       name={name + '_' + _currency.toLowerCase()}
                       required={required}
-                      onKeyDown={(e) => {
-                        if ((e.key === '-' || e.key === 'Minus') && !fieldData?.isAllowedMinus) {
-                          e.preventDefault();
-                        }
-                      }}
                       value={
                         isEditing
                           ? draft
@@ -1879,7 +1886,19 @@ const FormTypes = (props) => {
                               )}
                             </InputAdornment>
                           ),
-                          inputProps: { ...(fieldData?.isAllowedMinus ? {} : { min: 0 }), onFocus: (e) => e.target.select() },
+                          inputProps: {
+                            ...(fieldData?.isAllowedMinus ? {} : { min: 0 }),
+                            onFocus: (e) => e.target.select(),
+                            onKeyDown: (e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                e.currentTarget.blur();
+                              }
+                              if ((e.key === '-' || e.key === 'Minus') && !fieldData?.isAllowedMinus) {
+                                e.preventDefault();
+                              }
+                            }
+                          },
                           readOnly: fieldData && fieldData?.isUneditable ? true : false
                         }
                       }}
@@ -1950,11 +1969,6 @@ const FormTypes = (props) => {
           label={label}
           required={required}
           name={name}
-          onKeyDown={(e) => {
-            if ((e.key === '-' || e.key === 'Minus') && !fieldData?.isAllowedMinus) {
-              e.preventDefault();
-            }
-          }}
           value={isEditing ? draft : values[name]}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
@@ -1986,7 +2000,19 @@ const FormTypes = (props) => {
           inputMode="decimal"
           slotProps={{
             input: {
-              inputProps: { ...(fieldData?.isAllowedMinus ? {} : { min: 0 }), onFocus: (e) => e.target.select() },
+              inputProps: {
+                ...(fieldData?.isAllowedMinus ? {} : { min: 0 }),
+                onFocus: (e) => e.target.select(),
+                onKeyDown: (e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.currentTarget.blur();
+                  }
+                  if ((e.key === '-' || e.key === 'Minus') && !fieldData?.isAllowedMinus) {
+                    e.preventDefault();
+                  }
+                }
+              },
               readOnly: fieldData && fieldData?.isUneditable ? true : false
             }
           }}
