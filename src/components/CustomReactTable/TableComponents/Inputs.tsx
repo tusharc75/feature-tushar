@@ -497,17 +497,6 @@ const RenderCurrencyAutoComplete = ({
 //   );
 // };
 
-const schemas: Partial<Record<ValidInputType, YupSchema | ((attributes: any) => YupSchema)>> = {
-  name: yup.string(),
-  colorPicker: yup.string().min(7),
-  email: yup.string().email(),
-  mobileNumber: yup.string().min(5),
-  singleLine: yup.string().min(1),
-  multiLine: yup.string().min(1),
-  url: yup.string().url(),
-  number: (allowedMinus: boolean = false) => (allowedMinus ? yup.number() : yup.number().min(1))
-} as const;
-
 const decimalPlaceValidator = (decimalPlaces: number = 0, allowedMinus: boolean = false) => {
   if (allowedMinus) {
     return yup
@@ -530,8 +519,22 @@ const decimalPlaceValidator = (decimalPlaces: number = 0, allowedMinus: boolean 
     });
 };
 
+const schemas: Partial<Record<ValidInputType, YupSchema | ((attributes: any, allowedMinus?: boolean) => YupSchema)>> = {
+  name: yup.string(),
+  colorPicker: yup.string().min(7),
+  email: yup.string().email(),
+  mobileNumber: yup.string().min(5),
+  singleLine: yup.string().min(1),
+  multiLine: yup.string().min(1),
+  url: yup.string().url(),
+  number: (allowedMinus: boolean = false) => (allowedMinus ? yup.number() : yup.number().min(1)),
+  currencyNumber: (decimalPlaces: number, allowMinus: boolean) => decimalPlaceValidator(decimalPlaces, allowMinus)
+} as const;
+
 export const RenderInputField = memo((props: InputProps) => {
   const validationSchema = schemas[props.columnDef.type] || { isValid: () => new Promise((resove) => resove(true)) };
+
+  // isAllowedMinus
 
   if (props.columnDef?.dataList && props.columnDef?.dataListId) {
     return <DataListWrapper {...props} />;
@@ -549,7 +552,7 @@ export const RenderInputField = memo((props: InputProps) => {
       return <RenderTextInput {...props} validationSchema={validationSchema} type="color" />;
     }
     case 'currencyNumber': {
-      return <CurrencyNumber {...props} validationSchema={validationSchema} />;
+      return <CurrencyNumber {...props} validationSchema={validationSchema(props.columnDef.decimalPlaces ?? 2, props.columnDef.isAllowedMinus)} />;
     }
     case 'number': {
       return <RenderTextInput {...props} validationSchema={validationSchema(props.columnDef.isAllowedMinus)} type={'number'} />;
@@ -561,13 +564,19 @@ export const RenderInputField = memo((props: InputProps) => {
       return (
         <RenderTextInput
           {...props}
-          validationSchema={decimalPlaceValidator(props.columnDef.decimalPlaces, props.columnDef.isAllowedMinus)}
+          validationSchema={decimalPlaceValidator(props.columnDef.decimalPlaces ?? 2, props.columnDef.isAllowedMinus)}
           type={'number'}
         />
       );
     }
     case 'currencyAmount': {
-      return <RenderTextInput {...props} validationSchema={decimalPlaceValidator(2)} type={'number'} />;
+      return (
+        <RenderTextInput
+          {...props}
+          validationSchema={decimalPlaceValidator(props.columnDef.decimalPlaces ?? 2, props.columnDef.isAllowedMinus)}
+          type={'number'}
+        />
+      );
     }
     case 'mobileNumber': {
       return <PhoneNumberInput {...props} validationSchema={validationSchema} />;
@@ -586,6 +595,13 @@ export const RenderInputField = memo((props: InputProps) => {
       return <RenderCurrencyAutoComplete {...props} validationSchema={validationSchema} />;
     }
     default:
-      return <RenderTextInput {...props} validationSchema={decimalPlaceValidator(props.columnDef.decimalPlaces || 2)} type={'number'} forceUpdate />;
+      return (
+        <RenderTextInput
+          {...props}
+          validationSchema={decimalPlaceValidator(props.columnDef.decimalPlaces || 2, props.columnDef.isAllowedMinus)}
+          type={'number'}
+          forceUpdate
+        />
+      );
   }
 });

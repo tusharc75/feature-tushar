@@ -107,7 +107,7 @@ const SettingsDialog = ({
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullScreen={fullScreen} fullWidth>
       <CustomDialogHeader
         onClose={onClose}
-        title={'Step Settings - Access Control'}
+        title={'Settings'}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
           setFullScreen((prevState) => !prevState);
