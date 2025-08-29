@@ -45,6 +45,7 @@ const ListView = ({ topRightSlot }) => {
   const [selectedStatus, setSelectedStatus] = useState(localStorage.getItem('contentPostPlanningStatus') || CONTENT_POST_PLANNING_STATUS.pendingApproval);
   const [statusOptions, setStatusOptions] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null, data: null });
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
 
   const types = [
     {
@@ -221,6 +222,7 @@ const ListView = ({ topRightSlot }) => {
           finalObject['canEdit'] = checkIsAllowedToEdit(user, sidebarResource.contentPostPlanning, u)
           return finalObject;
         });
+        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.contentPostPlanning, rows[0]));
         dispatch({ type: 'initialize', data: rows, count: count });
         dispatch({ type: 'loading', loading: false });
       }
@@ -330,15 +332,17 @@ const ListView = ({ topRightSlot }) => {
                   onClick={() => {
                     handleChangeStatus(CONTENT_POST_PLANNING_STATUS.scheduled);
                   }}
+                  disabled={!user?.role?.selectedEntity?.policy?.isApproveContent}
                 >
                   {`Approve `}
                 </MenuItem>
               )}
-              {selectedRecords[0]?.status === CONTENT_POST_PLANNING_STATUS.scheduled && (
+              {selectedRecords[0]?.status === CONTENT_POST_PLANNING_STATUS.scheduled && allowedToEdit && (
                 <MenuItem
                   onClick={() => {
                     handleChangeStatus(CONTENT_POST_PLANNING_STATUS.published);
                   }}
+                  disabled={!user?.role?.selectedEntity?.policy?.isApproveContent}
                 >
                   {`Publish `}
                 </MenuItem>
