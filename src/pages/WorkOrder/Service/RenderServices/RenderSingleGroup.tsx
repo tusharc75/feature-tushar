@@ -33,16 +33,18 @@ const RenderSingleGroup = ({
   }, [selectedService, group?.serviceSteps, group._id]);
 
   return (
-    <div className="relative isolate min-w-0 max-w-full">
-      <div className="relative isolate rounded-[8px]">
-        <div className="absolute inset-0 z-[-1] rounded-[inherit] bg-[#F3F4F6] dark:bg-[--dark-secondary]" />
+    <div className="relative isolate min-w-0 max-w-full rounded-[8px] border">
+      <div
+        className={cn(
+          'relative isolate transition-[border-radius]',
+          expanded ? 'rounded-t-[8px] border-b bg-[rgb(242,245,254)] dark:bg-[--dark-secondary]' : 'rounded-[8px] '
+        )}
+      >
         <div
           className={cn(
-            'flex items-center gap-2 rounded-[inherit] bg-[#F3F4F6] dark:bg-[--dark-secondary]',
+            'flex items-center gap-2 rounded-[inherit] ',
             'data-[selected=true]:![outline:2px_solid_var(--new-theme-color)] ',
-            group?.serviceSteps?.length === 1
-              ? 'cursor-pointer transition-colors data-[selected=false]:outline-theme/50 data-[selected=false]:hover:outline'
-              : '',
+            group?.serviceSteps?.length === 1 ? 'cursor-pointer ' : '',
             isColapsed ? 'justify-center py-4' : 'justify-between p-4 '
           )}
           data-selected={isSelected}
@@ -77,9 +79,8 @@ const RenderSingleGroup = ({
           )}
         </div>
       </div>
-      {expanded && <div className="absolute -left-[10px] top-[25px] z-[-1] h-[calc(100%-68px)] w-full rounded-md border border-r-0 border-dashed" />}
       <Collapse in={expanded}>
-        <div className="bg-[var(--dark-primary,white)]">
+        <div className={cn('rounded-b-[8px] bg-[rgb(248,250,255)] p-4 transition-all dark:bg-[hsl(223,50%,10%)]', isColapsed ? 'p-2' : '')}>
           {!isColapsed && (
             <div className="mb-2 mt-2 flex items-center justify-end gap-2">
               {servicesButtons.map(({ id, children, onClick, visible, ...rest }) => {
