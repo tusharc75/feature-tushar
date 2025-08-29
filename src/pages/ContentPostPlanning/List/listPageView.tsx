@@ -22,6 +22,7 @@ import routes from 'src/components/Helpers/Routes';
 import ButtonMenu from 'src/components/ButtonMenu';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 import { HourglassEmpty, CheckCircle, Schedule } from '@mui/icons-material';
+import OutboxIcon from '@mui/icons-material/Outbox';
 
 const ListView = ({ topRightSlot }) => {
   const renderedFrom = camelCase(sidebarResource?.contentPostPlanning);
@@ -45,6 +46,7 @@ const ListView = ({ topRightSlot }) => {
   const [statusOptions, setStatusOptions] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null });
   const [approvetRecord, setApproveRecord] = useState(null);
+  const [scheduleRecord, setScheduleRecord] = useState(null);
 
   const types = [
     {
@@ -137,16 +139,47 @@ const ListView = ({ topRightSlot }) => {
               <IconButton
                 size="small"
                 aria-label="Approve"
+                disabled={!user?.role?.selectedEntity?.policy?.isApproveAccount}
                 onClick={() => {
                   setApproveRecord(row?.original);
                   setShowConfirmDialog({ open: true, status: CONTENT_POST_PLANNING_STATUS.scheduled });
                 }}
               >
-                <CheckCircle fontSize="small" color="primary" />
+                <CheckCircle fontSize="small" color={!user?.role?.selectedEntity?.policy?.isApproveAccount ? 'disabled' : 'primary'} />
               </IconButton>
             </span>
           </HtmlTooltip>
         )}
+
+        {row?.original?.status === CONTENT_POST_PLANNING_STATUS.scheduled && (() => {
+          const isAuthorized =
+            row?.original?.ownerId === user?.user?._id ||
+            row?.original?.collaboratorId === user?.user?._id ||
+            row?.original?.restcollaborator?.some(c => c.optionValue === user?.user?._id);
+
+          return (
+            <HtmlTooltip title="Published">
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Published"
+                  disabled={!isAuthorized}
+                  onClick={() => {
+                    setScheduleRecord(row?.original);
+                    setShowConfirmDialog({
+                      open: true,
+                      status: CONTENT_POST_PLANNING_STATUS.published,
+                    });
+                  }}
+                >
+                  <OutboxIcon fontSize="small" color={isAuthorized ? "primary" : "disabled"} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          );
+        })()}
+
+
         <HtmlTooltip title={row?.original?.canDelete && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
@@ -276,6 +309,9 @@ const ListView = ({ topRightSlot }) => {
     let _ids = [];
     if (approvetRecord) {
       _ids.push(approvetRecord?._id);
+    }
+    else if (scheduleRecord) {
+      _ids.push(scheduleRecord?._id);
     } else {
       const isSameStatus = selectedRecords?.every((e) => e.status === selectedRecords[0].status);
       if (!isSameStatus) {
@@ -438,7 +474,7 @@ const ListView = ({ topRightSlot }) => {
       {showConfirmDialog.open && (
         <ConfirmationDialog
           open={showConfirmDialog.open}
-          message={`Are you sure you want to approve this post ?`}
+          message={`${showConfirmDialog.status === CONTENT_POST_PLANNING_STATUS.published ? 'Are you sure you want to publish this post?' : 'Are you sure you want to approve this post?'}`}
           onClose={() => {
             setShowConfirmDialog({ open: false, status: null });
           }}

@@ -31,7 +31,7 @@ const ContentPostPlanningDetail = () => {
   const [statusOptions, setStatusOptions] = useState([]);
 
   const {
-    state: { permissions, resources }
+    state: { user, permissions, resources }
   }: any = useData();
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([
     { ...routes.contentPostPlanning, title: resources?.contentPostPlanning?.titlePlural }
@@ -149,41 +149,14 @@ const ContentPostPlanningDetail = () => {
             <>
               {permissions?.contentPostPlanning?.isUpdate && postData?.status !== CONTENT_POST_PLANNING_STATUS.published && (
                 <ThemeButton
-                  onClick={openActions}
-                  endIcon={<ExpandMore />}
-                  mobileTooltip="Change Status"
+                  onClick={() => handleChangeStatus(postData?.status === CONTENT_POST_PLANNING_STATUS.pendingApproval ? CONTENT_POST_PLANNING_STATUS.scheduled : CONTENT_POST_PLANNING_STATUS.published)}
+                  mobileTooltip={postData?.status === CONTENT_POST_PLANNING_STATUS.pendingApproval ? 'Approve' : 'Publish'}
                   iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
+                  disabled={!(postData?.owner?.optionValue === user?.user?._id || postData?.collaborators.some(c => c.optionValue === user?.user?._id))}
                 >
-                  {'Change Status'}
+                  {postData?.status === CONTENT_POST_PLANNING_STATUS.pendingApproval ? 'Approve' : 'Published'}
                 </ThemeButton>
               )}
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                {statusOptions?.map((o) => {
-                  return (
-                    <MenuItem
-                      key={o?.optionValue}
-                      disabled={validateStatus(o?.optionValue)}
-                      onClick={() => {
-                        closeActions();
-                        handleChangeStatus(o?.optionValue);
-                      }}
-                      value={o}
-                    >
-                      {o?.optionLabel}
-                    </MenuItem>
-                  );
-                })}
-              </Menu>
               {permissions?.contentPostPlanning?.isUpdate && postData?.status !== CONTENT_POST_PLANNING_STATUS.published && (
                 <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
