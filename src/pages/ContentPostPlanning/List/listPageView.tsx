@@ -37,12 +37,12 @@ const ListView = ({ topRightSlot }) => {
   const [columns, setColumns] = useState<any>(null);
   const pageTitle = camelCase(`${resources?.contentPostPlanning?.titlePlural}`);
   const { generateColumns, checkStaticField } = useColumns();
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(2);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isEdit: false, idToEdit: null });
-  const [selectedStatus, setSelectedStatus] = useState(CONTENT_POST_PLANNING_STATUS.pendingApproval);
+  const [selectedStatus, setSelectedStatus] = useState(localStorage.getItem('contentPostPlanningStatus') || CONTENT_POST_PLANNING_STATUS.pendingApproval);
   const [statusOptions, setStatusOptions] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null, data: null });
 
@@ -325,18 +325,24 @@ const ListView = ({ topRightSlot }) => {
           !selectedRecords?.some((s) => s.status === CONTENT_POST_PLANNING_STATUS.published) &&
           selectedRecords.every((e) => e.status === selectedRecords[0].status) && (
             <>
-              {statusOptions?.map((status) => {
-                return (
-                  <MenuItem
-                    onClick={() => {
-                      handleChangeStatus(status?.optionValue);
-                    }}
-                    disabled={validateStatus(status?.optionValue)}
-                  >
-                    {`Status Change - ${status?.optionLabel}`}
-                  </MenuItem>
-                );
-              })}
+              {selectedRecords[0]?.status === CONTENT_POST_PLANNING_STATUS.pendingApproval && (
+                <MenuItem
+                  onClick={() => {
+                    handleChangeStatus(CONTENT_POST_PLANNING_STATUS.scheduled);
+                  }}
+                >
+                  {`Approve `}
+                </MenuItem>
+              )}
+              {selectedRecords[0]?.status === CONTENT_POST_PLANNING_STATUS.scheduled && (
+                <MenuItem
+                  onClick={() => {
+                    handleChangeStatus(CONTENT_POST_PLANNING_STATUS.published);
+                  }}
+                >
+                  {`Publish `}
+                </MenuItem>
+              )}
             </>
           )}
       </>
@@ -382,6 +388,7 @@ const ListView = ({ topRightSlot }) => {
               items={statusMenuItems}
               onItemClick={(e, item) => {
                 setSelectedStatus(item.value);
+                localStorage.setItem('contentPostPlanningStatus', item.value);
                 dispatch({ type: 'pageChange', page: 0 });
               }}
             >
