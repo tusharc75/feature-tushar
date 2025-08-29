@@ -881,6 +881,20 @@ const FormTypes = (props) => {
     return isArray(label) ? label?.map((e) => e?.optionLabel)?.toString() : label?.optionLabel || label;
   };
 
+  function isValidNumberString(allowNegative: boolean, input: string): boolean {
+    if (allowNegative) {
+      if (/^-?\d*\.?\d*$/.test(input) || input === "" || input === "-") {
+        return true
+      }
+    }
+    else {
+      if (/^\d*\.?\d*$/.test(input) || input === "") {
+        return true
+      }
+    }
+    return false
+  }
+
   return fieldData?.hiddenField ? null : !fieldData || isFieldVisible(fieldData, fields, values) ? (
     type === 'singleLine' || (type === 'lookUpDisplay' && fromFilter) ? (
       <InfoLabel
@@ -1010,23 +1024,31 @@ const FormTypes = (props) => {
           label={getLabel(label)}
           name={name}
           required={required}
-          value={values[name]}
+          value={values[name] ? values[name].toLocaleString(undefined, {
+            maximumFractionDigits: fieldData?.decimalPlaces
+          }) : values[name]}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
-          ref={inputNumberRef}
-          onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
+          onChange={onChange ? onChange : (e) => {
+            let input = e.target.value;
+            input = input.replace(/,/g, "");
+            if (isValidNumberString(fieldData?.isAllowedMinus, input)) {
+              handleChange(name, input)
+            }
+          }}
+          onBlur={(e) => {
+            let input: any = e.target.value;
+            input = input.replace(/,/g, "");
+            if (isValidNumberString(fieldData?.isAllowedMinus, input)) {
+              handleChange(name, parseFloat(parseFloat(input || 0)?.toFixed(fieldData?.decimalPlaces)));
+            }
+          }}
           slotProps={{
             input: {
               inputProps: {
-                allowNegative: false,
-                onValueChange: (values) => {
-                  handleChange(name, values.value);
-                },
                 selectedCurrencyCode: selectedCurrencyCode
               },
-              startAdornment: startAdornment ? (
-                startAdornment
-              ) : (
+              startAdornment: startAdornment ? (startAdornment) : (
                 <InputAdornment position="start">
                   {result(
                     find(getUniqueCurrencies(), function (obj) {
@@ -1586,7 +1608,6 @@ const FormTypes = (props) => {
                       <TextField
                         {...rest}
                         variant="outlined"
-                        //type="number"
                         label={label + ' ' + _currency + '/' + _unit}
                         name={name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()}
                         required={required}
@@ -1606,24 +1627,20 @@ const FormTypes = (props) => {
                           errors[name + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()]
                         }
                         ref={inputNumberRef}
-                        onChange={
-                          onChange
-                            ? onChange
-                            : (e) => {
-                              if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-                                handleCurrencyChangeWithConverterChange(
-                                  name,
-                                  _currency,
-                                  _unit,
-                                  e.target.value === ''
-                                    ? 0
-                                    : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
-                                      ? e.target.value.replace(/,/g, '')
-                                      : parseFloat(e.target.value.replace(/,/g, ''))
-                                );
-                              }
-                            }
-                        }
+                        onChange={onChange ? onChange : (e) => {
+                          let input = e.target.value;
+                          input = input.replace(/,/g, "");
+                          if (isValidNumberString(fieldData?.isAllowedMinus, input)) {
+                            handleCurrencyChangeWithConverterChange(name, _currency, _unit, input);
+                          }
+                        }}
+                        onBlur={(e) => {
+                          let input: any = e.target.value;
+                          input = input.replace(/,/g, "");
+                          if (isValidNumberString(fieldData?.isAllowedMinus, input)) {
+                            handleCurrencyChangeWithConverterChange(name, _currency, _unit, parseFloat(parseFloat(input || 0)?.toFixed(fieldData?.decimalPlaces)));
+                          }
+                        }}
                         slotProps={{
                           input: {
                             startAdornment: (
@@ -1636,7 +1653,6 @@ const FormTypes = (props) => {
                                 )}
                               </InputAdornment>
                             ),
-                            inputProps: { min: 0, max: 9999999999 },
                             readOnly: fieldData && fieldData?.isUneditable ? true : false
                           }
                         }}
@@ -1734,7 +1750,6 @@ const FormTypes = (props) => {
                     <TextField
                       {...rest}
                       variant="outlined"
-                      //type="number"
                       label={label + ' ' + _currency}
                       name={name + '_' + _currency.toLowerCase()}
                       required={required}
@@ -1752,28 +1767,26 @@ const FormTypes = (props) => {
                         onChange
                           ? onChange
                           : (e) => {
-                            if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+                            let input = e.target.value;
+                            input = input.replace(/,/g, "");
+                            if (isValidNumberString(fieldData?.isAllowedMinus, input)) {
                               if (fieldData?.displayCurrency?.length > 1) {
-                                handleCurrencyChange(name, _currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+                                handleCurrencyChange(name, _currency, input);
                               } else {
-                                handleChange(name + '_' + _currency.toLowerCase(), e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+                                handleChange(name + '_' + _currency.toLowerCase(), input);
                               }
                             }
                           }
                       }
                       onBlur={(e) => {
-                        if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+                        let input: any = e.target.value;
+                        input = input.replace(/,/g, "");
+                        if (isValidNumberString(fieldData?.isAllowedMinus, input)) {
                           if (fieldData?.displayCurrency?.length > 1) {
-                            handleCurrencyChange(
-                              name,
-                              _currency,
-                              e.target.value === '' ? 0 : parseFloat(parseFloat(e.target.value.replace(/,/g, ''))?.toFixed(fieldData?.decimalPlaces))
+                            handleCurrencyChange(name, _currency, parseFloat(parseFloat(input || 0)?.toFixed(fieldData?.decimalPlaces))
                             );
                           } else {
-                            handleChange(
-                              name + '_' + _currency.toLowerCase(),
-                              e.target.value === '' ? 0 : parseFloat(parseFloat(e.target.value.replace(/,/g, ''))?.toFixed(fieldData?.decimalPlaces))
-                            );
+                            handleChange(name + '_' + _currency.toLowerCase(), parseFloat(parseFloat(input || 0)?.toFixed(fieldData?.decimalPlaces)));
                           }
                         }
                       }}
@@ -1789,7 +1802,6 @@ const FormTypes = (props) => {
                               )}
                             </InputAdornment>
                           ),
-                          inputProps: { min: 0 },
                           readOnly: fieldData && fieldData?.isUneditable ? true : false
                         }
                       }}

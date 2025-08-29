@@ -597,7 +597,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
-            {(fieldData.type === 'number' || fieldData.type === 'decimal') && (
+            {(fieldData.type === 'number' || fieldData.type === 'decimal' || fieldData.type === 'currencyAmount' || fieldData.type === 'currencyNumber') && (
               <FormControlLabel
                 control={
                   <Checkbox
