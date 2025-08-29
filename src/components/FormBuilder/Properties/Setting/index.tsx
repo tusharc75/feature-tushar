@@ -600,6 +600,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
         </Grid>
       </Box>
       <Box>
+        {console.log(fieldData)}
         <Grid container>
           <Grid item xs={12} md={6}>
             {(fieldData.type === 'number' ||
