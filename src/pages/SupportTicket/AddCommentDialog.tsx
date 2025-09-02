@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, Grid } from '@mui/material';
+import { Dialog, DialogContent } from '@mui/material';
 import { useState, useContext } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
@@ -96,19 +96,17 @@ const AddCommentDialog = ({ onClose, supportTicketData, uniqueId, fetchData }: A
       <CustomDialogHeader title="Add Comment" onClose={onClose} />
       <DialogContent>
         <div >
-          <Grid container spacing={2} style={{ marginTop: '8px' }}>
-            <Grid item xs={12}>
-              <TinyMce
-                id="comment-dialog"
-                onChange={(value) => {
-                  setComment(value);
-                }}
-                initialValue={''}
-                height={200}
-                doNotShowUploadFile={true}
-              />
-            </Grid>
-          </Grid>
+          <div className="mt-3">
+            <TinyMce
+              id="comment-dialog"
+              onChange={(value) => {
+                setComment(value);
+              }}
+              initialValue={''}
+              height={300}
+              doNotShowUploadFile={true}
+            />
+          </div>
           <div className="mb-3">
             {attachments.length > 0 && (
               <AttachmentThumbnail
@@ -143,15 +141,18 @@ const AddCommentDialog = ({ onClose, supportTicketData, uniqueId, fetchData }: A
       </DialogContent>
       <CustomDialogFooter>
         <ThemeButton
+          buttonType='transparent'
+          onClick={onClose}>
+          Cancel
+        </ThemeButton>
+        <ThemeButton
           disabled={comment === '' && attachments.length === 0}
           buttonType="theme"
           onClick={handleSubmit}
         >
           Send
         </ThemeButton>
-        <ThemeButton buttonType="themeBorder" onClick={onClose}>
-          Cancel
-        </ThemeButton>
+
       </CustomDialogFooter>
     </Dialog>
   );
