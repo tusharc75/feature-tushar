@@ -153,16 +153,16 @@ const WorkOrder = ({
       {
         accessor: 'type',
         Header: 'Type',
-        width: 100,
+        width: 150,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row.original['type'] ? <div>
-          <h5>{`${getMaterialLabel(row.original?.type)}
+          <h5>{`${getMaterialLabel(row.original?.type, row.original?.parentId)}
           ${row.original?.type === MATERIAL_TYPE.product ? row.original?.productDetail?.serializedProduct ? ' (Serialized)' : ' (Non-Serialized)' :
               row.original.type === MATERIAL_TYPE.service ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                 : ''}`}</h5>
         </div> : <NoDataCell />),
         accessorFn: (original) => {
-          return getMaterialLabel(original?.type);
+          return getMaterialLabel(original?.type, original?.parentId);
         }
       },
       {
