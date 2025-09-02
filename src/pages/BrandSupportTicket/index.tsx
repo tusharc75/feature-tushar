@@ -26,7 +26,7 @@ const BrandSupportTicket = () => {
     const {
         state: { user, selectedEntity, permissions }
     }: any = useData();
-    const [selectedBrand, setSelectedBrand] = useState({ optionValue: user?.user?.brand, optionLabel: user?.user?.brandName });
+    const [selectedBrand, setSelectedBrand] = useState(null);
     const [brandList, setBrandList] = useState([]);
     const [renderCount, setRenderCount] = useState(0);
     const [columns, setColumns] = useState(null);
@@ -36,9 +36,6 @@ const BrandSupportTicket = () => {
     }, []);
 
     useEffect(() => {
-        if (!selectedBrand) {
-            setSelectedBrand({ optionValue: user?.user?.brand, optionLabel: user?.user?.brandName });
-        }
         fetchGridColumns();
     }, [selectedBrand]);
 
@@ -80,9 +77,12 @@ const BrandSupportTicket = () => {
     };
 
     const getQueryString = (isExport = false) => {
-        let deepFilter = `?page=${page}&limit=${limit}&brand=${selectedBrand?.optionValue || user?.user?.brand}`;
+        let deepFilter = `?page=${page}&limit=${limit}`;
         if (isExport) {
             deepFilter = `?`;
+        }
+        if (selectedBrand) {
+            deepFilter = `${deepFilter}&brand=${selectedBrand?.optionValue || user?.user?.brand}`;
         }
         const { filterByIds, deepFilters } = gridFilterParser(filters);
         if (filterByIds?.length) {
