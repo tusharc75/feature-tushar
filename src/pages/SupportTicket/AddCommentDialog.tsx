@@ -3,12 +3,12 @@ import { useState, useContext } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import TinyMce from 'src/components/TinyMCE';
-import AttachmentThumbnail from 'src/pages/SupportTicket/AttachmentThumbnail';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import routes from 'src/components/Helpers/Routes';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 
 interface AddCommentDialogProps {
   onClose: () => void;
@@ -115,7 +115,6 @@ const AddCommentDialog = ({ onClose, supportTicketData, uniqueId, fetchData }: A
                 attachments={attachments}
                 handleDeleteAttachment={handleDeleteAttachment}
                 allowedToEdit={true}
-                brand={supportTicketData?.brand}
               />
             )}
           </div>

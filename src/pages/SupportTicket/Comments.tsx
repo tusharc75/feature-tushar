@@ -9,8 +9,8 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { displayDateTime } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useData } from 'src/StateProvider/Provider';
-import AttachmentThumbnail from 'src/pages/SupportTicket/AttachmentThumbnail';
 import AddCommentDialog from 'src/pages/SupportTicket/AddCommentDialog';
+import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 
 const Comments = ({ uniqueId, supportTicketData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -81,7 +81,6 @@ const Comments = ({ uniqueId, supportTicketData }) => {
                         attachments={item.attachments}
                         handleDeleteAttachment={() => { }}
                         allowedToEdit={false}
-                        brand={supportTicketData?.brand}
                       />
                     </div>
                   )}
