@@ -302,6 +302,16 @@ const ReceivingTicket = ({
         });
       }
     }
+    if (action === rentalManagementActions.transferToAnotherRental) {
+      const serializedPackageIds = uniq(map(getFilterSelectedRecords()?.filter((e) => e?.serializedPackageId), 'serializedPackageId'));
+      const allRecord = getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset, flattenArray(dataRows));
+      records = [...getFilterSelectedRecords()?.filter((e) => !e?.serializedPackageId), ...allRecord?.filter((e) => serializedPackageIds?.includes(e?.serializedPackageId))];
+
+      if (records?.length != getFilterSelectedRecords()?.length) {
+        errorMessages.push({ index: 1, message: rentalManagementMessage.selectAllAssetOfSerializedPackage });
+      }
+    }
+
     records.forEach((e) => {
       if (action === rentalManagementActions.deliveredToCustomer) {
         if (!e.hasOwnProperty('loadingTicketId')) {
@@ -1050,6 +1060,8 @@ const ReceivingTicket = ({
       obj.warehouseId = _subRow?.inventory?.warehouse?.optionValue;
       obj.currentOwner = _subRow?.inventory?.currentOwner;
       obj.currentLocation = _subRow?.inventory?.currentLocation?.optionValue;
+      obj.serializedPackageId = _subRow?.inventory?.serializedPackage?.optionValue;
+      obj.serializedPackage = _subRow?.inventory?.serializedPackage?.optionLabel;
       const loadingTicket = loadingTicketAssets?.find((e) => e?.asset === obj?._id && e?.uniqueId === obj?.uniqueId);
       if (loadingTicket) {
         obj.loadingTicket = loadingTicket?.loadingTicket;
@@ -1097,12 +1109,6 @@ const ReceivingTicket = ({
       obj.isAllowedEndDate = obj?.manualEndDate ? true : false;
       if (obj?.isAllowedEndDate && invoiceMaterial) {
         obj.minEndDate = new Date(invoiceMaterial?.endDate);
-      }
-
-      const serializedPackage = material?.find(m => m?._id === obj?.uniqueId && m?.materialId === obj?.materialId)?.serializedPackage
-      if (serializedPackage) {
-        obj.serializedPackage = serializedPackage?.optionLabel;
-        obj.serializedPackageId = serializedPackage?.optionValue
       }
 
       rows.push({ ..._subRow?.inventory, ...obj });
@@ -3710,7 +3716,7 @@ const ActionButtonMenuItems = ({
           </MenuItem>
         </HtmlTooltip>
       )}
-      {!isOffline && !getFilterSelectedRecords()?.some(r => r?.serializedPackageId) &&
+      {!isOffline &&
         ((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
           (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
           <MenuItem

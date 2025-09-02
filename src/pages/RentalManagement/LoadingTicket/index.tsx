@@ -1018,6 +1018,8 @@ const LoadingTicket = ({
       obj.warehouseId = _subRow?.inventory?.warehouse?.optionValue;
       obj.currentOwner = _subRow?.inventory?.currentOwner;
       obj.currentLocation = _subRow?.inventory?.currentLocation?.optionValue;
+      obj.serializedPackageId = _subRow?.inventory?.serializedPackage?.optionValue;
+      obj.serializedPackage = _subRow?.inventory?.serializedPackage?.optionLabel;
       const loading = loadingTicketAssets?.find((e) => e?.asset === obj?._id && e?.uniqueId === obj?.uniqueId);
       if (loading) {
         obj.loadingTicket = loading?.loadingTicket;
@@ -1032,11 +1034,6 @@ const LoadingTicket = ({
 
       obj.mtrAttachedView = _subRow?.inventory?.mtrAttached ? 'Yes' : 'No';
 
-      const serializedPackage = material?.find(m => m?._id === obj?.uniqueId && m?.materialId === obj?.materialId)?.serializedPackage
-      if (serializedPackage) {
-        obj.serializedPackage = serializedPackage?.optionLabel;
-        obj.serializedPackageId = serializedPackage?.optionValue
-      }
       rows.push({ ..._subRow?.inventory, ...obj });
     });
     return rows;

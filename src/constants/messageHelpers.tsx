@@ -104,6 +104,7 @@ export const rentalManagementMessage = {
   canNotChangeEndDate: `Can not change End Date`,
   invoiceCreated: `Invoice already created`,
   sameAssetsSelected: `Same Assets Selected`,
+  selectAllAssetOfSerializedPackage: `Please select the all asset of serializedPackage`,
   onlyInUseAssetsChangeSubStatus: `Sub status can be changed only In-Use assets`
 };
 
