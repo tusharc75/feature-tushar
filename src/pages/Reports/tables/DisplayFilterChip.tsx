@@ -128,7 +128,6 @@ const DisplayFilterChip = ({
       {filters.otherData?.map((d) => {
         const sign = ['checkBox'].includes(colTypeMap[d.field]) ? ':' : filterTerm[d.field] === '$nin' ? '≠' : '=';
         if (Array.isArray(d.term) && typeof d.term[0] === 'object') {
-          console.log(d)
           return (
             <RenderObjectArray
               sign={sign}
