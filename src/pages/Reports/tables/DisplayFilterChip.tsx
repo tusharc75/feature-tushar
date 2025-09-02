@@ -62,6 +62,14 @@ const chipClassName =
 
 const SPLIT_SIGN = ' =|= ';
 
+const operators = {
+  'gte': ' >=',
+  'gt': ' >',
+  'lte': ' <=',
+  'lt': ' <',
+  'eq': ' ='
+};
+
 const DisplayFilterChip = ({
   deepFilters,
   filterByIds,
@@ -119,6 +127,19 @@ const DisplayFilterChip = ({
     <div className="flex flex-wrap gap-2 md:max-w-[calc(100%-100px)]">
       {filters.otherData?.map((d) => {
         const sign = ['checkBox'].includes(colTypeMap[d.field]) ? ':' : filterTerm[d.field] === '$nin' ? '≠' : '=';
+        if (Array.isArray(d.term) && typeof d.term[0] === 'object') {
+          console.log(d)
+          return (
+            <RenderObjectArray
+              sign={sign}
+              colNameMap={colNameMap}
+              key={d.field}
+              data={d as FilterObjectArray}
+              handleClearFilter={handleClearFilter}
+              disableClear={disableClear}
+            />
+          );
+        }
         if (typeof d.term === 'string') {
           return (
             <RenderSringType
@@ -257,14 +278,34 @@ const RenderObject = <D extends FilterObject>({ data, handleClearFilter, colName
     </Tooltip>
   );
 };
-const RenderObjectArray = <D extends FilterObjectArray>({ data, handleClearFilter, colNameMap, sign, disableClear }: ChipProps<D>) => {
+const RenderObjectArray = <D extends FilterObjectArray>({
+  data,
+  handleClearFilter,
+  colNameMap,
+  sign,
+  disableClear
+}: ChipProps<D>) => {
   if (data?.term?.length === 0) return null;
+  const isNumberOp = data.term.every((t: any) => t?.operation && t?.value !== undefined);
+  const displayValue = isNumberOp
+    ? data.term.map((t: any) => `${operators[t.operation as keyof typeof operators] || t.operation} ${t.value}`).join(", ")
+    : data.term.map((d: any) => d?.optionLabel).join(", ");
+
+  const tooltipValue = isNumberOp
+    ? data.term.map((t: any) => `${operators[t.operation as keyof typeof operators] || t.operation} ${t.value}`).join(SPLIT_SIGN)
+    : data.term.map((d: any) => d?.optionLabel).join(SPLIT_SIGN);
+
   return (
-    <Tooltip sign={sign as any} label={colNameMap[data.field]} value={data.term?.map?.((d) => d?.optionLabel).join(SPLIT_SIGN) || ''}>
+    <Tooltip sign={sign as any} label={colNameMap[data.field]} value={tooltipValue}>
       <div className={cn(chipClassName)}>
         <span className={cn(textClassName)}>
-          {colNameMap[data.field]}&nbsp;{sign}&nbsp;
-          {data.term?.map?.((d) => d?.optionLabel).join(', ') || ''}
+          {colNameMap[data.field]}
+          {!isNumberOp && (
+            <>
+              &nbsp;{sign}&nbsp;
+            </>
+          )}
+          {displayValue}
         </span>
         {!disableClear && (
           <IconButton size="small" style={buttonStyle} onClick={() => handleClearFilter([data.field])}>

@@ -304,6 +304,7 @@ import OnboardingTemplateDetail from 'src/pages/OnboardingTemplate/OnboardingTem
 import QuickBookProxy from 'src/pages/Integration/QuickBookProxy';
 import Onboarding from 'src/pages/Onboarding';
 import OnboardingDetail from 'src/pages/Onboarding/OnboardingDetail';
+import BrandSupportTicket from './pages/BrandSupportTicket';
 
 var notificationInterval: any = null;
 
@@ -970,6 +971,9 @@ function App() {
             <PrivateRoute exact path={`${routes.contactUsDetail.path}/:id`}>
               <ContactUsDetail />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.brandSupportTicket.path}>
+              <BrandSupportTicket />
+            </PrivateRoute>
             <PrivateRoute exact path={routes.supportTicket.path}>
               <SupportTicket />
             </PrivateRoute>
@@ -1333,7 +1337,7 @@ function App() {
             <PrivateRoute exact path={`${routes.fieldView.path}/:padId/:wellId`}>
               <FieldView />
             </PrivateRoute>
-             <PrivateRoute exact path={`${routes.onboarding.path}`}>
+            <PrivateRoute exact path={`${routes.onboarding.path}`}>
               <Onboarding />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.onboardingDetail.path}/:id`}>
