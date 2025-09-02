@@ -202,7 +202,3 @@ const TimelineElement = () => (
   </TimlineProvider>
 );
 export default TimelineElement;
-
-// template: function (item, element, data) {
-//   return ReactDOM.render(<b>{item.content}</b>, element);
-// },
