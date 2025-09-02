@@ -283,7 +283,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
 
   return (
     <>
-      {permissions?.assemblyOrder?.isRead && !childItem && (
+      {!childItem && (
         <>
           <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-2">
             <ContainedTab value={0} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]}-WO`} />
@@ -293,15 +293,17 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
           </ContainedTabs>
         </>
       )}
-      <DetailsPageHeader
-        isAddButtonVisible={allowedToEdit}
-        addButtonMenuItems={addButtonMenuItems()}
-        rightSideContents={rightSideContents()}
-        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        isActionButtonVisible={allowedToEdit}
-        hasXpadding
-      />
+      {allowedToEdit &&
+        <DetailsPageHeader
+          isAddButtonVisible={allowedToEdit}
+          addButtonMenuItems={addButtonMenuItems()}
+          rightSideContents={rightSideContents()}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          isActionButtonVisible={allowedToEdit}
+          hasXpadding
+        />
+      }
       {columns ? (
         <CustomReactTable
           height={fullHeight ? 'calc(100vh - 250px)' : 'calc(100vh - 393px)'}

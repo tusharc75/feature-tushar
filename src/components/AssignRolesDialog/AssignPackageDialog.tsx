@@ -379,26 +379,24 @@ const AssignPackageDialog = ({
             <CustomDialogContent>
               <Box>
                 <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                  {permissions?.serializedPackages && <CustomTab value={0}>Child Items</CustomTab>}
-                  <CustomTab value={1}>Products</CustomTab>
-                  <CustomTab value={2}>Sub Packages</CustomTab>
-                  <CustomTab value={3}>Services</CustomTab>
+                  <CustomTab value={0}>Child Items</CustomTab>
+                  {permissions?.assemblyOrder && <CustomTab value={1}>Consumables</CustomTab>}
+                  <CustomTab value={2}>Services</CustomTab>
+                  <CustomTab value={3}>{`Sub ${resources?.packages?.titlePlural}`}</CustomTab>
                 </CustomTabs>
                 <Grid container spacing={2}>
                   <Grid size={{ md: 12, lg: 12, xs: 12, sm: 12 }}>
                     <TabPanel value={tabValue} index={0}>
-                      {tabValue === 0 && (
-                        <Products packageData={open?.data} packageId={open?.data?._id} allowedToEdit={false} fullHeight={true} childItem={true} />
-                      )}
+                      {tabValue === 0 && <Products packageData={open?.data} packageId={open?.data?._id} allowedToEdit={false} fullHeight={true} childItem={true} />}
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
                       {tabValue === 1 && <Products packageData={open?.data} packageId={open?.data?._id} allowedToEdit={false} fullHeight={true} />}
                     </TabPanel>
                     <TabPanel value={tabValue} index={2}>
-                      {tabValue === 2 && <Packages packageData={open?.data} packageId={open?.data?._id} allowedToEdit={false} fullHeight={true} />}
+                      {tabValue === 2 && <Services packageData={open?.data} packageId={open?.data?._id} allowedToEdit={false} fullHeight={true} />}
                     </TabPanel>
                     <TabPanel value={tabValue} index={3}>
-                      {tabValue === 3 && <Services packageData={open?.data} packageId={open?.data?._id} allowedToEdit={false} fullHeight={true} />}
+                      {tabValue === 3 && <Packages packageData={open?.data} packageId={open?.data?._id} allowedToEdit={false} fullHeight={true} />}
                     </TabPanel>
                   </Grid>
                 </Grid>
