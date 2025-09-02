@@ -1132,6 +1132,7 @@ const LoadingTicket = ({
         obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
         obj.storageLocation = element?.storageLocation?.optionLabel;
         obj.storageLocationId = element?.storageLocation?.optionValue;
+        obj.serializedPackage = element?.serializedPackage;
         obj.status = element?.productDetail?.hasOwnProperty('serializedProduct') && element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
         obj.rentalAssetStatus = element?.status;
         obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
@@ -1174,6 +1175,7 @@ const LoadingTicket = ({
         obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
         obj.storageLocation = element?.storageLocation?.optionLabel;
         obj.storageLocationId = element?.storageLocation?.optionValue;
+        obj.serializedPackage = element?.serializedPackage;
         obj.wellNumber = getParentWellNumber(material, element?._id);
         obj.nonSerializedProductSerialNumbers = element?.nonSerializedProductSerialNumbers;
         if (isSerialNumberProduct) {
