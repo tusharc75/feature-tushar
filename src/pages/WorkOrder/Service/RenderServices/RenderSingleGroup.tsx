@@ -80,7 +80,13 @@ const RenderSingleGroup = ({
         </div>
       </div>
       <Collapse in={expanded}>
-        <div className={cn('rounded-b-[8px] bg-[rgb(248,250,255)] p-4 transition-all dark:bg-[#111827]', isColapsed ? 'p-2' : '')}>
+        <div
+          className={cn(
+            'rounded-b-[8px] bg-[rgb(248,250,255)] p-4 transition-all dark:bg-[#111827]',
+            isColapsed ? 'p-2' : '',
+            isSelected ? 'dark:bg-[#1E293B]' : ''
+          )}
+        >
           {!isColapsed && (
             <div className="mb-2 mt-2 flex items-center justify-end gap-2">
               {servicesButtons.map(({ id, children, onClick, visible, ...rest }) => {

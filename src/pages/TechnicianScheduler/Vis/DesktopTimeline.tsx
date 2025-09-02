@@ -52,7 +52,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       zoomKey: 'ctrlKey',
       start: currentRange.current?.start ? currentRange.current.start : dayjs().subtract(10, 'day').toDate(),
       end: currentRange.current?.end ? currentRange.current.end : dayjs().add(10, 'day').toDate(),
-      minHeight: 62,
+      minHeight: Math.max(window.innerHeight - 200, 400),
       maxHeight: window.innerHeight - 200,
       selectable: false,
       groupHeightMode: 'auto',

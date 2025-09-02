@@ -820,6 +820,7 @@ const Services = ({
               rentalManagementData={rentalManagementData}
               selectedService={selectedServiceOption}
               services={serviceOption}
+              rentalPolicyData={rentalPolicyData}
             />
           </Box>
         </div>
