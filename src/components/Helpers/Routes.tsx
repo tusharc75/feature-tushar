@@ -464,6 +464,10 @@ const routes = {
   contactUsDetail: {
     path: '/contact-us/detail'
   },
+  brandSupportTicket: {
+    path: '/brand-support-tickets',
+    title: 'Brand Support Tickets'
+  },
   supportTicket: {
     path: '/support-ticket',
     title: 'Support Ticket'
