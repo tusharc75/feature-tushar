@@ -177,7 +177,7 @@ const SupportTicketDetail = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          {supportTicketData && <Comments uniqueId={id} />}
+          {supportTicketData && <Comments uniqueId={id} supportTicketData={supportTicketData} />}
         </TabPanel>
       </Box>
       {showConfirmBox && (
