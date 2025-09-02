@@ -127,10 +127,10 @@ const PackageDetails = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
-          {permissions?.serializedPackages && <CustomTab value={1}>Child Items</CustomTab>}
-          <CustomTab value={2}>Consumables</CustomTab>
-          <CustomTab value={3}>{`Sub ${resources?.packages?.titlePlural}`}</CustomTab>
-          <CustomTab value={4}>Services</CustomTab>
+          <CustomTab value={1}>Child Items</CustomTab>
+          {permissions?.assemblyOrder && <CustomTab value={2}>Consumables</CustomTab>}
+          <CustomTab value={3}>Services</CustomTab>
+          <CustomTab value={4}>{`Sub ${resources?.packages?.titlePlural}`}</CustomTab>
           <CustomTab value={5}>Drawings</CustomTab>
         </CustomTabs>
         <Grid container spacing={2}>
@@ -154,10 +154,10 @@ const PackageDetails = () => {
               {tabValue === 2 && <Products packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
             <TabPanel value={tabValue} index={3}>
-              {tabValue === 3 && <Packages packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
+              {tabValue === 3 && <Services packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
             <TabPanel value={tabValue} index={4}>
-              {tabValue === 4 && <Services packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
+              {tabValue === 4 && <Packages packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
             <TabPanel value={tabValue} index={5}>
               <Diagram resource={ACTIVITY_RESOURCE.packages} referenceId={id} attachmentType={ATTACHMENT_TYPE.drawing} />

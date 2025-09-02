@@ -244,15 +244,16 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
 
   return (
     <>
-      <DetailsPageHeader
-        isAddButtonVisible={allowedToEdit}
-        addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={allowedToEdit}
-        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-        rightSideContents={rightSideContents()}
-        hasXpadding
-        actionButtonMenuItems={actionButtonMenuItems()}
-      />
+      {allowedToEdit &&
+        <DetailsPageHeader
+          isAddButtonVisible={allowedToEdit}
+          addButtonMenuItems={addButtonMenuItems()}
+          isActionButtonVisible={allowedToEdit}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          rightSideContents={rightSideContents()}
+          hasXpadding
+          actionButtonMenuItems={actionButtonMenuItems()}
+        />}
       {columns ? (
         <CustomReactTable
           height={fullHeight ? 'calc(100vh - 250px)' : 'calc(100vh - 393px)'}
