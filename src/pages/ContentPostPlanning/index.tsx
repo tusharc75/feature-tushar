@@ -1,5 +1,4 @@
-import { Box, IconButton } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import { Box } from '@mui/material';
 import { useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import IconButtonTabs from 'src/components/IconButtonTabs';
@@ -16,6 +15,7 @@ import { sidebarResource } from 'src/constants/helpers';
 type ViewType = 'calendar' | 'list';
 
 const ContentPostPlanning = () => {
+
   const renderedFrom = camelCase(sidebarResource?.contentPostPlanning);
   const {
     state: { resources }
@@ -28,7 +28,7 @@ const ContentPostPlanning = () => {
   };
 
   const [view, setView] = useState<ViewType>(() => {
-    return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'calendar';
+    return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'list';
   });
 
   useEffect(() => {
@@ -41,7 +41,9 @@ const ContentPostPlanning = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ ...routes.contentPostPlanning, title: resources?.contentPostPlanning?.titlePlural }]} />
       </div>
-      {view === 'calendar' ? <CalenderView topRightSlot={topRightSlot} /> : <ListView topRightSlot={topRightSlot} />}
+      {view === 'calendar' ?
+        <CalenderView topRightSlot={topRightSlot} />
+        : <ListView topRightSlot={topRightSlot} />}
     </Box>
   );
 };

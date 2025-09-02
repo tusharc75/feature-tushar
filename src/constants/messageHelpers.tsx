@@ -19,6 +19,7 @@ export const addDisable = 'You do not have permission to Add';
 export const updateDisable = 'You do not have permission to Update';
 export const childDisable = 'You do not have permission to View Child';
 export const mobileNotSupported = 'Mobile device not supported.Kindly open this page in Laptop/Desktop browser.'
+export const approveDisable = 'You do not have permission to Approve';
 
 
 export const rentalManagementActions = {
