@@ -68,10 +68,8 @@ const View = ({
       setUserHasStepPermission(false);
     }
   }, [step, user]);
-  
-  const canEdit = userHasStepPermission? allowedToEdit && userHasStepPermission : false;
 
-  const editingPermission = resource === "Onboarding" ? canEdit : allowedToEdit;
+  const editingPermission = resource === "Onboarding" ? userHasStepPermission : allowedToEdit;
 
   useEffect(() => {
     fetchColumns();
