@@ -325,6 +325,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'enableTechnicianDispatchReturn',
+        fieldLabel: 'Enable Technician Dispatch Return',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'loadingReceivingDefaultView',
         fieldLabel: 'Loading Receiving Default View',
         type: 'dropDown',

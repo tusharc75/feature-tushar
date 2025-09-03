@@ -226,7 +226,7 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
             setFieldValue(name, content?.level?.content);
           }}
           init={{
-            height: '150px',
+            height: '300px',
             width: '100%',
             table_default_attributes: {
               border: '0'

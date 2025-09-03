@@ -262,7 +262,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
             if (data === undefined) {
               errors['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()] = 'Enter valid price';
             }
-            if (parseFloat(data) <= 0) {
+            if (parseFloat(data) < 0) {
               errors['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()] = 'Enter valid price';
             }
           });
@@ -277,7 +277,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
             if (data === undefined) {
               errors['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] = 'Enter valid price';
             }
-            if (parseFloat(data) <= 0) {
+            if (parseFloat(data) < 0) {
               errors['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] = 'Enter valid price';
             }
           }
@@ -290,7 +290,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
               if (values[_fieldName] === undefined) {
                 errors[_fieldName] = 'Enter valid price';
               }
-              if (parseFloat(values[_fieldName]) <= 0) {
+              if (parseFloat(values[_fieldName]) < 0) {
                 errors[_fieldName] = 'Enter valid price';
               }
 

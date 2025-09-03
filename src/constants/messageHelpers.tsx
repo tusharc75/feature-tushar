@@ -19,6 +19,7 @@ export const addDisable = 'You do not have permission to Add';
 export const updateDisable = 'You do not have permission to Update';
 export const childDisable = 'You do not have permission to View Child';
 export const mobileNotSupported = 'Mobile device not supported.Kindly open this page in Laptop/Desktop browser.'
+export const approveDisable = 'You do not have permission to Approve';
 
 
 export const rentalManagementActions = {
@@ -103,6 +104,7 @@ export const rentalManagementMessage = {
   canNotChangeEndDate: `Can not change End Date`,
   invoiceCreated: `Invoice already created`,
   sameAssetsSelected: `Same Assets Selected`,
+  selectAllAssetOfSerializedPackage: `Please select the all asset or serial numbers of serializedPackage`,
   onlyInUseAssetsChangeSubStatus: `Sub status can be changed only In-Use assets`
 };
 

@@ -36,7 +36,9 @@ const History = ({ id }) => {
                 ? routes?.rentalManagementDetail?.path
                 : row?.original?.type === sidebarResource?.deliveryTicket
                   ? routes?.deliveryTicketDetail?.path
-                  : null;
+                  : row?.original?.type === sidebarResource?.workOrder
+                    ? routes?.workOrderDetail?.path
+                    : null;
         return (
           <div>
             {row.original.reference ? (

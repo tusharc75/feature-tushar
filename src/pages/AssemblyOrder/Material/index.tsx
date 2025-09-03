@@ -21,7 +21,7 @@ import {
   CHILD_RESOURCE,
   MATERIAL_TYPE,
   PACKAGE_TYPE,
-  SERIALIZED_PACKAGES_STATUS,
+  SERIALIZED_PACKAGE_STATUS,
   sidebarResource,
   WORK_ORDER_TYPE
 } from '../../../constants/helpers';
@@ -78,11 +78,11 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       {
         accessor: 'type',
         Header: 'Type',
-        width: 100,
+        width: 150,
         sticky: isMobile || isTablet ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type)}`}</h5> : <NoDataCell />),
+        Cell: ({ row }) => (row.original['type'] ? <div><h5>{`${getMaterialLabel(row.original?.type, row.original?.parentId)}`}</h5></div> : <NoDataCell />),
         accessorFn: (original) => {
-          return getMaterialLabel(original?.type);
+          return getMaterialLabel(original?.type, original?.parentId);
         }
       },
       {
@@ -546,7 +546,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         <AssignSerializedPackagesDialog
           onSuccess={handleAdd}
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
-          extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGES_STATUS.available, SERIALIZED_PACKAGES_STATUS.underReview] }]}
+          extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGE_STATUS.available, SERIALIZED_PACKAGE_STATUS.underReview] }]}
           referenceData={{ warehouse: assemblyOrderData?.warehouse }}
           isSubmitting={isSubmitting}
         />
@@ -571,7 +571,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             setOpenSerializedPackagesDialog(false);
           }}
           referenceData={{ warehouse: assemblyOrderData?.warehouse }}
-          extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGES_STATUS.available, SERIALIZED_PACKAGES_STATUS.underReview] }]}
+          extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGE_STATUS.available, SERIALIZED_PACKAGE_STATUS.underReview] }]}
           isSubmitting={isSubmitting}
           ids={dataRows?.map((d) => d?.serializedPackageId)}
           selectedPackages={selectedRecords

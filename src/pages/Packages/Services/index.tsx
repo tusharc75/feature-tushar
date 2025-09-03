@@ -7,7 +7,6 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { TabPanel } from 'src/components/CustomTabs';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DescriptionIcon from '@mui/icons-material/Description';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -296,7 +295,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
 
   return (
     <Box>
-      {permissions?.assemblyOrder?.isRead && (
+      {permissions?.assemblyOrder && (
         <>
           <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-2">
             <ContainedTab value={0} label={`Field`} />
@@ -307,15 +306,17 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
           </ContainedTabs>
         </>
       )}
-      <DetailsPageHeader
-        isAddButtonVisible={allowedToEdit}
-        addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={allowedToEdit}
-        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        rightSideContents={rightSideContents()}
-        hasXpadding
-      />
+      {allowedToEdit &&
+        <DetailsPageHeader
+          isAddButtonVisible={allowedToEdit}
+          addButtonMenuItems={addButtonMenuItems()}
+          isActionButtonVisible={allowedToEdit}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          rightSideContents={rightSideContents()}
+          hasXpadding
+        />
+      }
       {columns ? (
         <CustomReactTable
           height={fullHeight ? 'calc(100vh - 250px)' : 'calc(100vh - 393px)'}

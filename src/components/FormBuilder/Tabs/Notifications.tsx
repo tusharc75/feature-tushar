@@ -356,17 +356,11 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
             />
             <CustomDialogContent>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                {/* Card 1: Create Record Notifications */}
                 <Card>
                   <CardContent>
-                    <Typography
-                      variant="h6"
-                      gutterBottom
-                    >
-                      Create Record
-                    </Typography>
-                    <Divider sx={{ mb: 2 }} />
-
+                    <div className='pb-4'>
+                      <span className="text-base font-semibold">Create Record</span>
+                    </div>
                     <Grid container spacing={2}>
                       <Grid size={permissions?.userGroup?.isRead ? 6 : 12}>
                         <Autocomplete
@@ -436,15 +430,11 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                     </Grid>
                   </CardContent>
                 </Card>
-
-                {/* Card 2: Update Record Notifications */}
                 <Card>
                   <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Update Record
-                    </Typography>
-                    <Divider sx={{ mb: 2 }} />
-
+                    <div className='pb-4'>
+                      <span className="text-base font-semibold">Update Record</span>
+                    </div>
                     <Grid container spacing={2}>
                       <Grid size={permissions?.userGroup?.isRead ? 6 : 12}>
                         <Autocomplete
@@ -515,15 +505,11 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                     </Grid>
                   </CardContent>
                 </Card>
-
-                {/* Card 3: Conditional Notifications */}
                 <Card>
                   <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Conditional
-                    </Typography>
-                    <Divider sx={{ mb: 2 }} />
-
+                    <div className='pb-4'>
+                      <span className="text-base font-semibold">Conditional</span>
+                    </div>
                     <Box mb={2}>
                       <ThemeButton
                         buttonType="theme"

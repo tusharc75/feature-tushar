@@ -172,17 +172,16 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.package
-            ? parent.packageDetail?.packageName
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent.serializedAssetDetail?.assetNumber
-              : parent.type === MATERIAL_TYPE.service
-                ? parent.serviceDetail?.serviceName
-                : parent.detail || ''
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.product
+        ? parent.productDetail?.productName
+        : parent.type === MATERIAL_TYPE.package
+          ? parent.packageDetail?.packageName
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent.serializedAssetDetail?.assetNumber
+            : parent.type === MATERIAL_TYPE.service
+              ? parent.serviceDetail?.serviceName
+              : parent.detail || ''
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -419,6 +418,17 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                             refreshGrid={fetchData}
                             isClientSideGrid={true}
                             expander={true}
+                            resource={sidebarResource.invoice}
+                            arrangeRowField={{
+                              keys: [
+                                {
+                                  key: 'material',
+                                  filterType: [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset]
+                                },
+                                { key: 'additionalCost', filterType: [MATERIAL_TYPE.manualEntry] }
+                              ],
+                              _id: invoiceData?._id
+                            }}
                           />
                         </Box>
                       ) : (

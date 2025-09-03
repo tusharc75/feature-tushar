@@ -10,7 +10,14 @@ import { DEFAULT_TIME_ZONE, sidebarResource } from 'src/constants/helpers';
 import ResourcePopover from 'src/pages/PlanningView/Calendar/ResourcePopover';
 import PlanningGroupTemplate from 'src/pages/PlanningView/GanttView/Templates/PlanningGroupTemplate';
 import { PlanningItemTemplate } from 'src/pages/PlanningView/GanttView/Templates/PlanningItemTemplate';
-import { buildFromRows, getWindow, handleTimelineCLick, RawGroup, TimeRange } from 'src/pages/PlanningView/GanttView/utils';
+import {
+  buildFromRows,
+  getWindow,
+  handleAddRemoveCollapseButton,
+  handleTimelineCLick,
+  RawGroup,
+  TimeRange
+} from 'src/pages/PlanningView/GanttView/utils';
 import { Params, VisibleWindowPager } from 'src/pages/PlanningView/GanttView/VisibleWindowPager';
 import { PlanningResource } from 'src/pages/PlanningView/usePlanningResource';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -50,7 +57,9 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
   const itemsDSRef = useRef<DataSet<any, 'id'>>(new DataSet([]));
   const timelineRef = useRef<Timeline | null>(null);
   const timelineContainer = useRef<HTMLDivElement>(null);
-  const inflightRef = useRef<Map<string, CancelTokenSource>>(new Map());
+  const inflightRefForSearch = useRef<Map<string, CancelTokenSource>>(new Map());
+  const inflightRefForRange = useRef<Map<string, CancelTokenSource>>(new Map());
+  const inflightRefForScroll = useRef<Map<string, CancelTokenSource>>(new Map());
   const currentRangeRef = useRef<TimeRange | null>(null);
   const initialDrawn = useRef(false);
   const scrollElement = useRef<HTMLDivElement>();
@@ -58,11 +67,25 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
   const pagerRef = useRef(new VisibleWindowPager({ limit: LIMIT }));
   const currentWindowKeyRef = useRef<string | null>(null);
   const searchValueRef = useRef('');
+  const isDragging = useRef(false);
+  const isScrolling = useRef(false);
 
   const scrollThrottleRef = useRef<number | null>(null);
 
   const fetchVisible = useCallback(
-    async ({ params, initial = false, hasMore, search }: { params: Params; initial?: boolean; hasMore?: boolean; search?: string }) => {
+    async ({
+      params,
+      initial = false,
+      hasMore,
+      search,
+      from
+    }: {
+      params: Params;
+      initial?: boolean;
+      hasMore?: boolean;
+      search?: string;
+      from: 'scroll' | 'rangeChange' | 'search';
+    }) => {
       if (initial) {
         setLoading(true);
       } else {
@@ -76,7 +99,13 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
       currentWindowKeyRef.current = inflightKey;
 
       const source = axios.CancelToken.source();
-      inflightRef.current.set(inflightKey, source);
+      if (from === 'scroll') {
+        inflightRefForScroll.current.set(inflightKey, source);
+      } else if (from === 'rangeChange') {
+        inflightRefForRange.current.set(inflightKey, source);
+      } else {
+        inflightRefForSearch.current.set(inflightKey, source);
+      }
 
       try {
         const resp = await axiosInstance().get('/planning-view/products-planning', {
@@ -100,22 +129,30 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
         pager.setHasMoreData(hasMoreVerticalRef.current);
 
         const { groups, items } = buildFromRows({ rows, resourcePolicy, selectedResource });
+
         if (groups.length) groupsDSRef.current.update(groups);
         if (items.length) itemsDSRef.current.update(items);
+
         timelineRef.current?.redraw();
         setLoading(false);
         setMoreDataLoading(false);
         pager.onRequestResult({ date: params.date, skip: params.skip, limit: params.limit, ok: true });
         queueMicrotask(() => {
-          inflightRef.current.get(inflightKey)?.cancel?.();
-          inflightRef.current.delete(inflightKey);
+          inflightRefForSearch.current.get(inflightKey)?.cancel?.();
+          inflightRefForSearch.current.delete(inflightKey);
+          inflightRefForRange.current.get(inflightKey)?.cancel();
+          inflightRefForRange.current.delete(inflightKey);
+          inflightRefForScroll.current.get(inflightKey)?.cancel();
+          inflightRefForScroll.current.delete(inflightKey);
         });
       } catch (error) {
         if (!axios.isCancel(error)) {
           toastConfig.setToastConfig(error);
         }
         pager.onRequestResult({ date: params.date, skip: params.skip, limit: params.limit, ok: false });
-        inflightRef.current.delete(inflightKey);
+        inflightRefForSearch.current.delete(inflightKey);
+        inflightRefForRange.current.delete(inflightKey);
+        inflightRefForScroll.current.delete(inflightKey);
       }
     },
     [buildFromRows, resourcePolicy, selectedResource]
@@ -151,8 +188,8 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
     const optionsData: TimelineOptions = {
       groupEditable: false,
       verticalScroll: true,
-      stack: false,
-      margin: { item: 10 },
+      stack: true,
+      margin: { item: 0, axis: 0 },
       zoomKey: 'ctrlKey',
       ...getWindow(timelineContainer.current),
       minHeight: 400,
@@ -196,7 +233,12 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
           const initial: TimeRange = { start: win.start, end: win.end };
           currentRangeRef.current = initial;
           // only fetch the visible window, first page
-          fetchVisible({ params: pagerRef.current.getParamsForVisible(initial), initial: true, search: searchValueRef.current || undefined });
+          fetchVisible({
+            params: pagerRef.current.getParamsForVisible(initial),
+            initial: true,
+            search: searchValueRef.current || undefined,
+            from: 'rangeChange'
+          });
 
           const { start, end } = getWindow(timelineContainer.current);
           timelineRef.current?.setWindow(start, end);
@@ -225,16 +267,18 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
 
         // when window changes, reset pager and keep data to only this window
         const params = pagerRef.current.getParamsForVisible(visible);
-        const newKey = pagerRef.current.crateKey(params);
+        const newKey = params ? pagerRef.current.crateKey(params) : null;
         if (newKey !== currentWindowKeyRef.current && params) {
           // cancel inflight
-          console.log('range change');
-          inflightRef.current.forEach((src) => src.cancel?.('window changed'));
-          inflightRef.current.clear();
+          inflightRefForRange.current.forEach((src) => src.cancel?.('window changed'));
+          inflightRefForRange.current.clear();
 
           // pagerRef.current.reset(visible); // resets skip for this window
           hasMoreVerticalRef.current = true;
-          fetchVisible({ params, hasMore: true, search: searchValueRef.current || '' });
+
+          queueMicrotask(() => {
+            fetchVisible({ params, hasMore: true, search: searchValueRef.current || '', from: 'rangeChange' });
+          });
         }
 
         // re-bind header click handlers
@@ -249,22 +293,26 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
       };
 
       timelineRef.current.on('rangechanged', onRangeChanged);
+      timelineRef.current.on('mouseDown', () => (isDragging.current = true));
+      timelineRef.current.on('mouseUp', () => (isDragging.current = true));
+
+      // timelineRef.current.on('changed', handleAddRemoveCollapseButton);
 
       return () => {
         timelineRef.current?.off('rangechanged', onRangeChanged);
+        // timelineRef.current.off('changed', handleAddRemoveCollapseButton);
         timelineRef.current?.destroy();
         timelineRef.current = null;
         pagerRef.current.reset({ clearLoaded: true, clearPending: true, resetScroll: true });
         hasMoreVerticalRef.current = true;
         groupsDSRef.current.clear();
         itemsDSRef.current.clear();
-        console.log('cleanup');
-        inflightRef.current.forEach((src) => src.cancel?.('Resource switched'));
-        inflightRef.current.clear();
+        inflightRefForSearch.current.forEach((src) => src.cancel?.('Resource switched'));
+        inflightRefForSearch.current.clear();
       };
     }
 
-    return () => {};
+    return () => { };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options]);
 
@@ -281,7 +329,7 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
 
       const onScroll = () => {
         if (scrollThrottleRef.current) return;
-        scrollThrottleRef.current = window.setTimeout(() => {
+        scrollThrottleRef.current = window.setTimeout(async () => {
           if (!initialDrawn.current) return;
           scrollThrottleRef.current = null;
           const target = getVerticalScrollTarget();
@@ -295,24 +343,21 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
           });
           const win = currentRangeRef.current ?? timelineRef.current?.getWindow();
           if (!win) return;
+          isScrolling.current = true;
 
           const fromBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
-          const token = axios.CancelToken.source();
           if (fromBottom > 45) {
-            console.log('scroll');
-            inflightRef.current.forEach((e) => e.cancel());
+            inflightRefForScroll.current.forEach((e) => e.cancel());
             const params = pagerRef.current.getParamsForVisible({ start: win.start, end: win.end });
             if (params && !moreDataLoading && hasMoreVerticalRef.current) {
-              const key = pagerRef.current.crateKey(params);
-              inflightRef.current.set(key, token);
-              fetchVisible({ params, search: searchValueRef.current || '' });
+              await fetchVisible({ params, search: searchValueRef.current || '', from: 'scroll' });
+              isScrolling.current = false;
             }
           } else {
             const params = pagerRef.current.getParamsForNextPage({ start: win.start, end: win.end });
             if (params && !moreDataLoading && hasMoreVerticalRef.current) {
-              const key = pagerRef.current.crateKey(params);
-              inflightRef.current.set(key, token);
-              fetchVisible({ params, hasMore: true, search: searchValueRef.current || '' });
+              await fetchVisible({ params, hasMore: true, search: searchValueRef.current || '', from: 'search' });
+              isScrolling.current = false;
             }
           }
         }, 500);
@@ -342,7 +387,8 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
       await fetchVisible({
         params: pagerRef.current.getParamsForVisible({ start: win.start, end: win.end }),
         initial: true,
-        search: searchValueRef.current || undefined
+        search: searchValueRef.current || undefined,
+        from: 'rangeChange'
       });
     }
   }));
@@ -367,8 +413,8 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
 
   const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
-      inflightRef.current.forEach((src) => src.cancel?.('Search changed'));
-      inflightRef.current.clear();
+      inflightRefForSearch.current.forEach((src) => src.cancel?.('Search changed'));
+      inflightRefForSearch.current.clear();
 
       setSearchedValue(e.target.value);
       searchValueRef.current = e.target.value;
@@ -382,10 +428,6 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
         groupsDSRef.current.clear();
         itemsDSRef.current.clear();
         const params = pagerRef.current.getParamsForVisible({ start: win.start, end: win.end });
-        const key = pagerRef.current.crateKey(params);
-        const token = axios.CancelToken.source();
-
-        inflightRef.current.set(key, token);
         await fetchVisible({
           params: params,
           initial: true,

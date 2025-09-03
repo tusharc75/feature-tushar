@@ -16,7 +16,7 @@ import { BiChevronDown } from 'react-icons/bi';
 import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialog';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import { displayDate } from 'src/constants/helpers';
-import { Add } from '@mui/icons-material';
+import { Add, Visibility } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import { CustomOfflineContext } from '../../../../StateProvider/OfflineContext/OfflineContext';
 import RentalTechnicianQtyDialog from './RentalTechnicianQtyDialog';
@@ -29,10 +29,14 @@ import { getPricingConditions, getPricingValue } from 'src/components/PricingCon
 import dayjs from 'dayjs';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import TechnicianAssign from 'src/components/TechnicianAssign';
+import { RiUserShared2Fill, RiUserReceived2Fill } from 'react-icons/ri';
+import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDialog';
+import StartStopLogsDialog from 'src/pages/FieldTicket/material/StartStopLogsDialog';
 
-const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services }) => {
+const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services, rentalPolicyData }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_technician`;
+  const canDispatchReturn = rentalPolicyData?.enableTechnicianDispatchReturn;
 
   const {
     state: { resources }
@@ -47,6 +51,14 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [technicianEdit, setTechnicianEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
+  const [startEndDateConfirmationDialog, setStartEndDateConfirmationDialog] = useState({
+    open: false,
+    type: null,
+    minDateTime: null,
+    notes: '',
+    _id: null
+  });
+  const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, technicianId: null });
   const open = Boolean(anchorEl);
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -219,62 +231,139 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
         : []),
       {
         accessor: 'startDate',
-        Header: 'Start Date',
+        Header: canDispatchReturn ? 'Dispatched Date' : 'Start Date',
         width: 250,
         Cell: ({ row }) => (row.original?.startDate ? <p>{displayDate(row.original?.startDate)}</p> : <NoDataCell />)
       },
       {
         accessor: 'endDate',
-        Header: 'End Date',
+        Header: canDispatchReturn ? 'Returned Date' : 'End Date',
         width: 250,
         Cell: ({ row }) => (row.original?.endDate ? <p>{displayDate(row.original?.endDate)}</p> : <NoDataCell />)
-      },
-      {
-        accessor: 'action',
-        Header: 'Actions',
-        minWidth: 100,
-        width: 100,
-        sticky: 'right',
-        disableFilters: true,
-        disableSortBy: true,
-        canDrag: false,
-        Cell: ({ row, table }) => {
+      }
+    ];
+
+    if (canDispatchReturn) {
+      column.push({
+        accessor: 'notes',
+        Header: 'Notes',
+        Cell: ({ row }) => {
           return (
             <>
-              {data?.length ? (
-                <HtmlTooltip title={isOffline || !allowedToEdit ? '' : 'Edit'}>
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    disabled={isOffline || !allowedToEdit ? true : false}
-                    onClick={() => {
-                      openTechnician(row, table.getRowModel().rows);
-                    }}
-                  >
-                    <EditIcon fontSize="small" color={isOffline || !allowedToEdit ? 'disabled' : 'primary'} />
-                  </IconButton>
-                </HtmlTooltip>
-              ) : null}
-              {allowedToEdit ? (
-                <HtmlTooltip title={'Delete'}>
-                  <span>
-                    <IconButton
-                      size="small"
-                      aria-label="Details"
-                      onClick={() => {
-                        setDeleteData([row.original._id]);
-                      }}
-                    >
-                      <DeleteIcon fontSize="small" color={'error'} />
-                    </IconButton>
-                  </span>
-                </HtmlTooltip>
-              ) : null}
+              {row?.original?.notes ? (
+                <div>
+                  <p className="text-truncate">{row.original?.notes}</p>
+                </div>
+              ) : (
+                <NoDataCell />
+              )}
             </>
           );
         }
+      });
+    }
+    column.push({
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 150,
+      width: 150,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row, table }) => {
+        return (
+          <>
+            {data?.length ? (
+              <HtmlTooltip title={isOffline || !allowedToEdit ? '' : 'Edit'}>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  disabled={isOffline || !allowedToEdit ? true : false}
+                  onClick={() => {
+                    openTechnician(row, table.getRowModel().rows);
+                  }}
+                >
+                  <EditIcon fontSize="small" color={isOffline || !allowedToEdit ? 'disabled' : 'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            ) : null}
+            {(row?.original?.endDate || (!row?.original?.startDate && !row?.original?.endDate)) && canDispatchReturn && (
+              <HtmlTooltip title={'Dispatch'}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    let date = null;
+                    if (row?.original?.endDate) {
+                      date = new Date(row?.original?.endDate);
+                      date.setMinutes(date.getMinutes() + 1);
+                    }
+
+                    setStartEndDateConfirmationDialog({
+                      open: true,
+                      type: 'start',
+                      minDateTime: date,
+                      notes: '',
+                      _id: row?.original?._id
+                    });
+                  }}
+                  color={'primary'}
+                >
+                  <RiUserShared2Fill fontSize={18} />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+            {row?.original?.startDate && !row?.original?.endDate && canDispatchReturn && (
+              <HtmlTooltip title={'Return'}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setStartEndDateConfirmationDialog({
+                      open: true,
+                      type: 'stop',
+                      minDateTime: new Date(row?.original?.maxStartDate),
+                      notes: row?.original?.notes,
+                      _id: row?.original?._id
+                    });
+                  }}
+                  color={'primary'}
+                >
+                  <RiUserReceived2Fill fontSize={18} />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+            {canDispatchReturn && (
+              <HtmlTooltip title={'View Logs'}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setViewStartStopLog({ open: true, technicianId: row?.original?.technicianId });
+                  }}
+                >
+                  <Visibility fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+            {allowedToEdit ? (
+              <HtmlTooltip title={'Delete'}>
+                <span>
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    disabled={!row?.original?.canDelete}
+                    onClick={() => {
+                      setDeleteData([row.original._id]);
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            ) : null}
+          </>
+        );
       }
-    ];
+    });
     const newColumns = generateColumns(
       renderedFrom,
       data?.filter((f) => f?.isRead && !['endDate', 'startDate'].includes(f?.fieldName)),
@@ -306,6 +395,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           res.technicianId = u?.technician['_id'];
           res.competencyType = u?.technician?.competencyType;
           res.competencies = u?.technician?.competencies;
+          res.canDelete = !canDispatchReturn ? true : res?.canDelete;
           return res;
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -386,6 +476,38 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
     setTechnicianAssign({ open: true, data: tempMaterial });
   };
 
+  const handleUpdateStartEndDate = (values, type, _id = null) => {
+    let value: any = {
+      type: type,
+      referenceId: rentalManagementData?._id,
+      referenceType: sidebarResource.rentalManagement,
+      _id: _id ? [_id] : selectedRecords?.map((r) => r?._id)
+    };
+    if (values?.notes) value.notes = values?.notes;
+    if (type !== 'stop') {
+      value.startDate = values?.startDate;
+    } else {
+      value.endDate = values?.endDate;
+    }
+    setUpdating(true);
+    axiosInstance()
+      .put(`/technician/start-end-date`, value)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        setStartEndDateConfirmationDialog({ open: false, type: null, minDateTime: null, notes: '', _id: null });
+        setUpdating(false);
+        fetchData();
+      })
+      .catch((error) => {
+        setUpdating(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <>
       <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
@@ -427,7 +549,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
               >
                 <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
                   <MenuItem
-                    disabled={isDeleting}
+                    disabled={isDeleting || selectedRecords?.some((e) => !e?.canDelete)}
                     onClick={() => {
                       setDeleteData(selectedRecords?.map((d) => d?._id));
                       handleClose();
@@ -498,6 +620,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           loadingEdit={isUpdating}
           bulkEdit={isBulkEdit}
           showSaveAndNext={technicianEdit.showSaveAndNext}
+          rentalPolicyData={rentalPolicyData}
         />
       )}
       {technicianAssign.open && (
@@ -512,6 +635,37 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           handleClose={() => {
             setTechnicianAssign({ open: false, data: null });
           }}
+        />
+      )}
+      {startEndDateConfirmationDialog.open && (
+        <StartStopDateDialog
+          type={startEndDateConfirmationDialog.type}
+          resource={sidebarResource.fieldServiceOrder}
+          onClose={() => {
+            setStartEndDateConfirmationDialog({ open: false, type: null, minDateTime: null, notes: '', _id: null });
+          }}
+          handleSubmit={(value) => {
+            handleUpdateStartEndDate(
+              value,
+              startEndDateConfirmationDialog.type,
+              startEndDateConfirmationDialog._id
+            );
+          }}
+          loading={isUpdating}
+          minStartDateTime={startEndDateConfirmationDialog.minDateTime}
+          notes={startEndDateConfirmationDialog.notes}
+        />
+      )}
+      {viewStartStopLog?.open && (
+        <StartStopLogsDialog
+          onClose={() => {
+            setViewStartStopLog({ open: false, technicianId: null });
+          }}
+          referenceId={rentalManagementData?._id}
+          service={null}
+          technician={viewStartStopLog?.technicianId}
+          fetchRecords={fetchData}
+          resource={sidebarResource.rentalManagement}
         />
       )}
     </>

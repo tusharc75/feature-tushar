@@ -12,15 +12,16 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { MATERIAL_TYPE, OTHER_MATERIAL_TYPE, SERIALIZED_PACKAGES_STATUS, sidebarResource } from 'src/constants/helpers';
+import { MATERIAL_TYPE, OTHER_MATERIAL_TYPE, SERIALIZED_PACKAGE_STATUS, sidebarResource } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@mui/icons-material';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
 
-const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssembled = false, fromInspection = false }) => {
+const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspection }) => {
 
-  const renderedFrom = `${fromInspection ? camelCase(sidebarResource?.serializedPackagesInspection) : camelCase(sidebarResource?.serializedPackages)}_Assign`;
+  const renderedFrom = `${fromInspection ? camelCase(sidebarResource?.serializedPackagesInspection) :
+    camelCase(sidebarResource?.serializedPackages)}_Assign`;
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
@@ -37,6 +38,19 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
   const [serialNumbers, setSerialNumbers] = useState([]);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+
+  useEffect(() => {
+    if (serializedPackagesData?.status === SERIALIZED_PACKAGE_STATUS.disassembled) {
+      setAllowedToEdit(false)
+    }
+    else if (fromInspection && permissions?.serializedPackagesInspection?.isUpdate) {
+      setAllowedToEdit(serializedPackagesData?.status === SERIALIZED_PACKAGE_STATUS.reserved ? false : true)
+    }
+    else if (permissions?.serializedPackages?.isUpdate) {
+      setAllowedToEdit(true)
+    }
+  }, [serializedPackagesData, fromInspection]);
 
   useEffect(() => {
     fetchColumns();
@@ -172,21 +186,22 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
         canDrag: false,
         Cell: ({ row }) => (
           <>
-            {permissions?.serializedPackages?.isUpdate && [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && (
-              <HtmlTooltip title="Unassign">
-                <IconButton
-                  size="small"
-                  aria-label="Unassign"
-                  onClick={() => {
-                    setDeleteRecord(row.original);
-                    setShowDeleteConfirmBox(true);
-                  }}
-                  disabled={!row?.original?.canDelete}
-                >
-                  <Delete color={row?.original?.canDelete ? 'error' : 'disabled'} fontSize="small" />
-                </IconButton>
-              </HtmlTooltip>
-            )}
+            {permissions?.serializedPackages?.isUpdate && !fromInspection
+              && [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && (
+                <HtmlTooltip title="Unassign">
+                  <IconButton
+                    size="small"
+                    aria-label="Unassign"
+                    onClick={() => {
+                      setDeleteRecord(row.original);
+                      setShowDeleteConfirmBox(true);
+                    }}
+                    disabled={!row?.original?.canDelete}
+                  >
+                    <Delete color={row?.original?.canDelete ? 'error' : 'disabled'} fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
           </>
         )
       }
@@ -265,7 +280,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
         _subRow.type = MATERIAL_TYPE.serializedAsset;
         _subRow.detail = _subRow?.assetDetail?.assetNumber;
         _subRow.parentId = _subRow?.product;
-        _subRow.canDelete = serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.available;
+        _subRow.canDelete = serializedPackagesData?.status === SERIALIZED_PACKAGE_STATUS.available;
         subRows.push(_subRow);
       });
     }
@@ -277,7 +292,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
         _subRow.type = OTHER_MATERIAL_TYPE.serialNumber;
         _subRow.detail = _subRow?.serialNumberDetail?.serialNumber;
         _subRow.parentId = _subRow?.product;
-        _subRow.canDelete = serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.available;
+        _subRow.canDelete = serializedPackagesData?.status === SERIALIZED_PACKAGE_STATUS.available;
         subRows.push(_subRow);
       });
     }
@@ -402,56 +417,57 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
     return Array.from(productsMap.values())
   }
 
-  const isVisible = (action = '') => {
-    if (selectedRecords.length === 0 || !permissions?.serializedPackages?.isUpdate) return false;
-    if (action === 'replaceAsset') {
-      return selectedRecords.some((f) => f.type === MATERIAL_TYPE.serializedAsset);
-    }
+  const isVisible = () => {
     const flatArray = selectedRecords.filter((f) => f.type === MATERIAL_TYPE.product && f.qty > f.assetQty && f?.serializedProduct);
     return flatArray.length > 0;
   }
 
   const actionButtonMenuItems = () => {
     return (
-      <>
-        {isVisible() && !fromInspection && (
-          <MenuItem
-            onClick={() => {
-              setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: false, products: getProducts() });
-            }}
-          >
-            {`Assign ${resources?.serializedAsset?.titlePlural}`}
-          </MenuItem>
-        )}
-        {isVisible('replaceAsset') && fromInspection && (
-          <MenuItem
-            onClick={() => {
-              setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: true, products: getProducts(MATERIAL_TYPE.serializedAsset, 'replaceAsset') });
-            }}
-          >
-            {`Replace ${resources?.serializedAsset?.titlePlural}`}
-          </MenuItem>
-        )}
-        {isVisible() && !fromInspection && (
-          <MenuItem
-            onClick={() => {
-              setAssignDialog({ open: true, type: OTHER_MATERIAL_TYPE.serialNumber, replaceAsset: false, products: getProducts(OTHER_MATERIAL_TYPE.serialNumber) });
-            }}
-          >
-            Assign Serial Numbers
-          </MenuItem>
-        )}
-        {permissions?.serializedPackages?.isUpdate && !fromInspection && (
-          <MenuItem
-            disabled={selectedRecords?.some((e) => e?.canDelete && [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(e.type)) ? false : true}
-            onClick={() => {
-              setShowDeleteConfirmBox(true);
-            }}
-          >
-            Unassign
-          </MenuItem>
-        )}
+      fromInspection ? <>
+        <MenuItem
+          onClick={() => {
+            setAssignDialog({
+              open: true,
+              type: MATERIAL_TYPE.serializedAsset,
+              replaceAsset: true,
+              products: getProducts(MATERIAL_TYPE.serializedAsset, 'replaceAsset')
+            });
+          }}
+        >
+          {`Replace ${resources?.serializedAsset?.titlePlural}`}
+        </MenuItem>
       </>
+        : <>
+          {isVisible() && (
+            <MenuItem
+              onClick={() => {
+                setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: false, products: getProducts() });
+              }}
+            >
+              {`Assign ${resources?.serializedAsset?.titlePlural}`}
+            </MenuItem>
+          )}
+          {isVisible() && (
+            <MenuItem
+              onClick={() => {
+                setAssignDialog({ open: true, type: OTHER_MATERIAL_TYPE.serialNumber, replaceAsset: false, products: getProducts(OTHER_MATERIAL_TYPE.serialNumber) });
+              }}
+            >
+              Assign Serial Numbers
+            </MenuItem>
+          )}
+          {permissions?.serializedPackages?.isUpdate && (
+            <MenuItem
+              disabled={selectedRecords?.some((e) => e?.canDelete && [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(e.type)) ? false : true}
+              onClick={() => {
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              Unassign
+            </MenuItem>
+          )}
+        </>
     );
   };
 
@@ -459,9 +475,13 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
     <>
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={!disAssembled}
+        isActionButtonVisible={allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: !selectedRecords.length }}
+        actionButtonProps={{
+          disabled: selectedRecords?.length === 0 ? true :
+            fromInspection ? selectedRecords.filter((f) => f.type === MATERIAL_TYPE.serializedAsset)?.length > 0 ? false : true :
+              !allowedToEdit
+        }}
         hasXpadding
       />
       {columns ? (
@@ -474,8 +494,8 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           expander={true}
-          hideAction={disAssembled || fromInspection}
-          hideSelection={disAssembled}
+          hideAction={!allowedToEdit}
+          hideSelection={!allowedToEdit}
         />
       ) : (
         <Box p={2} height={500}>
@@ -497,6 +517,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
           isAssigning={isSubmitting}
           selectedProducts={assignDialog.products}
           referenceData={{ warehouse: serializedPackagesData?.warehouse?.optionValue }}
+          checkCertificateExpiry={true}
         />
       )}
       {assignDialog.open && assignDialog.type === OTHER_MATERIAL_TYPE.serialNumber && (
