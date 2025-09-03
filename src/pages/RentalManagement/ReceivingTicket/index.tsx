@@ -302,6 +302,16 @@ const ReceivingTicket = ({
         });
       }
     }
+    if (action === rentalManagementActions.transferToAnotherRental) {
+      const serializedPackageIds = uniq(map(getFilterSelectedRecords()?.filter((e) => e?.serializedPackageId), 'serializedPackageId'));
+      const allRecord = getFilterSelectedRecords(null, flattenArray(dataRows));
+      records = [...getFilterSelectedRecords()?.filter((e) => !e?.serializedPackageId), ...allRecord?.filter((e) => serializedPackageIds?.includes(e?.serializedPackageId))];
+
+      if (records?.length != getFilterSelectedRecords()?.length) {
+        errorMessages.push({ index: 1, message: rentalManagementMessage.selectAllAssetOfSerializedPackage });
+      }
+    }
+
     records.forEach((e) => {
       if (action === rentalManagementActions.deliveredToCustomer) {
         if (!e.hasOwnProperty('loadingTicketId')) {
@@ -450,19 +460,25 @@ const ReceivingTicket = ({
           });
         }
       } else if (action === rentalManagementActions.transferToAnotherRental) {
-        if ([ASSET_STATUS.lost]?.includes(e?.status)) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketNotForLost });
-        } else if (!e?.hasOwnProperty('loadingTicketId')) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
-        } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
-        } else if (
-          ([ASSET_STATUS.inUse].includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(e.rentalAssetStatus)) ||
-          ([ASSET_STATUS.available, ASSET_STATUS.underReview].includes(e.status) &&
-            [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(e.rentalAssetStatus))
-        ) {
+        if (e?.type === MATERIAL_TYPE.product) {
+          if (e?.rentalAssetStatus != RENTAL_INTERNAL_ASSET_STATUS.inUse) {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
+          }
         } else {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
+          if ([ASSET_STATUS.lost]?.includes(e?.status)) {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketNotForLost });
+          } else if (!e?.hasOwnProperty('loadingTicketId')) {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
+          } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
+          } else if (
+            ([ASSET_STATUS.inUse].includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(e.rentalAssetStatus)) ||
+            ([ASSET_STATUS.available, ASSET_STATUS.underReview].includes(e.status) &&
+              [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(e.rentalAssetStatus))
+          ) {
+          } else {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
+          }
         }
       } else if (action === rentalManagementActions.swapInUseAssets) {
         if (e.type !== MATERIAL_TYPE.serializedAsset) {
@@ -495,7 +511,12 @@ const ReceivingTicket = ({
       } else {
         if (records?.find((e) => [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus))) {
           if (
-            records?.filter((e) => [ASSET_STATUS.inUse]?.includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus))
+            records?.filter((e) => {
+              if (e?.type === MATERIAL_TYPE.product) {
+                return [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus)
+              }
+              return [ASSET_STATUS.inUse]?.includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus)
+            })
               ?.length !== records?.length
           ) {
             records?.forEach((e) => {
@@ -622,6 +643,7 @@ const ReceivingTicket = ({
         productSerialNumbers?.forEach((e) => {
           e.warehouse = e?.productSerialNumberDetail?.warehouse
           e.storageLocation = e?.productSerialNumberDetail?.storageLocation
+          e.serializedPackages = e?.productSerialNumberDetail?.serializedPackages
         })
         nonSerializedInventory = productResponse?.data?.data?.nonSerializedInventory;
         setOnReceiveAssetDataCapture(productResponse?.data?.data?.defaultDeliveryTicketStatus === DELIVERY_TICKET_STATUS.inTransit ? true : false);
@@ -1050,6 +1072,8 @@ const ReceivingTicket = ({
       obj.warehouseId = _subRow?.inventory?.warehouse?.optionValue;
       obj.currentOwner = _subRow?.inventory?.currentOwner;
       obj.currentLocation = _subRow?.inventory?.currentLocation?.optionValue;
+      obj.serializedPackageId = _subRow?.inventory?.serializedPackage?.optionValue;
+      obj.serializedPackage = _subRow?.inventory?.serializedPackage?.optionLabel;
       const loadingTicket = loadingTicketAssets?.find((e) => e?.asset === obj?._id && e?.uniqueId === obj?.uniqueId);
       if (loadingTicket) {
         obj.loadingTicket = loadingTicket?.loadingTicket;
@@ -1097,12 +1121,6 @@ const ReceivingTicket = ({
       obj.isAllowedEndDate = obj?.manualEndDate ? true : false;
       if (obj?.isAllowedEndDate && invoiceMaterial) {
         obj.minEndDate = new Date(invoiceMaterial?.endDate);
-      }
-
-      const serializedPackage = material?.find(m => m?._id === obj?.uniqueId && m?.materialId === obj?.materialId)?.serializedPackage
-      if (serializedPackage) {
-        obj.serializedPackage = serializedPackage?.optionLabel;
-        obj.serializedPackageId = serializedPackage?.optionValue
       }
 
       rows.push({ ..._subRow?.inventory, ...obj });
@@ -1262,6 +1280,7 @@ const ReceivingTicket = ({
         obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
         obj.storageLocation = element?.storageLocation?.optionLabel;
         obj.storageLocationId = element?.storageLocation?.optionValue;
+        obj.serializedPackage = element?.serializedPackage;
         obj.consumeQty = consumeQty;
         obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicket?.qty || receiveTicket?.qty || 0 : 0;
         obj.status = ASSET_STATUS.notApplied;
@@ -1329,6 +1348,7 @@ const ReceivingTicket = ({
         obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
         obj.storageLocation = element?.storageLocation?.optionLabel;
         obj.storageLocationId = element?.storageLocation?.optionValue;
+        obj.serializedPackage = element?.serializedPackage;
         obj.status = ASSET_STATUS.notApplied;
         obj.rentalAssetStatus = element?.productDetail?.serializedProduct ? element?.status : '';
         obj.currentLocation =
@@ -3064,6 +3084,7 @@ const ReceivingTicket = ({
             fetchRecords();
           }}
           assetPolicyData={assetPolicyData}
+          productSerialNumber={getFilterSelectedRecords(MATERIAL_TYPE.product)}
         />
       )}
       {showRemoveAssetFromReceivingTicketDialog && (
