@@ -137,6 +137,7 @@ const ReceivingTicket = ({
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: null, message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
+  const [subStatusAnchorEl, setSubStatusAnchorEl] = useState(null);
   const [showQtyDialog, setShowQtyDialog] = useState({ open: false, data: null });
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: '', data: {} });
   const { isOffline } = useContext(CustomOfflineContext);
@@ -155,7 +156,7 @@ const ReceivingTicket = ({
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [], type: '' });
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
-  const [subStatusToUpdate, setSubStatusToUpdate] = useState(false);
+  const [subStatusToUpdate, setSubStatusToUpdate] = useState({ open: false, status: null });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
@@ -196,6 +197,14 @@ const ReceivingTicket = ({
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleClickChangeSubStatus = (event) => {
+    setSubStatusAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseChangeSubStatusMenu = () => {
+    setSubStatusAnchorEl(null);
   };
 
   const openLinkActions = (event) => {
@@ -2711,6 +2720,17 @@ const ReceivingTicket = ({
             {'Change Status'}
           </ThemeButton>
         )}
+        {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
+          (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) &&
+          assetPolicyData?.policy?.inUseSubStatus?.length > 0 && (
+            <ThemeButton
+              disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0}
+              onClick={handleClickChangeSubStatus}
+              endIcon={<ExpandMore />}
+            >
+              {'Change Sub Status'}
+            </ThemeButton>
+          )}
         {(repairJobCount > 0 || repairOrderCount > 0) && (
           <ThemeButton onClick={openLinkActions} endIcon={<ExpandMore fontSize="inherit" />}>
             Order(s)
@@ -2808,7 +2828,7 @@ const ReceivingTicket = ({
           dates: dates
         })
       .then(({ data }) => {
-        setSubStatusToUpdate(false);
+        setSubStatusToUpdate({ open: false, status: null });
         fetchRecords();
         setIsSubmitting(false)
         toastConfig.setToastConfig({
@@ -2967,6 +2987,42 @@ const ReceivingTicket = ({
               }}
             >
               {o.optionLabel}
+            </MenuItem>
+          )
+        })}
+      </Menu>
+      <Menu
+        id="sub-status-menu"
+        anchorEl={subStatusAnchorEl}
+        keepMounted
+        open={Boolean(subStatusAnchorEl)}
+        onClose={handleCloseChangeSubStatusMenu}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+      >
+        {assetPolicyData?.policy?.inUseSubStatus?.map((o, i) => {
+          return (
+            <MenuItem
+              key={`${i}`}
+              disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every(s => s?.subStatus === o) ? true : false}
+              onClick={() => {
+                if (validateAction(rentalManagementActions.changeSubStatus)) {
+                  if (rentalPolicyData?.subStatusDateWiseCapture) {
+                    setSubStatusToUpdate({ open: true, status: o })
+                  } else {
+                    handleSubStatusChange([{ startDate: null, endDate: null, subStatus: o }])
+                  }
+                }
+                handleCloseChangeSubStatusMenu()
+              }}
+            >
+              {o}
             </MenuItem>
           )
         })}
@@ -3222,12 +3278,13 @@ const ReceivingTicket = ({
           isClone={false}
         />
       )}
-      {subStatusToUpdate && (
+      {subStatusToUpdate.open && (
         <SubStatusDatesDialog
           handleClose={() => {
-            setSubStatusToUpdate(false)
+            setSubStatusToUpdate({ open: false, status: null })
           }}
           options={assetPolicyData?.policy?.inUseSubStatus}
+          selectedOption={subStatusToUpdate.status}
           onSuccess={handleSubStatusChange}
           submitting={isSubmitting}
           rentalId={rentalManagementData?._id}
@@ -3975,7 +4032,7 @@ const ActionButtonMenuItems = ({
             Change Assets Data
           </MenuItem>
         )}
-      {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
+      {/* {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) &&
         assetPolicyData?.policy?.inUseSubStatus?.length > 0 && getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length > 0 && (
           <MenuItem
@@ -3997,7 +4054,7 @@ const ActionButtonMenuItems = ({
           >
             {`Change Sub Status${!rentalPolicyData?.subStatusDateWiseCapture && assetPolicyData?.policy?.inUseSubStatus?.length === 1 ? ` - ${assetPolicyData?.policy?.inUseSubStatus[0]}` : ''}`}
           </MenuItem>
-        )}
+        )} */}
     </>
   );
 };
