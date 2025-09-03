@@ -25,7 +25,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Add, Delete } from '@mui/icons-material';
-import CustomDatePicker from 'src/components/CustomDatePicker';
+import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import dayjs from 'dayjs';
 
 const MaterialDialog = ({
@@ -278,118 +278,118 @@ const MaterialDialog = ({
                         <div className="space-y-4">
                           {values?.dates?.length
                             ? values?.dates?.map((_date, index) => {
-                                return (
-                                  <div
-                                    key={index}
-                                    className={
-                                      'grid grid-cols-[1fr_30px] flex-wrap items-center gap-2 rounded-md border bg-gray-50 p-4 dark:bg-gray-800 sm:grid-cols-[1fr_1fr_1fr_30px]'
-                                    }
-                                  >
-                                    <div className="max-sm:col-start-1">
-                                      <CustomDatePicker
-                                        fullWidth
-                                        size="small"
-                                        margin="dense"
-                                        required
-                                        value={_date?.startDate}
-                                        name="startDate"
-                                        placeholder={`Start Date`}
-                                        label={`Start Date`}
-                                        onChange={(value) => {
-                                          arrayHelpers.replace(index, {
-                                            ...values?.dates[index],
-                                            startDate: value || null
-                                          });
-                                        }}
-                                        error={
-                                          touched?.dates &&
-                                          touched?.dates[index]?.startDate &&
-                                          errors?.dates &&
-                                          Boolean(errors?.dates[index]?.startDate)
-                                        }
-                                        helperText={
-                                          touched?.dates && touched?.dates[index]?.startDate && errors?.dates && errors?.dates[index]?.startDate
-                                        }
-                                      />
-                                    </div>
-                                    <div className="max-sm:col-start-1">
-                                      <CustomDatePicker
-                                        fullWidth
-                                        size="small"
-                                        margin="dense"
-                                        required
-                                        value={_date?.endDate}
-                                        name="endDate"
-                                        placeholder={`End Date`}
-                                        label={`End Date`}
-                                        onChange={(value) => {
-                                          arrayHelpers.replace(index, {
-                                            ...values?.dates[index],
-                                            ['endDate']: value || null
-                                          });
-                                        }}
-                                        {...(_date?.startDate ? { minDate: _date?.startDate } : {})}
-                                        error={
-                                          touched?.dates && touched?.dates[index]?.endDate && errors?.dates && Boolean(errors?.dates[index]?.endDate)
-                                        }
-                                        helperText={
-                                          touched?.dates && touched?.dates[index]?.endDate && errors?.dates && errors?.dates[index]?.endDate
-                                        }
-                                      />
-                                    </div>
-                                    <div className="max-sm:col-start-1">
-                                      <Autocomplete
-                                        options={subStatusOptions}
-                                        fullWidth
-                                        getOptionLabel={(option: any) => (option ? option : '')}
-                                        value={_date?.subStatus}
-                                        onChange={(e, val) => {
-                                          arrayHelpers.replace(index, {
-                                            ...values?.dates[index],
-                                            subStatus: val || ''
-                                          });
-                                        }}
-                                        renderInput={(params) => (
-                                          <TextField
-                                            {...params}
-                                            margin="dense"
-                                            size="small"
-                                            name="subStatus"
-                                            label="Sub Status"
-                                            variant="outlined"
-                                            fullWidth
-                                            required
-                                            error={
-                                              touched?.dates &&
-                                              touched?.dates[index]?.subStatus &&
-                                              errors?.dates &&
-                                              Boolean(errors?.dates[index]?.subStatus)
-                                            }
-                                            helperText={
-                                              touched?.dates && touched?.dates[index]?.subStatus && errors?.dates && errors?.dates[index]?.subStatus
-                                            }
-                                          />
-                                        )}
-                                      />
-                                    </div>
-
-                                    <div className="max-sm:col-start-2 max-sm:row-start-2">
-                                      <HtmlTooltip title="Remove">
-                                        <IconButton
-                                          size="small"
-                                          onClick={() => {
-                                            addRemove(values?.dates, 'remove', index);
-                                          }}
-                                          aria-label="Remove"
-                                          color={'error'}
-                                        >
-                                          <Delete fontSize="small" />
-                                        </IconButton>
-                                      </HtmlTooltip>
-                                    </div>
+                              return (
+                                <div
+                                  key={index}
+                                  className={
+                                    'grid grid-cols-[1fr_30px] flex-wrap items-center gap-2 rounded-md border bg-gray-50 p-4 dark:bg-gray-800 sm:grid-cols-[1fr_1fr_1fr_30px]'
+                                  }
+                                >
+                                  <div className="max-sm:col-start-1">
+                                    <CustomDateTimePicker
+                                      fullWidth
+                                      size="small"
+                                      margin="dense"
+                                      required
+                                      value={_date?.startDate}
+                                      name="startDate"
+                                      placeholder={`Start Date-Time`}
+                                      label={`Start Date-Time`}
+                                      onChange={(value) => {
+                                        arrayHelpers.replace(index, {
+                                          ...values?.dates[index],
+                                          startDate: value || null
+                                        });
+                                      }}
+                                      error={
+                                        touched?.dates &&
+                                        touched?.dates[index]?.startDate &&
+                                        errors?.dates &&
+                                        Boolean(errors?.dates[index]?.startDate)
+                                      }
+                                      helperText={
+                                        touched?.dates && touched?.dates[index]?.startDate && errors?.dates && errors?.dates[index]?.startDate
+                                      }
+                                    />
                                   </div>
-                                );
-                              })
+                                  <div className="max-sm:col-start-1">
+                                    <CustomDateTimePicker
+                                      fullWidth
+                                      size="small"
+                                      margin="dense"
+                                      required
+                                      value={_date?.endDate}
+                                      name="endDate"
+                                      placeholder={`End Date-Time`}
+                                      label={`End Date-Time`}
+                                      onChange={(value) => {
+                                        arrayHelpers.replace(index, {
+                                          ...values?.dates[index],
+                                          ['endDate']: value || null
+                                        });
+                                      }}
+                                      {...(_date?.startDate ? { minDateTime: _date?.startDate } : {})}
+                                      error={
+                                        touched?.dates && touched?.dates[index]?.endDate && errors?.dates && Boolean(errors?.dates[index]?.endDate)
+                                      }
+                                      helperText={
+                                        touched?.dates && touched?.dates[index]?.endDate && errors?.dates && errors?.dates[index]?.endDate
+                                      }
+                                    />
+                                  </div>
+                                  <div className="max-sm:col-start-1">
+                                    <Autocomplete
+                                      options={subStatusOptions}
+                                      fullWidth
+                                      getOptionLabel={(option: any) => (option ? option : '')}
+                                      value={_date?.subStatus}
+                                      onChange={(e, val) => {
+                                        arrayHelpers.replace(index, {
+                                          ...values?.dates[index],
+                                          subStatus: val || ''
+                                        });
+                                      }}
+                                      renderInput={(params) => (
+                                        <TextField
+                                          {...params}
+                                          margin="dense"
+                                          size="small"
+                                          name="subStatus"
+                                          label="Sub Status"
+                                          variant="outlined"
+                                          fullWidth
+                                          required
+                                          error={
+                                            touched?.dates &&
+                                            touched?.dates[index]?.subStatus &&
+                                            errors?.dates &&
+                                            Boolean(errors?.dates[index]?.subStatus)
+                                          }
+                                          helperText={
+                                            touched?.dates && touched?.dates[index]?.subStatus && errors?.dates && errors?.dates[index]?.subStatus
+                                          }
+                                        />
+                                      )}
+                                    />
+                                  </div>
+
+                                  <div className="max-sm:col-start-2 max-sm:row-start-2">
+                                    <HtmlTooltip title="Remove">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => {
+                                          addRemove(values?.dates, 'remove', index);
+                                        }}
+                                        aria-label="Remove"
+                                        color={'error'}
+                                      >
+                                        <Delete fontSize="small" />
+                                      </IconButton>
+                                    </HtmlTooltip>
+                                  </div>
+                                </div>
+                              );
+                            })
                             : null}
                         </div>
                       )}
