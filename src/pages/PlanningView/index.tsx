@@ -28,8 +28,6 @@ import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubco
 import ManageSublease from 'src/pages/Sublease/ManageSublease';
 import CalendarView from './Calendar';
 import ListView from './List';
-import { DateSelectArg } from '@fullcalendar/core';
-import CreatePlanningDialog from 'src/pages/PlanningView/CreatePlanningDialog';
 
 function PlanningView() {
   const {
@@ -46,7 +44,6 @@ function PlanningView() {
   const resourceList = usePlanningResource();
   const [selectedResource, setSelectedResource] = useState<PlanningResource>(null);
   const [queryString, setQueryString] = useState(null);
-  const [selectedRange, setSelectedRange] = useState<DateSelectArg | null>(null);
 
   const [view, setView] = useState<'calendar' | 'list' | 'gantt'>('calendar');
   const [createDialog, setCreateDialog] = useState(false);
@@ -54,8 +51,6 @@ function PlanningView() {
   const [resourcePolicy, setResourcePolicy] = useState(null);
 
   const isProductSelected = selectedResource?.resource === sidebarResource.product;
-
-  const productIDs = queryString?.split('&')?.find(q => q?.includes('product='))?.split('=')[1]?.split(',') || [];
 
   const ref: any = useRef();
   const ganttRef = useRef<GantttViewRef>();
@@ -135,7 +130,6 @@ function PlanningView() {
                   view={view}
                 />
               }
-              setSelectedRange={setSelectedRange}
               resourceList={resourceList}
               selectedResource={selectedResource}
               setSelectedResource={setSelectedResource}
@@ -197,7 +191,7 @@ function PlanningView() {
           isAutomated={true}
         />
       )}
-      {selectedRange && <CreatePlanningDialog onClose={() => setSelectedRange(null)} selectedRange={selectedRange} productIDs={productIDs} />}
+
       {createDialog && selectedResource?.resource === sidebarResource?.planning && (
         <ManagePlanning
           isClone={false}

@@ -3,7 +3,6 @@ import { Autocomplete, Box, Dialog, IconButton, TextField } from '@mui/material'
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FieldArray, Form, Formik } from 'formik';
-import { useHistory } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -11,7 +10,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { CustomDialogTransition, customerContact, getObjKeys, sidebarResource, yupSchema } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormatToSend, GenerateResourceLineNumber, getObjKeys, MATERIAL_TYPE, sidebarResource, yupSchema } from 'src/constants/helpers';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
 import { useData } from 'src/StateProvider/Provider';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
@@ -22,18 +21,12 @@ import { Add, Delete } from '@mui/icons-material';
 import dayjs from 'dayjs';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
-type CreatePlanningDialogProps = {
-  onClose: (event: {}, reason?: 'backdropClick' | 'escapeKeyDown' | ('' & {})) => void;
-  selectedRange: DateSelectArg;
-  productIDs: string[];
-};
+const CreatePlanningDialog = ({ onClose, handleSucess, selectedRange, productIds }) => {
 
-const CreatePlanningDialog = ({ onClose, selectedRange, productIDs }: CreatePlanningDialogProps) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   }: any = useData();
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [dates, setDates] = useState([{ startDate: selectedRange.start, endDate: selectedRange.end, subStatus: '' }]);
@@ -42,13 +35,15 @@ const CreatePlanningDialog = ({ onClose, selectedRange, productIDs }: CreatePlan
   const fetchFields = async () => {
     try {
       const { fieldsDataForCreate } = await fetch_resource_fields(sidebarResource.planning, ['rentalJob', 'salesOrder', 'fieldServiceOrder']);
-
       const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
+      tempInitialData['planningNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+      if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+        tempInitialData['currency'] = user.user?.brandCurrency;
+      }
       const filteredFields = fieldsDataForCreate.filter(field => {
         const isRequiredAndEmpty = field.required && !tempInitialData[field.fieldName];
         return isRequiredAndEmpty;
       });
-
       setInitialData({
         fields: filteredFields,
         values: tempInitialData
@@ -72,13 +67,11 @@ const CreatePlanningDialog = ({ onClose, selectedRange, productIDs }: CreatePlan
     try {
       const transformedValues = {
         ...values,
-        currency: user.user?.brandCurrency,
         startDate: selectedRange.start,
         endDate: selectedRange.end,
-        material: productIDs.map((materialId) => ({
+        material: productIds.map((materialId) => ({
           materialId,
-          type: "product",
-          unit: "Piece",
+          type: MATERIAL_TYPE.product,
           qty: 1,
           parentId: null,
           dates: values.dates.map(date => ({
@@ -88,22 +81,14 @@ const CreatePlanningDialog = ({ onClose, selectedRange, productIDs }: CreatePlan
           }))
         }))
       };
-
       delete transformedValues.dates;
-
       const { data } = await axiosInstance().post(`${routes.planning?.path}`, transformedValues);
-
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
         message: data.message
       });
-
-      if (data?.data?._id) {
-        history.push(`${routes.planningDetail.path}/${data.data._id}`);
-      }
-
-      onClose({}, '');
+      handleSucess();
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -184,8 +169,8 @@ const CreatePlanningDialog = ({ onClose, selectedRange, productIDs }: CreatePlan
       fullScreen={fullScreen}
     >
       <CustomDialogHeader
-        onClose={() => onClose({}, '')}
-        title={`Create Planning`}
+        onClose={onClose}
+        title={`Create ${resources?.planning?.titleSingular}`}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
           setFullScreen((prevState) => !prevState);
