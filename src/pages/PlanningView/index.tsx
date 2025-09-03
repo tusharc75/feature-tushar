@@ -29,7 +29,7 @@ import ManageSublease from 'src/pages/Sublease/ManageSublease';
 import CalendarView from './Calendar';
 import ListView from './List';
 import { DateSelectArg } from '@fullcalendar/core';
-import OnRangeSelectDialog from 'src/pages/PlanningView/OnRangeSelectDialog';
+import CreatePlanningDialog from 'src/pages/PlanningView/CreatePlanningDialog';
 
 function PlanningView() {
   const {
@@ -54,6 +54,8 @@ function PlanningView() {
   const [resourcePolicy, setResourcePolicy] = useState(null);
 
   const isProductSelected = selectedResource?.resource === sidebarResource.product;
+
+  const productIDs = queryString?.split('&')?.find(q => q?.includes('product='))?.split('=')[1]?.split(',') || [];
 
   const ref: any = useRef();
   const ganttRef = useRef<GantttViewRef>();
@@ -112,8 +114,8 @@ function PlanningView() {
               permissions={permissions?.planningView}
               module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
-              afterImportCompleted={() => {}}
-              onExportToExcelSuccess={() => {}}
+              afterImportCompleted={() => { }}
+              onExportToExcelSuccess={() => { }}
               additionalParams={queryString}
               onlyExport={true}
             />
@@ -195,7 +197,7 @@ function PlanningView() {
           isAutomated={true}
         />
       )}
-      {selectedRange && <OnRangeSelectDialog onClose={() => setSelectedRange(null)} selectedRange={selectedRange} />}
+      {selectedRange && <CreatePlanningDialog onClose={() => setSelectedRange(null)} selectedRange={selectedRange} productIDs={productIDs} />}
       {createDialog && selectedResource?.resource === sidebarResource?.planning && (
         <ManagePlanning
           isClone={false}
@@ -281,7 +283,7 @@ function PlanningView() {
           isClone={false}
           projectSalesId={false}
           close={() => setCreateDialog(false)}
-          fetchData={() => {}}
+          fetchData={() => { }}
           onSuccess={() => {
             onClickRefreshIcon();
           }}
