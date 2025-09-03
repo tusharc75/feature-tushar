@@ -22,7 +22,7 @@ import ManageOnboarding from './ManageOnboarding';
 const Onboarding = () => {
   const renderedFrom = camelCase(sidebarResource.onboarding);
   const toastConfig = useContext(CustomToastContext);
-  
+
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
@@ -42,13 +42,13 @@ const Onboarding = () => {
 
   const fetchGridColumns = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(
-      sidebarResource?.onboarding, 
+      sidebarResource?.onboarding,
       permissions?.onboarding?.isUpdate
     );
     const newColumns = generateColumns(
-      renderedFrom, 
-      fieldsDataForRead, 
-      routes.onboardingDetail.path, 
+      renderedFrom,
+      fieldsDataForRead,
+      routes.onboardingDetail.path,
       true
     );
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
@@ -119,7 +119,7 @@ const Onboarding = () => {
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -149,18 +149,18 @@ const Onboarding = () => {
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    
+
     try {
       const response = await axiosInstance().get(`${routes.onboarding.path}${queryString}`, {
         cancelToken: cancelTokenSource?.token
       });
-      
+
       const rows = response?.data?.data?.map((u) => {
         const finalObject = prepareDataForGrid(u, user);
         finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
         return finalObject;
       });
-      
+
       dispatch({ type: 'initialize', data: rows, count: response?.data?.count });
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -178,14 +178,14 @@ const Onboarding = () => {
     } else if (selectedRecords?.length) {
       recordsToDelete = selectedRecords?.map((r) => r?._id);
     }
-    
+
     if (recordsToDelete.length > 0) {
       setDeleteLoading(true);
       try {
         await axiosInstance().put(`${routes.onboarding.path}/remove`, {
           ids: recordsToDelete
         });
-        
+
         dispatch({ type: 'selection', selectedRecords: [] });
         setShowDeleteConfirmBox({ open: false, data: null });
         fetchData();
@@ -211,11 +211,11 @@ const Onboarding = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs 
-          routes={[{ ...routes.onboarding, title: resources?.onboarding?.titlePlural }]} 
+        <CustomBreadCrumbs
+          routes={[{ ...routes.onboarding, title: resources?.onboarding?.titlePlural }]}
         />
       </div>
-      
+
       <CustomContainer>
         <ListingPageHeader
           searchValue={search}
@@ -226,7 +226,7 @@ const Onboarding = () => {
           addButtonOnclick={() => setShowManageDialog({ open: true, id: null, isClone: false })}
           isAddButtonVisible={permissions?.onboarding?.isCreate}
         />
-        
+
         {columns ? (
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
@@ -247,7 +247,7 @@ const Onboarding = () => {
           </Box>
         )}
       </CustomContainer>
-      
+
       {showManageDialog.open && (
         <ManageOnboarding
           onClose={() => setShowManageDialog({ open: false, id: null, isClone: false })}
@@ -259,15 +259,14 @@ const Onboarding = () => {
           isClone={showManageDialog.isClone}
         />
       )}
-      
+
       {showDeleteConfirmBox?.open && (
         <ConfirmationDialog
           open={showDeleteConfirmBox?.open}
-          message={`Are you sure you want to delete ${
-            showDeleteConfirmBox?.data 
-              ? `${resources?.onboarding?.titleSingular?.toLowerCase()}: ${showDeleteConfirmBox?.data?.componentName}`
-              : 'selected record(s)'
-          }?`}
+          message={`Are you sure you want to delete ${showDeleteConfirmBox?.data
+            ? `${resources?.onboarding?.titleSingular?.toLowerCase()}: ${showDeleteConfirmBox?.data?.componentName}`
+            : 'selected record(s)'
+            }?`}
           onClose={() => setShowDeleteConfirmBox({ open: false, data: null })}
           okBtnLoading={deleteLoading}
           onOk={() => handleDelete(showDeleteConfirmBox?.data)}

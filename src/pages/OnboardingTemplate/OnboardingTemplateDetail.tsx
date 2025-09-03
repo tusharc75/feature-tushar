@@ -18,12 +18,13 @@ import ManageOnboardingTemplate from 'src/pages/OnboardingTemplate/ManageOnboard
 import DynamicTabs from 'src/components/FormBuilder/Tabs';
 
 const OnboardingTemplateDetail = () => {
+
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
 
   const {
-    state: { user, permissions, resources }
+    state: { permissions, resources }
   }: any = useData();
 
   const [onboardingTemplateData, setOnboardingTemplateData] = useState(null);
@@ -44,7 +45,7 @@ const OnboardingTemplateDetail = () => {
 
   const fetchFields = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(
-      sidebarResource.onboardingTemplate, 
+      sidebarResource.onboardingTemplate,
       permissions?.onboardingTemplate?.isUpdate
     );
     setFields(fieldsDataForRead);
@@ -95,8 +96,8 @@ const OnboardingTemplateDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {allowedToEdit && (
-              <ThemeButton 
-                iconForMobile={<Edit />} 
+              <ThemeButton
+                iconForMobile={<Edit />}
                 onClick={() => setOpenUpdateDialog(true)}
                 mobileTooltip="Edit"
               >
@@ -104,36 +105,36 @@ const OnboardingTemplateDetail = () => {
               </ThemeButton>
             )}
             {allowedToDelete && (
-              <DeleteButton 
-                text="Delete" 
-                onClick={() => setShowConfirmBox(true)} 
+              <DeleteButton
+                text="Delete"
+                onClick={() => setShowConfirmBox(true)}
               />
             )}
           </Box>
         </Box>
       </Box>
-      
+
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Tabs</CustomTab>
         </CustomTabs>
-        
+
         <TabPanel value={tabValue} index={0}>
           {loading || !fields ? (
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           ) : (
-            <DetailsPage 
-              data={onboardingTemplateData} 
-              fields={fields} 
+            <DetailsPage
+              data={onboardingTemplateData}
+              fields={fields}
             />
           )}
         </TabPanel>
-        
+
         <TabPanel value={tabValue} index={1}>
           <DynamicTabs
-            onboardingTemplateId={id} 
-            resource={sidebarResource.onboardingTemplate} 
+            onboardingTemplateId={id}
+            resource={sidebarResource.onboardingTemplate}
           />
         </TabPanel>
       </Box>
@@ -146,7 +147,7 @@ const OnboardingTemplateDetail = () => {
           onOk={handleDelete}
         />
       )}
-      
+
       {openUpdateDialog && (
         <ManageOnboardingTemplate
           id={id}
