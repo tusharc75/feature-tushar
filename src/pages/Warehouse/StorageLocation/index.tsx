@@ -100,6 +100,7 @@ const StorageLocation = ({ warehouse }) => {
       deepFilter = `?`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
+    filterByIds.push({ field: 'warehouse', term: { $in: [warehouse] } });
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
