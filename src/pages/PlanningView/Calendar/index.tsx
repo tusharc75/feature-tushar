@@ -897,9 +897,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   }, [selectedResource, selectedResource?.resource, filteredColumns?.length, selectedLookUpResourceData, dateRange]);
 
   const isSelectable =
-    permissions[sidebarResource.planning.toLowerCase()]?.isCreate &&
-    selectedResource?.resource === sidebarResource.product &&
-    !!selectedLookUpResourceData
+    permissions['planning']?.isCreate && selectedResource?.resource === sidebarResource.product && !!selectedLookUpResourceData
       ? Object.keys(selectedLookUpResourceData).length > 0
       : false;
 
