@@ -18,7 +18,6 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { isEqual, isString } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isRedirectToDetailPage = true, referenceData = null }) => {
@@ -256,7 +255,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
               {showConfirmCloneDetailsDialog && (
                 <SelectionConfirmationDialog
                   open={showConfirmCloneDetailsDialog}
-                  message={"Would you like to clone with all details? Click 'Yes' to include header and details, or 'No' to clone only the header."}
+                  message={"Would you like to clone this with all line items? Click 'Yes' to clone both the header and its line items, or 'No' to clone only the header."}
                   onOk={(type) => {
                     if (type === 'Yes') {
                       setFieldValue('packageId', packageId);
