@@ -19,7 +19,7 @@ import CustomMessageDialog from 'src/components/MessageDialog';
 
 const renderedFrom = 'rental_management_existing';
 
-const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onClose, onSuccess, assetPolicyData = null }) => {
+const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onClose, onSuccess, assetPolicyData = null, productSerialNumber = [] }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, selectedEntity, resources }
@@ -146,6 +146,21 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
       data['packageUniqueId'] = selectedPackage?.optionValue;
     }
     data.skipTriggerAssetStatusChange = skipTriggerAssetStatusChange;
+
+    const productSerialNumbers = []
+    productSerialNumber?.forEach(p => {
+      const obj: any = {
+        product: p?.materialId,
+        uniqueId: p?.uniqueId,
+        qty: p?.qty,
+        serialNumber: p?.productSerialNumbers?.map(s => s?.serialNumber)
+      }
+      productSerialNumbers.push(obj)
+    });
+
+    if (productSerialNumbers?.length) {
+      data['productSerialNumber'] = productSerialNumbers;
+    }
     axiosInstance()
       .post(`${rentalManagement.api}/move-asset-inter-rental`, data)
       .then(({ data }) => {
