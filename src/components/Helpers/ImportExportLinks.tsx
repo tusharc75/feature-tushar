@@ -52,7 +52,7 @@ export default function ImportExportLinks({
   const isMobile = useMediaQuery('(max-width: 960px)');
 
   const toastConfig = useContext(CustomToastContext);
-  const [openAsyncImpExpDialog, setOpenAsyncImpExpDialog] = useState({ open: false, type: null, api: null });
+  const [openAsyncImpExpDialog, setOpenAsyncImpExpDialog] = useState({ open: false, type: null, api: null, subResource: null });
   const [refresh, setRefresh] = useState(false);
   const [imptExptDnldMenuDta, setImptExptDnldMenuDta] = useState({ anchorEl: null, action: null, open: false });
 
@@ -261,7 +261,7 @@ export default function ImportExportLinks({
               className="cursor-pointer"
               onClick={() => {
                 if (asyncImport && resource) {
-                  setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, api: null });
+                  setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, api: null, subResource: null });
                   handleCloseMenu();
                 }
               }}
@@ -273,7 +273,7 @@ export default function ImportExportLinks({
         {imptExptDnldMenuDta.action === 'export' && !hideDefaultImportExport && (
           <MenuItem
             onClick={() => {
-              asyncExport && resource ? setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, api: null }) : exportToExcel();
+              asyncExport && resource ? setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, api: null, subResource: null }) : exportToExcel();
               handleCloseMenu();
             }}
           >
@@ -315,7 +315,7 @@ export default function ImportExportLinks({
                   htmlFor={asyncImport && resource ? '' : `${d.title}-${idx + 1}`.replace(/\s+/g, '')}
                   onClick={() => {
                     if (asyncImport && resource) {
-                      setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, api: d.api });
+                      setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, api: d.api, subResource: d?.subResource || null });
                       handleCloseMenu();
                     }
                   }}
@@ -330,7 +330,7 @@ export default function ImportExportLinks({
                 key={d.title}
                 onClick={() => {
                   asyncExport && resource
-                    ? setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, api: d.api })
+                    ? setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, api: d.api, subResource: d?.subResource || null })
                     : exportToExcel(d.api);
                   handleCloseMenu();
                 }}
@@ -373,7 +373,7 @@ export default function ImportExportLinks({
                 if (extraImportExportLinks.length > 0) {
                   handleOpenMenu(e, 'import');
                 } else if (asyncImport && resource) {
-                  setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, api: null });
+                  setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, api: null, subResource: null });
                 }
               }}
               className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
@@ -389,7 +389,7 @@ export default function ImportExportLinks({
               if (extraImportExportLinks.length > 0) {
                 handleOpenMenu(e, 'export');
               } else {
-                asyncExport && resource ? setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, api: null }) : exportToExcel();
+                asyncExport && resource ? setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, api: null, subResource: null }) : exportToExcel();
               }
             }}
             className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
@@ -425,11 +425,11 @@ export default function ImportExportLinks({
       {openAsyncImpExpDialog.open && (
         <ImportExportDialog
           handleClose={() => {
-            setOpenAsyncImpExpDialog({ open: false, type: null, api: null });
+            setOpenAsyncImpExpDialog({ open: false, type: null, api: null, subResource: null });
           }}
           type={openAsyncImpExpDialog.type}
           resource={resource}
-          subResource={null}
+          subResource={openAsyncImpExpDialog.subResource}
           referenceId={null}
           handleExport={() => {
             exportToExcel(openAsyncImpExpDialog.api);
