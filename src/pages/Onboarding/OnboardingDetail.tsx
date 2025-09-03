@@ -16,7 +16,6 @@ import { sidebarResource } from 'src/constants/helpers';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import ManageOnboarding from './ManageOnboarding';
 import Step from 'src/pages/DynamicForm/Step';
-import { camelCase, startCase } from 'lodash';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const OnboardingDetail = () => {
@@ -27,9 +26,6 @@ const OnboardingDetail = () => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
-
-  const resource = startCase(sidebarResource.onboarding);
-  const renderedFrom = camelCase(resource);
 
   const [onboardingData, setOnboardingData] = useState(null);
   const [onboardingTemplateData, setOnboardingTemplateData] = useState(null);
@@ -50,10 +46,7 @@ const OnboardingDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(
-      sidebarResource.onboarding, 
-      permissions?.onboarding?.isUpdate
-    );
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.onboarding, permissions?.onboarding?.isUpdate);
     setFields(fieldsDataForRead);
   };
 
@@ -76,10 +69,10 @@ const OnboardingDetail = () => {
 
   useEffect(() => {
     fetchPolicy();
-  }, [resource]);
+  }, []);
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, resource)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.onboarding)
     setResourcePolicyData(data)
   };
 
@@ -117,8 +110,8 @@ const OnboardingDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {allowedToEdit && (
-              <ThemeButton 
-                iconForMobile={<Edit />} 
+              <ThemeButton
+                iconForMobile={<Edit />}
                 onClick={() => setOpenUpdateDialog(true)}
                 mobileTooltip="Edit"
               >
@@ -126,15 +119,15 @@ const OnboardingDetail = () => {
               </ThemeButton>
             )}
             {allowedToDelete && (
-              <DeleteButton 
-                text="Delete" 
-                onClick={() => setShowConfirmBox(true)} 
+              <DeleteButton
+                text="Delete"
+                onClick={() => setShowConfirmBox(true)}
               />
             )}
           </Box>
         </Box>
       </Box>
-      
+
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleTabChange}>
           <CustomTab value={0}>Header</CustomTab>
@@ -149,14 +142,14 @@ const OnboardingDetail = () => {
             </CustomTab>
           ))}
         </CustomTabs>
-        
+
         <TabPanel value={tabValue} index={0}>
           {loading || !fields ? (
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           ) : (
-            <DetailsPage 
-              data={onboardingData} 
-              fields={fields} 
+            <DetailsPage
+              data={onboardingData}
+              fields={fields}
             />
           )}
         </TabPanel>
@@ -169,14 +162,13 @@ const OnboardingDetail = () => {
                 tab={tab}
                 onboardingTemplateId={onboardingTemplateData._id}
                 resourceId={id}
-                resource={resource}
+                resource={sidebarResource.onboarding}
                 data={onboardingTemplateData}
-                allowedToEdit={permissions[renderedFrom]?.isUpdate ? allowedToEdit : false}
+                allowedToEdit={permissions?.onboarding?.isUpdate ? allowedToEdit : false}
               />
             </TabPanel>
           ))
         }
-
         {resourcePolicyData &&
           resourcePolicyData?.tabs?.length > 0 &&
           resourcePolicyData?.tabs?.map((tab, i) => (
@@ -185,9 +177,9 @@ const OnboardingDetail = () => {
                 tab={tab}
                 resourcePolicyId={resourcePolicyData?._id}
                 resourceId={id}
-                resource={resource}
+                resource={sidebarResource.onboarding}
                 data={onboardingTemplateData}
-                allowedToEdit={permissions[renderedFrom]?.isUpdate ? allowedToEdit : false}
+                allowedToEdit={permissions?.onboarding?.isUpdate ? allowedToEdit : false}
               />
             </TabPanel>
           ))
@@ -202,7 +194,7 @@ const OnboardingDetail = () => {
           onOk={handleDelete}
         />
       )}
-      
+
       {openUpdateDialog && (
         <ManageOnboarding
           id={id}
