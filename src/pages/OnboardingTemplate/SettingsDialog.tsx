@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from 'react';
-import { Dialog, Box, TextField, Chip } from '@mui/material';
+import { Dialog, Box, TextField, Chip, Checkbox, FormControlLabel } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -35,11 +35,13 @@ const SettingsDialog = ({
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [filledByCandidate, setFilledByCandidate] = useState(false);
 
   useEffect(() => {
     if (open) {
       setSelectedUsers(step?.properties?.users || []);
       setSelectedRoles(step?.properties?.roles || []);
+      setFilledByCandidate(step?.properties?.filledByCandidate || false);
       fetchUsersAndRoles();
     }
   }, [open, step]);
@@ -98,7 +100,8 @@ const SettingsDialog = ({
   const handleSave = () => {
     const Properties = {
       users: selectedUsers,
-      roles: selectedRoles
+      roles: selectedRoles,
+      filledByCandidate
     };
     handleSettingsSave(Properties);
   };
@@ -172,6 +175,15 @@ const SettingsDialog = ({
                 />
               ))
             }
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={filledByCandidate}
+                onChange={(e) => setFilledByCandidate(e.target.checked)}
+              />
+            }
+            label="Filled By Candidate"
           />
         </Box>
       </CustomDialogContent>
