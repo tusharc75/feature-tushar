@@ -32,7 +32,7 @@ import { useData } from '../../../StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 const ManageRentalManagementDialog = ({
   isClone,
@@ -440,16 +440,20 @@ const ManageRentalManagementDialog = ({
                 />
               )}
               {showConfirmCloneDetailsDialog && (
-                <ConfirmationDialog
-                  open={true}
-                  message="Please confirm if you'd like to proceed with cloning, including all the line items. If not, click on cancel."
-                  onOk={() => {
-                    setFieldValue('rentalJobId', rentalManagementId);
+                <SelectionConfirmationDialog
+                  open={showConfirmCloneDetailsDialog}
+                  message={"Would you like to clone this with all line items? Click 'Yes' to clone both the header and its line items, or 'No' to clone only the header."}
+                  onOk={(type) => {
+                    if (type === 'Yes') {
+                      setFieldValue('rentalJobId', rentalManagementId);
+                    }
                     submitForm();
                   }}
                   onClose={() => {
-                    submitForm();
+                    setShowConfirmCloneDetailsDialog(false)
                   }}
+                  selection1={'Yes'}
+                  selection2={'No'}
                   okBtnLoading={loading}
                 />
               )}
