@@ -37,7 +37,7 @@ const CustomCalendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
         {...rest}
       />
     ) : (
-      <div className={cn(selectable ? '[&_.fc-daygrid-day]:cursor-cell' : '')}>
+      <div className={cn(selectable ? '[&_:is(.fc-daygrid-day,.fc-timegrid-slot-lane)]:cursor-cell' : '')}>
         <Calendar
           events={events}
           ref={ref}
