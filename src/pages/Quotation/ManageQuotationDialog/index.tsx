@@ -332,7 +332,7 @@ const ManageQuotationDialog = ({
               {showConfirmCloneDetailsDialog && (
                 <SelectionConfirmationDialog
                   open={showConfirmCloneDetailsDialog}
-                  message={"Would you like to clone with all details? Click 'Yes' to include header and details, or 'No' to clone only the header."}
+                  message={"Would you like to clone this with all line items? Click 'Yes' to clone both the header and its line items, or 'No' to clone only the header."}
                   onOk={(type) => {
                     if (type === 'Yes') {
                       setFieldValue('quotationId', quotationId);
