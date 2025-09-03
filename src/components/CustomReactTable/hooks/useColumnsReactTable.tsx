@@ -206,7 +206,6 @@ export function useColumns() {
         } else if (field?.primaryField === true && detailScreenRoute) {
           const fieldName = field?.fieldName === 'firstName' ? 'concatedName' : field.fieldName;
           column.push({
-            lockPosition: true,
             ...commonFieldData,
             id: fieldName,
             accessor: fieldName,
