@@ -18,7 +18,6 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { isEqual, isString } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isRedirectToDetailPage = true, referenceData = null }) => {
