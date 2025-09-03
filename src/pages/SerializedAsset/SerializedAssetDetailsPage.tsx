@@ -26,6 +26,7 @@ import {
   INVENTORY_HISTORY_TYPE,
   INVENTORY_OWNER_TYPE,
   MATERIAL_TYPE,
+  rentalManagement,
   repairJob,
   repairOrder,
   serializedAsset,
@@ -84,6 +85,9 @@ const SerializedAssetDetailsPage = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [status, setStatus] = useState('');
   const [statusOptions, setStatusOptions] = useState(null);
+
+  const [subStatusanchorEl, setSubStatusanchorEl] = useState(null);
+
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [customField, setCustomField] = useState([]);
@@ -306,6 +310,14 @@ const SerializedAssetDetailsPage = () => {
     setAnchorEl(null);
   };
 
+  const openSubStatus = (event) => {
+    setSubStatusanchorEl(event.currentTarget);
+  };
+
+  const closeSubStatus = () => {
+    setSubStatusanchorEl(null);
+  };
+
   const handleStatusChange = (o) => {
     const { policy } = resourcePolicyData;
     const statusPolicy = policy?.statusChangeFields?.find(
@@ -458,6 +470,29 @@ const SerializedAssetDetailsPage = () => {
     );
   };
 
+  const handleSubStatusChange = (subStatus) => {
+    axiosInstance().put(`${rentalManagement.api}/${assetDetails?.rentalJob?.optionValue}/inventory/update-sub-status`,
+      {
+        assets: [{ _id: assetDetails?._id, uniqueId: null }],
+        dates: [{
+          endDate: null,
+          startDate: null,
+          subStatus: subStatus
+        }]
+      }).then(({ data }) => {
+        fetchData()
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -530,6 +565,43 @@ const SerializedAssetDetailsPage = () => {
                         </ThemeButton>
                       </HtmlTooltip>
                     ) : null}
+                    {assetDetails?.status === ASSET_STATUS.inUse && resourcePolicyData?.policy?.inUseSubStatus?.length > 0 && assetDetails?.rentalJob?.optionValue &&
+                      <ThemeButton
+                        onClick={openSubStatus}
+                        endIcon={<ExpandMore />}
+                        mobileTooltip="Change Status"
+                        disabled={updateLoading}
+                        iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
+                      >
+                        {'Change Sub Status'}
+                      </ThemeButton>}
+                    <Menu
+                      anchorEl={subStatusanchorEl}
+                      keepMounted
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(subStatusanchorEl)}
+                      onClose={closeSubStatus}
+                    >
+                      {resourcePolicyData?.policy?.inUseSubStatus?.map((o) => {
+                        return (
+                          <MenuItem
+                            key={o?.optionValue}
+                            disabled={o === assetDetails?.subStatus}
+                            onClick={() => {
+                              closeSubStatus();
+                              handleSubStatusChange(o)
+                            }}
+                            value={o}
+                          >
+                            {o}
+                          </MenuItem>
+                        );
+                      })}
+                    </Menu>
                     {allowUpdateStatus ? (
                       assetDetails?.status === ASSET_STATUS.lost ? (
                         <ThemeButton
