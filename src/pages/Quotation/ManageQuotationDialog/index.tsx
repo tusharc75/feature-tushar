@@ -28,7 +28,6 @@ import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import dayjs from 'dayjs';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 const ManageQuotationDialog = ({

@@ -27,7 +27,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, onSuccess }) => {
