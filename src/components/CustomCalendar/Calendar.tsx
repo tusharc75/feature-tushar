@@ -14,18 +14,7 @@ import { useAppTheme } from 'src/constants/AppConfig';
 import { DEFAULT_TIME_ZONE } from 'src/constants/helpers';
 
 export const Calendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
-  (
-    {
-      events,
-      isLoading,
-      initialView = 'dayGridMonth',
-      getEventStyle,
-      onNavigate,
-      height = 'max(calc(100vh - 250px), 700px)',
-      ...rest
-    },
-    ref
-  ) => {
+  ({ events, isLoading, initialView = 'dayGridMonth', getEventStyle, onNavigate, height = 'max(calc(100vh - 250px), 700px)', ...rest }, ref) => {
     const {
       state: { user }
     }: any = useData();
@@ -55,7 +44,6 @@ export const Calendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
         clearTimeout(id);
       };
     }, [storeData]);
-
 
     return (
       <div className="relative">
