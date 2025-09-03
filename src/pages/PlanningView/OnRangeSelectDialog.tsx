@@ -9,7 +9,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
 type OnRangeSelectDialogProps = {
-  onClose: (event: {}, reason: 'backdropClick' | 'escapeKeyDown' | ('' & {})) => void;
+  onClose: (event: {}, reason?: 'backdropClick' | 'escapeKeyDown' | ('' & {})) => void;
   selectedRange: DateSelectArg;
 };
 
@@ -40,7 +40,7 @@ const OnRangeSelectDialog = ({ onClose, selectedRange }: OnRangeSelectDialogProp
         <p>{selectedRange.end.toLocaleString()}</p>
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton buttonType="transparent" onClick={() => onClose({}, '')}>
+        <ThemeButton buttonType="transparent" onClick={onClose}>
           Cancel
         </ThemeButton>
 
