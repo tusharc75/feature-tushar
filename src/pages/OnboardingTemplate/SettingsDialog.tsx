@@ -1,4 +1,5 @@
 import { useState, useContext, useEffect } from 'react';
+import { useFormik } from 'formik';
 import { Dialog, Box, TextField, Chip, Checkbox, FormControlLabel } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -19,6 +20,12 @@ interface SettingsDialogProps {
   fetchData?: () => void;
 }
 
+interface FormValues {
+  users: string[];
+  roles: string[];
+  filledByCandidate: boolean;
+}
+
 const SettingsDialog = ({ 
   open, 
   onClose, 
@@ -28,20 +35,30 @@ const SettingsDialog = ({
   fetchData 
 }: SettingsDialogProps) => {
   const toastConfig = useContext(CustomToastContext);
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [filledByCandidate, setFilledByCandidate] = useState(false);
+
+  const formik = useFormik<FormValues>({
+    initialValues: {
+      users: [],
+      roles: [],
+      filledByCandidate: false
+    },
+    onSubmit: async (values) => {
+      await handleSettingsSave(values);
+    },
+  });
 
   useEffect(() => {
     if (open) {
-      setSelectedUsers(step?.properties?.users || []);
-      setSelectedRoles(step?.properties?.roles || []);
-      setFilledByCandidate(step?.properties?.filledByCandidate || false);
+      formik.setValues({
+        users: step?.properties?.users || [],
+        roles: step?.properties?.roles || [],
+        filledByCandidate: step?.properties?.filledByCandidate || false
+      });
       fetchUsersAndRoles();
     }
   }, [open, step]);
@@ -65,7 +82,7 @@ const SettingsDialog = ({
     setLoading(false);
   };
 
-  const handleSettingsSave = async (Properties: { users: string[]; roles: string[] }) => {
+  const handleSettingsSave = async (properties: FormValues) => {
     if (!onboardingTemplateId || !tabId) {
       toastConfig.setToastConfig({
         open: true,
@@ -79,7 +96,7 @@ const SettingsDialog = ({
       const api = `${routes.onboardingTemplate.path}/tabs/steps/${onboardingTemplateId}/${tabId}/settings`;
       await axiosInstance().put(api, {
         stepId: step?._id,
-        properties: Properties
+        properties
       });
       toastConfig.setToastConfig({
         open: true,
@@ -97,15 +114,6 @@ const SettingsDialog = ({
     }
   };
 
-  const handleSave = () => {
-    const Properties = {
-      users: selectedUsers,
-      roles: selectedRoles,
-      filledByCandidate
-    };
-    handleSettingsSave(Properties);
-  };
-
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullScreen={fullScreen} fullWidth>
       <CustomDialogHeader
@@ -118,88 +126,107 @@ const SettingsDialog = ({
         showManimizeMaximize={true}
         showRequiredLabel={false}
       />
-      <CustomDialogContent>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
-          <Autocomplete
-            multiple
-            options={users}
-            loading={loading}
-            getOptionLabel={(option) => option.optionLabel || ''}
-            value={users.filter(user => selectedUsers.includes(user.optionValue)) || []}
-            onChange={(e, newValue) => {
-              setSelectedUsers(newValue.map(user => user.optionValue));
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Select Users"
-                variant="outlined"
-                size="small"
-              />
-            )}
-            renderTags={(tagValue, getTagProps) =>
-              tagValue.map((option, index) => (
-                <Chip
-                  label={option.optionLabel}
-                  {...getTagProps({ index })}
+      
+      <form onSubmit={formik.handleSubmit}>
+        <CustomDialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
+            <Autocomplete
+              multiple
+              options={users}
+              loading={loading}
+              getOptionLabel={(option) => option.optionLabel || ''}
+              value={users.filter(user => formik.values.users.includes(user.optionValue)) || []}
+              onChange={(e, newValue) => {
+                formik.setFieldValue(
+                  'users', 
+                  newValue.map(user => user.optionValue)
+                );
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Select Users"
+                  variant="outlined"
                   size="small"
-                  key={option.optionValue}
                 />
-              ))
-            }
-          />
-          <Autocomplete
-            multiple
-            options={roles}
-            loading={loading}
-            getOptionLabel={(option) => option.optionLabel || ''}
-            value={roles.filter(role => selectedRoles.includes(role.optionValue)) || []}
-            onChange={(e, newValue) => {
-              setSelectedRoles(newValue.map(role => role.optionValue));
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Select Roles"
-                variant="outlined"
-                size="small"
-              />
-            )}
-            renderTags={(tagValue, getTagProps) =>
-              tagValue.map((option, index) => (
-                <Chip
-                  label={option.optionLabel}
-                  {...getTagProps({ index })}
+              )}
+              renderTags={(tagValue, getTagProps) =>
+                tagValue.map((option, index) => (
+                  <Chip
+                    label={option.optionLabel}
+                    {...getTagProps({ index })}
+                    size="small"
+                    key={option.optionValue}
+                  />
+                ))
+              }
+            />
+            
+            <Autocomplete
+              multiple
+              options={roles}
+              loading={loading}
+              getOptionLabel={(option) => option.optionLabel || ''}
+              value={roles.filter(role => formik.values.roles.includes(role.optionValue)) || []}
+              onChange={(e, newValue) => {
+                formik.setFieldValue(
+                  'roles', 
+                  newValue.map(role => role.optionValue)
+                );
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Select Roles"
+                  variant="outlined"
                   size="small"
-                  key={option.optionValue}
                 />
-              ))
-            }
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={filledByCandidate}
-                onChange={(e) => setFilledByCandidate(e.target.checked)}
-              />
-            }
-            label="Filled By Candidate"
-          />
-        </Box>
-      </CustomDialogContent>
-      <CustomDialogFooter>
-        <ThemeButton onClick={onClose} buttonType="transparent">
-          Cancel
-        </ThemeButton>
-        <ThemeButton 
-          onClick={handleSave} 
-          buttonType="theme"
-          loading={isSubmitting}
-          disabled={isSubmitting}
-        >
-          Save
-        </ThemeButton>
-      </CustomDialogFooter>
+              )}
+              renderTags={(tagValue, getTagProps) =>
+                tagValue.map((option, index) => (
+                  <Chip
+                    label={option.optionLabel}
+                    {...getTagProps({ index })}
+                    size="small"
+                    key={option.optionValue}
+                  />
+                ))
+              }
+            />
+            
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formik.values.filledByCandidate}
+                  onChange={(e) => 
+                    formik.setFieldValue('filledByCandidate', e.target.checked)
+                  }
+                  name="filledByCandidate"
+                />
+              }
+              label="Filled By Candidate"
+            />
+          </Box>
+        </CustomDialogContent>
+        
+        <CustomDialogFooter>
+          <ThemeButton 
+            onClick={onClose} 
+            buttonType="transparent"
+            type="button"
+          >
+            Cancel
+          </ThemeButton>
+          <ThemeButton 
+            type="submit"
+            buttonType="theme"
+            loading={isSubmitting}
+            disabled={isSubmitting}
+          >
+            Save
+          </ThemeButton>
+        </CustomDialogFooter>
+      </form>
     </Dialog>
   );
 };
