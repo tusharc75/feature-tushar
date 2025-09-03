@@ -28,7 +28,7 @@ import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import dayjs from 'dayjs';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 const ManageQuotationDialog = ({
   isClone,
@@ -330,16 +330,20 @@ const ManageQuotationDialog = ({
                 />
               ) : null}
               {showConfirmCloneDetailsDialog && (
-                <ConfirmationDialog
-                  open={true}
-                  message="Please confirm if you'd like to proceed with cloning, including all the line items. If not, click on cancel."
-                  onOk={() => {
-                    setFieldValue('quotationId', quotationId);
+                <SelectionConfirmationDialog
+                  open={showConfirmCloneDetailsDialog}
+                  message={"Would you like to clone this with all line items? Click 'Yes' to clone both the header and its line items, or 'No' to clone only the header."}
+                  onOk={(type) => {
+                    if (type === 'Yes') {
+                      setFieldValue('quotationId', quotationId);
+                    }
                     submitForm();
                   }}
                   onClose={() => {
-                    submitForm();
+                    setShowConfirmCloneDetailsDialog(false)
                   }}
+                  selection1={'Yes'}
+                  selection2={'No'}
                   okBtnLoading={loading}
                 />
               )}

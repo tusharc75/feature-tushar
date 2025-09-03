@@ -15,7 +15,7 @@ import { cn, CustomDialogTransition, dateFormat, rentalManagement } from 'src/co
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const SubStatusDatesDialog = ({ handleClose, options, onSuccess, submitting, rentalId, assets, showDates = false }) => {
+const SubStatusDatesDialog = ({ handleClose, options, onSuccess, submitting, rentalId, assets, showDates = false, selectedOption = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -23,7 +23,7 @@ const SubStatusDatesDialog = ({ handleClose, options, onSuccess, submitting, ren
   }: any = useData();
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [dates, setDates] = useState([{ startDate: null, endDate: null, subStatus: '' }]);
+  const [dates, setDates] = useState([{ startDate: null, endDate: null, subStatus: selectedOption ? selectedOption : '' }]);
   const [minDate, setMinDate] = useState(null);
 
   const addRemove = (values, type, index) => {

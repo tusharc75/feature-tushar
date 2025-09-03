@@ -27,7 +27,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -277,16 +277,20 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                   />
                 ) : null}
                 {showConfirmCloneDetailsDialog && (
-                  <ConfirmationDialog
-                    open={true}
-                    message="Please confirm if you'd like to proceed with cloning, including all the line items. If not, click on cancel."
-                    onOk={() => {
-                      setFieldValue('invoiceId', invoiceId);
+                  <SelectionConfirmationDialog
+                    open={showConfirmCloneDetailsDialog}
+                    message={"Would you like to clone this with all line items? Click 'Yes' to clone both the header and its line items, or 'No' to clone only the header."}
+                    onOk={(type) => {
+                      if (type === 'Yes') {
+                        setFieldValue('invoiceId', invoiceId);
+                      }
                       submitForm();
                     }}
                     onClose={() => {
-                      submitForm();
+                      setShowConfirmCloneDetailsDialog(false)
                     }}
+                    selection1={'Yes'}
+                    selection2={'No'}
                     okBtnLoading={loading}
                   />
                 )}

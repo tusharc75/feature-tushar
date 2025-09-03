@@ -4,7 +4,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { Box, IconButton, MenuItem, Typography } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
-import { MATERIAL_TYPE, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { MATERIAL_TYPE, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import ManageStep from '../ManageStep';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../../../components/Shared/DetailsPage';
@@ -26,6 +26,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import { useData } from 'src/StateProvider/Provider';
 
 const View = ({
   step,
@@ -41,6 +42,10 @@ const View = ({
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
+  const {
+    state: { user }
+  }: any = useData();
+
   const renderedFrom = `${camelCase(resource)}_${camelCase(step?.stepName)}`;
 
   const [open, setOpen] = useState({ open: false, id: null });
@@ -48,6 +53,7 @@ const View = ({
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [openMaterial, setOpenMaterial] = useState({ open: false, type: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [allowedToEditState, setAllowedToEditState] = useState(null);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -55,8 +61,23 @@ const View = ({
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
-    fetchColumns();
+    if (resource === sidebarResource.onboarding) {
+      if (step?.properties && step?.properties?.users?.length) {
+        setAllowedToEditState(step?.properties?.users.includes(user.user._id));
+      } else {
+        setAllowedToEditState(allowedToEdit);
+      }
+    }
+    else {
+      setAllowedToEditState(allowedToEdit)
+    }
   }, [step]);
+
+  useEffect(() => {
+    if (allowedToEditState !== null) {
+      fetchColumns();
+    }
+  }, [step, allowedToEditState]);
 
   useEffect(() => {
     if (step && (step?.fields?.length || step?.linkWithMaterial)) {
@@ -79,51 +100,51 @@ const View = ({
       },
       ...(step?.linkWithMaterial
         ? [
-            {
-              accessor: 'type',
-              Header: 'Type',
-              disableFilters: true,
-              sticky: isMobile || isTablet ? 'none' : 'left',
-              width: 200,
-              Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
-            },
-            {
-              accessor: 'detail',
-              Header: 'Details',
-              minWidth: 300,
-              width: 300,
-              disabled: true,
-              sticky: isMobile || isTablet ? 'none' : 'left',
-              Cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                  <p className="text-truncate" title={row.original.detail}>
-                    {row.original.detail}
-                  </p>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      if (row.original.type === MATERIAL_TYPE.product) {
-                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                      }
-                      if (row.original.type === MATERIAL_TYPE.service) {
-                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                      }
-                      if (row.original.type === MATERIAL_TYPE.package) {
-                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                      }
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              )
-            },
-            {
-              accessor: 'description',
-              Header: 'Description',
-              Cell: ({ row }) => (row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'type',
+            Header: 'Type',
+            disableFilters: true,
+            sticky: isMobile || isTablet ? 'none' : 'left',
+            width: 200,
+            Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
+          },
+          {
+            accessor: 'detail',
+            Header: 'Details',
+            minWidth: 300,
+            width: 300,
+            disabled: true,
+            sticky: isMobile || isTablet ? 'none' : 'left',
+            Cell: ({ row }) => (
+              <div className="flex items-center gap-2">
+                <p className="text-truncate" title={row.original.detail}>
+                  {row.original.detail}
+                </p>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === MATERIAL_TYPE.product) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    }
+                    if (row.original.type === MATERIAL_TYPE.service) {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    }
+                    if (row.original.type === MATERIAL_TYPE.package) {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              </div>
+            )
+          },
+          {
+            accessor: 'description',
+            Header: 'Description',
+            Cell: ({ row }) => (row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />)
+          }
+        ]
         : [])
     ];
     const newColumns = await generateColumns(renderedFrom, step?.fields || [], null, false, data?.currency);
@@ -139,33 +160,33 @@ const View = ({
       Cell: ({ row }) => (
         <>
           {step?.fields?.length > 0 && (
-            <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
+            <HtmlTooltip title={allowedToEditState ? 'Edit' : editDisable}>
               <span>
                 <IconButton
                   size="small"
                   aria-label="Edit"
-                  disabled={allowedToEdit ? false : true}
+                  disabled={allowedToEditState ? false : true}
                   onClick={() => {
                     setOpen({ open: true, id: row?.original?._id });
                   }}
                 >
-                  <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                  <EditIcon fontSize="small" color={allowedToEditState ? 'primary' : 'disabled'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
           )}
-          <HtmlTooltip title={allowedToEdit ? 'Delete' : deleteDisable}>
+          <HtmlTooltip title={allowedToEditState ? 'Delete' : deleteDisable}>
             <span>
               <IconButton
                 size="small"
                 aria-label="Delete"
-                disabled={allowedToEdit ? false : true}
+                disabled={allowedToEditState ? false : true}
                 onClick={() => {
                   setDeleteRecord(row?.original);
                   setShowDeleteConfirmBox(true);
                 }}
               >
-                <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+                <DeleteIcon fontSize="small" color={allowedToEditState ? 'error' : 'disabled'} />
               </IconButton>
             </span>
           </HtmlTooltip>
@@ -349,8 +370,8 @@ const View = ({
   const addButtonMenuItems = () => {
     return step?.linkWithMaterial
       ? step?.linkedMaterial?.map((m) => (
-          <MenuItem onClick={() => setOpenMaterial({ open: true, type: m })}>Add Existing {startCase(m) + 's'}</MenuItem>
-        ))
+        <MenuItem onClick={() => setOpenMaterial({ open: true, type: m })}>Add Existing {startCase(m) + 's'}</MenuItem>
+      ))
       : null;
   };
 
@@ -381,7 +402,7 @@ const View = ({
           {step?.fields?.length || step?.linkWithMaterial ? (
             step?.multipleStepData ? (
               <>
-                {allowedToEdit && (
+                {allowedToEditState && (
                   <DetailsPageHeader
                     isAddButtonVisible={step?.linkWithMaterial ? true : false}
                     addButtonMenuItems={addButtonMenuItems()}
@@ -431,14 +452,17 @@ const View = ({
               <>
                 {sidebarButton}
                 <Box textAlign={'right'}>
-                  <ThemeButton
-                    onClick={() => {
-                      setOpen({ open: true, id: dataRows[0] ? dataRows[0]?._id : null });
-                    }}
-                    buttonType="theme"
-                  >
-                    Edit
-                  </ThemeButton>
+                  <HtmlTooltip title={allowedToEditState ? 'Edit' : editDisable}>
+                    <ThemeButton
+                      onClick={() => {
+                        setOpen({ open: true, id: dataRows[0] ? dataRows[0]?._id : null });
+                      }}
+                      disabled={!allowedToEditState}
+                      buttonType="theme"
+                    >
+                      Edit
+                    </ThemeButton>
+                  </HtmlTooltip>
                 </Box>
                 <Box mt={2}>
                   <DetailsPage data={dataRows[0] || {}} fields={step?.fields?.map((f) => ({ fieldData: f }))} />
