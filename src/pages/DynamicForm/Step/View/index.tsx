@@ -26,6 +26,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import { useData } from 'src/StateProvider/Provider';
 
 const View = ({
   step,
@@ -41,6 +42,10 @@ const View = ({
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
+  const {
+    state: { user }
+  }: any = useData();
+
   const renderedFrom = `${camelCase(resource)}_${camelCase(step?.stepName)}`;
 
   const [open, setOpen] = useState({ open: false, id: null });
@@ -48,6 +53,7 @@ const View = ({
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [openMaterial, setOpenMaterial] = useState({ open: false, type: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userHasStepPermission, setUserHasStepPermission] = useState(false);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -55,8 +61,21 @@ const View = ({
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
+    if (step?.properties && user) {
+      const hasUserAccess = step.properties.users.includes(user.user._id);
+      setUserHasStepPermission(hasUserAccess);
+    } else {
+      setUserHasStepPermission(false);
+    }
+  }, [step, user]);
+  
+  const canEdit = userHasStepPermission? allowedToEdit && userHasStepPermission : false;
+
+  const editingPermission = resource === "Onboarding" ? canEdit : allowedToEdit;
+
+  useEffect(() => {
     fetchColumns();
-  }, [step]);
+  }, [step, editingPermission]);
 
   useEffect(() => {
     if (step && (step?.fields?.length || step?.linkWithMaterial)) {
@@ -139,33 +158,33 @@ const View = ({
       Cell: ({ row }) => (
         <>
           {step?.fields?.length > 0 && (
-            <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
+            <HtmlTooltip title={editingPermission ? 'Edit' : editDisable}>
               <span>
                 <IconButton
                   size="small"
                   aria-label="Edit"
-                  disabled={allowedToEdit ? false : true}
+                  disabled={editingPermission ? false : true}
                   onClick={() => {
                     setOpen({ open: true, id: row?.original?._id });
                   }}
                 >
-                  <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                  <EditIcon fontSize="small" color={editingPermission ? 'primary' : 'disabled'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
           )}
-          <HtmlTooltip title={allowedToEdit ? 'Delete' : deleteDisable}>
+          <HtmlTooltip title={editingPermission ? 'Delete' : deleteDisable}>
             <span>
               <IconButton
                 size="small"
                 aria-label="Delete"
-                disabled={allowedToEdit ? false : true}
+                disabled={editingPermission ? false : true}
                 onClick={() => {
                   setDeleteRecord(row?.original);
                   setShowDeleteConfirmBox(true);
                 }}
               >
-                <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+                <DeleteIcon fontSize="small" color={editingPermission ? 'error' : 'disabled'} />
               </IconButton>
             </span>
           </HtmlTooltip>
@@ -381,7 +400,7 @@ const View = ({
           {step?.fields?.length || step?.linkWithMaterial ? (
             step?.multipleStepData ? (
               <>
-                {allowedToEdit && (
+                {editingPermission && (
                   <DetailsPageHeader
                     isAddButtonVisible={step?.linkWithMaterial ? true : false}
                     addButtonMenuItems={addButtonMenuItems()}
