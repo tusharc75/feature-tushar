@@ -30,7 +30,7 @@ export const usePlanningResource = () => {
         end: 'endDate'
       },
       {
-        key: 'planning',
+        key: sidebarResource.planning.toLowerCase(),
         resource: sidebarResource.planning,
         title: resources?.planning?.titlePlural,
         path: routes.planningDetail.path,

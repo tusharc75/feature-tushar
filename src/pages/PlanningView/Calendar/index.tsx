@@ -28,7 +28,7 @@ import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/co
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
 
-function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString, resourcePolicy, topRightSlot }, ref) {
+function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString, resourcePolicy, topRightSlot, setSelectedRange }, ref) {
   const {
     state: { user, permissions, resources }
   }: any = useData();
@@ -896,6 +896,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     };
   }, [selectedResource, selectedResource?.resource, filteredColumns?.length, selectedLookUpResourceData, dateRange]);
 
+  const isSelectable =
+    permissions[sidebarResource.planning.toLowerCase()]?.isCreate &&
+    selectedResource?.resource === sidebarResource.product &&
+    !!selectedLookUpResourceData
+      ? Object.keys(selectedLookUpResourceData).length > 0
+      : false;
+
   return (
     <>
       <div>
@@ -1013,8 +1020,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 eventResize={resizeEvent}
                 isLoading={isDataFetching}
                 getEventStyle={setEventStyle}
+                selectable={isSelectable}
                 onNavigate={onNavigate}
                 eventClick={dragAndDropOnSelectEvent}
+                select={setSelectedRange}
               />
             </>
           ) : (
@@ -1022,9 +1031,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               <CustomCalendar
                 events={events}
                 getEventStyle={setEventStyle}
+                selectable={isSelectable}
                 isLoading={isDataFetching}
                 onNavigate={onNavigate}
                 eventClick={handleClick}
+                select={setSelectedRange}
               />
             </div>
           )}
