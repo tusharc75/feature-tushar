@@ -136,7 +136,7 @@ const ScheduleReport = () => {
       {
         accessor: 'nextDate',
         Header: 'Expected Run Time',
-        Cell: ({ row }) => (row?.original?.nextDate ? <p className="text-truncate">{displayDateTime(row.original.nextDate)}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.nextDate && row?.original?.status !== 'pause' ? <p className="text-truncate">{displayDateTime(row.original.nextDate)}</p> : <NoDataCell />)
       },
       ...getStaticFields(),
       ActionsRenderer
