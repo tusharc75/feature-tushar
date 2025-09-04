@@ -33,7 +33,6 @@ import { CreateTask } from './Task/CreateTask';
 import ManageFile from 'src/components/Activity/AttachmentsNew/ManageFile';
 import AttachmentsNew from 'src/components/Activity/AttachmentsNew';
 import ManageFolder from 'src/components/Activity/AttachmentsNew/ManageFolder';
-import { createPortal as reactCreatePortal } from 'react-dom';
 
 const Activity = (props) => {
   const {
@@ -46,8 +45,7 @@ const Activity = (props) => {
     resourceLabel = '',
     resourceData = null,
     resource = '',
-    close = () => {},
-    createPortal = false
+    close = () => {}
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -106,15 +104,6 @@ const Activity = (props) => {
   useEffect(() => {
     fetchUsersEmails();
   }, []);
-
-  useEffect(() => {
-    if (createPortal) {
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.removeProperty('overflow');
-      };
-    }
-  }, [createPortal]);
 
   useEffect(() => {
     if (Boolean(viewRelatedTo[0]?.referenceId) && !countFetched) {
@@ -202,36 +191,27 @@ const Activity = (props) => {
     });
   };
 
-  const content = (
+  return (
     <>
       <Box>
         <Box
           className={`sticky top-0 z-[5] rounded-[7px_7px_0_0] bg-[var(--card-bg,#FFFFFF)] p-[14px_20px_16px_20px] [border-bottom:1px_solid_var(--common-border-color)]`}
         >
-          <div className="flex items-center justify-between gap-[14px]">
-            <div className="flex items-center gap-[14px]">
-              <div
-                className="icon grid h-[30px] w-[30px] place-items-center rounded-[6px] bg-gradient-to-r from-[#FAC94B] to-[rgb(255,155,4)]"
-                style={{ backgroundImage: 'linear-gradient(to right, #FAC94B, rgb(255,155,4))' }}
-              >
-                <CollaborateIcon />
-              </div>
-              <div>
-                <span className=" text-[11px] text-[#8c8c8c] dark:text-[var(--dark-secondary-text)]">Workspace</span>
-                <h2 className=" truncate text-sm text-[var(--dark-primary-text,#2A3042)] md:text-[15px]">{resourceLabel}</h2>
-              </div>
+          <div className="flex items-center gap-[14px]">
+            <div
+              className="icon grid h-[30px] w-[30px] place-items-center rounded-[6px] bg-gradient-to-r from-[#FAC94B] to-[rgb(255,155,4)]"
+              style={{ backgroundImage: 'linear-gradient(to right, #FAC94B, rgb(255,155,4))' }}
+            >
+              <CollaborateIcon />
             </div>
-            {createPortal ? (
-              <IconButton onClick={() => close()}>
-                <CloseIcon />
-              </IconButton>
-            ) : null}
+            <div>
+              <span className=" text-[11px] text-[#8c8c8c] dark:text-[var(--dark-secondary-text)]">Workspace</span>
+              <h2 className=" truncate text-sm text-[var(--dark-primary-text,#2A3042)] md:text-[15px]">{resourceLabel}</h2>
+            </div>
           </div>
-          {!createPortal ? (
-            <IconButton onClick={() => close()} className="close-icon-v1">
-              <CloseIcon />
-            </IconButton>
-          ) : null}
+          <IconButton onClick={() => close()} className="close-icon-v1">
+            <CloseIcon />
+          </IconButton>
         </Box>
 
         <Box className={` bg-[var(--dark-secondary,#FFFFFF)] p-[18px_20px_30px]`}>
@@ -518,16 +498,6 @@ const Activity = (props) => {
       ) : null}
     </>
   );
-
-  return createPortal
-    ? reactCreatePortal(
-        <>
-          <div className="fixed right-0 top-0 z-[1298] h-full w-full bg-black/40" onClick={() => close()} />
-          <div className="fixed right-0 top-0 z-[1300] h-full w-[400px] bg-[var(--dark-primary,white)] shadow-xl">{content}</div>
-        </>,
-        document.body
-      )
-    : content;
 };
 
 export default Activity;
