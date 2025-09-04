@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Delete, Visibility, Edit, Assignment } from '@mui/icons-material';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
@@ -11,15 +11,14 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { displayDateTime, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ManageScheduleReport from './ManageScheduleReport';
 import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import EditIcon from '@mui/icons-material/Edit';
+import ReportRunLogs from './ReportRunLogs';
 import ScheduleReportHistoryDialog from 'src/pages/ScheduleReport/ScheduleReportHistoryDialog';
-
 
 const ScheduleReport = () => {
   const renderedFrom = camelCase(sidebarResource.scheduleReport);
@@ -38,6 +37,7 @@ const ScheduleReport = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
 
   const [scheduleReportHistoryDialog, setScheduleReportHistoryDialog] = useState({ open: false, id: null });
+  const [showRunLogDialog, setShowRunLogDialog] = useState({ open: false, data: null });
 
   const [columns, setColumns] = useState(null);
 
@@ -97,28 +97,58 @@ const ScheduleReport = () => {
       {
         accessor: 'resource',
         Header: 'Report',
-        Cell: ({ row }) => (row?.original?.resource ? <div>
-          <p className="text-truncate" title={row.original.resource}>{row.original.resource}</p>
-        </div> : <NoDataCell />)
+        Cell: ({ row }) =>
+          row?.original?.resource ? (
+            <div>
+              <p className="text-truncate" title={row.original.resource}>
+                {row.original.resource}
+              </p>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'emailSubject',
         Header: 'Email Subject',
-        Cell: ({ row }) => (row?.original?.emailSubject ? <div>
-          <p className="text-truncate">{row.original.emailSubject}</p>
-        </div> : <NoDataCell />)
+        Cell: ({ row }) =>
+          row?.original?.emailSubject ? (
+            <div>
+              <p className="text-truncate">{row.original.emailSubject}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'subscribeUsers',
         Header: 'Subscribe Users',
-        Cell: ({ row }) => (row?.original?.subscribeUsers?.length ? <div> <p
-          className="text-truncate"
-          title={row.original.subscribeUsers}>{row.original.subscribeUsers}</p></div> : <NoDataCell />)
+        Cell: ({ row }) =>
+          row?.original?.subscribeUsers?.length ? (
+            <div>
+              {' '}
+              <p className="text-truncate" title={row.original.subscribeUsers}>
+                {row.original.subscribeUsers}
+              </p>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'emails',
         Header: 'Emails',
-        Cell: ({ row }) => (row?.original?.emails?.length ? <div> <p className="text-truncate" title={row.original.emails}>{row.original.emails}</p></div> : <NoDataCell />)
+        Cell: ({ row }) =>
+          row?.original?.emails?.length ? (
+            <div>
+              {' '}
+              <p className="text-truncate" title={row.original.emails}>
+                {row.original.emails}
+              </p>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'frequency',
@@ -133,11 +163,7 @@ const ScheduleReport = () => {
       {
         accessor: 'status',
         Header: 'Status',
-        Cell: ({ row }) => (
-          <div>
-            {startCase(row?.original?.status)}
-          </div>
-        ),
+        Cell: ({ row }) => <div>{startCase(row?.original?.status)}</div>
       },
       {
         accessor: 'reportAction',
@@ -155,10 +181,37 @@ const ScheduleReport = () => {
         Header: 'Time',
         Cell: ({ row }) => (row?.original?.time ? <p className="text-truncate">{row.original.time}</p> : <NoDataCell />)
       },
+      {
+        accessor: 'nextDate',
+        Header: 'Expected Run Time',
+        Cell: ({ row }) =>
+          row?.original?.nextDate && row?.original?.status !== 'pause' ? (
+            <p className="text-truncate">{displayDateTime(row.original.nextDate)}</p>
+          ) : (
+            <NoDataCell />
+          )
+      },
       ...getStaticFields(),
       ActionsRenderer
     ];
     setColumns(columns);
+  };
+
+  const handleRunReportInstantly = async (id) => {
+    try {
+      toastConfig.setToastConfig({
+        type: 'info',
+        message: 'Report Generation In Progress...',
+        open: true
+      });
+      const { data } = await axiosInstance().get(`${routes?.scheduleReport.path}/${id}/run`);
+      toastConfig.setToastConfig({
+        type: 'success',
+        message: data.message,
+        open: true
+      });
+    } catch (error) {
+    }
   };
 
   const ActionsRenderer = {
@@ -172,18 +225,43 @@ const ScheduleReport = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {permissions?.scheduleReport?.isUpdate &&
+        {permissions?.scheduleReport?.isUpdate && (
           <HtmlTooltip title={'Edit'}>
             <IconButton
               size="small"
               aria-label="Edit"
               onClick={() => {
-                setShowManageDialog({ open: true, id: row?.original?._id })
+                setShowManageDialog({ open: true, id: row?.original?._id });
               }}
             >
-              <EditIcon fontSize="small" color={'primary'} />
+              <Edit fontSize="small" color={'primary'} />
             </IconButton>
-          </HtmlTooltip>}
+          </HtmlTooltip>
+        )}
+        <HtmlTooltip title={'Run Report Instantly'}>
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => {
+                handleRunReportInstantly(row?.original?._id);
+              }}
+            >
+              <Assignment fontSize="small" color={'primary'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={'View Report Run Logs'}>
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => {
+                setShowRunLogDialog({ open: true, data: row?.original });
+              }}
+            >
+              <Visibility fontSize="small" color="primary" />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
         {permissions?.scheduleReport?.isDelete && (
           <HtmlTooltip title="Delete">
             <IconButton
@@ -194,7 +272,7 @@ const ScheduleReport = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize="small" />
+              <Delete color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -210,7 +288,6 @@ const ScheduleReport = () => {
         let count = data?.length;
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
-
           finalObject.resource = resources[camelCase(finalObject.resource)]?.titleSingular
             ? resources[camelCase(finalObject.resource)]?.titleSingular
             : finalObject.resource;
@@ -218,7 +295,6 @@ const ScheduleReport = () => {
             ? finalObject.subscribeUsers.map((user: any) => `${user?.firstName} ${user?.lastName}`).join(', ')
             : [];
           finalObject.date = new Date(finalObject.date).toDateString();
-          // finalObject.time = new Date(finalObject.time).toLocaleTimeString();
           finalObject.column = finalObject.column
             .split(',')
             .map((s: string) => startCase(s))
@@ -357,6 +433,11 @@ const ScheduleReport = () => {
         />
       )}
 
+      {showRunLogDialog.open &&
+        <ReportRunLogs
+          scheduleReportData={showRunLogDialog.data}
+          handleClose={() => setShowRunLogDialog({ open: false, data: null })} />
+      }
     </section>
   );
 };
