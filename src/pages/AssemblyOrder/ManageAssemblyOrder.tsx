@@ -191,7 +191,7 @@ const ManageAssemblyOrder = ({
           validateOnMount
           validate={validate}
           onSubmit={(values) => {
-            if (assemblyOrderId && isClone && !assemblyOrderData?.canDelete && !showConfirmCloneDetailsDialog) {
+            if (assemblyOrderId && isClone && assemblyOrderData?.isChildItems && !showConfirmCloneDetailsDialog) {
               setShowConfirmCloneDetailsDialog(true);
             }
             else {
