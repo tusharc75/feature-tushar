@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import { Delete, Visibility, Edit } from '@mui/icons-material';
+import { Delete, Visibility, Edit, Assignment } from '@mui/icons-material';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
@@ -175,6 +175,23 @@ const ScheduleReport = () => {
     setColumns(columns);
   };
 
+  const handleRunReportInstantly = async (id) => {
+    try {
+      toastConfig.setToastConfig({
+        type: 'info',
+        message: 'Report Generation In Progress...',
+        open: true
+      });
+      const { data } = await axiosInstance().get(`${routes?.scheduleReport.path}/${id}/run`);
+      toastConfig.setToastConfig({
+        type: 'success',
+        message: data.message,
+        open: true
+      });
+    } catch (error) {
+    }
+  };
+
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -199,6 +216,18 @@ const ScheduleReport = () => {
             </IconButton>
           </HtmlTooltip>
         )}
+        <HtmlTooltip title={'Run Report Instantly'}>
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => {
+                handleRunReportInstantly(row?.original?._id);
+              }}
+            >
+              <Assignment fontSize="small" color={'primary'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
         <HtmlTooltip title={'View Report Run Logs'}>
           <span>
             <IconButton
