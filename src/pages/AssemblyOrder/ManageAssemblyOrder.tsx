@@ -13,6 +13,7 @@ import {
   GenerateResourceLineNumber,
   getObjKeys,
   getObjKeysWithValues,
+  MATERIAL_TYPE,
   sidebarResource,
   yupSchema
 } from 'src/constants/helpers';
@@ -48,7 +49,7 @@ const ManageAssemblyOrder = ({
   const [assemblyOrderData, setAssemblyOrderData] = useState(null);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmCloneDetailsDialog, setShowConfirmCloneDetailsDialog] = useState(false);
-
+  const [isMaterialAvailable, setIsMaterialAvailable] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -70,6 +71,9 @@ const ManageAssemblyOrder = ({
             rest.status = ASSEMBLY_ORDER_STATUS.new;
             rest.assemblyOrderNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(assemblyOrderNumber);
+            if (data?.material && data?.material?.length > 0 && data?.material?.some(m => [MATERIAL_TYPE.package, MATERIAL_TYPE.product]?.includes(m?.type))) {
+              setIsMaterialAvailable(true)
+            }
             setInitialData({
               fields: fieldsDataForCreate,
               values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
@@ -191,7 +195,7 @@ const ManageAssemblyOrder = ({
           validateOnMount
           validate={validate}
           onSubmit={(values) => {
-            if (assemblyOrderId && isClone && !assemblyOrderData?.canDelete && !showConfirmCloneDetailsDialog) {
+            if (assemblyOrderId && isClone && isMaterialAvailable && !showConfirmCloneDetailsDialog) {
               setShowConfirmCloneDetailsDialog(true);
             }
             else {
