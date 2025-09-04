@@ -2821,10 +2821,7 @@ const ReceivingTicket = ({
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData?._id}/inventory/update-sub-status`,
         {
-          assets: getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => ({
-            _id: a?._id,
-            uniqueId: a?.uniqueId,
-          })),
+          assets: getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => a?._id),
           dates: dates
         })
       .then(({ data }) => {
@@ -2879,7 +2876,6 @@ const ReceivingTicket = ({
                 currentStep,
                 columns,
                 rentalManagementData,
-                rentalPolicyData,
                 setTransferAnotherPackageialog,
                 hideDeliveryTicketDelivered,
                 openChangeActualDateDialog,
@@ -2888,9 +2884,7 @@ const ReceivingTicket = ({
                 assetPolicyData,
                 validateAction,
                 resources,
-                getFilterSelectedRecords,
-                setSubStatusToUpdate,
-                handleSubStatusChange
+                getFilterSelectedRecords
               }}
             />
           }
@@ -3288,8 +3282,7 @@ const ReceivingTicket = ({
           onSuccess={handleSubStatusChange}
           submitting={isSubmitting}
           rentalId={rentalManagementData?._id}
-          assets={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => ({ _id: a?._id, uniqueId: a?.uniqueId }))}
-          showDates={rentalPolicyData?.subStatusDateWiseCapture}
+          assets={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => a?._id)}
         />
       )}
       {subStatusLog.open && (
@@ -3505,7 +3498,6 @@ const ActionButtonMenuItems = ({
   currentStep,
   columns,
   rentalManagementData,
-  rentalPolicyData,
   setTransferAnotherPackageialog,
   hideDeliveryTicketDelivered,
   openChangeActualDateDialog,
@@ -3515,8 +3507,6 @@ const ActionButtonMenuItems = ({
   validateAction,
   resources,
   getFilterSelectedRecords,
-  setSubStatusToUpdate,
-  handleSubStatusChange
 }) => {
   const checkUniqStatus = () => {
     if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset).length === 0) {
@@ -4032,29 +4022,6 @@ const ActionButtonMenuItems = ({
             Change Assets Data
           </MenuItem>
         )}
-      {/* {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
-        (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) &&
-        assetPolicyData?.policy?.inUseSubStatus?.length > 0 && getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length > 0 && (
-          <MenuItem
-            onClick={() => {
-              if (validateAction(rentalManagementActions.changeSubStatus)) {
-                if (!rentalPolicyData?.subStatusDateWiseCapture && assetPolicyData?.policy?.inUseSubStatus?.length === 1) {
-                  handleSubStatusChange([{ startDate: null, endDate: null, subStatus: assetPolicyData?.policy?.inUseSubStatus[0] }])
-                } else {
-                  setSubStatusToUpdate(true)
-                }
-              }
-            }}
-            id={'change-sub-status-menu-item'}
-            disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0 ||
-              !rentalPolicyData?.subStatusDateWiseCapture &&
-              assetPolicyData?.policy?.inUseSubStatus?.length === 1 &&
-              getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every(s => s?.subStatus === assetPolicyData?.policy?.inUseSubStatus[0]) ? true : false
-            }
-          >
-            {`Change Sub Status${!rentalPolicyData?.subStatusDateWiseCapture && assetPolicyData?.policy?.inUseSubStatus?.length === 1 ? ` - ${assetPolicyData?.policy?.inUseSubStatus[0]}` : ''}`}
-          </MenuItem>
-        )} */}
     </>
   );
 };

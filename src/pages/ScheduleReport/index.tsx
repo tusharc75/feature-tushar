@@ -17,7 +17,7 @@ import ManageScheduleReport from './ManageScheduleReport';
 import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import ViewLogs from './Logs';
+import ReportRunLogs from './ReportRunLogs';
 
 const ScheduleReport = () => {
   const renderedFrom = camelCase(sidebarResource.scheduleReport);
@@ -34,7 +34,7 @@ const ScheduleReport = () => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, id: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [showLogDialog, setShowLogDialog] = useState({ open: false, data: null });
+  const [showRunLogDialog, setShowRunLogDialog] = useState({ open: false, data: null });
 
   const [columns, setColumns] = useState(null);
 
@@ -228,12 +228,12 @@ const ScheduleReport = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={'View Logs'}>
+        <HtmlTooltip title={'View Report Run Logs'}>
           <span>
             <IconButton
               size="small"
               onClick={() => {
-                setShowLogDialog({ open: true, data: row?.original });
+                setShowRunLogDialog({ open: true, data: row?.original });
               }}
             >
               <Visibility fontSize="small" color="primary" />
@@ -266,7 +266,6 @@ const ScheduleReport = () => {
         let count = data?.length;
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
-
           finalObject.resource = resources[camelCase(finalObject.resource)]?.titleSingular
             ? resources[camelCase(finalObject.resource)]?.titleSingular
             : finalObject.resource;
@@ -274,7 +273,6 @@ const ScheduleReport = () => {
             ? finalObject.subscribeUsers.map((user: any) => `${user?.firstName} ${user?.lastName}`).join(', ')
             : [];
           finalObject.date = new Date(finalObject.date).toDateString();
-          // finalObject.time = new Date(finalObject.time).toLocaleTimeString();
           finalObject.column = finalObject.column
             .split(',')
             .map((s: string) => startCase(s))
@@ -405,7 +403,11 @@ const ScheduleReport = () => {
           }}
         />
       )}
-      {showLogDialog.open && <ViewLogs scheduleReportData={showLogDialog.data} handleClose={() => setShowLogDialog({ open: false, data: null })} />}
+      {showRunLogDialog.open &&
+        <ReportRunLogs
+          scheduleReportData={showRunLogDialog.data}
+          handleClose={() => setShowRunLogDialog({ open: false, data: null })} />
+      }
     </section>
   );
 };
