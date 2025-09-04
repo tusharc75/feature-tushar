@@ -32,7 +32,7 @@ function ViewLogs({ scheduleReportData, handleClose }) {
         accessor: 'subject',
         Header: 'Email Subject',
         Cell: ({ row }) =>
-          row?.original?.emailSubject ? (
+          row?.original?.subject ? (
             <div>
               <p className="text-truncate">{row.original.subject}</p>
             </div>
