@@ -53,8 +53,7 @@ const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel,
         setToastConfig(error);
       }
     }, 1000),
-    []
-  );
+    [resource, selectedEntity]);
 
   return (
     <>
