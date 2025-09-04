@@ -78,6 +78,10 @@ type ReturnMultiFileType = string | void | MultiFileType;
 
 const filter = createFilterOptions();
 
+export const getLabel = (label) => {
+  return label ? (label.length > 35 ? label.substr(0, 35) + '...' : label) : '';
+};
+
 interface NumberFormatCustomProps {
   inputRef: (instance: NumberFormat | null) => void;
   onChange: (event: { target: { name: string; value: string } }) => void;
@@ -469,10 +473,6 @@ const FormTypes = (props) => {
 
       event.target.value = '';
     }
-  };
-
-  const getLabel = (label) => {
-    return label ? (label.length > 35 ? label.substr(0, 35) + '...' : label) : '';
   };
 
   const handleUploadFile = async (ev, isMultiple = false) => {
