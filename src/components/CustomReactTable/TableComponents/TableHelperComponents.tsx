@@ -19,22 +19,22 @@ export type TColType = {
   disabled?: boolean;
   Footer?: (data: any) => React.ReactNode;
   type?:
-  | 'mobileNumber'
-  | 'phone'
-  | 'email'
-  | 'imageUpload'
-  | 'date'
-  | 'dateTime'
-  | 'colorPicker'
-  | 'checkBox'
-  | 'number'
-  | 'signature'
-  | 'decimal'
-  | 'currencyAmount'
-  | 'converter'
-  | 'singleLine'
-  | 'dropDown'
-  | 'multiSelect';
+    | 'mobileNumber'
+    | 'phone'
+    | 'email'
+    | 'imageUpload'
+    | 'date'
+    | 'dateTime'
+    | 'colorPicker'
+    | 'checkBox'
+    | 'number'
+    | 'signature'
+    | 'decimal'
+    | 'currencyAmount'
+    | 'converter'
+    | 'singleLine'
+    | 'dropDown'
+    | 'multiSelect';
   currency?: string;
   accessorFn: (data: any) => string;
   sticky: undefined | 'left' | 'right';
@@ -305,14 +305,9 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
 
   const isNotDraggable = useMemo(() => {
     return (
-      columnDef.canDrag === false ||
-      Boolean(columnDef.sticky) ||
-      columnDef.primaryField ||
-      columnDef.lockPosition ||
-      columnDef.disabled === true ||
-      ['action', 'selection', 'expand'].includes(column?.id)
+      columnDef.canDrag === false || Boolean(columnDef.sticky) || columnDef.lockPosition || ['action', 'selection', 'expand'].includes(column?.id)
     );
-  }, [column?.id, columnDef.canDrag, columnDef.disabled, columnDef.lockPosition, columnDef.primaryField, columnDef.sticky]);
+  }, [column?.id, columnDef.canDrag, columnDef.lockPosition, columnDef.sticky]);
 
   const [filters, setFilters] = useState([]);
 
@@ -388,7 +383,8 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
         title={typeof columnDef.header === 'string' ? columnDef.header : ''}
         colSpan={header.colSpan}
         className={cn(
-          `th text-truncate table-header overflow-hidden  ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} bg-[var(--dark-primary,_white)] ${overlayMode ? 'border text-[13px] font-semibold' : ''
+          `th text-truncate table-header overflow-hidden  ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} bg-[var(--dark-primary,_white)] ${
+            overlayMode ? 'border text-[13px] font-semibold' : ''
           } `,
           className
         )}
@@ -403,12 +399,14 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
         }}
       >
         <div
-          className={`pos-rel flex flex-grow items-center  ${column.id === 'selection' ? 'justify-center' : 'justify-between pr-[16px]'} ${isDragging ? ' opacity-50 [outline:4px_dashed_var(--common-border-color)]' : ''
-            }`}
+          className={`pos-rel flex flex-grow items-center  ${column.id === 'selection' ? 'justify-center' : 'justify-between pr-[16px]'} ${
+            isDragging ? ' opacity-50 [outline:4px_dashed_var(--common-border-color)]' : ''
+          }`}
         >
           <div
-            className={`d-flex align-items-center gap-2 ${column.id === 'selection' ? 'justify-center' : 'justify-between'} ${header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
-              }`}
+            className={`d-flex align-items-center gap-2 ${column.id === 'selection' ? 'justify-center' : 'justify-between'} ${
+              header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
+            }`}
             onClick={columnDef.disableSortBy !== true ? header.column.getToggleSortingHandler() : null}
           >
             <div className="line-clamp-1">
