@@ -22,7 +22,6 @@ import {
   sidebarResource,
   getObjKeys,
   GenerateResourceLineNumber,
-  getUniqueCurrencies
 } from '../../constants/helpers';
 import routes from '../../components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -47,35 +46,21 @@ const ManageAssetServiceTicket = ({ isClone = false, assetTicketId = null, isRed
 
   const fetchFields = async () => {
     try {
-      console.log('Fetching fields for asset service tickets...');
       let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.assetServiceTickets);
-      console.log('Fields data for create:', fieldsDataForCreate);
-      console.log('Fields data for update:', fieldsDataForUpdate);
-      console.log('All fields data:', fieldsDataAll);
-      
       if (assetTicketId) {
         axiosInstance()
           .get(`${assetServiceTickets.api}/` + assetTicketId)
           .then(({ data: { data } }) => {
             if (isClone) {
-              // Find the primary field name
-              const primaryField = fieldsDataForCreate?.find((e) => e?.fieldData?.primaryField);
-              const primaryFieldName = primaryField?.fieldData?.fieldName || 'ticketId';
-              
-              const { [primaryFieldName]: primaryValue, ...rest } = data;
-              setTitle(`Clone - ${primaryValue}`);
-              rest[primaryFieldName] = GenerateResourceLineNumber(fieldsDataForCreate);
+              const { assetId, ...rest } = data;
+              setTitle(`Clone - ${assetId}`);
+              rest.assetId = GenerateResourceLineNumber(fieldsDataForCreate);
               setInitialData({
                 fields: fieldsDataForCreate,
                 values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
               });
             } else {
-              // Find the primary field name
-              const primaryField = fieldsDataForUpdate?.find((e) => e?.fieldData?.primaryField);
-              const primaryFieldName = primaryField?.fieldData?.fieldName || 'ticketId';
-              const primaryValue = data[primaryFieldName];
-              
-              setTitle(`Edit - ${primaryValue}`);
+              setTitle(`Edit - ${data.assetId}`);
               setInitialData({
                 fields: fieldsDataForUpdate,
                 values: { ...getObjKeysWithValues(data, fieldsDataAll) }
@@ -88,24 +73,7 @@ const ManageAssetServiceTicket = ({ isClone = false, assetTicketId = null, isRed
       } else {
         setTitle(`Create ${resources?.assetServiceTickets?.titleSingular}`);
         let initialData = getObjKeys('', fieldsDataForCreate);
-        
-        // Find the primary field
-        const primaryField = fieldsDataForCreate?.find((e) => e?.fieldData?.primaryField);
-        console.log('Primary field:', primaryField);
-        
-        if (primaryField?.fieldData?.fieldName) {
-          initialData[primaryField.fieldData.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);
-        } else {
-          // Fallback to ticketId if no primary field is found
-          initialData['ticketId'] = GenerateResourceLineNumber(fieldsDataForCreate);
-        }
-        
-        if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
-          initialData['currency'] = user.user?.brandCurrency;
-        }
-        initialData['users'] = [user?.user?._id];
-        
-        console.log('Initial data for create:', initialData);
+        initialData['assetId'] = GenerateResourceLineNumber(fieldsDataForCreate);
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData
@@ -151,7 +119,7 @@ const ManageAssetServiceTicket = ({ isClone = false, assetTicketId = null, isRed
           });
         })
         .catch((error) => {
-          setIsSubmitting(false);;
+          setIsSubmitting(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -184,12 +152,7 @@ const ManageAssetServiceTicket = ({ isClone = false, assetTicketId = null, isRed
       open={true}
     >
       {initialData && initialData?.fields?.length ? (
-        <Formik
-          initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
-          validateOnMount
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <>
               <CustomDialogHeader

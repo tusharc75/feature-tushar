@@ -113,7 +113,7 @@ const AssetServiceTicketDetail = () => {
           <CustomBreadCrumbs
             routes={[
               { ...routes?.assetServiceTickets, title: resources?.assetServiceTickets?.titlePlural },
-              { title: `${assetTicketData ? assetTicketData?.ticketNumber : ''}` }
+              { title: `${assetTicketData ? assetTicketData?.ticketId : ''}` }
             ]}
           />
         </Box>
@@ -162,7 +162,7 @@ const AssetServiceTicketDetail = () => {
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete ${resources?.assetServiceTickets?.titleSingular?.toLowerCase()} : ${assetTicketData?.ticketNumber} ?`}
+          message={`Are you sure you want to delete ${resources?.assetServiceTickets?.titleSingular?.toLowerCase()} : ${assetTicketData?.ticketId} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}

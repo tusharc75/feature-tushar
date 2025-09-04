@@ -222,7 +222,7 @@ const AssetServiceTickets = () => {
     <div className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ ...routes.assetServiceTickets, title: resources?.assetServiceTickets?.titlePlural }]} />
-        <ImportExportLinks
+        {/* <ImportExportLinks
           permissions={permissions.assetServiceTickets}
           module={resources?.assetServiceTickets?.titlePlural}
           api={assetServiceTickets.api}
@@ -237,7 +237,7 @@ const AssetServiceTickets = () => {
             fetchData();
           }}
           additionalParams={getQueryString(true)}
-        />
+        /> */}
       </div>
       <CustomContainer>
         <ListingPageHeader
