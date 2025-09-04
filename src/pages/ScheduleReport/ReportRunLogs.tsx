@@ -9,8 +9,9 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, displayDateTime, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 
-function ViewLogs({ scheduleReportData, handleClose }) {
-  const renderedFrom = `${sidebarResource.scheduleReport}_logs`;
+function ReportRunLogs({ scheduleReportData, handleClose }) {
+
+  const renderedFrom = `${sidebarResource.scheduleReport}_ReportRunLogs`;
 
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
@@ -25,7 +26,7 @@ function ViewLogs({ scheduleReportData, handleClose }) {
     let columns = [
       {
         accessor: 'date',
-        Header: 'Run Time',
+        Header: 'Date Time',
         Cell: ({ row }) => (row?.original?.date ? <p className="text-truncate">{displayDateTime(row.original.date)}</p> : <NoDataCell />)
       },
       {
@@ -121,7 +122,7 @@ function ViewLogs({ scheduleReportData, handleClose }) {
         }}
       >
         <CustomDialogHeader
-          title={`Logs - ${scheduleReportData?.scheduleName}`}
+          title={`Report Run Logs - ${scheduleReportData?.scheduleName}`}
           onClose={handleClose}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
@@ -132,19 +133,17 @@ function ViewLogs({ scheduleReportData, handleClose }) {
         />
         <CustomDialogContent isFooterPresent={false}>
           {columns ? (
-            <Box p={2}>
-              <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
-                <CustomReactTable
-                  height={'calc(100vh - 200px)'}
-                  columns={columns}
-                  state={state}
-                  dispatch={dispatch}
-                  refreshGrid={fetchData}
-                  hideSelection={true}
-                  renderedFrom={renderedFrom}
-                  isClientSideGrid={true}
-                />
-              </Box>
+            <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
+              <CustomReactTable
+                height={'calc(100vh - 200px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                refreshGrid={fetchData}
+                hideSelection={true}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={true}
+              />
             </Box>
           ) : (
             <Box p={2} height={500}>
@@ -157,4 +156,4 @@ function ViewLogs({ scheduleReportData, handleClose }) {
   );
 }
 
-export default ViewLogs;
+export default ReportRunLogs;
