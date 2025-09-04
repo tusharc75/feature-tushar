@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Delete, Visibility, Edit } from '@mui/icons-material';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
@@ -11,14 +11,13 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { displayDateTime, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ManageScheduleReport from './ManageScheduleReport';
 import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import EditIcon from '@mui/icons-material/Edit';
-
+import ViewLogs from './Logs';
 
 const ScheduleReport = () => {
   const renderedFrom = camelCase(sidebarResource.scheduleReport);
@@ -35,6 +34,7 @@ const ScheduleReport = () => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, id: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
+  const [showLogDialog, setShowLogDialog] = useState({ open: false, data: null });
 
   const [columns, setColumns] = useState(null);
 
@@ -75,28 +75,58 @@ const ScheduleReport = () => {
       {
         accessor: 'resource',
         Header: 'Report',
-        Cell: ({ row }) => (row?.original?.resource ? <div>
-          <p className="text-truncate" title={row.original.resource}>{row.original.resource}</p>
-        </div> : <NoDataCell />)
+        Cell: ({ row }) =>
+          row?.original?.resource ? (
+            <div>
+              <p className="text-truncate" title={row.original.resource}>
+                {row.original.resource}
+              </p>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'emailSubject',
         Header: 'Email Subject',
-        Cell: ({ row }) => (row?.original?.emailSubject ? <div>
-          <p className="text-truncate">{row.original.emailSubject}</p>
-        </div> : <NoDataCell />)
+        Cell: ({ row }) =>
+          row?.original?.emailSubject ? (
+            <div>
+              <p className="text-truncate">{row.original.emailSubject}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'subscribeUsers',
         Header: 'Subscribe Users',
-        Cell: ({ row }) => (row?.original?.subscribeUsers?.length ? <div> <p
-          className="text-truncate"
-          title={row.original.subscribeUsers}>{row.original.subscribeUsers}</p></div> : <NoDataCell />)
+        Cell: ({ row }) =>
+          row?.original?.subscribeUsers?.length ? (
+            <div>
+              {' '}
+              <p className="text-truncate" title={row.original.subscribeUsers}>
+                {row.original.subscribeUsers}
+              </p>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'emails',
         Header: 'Emails',
-        Cell: ({ row }) => (row?.original?.emails?.length ? <div> <p className="text-truncate" title={row.original.emails}>{row.original.emails}</p></div> : <NoDataCell />)
+        Cell: ({ row }) =>
+          row?.original?.emails?.length ? (
+            <div>
+              {' '}
+              <p className="text-truncate" title={row.original.emails}>
+                {row.original.emails}
+              </p>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'frequency',
@@ -111,11 +141,7 @@ const ScheduleReport = () => {
       {
         accessor: 'status',
         Header: 'Status',
-        Cell: ({ row }) => (
-          <div>
-            {startCase(row?.original?.status)}
-          </div>
-        ),
+        Cell: ({ row }) => <div>{startCase(row?.original?.status)}</div>
       },
       {
         accessor: 'reportAction',
@@ -132,6 +158,16 @@ const ScheduleReport = () => {
         accessor: 'time',
         Header: 'Time',
         Cell: ({ row }) => (row?.original?.time ? <p className="text-truncate">{row.original.time}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'nextDate',
+        Header: 'Expected Run Time',
+        Cell: ({ row }) =>
+          row?.original?.nextDate && row?.original?.status !== 'pause' ? (
+            <p className="text-truncate">{displayDateTime(row.original.nextDate)}</p>
+          ) : (
+            <NoDataCell />
+          )
       },
       ...getStaticFields(),
       ActionsRenderer
@@ -150,18 +186,31 @@ const ScheduleReport = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {permissions?.scheduleReport?.isUpdate &&
+        {permissions?.scheduleReport?.isUpdate && (
           <HtmlTooltip title={'Edit'}>
             <IconButton
               size="small"
               aria-label="Edit"
               onClick={() => {
-                setShowManageDialog({ open: true, id: row?.original?._id })
+                setShowManageDialog({ open: true, id: row?.original?._id });
               }}
             >
-              <EditIcon fontSize="small" color={'primary'} />
+              <Edit fontSize="small" color={'primary'} />
             </IconButton>
-          </HtmlTooltip>}
+          </HtmlTooltip>
+        )}
+        <HtmlTooltip title={'View Logs'}>
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => {
+                setShowLogDialog({ open: true, data: row?.original });
+              }}
+            >
+              <Visibility fontSize="small" color="primary" />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
         {permissions?.scheduleReport?.isDelete && (
           <HtmlTooltip title="Delete">
             <IconButton
@@ -172,7 +221,7 @@ const ScheduleReport = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize="small" />
+              <Delete color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -327,6 +376,7 @@ const ScheduleReport = () => {
           }}
         />
       )}
+      {showLogDialog.open && <ViewLogs scheduleReportData={showLogDialog.data} handleClose={() => setShowLogDialog({ open: false, data: null })} />}
     </section>
   );
 };

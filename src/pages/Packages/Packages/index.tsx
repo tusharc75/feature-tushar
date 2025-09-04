@@ -20,6 +20,7 @@ import ArrangeView from 'src/components/Helpers/ArrangeView';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 
 const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_packages'}`;
@@ -184,14 +185,16 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
     return (
       allowedToEdit && (
         <>
-          <ImportExportMenu
+          <AsynImportExportMenu
+            resource={sidebarResource.packages}
+            subResource={sidebarResource.packages}
+            referenceId={packageId}
             permissions={permissions?.packages}
             module="packages"
             api={`${packages.api}/${packageId}/package`}
             afterImportCompleted={() => {
               fetchData();
             }}
-            isExportAllOrSomeFeature={true}
             ids={[]}
             additionalParams={`referenceId=${packageId}`}
           />
@@ -244,7 +247,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
 
   return (
     <>
-      {allowedToEdit &&
+      {allowedToEdit && (
         <DetailsPageHeader
           isAddButtonVisible={allowedToEdit}
           addButtonMenuItems={addButtonMenuItems()}
@@ -253,7 +256,8 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
           rightSideContents={rightSideContents()}
           hasXpadding
           actionButtonMenuItems={actionButtonMenuItems()}
-        />}
+        />
+      )}
       {columns ? (
         <CustomReactTable
           height={fullHeight ? 'calc(100vh - 250px)' : 'calc(100vh - 393px)'}

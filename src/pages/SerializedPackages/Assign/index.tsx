@@ -142,6 +142,14 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
         }
       },
       {
+        accessor: 'status',
+        Header: 'Status',
+        width: 150,
+        Cell: ({ row }) => {
+          return row?.original?.status ? <p className="text-truncate">{row.original.status}</p> : <NoDataCell />;
+        }
+      },
+      {
         accessor: 'productNumber',
         Header: productFields?.find((e) => e.fieldName === 'productNumber')?.fieldLabel || 'Product Number',
         width: 200,
@@ -217,33 +225,26 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
     const serialNumbers = allAssetsResponse?.data?.data?.serialNumbers || [];
     setSerialNumbers(JSON.parse(JSON.stringify(serialNumbers)))
 
-    axiosInstance()
-      .get(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/material`)
-      .then(({ data: { data } }) => {
-        const rows = data?.filter((e) => !e.parentId);
-        rows?.forEach((parent, i) => {
-          parent.index = i + 1;
-          parent.detail =
-            parent?.type === MATERIAL_TYPE.product
-              ? parent?.productDetail?.productName
-              : parent?.type === MATERIAL_TYPE.package
-                ? parent?.packageDetail?.packageName
-                : '';
-          parent.description =
-            parent?.type === MATERIAL_TYPE.product
-              ? parent?.productDetail?.productDescription
-              : parent?.type === MATERIAL_TYPE.package
-                ? parent?.packageDetail?.packageDescription
-                : '';
-          parent.productNumber = parent?.type === MATERIAL_TYPE.product ? parent?.productDetail?.productNumber : '';
-          parent.serializedProduct = parent?.type === MATERIAL_TYPE.product ? parent?.productDetail?.serializedProduct : false;
-          parent.assetQty =
-            parent?.type === MATERIAL_TYPE.product ? (assets.filter((e) => e?._id === parent?._id && e.product === parent?.materialId)?.length + serialNumbers?.filter((e) => e?._id === parent?._id && e.product === parent?.materialId)?.length) : 0;
-          parent.subRows = generateNestedData(data, assets, serialNumbers, parent);
-        });
-        dispatch({ type: 'initialize', data: rows, count: rows?.length });
-        dispatch({ type: 'loading', loading: false });
-      })
+    axiosInstance().get(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/material`).then(({ data: { data } }) => {
+      const rows = data?.filter((e) => !e.parentId);
+      rows?.forEach((parent, i) => {
+        parent.index = i + 1;
+        parent.detail = parent?.type === MATERIAL_TYPE.product
+          ? parent?.productDetail?.productName : parent?.type === MATERIAL_TYPE.package ? parent?.packageDetail?.packageName
+            : '';
+        parent.description = parent?.type === MATERIAL_TYPE.product
+          ? parent?.productDetail?.productDescription
+          : parent?.type === MATERIAL_TYPE.package
+            ? parent?.packageDetail?.packageDescription
+            : '';
+        parent.productNumber = parent?.type === MATERIAL_TYPE.product ? parent?.productDetail?.productNumber : '';
+        parent.serializedProduct = parent?.type === MATERIAL_TYPE.product ? parent?.productDetail?.serializedProduct : false;
+        parent.assetQty = parent?.type === MATERIAL_TYPE.product ? (assets.filter((e) => e?._id === parent?._id && e.product === parent?.materialId)?.length + serialNumbers?.filter((e) => e?._id === parent?._id && e.product === parent?.materialId)?.length) : 0;
+        parent.subRows = generateNestedData(data, assets, serialNumbers, parent);
+      });
+      dispatch({ type: 'initialize', data: rows, count: rows?.length });
+      dispatch({ type: 'loading', loading: false });
+    })
       .catch((err) => {
         setToastConfig(err);
       });
@@ -279,6 +280,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
         _subRow.index = parent.index + '.' + (j + 1 + subRowsLength);
         _subRow.type = MATERIAL_TYPE.serializedAsset;
         _subRow.detail = _subRow?.assetDetail?.assetNumber;
+        _subRow.status = _subRow?.assetDetail?.status;
         _subRow.parentId = _subRow?.product;
         _subRow.canDelete = serializedPackagesData?.status === SERIALIZED_PACKAGE_STATUS.available;
         subRows.push(_subRow);
@@ -356,13 +358,17 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
   };
 
   const handleReplaceAssets = (data) => {
+    const assets = selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)
+    data?.forEach(d => {
+      const asset = assets?.find(a => a?._id === d?._id && a?.product === d?.product && !a?.isCounted)
+      if (asset) {
+        d.oldAsset = asset?.asset;
+        asset.isCounted = true
+      }
+    });
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets/replace`,
-        {
-          assets: selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)?.map(r => r?.asset),
-          newAssets: data
-        })
+      .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets/replace`, data)
       .then(() => {
         fetchSerializedPackagesData()
         setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });

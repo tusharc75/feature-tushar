@@ -483,7 +483,7 @@ const CustomReactTable = ({
     setActiveHeader(null);
 
     if (!event.over) return;
-    if (event.over.data.current.isNotDraggable) return;
+    if (event.over.data.current.isNotDraggable || event.active.data.current.isNotDraggable) return;
     const { active, over } = event;
     if (active.id === over.id) return;
     reorder(active.id as string, over.id as string);

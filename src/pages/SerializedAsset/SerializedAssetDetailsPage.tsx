@@ -26,6 +26,7 @@ import {
   INVENTORY_HISTORY_TYPE,
   INVENTORY_OWNER_TYPE,
   MATERIAL_TYPE,
+  rentalManagement,
   repairJob,
   repairOrder,
   serializedAsset,
@@ -57,8 +58,9 @@ import dayjs from 'dayjs';
 import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
 import ServiceHistory from 'src/pages/SerializedAsset/ServiceHistory';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
-import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { getMultipleResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -84,6 +86,9 @@ const SerializedAssetDetailsPage = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [status, setStatus] = useState('');
   const [statusOptions, setStatusOptions] = useState(null);
+
+  const [subStatusanchorEl, setSubStatusanchorEl] = useState(null);
+
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [customField, setCustomField] = useState([]);
@@ -93,12 +98,15 @@ const SerializedAssetDetailsPage = () => {
   const { tab }: any = parsed;
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [resourcePolicyData, setResourcePolicyData] = useState(null);
+  const [rentalPolicyData, setRentalPolicyData] = useState(null)
   const [deviceTemplate, setDeviceTemplate] = useState(null);
   const [dataPoints, setDataPoints] = useState([]);
   // const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
   const [openStatusChangeFieldDialog, setOpenStatusChangeFieldDialog] = useState({ open: false, statusPolicy: null });
   const [refreshAssetHistory, setRefreshAssetHistory] = useState(false);
   const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
+  const [subStatusToUpdate, setSubStatusToUpdate] = useState({ open: false, status: null });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const extraFields = [
     ...(permissions?.rentalManagement?.isRead
@@ -250,8 +258,13 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.serializedAsset);
-    setResourcePolicyData(data);
+    const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.rentalManagement},${sidebarResource.serializedAsset}`)
+    if (data?.find((e) => e.resource === sidebarResource.rentalManagement)) {
+      setRentalPolicyData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
+    }
+    if (data?.find((e) => e.resource === sidebarResource.serializedAsset)) {
+      setResourcePolicyData(data?.find((e) => e.resource === sidebarResource.serializedAsset));
+    }
   };
 
   const fetchFields = async () => {
@@ -304,6 +317,14 @@ const SerializedAssetDetailsPage = () => {
 
   const closeActions = () => {
     setAnchorEl(null);
+  };
+
+  const openSubStatus = (event) => {
+    setSubStatusanchorEl(event.currentTarget);
+  };
+
+  const closeSubStatus = () => {
+    setSubStatusanchorEl(null);
   };
 
   const handleStatusChange = (o) => {
@@ -458,6 +479,29 @@ const SerializedAssetDetailsPage = () => {
     );
   };
 
+  const handleSubStatusChange = (dates) => {
+    setIsSubmitting(true)
+    axiosInstance().put(`${rentalManagement.api}/${assetDetails?.rentalJob?.optionValue}/inventory/update-sub-status`,
+      {
+        assets: [assetDetails?._id],
+        dates: dates
+      }).then(({ data }) => {
+        setSubStatusToUpdate({ open: false, status: null });
+        fetchData()
+        setIsSubmitting(false)
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setIsSubmitting(false)
+        toastConfig.setToastConfig(error);
+      });
+  }
+
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -530,6 +574,47 @@ const SerializedAssetDetailsPage = () => {
                         </ThemeButton>
                       </HtmlTooltip>
                     ) : null}
+                    {assetDetails?.status === ASSET_STATUS.inUse && resourcePolicyData?.policy?.inUseSubStatus?.length > 0 && assetDetails?.rentalJob?.optionValue &&
+                      <ThemeButton
+                        onClick={openSubStatus}
+                        endIcon={<ExpandMore />}
+                        mobileTooltip="Change Status"
+                        disabled={updateLoading}
+                        iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
+                      >
+                        {'Change Sub Status'}
+                      </ThemeButton>}
+                    <Menu
+                      anchorEl={subStatusanchorEl}
+                      keepMounted
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                      }}
+                      id="action-menu"
+                      open={Boolean(subStatusanchorEl)}
+                      onClose={closeSubStatus}
+                    >
+                      {resourcePolicyData?.policy?.inUseSubStatus?.map((o) => {
+                        return (
+                          <MenuItem
+                            key={o?.optionValue}
+                            disabled={o === assetDetails?.subStatus}
+                            onClick={() => {
+                              if (rentalPolicyData?.policy?.subStatusDateWiseCapture) {
+                                setSubStatusToUpdate({ open: true, status: o })
+                              } else {
+                                handleSubStatusChange([{ startDate: null, endDate: null, subStatus: o }])
+                              }
+                              closeSubStatus();
+                            }}
+                            value={o}
+                          >
+                            {o}
+                          </MenuItem>
+                        );
+                      })}
+                    </Menu>
                     {allowUpdateStatus ? (
                       assetDetails?.status === ASSET_STATUS.lost ? (
                         <ThemeButton
@@ -740,6 +825,19 @@ const SerializedAssetDetailsPage = () => {
             fetchAllData();
           }}
           isClone={false}
+        />
+      )}
+      {subStatusToUpdate.open && (
+        <SubStatusDatesDialog
+          handleClose={() => {
+            setSubStatusToUpdate({ open: false, status: null })
+          }}
+          options={resourcePolicyData?.policy?.inUseSubStatus}
+          selectedOption={subStatusToUpdate.status}
+          onSuccess={handleSubStatusChange}
+          submitting={isSubmitting}
+          rentalId={assetDetails?.rentalJob?.optionValue}
+          assets={[assetDetails?._id]}
         />
       )}
       {showRepairJobDialog && (
