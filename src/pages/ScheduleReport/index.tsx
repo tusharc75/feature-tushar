@@ -11,7 +11,7 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { displayDateTime, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ManageScheduleReport from './ManageScheduleReport';
 import axios, { CancelTokenSource } from 'axios';
@@ -132,6 +132,11 @@ const ScheduleReport = () => {
         accessor: 'time',
         Header: 'Time',
         Cell: ({ row }) => (row?.original?.time ? <p className="text-truncate">{row.original.time}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'nextDate',
+        Header: 'Expected Run Time',
+        Cell: ({ row }) => (row?.original?.nextDate ? <p className="text-truncate">{displayDateTime(row.original.nextDate)}</p> : <NoDataCell />)
       },
       ...getStaticFields(),
       ActionsRenderer
