@@ -58,7 +58,15 @@ import routes from './components/Helpers/Routes';
 import PrivateRoute from './components/PrivateRoute';
 import ScreenOrientationOverlay from './components/ScreenMessages/ScreenOrientationOverlay';
 import ColorModeProvider from './constants/AppConfig';
-import { compareVersions, customerAccount, customerContact, handleHardReload, sidebarResource, supplierAccount, supplierContact } from './constants/helpers';
+import {
+  compareVersions,
+  customerAccount,
+  customerContact,
+  handleHardReload,
+  sidebarResource,
+  supplierAccount,
+  supplierContact
+} from './constants/helpers';
 import ErrorBoundaryComponent from './ErrorBoundary';
 import { firebaseConfig } from './firebase';
 import { useLiveLocationTracking } from './hooks/useLiveLocationTracking';
@@ -305,6 +313,8 @@ import QuickBookProxy from 'src/pages/Integration/QuickBookProxy';
 import Onboarding from 'src/pages/Onboarding';
 import OnboardingDetail from 'src/pages/Onboarding/OnboardingDetail';
 import BrandSupportTicket from './pages/BrandSupportTicket';
+import AssetServiceTickets from 'src/pages/AssetServiceTicket';
+import AssetServiceTicketDetail from 'src/pages/AssetServiceTicket/AssetServiceTicketDetail';
 
 var notificationInterval: any = null;
 
@@ -382,7 +392,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -479,7 +489,6 @@ function App() {
       <AnimatePresence initial={false} exitBeforeEnter>
         <ErrorBoundaryComponent>
           <Switch>
-
             <Route exact path="/login/mfa" render={({ location }) => conditionalRedirect(LoginMFA, location)} />
             <Route
               // exact
@@ -1348,6 +1357,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.onboardingTemplateDetail.path}/:id`}>
               <OnboardingTemplateDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.assetServiceTickets.path}`}>
+              <AssetServiceTickets />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.assetServiceTicketsDetail.path}/:id`}>
+              <AssetServiceTicketDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

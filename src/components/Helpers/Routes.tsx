@@ -23,6 +23,12 @@ const routes = {
   supplierContactDetail: {
     path: '/supplier-contact/detail'
   },
+  assetServiceTickets: {
+    path: '/asset-service-tickets'
+  },
+  assetServiceTicketsDetail: {
+    path: '/asset-service-tickets/detail'
+  },
   lead: {
     path: '/lead',
     data: {}
@@ -816,7 +822,7 @@ const routes = {
   },
   contentPostPlanningDetail: {
     path: '/content-post-planning/detail'
-  },
+  }
 };
 
 export default routes;
