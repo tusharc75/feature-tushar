@@ -12,7 +12,6 @@ import {
   MATERIAL_TYPE,
   OTHER_MATERIAL_TYPE,
   QUOTATION_STATUS,
-  SERIALIZED_PACKAGE_STATUS,
   WORK_ORDER_TYPE,
   sidebarResource,
   workOrder
@@ -297,8 +296,8 @@ const Consumables = ({
     extracolumns.push({
       accessor: 'action',
       Header: 'Actions',
-      width: 150,
-      minWidth: 150,
+      width: 170,
+      minWidth: 170,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -306,42 +305,41 @@ const Consumables = ({
       Cell: ({ row }: any) => (
         <div style={{ display: 'flex', justifyContent: 'right' }}>
           <>
-            {!isDisassemblyChildItem && !row?.original?.serializedProduct &&
-              ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && (
-                <>
-                  {row.original?.isqtyRequestLog && (
-                    <HtmlTooltip title="View Requests">
-                      <IconButton
-                        size="small"
-                        aria-label="Requests"
-                        onClick={() => {
-                          setOpenLogDialog({ open: true, product: row?.original?.productId, uniqueId: row.original._id, data: row.original });
-                        }}
-                      >
-                        <FormatListBulletedIcon fontSize="small" color={'primary'} />
-                      </IconButton>
-                    </HtmlTooltip>
-                  )}
-                  {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && (
-                    <HtmlTooltip title="History">
-                      <IconButton
-                        size="small"
-                        aria-label="History"
-                        onClick={() => {
-                          setHistoryDialog({
-                            open: true,
-                            _id: row?.original?._id,
-                            product: row?.original?.productId,
-                            productName: row?.original?.productName
-                          });
-                        }}
-                      >
-                        <HistoryIcon fontSize="small" color={'primary'} />
-                      </IconButton>
-                    </HtmlTooltip>
-                  )}
-                </>
-              )}
+            {materialSubType === MATERIAL_SUB_TYPE.consumable && ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && (
+              <>
+                {row.original?.isqtyRequestLog && (
+                  <HtmlTooltip title="View Requests">
+                    <IconButton
+                      size="small"
+                      aria-label="Requests"
+                      onClick={() => {
+                        setOpenLogDialog({ open: true, product: row?.original?.productId, uniqueId: row.original._id, data: row.original });
+                      }}
+                    >
+                      <FormatListBulletedIcon fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
+                {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && (
+                  <HtmlTooltip title="History">
+                    <IconButton
+                      size="small"
+                      aria-label="History"
+                      onClick={() => {
+                        setHistoryDialog({
+                          open: true,
+                          _id: row?.original?._id,
+                          product: row?.original?.productId,
+                          productName: row?.original?.productName
+                        });
+                      }}
+                    >
+                      <HistoryIcon fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
+              </>
+            )}
           </>
           {allowedToEdit && hasChildFields && ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && !isDisassemblyChildItem && (
             <HtmlTooltip title="Edit">
@@ -665,11 +663,11 @@ const Consumables = ({
             additionalParams={`workOrderIds=${JSON.stringify([workOrderId])}&subType=${materialSubType}`}
           />
         )}
-        {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && allowedToEdit && (
+        {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && allowedToEdit && materialSubType == MATERIAL_SUB_TYPE.consumable && (
           <ThemeButton
             disabled={
               selectedRecords?.length &&
-                selectedRecords?.every((r) => !r?.serializedProduct && !r?.hideSelection && r?.type === MATERIAL_TYPE.product)
+                selectedRecords?.every((r) => !r?.hideSelection && r?.type === MATERIAL_TYPE.product)
                 ? false
                 : true
             }
@@ -677,8 +675,8 @@ const Consumables = ({
             buttonType="theme"
           >
             {consumeRequest ? 'Request ' : 'Consume '}{' '}
-            {selectedRecords?.filter((e) => !e?.hideSelection && !e?.serializedProduct && e?.type === MATERIAL_TYPE.product).length > 0
-              ? '(' + selectedRecords?.filter((e) => !e?.hideSelection && !e?.serializedProduct && e?.type === MATERIAL_TYPE.product).length + ')'
+            {selectedRecords?.filter((e) => !e?.hideSelection && e?.type === MATERIAL_TYPE.product).length > 0
+              ? '(' + selectedRecords?.filter((e) => !e?.hideSelection && e?.type === MATERIAL_TYPE.product).length + ')'
               : ''}
           </ThemeButton>
         )}
@@ -765,32 +763,36 @@ const Consumables = ({
         </MenuItem>
       </> :
         <>
-          <MenuItem
-            disabled={
-              selectedRecords?.filter((s) => s?.serializedProduct && s?.type === MATERIAL_TYPE.product && s?.qty - (s?.assignedAssetQty || 0) > 0)
-                ?.length > 0
-                ? false
-                : true
-            }
-            onClick={() => {
-              setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: false, products: getProducts() });
-            }}
-          >
-            Assign {resources?.serializedAsset?.titlePlural}
-          </MenuItem>
-          <MenuItem
-            disabled={
-              selectedRecords?.filter((s) => s?.serializedProduct && s?.type === MATERIAL_TYPE.product && s?.qty - (s?.assignedAssetQty || 0) > 0)
-                ?.length > 0
-                ? false
-                : true
-            }
-            onClick={() => {
-              setAssignDialog({ open: true, type: OTHER_MATERIAL_TYPE.serialNumber, replaceAsset: false, products: getProducts(OTHER_MATERIAL_TYPE.serialNumber) })
-            }}
-          >
-            Assign Serial Numbers
-          </MenuItem>
+          {materialSubType === MATERIAL_SUB_TYPE.childItem && (
+            <>
+              <MenuItem
+                disabled={
+                  selectedRecords?.filter((s) => s?.serializedProduct && s?.type === MATERIAL_TYPE.product && s?.qty - (s?.assignedAssetQty || 0) > 0)
+                    ?.length > 0
+                    ? false
+                    : true
+                }
+                onClick={() => {
+                  setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: false, products: getProducts() });
+                }}
+              >
+                Assign {resources?.serializedAsset?.titlePlural}
+              </MenuItem>
+              <MenuItem
+                disabled={
+                  selectedRecords?.filter((s) => s?.serializedProduct && s?.type === MATERIAL_TYPE.product && s?.qty - (s?.assignedAssetQty || 0) > 0)
+                    ?.length > 0
+                    ? false
+                    : true
+                }
+                onClick={() => {
+                  setAssignDialog({ open: true, type: OTHER_MATERIAL_TYPE.serialNumber, replaceAsset: false, products: getProducts(OTHER_MATERIAL_TYPE.serialNumber) })
+                }}
+              >
+                Assign Serial Numbers
+              </MenuItem>
+            </>
+          )}
           <MenuItem
             disabled={!selectedRecords?.some((s) => s?.canDelete)}
             onClick={() => {
@@ -802,6 +804,14 @@ const Consumables = ({
         </>
     );
   };
+
+  const getExtraDeepFilters = () => {
+    const extraDeepFilters: any = [{ field: 'expenseItem', term: 'No' }]
+    if (materialSubType === MATERIAL_SUB_TYPE.childItem) {
+      extraDeepFilters.push({ field: 'serializedProduct', term: 'Yes' })
+    }
+    return extraDeepFilters
+  }
 
   return (
     <>
@@ -856,7 +866,7 @@ const Consumables = ({
               );
             }}
             serialized={workOrderData?.type === WORK_ORDER_TYPE.repairOrder ? false : null}
-            extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
+            extraDeepFilter={getExtraDeepFilters()}
             isSubmitting={isSubmitting}
           />
         )}
@@ -870,7 +880,7 @@ const Consumables = ({
               setOpenConsumablesQtyDialog(false);
             }}
             warehouse={warehouse}
-            selectedRecords={selectedRecords?.filter((e) => !e?.hideSelection && !e?.serializedProduct && e?.type === MATERIAL_TYPE.product)}
+            selectedRecords={selectedRecords?.filter((e) => !e?.hideSelection && e?.type === MATERIAL_TYPE.product)}
             serviceName={serviceName}
             consumeRequest={consumeRequest}
             serialNumberRequired={serialNumberRequired}
