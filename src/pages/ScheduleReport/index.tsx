@@ -18,6 +18,7 @@ import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import EditIcon from '@mui/icons-material/Edit';
+import ScheduleReportHistoryDialog from 'src/pages/ScheduleReport/ScheduleReportHistoryDialog';
 
 
 const ScheduleReport = () => {
@@ -35,6 +36,8 @@ const ScheduleReport = () => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, id: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
+
+  const [scheduleReportHistoryDialog, setScheduleReportHistoryDialog] = useState({ open: false, id: null });
 
   const [columns, setColumns] = useState(null);
 
@@ -71,6 +74,25 @@ const ScheduleReport = () => {
           ) : (
             <NoDataCell />
           )
+      },
+      {
+        accessor: 'history',
+        Header: 'History',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <div>
+            <p
+              className="link"
+              title={'View History'}
+              onClick={() => {
+                setScheduleReportHistoryDialog({ open: true, id: row?.original?._id });
+              }}
+            >
+              View History
+            </p>
+          </div>
+        )
       },
       {
         accessor: 'resource',
@@ -327,6 +349,14 @@ const ScheduleReport = () => {
           }}
         />
       )}
+
+      {scheduleReportHistoryDialog.open && (
+        <ScheduleReportHistoryDialog
+          id={scheduleReportHistoryDialog.id}
+          onClose={() => setScheduleReportHistoryDialog({ open: false, id: null })}
+        />
+      )}
+
     </section>
   );
 };
