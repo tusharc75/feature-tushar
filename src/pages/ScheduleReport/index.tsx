@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import { Delete, Visibility, Edit, Assignment } from '@mui/icons-material';
+import { Delete, Visibility, Edit, Assignment, History, Send, SendOutlined } from '@mui/icons-material';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
@@ -74,25 +74,6 @@ const ScheduleReport = () => {
           ) : (
             <NoDataCell />
           )
-      },
-      {
-        accessor: 'history',
-        Header: 'History',
-        disableFilters: true,
-        disableSortBy: true,
-        Cell: ({ row }) => (
-          <div>
-            <p
-              className="link"
-              title={'View History'}
-              onClick={() => {
-                setScheduleReportHistoryDialog({ open: true, id: row?.original?._id });
-              }}
-            >
-              View History
-            </p>
-          </div>
-        )
       },
       {
         accessor: 'resource',
@@ -218,7 +199,7 @@ const ScheduleReport = () => {
     accessor: 'action',
     Header: 'Actions',
     minWidth: 100,
-    width: 100,
+    width: 160,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
@@ -246,7 +227,7 @@ const ScheduleReport = () => {
                 handleRunReportInstantly(row?.original?._id);
               }}
             >
-              <Assignment fontSize="small" color={'primary'} />
+              <Send fontSize="small" color={'primary'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -261,6 +242,17 @@ const ScheduleReport = () => {
               <Visibility fontSize="small" color="primary" />
             </IconButton>
           </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={'View History'}>
+          <IconButton
+            size="small"
+            aria-label="History"
+            onClick={() => {
+              setScheduleReportHistoryDialog({ open: true, id: row?.original?._id });
+            }}
+          >
+            <History color="primary" fontSize="small" />
+          </IconButton>
         </HtmlTooltip>
         {permissions?.scheduleReport?.isDelete && (
           <HtmlTooltip title="Delete">
