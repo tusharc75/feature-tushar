@@ -18,9 +18,10 @@ import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import ReportRunLogs from './ReportRunLogs';
-import ScheduleReportHistoryDialog from 'src/pages/ScheduleReport/ScheduleReportHistoryDialog';
+import ReportUpdateHistory from 'src/pages/ScheduleReport/ReportUpdateHistory';
 
 const ScheduleReport = () => {
+
   const renderedFrom = camelCase(sidebarResource.scheduleReport);
 
   const toastConfig = useContext(CustomToastContext);
@@ -36,8 +37,8 @@ const ScheduleReport = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
 
-  const [scheduleReportHistoryDialog, setScheduleReportHistoryDialog] = useState({ open: false, id: null });
   const [showRunLogDialog, setShowRunLogDialog] = useState({ open: false, data: null });
+  const [showReportUpdateHistoryDialog, setShowReportUpdateHistoryDialog] = useState({ open: false, id: null });
 
   const [columns, setColumns] = useState(null);
 
@@ -178,11 +179,11 @@ const ScheduleReport = () => {
     setColumns(columns);
   };
 
-  const handleRunReportInstantly = async (id) => {
+  const handleRunReportNow = async (id) => {
     try {
       toastConfig.setToastConfig({
         type: 'info',
-        message: 'Report Generation In Progress...',
+        message: 'Report Running...',
         open: true
       });
       const { data } = await axiosInstance().get(`${routes?.scheduleReport.path}/${id}/run`);
@@ -192,6 +193,7 @@ const ScheduleReport = () => {
         open: true
       });
     } catch (error) {
+      toastConfig.setToastConfig(error);
     }
   };
 
@@ -219,12 +221,12 @@ const ScheduleReport = () => {
             </IconButton>
           </HtmlTooltip>
         )}
-        <HtmlTooltip title={'Run Report Instantly'}>
+        <HtmlTooltip title={'Run Report Now'}>
           <span>
             <IconButton
               size="small"
               onClick={() => {
-                handleRunReportInstantly(row?.original?._id);
+                handleRunReportNow(row?.original?._id);
               }}
             >
               <Send fontSize="small" color={'primary'} />
@@ -243,12 +245,12 @@ const ScheduleReport = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={'View History'}>
+        <HtmlTooltip title={'View Report Update History'}>
           <IconButton
             size="small"
             aria-label="History"
             onClick={() => {
-              setScheduleReportHistoryDialog({ open: true, id: row?.original?._id });
+              setShowReportUpdateHistoryDialog({ open: true, id: row?.original?._id });
             }}
           >
             <History color="primary" fontSize="small" />
@@ -417,14 +419,12 @@ const ScheduleReport = () => {
           }}
         />
       )}
-
-      {scheduleReportHistoryDialog.open && (
-        <ScheduleReportHistoryDialog
-          id={scheduleReportHistoryDialog.id}
-          onClose={() => setScheduleReportHistoryDialog({ open: false, id: null })}
+      {showReportUpdateHistoryDialog.open && (
+        <ReportUpdateHistory
+          id={showReportUpdateHistoryDialog.id}
+          onClose={() => setShowReportUpdateHistoryDialog({ open: false, id: null })}
         />
       )}
-
       {showRunLogDialog.open &&
         <ReportRunLogs
           scheduleReportData={showRunLogDialog.data}
