@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import { Delete, Visibility, Edit, Assignment } from '@mui/icons-material';
+import { Delete, Visibility, Edit, History, Send } from '@mui/icons-material';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
@@ -18,8 +18,10 @@ import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import ReportRunLogs from './ReportRunLogs';
+import ReportUpdateHistory from 'src/pages/ScheduleReport/ReportUpdateHistory';
 
 const ScheduleReport = () => {
+
   const renderedFrom = camelCase(sidebarResource.scheduleReport);
 
   const toastConfig = useContext(CustomToastContext);
@@ -34,7 +36,9 @@ const ScheduleReport = () => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, id: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
+
   const [showRunLogDialog, setShowRunLogDialog] = useState({ open: false, data: null });
+  const [showReportUpdateHistoryDialog, setShowReportUpdateHistoryDialog] = useState({ open: false, id: null });
 
   const [columns, setColumns] = useState(null);
 
@@ -175,11 +179,11 @@ const ScheduleReport = () => {
     setColumns(columns);
   };
 
-  const handleRunReportInstantly = async (id) => {
+  const handleRunReportNow = async (id) => {
     try {
       toastConfig.setToastConfig({
         type: 'info',
-        message: 'Report Generation In Progress...',
+        message: 'Report Running...',
         open: true
       });
       const { data } = await axiosInstance().get(`${routes?.scheduleReport.path}/${id}/run`);
@@ -189,6 +193,7 @@ const ScheduleReport = () => {
         open: true
       });
     } catch (error) {
+      toastConfig.setToastConfig(error);
     }
   };
 
@@ -196,7 +201,7 @@ const ScheduleReport = () => {
     accessor: 'action',
     Header: 'Actions',
     minWidth: 100,
-    width: 100,
+    width: 160,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
@@ -216,15 +221,15 @@ const ScheduleReport = () => {
             </IconButton>
           </HtmlTooltip>
         )}
-        <HtmlTooltip title={'Run Report Instantly'}>
+        <HtmlTooltip title={'Run Report Now'}>
           <span>
             <IconButton
               size="small"
               onClick={() => {
-                handleRunReportInstantly(row?.original?._id);
+                handleRunReportNow(row?.original?._id);
               }}
             >
-              <Assignment fontSize="small" color={'primary'} />
+              <Send fontSize="small" color={'primary'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -239,6 +244,17 @@ const ScheduleReport = () => {
               <Visibility fontSize="small" color="primary" />
             </IconButton>
           </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={'View Report Update History'}>
+          <IconButton
+            size="small"
+            aria-label="History"
+            onClick={() => {
+              setShowReportUpdateHistoryDialog({ open: true, id: row?.original?._id });
+            }}
+          >
+            <History color="primary" fontSize="small" />
+          </IconButton>
         </HtmlTooltip>
         {permissions?.scheduleReport?.isDelete && (
           <HtmlTooltip title="Delete">
@@ -401,6 +417,12 @@ const ScheduleReport = () => {
             fetchData();
             setShowManageDialog({ open: false, id: null });
           }}
+        />
+      )}
+      {showReportUpdateHistoryDialog.open && (
+        <ReportUpdateHistory
+          id={showReportUpdateHistoryDialog.id}
+          onClose={() => setShowReportUpdateHistoryDialog({ open: false, id: null })}
         />
       )}
       {showRunLogDialog.open &&

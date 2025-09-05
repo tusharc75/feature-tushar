@@ -1,4 +1,5 @@
 import { Box, Dialog } from '@mui/material';
+import { camelCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -11,7 +12,7 @@ import { CustomDialogTransition, displayDateTime, prepareDataForGrid, sidebarRes
 
 function ReportRunLogs({ scheduleReportData, handleClose }) {
 
-  const renderedFrom = `${sidebarResource.scheduleReport}_ReportRunLogs`;
+  const renderedFrom = `${camelCase(sidebarResource.scheduleReport)}_ReportRunLogs`;
 
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
