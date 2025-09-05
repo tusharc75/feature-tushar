@@ -27,7 +27,6 @@ export const rentalManagementActions = {
   deliveredToCustomer: 'Delivered to Customer',
   cancelInTransitLoadingTicket: 'Cancel In-Transit Loading Ticket',
   cancelLoadingTicket: 'Cancel Loading Ticket',
-  replaceAsset: 'Replace Asset',
   createReceivingTicket: 'Create Receiving Ticket',
   createReturnTicket: 'Create Return Ticket',
   receiveItems: 'Receive Items',
