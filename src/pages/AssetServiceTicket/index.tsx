@@ -274,7 +274,7 @@ const AssetServiceTickets = () => {
             message={`Are you sure you want to delete ${
               deleteRecord
                 ? `${resources?.assetServiceTickets?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.ticketNumber}`
+              ${deleteRecord?.ticketId}`
                 : `selected ${resources?.assetServiceTickets?.titlePlural?.toLowerCase()}`
             } ?`}
             onClose={() => {
