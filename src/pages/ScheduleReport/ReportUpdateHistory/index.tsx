@@ -12,11 +12,13 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { isMobile } from 'react-device-detect';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { camelCase, startCase } from "lodash";
-import LogDialog from 'src/pages/ScheduleReport/LogDialog';
+import LogDialog from './LogDialog';
 
-const renderedFrom = camelCase(sidebarResource.scheduleReport);
 
-export default function ScheduleReportHistoryDialog({ id, onClose }: { id: string, onClose: () => void }) {
+export default function ReportUpdateHistory({ id, onClose }: { id: string, onClose: () => void }) {
+
+  const renderedFrom = `${camelCase(sidebarResource.scheduleReport)}_ReportUpdateHistory`;
+
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -124,7 +126,7 @@ export default function ScheduleReportHistoryDialog({ id, onClose }: { id: strin
     >
       <CustomDialogHeader
         showRequiredLabel={false}
-        title="Schedule Report History"
+        title="Report Update History"
         onClose={onClose}
       />
       <div className="listing-grid p-3">
