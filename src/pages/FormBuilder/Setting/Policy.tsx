@@ -1,5 +1,5 @@
 import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
-import { Autocomplete, Box, Checkbox, FormControlLabel, IconButton, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, Checkbox, Chip, FormControlLabel, IconButton, TextField, Typography } from '@mui/material';
 import { isArray } from 'lodash';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -7,6 +7,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Grid from '@mui/material/Grid2';
 import { FieldArray } from 'formik';
+import { getLabel } from 'src/components/Helpers/FormTypes';
 
 const Policy = ({ values, setFieldValue, errors, touched, resource, initialValues }) => {
   const [fields, setFields] = useState([]);
@@ -85,15 +86,17 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
     const options =
       data?.option && data?.option?.length
         ? data?.option
-        : data?.fieldOption ? fields?.find((e) => e?.fieldData?.fieldName === data?.fieldOption)?.fieldData?.option || [] : fields
-          ?.filter((ele) => !ele.fieldData?.primaryField)
-          ?.map((e) => {
-            return {
-              optionLabel: e?.fieldData?.fieldLabel,
-              optionValue: e?.fieldData?.fieldName,
-              order: e?.fieldData?.order
-            };
-          });
+        : data?.fieldOption
+          ? fields?.find((e) => e?.fieldData?.fieldName === data?.fieldOption)?.fieldData?.option || []
+          : fields
+              ?.filter((ele) => !ele.fieldData?.primaryField)
+              ?.map((e) => {
+                return {
+                  optionLabel: e?.fieldData?.fieldLabel,
+                  optionValue: e?.fieldData?.fieldName,
+                  order: e?.fieldData?.order
+                };
+              });
     return (
       <>
         {!loading ? (
@@ -190,6 +193,47 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
         </Grid>
       </Grid>
     );
+  } else if (type === 'freeStyleMultiSelect') {
+    return (
+      <Grid container spacing={2}>
+        <Grid size={{ lg: 6, md: 6, sm: 6, xs: 12 }}>
+          <Autocomplete
+            limitTags={2}
+            multiple
+            disableCloseOnSelect={true}
+            freeSolo
+            options={[]}
+            renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                margin="dense"
+                size="small"
+                label={getLabel(data?.fieldLabel)}
+                name={data?.fieldName}
+                required={false}
+              />
+            )}
+            value={data?.data}
+            onBlur={(e: any) => {
+              if (e.target.value && e.target.value.trim() !== '') {
+                onChange(null, [...data?.data, e.target.value]);
+              }
+            }}
+            onChange={(e, value: any) => {
+              let valuesToInsert = [];
+              for (var val of value) {
+                if (val && val.trim() !== '') {
+                  valuesToInsert.push(val);
+                }
+              }
+              onChange(null, valuesToInsert);
+            }}
+          />
+        </Grid>
+      </Grid>
+    );
   }
   return null;
 };
@@ -232,7 +276,6 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, touc
 };
 
 const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resource, setFieldValue, fields }) => {
-
   const [fieldOptions, setFieldOptions] = useState([]);
 
   const [statusOptions, setStatusOptions] = useState([]);
@@ -298,9 +341,9 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
     if (Data?.fieldName === 'statusColor') {
       subStatusOptions?.forEach((e) => {
         if (!statusTemp?.find((ele) => ele?.optionLabel === e?.optionLabel)) {
-          statusTemp.push(e)
+          statusTemp.push(e);
         }
-      })
+      });
     }
     return statusTemp;
   };
@@ -309,7 +352,6 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
     const options = subStatusOptions?.filter((ele) => !data?.some((e) => e?.status === ele.optionValue));
     return options ? options : subStatusOptions;
   };
-
 
   return (
     <>
@@ -426,8 +468,8 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                                 ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))
                                 : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
                           : field?.fieldName === 'subStatus'
-                            ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))[0] :
-                            getStatusOptions(initialData?.fieldsData)?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
+                            ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))[0]
+                            : getStatusOptions(initialData?.fieldsData)?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
                       }
                       multiple={field?.type === 'multiSelect'}
                       fieldLabel={field?.fieldLabel}

@@ -45,7 +45,7 @@ const Activity = (props) => {
     resourceLabel = '',
     resourceData = null,
     resource = '',
-    close = () => { }
+    close = () => {}
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -289,9 +289,17 @@ const Activity = (props) => {
                     <Email relatedTo={viewRelatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
                   {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT != 'new' ? (
-                    <Attachments relatedTo={viewRelatedTo} resourceLabel={resourceLabel} resource={resource} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
+                    <Attachments
+                      relatedTo={viewRelatedTo}
+                      resourceLabel={resourceLabel}
+                      resource={resource}
+                      handleActivityRefresh={handleActivityRefresh}
+                      onSetCount={handleSetCount}
+                    />
                   ) : null}
-                  {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT === 'new' ? (
+                  {(type === 'Attachment' || type === 'AttachmentFolder') &&
+                  data === 'Attachment' &&
+                  import.meta.env.VITE_APP_ATTACHMENT === 'new' ? (
                     <AttachmentsNew
                       resource={sidebarResource[resource] || startCase(resource)}
                       referenceId={resourceId}
@@ -421,7 +429,7 @@ const Activity = (props) => {
                 setFullScreen(false);
               }}
               onSuccess={() => {
-                handleClose()
+                handleClose();
                 setFullScreen(false);
               }}
               relatedTo={[{ resource: sidebarResource[resource] || startCase(resource), referenceId: resourceId, label: resourceLabel }]}

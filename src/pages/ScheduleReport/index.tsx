@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import { Delete, Visibility, Edit } from '@mui/icons-material';
+import { Delete, Visibility, Edit, Assignment } from '@mui/icons-material';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
@@ -18,6 +18,7 @@ import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import ReportRunLogs from './ReportRunLogs';
+import ScheduleReportHistoryDialog from 'src/pages/ScheduleReport/ScheduleReportHistoryDialog';
 
 const ScheduleReport = () => {
   const renderedFrom = camelCase(sidebarResource.scheduleReport);
@@ -34,6 +35,8 @@ const ScheduleReport = () => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, id: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
+
+  const [scheduleReportHistoryDialog, setScheduleReportHistoryDialog] = useState({ open: false, id: null });
   const [showRunLogDialog, setShowRunLogDialog] = useState({ open: false, data: null });
 
   const [columns, setColumns] = useState(null);
@@ -71,6 +74,25 @@ const ScheduleReport = () => {
           ) : (
             <NoDataCell />
           )
+      },
+      {
+        accessor: 'history',
+        Header: 'History',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <div>
+            <p
+              className="link"
+              title={'View History'}
+              onClick={() => {
+                setScheduleReportHistoryDialog({ open: true, id: row?.original?._id });
+              }}
+            >
+              View History
+            </p>
+          </div>
+        )
       },
       {
         accessor: 'resource',
@@ -175,6 +197,23 @@ const ScheduleReport = () => {
     setColumns(columns);
   };
 
+  const handleRunReportInstantly = async (id) => {
+    try {
+      toastConfig.setToastConfig({
+        type: 'info',
+        message: 'Report Generation In Progress...',
+        open: true
+      });
+      const { data } = await axiosInstance().get(`${routes?.scheduleReport.path}/${id}/run`);
+      toastConfig.setToastConfig({
+        type: 'success',
+        message: data.message,
+        open: true
+      });
+    } catch (error) {
+    }
+  };
+
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -199,6 +238,18 @@ const ScheduleReport = () => {
             </IconButton>
           </HtmlTooltip>
         )}
+        <HtmlTooltip title={'Run Report Instantly'}>
+          <span>
+            <IconButton
+              size="small"
+              onClick={() => {
+                handleRunReportInstantly(row?.original?._id);
+              }}
+            >
+              <Assignment fontSize="small" color={'primary'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
         <HtmlTooltip title={'View Report Run Logs'}>
           <span>
             <IconButton
@@ -374,6 +425,14 @@ const ScheduleReport = () => {
           }}
         />
       )}
+
+      {scheduleReportHistoryDialog.open && (
+        <ScheduleReportHistoryDialog
+          id={scheduleReportHistoryDialog.id}
+          onClose={() => setScheduleReportHistoryDialog({ open: false, id: null })}
+        />
+      )}
+
       {showRunLogDialog.open &&
         <ReportRunLogs
           scheduleReportData={showRunLogDialog.data}

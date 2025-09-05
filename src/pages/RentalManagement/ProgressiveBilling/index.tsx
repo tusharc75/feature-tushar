@@ -44,7 +44,7 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
       const response: any = await axiosInstance().get(`${rentalManagement.api}/${rentalId}`);
       data = response?.data?.data;
       setRentalManagementData(data);
-    } catch (error) { }
+    } catch (error) {}
   };
 
   useEffect(() => {
@@ -73,7 +73,7 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
     columns?.forEach((column) => {
       if (column?.primaryField) {
         column.cell = ({ row }) => (
-          <div className='flex items-center gap-2'>
+          <div className="flex items-center gap-2">
             <Link
               className="link text-truncate"
               onClick={() => {

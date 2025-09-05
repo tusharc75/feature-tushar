@@ -339,6 +339,12 @@ export const resourcePolicy = [
           { optionValue: 'parentChild', optionLabel: 'Parent Child', order: 1 }
         ],
         defaultValue: ''
+      },
+      {
+        fieldName: 'autoCreateFolderInWorkSpace',
+        fieldLabel: 'Auto Create Folder In Work Space',
+        type: 'freeStyleMultiSelect',
+        defaultValue: []
       }
     ]
   },
