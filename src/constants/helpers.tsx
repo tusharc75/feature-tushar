@@ -427,7 +427,8 @@ export const sidebarResource = {
   customPdfTemplate: 'Custom Pdf Template',
   contentPostPlanning: 'Content Post Planning',
   onboardingTemplate: 'Onboarding Template',
-  onboarding: 'Onboarding'
+  onboarding: 'Onboarding',
+  assetServiceTickets: 'Asset Service Tickets'
 } as const;
 
 export const primaryFields = {
@@ -547,6 +548,11 @@ export const deliveryTicket = {
 export const repairJob = {
   resource: 'repairJob',
   api: '/repair-job'
+};
+
+export const assetServiceTickets = {
+  resource: 'assetServiceTickets',
+  api: '/asset-service-tickets'
 };
 
 export const expenses = {
@@ -975,7 +981,6 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
   return obj;
 };
 
-
 export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false, user: any = null, resetDateOnClone: any = true) => {
   const obj = {};
 
@@ -1273,7 +1278,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length;) {
+        for (let i = 0; i < validationFields?.length; ) {
           const field = validationFields[i];
           const condition =
             field?.type === 'section'
@@ -1680,7 +1685,7 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
         });
       }
       return { permissions, resources };
-    } catch (e) { }
+    } catch (e) {}
   }
 };
 
@@ -3727,8 +3732,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
-  if (typeof callBack !== 'function') callBack = (text) => { };
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
+  if (typeof callBack !== 'function') callBack = (text) => {};
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
@@ -4028,9 +4033,9 @@ export const getEmailsFromContacts = (data, field = 'customerContact') => {
 };
 
 export const getCustomInvoiceFileName = (customDownloadFileName, data) => {
-  const status = data?.status === INVOICE_STATUS.proforma ? data?.status : 'Invoice'
-  return customDownloadFileName.replace("{status}", status).replace("{invoiceNumber}", data?.invoiceNumber);
-}
+  const status = data?.status === INVOICE_STATUS.proforma ? data?.status : 'Invoice';
+  return customDownloadFileName.replace('{status}', status).replace('{invoiceNumber}', data?.invoiceNumber);
+};
 
 export const EQUIPT_BE_CONNECTED_WINDOW = 'equipt-beConnected-window';
 export const handleClearLocalStore = () => {
