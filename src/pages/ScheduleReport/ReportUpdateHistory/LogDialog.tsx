@@ -34,12 +34,28 @@ const LogDialog = ({ onClose, data }) => {
               <TableHead>
                 <TableRow>
                   <TableCell>Detail</TableCell>
+                  <TableCell>Old Value</TableCell>
+                  <TableCell>New Value</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data?.originalData?.log && data?.originalData?.log.map((item: any, index: any) => (
+                {data?.log && data?.log.map((item, index) => (
                   <TableRow key={index}>
-                    <TableCell>{startCase(item?.fieldName)}: {item?.oldValue} → {item?.newValue}</TableCell>
+                    <TableCell >{startCase(item?.fieldName)}</TableCell>
+                    <TableCell>
+                      {item?.oldValue === "" || item?.oldValue === undefined || item?.oldValue === null
+                        ? "--"
+                        : Array.isArray(item?.oldValue)
+                          ? JSON.stringify(item.oldValue)
+                          : item?.oldValue}
+                    </TableCell>
+                    <TableCell>
+                      {item?.newValue === "" || item?.newValue === undefined || item?.newValue === null
+                        ? "--"
+                        : Array.isArray(item?.newValue)
+                          ? JSON.stringify(item.newValue)
+                          : item?.newValue}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

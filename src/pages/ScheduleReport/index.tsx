@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import { Delete, Visibility, Edit, Assignment, History, Send, SendOutlined } from '@mui/icons-material';
+import { Delete, Visibility, Edit, History, Send } from '@mui/icons-material';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';

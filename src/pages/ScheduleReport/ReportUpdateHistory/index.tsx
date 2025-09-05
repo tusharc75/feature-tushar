@@ -89,26 +89,26 @@ export default function ReportUpdateHistory({ id, onClose }: { id: string, onClo
     dispatch({ type: 'loading', loading: true });
     try {
       const { data: { data } } = await axiosInstance().get(`/schedule-report/history/${id}`);
-      const expandedRows = data?.flatMap(historyItem => {
+
+      const processedData = data?.map(historyItem => {
         const formattedDate = displayDateTime(historyItem?.date);
-        return historyItem?.log?.map(logEntry => {
+        const changes = historyItem?.log?.map(logEntry => {
           const isArray = Array.isArray(logEntry.oldValue) || Array.isArray(logEntry.newValue);
-          const changeText = isArray
+          return isArray
             ? `${startCase(logEntry.fieldName)}: [${logEntry.oldValue}] → [${logEntry.newValue}]`
             : `${startCase(logEntry.fieldName)}: ${logEntry.oldValue || ''} → ${logEntry.newValue || ''}`;
-          return {
-            _id: `${historyItem._id}-${logEntry.fieldName}`,
-            date: formattedDate,
-            user: historyItem.user,
-            changes: changeText,
-            originalData: historyItem
-          };
-        }) || [];
-      }) || [];
+        })?.join(', ');
+        return {
+          ...historyItem,
+          date: formattedDate,
+          changes
+        };
+      });
+
       dispatch({
         type: 'initialize',
-        data: expandedRows,
-        count: expandedRows.length
+        data: processedData || [],
+        count: (processedData || []).length
       });
     } catch (err) {
       toastConfig.setToastConfig(err);
