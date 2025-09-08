@@ -119,8 +119,8 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
             if (conditionData['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] === undefined)
               conditionData['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] = 0;
             details?.pricingMethod?.map((_pricingMethod) => {
-              const _fieldName = `rent_${camelCase(_pricingMethod.toLowerCase())}_${_currency.toLowerCase()}`
-              const __fieldName = `${_fieldName}_${camelCase(_unit.toLowerCase())}`
+              const _fieldName = `rent_${camelCase(_pricingMethod.toLowerCase())}`
+              const __fieldName = `${_fieldName}_${_currency.toLowerCase()}_${camelCase(_unit.toLowerCase())}`
               if (conditionData[__fieldName] == undefined) {
                 conditionData[__fieldName] = 0;
               }
@@ -158,8 +158,8 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
           }
           v.conditionType?.includes('Rent') &&
             v['pricingMethod']?.map((_pricingMethod) => {
-              const _fieldName = `rent_${camelCase(_pricingMethod.toLowerCase())}_${_currency.toLowerCase()}`
-              const __fieldName = `${_fieldName}_${camelCase(_unit.toLowerCase())}`
+              const _fieldName = `rent_${camelCase(_pricingMethod.toLowerCase())}`
+              const __fieldName = `${_fieldName}_${_currency.toLowerCase()}_${camelCase(_unit.toLowerCase())}`
               updatedData[__fieldName] = v[__fieldName];
               if (v?.enableMinimumDuration) {
                 if (!updatedData['minimumDuration']) {
@@ -580,7 +580,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                             label="Enable Minimum Duration"
                           />
                           {values['enableMinimumDuration'] && values['pricingMethod']?.length > 0 && (
-                            <RentalMinimumDuration values={values} setFieldValue={setFieldValue} currency={currency[0]} />
+                            <RentalMinimumDuration values={values} setFieldValue={setFieldValue} />
                           )}
                         </div>
                         <div className='mt-2 border p-2'>
@@ -1176,12 +1176,12 @@ const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedT
   )
 }
 
-const RentalMinimumDuration = ({ values, setFieldValue, currency }) => {
+const RentalMinimumDuration = ({ values, setFieldValue }) => {
   const value = values?.minimumDuration || {}
   return (
     <div className='mt-2 p-2'>
       {values['pricingMethod'] && values['pricingMethod']?.map((_pricingMethod, i) => {
-        const _fieldName = `rent_${camelCase(_pricingMethod.toLowerCase())}_${currency.toLowerCase()}`
+        const _fieldName = `rent_${camelCase(_pricingMethod.toLowerCase())}}`
         return (
           <div className='flex gap-5 items-center'>
             <p className='min-w-[100px]'>{startCase(_pricingMethod)}</p>
