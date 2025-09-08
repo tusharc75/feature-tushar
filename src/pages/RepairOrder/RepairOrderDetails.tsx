@@ -347,7 +347,7 @@ const RepairOrderDetails = () => {
                   !repairOrderData?.deleted &&
                   ['Add Assets', 'Work Order'].includes(stepNames[currentStep]) &&
                   isQuotationStep &&
-                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.expired].includes(
                     quotationVersionData?.status
                   ) && (
                     <ThemeButton
@@ -365,7 +365,7 @@ const RepairOrderDetails = () => {
                   !repairOrderData?.deleted &&
                   ![REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) &&
                   !(
-                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.expired].includes(
                       quotationVersionData?.status
                     ) &&
                     isQuotationStep &&
@@ -431,7 +431,7 @@ const RepairOrderDetails = () => {
               handlePrev={
                 stepNames[currentStep] === 'Quotation' &&
                   allowedToEdit &&
-                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.expired].includes(
                     quotationVersionData?.status
                   )
                   ? () => {
@@ -456,7 +456,7 @@ const RepairOrderDetails = () => {
                   allowedToEdit={
                     !allowedToEdit
                       ? allowedToEdit
-                      : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                      : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.expired].includes(
                         quotationVersionData?.status
                       ) && isQuotationStep
                         ? false
@@ -477,7 +477,7 @@ const RepairOrderDetails = () => {
                 allowedToEdit={
                   currentStep === 3
                     ? allowedToEdit
-                    : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                    : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.expired].includes(
                       quotationVersionData?.status
                     ) && isQuotationStep
                       ? false

@@ -201,7 +201,7 @@ const QuotationViews = (props) => {
       });
       xPosition = maxXPosition;
       if (
-        [QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted, QUOTATION_STATUS.rejectByCustomer].includes(
+        [QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired].includes(
           status
         )
       ) {

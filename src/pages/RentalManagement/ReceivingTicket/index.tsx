@@ -3146,18 +3146,14 @@ const ReceivingTicket = ({
           open={showReplaceAssetWarnings.confirmationAddNewLineItemsDialog}
           message={`Would you like to add the replacement assets as a new line item? Click Yes to add it as a new line item, or No to keep it under the same line item.`}
           onOk={(type) => {
-            if (type === 'Yes') {
-              setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: false, confirmationAddNewLineItems: 'Yes', replaceAssetReasonDialog: true }))
+            if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some(d => d?.subleaseAsset)) {
+              setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: false, confirmationAddNewLineItems: type, confirmationDirectSendToSupplierDialog: true }))
             } else {
-              if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some(d => d?.subleaseAsset)) {
-                setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: false, confirmationAddNewLineItems: 'No', confirmationDirectSendToSupplierDialog: true }))
-              } else {
-                handleSwapAssets(showReplaceAssetWarnings.data)
-              }
+              handleSwapAssets(showReplaceAssetWarnings.data, showReplaceAssetWarnings.replaceAssetReason, type === 'Yes' ? true : false)
             }
           }}
           onClose={() => {
-            setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: false, data: null }))
+            setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: false, replaceAssetReason: '', data: null }))
           }}
           selection1={'Yes'}
           selection2={'No'}
@@ -3370,7 +3366,7 @@ const ReceivingTicket = ({
       {addSerializedAssetDialog.open && (
         <AddSerializedAsset
           addSerializedAsset={(rows) => {
-            setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: true, data: rows }))
+            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: true, data: rows }))
           }}
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog({ open: false, products: [], type: '' });
@@ -3420,13 +3416,8 @@ const ReceivingTicket = ({
           handleClose={() => setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, data: null }))}
           loading={isSubmitting}
           handleSucess={(data) => {
-            if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some(d => d?.subleaseAsset)) {
-              setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, replaceAssetReason: data?.reason, confirmationDirectSendToSupplierDialog: true }))
-            } else {
-              handleSwapAssets(showReplaceAssetWarnings.data, data?.reason, true)
-            }
+            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, replaceAssetReason: data?.reason, confirmationAddNewLineItemsDialog: true }))
           }}
-
         />
       )}
       {transferAnotherPackageDialog && (

@@ -2399,7 +2399,8 @@ export const ACTIVITY_RESOURCE = {
   serializedPackages: 'serializedPackages',
   expenses: 'expenses',
   expenseReport: 'expenseReport',
-  contentPostPlanning: 'contentPostPlanning'
+  contentPostPlanning: 'contentPostPlanning',
+  assetServiceTicket: 'assetServiceTicket'
 };
 
 export const LOG_RESOURCE = {
@@ -2832,7 +2833,8 @@ export const QUOTATION_STATUS = {
   sentforDOA: 'Sent for DOA',
   acceptedbyDOA: 'Accepted by DOA',
   rejectedbyDOA: 'Rejected by DOA',
-  customerAcceptanceNotRequired: 'Customer Acceptance Not Required'
+  customerAcceptanceNotRequired: 'Customer Acceptance Not Required',
+  expired: 'Expired'
 };
 
 export const QUOTATION_TYPE = {
