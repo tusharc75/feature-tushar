@@ -17,6 +17,8 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@mui/icons-material';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
+import ReplaceAssetReason from 'src/components/RentalManagment/ReplaceAssetReason';
+import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspection }) => {
 
@@ -39,6 +41,12 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [showReplaceAssetWarnings, setShowReplaceAssetWarnings] = useState({
+    replaceAssetReasonDialog: false,
+    replaceAssetReason: '',
+    data: null,
+    confirmationAddNewLineItemsDialog: false
+  })
 
   useEffect(() => {
     if (serializedPackagesData?.status === SERIALIZED_PACKAGE_STATUS.disassembled) {
@@ -357,7 +365,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
       });
   };
 
-  const handleReplaceAssets = (data) => {
+  const handleReplaceAssets = (data, replaceReason = '', replaceWithNewLineItems = false) => {
     const assets = selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)
     data?.forEach(d => {
       const asset = assets?.find(a => a?._id === d?._id && a?.product === d?.product && !a?.isCounted)
@@ -368,10 +376,11 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
     });
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets/replace`, data)
+      .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets/replace`, { assets: data, reason: replaceReason, replaceWithNewLineItems })
       .then(() => {
         fetchSerializedPackagesData()
         setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
+        setShowReplaceAssetWarnings({ replaceAssetReasonDialog: false, replaceAssetReason: '', data: null, confirmationAddNewLineItemsDialog: false })
         setIsSubmitting(false);
         fetchData();
       })
@@ -515,7 +524,11 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
           handleClose={() => setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] })}
           handleSucess={(rows) => {
             if (assignDialog.replaceAsset) {
-              handleReplaceAssets(rows)
+              if (serializedPackagesData.status === SERIALIZED_PACKAGE_STATUS.inUse && serializedPackagesData?.rentalJob) {
+                setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: true, data: rows }))
+              } else {
+                handleReplaceAssets(rows)
+              }
             } else {
               handleAssignAssets(rows)
             }
@@ -548,6 +561,30 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
           }}
           okBtnLoading={isDeleting}
           onOk={handleDelete}
+        />
+      )}
+      {showReplaceAssetWarnings.replaceAssetReasonDialog && (
+        <ReplaceAssetReason
+          handleClose={() => setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, data: null }))}
+          loading={isSubmitting}
+          handleSucess={(data) => {
+            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, replaceAssetReason: data?.reason, confirmationAddNewLineItemsDialog: true }))
+          }}
+        />
+      )}
+      {showReplaceAssetWarnings.confirmationAddNewLineItemsDialog && (
+        <SelectionConfirmationDialog
+          open={showReplaceAssetWarnings.confirmationAddNewLineItemsDialog}
+          message={`Would you like to add the replacement assets as a new line item? Click Yes to add it as a new line item, or No to keep it under the same line item.`}
+          onOk={(type) => {
+            handleReplaceAssets(showReplaceAssetWarnings.data, showReplaceAssetWarnings.replaceAssetReason, type === 'Yes' ? true : false)
+          }}
+          onClose={() => {
+            setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: false, replaceAssetReason: '', data: null }))
+          }}
+          selection1={'Yes'}
+          selection2={'No'}
+          okBtnLoading={isSubmitting}
         />
       )}
     </>
