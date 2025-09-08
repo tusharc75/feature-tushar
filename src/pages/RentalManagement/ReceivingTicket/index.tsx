@@ -156,7 +156,14 @@ const ReceivingTicket = ({
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [], type: '' });
   const [subStatusToUpdate, setSubStatusToUpdate] = useState({ open: false, status: null });
-  const [showReplaceAssetWarnings, setShowReplaceAssetWarnings] = useState({ replaceAssetReasonDialog: false, replaceAssetReason: '', confirmationDirectSendToSupplierDialog: false, data: null, confirmationAddNewLineItemsDialog: false, confirmationAddNewLineItems: '' })
+  const [showReplaceAssetWarnings, setShowReplaceAssetWarnings] = useState({
+    replaceAssetReasonDialog: false,
+    replaceAssetReason: '',
+    confirmationDirectSendToSupplierDialog: false,
+    data: null,
+    confirmationAddNewLineItemsDialog: false,
+    confirmationAddNewLineItems: ''
+  })
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
@@ -874,6 +881,7 @@ const ReceivingTicket = ({
             newRows.push(parent);
           }
           parent.serializedPackageId = parent?.serializedPackage?.optionValue
+          parent.serializedPackageStatus = parent?.serializedPackage?.status;
           parent.serializedPackage = parent?.serializedPackage?.optionLabel;
         });
       }
@@ -1019,6 +1027,7 @@ const ReceivingTicket = ({
             _subRow.rentalAssetStatus = '';
           }
           _subRow.serializedPackageId = _subRow?.serializedPackage?.optionValue
+          _subRow.serializedPackageStatus = _subRow?.serializedPackage?.status;
           _subRow.serializedPackage = _subRow?.serializedPackage?.optionLabel;
           _subRow.subRows = generateNestedData(
             _subRow,
@@ -1071,6 +1080,7 @@ const ReceivingTicket = ({
       obj.currentOwner = _subRow?.inventory?.currentOwner;
       obj.currentLocation = _subRow?.inventory?.currentLocation?.optionValue;
       obj.serializedPackageId = _subRow?.inventory?.serializedPackage?.optionValue;
+      obj.serializedPackageStatus = _subRow?.inventory?.serializedPackage?.status;
       obj.serializedPackage = _subRow?.inventory?.serializedPackage?.optionLabel;
       const loadingTicket = loadingTicketAssets?.find((e) => e?.asset === obj?._id && e?.uniqueId === obj?.uniqueId);
       if (loadingTicket) {
@@ -1377,6 +1387,7 @@ const ReceivingTicket = ({
         element.minEndDate = new Date(invoiceMaterial?.endDate);
       }
       element.serializedPackageId = element?.serializedPackage?.optionValue
+      element.serializedPackageStatus = element?.serializedPackage?.status;
       element.serializedPackage = element?.serializedPackage?.optionLabel;
     });
 
@@ -1723,6 +1734,17 @@ const ReceivingTicket = ({
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        }, {
+          accessor: 'serializedPackageStatus',
+          Header: `${resources?.serializedPackages?.titleSingular} Status`,
+          cell: ({ row }) =>
+            row?.original?.serializedPackageStatus ? (
+              <div className="flex items-center gap-2">
+                <h5 className="text-truncate" title={row?.original?.serializedPackageStatus}>{row?.original?.serializedPackageStatus}</h5>
               </div>
             ) : (
               <NoDataCell />
@@ -2592,7 +2614,7 @@ const ReceivingTicket = ({
     });
     setIsSubmitting(true);
     axiosInstance()
-      .post(`${rentalManagement.api}/swap-inuse-assets`, {
+      .post(`${rentalManagement.api}/replace-inuse-assets`, {
         assets: data?.map((e) => {
           return { asset: e.newId, oldAssetParentId: e?.parentId, oldAsset: e?._id };
         }),
@@ -2610,7 +2632,7 @@ const ReceivingTicket = ({
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Assets Swapped Successfully`
+          message: `Assets Replaced Successfully`
         });
       })
       .catch((error) => {
@@ -3122,7 +3144,7 @@ const ReceivingTicket = ({
       {showReplaceAssetWarnings.confirmationAddNewLineItemsDialog && (
         <SelectionConfirmationDialog
           open={showReplaceAssetWarnings.confirmationAddNewLineItemsDialog}
-          message={`Would you like to add new line items ? Click 'Yes' to proceed, or 'No'`}
+          message={`Would you like to add the replacement assets as a new line item? Click Yes to add it as a new line item, or No to keep it under the same line item.`}
           onOk={(type) => {
             if (type === 'Yes') {
               setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: false, confirmationAddNewLineItems: 'Yes', replaceAssetReasonDialog: true }))
