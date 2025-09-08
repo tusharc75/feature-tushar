@@ -163,7 +163,7 @@ const DynamicTabs = ({ workflowId = null, onboardingTemplateId = null, resource 
                 </IconButton>
               </HtmlTooltip>
             )}
-            {[sidebarResource.serializedAsset]?.includes(resource) && (
+            {[sidebarResource.serializedAsset, sidebarResource.quotation]?.includes(resource) && (
               <HtmlTooltip title={'Resource Triggers'}>
                 <IconButton
                   aria-label="Actions"

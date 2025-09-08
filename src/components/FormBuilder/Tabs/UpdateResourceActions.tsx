@@ -20,7 +20,6 @@ import { startCase } from 'lodash';
 import { DATE_VALUE, RESOURCE_ACTION_TYPE } from 'src/components/FormBuilder/Tabs/helper';
 
 export default function UpdateResourceActions({ onClose, onSuccess, resource, resourceData, type }) {
-
   const OPERATOR = [
     {
       optionLabel: 'Less than',
@@ -50,23 +49,24 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
     state: { resources }
   }: any = useData();
 
-  const actionKey = type === RESOURCE_ACTION_TYPE.actions ? 'updateResourceActions' : 'resourceTriggers'
+  const actionKey = type === RESOURCE_ACTION_TYPE.actions ? 'updateResourceActions' : 'resourceTriggers';
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialValues, setInitialValues] = useState({ [actionKey]: [] });
   const [submitting, setSubmitting] = useState(false);
   const [fields, setFields] = useState([]);
-  const [lookupResourceDataOptions, setLookupResourceDataOptions] = useState({})
+  const [lookupResourceDataOptions, setLookupResourceDataOptions] = useState({});
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.product}`)
-      .then(({ data: { data } }) => {
-        setLookupResourceDataOptions(data)
-      })
-      .catch((err) => {
-      });
-  }, [])
+    if (resource === sidebarResource.serializedAsset) {
+      axiosInstance()
+        .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.product}`)
+        .then(({ data: { data } }) => {
+          setLookupResourceDataOptions(data);
+        })
+        .catch((err) => {});
+    }
+  }, []);
 
   useEffect(() => {
     getResourceFieldList(resource);
@@ -104,7 +104,7 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
       } = await axiosInstance().get(`/field?resource=${resource}`);
       data = data?.filter((obj) => obj?.isCreate).map((d: any) => d.fieldData);
       setFields(data);
-    } catch (e) { }
+    } catch (e) {}
   };
 
   function validate(values) {
@@ -169,8 +169,10 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
                       <>
                         <div className="sticky top-0 z-10 flex items-center justify-between gap-2 bg-[var(--dark-primary,white)] py-3 pb-3">
                           <ThemeButton
-                            buttonType='theme'
-                            onClick={() => push({ checkFields: [{ fieldName: '', value: '', operator: '' }], products: [], updateField: '', updateValue: '' })}
+                            buttonType="theme"
+                            onClick={() =>
+                              push({ checkFields: [{ fieldName: '', value: '', operator: '' }], products: [], updateField: '', updateValue: '' })
+                            }
                           >
                             Add
                           </ThemeButton>
@@ -189,6 +191,7 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
                               resources={resources}
                               lookupResourceDataOptions={lookupResourceDataOptions}
                               actionKey={actionKey}
+                              resource={resource}
                             />
                           ))}
                         </ul>
@@ -217,7 +220,20 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
   );
 }
 
-const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fields, operators, resources, lookupResourceDataOptions, actionKey }) => {
+const Card = ({
+  values,
+  index,
+  parentRemove,
+  setFieldValue,
+  errors,
+  touched,
+  fields,
+  operators,
+  resources,
+  lookupResourceDataOptions,
+  actionKey,
+  resource
+}) => {
   return (
     <li className="flex list-none items-center gap-2">
       <fieldset className="flex-grow space-y-2 rounded-md border px-3 pb-3">
@@ -247,9 +263,7 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
                         <Autocomplete
                           options={fields}
                           getOptionLabel={(option) => option?.fieldLabel || ''}
-                          value={
-                            fields?.find((data) => data?.fieldName === values?.[actionKey]?.[index]?.checkFields?.[i]?.fieldName) || {}
-                          }
+                          value={fields?.find((data) => data?.fieldName === values?.[actionKey]?.[index]?.checkFields?.[i]?.fieldName) || {}}
                           fullWidth
                           onChange={(e, newValue) => {
                             setFieldValue(`${actionKey}.${index}.checkFields.${i}.fieldName`, newValue?.fieldName);
@@ -276,10 +290,7 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
                         <Autocomplete
                           options={operators}
                           getOptionLabel={(option) => option?.optionLabel || ''}
-                          value={
-                            operators?.find((data) => data?.optionValue === values?.[actionKey]?.[index]?.checkFields?.[i]?.operator) ??
-                            null
-                          }
+                          value={operators?.find((data) => data?.optionValue === values?.[actionKey]?.[index]?.checkFields?.[i]?.operator) ?? null}
                           fullWidth
                           onChange={(event, newValue) => {
                             setFieldValue(`${actionKey}.${index}.checkFields.${i}.operator`, newValue?.optionValue || '');
@@ -296,8 +307,7 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
                                 Boolean(errors[`${actionKey}.${index}.checkFields.${i}.operator`])
                               }
                               helperText={
-                                touched?.[actionKey]?.[index]?.checkFields?.[i]?.operator &&
-                                errors[`${actionKey}.${index}.checkFields.${i}.operator`]
+                                touched?.[actionKey]?.[index]?.checkFields?.[i]?.operator && errors[`${actionKey}.${index}.checkFields.${i}.operator`]
                               }
                               variant="outlined"
                             />
@@ -317,12 +327,7 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
                         ) : null}
                         <div className="mt-1 flex">
                           <HtmlTooltip title={'Remove'}>
-                            <IconButton
-                              size="small"
-                              aria-label="close"
-                              onClick={() => remove(i)}
-                              disabled={arr.length === 1}
-                            >
+                            <IconButton size="small" aria-label="close" onClick={() => remove(i)} disabled={arr.length === 1}>
                               <RemoveCircleOutline fontSize="small" color={arr.length === 1 ? 'disabled' : 'error'} />
                             </IconButton>
                           </HtmlTooltip>
@@ -339,28 +344,26 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
               )}
             </FieldArray>
           </div>
-          <div className='mt-4'>
-            <Autocomplete
-              options={lookupResourceDataOptions[sidebarResource.product] || []}
-              getOptionLabel={(option: any) => option?.optionLabel || ''}
-              fullWidth
-              multiple
-              value={[...lookupResourceDataOptions[sidebarResource.product] || []]?.filter(p => values?.[actionKey]?.[index]?.products?.includes(p?.optionValue))}
-              onChange={(e, newValue) => {
-                setFieldValue(`${actionKey}.${index}.products`, newValue?.map(v => v?.optionValue) || []);
-              }}
-              size="small"
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label={resources?.product?.titlePlural}
-                  margin="none"
-                  size="small"
-                  variant="outlined"
-                />
-              )}
-            />
-          </div>
+          {resource === sidebarResource.serializedAsset && (
+            <div className="mt-4">
+              <Autocomplete
+                options={lookupResourceDataOptions[sidebarResource.product] || []}
+                getOptionLabel={(option: any) => option?.optionLabel || ''}
+                fullWidth
+                multiple
+                value={[...(lookupResourceDataOptions[sidebarResource.product] || [])]?.filter((p) =>
+                  values?.[actionKey]?.[index]?.products?.includes(p?.optionValue)
+                )}
+                onChange={(e, newValue) => {
+                  setFieldValue(`${actionKey}.${index}.products`, newValue?.map((v) => v?.optionValue) || []);
+                }}
+                size="small"
+                renderInput={(params) => (
+                  <TextField {...params} label={resources?.product?.titlePlural} margin="none" size="small" variant="outlined" />
+                )}
+              />
+            </div>
+          )}
         </fieldset>
         <fieldset className="rounded-md  border border-dashed border-gray-200 p-3 dark:border-gray-800">
           <legend className="px-1 text-sm  font-semibold">Actions</legend>
@@ -408,7 +411,7 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
 };
 
 const DynamicFormField = ({ fieldName, value, field, setFieldValue, formikField, error, touched, label }) => {
-  return (field?.type === FieldList.DATE.type ? (
+  return field?.type === FieldList.DATE.type ? (
     <>
       <Autocomplete
         options={Object.values(DATE_VALUE)}
@@ -419,15 +422,7 @@ const DynamicFormField = ({ fieldName, value, field, setFieldValue, formikField,
           setFieldValue(formikField, newValue);
         }}
         size="small"
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Value"
-            margin="none"
-            size="small"
-            variant="outlined"
-          />
-        )}
+        renderInput={(params) => <TextField {...params} label="Value" margin="none" size="small" variant="outlined" />}
       />
       {value === DATE_VALUE.custom && (
         <FormTypes
@@ -473,6 +468,5 @@ const DynamicFormField = ({ fieldName, value, field, setFieldValue, formikField,
       tooltipMessage={field?.tooltipMessage || ''}
       size="small"
     />
-  )
   );
 };
