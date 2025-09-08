@@ -1,11 +1,13 @@
 import { Box, Typography, Stepper, Step, StepLabel, Card, CardContent, Grid, Button, Chip, CircularProgress } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Form, Formik } from 'formik';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { SVG } from 'src/assets';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import RenderField from 'src/pages/Onboarding/Public/RenderField';
+import InputField from 'src/components/Helpers/InputField';
+import { sidebarResource, yupSchema } from 'src/constants/helpers';
 
 const PublicOnboarding = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -16,6 +18,7 @@ const PublicOnboarding = () => {
   const [loading, setLoading] = useState(true);
   const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [stepsData, setStepsData] = useState([]);
+  const [initialValues, setInitialValues] = useState({});
 
   useEffect(() => {
     if (id) {
@@ -28,6 +31,7 @@ const PublicOnboarding = () => {
     try {
       const { data: { data: onboardingResponse } } = await axiosInstance().get(`${routes.onboarding.path}/public/${id}`);
       setOnboardingData(onboardingResponse);
+
       if (onboardingResponse.onboardingTemplateData) {
         setOnboardingTemplateData(onboardingResponse.onboardingTemplateData);
         
@@ -43,6 +47,10 @@ const PublicOnboarding = () => {
         }) || [];
         
         setStepsData(initialStepsData);
+        
+        const currentStepId = onboardingResponse.onboardingTemplateData.tabs[0].steps[activeStepIndex]._id;
+        const currentStepData = initialStepsData.find(step => step.stepId === currentStepId) || {};
+        setInitialValues(currentStepData);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -53,27 +61,32 @@ const PublicOnboarding = () => {
   
   const handleStepChange = (index: number) => {
     setActiveStepIndex(index);
+    const currentStepId = onboardingTemplateData.tabs[0].steps[index]._id;
+    const currentStepData = stepsData.find(step => step.stepId === currentStepId) || {};
+    setInitialValues(currentStepData);
   };
 
-  const handleDataChange = (fieldName: string, value: any) => {
+  const handleSubmit = async (values) => {
+    const currentStepId = onboardingTemplateData.tabs[0].steps[activeStepIndex]._id;
+    
     setStepsData(prev => {
       const newStepsData = [...prev];
-      const currentStepId = onboardingTemplateData.tabs[0].steps[activeStepIndex]._id;
       const stepIndex = newStepsData.findIndex(step => step.stepId === currentStepId);
       
       if (stepIndex === -1) {
         newStepsData.push({
           stepId: currentStepId,
-          [fieldName]: value
+          ...values
         });
       } else {
         newStepsData[stepIndex] = {
           ...newStepsData[stepIndex],
-          [fieldName]: value
+          ...values
         };
       }
       return newStepsData;
     });
+    handleStepChange(activeStepIndex + 1);
   };
 
   if (loading) {
@@ -86,33 +99,15 @@ const PublicOnboarding = () => {
 
   if (!onboardingData || !onboardingTemplateData) {
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <Typography>Could not load onboarding information.</Typography>
-        </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Typography>Could not load onboarding information.</Typography>
+      </Box>
     );
   }
 
   const steps = onboardingTemplateData.tabs?.[0]?.steps || [];
   const activeStepData = steps[activeStepIndex];
-  const currentStepData = stepsData.find(step => step.stepId === activeStepData._id) || {};
-
-  const groupedFields = activeStepData?.fields.reduce((acc, field) => {
-    const section = field.sectionName || 'General Information';
-    if (!acc[section]) {
-      acc[section] = [];
-    }
-    acc[section].push(field);
-    return acc;
-  }, {});
-
-  const submitData = {
-    ...onboardingData,
-    stepsData: stepsData
-  };
-
-  const handleSubmit = async () => {
-    
-  };
+  const fieldsData = activeStepData?.fields || [];
 
   return (
     <Box className="main-container-v1" sx={{ p: { xs: 2, md: 4 }, minHeight: '100vh' }}>
@@ -155,47 +150,47 @@ const PublicOnboarding = () => {
           </Stepper>
         </Box>
 
-        <Box>
-          {groupedFields && Object.entries(groupedFields).map(([sectionName, fields]: [string, any[]]) => (
-            <Card key={sectionName} sx={{ mb: 3 }}>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>{sectionName}</Typography>
-                <Grid container spacing={3}>
-                  {fields.map((field: any) => (
-                    <Grid item xs={12} sm={6} key={field._id}>
-                      <RenderField 
-                        field={field} 
-                        value={currentStepData[field.fieldName] || ''} 
-                        onChange={handleDataChange} 
-                      />
-                    </Grid>
-                  ))}
-                </Grid>
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
-      
-       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-            <Button
-                disabled={activeStepIndex === 0}
-                onClick={() => handleStepChange(activeStepIndex - 1)}
-            >
-                Back
-            </Button>
-            <Button
-                variant="contained"
-                onClick={() => {
-                    if (activeStepIndex < steps.length - 1) {
-                        handleStepChange(activeStepIndex + 1);
-                    } else {
-                        handleSubmit();
-                    }
-                }}
-            >
-                {activeStepIndex === steps.length - 1 ? 'Submit' : 'Next'}
-            </Button>
-        </Box>
+        <Formik
+          initialValues={initialValues}
+          validationSchema={yupSchema(fieldsData)}
+          onSubmit={handleSubmit}
+          enableReinitialize
+        >
+          {({ values, errors, touched, setFieldValue, submitForm }) => (
+            <Form>
+              <Card sx={{ mb: 3 }}>
+                <CardContent>
+                  <InputField
+                    fieldsData={fieldsData}
+                    values={values}
+                    errors={errors}
+                    touched={touched}
+                    setFieldValue={setFieldValue}
+                    resource={sidebarResource.onboarding}
+                    size="small"
+                    fullWidth
+                    referenceId={id}
+                  />
+                </CardContent>
+              </Card>
+              
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+                <Button
+                  disabled={activeStepIndex === 0}
+                  onClick={() => handleStepChange(activeStepIndex - 1)}
+                >
+                  Back
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={submitForm}
+                >
+                  {activeStepIndex === steps.length - 1 ? 'Submit' : 'Next'}
+                </Button>
+              </Box>
+            </Form>
+          )}
+        </Formik>
       </Box>
     </Box>
   );
