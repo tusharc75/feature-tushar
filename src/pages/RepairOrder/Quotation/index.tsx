@@ -228,7 +228,7 @@ const Quotation = ({
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
           <div className="flex items-center gap-2">
-            {[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+            {[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.expired].includes(
               quotationInfo?.versions[tempCurrentVersion]?.status
             ) || invoiceStep ? (
               <p> {row.original.detail}</p>
@@ -323,7 +323,7 @@ const Quotation = ({
                   <IconButton
                     size="small"
                     disabled={
-                      repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                      repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.expired].includes(
                         quotationInfo?.versions[tempCurrentVersion]?.status
                       ) || invoiceStep
                     }
@@ -335,7 +335,7 @@ const Quotation = ({
                     <EditIcon
                       fontSize="small"
                       color={
-                        repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                        repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.expired].includes(
                           quotationInfo?.versions[tempCurrentVersion]?.status
                         ) || invoiceStep
                           ? 'disabled'
@@ -767,6 +767,11 @@ const Quotation = ({
                   <FcCancel size={25} />
                   <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quotation has been rejected by customer</Typography>
                 </div>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.expired ? (
+                <div className={`d-flex align-items-center justify-content-center spacing-1 text-align-center flex-wrap`}>
+                  <FcCancel size={25} />
+                  <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quotation has been expired</Typography>
+                </div>
               ) : null}
             </Box>
           )}
@@ -799,7 +804,7 @@ const Quotation = ({
                   >
                     Accept / Reject
                   </ThemeButton>
-                ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(
+                ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.expired].includes(
                   quotationData?.versions[currentVersion]?.status
                 ) ? (
                   <ThemeButton
@@ -812,7 +817,7 @@ const Quotation = ({
                     Create New Version
                   </ThemeButton>
                 ) : null)}
-              {repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+              {repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.expired].includes(
                 quotationData?.versions[currentVersion]?.status
               ) ? null : (
                 <ThemeButton
@@ -890,6 +895,11 @@ const Quotation = ({
                   <FcCancel size={25} />
                   <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quotation has been rejected by customer</Typography>
                 </div>
+              ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.expired ? (
+                <div className={`d-flex align-items-center justify-content-center spacing-1 text-align-center flex-wrap`}>
+                  <FcCancel size={25} />
+                  <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quotation has been expired</Typography>
+                </div>
               ) : null}
             </Box>
           )}
@@ -911,7 +921,7 @@ const Quotation = ({
             refreshGrid={fetchData}
             hideSelection={
               !allowedToEdit ||
-              (repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+              (repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.expired].includes(
                 quotationData?.versions[currentVersion]?.status
               ))
             }
