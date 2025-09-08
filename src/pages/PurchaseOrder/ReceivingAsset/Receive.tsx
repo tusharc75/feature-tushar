@@ -150,11 +150,11 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
         if (tempProduct && !d.warehouse) {
           errors.warehouse = `${resources?.warehouse?.titleSingular} is required`;
         }
-        if (user?.user?.brandPolicy?.storageLocation) {
-          if (tempProduct && !d.storageLocation) {
-            errors.storageLocation = 'Storage Location is required';
-          }
-        }
+        // if (user?.user?.brandPolicy?.storageLocation) {
+        //   if (tempProduct && !d.storageLocation) {
+        //     errors.storageLocation = 'Storage Location is required';
+        //   }
+        // }
         if (tempProduct?.serializedProduct) {
           if (d.serialNumber?.length > parseInt(d.inventoryQuantity)) {
             errors['serialNumber'] = `Please enter serial numbers same as quantity`;
@@ -370,7 +370,6 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                                             label="Storage Location"
                                             error={validate([data]).storageLocation}
                                             helperText={validate([data]).storageLocation ? 'Storage Location is required' : ''}
-                                            required
                                           />
                                         )}
                                       />
