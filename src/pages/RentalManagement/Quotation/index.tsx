@@ -349,7 +349,7 @@ const Quotation = ({
               >
                 Accept / Reject
               </ThemeButton>
-            ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
+            ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired].includes(quotationData?.versions[currentVersion]?.status)  ? (
               <ThemeButton
                 onClick={() => {
                   cloneVersion();
@@ -487,6 +487,13 @@ const RenderQuotationMessage = ({ quotationData, currentVersion, isMobile }) => 
             <FcCancel size={25} className="text-[var(--primary)]" />
             <Typography style={{ color: '#dc3545', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
               Quotation has been rejected by customer
+            </Typography>
+          </div>
+        ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.expired ? (
+          <div className="d-flex align-items-center justify-content-center m-1 text-center">
+            <FcCancel size={25} className="text-[var(--primary)]" />
+            <Typography style={{ color: '#dc3545', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
+              Quotation has been expired
             </Typography>
           </div>
         ) : null}
