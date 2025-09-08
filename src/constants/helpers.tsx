@@ -2832,7 +2832,8 @@ export const QUOTATION_STATUS = {
   sentforDOA: 'Sent for DOA',
   acceptedbyDOA: 'Accepted by DOA',
   rejectedbyDOA: 'Rejected by DOA',
-  customerAcceptanceNotRequired: 'Customer Acceptance Not Required'
+  customerAcceptanceNotRequired: 'Customer Acceptance Not Required',
+  expired: 'Expired'
 };
 
 export const QUOTATION_TYPE = {
