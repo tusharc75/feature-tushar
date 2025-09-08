@@ -25,7 +25,6 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 import {
   ASSET_STATUS,
   COLOUR_MASTER,
@@ -48,7 +47,6 @@ import {
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import MultipleTicket from '../../DeliveryTicket/MultipleTicket';
-import AddSerializedAsset from '../SerializedAsset/AddSerializedAsset';
 import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 import { getNestedQty, getRentalDeliveryTicket, getRentalProductAssets } from './../rentalOfflineHelper';
 import DateDialog from './DateDialog';
@@ -126,8 +124,6 @@ const LoadingTicket = ({
   const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
   const [showInfo, setShowInfo] = useState({ open: false, data: {}, isNonSerializedProductSerialNumbers: null });
-  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
-  const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
   const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
   const [showConformationCancleTicket, setShowConformationCancleTicket] = useState({ open: false });
@@ -369,6 +365,18 @@ const LoadingTicket = ({
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
+          accessor: 'serializedPackageStatus',
+          Header: `${resources?.serializedPackages?.titleSingular} Status`,
+          cell: ({ row }) =>
+            row?.original?.serializedPackageStatus ? (
+              <div className="flex items-center gap-2">
+                <h5 className="text-truncate" title={row?.original?.serializedPackageStatus}>{row?.original?.serializedPackageStatus}</h5>
               </div>
             ) : (
               <NoDataCell />
@@ -873,6 +881,7 @@ const LoadingTicket = ({
           }
 
           parent.serializedPackageId = parent?.serializedPackage?.optionValue
+          parent.serializedPackageStatus = parent?.serializedPackage?.status;
           parent.serializedPackage = parent?.serializedPackage?.optionLabel;
         });
       }
@@ -974,6 +983,7 @@ const LoadingTicket = ({
             _subRow.rentalAssetStatus = '';
           }
           _subRow.serializedPackageId = _subRow?.serializedPackage?.optionValue
+          _subRow.serializedPackageStatus = _subRow?.serializedPackage?.status;
           _subRow.serializedPackage = _subRow?.serializedPackage?.optionLabel;
           _subRow.subRows = generateNestedData(
             _subRow,
@@ -1020,6 +1030,7 @@ const LoadingTicket = ({
       obj.currentOwner = _subRow?.inventory?.currentOwner;
       obj.currentLocation = _subRow?.inventory?.currentLocation?.optionValue;
       obj.serializedPackageId = _subRow?.inventory?.serializedPackage?.optionValue;
+      obj.serializedPackageStatus = _subRow?.inventory?.serializedPackage?.status;
       obj.serializedPackage = _subRow?.inventory?.serializedPackage?.optionLabel;
       const loading = loadingTicketAssets?.find((e) => e?.asset === obj?._id && e?.uniqueId === obj?.uniqueId);
       if (loading) {
@@ -1195,6 +1206,7 @@ const LoadingTicket = ({
       element.index = parentIndex ? `${parentIndex}.${subRowsCount + index + 1}` : `${subRowsCount + index + 1}`;
       element.hideSelection = [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(element.rentalAssetStatus);
       element.serializedPackageId = element?.serializedPackage?.optionValue
+      element.serializedPackageStatus = element?.serializedPackage?.status;
       element.serializedPackage = element?.serializedPackage?.optionLabel;
     });
 
@@ -1338,48 +1350,6 @@ const LoadingTicket = ({
 
   const handleCloseChangeSubStatusMenu = () => {
     setSubStatusAnchorEl(null);
-  };
-
-  const handleOpenReplaceAssetReason = (rows) => {
-    const data: any = {};
-    data.referenceType = 'rentalJob';
-    data.referenceId = rentalManagementData._id;
-    const assets: any = [];
-    getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.forEach((element: any) => {
-      const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
-      if (result.length) {
-        assets.push({
-          _id: element._id,
-          uniqueId: element.uniqueId,
-          status: element.status,
-          deliveryTicketId: element.loadingTicketId,
-          newId: result[0]._id
-        });
-        result[0].isCounted = true;
-      }
-    });
-    data.assets = assets;
-    setShowReplaceReason({ open: true, data: data });
-  };
-
-  const handleReplaceAsset = (reason) => {
-    setReplaceLoading(true);
-    axiosInstance()
-      .post(`${deliveryTicket.api}/replace-assets`, { ...showReplaceReason.data, reason: reason })
-      .then(({ data }) => {
-        setShowReplaceReason({ open: false, data: [] });
-        setAddSerializedAssetDialog({ open: false, products: [] });
-        setReplaceLoading(false);
-        fetchRecords();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Assets Replaced Successfully`
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
   };
 
   const handelProcessTickets = (date = new Date(), status = null) => {
@@ -1579,16 +1549,6 @@ const LoadingTicket = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         } else if (e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingAlreadyDelivered });
-        }
-      } else if (action === rentalManagementActions.replaceAsset) {
-        if (e?.type !== MATERIAL_TYPE.serializedAsset) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.productsCanNotReplace });
-        } else if (!e.hasOwnProperty('loadingTicketId')) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
-        } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingDeliveredForReplace });
-        } else if (e?.status !== ASSET_STATUS.inUse || e?.rentalAssetStatus !== ASSET_STATUS.inUse) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyReplaceInUse });
         }
       } else if (action === rentalManagementActions.cancelInTransitLoadingTicket) {
         if (!e.hasOwnProperty('loadingTicketId')) {
@@ -1829,7 +1789,6 @@ const LoadingTicket = ({
               user,
               setOpenDateDialog,
               handelProcessTickets,
-              setAddSerializedAssetDialog,
               setShowConformationRevertTicket,
               setShowConformationCancleTicket,
               hideDeliveryTicketDelivered,
@@ -2095,32 +2054,6 @@ const LoadingTicket = ({
           isNonSerializedProductSerialNumbers={showInfo.isNonSerializedProductSerialNumbers}
         />
       )}
-      {addSerializedAssetDialog.open && (
-        <AddSerializedAsset
-          addSerializedAsset={handleOpenReplaceAssetReason}
-          handleSerializedAssetClose={() => {
-            setAddSerializedAssetDialog({ open: false, products: [] });
-          }}
-          referenceType={'ReplaceAsset'}
-          replaceAssets={true}
-          referenceData={{
-            _id: rentalManagementData?._id,
-            warehouse: rentalManagementData?.warehouse?.optionValue
-          }}
-          isAdding={replaceLoading}
-          selectedProducts={addSerializedAssetDialog.products}
-          filterByPlant={rentalManagementData?.warehouse}
-        />
-      )}
-      {showReplaceReason.open && (
-        <ReplaceAssetReason
-          handleClose={() => setShowReplaceReason({ open: false, data: {} })}
-          loading={replaceLoading}
-          handleSucess={(data) => {
-            handleReplaceAsset(data?.reason);
-          }}
-        />
-      )}
       {showConformationRevertTicket && (
         <ConfirmationDialog
           open={showConformationRevertTicket}
@@ -2230,7 +2163,6 @@ const ActionButtonMenuItems = ({
   user,
   setOpenDateDialog,
   handelProcessTickets,
-  setAddSerializedAssetDialog,
   setShowConformationRevertTicket,
   setShowConformationCancleTicket,
   hideDeliveryTicketDelivered,
@@ -2410,33 +2342,6 @@ const ActionButtonMenuItems = ({
               )}
           </Box>
         ))}
-      {user?.user?.brandPolicy?.rentalOnFieldStep ? null : (
-        <MenuItem
-          onClick={() => {
-            if (!validateAction(rentalManagementActions.replaceAsset)) {
-              const products = [];
-              getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.forEach((element) => {
-                const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
-                if (foundProduct.length) {
-                  foundProduct[0].qty += 1;
-                } else {
-                  products.push({
-                    _id: element?.product?.optionValue,
-                    id: element?.product?.optionValue,
-                    productName: element?.product?.optionLabel,
-                    qty: 1
-                  });
-                }
-              });
-              setAddSerializedAssetDialog({ open: true, products: products });
-            }
-          }}
-          id={'last-status-menu-item'}
-          disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0}
-        >
-          Replace Asset
-        </MenuItem>
-      )}
       {!hideDeliveryTicketDelivered && (
         <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
           <MenuItem

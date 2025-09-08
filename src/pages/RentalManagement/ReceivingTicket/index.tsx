@@ -155,8 +155,15 @@ const ReceivingTicket = ({
   const [repairOrderCount, setRepairOrderCount] = useState(0);
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [], type: '' });
-  const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [subStatusToUpdate, setSubStatusToUpdate] = useState({ open: false, status: null });
+  const [showReplaceAssetWarnings, setShowReplaceAssetWarnings] = useState({
+    replaceAssetReasonDialog: false,
+    replaceAssetReason: '',
+    confirmationDirectSendToSupplierDialog: false,
+    data: null,
+    confirmationAddNewLineItemsDialog: false,
+    confirmationAddNewLineItems: ''
+  })
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
@@ -182,7 +189,6 @@ const ReceivingTicket = ({
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
   const [fieldLabels, setFieldLabels] = useState(null);
   const [rentalJobChildFields, setRentalJobChildFields] = useState(null);
-  const [confirmationDirectSendToSupplier, setConfirmationDirectSendToSupplier] = useState({ open: false, data: null })
   const [subStatusLog, setSubStatusLog] = useState({ open: false, data: null })
 
   const {
@@ -327,16 +333,6 @@ const ReceivingTicket = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         } else if (e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingAlreadyDelivered });
-        }
-      } else if (action === rentalManagementActions.replaceAsset) {
-        if (e?.type !== MATERIAL_TYPE.serializedAsset) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.productsCanNotReplace });
-        } else if (!e.hasOwnProperty('loadingTicketId')) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
-        } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingDeliveredForReplace });
-        } else if (e?.status !== ASSET_STATUS.inUse || e?.rentalAssetStatus !== ASSET_STATUS.inUse) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyReplaceInUse });
         }
       } else if (action === rentalManagementActions.createReceivingTicket) {
         if (
@@ -885,6 +881,7 @@ const ReceivingTicket = ({
             newRows.push(parent);
           }
           parent.serializedPackageId = parent?.serializedPackage?.optionValue
+          parent.serializedPackageStatus = parent?.serializedPackage?.status;
           parent.serializedPackage = parent?.serializedPackage?.optionLabel;
         });
       }
@@ -1030,6 +1027,7 @@ const ReceivingTicket = ({
             _subRow.rentalAssetStatus = '';
           }
           _subRow.serializedPackageId = _subRow?.serializedPackage?.optionValue
+          _subRow.serializedPackageStatus = _subRow?.serializedPackage?.status;
           _subRow.serializedPackage = _subRow?.serializedPackage?.optionLabel;
           _subRow.subRows = generateNestedData(
             _subRow,
@@ -1082,6 +1080,7 @@ const ReceivingTicket = ({
       obj.currentOwner = _subRow?.inventory?.currentOwner;
       obj.currentLocation = _subRow?.inventory?.currentLocation?.optionValue;
       obj.serializedPackageId = _subRow?.inventory?.serializedPackage?.optionValue;
+      obj.serializedPackageStatus = _subRow?.inventory?.serializedPackage?.status;
       obj.serializedPackage = _subRow?.inventory?.serializedPackage?.optionLabel;
       const loadingTicket = loadingTicketAssets?.find((e) => e?.asset === obj?._id && e?.uniqueId === obj?.uniqueId);
       if (loadingTicket) {
@@ -1388,6 +1387,7 @@ const ReceivingTicket = ({
         element.minEndDate = new Date(invoiceMaterial?.endDate);
       }
       element.serializedPackageId = element?.serializedPackage?.optionValue
+      element.serializedPackageStatus = element?.serializedPackage?.status;
       element.serializedPackage = element?.serializedPackage?.optionLabel;
     });
 
@@ -1734,6 +1734,17 @@ const ReceivingTicket = ({
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        }, {
+          accessor: 'serializedPackageStatus',
+          Header: `${resources?.serializedPackages?.titleSingular} Status`,
+          cell: ({ row }) =>
+            row?.original?.serializedPackageStatus ? (
+              <div className="flex items-center gap-2">
+                <h5 className="text-truncate" title={row?.original?.serializedPackageStatus}>{row?.original?.serializedPackageStatus}</h5>
               </div>
             ) : (
               <NoDataCell />
@@ -2592,49 +2603,7 @@ const ReceivingTicket = ({
       });
   };
 
-  const handleOpenReplaceAssetReason = (rows) => {
-    const data: any = {};
-    data.referenceType = 'rentalJob';
-    data.referenceId = rentalManagementData._id;
-    const assets: any = [];
-    getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.forEach((element: any) => {
-      const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
-      if (result.length) {
-        assets.push({
-          _id: element._id,
-          uniqueId: element.uniqueId,
-          status: element.status,
-          deliveryTicketId: element.loadingTicketId,
-          newId: result[0]._id
-        });
-        result[0].isCounted = true;
-      }
-    });
-    data.assets = assets;
-    setShowReplaceReason({ open: true, data: data });
-  };
-
-  const handleReplaceAsset = (reason) => {
-    setIsSubmitting(true);
-    axiosInstance()
-      .post(`${deliveryTicket.api}/replace-assets`, { ...showReplaceReason.data, reason: reason })
-      .then(({ data }) => {
-        setShowReplaceReason({ open: false, data: [] });
-        setAddSerializedAssetDialog({ open: false, products: [], type: '' });
-        setIsSubmitting(false);
-        fetchRecords();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Assets Replaced Successfully`
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const handleSwapAssets = (rows, directSendToSupplier = false) => {
+  const handleSwapAssets = (rows, replaceReason = '', replaceWithNewLineItems = false, directSendToSupplier = false) => {
     const data = [];
     getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.forEach((element: any) => {
       const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
@@ -2645,24 +2614,25 @@ const ReceivingTicket = ({
     });
     setIsSubmitting(true);
     axiosInstance()
-      .post(`${rentalManagement.api}/swap-inuse-assets`, {
-        assets: data?.map((e) => e._id),
-        newAssets: data?.map((e) => {
-          return { asset: e.newId, oldAssetParentId: e?.parentId };
+      .post(`${rentalManagement.api}/replace-inuse-assets`, {
+        assets: data?.map((e) => {
+          return { asset: e.newId, oldAssetParentId: e?.parentId, oldAsset: e?._id };
         }),
         rentalJob: rentalManagementData?._id,
+        reason: replaceReason,
+        replaceWithNewLineItems: replaceWithNewLineItems,
         directSendToSupplier: directSendToSupplier
       })
       .then(({ data }) => {
         setAddSerializedAssetDialog({ open: false, products: [], type: '' });
-        setConfirmationDirectSendToSupplier({ open: false, data: null });
+        setShowReplaceAssetWarnings({ replaceAssetReason: '', replaceAssetReasonDialog: false, data: null, confirmationAddNewLineItems: '', confirmationAddNewLineItemsDialog: false, confirmationDirectSendToSupplierDialog: false });
         setIsSubmitting(false);
         setOkBtnLoading(false)
         fetchRecords();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Assets Swapped Successfully`
+          message: `Assets Replaced Successfully`
         });
       })
       .catch((error) => {
@@ -3171,19 +3141,38 @@ const ReceivingTicket = ({
           okBtnLoading={okBtnLoading}
         />
       )}
-      {confirmationDirectSendToSupplier.open && (
+      {showReplaceAssetWarnings.confirmationAddNewLineItemsDialog && (
         <SelectionConfirmationDialog
-          open={confirmationDirectSendToSupplier.open}
-          message={`Would you like to send the sublease assets (${getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter(a => a?.subleaseAsset)?.map(a => a?.assetNumber).join(', ')}) directly to the supplier? Click 'Yes' to proceed, or 'No' to keep them internal.`}
+          open={showReplaceAssetWarnings.confirmationAddNewLineItemsDialog}
+          message={`Would you like to add the replacement assets as a new line item? Click Yes to add it as a new line item, or No to keep it under the same line item.`}
           onOk={(type) => {
-            setOkBtnLoading(true)
-            handleSwapAssets(confirmationDirectSendToSupplier.data, type === 'Yes' ? true : false)
+            if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some(d => d?.subleaseAsset)) {
+              setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: false, confirmationAddNewLineItems: type, confirmationDirectSendToSupplierDialog: true }))
+            } else {
+              handleSwapAssets(showReplaceAssetWarnings.data, showReplaceAssetWarnings.replaceAssetReason, type === 'Yes' ? true : false)
+            }
           }}
           onClose={() => {
-            setConfirmationDirectSendToSupplier({ open: false, data: null });
+            setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: false, replaceAssetReason: '', data: null }))
           }}
           selection1={'Yes'}
           selection2={'No'}
+          okBtnLoading={isSubmitting}
+        />
+      )}
+      {showReplaceAssetWarnings.confirmationDirectSendToSupplierDialog && (
+        <SelectionConfirmationDialog
+          open={showReplaceAssetWarnings.confirmationDirectSendToSupplierDialog}
+          message={`Would you like to send the sublease assets (${getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter(a => a?.subleaseAsset)?.map(a => a?.assetNumber).join(', ')}) directly to the supplier? Click 'Yes' to proceed, or 'No' to keep them internal.`}
+          onOk={(type) => {
+            handleSwapAssets(showReplaceAssetWarnings.data, showReplaceAssetWarnings.replaceAssetReason, showReplaceAssetWarnings.confirmationAddNewLineItems === 'Yes' ? true : false, type === 'Yes' ? true : false)
+          }}
+          onClose={() => {
+            setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationDirectSendToSupplierDialog: false, replaceAssetReason: '', data: null, confirmationAddNewLineItems: '' }))
+          }}
+          selection1={'Yes'}
+          selection2={'No'}
+          okBtnLoading={isSubmitting}
         />
       )}
       {statusToUpdate.open && (
@@ -3377,15 +3366,7 @@ const ReceivingTicket = ({
       {addSerializedAssetDialog.open && (
         <AddSerializedAsset
           addSerializedAsset={(rows) => {
-            if (addSerializedAssetDialog.type === 'RentalJobReplaceAsset') {
-              handleOpenReplaceAssetReason(rows);
-            } else {
-              if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some(d => d?.subleaseAsset)) {
-                setConfirmationDirectSendToSupplier({ open: true, data: rows })
-              } else {
-                handleSwapAssets(rows);
-              }
-            }
+            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: true, data: rows }))
           }}
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog({ open: false, products: [], type: '' });
@@ -3430,12 +3411,12 @@ const ReceivingTicket = ({
           assets={openDateDialog.assets}
         />
       )}
-      {showReplaceReason.open && (
+      {showReplaceAssetWarnings.replaceAssetReasonDialog && (
         <ReplaceAssetReason
-          handleClose={() => setShowReplaceReason({ open: false, data: {} })}
+          handleClose={() => setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, data: null }))}
           loading={isSubmitting}
           handleSucess={(data) => {
-            handleReplaceAsset(data?.reason);
+            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, replaceAssetReason: data?.reason, confirmationAddNewLineItemsDialog: true }))
           }}
         />
       )}
@@ -3806,32 +3787,6 @@ const ActionButtonMenuItems = ({
             {`Transfer to another Package`}
           </MenuItem>
         )}
-      {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && (
-        <MenuItem
-          id={'replace-asset-menu-item'}
-          onClick={() => {
-            if (validateAction(rentalManagementActions.replaceAsset)) {
-              const products = [];
-              getFilterSelectedRecords()?.forEach((element) => {
-                const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
-                if (foundProduct.length) {
-                  foundProduct[0].qty += 1;
-                } else {
-                  products.push({
-                    _id: element?.product?.optionValue,
-                    id: element?.product?.optionValue,
-                    productName: element?.product?.optionLabel,
-                    qty: 1
-                  });
-                }
-              });
-              setAddSerializedAssetDialog({ open: true, products: products, type: 'RentalJobReplaceAsset' });
-            }
-          }}
-        >
-          Replace Asset
-        </MenuItem>
-      )}
       {!isOffline &&
         ((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
           (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
@@ -3857,7 +3812,7 @@ const ActionButtonMenuItems = ({
               }
             }}
           >
-            {`Swap In-Use Assets`}
+            Replace In-Use Assets
           </MenuItem>
         )}
       {permissions?.repairJob?.isCreate && !isOffline && currentStep === RENTAL_STEPS.receiving && (
