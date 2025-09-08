@@ -13,10 +13,11 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { assetServiceTickets, sidebarResource } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, assetServiceTickets, sidebarResource } from '../../constants/helpers';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import ManageAssetServiceTicket from 'src/pages/AssetServiceTicket/ManageAssetServiceTicket';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const AssetServiceTicketDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -132,6 +133,12 @@ const AssetServiceTicketDetail = () => {
               </ThemeButton>
             </Fragment>
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            <ActivityButton
+                referenceId={null}
+                resource={ACTIVITY_RESOURCE.assetServiceTicket}
+                resourceLabel={resources?.assetServiceTickets?.titlePlural}
+                resourceData={null}
+              />
           </Box>
         </Box>
       </Box>

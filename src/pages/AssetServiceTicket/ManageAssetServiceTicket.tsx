@@ -21,13 +21,20 @@ import {
   yupSchema,
   sidebarResource,
   getObjKeys,
-  GenerateResourceLineNumber,
+  GenerateResourceLineNumber
 } from '../../constants/helpers';
 import routes from '../../components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
 
-const ManageAssetServiceTicket = ({ isClone = false, assetTicketId = null, isRedirectToDetailPage = true, onClose, onSuccess, initialAssetId = null }) => {
+const ManageAssetServiceTicket = ({
+  isClone = false,
+  assetTicketId = null,
+  isRedirectToDetailPage = true,
+  onClose,
+  onSuccess,
+  initialAssetId = null
+}) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -76,7 +83,13 @@ const ManageAssetServiceTicket = ({ isClone = false, assetTicketId = null, isRed
         initialData['assetId'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (initialAssetId) {
           initialData['asset'] = initialAssetId;
+          fieldsDataForUpdate?.forEach((e) => {
+            if (['asset']?.includes(e?.fieldName)) {
+              e.isUneditable = true;
+            }
+          });
         }
+
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData
