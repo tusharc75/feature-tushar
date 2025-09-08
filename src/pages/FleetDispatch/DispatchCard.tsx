@@ -110,7 +110,6 @@ const FleetDispatchBox = ({ data, id, index, cardType }) => {
       props: { data, id, index, cardType }
     }
   });
-  console.log(data)
   const style = {
     transform: CSS.Translate.toString(transform),
     transition
