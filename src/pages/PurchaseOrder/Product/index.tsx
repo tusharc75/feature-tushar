@@ -818,6 +818,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
               : []
           }
           isSubmitting={isAddingProducts}
+          serialized={user?.user?.brandPolicy?.purchaseOrderShowSerializedProduct ? null : false}
         />
       )}
       {showProductDialog.open && (
