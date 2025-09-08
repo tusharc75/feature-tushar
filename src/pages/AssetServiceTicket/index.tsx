@@ -39,7 +39,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageTicketsDialog, setShowManageTicketsDialog] = useState({ open: false, isClone: false, idToClone: null });
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
 
   const { generateColumns } = useColumns();
@@ -240,7 +240,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
       {!isTabMode && (
         <div className="headerbox-v1">
           <CustomBreadCrumbs routes={[{ ...routes.assetServiceTickets, title: resources?.assetServiceTickets?.titlePlural }]} />
-          {/* <ImportExportLinks
+          <ImportExportLinks
             permissions={permissions.assetServiceTickets}
             module={resources?.assetServiceTickets?.titlePlural}
             api={assetServiceTickets.api}
@@ -255,7 +255,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
               fetchData();
             }}
             additionalParams={getQueryString(true)}
-          /> */}
+          />
         </div>
       )}
       {!isTabMode ? (
@@ -361,11 +361,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
     </>
   );
 
-  return isTabMode ? content : (
-    <div className="main-container-v1">
-      {content}
-    </div>
-  );
+  return isTabMode ? content : <div className="main-container-v1">{content}</div>;
 };
 
 export default AssetServiceTickets;
