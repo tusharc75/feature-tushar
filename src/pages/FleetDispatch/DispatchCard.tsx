@@ -110,7 +110,7 @@ const FleetDispatchBox = ({ data, id, index, cardType }) => {
       props: { data, id, index, cardType }
     }
   });
-
+  console.log(data)
   const style = {
     transform: CSS.Translate.toString(transform),
     transition
@@ -137,12 +137,13 @@ const FleetDispatchBox = ({ data, id, index, cardType }) => {
         >
           <div>
             <div className="mb-[14px] md:mb-[24px]">
-              <Typography className={classes.primaryText}>{resources?.truckMaster?.titleSingular} : {data?.fleetNumber}</Typography>
+              <Typography className={classes.primaryText}>{resources?.truckMaster?.titleSingular} : {data?.assetNumber}</Typography>
               <Typography className={classes.secondaryText}>
                 <strong>Location :</strong> {data?.currentLocation?.optionLabel}
               </Typography>
             </div>
             <Box className={`${classes.gaugeContainer} gap-4`}>
+              {/* no track for this in serializedAsset */}
               <MetricsWithIcon type="temperature" suffixText={<> °F</>} value={data?.temperature || 30} />
               <MetricsWithIcon type="pressure" suffixText={<> PSI</>} value={data?.pressure || 30} />
               <MetricsWithIcon type="volume" suffixText={<> MMcf</>} value={data?.volume || 30} />
@@ -156,10 +157,10 @@ const FleetDispatchBox = ({ data, id, index, cardType }) => {
               <WorkIcon className={classes.icon} />
             </Box>
             <Box>
-              <Typography className={classes.primaryText}>{data?.jobNumber}</Typography>
-              <Typography className={classes.primaryText}>
+              <Typography className={classes.primaryText}>{data?.rentalJobName}</Typography>
+              {/* <Typography className={classes.primaryText}>
                 <strong>{resources?.serializedAsset?.titleSingular}  :</strong> {data?.asset?.assetNumber}
-              </Typography>
+              </Typography> */}
               <Typography className={classes.secondaryText}>
                 <strong>Customer :</strong> {data?.customerAccount?.optionLabel}
               </Typography>

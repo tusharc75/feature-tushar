@@ -23,6 +23,34 @@ const Policy = ({ values, setFieldValue, errors, touched, resource, initialValue
           setLoading(false);
         });
     }
+    const lookupResources = values.policies?.reduce((acc, policy) => {
+      if (policy?.lookupResource) {
+        acc.push(policy.lookupResource);
+      }
+      return acc;
+    }, []);
+
+    if (lookupResources?.length > 0) {
+      const lookupString = lookupResources.join(',');
+      axiosInstance()
+        .get(`/sa-formbuilder/lookup?lookupResource=${lookupString}`)
+        .then(({ data: { data } }) => {
+          const updatedPolicies = values.policies.map(policy => {
+            if (policy.lookupResource && data[policy.lookupResource]) {
+              return {
+                ...policy,
+                option: data[policy.lookupResource]
+              };
+            }
+            return policy;
+          });
+
+          setFieldValue('policies', updatedPolicies);
+        })
+        .catch((error) => {
+          console.error('Error fetching lookup resources:', error);
+        });
+    }
   }, [resource]);
 
   return (
