@@ -55,6 +55,48 @@ export const getPricingConditions = (resource: any, referenceData: any, material
   }
 };
 
+export const getJobDuration = (row, minimumDuration, fieldName = '') => {
+  let jobDuration = 1
+
+  if (fieldName === 'estimateJobDuration') {
+    jobDuration = row[fieldName]
+  } else {
+    const startDate: any = new Date(row?.estimateStartDate);
+    startDate.toUTCString().slice(0, -4);
+    startDate.setHours(0);
+    startDate.setMinutes(0);
+    startDate.setSeconds(0);
+
+    const endDate: any = new Date(row?.estimateEndDate);
+    endDate.toUTCString().slice(0, -4);
+    endDate.setHours(23);
+    endDate.setMinutes(59);
+    endDate.setSeconds(59);
+    const diffTime = Math.abs(endDate - startDate);
+
+    if (row?.pricingMethod === "Per Day") {
+      var days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      jobDuration = days <= 0 ? 1 : days;
+    }
+    else if (row?.pricingMethod === "Per Week") {
+      var weeks = Math.ceil(diffTime / 604800000)
+      jobDuration = weeks <= 0 ? 1 : weeks;
+    }
+    else if (row?.pricingMethod === "Per Month") {
+      var months;
+      months = (endDate.getFullYear() - startDate.getFullYear()) * 12;
+      months -= startDate.getMonth();
+      months += endDate.getMonth();
+      jobDuration = months <= 0 ? 1 : months;
+    }
+  }
+
+  if (minimumDuration && minimumDuration > jobDuration) {
+    return minimumDuration
+  }
+  return jobDuration
+}
+
 export const getPricingValue = (row: any, priceData: any, currency: any, fields: any[], subStatusFields: any[] = []) => {
   let rateList = [];
   let changeUnit = false;
@@ -71,6 +113,7 @@ export const getPricingValue = (row: any, priceData: any, currency: any, fields:
     row[priceFieldName] = rateList[0].mrp;
     row['pricingCondition'] = rateList[0].conditionId;
     row['pricingMethod'] = rateList[0].pricingMethod?.trim();
+
     if (subStatusFields?.length > 0) {
       subStatusFields?.forEach(sf => {
         const field = fields?.find(f => f?.fieldName === `${camelCase(sf)}Price`)
@@ -100,27 +143,35 @@ export const getPricingValue = (row: any, priceData: any, currency: any, fields:
         Object.assign(row, calValues);
       }
     }
+
+    if (rateList[0]?.minimumDuration && rateList[0]?.minimumDuration > row['estimateJobDuration']) {
+      const calValues = autoCalculateSpecificFields({ estimateJobDuration: rateList[0]?.minimumDuration }, row, fields);
+      Object.assign(row, calValues);
+    }
   }
   return row;
 };
 
-export const getDurationBasedPrice = (row: any, pricingList: any[]) => {
+export const getDurationBasedPrice = (row: any, pricingList: any[], fieldName = '') => {
   let price = 0
   const priceValue = pricingList?.find(d => row?.materialId === d?.materialId && row?.type === d?.materialType && d.conditionId === row['pricingCondition'] && d.pricingMethod === row['pricingMethod'] && d.unit === row['unit'])
+
+  const estimateJobDuration = getJobDuration(row, priceValue?.minimumDuration, fieldName)
+
   if (priceValue && priceValue?.durationBasedPricing?.length > 0) {
     const durationBasedPricing = orderBy(priceValue?.durationBasedPricing, ['duration'], ['asc'])
     for (let i = 0; i < durationBasedPricing?.length; i++) {
-      if (row?.estimateJobDuration === durationBasedPricing[i].duration) {
+      if (estimateJobDuration === durationBasedPricing[i].duration) {
         return durationBasedPricing[i].price;
       }
-      if (row?.estimateJobDuration < durationBasedPricing[i].duration) {
+      if (estimateJobDuration < durationBasedPricing[i].duration) {
         return price ? price : 0;
       }
       price = durationBasedPricing[i]?.price;
     }
   }
 
-  return price
+  return { estimateJobDuration, durationPrice: price }
 }
 
 export const getTaxList = async (user: any, referenceData: any, fields: any, materialType: any, taxApplicableField = 'billingAddress') => {

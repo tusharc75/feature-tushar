@@ -468,10 +468,10 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             }
                                             let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
 
-                                            const durationPrice = getDurationBasedPrice({ ...values, ...(field.fieldName === 'pricingCondition' ? { pricingCondition: value } : field.fieldName === 'pricingMethod' ? { pricingMethod: value } : { unit: value }), materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst)
+                                            const { estimateJobDuration, durationPrice } = getDurationBasedPrice({ ...values, ...(field.fieldName === 'pricingCondition' ? { pricingCondition: value } : field.fieldName === 'pricingMethod' ? { pricingMethod: value } : { unit: value }), materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst)
                                             const result = autoCalculateSpecificFields(
-                                              { [priceFieldName]: durationPrice || priceValue?.mrp || 0, [field.fieldName]: value },
-                                              values,
+                                              { [priceFieldName]: durationPrice || priceValue?.mrp || 0, [field.fieldName]: value, estimateJobDuration: estimateJobDuration },
+                                              { ...values, estimateJobDuration: estimateJobDuration },
                                               initialData.fields
                                             );
 
@@ -521,11 +521,11 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             });
                                             if (!isBulkedit && name === 'estimateJobDuration') {
                                               let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
-                                              const durationPrice = getDurationBasedPrice({ ...values, estimateJobDuration: value, materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst)
-                                              if (durationPrice) {
+                                              const { estimateJobDuration, durationPrice } = getDurationBasedPrice({ ...values, estimateJobDuration: value, materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst, 'estimateJobDuration')
+                                              if (durationPrice || estimateJobDuration) {
                                                 const result = autoCalculateSpecificFields(
-                                                  { [priceFieldName]: durationPrice },
-                                                  { ...values, estimateJobDuration: value },
+                                                  { ...(durationPrice ? { [priceFieldName]: durationPrice } : {}), estimateJobDuration: estimateJobDuration },
+                                                  { ...values, estimateJobDuration: estimateJobDuration },
                                                   initialData.fields
                                                 );
                                                 if (Object.keys(result).length >= 1) {
