@@ -185,39 +185,35 @@ const AssignProductDialog = ({
       });
     }
 
-    if (reference === 'purchaseOrder') {
-      if (!user?.user?.brandPolicy?.purchaseOrderShowSerializedProduct) {
-        updatedDeepFilters.push({ field: 'serializedProduct', term: 'No' });
-      }
-    } else {
-      if (serialized != null) {
-        const serializedProductFilter = updatedDeepFilters?.find((e) => e.field === 'serializedProduct');
-        updatedDeepFilters = updatedDeepFilters?.filter((e) => e.field !== 'serializedProduct');
-        if (serializedProductFilter) {
-          if (serialized && serializedProductFilter?.term?.toLowerCase() !== 'yes') {
-            updatedDeepFilters.push({
-              field: 'serializedProduct',
-              term: ``
-            });
-          } else if (!serialized && serializedProductFilter?.term?.toLowerCase() !== 'no') {
-            updatedDeepFilters.push({
-              field: 'serializedProduct',
-              term: ``
-            });
-          } else {
-            updatedDeepFilters.push({
-              field: 'serializedProduct',
-              term: `${serialized === true ? 'Yes' : 'No'}`
-            });
-          }
+
+    if (serialized != null) {
+      const serializedProductFilter = updatedDeepFilters?.find((e) => e.field === 'serializedProduct');
+      updatedDeepFilters = updatedDeepFilters?.filter((e) => e.field !== 'serializedProduct');
+      if (serializedProductFilter) {
+        if (serialized && serializedProductFilter?.term?.toLowerCase() !== 'yes') {
+          updatedDeepFilters.push({
+            field: 'serializedProduct',
+            term: ``
+          });
+        } else if (!serialized && serializedProductFilter?.term?.toLowerCase() !== 'no') {
+          updatedDeepFilters.push({
+            field: 'serializedProduct',
+            term: ``
+          });
         } else {
           updatedDeepFilters.push({
             field: 'serializedProduct',
             term: `${serialized === true ? 'Yes' : 'No'}`
           });
         }
+      } else {
+        updatedDeepFilters.push({
+          field: 'serializedProduct',
+          term: `${serialized === true ? 'Yes' : 'No'}`
+        });
       }
     }
+
     if (extraFilterById && extraFilterById?.length) {
       extraFilterById?.forEach((e) => {
         updatedFilterByIds.push(e);

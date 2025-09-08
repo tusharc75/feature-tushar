@@ -148,7 +148,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
     if (Number(data.qty) > Number(row.inventory)) {
       toastConfig.setToastConfig({
         type: 'warning',
-        message: "Qty can't be greater then inventory",
+        message: "Please enter a quantity less than or equal to the available inventory",
         open: true
       });
       return;

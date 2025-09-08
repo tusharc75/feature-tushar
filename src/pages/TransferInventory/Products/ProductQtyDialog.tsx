@@ -46,7 +46,7 @@ const ProductQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSave })
   const validate = (values) => {
     const errors = {};
     if (values?.qty > rowData?.inventory) {
-      errors['qty'] = "Qty can't be greater then inventory";
+      errors['qty'] = "Please enter a quantity less than or equal to the available inventory";
     }
     return errors;
   };
