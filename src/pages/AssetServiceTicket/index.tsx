@@ -46,7 +46,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
 
   useEffect(() => {
     fetchColumns();
-  }, []);
+  }, [isTabMode]);
 
   useEffect(() => {
     if (refresh !== undefined && isTabMode) {
@@ -56,7 +56,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
 
   const fetchColumns = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.assetServiceTickets, permissions?.assetServiceTickets?.isUpdate);
-    let columns = generateColumns(renderedFrom, fieldsDataForRead, routes.assetServiceTicketsDetail.path, true);
+    let columns = generateColumns(renderedFrom, fieldsDataForRead, routes.assetServiceTicketsDetail.path, !isTabMode);
     columns = [...columns, ...getStaticFields(true), ActionsRenderer];
     setColumns(columns);
   };

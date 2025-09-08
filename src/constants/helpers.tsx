@@ -2399,7 +2399,8 @@ export const ACTIVITY_RESOURCE = {
   serializedPackages: 'serializedPackages',
   expenses: 'expenses',
   expenseReport: 'expenseReport',
-  contentPostPlanning: 'contentPostPlanning'
+  contentPostPlanning: 'contentPostPlanning',
+  assetServiceTicket: 'assetServiceTicket'
 };
 
 export const LOG_RESOURCE = {
