@@ -61,6 +61,7 @@ import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import { getMultipleResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
+import AssetServiceTickets from 'src/pages/AssetServiceTicket';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -98,7 +99,7 @@ const SerializedAssetDetailsPage = () => {
   const { tab }: any = parsed;
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [resourcePolicyData, setResourcePolicyData] = useState(null);
-  const [rentalPolicyData, setRentalPolicyData] = useState(null)
+  const [rentalPolicyData, setRentalPolicyData] = useState(null);
   const [deviceTemplate, setDeviceTemplate] = useState(null);
   const [dataPoints, setDataPoints] = useState([]);
   // const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
@@ -111,37 +112,37 @@ const SerializedAssetDetailsPage = () => {
   const extraFields = [
     ...(permissions?.rentalManagement?.isRead
       ? [
-        {
-          fieldData: {
-            _id: '630dc2429ec41869032395b3',
-            fieldName: 'rentalJob',
-            fieldLabel: resources?.rentalManagement?.titleSingular,
-            lookup: true,
-            lookupResource: sidebarResource.rentalManagement,
-            resource: sidebarResource.serializedAsset,
-            type: 'dropDown',
-            sectionName: 'Other Information'
-          },
-          isRead: true
-        }
-      ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869032395b3',
+              fieldName: 'rentalJob',
+              fieldLabel: resources?.rentalManagement?.titleSingular,
+              lookup: true,
+              lookupResource: sidebarResource.rentalManagement,
+              resource: sidebarResource.serializedAsset,
+              type: 'dropDown',
+              sectionName: 'Other Information'
+            },
+            isRead: true
+          }
+        ]
       : []),
     ...(permissions?.repairOrder?.isRead
       ? [
-        {
-          fieldData: {
-            _id: '630dc2429ec41869032395b5',
-            fieldName: 'repairOrder',
-            fieldLabel: resources?.repairOrder?.titleSingular,
-            lookup: true,
-            lookupResource: sidebarResource.repairOrder,
-            resource: sidebarResource.serializedAsset,
-            type: 'dropDown',
-            sectionName: 'Other Information'
-          },
-          isRead: true
-        }
-      ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869032395b5',
+              fieldName: 'repairOrder',
+              fieldLabel: resources?.repairOrder?.titleSingular,
+              lookup: true,
+              lookupResource: sidebarResource.repairOrder,
+              resource: sidebarResource.serializedAsset,
+              type: 'dropDown',
+              sectionName: 'Other Information'
+            },
+            isRead: true
+          }
+        ]
       : [])
   ];
 
@@ -258,7 +259,7 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const fetchPolicy = async () => {
-    const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.rentalManagement},${sidebarResource.serializedAsset}`)
+    const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.rentalManagement},${sidebarResource.serializedAsset}`);
     if (data?.find((e) => e.resource === sidebarResource.rentalManagement)) {
       setRentalPolicyData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
     }
@@ -287,10 +288,7 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const fetchFieldSerializedAssetStatusChangeRequest = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(
-      sidebarResource.serializedAssetStatusChangeRequest,
-      false
-    );
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serializedAssetStatusChangeRequest, false);
     setSerializedAssetStatusChangeRequestFields([...fieldsDataForRead]);
   };
 
@@ -356,7 +354,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -374,7 +372,7 @@ const SerializedAssetDetailsPage = () => {
 
     axiosInstance()
       .post(`${repairOrder.api}/${repairOrderId}/product-package`, { material: rows, autoCreateWorkOrder: true })
-      .then(() => { })
+      .then(() => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -480,15 +478,16 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleSubStatusChange = (dates) => {
-    setIsSubmitting(true)
-    axiosInstance().put(`${rentalManagement.api}/${assetDetails?.rentalJob?.optionValue}/inventory/update-sub-status`,
-      {
+    setIsSubmitting(true);
+    axiosInstance()
+      .put(`${rentalManagement.api}/${assetDetails?.rentalJob?.optionValue}/inventory/update-sub-status`, {
         assets: [assetDetails?._id],
         dates: dates
-      }).then(({ data }) => {
+      })
+      .then(({ data }) => {
         setSubStatusToUpdate({ open: false, status: null });
-        fetchData()
-        setIsSubmitting(false)
+        fetchData();
+        setIsSubmitting(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -496,11 +495,10 @@ const SerializedAssetDetailsPage = () => {
         });
       })
       .catch((error) => {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
-  }
-
+  };
 
   return (
     <Box className="main-container-v1">
@@ -574,16 +572,19 @@ const SerializedAssetDetailsPage = () => {
                         </ThemeButton>
                       </HtmlTooltip>
                     ) : null}
-                    {assetDetails?.status === ASSET_STATUS.inUse && resourcePolicyData?.policy?.inUseSubStatus?.length > 0 && assetDetails?.rentalJob?.optionValue &&
-                      <ThemeButton
-                        onClick={openSubStatus}
-                        endIcon={<ExpandMore />}
-                        mobileTooltip="Change Status"
-                        disabled={updateLoading}
-                        iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
-                      >
-                        {'Change Sub Status'}
-                      </ThemeButton>}
+                    {assetDetails?.status === ASSET_STATUS.inUse &&
+                      resourcePolicyData?.policy?.inUseSubStatus?.length > 0 &&
+                      assetDetails?.rentalJob?.optionValue && (
+                        <ThemeButton
+                          onClick={openSubStatus}
+                          endIcon={<ExpandMore />}
+                          mobileTooltip="Change Status"
+                          disabled={updateLoading}
+                          iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
+                        >
+                          {'Change Sub Status'}
+                        </ThemeButton>
+                      )}
                     <Menu
                       anchorEl={subStatusanchorEl}
                       keepMounted
@@ -602,9 +603,9 @@ const SerializedAssetDetailsPage = () => {
                             disabled={o === assetDetails?.subStatus}
                             onClick={() => {
                               if (rentalPolicyData?.policy?.subStatusDateWiseCapture) {
-                                setSubStatusToUpdate({ open: true, status: o })
+                                setSubStatusToUpdate({ open: true, status: o });
                               } else {
-                                handleSubStatusChange([{ startDate: null, endDate: null, subStatus: o }])
+                                handleSubStatusChange([{ startDate: null, endDate: null, subStatus: o }]);
                               }
                               closeSubStatus();
                             }}
@@ -712,11 +713,12 @@ const SerializedAssetDetailsPage = () => {
             resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
           <CustomTab value={tabIndexValue(resourcePolicyData, 6)}>Status History</CustomTab>
           <CustomTab value={tabIndexValue(resourcePolicyData, 7)}>Service History</CustomTab>
+          {permissions?.assetServiceTickets?.isRead && <CustomTab value={tabIndexValue(resourcePolicyData, 8)}>Service Tickets</CustomTab>}
           {user?.user?.brandPolicy?.serializedAssetCertification && (
-            <CustomTab value={tabIndexValue(resourcePolicyData, 8)}>Certification History</CustomTab>
+            <CustomTab value={tabIndexValue(resourcePolicyData, 9)}>Certification History</CustomTab>
           )}
           {user?.user?.brandPolicy?.serializedAssetDepreciation && (
-            <CustomTab value={tabIndexValue(resourcePolicyData, 9)}>Depreciation History</CustomTab>
+            <CustomTab value={tabIndexValue(resourcePolicyData, 10)}>Depreciation History</CustomTab>
           )}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -739,10 +741,10 @@ const SerializedAssetDetailsPage = () => {
                   fields={
                     assetDetails?.status && (assetDetails?.status === ASSET_STATUS.scrap || assetDetails?.status === ASSET_STATUS.lost)
                       ? [
-                        ...fields,
-                        ...customField?.filter((ele) => !fields?.map((e) => e?.fieldData?.fieldName)?.includes(ele?.fieldData?.fieldName)),
-                        ...extraFields
-                      ]
+                          ...fields,
+                          ...customField?.filter((ele) => !fields?.map((e) => e?.fieldData?.fieldName)?.includes(ele?.fieldData?.fieldName)),
+                          ...extraFields
+                        ]
                       : [...fields, ...extraFields]
                   }
                   resource={sidebarResource?.serializedAsset}
@@ -790,6 +792,9 @@ const SerializedAssetDetailsPage = () => {
           <ServiceHistory id={id} refresh={refreshAssetHistory} />
         </TabPanel>
         <TabPanel value={tabValue} index={tabIndexValue(resourcePolicyData, 8)}>
+          <AssetServiceTickets assetId={id} refresh={refreshAssetHistory} isTabMode={true} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={tabIndexValue(resourcePolicyData, 9)}>
           <CertificationHistory
             id={id}
             canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate}
@@ -798,7 +803,7 @@ const SerializedAssetDetailsPage = () => {
             fetchAssetData={fetchData}
           />
         </TabPanel>
-        <TabPanel value={tabValue} index={tabIndexValue(resourcePolicyData, 9)}>
+        <TabPanel value={tabValue} index={tabIndexValue(resourcePolicyData, 10)}>
           <DepreciationHistory id={id} />
         </TabPanel>
       </Box>
@@ -830,7 +835,7 @@ const SerializedAssetDetailsPage = () => {
       {subStatusToUpdate.open && (
         <SubStatusDatesDialog
           handleClose={() => {
-            setSubStatusToUpdate({ open: false, status: null })
+            setSubStatusToUpdate({ open: false, status: null });
           }}
           options={resourcePolicyData?.policy?.inUseSubStatus}
           selectedOption={subStatusToUpdate.status}
