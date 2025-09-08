@@ -369,6 +369,18 @@ const LoadingTicket = ({
             ) : (
               <NoDataCell />
             )
+        },
+        {
+          accessor: 'serializedPackageStatus',
+          Header: `${resources?.serializedPackages?.titleSingular} Status`,
+          cell: ({ row }) =>
+            row?.original?.serializedPackageStatus ? (
+              <div className="flex items-center gap-2">
+                <h5 className="text-truncate" title={row?.original?.serializedPackageStatus}>{row?.original?.serializedPackageStatus}</h5>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
         }] : []),
       {
         accessor: 'loadingTicket',
@@ -869,6 +881,7 @@ const LoadingTicket = ({
           }
 
           parent.serializedPackageId = parent?.serializedPackage?.optionValue
+          parent.serializedPackageStatus = parent?.serializedPackage?.status;
           parent.serializedPackage = parent?.serializedPackage?.optionLabel;
         });
       }
@@ -970,6 +983,7 @@ const LoadingTicket = ({
             _subRow.rentalAssetStatus = '';
           }
           _subRow.serializedPackageId = _subRow?.serializedPackage?.optionValue
+          _subRow.serializedPackageStatus = _subRow?.serializedPackage?.status;
           _subRow.serializedPackage = _subRow?.serializedPackage?.optionLabel;
           _subRow.subRows = generateNestedData(
             _subRow,
@@ -1016,6 +1030,7 @@ const LoadingTicket = ({
       obj.currentOwner = _subRow?.inventory?.currentOwner;
       obj.currentLocation = _subRow?.inventory?.currentLocation?.optionValue;
       obj.serializedPackageId = _subRow?.inventory?.serializedPackage?.optionValue;
+      obj.serializedPackageStatus = _subRow?.inventory?.serializedPackage?.status;
       obj.serializedPackage = _subRow?.inventory?.serializedPackage?.optionLabel;
       const loading = loadingTicketAssets?.find((e) => e?.asset === obj?._id && e?.uniqueId === obj?.uniqueId);
       if (loading) {
@@ -1191,6 +1206,7 @@ const LoadingTicket = ({
       element.index = parentIndex ? `${parentIndex}.${subRowsCount + index + 1}` : `${subRowsCount + index + 1}`;
       element.hideSelection = [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(element.rentalAssetStatus);
       element.serializedPackageId = element?.serializedPackage?.optionValue
+      element.serializedPackageStatus = element?.serializedPackage?.status;
       element.serializedPackage = element?.serializedPackage?.optionLabel;
     });
 
