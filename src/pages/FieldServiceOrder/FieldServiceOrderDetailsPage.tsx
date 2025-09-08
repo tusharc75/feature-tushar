@@ -41,6 +41,7 @@ import Technicians from './Technicians';
 import Services from './Services';
 import FieldServiceOrderView from './RoadMapViews';
 import OnField from 'src/pages/FieldServiceOrder/OnField';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ServiceOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -178,8 +179,8 @@ const ServiceOrderDetailsPage = () => {
       if (isOffline) {
         data = await findOne(objectStore.resource, sidebarResource.fieldServiceOrder);
       } else {
-        const response = await axiosInstance().get(`/field/field-policy?resource=${sidebarResource.fieldServiceOrder}`);
-        data = response?.data?.data?.field;
+        const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.fieldServiceOrder, permissions.fieldServiceOrder?.isUpdate);
+        data = fieldsDataForRead;
       }
       data?.some((o) => {
         if (o?.fieldData?.fieldName === 'status') {
