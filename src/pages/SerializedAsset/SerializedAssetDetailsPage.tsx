@@ -61,7 +61,7 @@ import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import { getMultipleResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
-import AssetServiceTicketsTab from 'src/pages/SerializedAsset/ServiceTicket';
+import AssetServiceTickets from 'src/pages/AssetServiceTicket';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -792,7 +792,7 @@ const SerializedAssetDetailsPage = () => {
           <ServiceHistory id={id} refresh={refreshAssetHistory} />
         </TabPanel>
         <TabPanel value={tabValue} index={tabIndexValue(resourcePolicyData, 8)}>
-          <AssetServiceTicketsTab assetId={id} refresh={refreshAssetHistory} />
+          <AssetServiceTickets assetId={id} refresh={refreshAssetHistory} isTabMode={true} />
         </TabPanel>
         <TabPanel value={tabValue} index={tabIndexValue(resourcePolicyData, 9)}>
           <CertificationHistory
