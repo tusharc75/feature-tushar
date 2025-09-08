@@ -1,4 +1,5 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
+import { Add } from '@mui/icons-material';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
@@ -21,10 +22,11 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ManageAssetServiceTicket from 'src/pages/AssetServiceTicket/ManageAssetServiceTicket';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 let assetServiceTicketsTimeout;
 
-const AssetServiceTickets = () => {
+const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
   const renderedFrom = camelCase(sidebarResource?.assetServiceTickets);
 
   const toastConfig = useContext(CustomToastContext);
@@ -37,18 +39,24 @@ const AssetServiceTickets = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageTicketsDialog, setShowManageTicketsDialog] = useState({ open: false, isClone: false, idToClone: null });
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
 
   const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchColumns();
-  }, []);
+  }, [isTabMode]);
+
+  useEffect(() => {
+    if (refresh !== undefined && isTabMode) {
+      fetchData();
+    }
+  }, [refresh]);
 
   const fetchColumns = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.assetServiceTickets, permissions?.assetServiceTickets?.isUpdate);
-    let columns = generateColumns(renderedFrom, fieldsDataForRead, routes.assetServiceTicketsDetail.path, true);
+    let columns = generateColumns(renderedFrom, fieldsDataForRead, routes.assetServiceTicketsDetail.path, !isTabMode);
     columns = [...columns, ...getStaticFields(true), ActionsRenderer];
     setColumns(columns);
   };
@@ -67,7 +75,7 @@ const AssetServiceTickets = () => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, assetId]);
 
   const ActionsRenderer = {
     accessor: 'action',
@@ -116,16 +124,25 @@ const AssetServiceTickets = () => {
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
+    if (isTabMode && assetId) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify([{ field: 'asset', term: assetId }])}`;
+    }
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (filterByIds?.length) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+      if (isTabMode && assetId) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify([...filterByIds, { field: 'asset', term: assetId }])}`;
+      } else {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+      }
     }
+
     if (deepFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
 
-    if (filterByIds?.length || deepFilters?.length) {
+    if (filterByIds?.length || deepFilters?.length || (isTabMode && assetId)) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
 
@@ -218,85 +235,135 @@ const AssetServiceTickets = () => {
     );
   };
 
-  return (
-    <div className="main-container-v1">
-      <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ ...routes.assetServiceTickets, title: resources?.assetServiceTickets?.titlePlural }]} />
-        {/* <ImportExportLinks
-          permissions={permissions.assetServiceTickets}
-          module={resources?.assetServiceTickets?.titlePlural}
-          api={assetServiceTickets.api}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
-          isExportAllOrSomeFeature={true}
-          total={rowCount}
-          recordsToExport={selectedRecords?.length}
-          ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={() => {
-            fetchData();
-          }}
-          additionalParams={getQueryString(true)}
-        /> */}
-      </div>
-      <CustomContainer>
-        <ListingPageHeader
-          searchValue={search}
-          onSearch={handleSearch}
-          isActionButtonVisible={true}
-          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          actionMenuItems={<ActionMenuItems />}
-          addButtonOnclick={() => {
-            setShowManageTicketsDialog({ open: true, isClone: false, idToClone: null });
-          }}
-          isAddButtonVisible={permissions?.assetServiceTickets?.isCreate}
-        />
-        {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 200px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
-            resource={sidebarResource.assetServiceTickets}
-            showFilters={true}
-          />
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-        {showDeleteConfirmBox ? (
-          <ConfirmationDialog
-            open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.assetServiceTickets?.titleSingular?.toLowerCase()} :
-              ${deleteRecord?.ticketId}`
-                : `selected ${resources?.assetServiceTickets?.titlePlural?.toLowerCase()}`
-            } ?`}
-            onClose={() => {
-              setDeleteRecord(null);
-              setShowDeleteConfirmBox(false);
+  const content = (
+    <>
+      {!isTabMode && (
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[{ ...routes.assetServiceTickets, title: resources?.assetServiceTickets?.titlePlural }]} />
+          {/* <ImportExportLinks
+            permissions={permissions.assetServiceTickets}
+            module={resources?.assetServiceTickets?.titlePlural}
+            api={assetServiceTickets.api}
+            afterImportCompleted={() => {
+              fetchData();
             }}
-            onOk={handleDeleteTickets}
-            okBtnLoading={deleteLoading}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords?.length}
+            ids={selectedRecords?.map((obj) => obj._id)}
+            onExportToExcelSuccess={() => {
+              fetchData();
+            }}
+            additionalParams={getQueryString(true)}
+          /> */}
+        </div>
+      )}
+      {!isTabMode ? (
+        <CustomContainer>
+          <ListingPageHeader
+            searchValue={search}
+            onSearch={handleSearch}
+            isActionButtonVisible={true}
+            actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+            actionMenuItems={<ActionMenuItems />}
+            addButtonOnclick={() => {
+              setShowManageTicketsDialog({ open: true, isClone: false, idToClone: null });
+            }}
+            isAddButtonVisible={permissions?.assetServiceTickets?.isCreate}
           />
-        ) : null}
-      </CustomContainer>
+          {columns ? (
+            <CustomReactTable
+              height={'calc(100vh - 200px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchData}
+              showOnlyShowFilteredRecordSwitch={true}
+              resource={sidebarResource.assetServiceTickets}
+              showFilters={true}
+            />
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
+        </CustomContainer>
+      ) : (
+        <Box>
+          <Box className="mb-4 flex items-center justify-between">
+            <Box className="flex items-center gap-4">
+              {permissions?.assetServiceTickets?.isCreate && (
+                <ThemeButton
+                  startIcon={<Add />}
+                  onClick={() => {
+                    setShowManageTicketsDialog({ open: true, isClone: false, idToClone: null });
+                  }}
+                >
+                  Add
+                </ThemeButton>
+              )}
+            </Box>
+          </Box>
+
+          {columns ? (
+            <CustomReactTable
+              height={'calc(100vh - 400px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchData}
+              showOnlyShowFilteredRecordSwitch={false}
+              resource={sidebarResource.assetServiceTickets}
+              showFilters={true}
+            />
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
+        </Box>
+      )}
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.assetServiceTickets?.titleSingular?.toLowerCase()} : ${deleteRecord?.ticketId}`
+              : `selected ${resources?.assetServiceTickets?.titlePlural?.toLowerCase()}`
+          } ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          onOk={handleDeleteTickets}
+          okBtnLoading={deleteLoading}
+        />
+      )}
       {showManageTicketsDialog.open && (
         <ManageAssetServiceTicket
           isClone={showManageTicketsDialog.isClone}
           assetTicketId={showManageTicketsDialog.idToClone}
+          isRedirectToDetailPage={!isTabMode}
           onClose={() => setShowManageTicketsDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={(data) => {
-            history.push(`${routes.assetServiceTicketsDetail.path}/${data._id}`);
+            if (isTabMode) {
+              fetchData();
+            } else {
+              history.push(`${routes.assetServiceTicketsDetail.path}/${data._id}`);
+            }
             setShowManageTicketsDialog({ open: false, isClone: false, idToClone: null });
           }}
+          initialAssetId={assetId}
         />
       )}
+    </>
+  );
+
+  return isTabMode ? content : (
+    <div className="main-container-v1">
+      {content}
     </div>
   );
 };
