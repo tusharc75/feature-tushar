@@ -377,7 +377,7 @@ const Products = ({
     if (Number(row.qty) > Number(row.inventory)) {
       toastConfig.setToastConfig({
         type: 'error',
-        message: "Qty can't be greater then inventory",
+        message: "Please enter a quantity less than or equal to the available inventory",
         open: true
       });
       fetchData();
@@ -424,7 +424,7 @@ const Products = ({
     if (Number(data.qty) > Number(data.inventory)) {
       toastConfig.setToastConfig({
         type: 'error',
-        message: "Qty can't be greater then inventory",
+        message: "Please enter a quantity less than or equal to the available inventory",
         open: true
       });
       fetchData();
