@@ -728,7 +728,7 @@ const Consumables = ({
         >
           {`Add Products/Consumables`}
         </MenuItem>
-        {!isOffline && resourcePolicy?.showRentalAddMaterial && fieldTicketData?.rentalJob?.optionValue && (
+        {!isOffline && resourcePolicy?.showRentalAddMaterial && fieldTicketData?.rentalJob?.optionValue && fieldTicketData?.isConsumablesInRentalJob && (
           <>
             <MenuItem
               onClick={() => {
