@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isEmpty, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -540,7 +540,7 @@ const Material = ({
   const rightSideContents = () => {
     return (
       <>
-        {!DOAData && currentStep === 'DOA' && (
+        {(isEmpty(DOAData) || DOAData?.status === DOA_STATUS.rejected) && currentStep === 'DOA' && (
           <RequestButton
             resource={sidebarResource.purchaseRequisition}
             id={purchaseRequisitionData._id}

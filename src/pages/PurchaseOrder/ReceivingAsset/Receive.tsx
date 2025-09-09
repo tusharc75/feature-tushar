@@ -150,7 +150,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
         if (tempProduct && !d.warehouse) {
           errors.warehouse = `${resources?.warehouse?.titleSingular} is required`;
         }
-        if (user?.user?.brandPolicy?.storageLocation) {
+        if (user?.user?.brandPolicy?.storageLocation && d?.inventoryQuantity > 0) {
           if (tempProduct && !d.storageLocation) {
             errors.storageLocation = 'Storage Location is required';
           }
@@ -370,7 +370,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                                             label="Storage Location"
                                             error={validate([data]).storageLocation}
                                             helperText={validate([data]).storageLocation ? 'Storage Location is required' : ''}
-                                            required
+                                            required={data?.inventoryQuantity > 0}
                                           />
                                         )}
                                       />
