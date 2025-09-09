@@ -468,10 +468,8 @@ const AddSerializedAsset = ({
         addSerializedAsset(selectedRecords);
         return;
       }
-    } else if (referenceType === 'ReplaceAsset' || referenceType === 'RentalJobSwapAsset') {
-      if (
-        user?.user?.brandPolicy?.serializedAssetCertification &&
-        selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+    } else if (referenceType === 'ReplaceAsset' || referenceType === 'RentalJobReplaceAsset') {
+      if (user?.user?.brandPolicy?.serializedAssetCertification && selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
       ) {
         setCertificateExpireAlert({
           open: true,
@@ -661,7 +659,7 @@ const AddSerializedAsset = ({
               </div>
             </div>
 
-            {['Rental Job', 'RentalJobReplaceAsset', 'RentalJobSwapAsset'].includes(referenceType) && (
+            {['Rental Job', 'RentalJobReplaceAsset'].includes(referenceType) && (
               <Box pt={1}>
                 <CustomTabs value={tabValue} onChange={handleMainTabChange}>
                   <CustomTab value={0} label={resources?.serializedAsset?.titlePlural} />

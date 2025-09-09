@@ -154,7 +154,7 @@ const ReceivingTicket = ({
   const [repairJobCount, setRepairJobCount] = useState(0);
   const [repairOrderCount, setRepairOrderCount] = useState(0);
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
-  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [], type: '' });
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
   const [subStatusToUpdate, setSubStatusToUpdate] = useState({ open: false, status: null });
   const [showReplaceAssetWarnings, setShowReplaceAssetWarnings] = useState({
     replaceAssetReasonDialog: false,
@@ -485,12 +485,12 @@ const ReceivingTicket = ({
             errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
           }
         }
-      } else if (action === rentalManagementActions.swapInUseAssets) {
+      } else if (action === rentalManagementActions.replaceInUseAssets) {
         if (e.type !== MATERIAL_TYPE.serializedAsset) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlySwapAssets });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyReplacedAssets });
         } else if ([ASSET_STATUS.inUse].includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(e.rentalAssetStatus)) {
         } else {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlySwapInUseAssets });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyReplacedInUseAssets });
         }
       } else if (action === rentalManagementActions.updateStartDateEndDate) {
         if (!e.isAllowedStartDate && !e.isAllowedEndDate) {
@@ -2624,7 +2624,7 @@ const ReceivingTicket = ({
         directSendToSupplier: directSendToSupplier
       })
       .then(({ data }) => {
-        setAddSerializedAssetDialog({ open: false, products: [], type: '' });
+        setAddSerializedAssetDialog({ open: false, products: [] });
         setShowReplaceAssetWarnings({ replaceAssetReason: '', replaceAssetReasonDialog: false, data: null, confirmationAddNewLineItems: '', confirmationAddNewLineItemsDialog: false, confirmationDirectSendToSupplierDialog: false });
         setIsSubmitting(false);
         setOkBtnLoading(false)
@@ -3369,9 +3369,9 @@ const ReceivingTicket = ({
             setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: true, data: rows }))
           }}
           handleSerializedAssetClose={() => {
-            setAddSerializedAssetDialog({ open: false, products: [], type: '' });
+            setAddSerializedAssetDialog({ open: false, products: [] });
           }}
-          referenceType={addSerializedAssetDialog.type}
+          referenceType={'RentalJobReplaceAsset'}
           referenceData={{
             _id: rentalManagementData?._id,
             warehouse: rentalManagementData?.warehouse?.optionValue
@@ -3379,6 +3379,7 @@ const ReceivingTicket = ({
           isAdding={isSubmitting}
           selectedProducts={addSerializedAssetDialog.products}
           filterByPlant={rentalManagementData?.warehouse}
+          replaceAssets={true}
         />
       )}
       {openDateDialog.open && (
@@ -3791,9 +3792,9 @@ const ActionButtonMenuItems = ({
         ((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
           (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
           <MenuItem
-            id={'swap-in-use-assets-menu-item'}
+            id={'replace-in-use-assets-menu-item'}
             onClick={() => {
-              if (validateAction(rentalManagementActions.swapInUseAssets)) {
+              if (validateAction(rentalManagementActions.replaceInUseAssets)) {
                 const products = [];
                 getFilterSelectedRecords()?.forEach((element) => {
                   const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
@@ -3808,7 +3809,7 @@ const ActionButtonMenuItems = ({
                     });
                   }
                 });
-                setAddSerializedAssetDialog({ open: true, products: products, type: 'RentalJobSwapAsset' });
+                setAddSerializedAssetDialog({ open: true, products: products });
               }
             }}
           >
