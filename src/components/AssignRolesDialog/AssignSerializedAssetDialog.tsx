@@ -1,16 +1,21 @@
-import { Box, Dialog } from '@mui/material';
+import { Box, Dialog, TextField, Autocomplete } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import {
   CustomDialogTransition,
   gridLoadingTimeout,
   prepareDataForGrid,
   serializedAsset,
-  sidebarResource
+  sidebarResource,
+  transferAsset,
+  ASSET_STATUS
 } from 'src/constants/helpers';
+import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
+import ManageTransferAsset from 'src/pages/TransferAssets/ManageTransferAsset';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
@@ -19,8 +24,10 @@ import { ListingPageHeader } from '../PageHeaders';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import axios, { CancelTokenSource } from 'axios';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
+import { getMultipleResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { map, uniq } from 'lodash';
 
-const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleClose, handleSucess, ids, isAssigning, selectedProducts = [], checkCertificateExpiry = false }) => {
+const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleClose, handleSucess, ids, isAssigning, selectedProducts = [], checkCertificateExpiry = false, serializedPackagesData }) => {
   const renderedFrom = `${sidebarResource?.serializedAsset}`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -41,15 +48,40 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [certificateExpireAlert, setCertificateExpireAlert] = useState({ open: false, asset: '' });
 
+  const [warehouseOption, setWarehouseOption] = useState([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(serializedPackagesData?.warehouse?.optionValue);
+
+  const [showTransferAssetDialog, setShowTransferAssetDialog] = useState({ open: false, data: null });
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null, type: '' });
+
+  const [assetPolicyData, setAssetPolicyData] = useState(null);
+
   useEffect(() => {
+    fetchPolicy();
     fetchGridColumns();
+  }, []);
+
+  useEffect(() => {
+    axiosInstance()
+      .get('/sa-formbuilder/lookup?lookupResource=Warehouse')
+      .then(({ data: { data } }) => {
+        setWarehouseOption(data['Warehouse']);
+      });
   }, []);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedProduct]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedProduct, selectedWarehouse, reference]);
+
+  const fetchPolicy = async () => {
+    const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.rentalManagement},${sidebarResource.serializedAsset}`)
+    if (data?.find((e) => e.resource === sidebarResource.serializedAsset)) {
+      setAssetPolicyData(data?.find((e) => e.resource === sidebarResource.serializedAsset));
+    }
+  };
+
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -148,8 +180,10 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
 
     if (reference === 'serializedPackages') {
       deepFilter = `${deepFilter}&serializedPackages=1`;
-      if (referenceData?.warehouse) {
-        deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
+      if (selectedWarehouse == null) {
+        deepFilter = `${deepFilter}`;
+      } else {
+        deepFilter = `${deepFilter}&plant=${selectedWarehouse}`;
       }
     }
 
@@ -185,6 +219,58 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
+
+  const checkAssetPolicy = (status) => {
+    let result: any = null;
+    const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === status);
+    if (statusPolicy) {
+      if (statusPolicy?.products && statusPolicy?.products?.length > 0) {
+        const assetIds = selectedRecords?.filter((r) => statusPolicy?.products?.includes(r?.productId))?.map((a) => a?._id);
+        if (assetIds && assetIds?.length > 0) {
+          result = { statusPolicy: statusPolicy, assetIds: assetIds };
+        }
+      } else {
+        result = { statusPolicy: statusPolicy, assetIds: selectedRecords?.map((a) => a?._id) };
+      }
+    }
+    return result;
+  };
+
+  const checkUniqWarehouse = () => {
+    if (selectedRecords?.length === 0) {
+      return true;
+    } else if (uniq(map(selectedRecords, 'warehouseId')).length === 1) {
+      if (uniq(map(selectedRecords, 'warehouseId'))[0] === null || uniq(map(selectedRecords, 'warehouseId'))[0] === undefined) {
+        return true;
+      }
+      if (uniq(map(selectedRecords, 'warehouseId'))[0] === serializedPackagesData?.warehouse?.optionValue) {
+        return true;
+      }
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const handleAddAssetToTransferAsset = (transferAssetId) => {
+    axiosInstance()
+      .put(`${transferAsset.api}/add-asset-complete-transfer-asset/${transferAssetId}`, {
+        assets: selectedRecords?.map((s) => {
+          return {
+            _id: s._id,
+            currentStatus: s.status
+          };
+        })
+      })
+      .then(({ data }) => {
+        fetchData();
+        setShowTransferAssetDialog({ open: false, data: null });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
 
   useEffect(() => {
     let tempProducts = [];
@@ -274,6 +360,81 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
     );
   };
 
+  const warehouseDropdown = () => {
+    return reference === 'serializedPackages' ? (
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="min-w-[230px] flex-grow md:flex-grow-0">
+          <Autocomplete
+            fullWidth
+            options={warehouseOption}
+            getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+            isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+            value={
+              warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
+                ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
+                : ''
+            }
+            onChange={(e, val) => {
+              setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                margin="dense"
+                size="small"
+                name="plant"
+                placeholder={resources?.warehouse?.titleSingular}
+                label={resources?.warehouse?.titleSingular}
+                variant="outlined"
+                fullWidth
+                className="m-0"
+              />
+            )}
+          />
+        </div>
+        {selectedWarehouse && selectedRecords?.length > 0 && permissions?.transferAsset?.isCreate && !checkUniqWarehouse() && (
+          <ThemeButton
+            buttonType="theme"
+            onClick={() => {
+              if (
+                checkCertificateExpiry &&
+                user?.user?.brandPolicy?.serializedAssetCertification &&
+                selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+              ) {
+                setCertificateExpireAlert({
+                  open: true,
+                  asset: selectedRecords
+                    ?.filter((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+                    ?.map((e) => e.assetNumber)
+                    ?.toString()
+                });
+                return;
+              }
+
+              const assetPolicyResult = checkAssetPolicy(ASSET_STATUS.reserved);
+              if (assetPolicyResult) {
+                setOpenAssetDataDialog({
+                  open: true,
+                  statusPolicy: assetPolicyResult.statusPolicy,
+                  _ids: assetPolicyResult.assetIds,
+                  type: 'transfer'
+                });
+              } else {
+                setShowTransferAssetDialog({ open: true, data: null });
+              }
+            }}
+            disabled={isAssigning}
+            isLoading={isAssigning}
+          >
+            {`Transfer to ${warehouseOption.find(w => w.optionValue === referenceData.warehouse)?.optionLabel || 'selected warehouse'
+              }`}
+            {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
+          </ThemeButton>
+        )}
+      </div>
+    ) : null;
+  };
+
   return (
     <Dialog
       TransitionComponent={CustomDialogTransition}
@@ -297,6 +458,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
           onSearch={handleSearch}
           isActionButtonVisible={false}
           leftSideContents={leftSideContents()}
+          leftSideContentsOfSearchFilter={warehouseDropdown()}
           addButtonProps={{
             iconsEnabled: false,
             disabled: isAssigning || disableSaveButton || selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0),
@@ -360,6 +522,41 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
           header="Certification Information"
           message={`Certification has expired for asset(s) - ${certificateExpireAlert.asset}`}
           onClose={() => setCertificateExpireAlert({ open: false, asset: '' })}
+        />
+      )}
+
+      {openAssetDataDialog.open && (
+        <AssetDetailsChangeDialog
+          ids={openAssetDataDialog._ids}
+          statusPolicy={openAssetDataDialog.statusPolicy || []}
+          setAssetsData={() => { }}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
+          onSuccess={(data) => {
+            setShowTransferAssetDialog({ open: true, data: data });
+            setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' });
+          }}
+        />
+      )}
+
+      {showTransferAssetDialog.open && (
+        <ManageTransferAsset
+          isClone={false}
+          transferAssetId={null}
+          onClose={() => setShowTransferAssetDialog({ open: false, data: null })}
+          onSuccess={(data) => {
+            handleAddAssetToTransferAsset(data?._id);
+          }}
+          referenceId={referenceData?._id}
+          referenceType={reference || ''}
+          assets={selectedRecords?.map((e) => e._id)}
+          referenceData={{
+            transferFromPlant: selectedRecords[0]?.warehouseId,
+            transfertoPlant: referenceData?.warehouse,
+            wellName: referenceData?.wellName,
+            wellNumber: referenceData?.wellNumber,
+            afeNumber: referenceData?.afeNumber,
+            transferType: 'Internal'
+          }}
         />
       )}
     </Dialog>

@@ -535,8 +535,12 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
           }}
           isAssigning={isSubmitting}
           selectedProducts={assignDialog.products}
-          referenceData={{ warehouse: serializedPackagesData?.warehouse?.optionValue }}
+          referenceData={{
+            _id: serializedPackagesData?._id,
+            warehouse: serializedPackagesData?.warehouse?.optionValue
+          }}
           checkCertificateExpiry={true}
+          serializedPackagesData={serializedPackagesData}
         />
       )}
       {assignDialog.open && assignDialog.type === OTHER_MATERIAL_TYPE.serialNumber && (
