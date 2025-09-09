@@ -68,7 +68,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedProduct, selectedWarehouse, reference]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedProduct, selectedWarehouse]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -219,13 +219,20 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
       })
       .then(({ data }) => {
         fetchData();
+
+        const transferAssetData = selectedProducts.map((record) => ({
+          product: record.product,
+          _id: record._id[0],
+          asset: transferAssetId
+        }));
+
+        handleSucess(transferAssetData);
         setShowTransferAssetDialog({ open: false, data: null });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
-
 
   useEffect(() => {
     let tempProducts = [];
