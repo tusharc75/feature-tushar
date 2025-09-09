@@ -44,8 +44,7 @@ const PublicOnboarding = () => {
           step => step.properties?.filledByCandidate === true
         ) || [];
         setEditableSteps(editableStepsArray);
-        console.log("editableStepsArray : ", editableStepsArray)
-
+        
         const initialStepsData = onboardingResponse.onboardingTemplateData.tabs?.[0]?.steps.map(step => {
           const existingStepData = onboardingResponse.stepsData?.find(sd => sd.stepId === step._id);
           return existingStepData || {
@@ -80,6 +79,7 @@ const PublicOnboarding = () => {
   const handleSubmit = async (values) => {
     const currentStepId = onboardingTemplateData.tabs[0].steps[activeStepIndex]._id;
     
+    // Only update data if the current step is editable
     if (editableSteps[activeStepIndex]) {
       setStepsData(prev => {
         const newStepsData = [...prev];
@@ -99,25 +99,23 @@ const PublicOnboarding = () => {
         return newStepsData;
       });
     }
-    if (activeStepIndex === onboardingTemplateData.tabs[0].steps.length - 1) {
+    
+    // Move to next step if available
+    if (activeStepIndex < steps.length - 1) {
+      handleStepChange(activeStepIndex + 1);
+    } else {
+      // Submit the entire form if we're on the last step
       try {
-        const submitData = {
-          ...onboardingData,
-          stepsData: stepsData
-        };
-        
-        await axiosInstance().put(`${routes.onboarding.path}/public/${id}`, submitData);
+        // Add your submission logic here
+        console.log("Final submission data:", stepsData);
         toastConfig.setToastConfig({
           open: true,
-          type: 'success',
-          message: 'Onboarding submitted successfully!'
+          message: "Onboarding form submitted successfully!",
+          type: "success"
         });
       } catch (error) {
         toastConfig.setToastConfig(error);
       }
-    } else {
-      // Move to next step
-      handleStepChange(activeStepIndex + 1);
     }
   };
 
@@ -142,13 +140,14 @@ const PublicOnboarding = () => {
   const fieldsData = activeStepData?.fields || [];
   const isCurrentStepEditable = editableSteps[activeStepIndex];
 
-  const modifiedFieldsData = isCurrentStepEditable
-    ? fieldsData
+  // Create a modified fieldsData with disabled property for non-editable steps
+  const modifiedFieldsData = isCurrentStepEditable 
+    ? fieldsData 
     : fieldsData.map(field => ({
-      ...field,
-      isUneditable: true,
-      disableOnEdit: true
-    }))
+        ...field,
+        isUneditable: true, // This will make the fields read-only in FormTypes
+        disableOnEdit: true // This will make the fields read-only in InputField
+      }));
 
   return (
     <Box className="main-container-v1" sx={{ p: { xs: 2, md: 4 }, minHeight: '100vh' }}>
@@ -219,7 +218,7 @@ const PublicOnboarding = () => {
 
           <Formik
             initialValues={initialValues}
-            validationSchema={yupSchema(fieldsData)}
+            validationSchema={isCurrentStepEditable ? yupSchema(fieldsData) : {}}
             onSubmit={handleSubmit}
             enableReinitialize
           >
@@ -227,17 +226,38 @@ const PublicOnboarding = () => {
               <Form>
                 <Card sx={{ mb: 3 }}>
                   <CardContent>
-                    <InputField
-                      fieldsData={modifiedFieldsData}
-                      values={values}
-                      errors={errors}
-                      touched={touched}
-                      setFieldValue={setFieldValue}
-                      resource={sidebarResource.onboarding}
-                      size="small"
-                      fullWidth
-                      referenceId={id}
-                    />
+                    {!isCurrentStepEditable && (
+                      <Box sx={{ 
+                        backgroundColor: 'grey.100', 
+                        p: 2, 
+                        mb: 2, 
+                        borderRadius: 1,
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}>
+                        <Typography variant="body2" color="text.secondary">
+                          This section is for informational purposes only and cannot be edited.
+                        </Typography>
+                      </Box>
+                    )}
+                    
+                    {/* Add a wrapper div with pointer-events: none for non-editable steps */}
+                    <Box sx={{ 
+                      pointerEvents: isCurrentStepEditable ? 'auto' : 'none',
+                      opacity: isCurrentStepEditable ? 1 : 0.7
+                    }}>
+                      <InputField
+                        fieldsData={modifiedFieldsData}
+                        values={values}
+                        errors={errors}
+                        touched={touched}
+                        setFieldValue={setFieldValue}
+                        resource={sidebarResource.onboarding}
+                        size="small"
+                        fullWidth
+                        referenceId={id}
+                      />
+                    </Box>
                   </CardContent>
                 </Card>
                 
@@ -251,6 +271,7 @@ const PublicOnboarding = () => {
                   <Button
                     variant="contained"
                     onClick={submitForm}
+                    disabled={!isCurrentStepEditable && activeStepIndex !== steps.length - 1}
                   >
                     {activeStepIndex === steps.length - 1 ? 'Submit' : 'Next'}
                   </Button>

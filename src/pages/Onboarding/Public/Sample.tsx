@@ -44,8 +44,7 @@ const PublicOnboarding = () => {
           step => step.properties?.filledByCandidate === true
         ) || [];
         setEditableSteps(editableStepsArray);
-        console.log("editableStepsArray : ", editableStepsArray)
-
+        
         const initialStepsData = onboardingResponse.onboardingTemplateData.tabs?.[0]?.steps.map(step => {
           const existingStepData = onboardingResponse.stepsData?.find(sd => sd.stepId === step._id);
           return existingStepData || {
@@ -80,6 +79,7 @@ const PublicOnboarding = () => {
   const handleSubmit = async (values) => {
     const currentStepId = onboardingTemplateData.tabs[0].steps[activeStepIndex]._id;
     
+    // Only update data if the current step is editable
     if (editableSteps[activeStepIndex]) {
       setStepsData(prev => {
         const newStepsData = [...prev];
@@ -99,25 +99,23 @@ const PublicOnboarding = () => {
         return newStepsData;
       });
     }
-    if (activeStepIndex === onboardingTemplateData.tabs[0].steps.length - 1) {
+    
+    // Move to next step if available
+    if (activeStepIndex < steps.length - 1) {
+      handleStepChange(activeStepIndex + 1);
+    } else {
+      // Submit the entire form if we're on the last step
       try {
-        const submitData = {
-          ...onboardingData,
-          stepsData: stepsData
-        };
-        
-        await axiosInstance().put(`${routes.onboarding.path}/public/${id}`, submitData);
+        // Add your submission logic here
+        console.log("Final submission data:", stepsData);
         toastConfig.setToastConfig({
           open: true,
-          type: 'success',
-          message: 'Onboarding submitted successfully!'
+          message: "Onboarding form submitted successfully!",
+          type: "success"
         });
       } catch (error) {
         toastConfig.setToastConfig(error);
       }
-    } else {
-      // Move to next step
-      handleStepChange(activeStepIndex + 1);
     }
   };
 
@@ -140,15 +138,8 @@ const PublicOnboarding = () => {
   const steps = onboardingTemplateData.tabs?.[0]?.steps || [];
   const activeStepData = steps[activeStepIndex];
   const fieldsData = activeStepData?.fields || [];
+  console.log("fieldsData : ", fieldsData)
   const isCurrentStepEditable = editableSteps[activeStepIndex];
-
-  const modifiedFieldsData = isCurrentStepEditable
-    ? fieldsData
-    : fieldsData.map(field => ({
-      ...field,
-      isUneditable: true,
-      disableOnEdit: true
-    }))
 
   return (
     <Box className="main-container-v1" sx={{ p: { xs: 2, md: 4 }, minHeight: '100vh' }}>
@@ -219,7 +210,7 @@ const PublicOnboarding = () => {
 
           <Formik
             initialValues={initialValues}
-            validationSchema={yupSchema(fieldsData)}
+            validationSchema={isCurrentStepEditable ? yupSchema(fieldsData) : {}}
             onSubmit={handleSubmit}
             enableReinitialize
           >
@@ -227,8 +218,22 @@ const PublicOnboarding = () => {
               <Form>
                 <Card sx={{ mb: 3 }}>
                   <CardContent>
+                    {!isCurrentStepEditable && (
+                      <Box sx={{ 
+                        backgroundColor: 'grey.100', 
+                        p: 2, 
+                        mb: 2, 
+                        borderRadius: 1,
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}>
+                        <Typography variant="body2" color="text.secondary">
+                          This section is for informational purposes only and cannot be edited.
+                        </Typography>
+                      </Box>
+                    )}
                     <InputField
-                      fieldsData={modifiedFieldsData}
+                      fieldsData={fieldsData}
                       values={values}
                       errors={errors}
                       touched={touched}
@@ -237,6 +242,7 @@ const PublicOnboarding = () => {
                       size="small"
                       fullWidth
                       referenceId={id}
+                      disabled={!isCurrentStepEditable}
                     />
                   </CardContent>
                 </Card>
