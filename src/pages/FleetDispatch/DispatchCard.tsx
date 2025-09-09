@@ -158,7 +158,7 @@ const FleetDispatchBox = ({ data, id, index, cardType }) => {
             <Box>
               <Typography className={classes.primaryText}>{data?.rentalJobName}</Typography>
               <Typography className={classes.primaryText}>
-                <strong>{resources?.serializedAsset?.titleSingular}  :</strong>  {data?.asset?.map((e) => e.optionLabel).join(', ')}
+                <strong>{resources?.serializedAsset?.titleSingular}  :</strong>  {data?.asset?.optionLabel}
               </Typography>
               <Typography className={classes.secondaryText}>
                 <strong>Customer :</strong> {data?.customerAccount?.optionLabel}
