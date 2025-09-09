@@ -194,12 +194,12 @@ const ContactDetailsPage = (props) => {
         setContactName([data.firstName, data.lastName].filter((d) => d).join(' '));
         let orgChartData = [];
         let excludeContacts = [];
-        if (data.parentHierarchy && data.parentHierarchy.length > 0) {
+        if (data?.parentHierarchy?.length > 0) {
           data.parentHierarchy.map((d) => {
             excludeContacts.push(d._id);
             orgChartData.push({
               id: d._id,
-              name: [data?.firstName, data?.middleName, data?.lastName].filter((d) => d).join(' '),
+              name: [d?.firstName, d?.middleName, d?.lastName].filter((d) => d).join(' '),
               parentId: d.reportsTo ? d.reportsTo : 0,
               logo: d.contactLogo,
               email: d.email,

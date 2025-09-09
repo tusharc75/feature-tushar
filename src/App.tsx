@@ -315,6 +315,7 @@ import OnboardingDetail from 'src/pages/Onboarding/OnboardingDetail';
 import BrandSupportTicket from './pages/BrandSupportTicket';
 import AssetServiceTickets from 'src/pages/AssetServiceTicket';
 import AssetServiceTicketDetail from 'src/pages/AssetServiceTicket/AssetServiceTicketDetail';
+import PublicOnboarding from 'src/pages/Onboarding/Public/PublicOnboarding';
 
 var notificationInterval: any = null;
 
@@ -1346,6 +1347,9 @@ function App() {
             <PrivateRoute exact path={`${routes.fieldView.path}/:padId/:wellId`}>
               <FieldView />
             </PrivateRoute>
+            <Route exact path={'/public/onboarding/:id'}>
+              <PublicOnboarding />
+            </Route>
             <PrivateRoute exact path={`${routes.onboarding.path}`}>
               <Onboarding />
             </PrivateRoute>
