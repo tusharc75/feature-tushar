@@ -55,48 +55,6 @@ export const getPricingConditions = (resource: any, referenceData: any, material
   }
 };
 
-export const getJobDuration = (row, minimumDuration, fieldName = '') => {
-  let jobDuration = 1
-
-  if (fieldName === 'estimateJobDuration') {
-    jobDuration = row[fieldName]
-  } else {
-    const startDate: any = new Date(row?.estimateStartDate);
-    startDate.toUTCString().slice(0, -4);
-    startDate.setHours(0);
-    startDate.setMinutes(0);
-    startDate.setSeconds(0);
-
-    const endDate: any = new Date(row?.estimateEndDate);
-    endDate.toUTCString().slice(0, -4);
-    endDate.setHours(23);
-    endDate.setMinutes(59);
-    endDate.setSeconds(59);
-    const diffTime = Math.abs(endDate - startDate);
-
-    if (row?.pricingMethod === "Per Day") {
-      var days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      jobDuration = days <= 0 ? 1 : days;
-    }
-    else if (row?.pricingMethod === "Per Week") {
-      var weeks = Math.ceil(diffTime / 604800000)
-      jobDuration = weeks <= 0 ? 1 : weeks;
-    }
-    else if (row?.pricingMethod === "Per Month") {
-      var months;
-      months = (endDate.getFullYear() - startDate.getFullYear()) * 12;
-      months -= startDate.getMonth();
-      months += endDate.getMonth();
-      jobDuration = months <= 0 ? 1 : months;
-    }
-  }
-
-  if (minimumDuration && minimumDuration > jobDuration) {
-    return minimumDuration
-  }
-  return jobDuration
-}
-
 export const getPricingValue = (row: any, priceData: any, currency: any, fields: any[], subStatusFields: any[] = []) => {
   let rateList = [];
   let changeUnit = false;
@@ -156,22 +114,20 @@ export const getDurationBasedPrice = (row: any, pricingList: any[], fieldName = 
   let price = 0
   const priceValue = pricingList?.find(d => row?.materialId === d?.materialId && row?.type === d?.materialType && d.conditionId === row['pricingCondition'] && d.pricingMethod === row['pricingMethod'] && d.unit === row['unit'])
 
-  const estimateJobDuration = getJobDuration(row, priceValue?.minimumDuration, fieldName)
-
   if (priceValue && priceValue?.durationBasedPricing?.length > 0) {
     const durationBasedPricing = orderBy(priceValue?.durationBasedPricing, ['duration'], ['asc'])
     for (let i = 0; i < durationBasedPricing?.length; i++) {
-      if (estimateJobDuration === durationBasedPricing[i].duration) {
+      if (row?.estimateJobDuration === durationBasedPricing[i].duration) {
         return durationBasedPricing[i].price;
       }
-      if (estimateJobDuration < durationBasedPricing[i].duration) {
+      if (row?.estimateJobDuration < durationBasedPricing[i].duration) {
         return price ? price : 0;
       }
       price = durationBasedPricing[i]?.price;
     }
   }
 
-  return { estimateJobDuration, durationPrice: price }
+  return price
 }
 
 export const getTaxList = async (user: any, referenceData: any, fields: any, materialType: any, taxApplicableField = 'billingAddress') => {

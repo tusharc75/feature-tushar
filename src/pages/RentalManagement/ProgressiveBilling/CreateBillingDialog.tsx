@@ -21,7 +21,6 @@ import {
   displayDate,
   dateFormatToSend,
   PACKAGE_TYPE,
-  PRICING_SETUP_TYPE
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -42,7 +41,6 @@ import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 import { getNestedQty } from 'src/pages/RentalManagement/rentalOfflineHelper';
-import { getPricingConditions } from 'src/components/PricingCondition';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
   const uniqueDates = new Set<string>();
@@ -100,7 +98,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const [rentalResourceData, setRentalResourceData] = useState(null);
   const [invoiceResourceData, setInvoiceResourceData] = useState(null);
   const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState(false);
-  const [priceConditionListConst, setPriceConditionListConst] = useState([]);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
@@ -363,11 +360,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     data.material = data?.material?.filter((e) => e[`price_${currency}`] || e[`finalPrice_${currency}`]);
 
-    if (data.material?.length > 0) {
-      const priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, data.material?.map(m => ({ materialId: m?.materialId, qty: m?.qty, type: m?.type })), PRICING_SETUP_TYPE.rent);
-      setPriceConditionListConst(priceData || []);
-    }
-
     if (rentalResourceData?.policy?.hidePackageInInvoice) {
       data.material = data.material?.filter((e) => e.type !== MATERIAL_TYPE.package);
       data.material?.forEach((e) => {
@@ -597,15 +589,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     }
   };
 
-  const setActualJobDuration = (element) => {
-    let calValues = {}
-    const priceValue = priceConditionListConst?.find(p => p?.materialId === element?.product && p?.conditionId === element?.pricingCondition?.optionValue)
-    if (priceValue && priceValue?.minimumDuration && priceValue?.minimumDuration > element?.actualJobDuration) {
-      calValues = autoCalculateSpecificFields({ actualJobDuration: priceValue?.minimumDuration }, { ...element, actualJobDuration: priceValue?.minimumDuration }, materialFields);
-    }
-    return { ...element, ...calValues }
-  }
-
   const handleApplyDate = async () => {
     const records = [...selectedRecords];
     setIsApplingDate(true);
@@ -785,7 +768,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         if (rentalResourceData?.policy?.subStatusDateWiseCapture && assetLogs?.find((e) => e?.uniqueId === element?.uniqueId && e?.inventory === element?.inventory)) {
           getMaterialLogs({ ...element, ...calValues }, assetLogs, rows)
         } else {
-          rows.push(setActualJobDuration({ ...element, ...calValues }));
+          rows.push({ ...element, ...calValues });
         }
         if (extraRows?.length) {
           rows = [...rows, ...extraRows];
