@@ -95,7 +95,8 @@ const CreatePlanningDialog = ({ onClose, handleSucess, selectedRange, productIds
   };
 
   const addRemove = (values, type, index) => {
-    let newDates = [...values];
+    const { dates, ...rest } = values
+    let newDates = [...dates];
     if (type === 'add') {
       newDates.splice(index, 0, {
         startDate: null,
@@ -105,6 +106,7 @@ const CreatePlanningDialog = ({ onClose, handleSucess, selectedRange, productIds
     } else {
       newDates.splice(index, 1);
     }
+    setInitialData(prev => ({ ...prev, values: rest }))
     setDates([...newDates]);
   };
 
@@ -306,7 +308,7 @@ const CreatePlanningDialog = ({ onClose, handleSucess, selectedRange, productIds
                                   <IconButton
                                     size="small"
                                     onClick={() => {
-                                      addRemove(values?.dates, 'remove', index);
+                                      addRemove(values, 'remove', index);
                                     }}
                                     aria-label="Remove"
                                     color={'error'}
@@ -326,7 +328,7 @@ const CreatePlanningDialog = ({ onClose, handleSucess, selectedRange, productIds
                       buttonType="themeBorder"
                       startIcon={<Add />}
                       onClick={() => {
-                        addRemove(values?.dates, 'add', values?.dates?.length);
+                        addRemove(values, 'add', values?.dates?.length);
                       }}
                     >
                       Add Date
