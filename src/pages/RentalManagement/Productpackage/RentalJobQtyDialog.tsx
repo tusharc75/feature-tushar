@@ -420,12 +420,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
-                                          options={
-                                            field.fieldName === 'pricingCondition'
-                                              ? priceConditionList
-                                              : field.fieldName === 'pricingMethod'
-                                                ? priceMethodList
-                                                : field.option
+                                          options={field.fieldName === 'pricingCondition'
+                                            ? priceConditionList : field.fieldName === 'pricingMethod'
+                                              ? priceMethodList : field.option
                                           }
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
@@ -447,23 +444,19 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             }
                                             let priceValue;
                                             if (field.fieldName === 'pricingCondition') {
-                                              priceValue = priceConditionListConst?.find(
-                                                (d) =>
-                                                  d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']
-                                              );
+                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === value
+                                                && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']);
                                             } else if (field.fieldName === 'pricingMethod') {
                                               priceValue = priceConditionListConst?.find(
-                                                (d) =>
-                                                  d.conditionId === values['pricingCondition'] &&
+                                                (d) => d.conditionId === values['pricingCondition'] &&
                                                   d.pricingMethod === value &&
                                                   d.unit === values['unit']
                                               );
                                             } else {
-                                              priceValue = priceConditionListConst?.find(
-                                                (d) =>
-                                                  d.conditionId === values['pricingCondition'] &&
-                                                  d.pricingMethod === values['pricingMethod'] &&
-                                                  d.unit === value
+                                              priceValue = priceConditionListConst?.find((d) =>
+                                                d.conditionId === values['pricingCondition'] &&
+                                                d.pricingMethod === values['pricingMethod'] &&
+                                                d.unit === value
                                               );
                                             }
                                             let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
@@ -476,10 +469,10 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             );
 
                                             if (assetPolicyData?.inUseSubStatus?.length > 0) {
-                                              assetPolicyData?.inUseSubStatus?.forEach(sf => {
-                                                const field = initialData.fields?.find(f => f?.fieldName === `${camelCase(sf)}Price`)
+                                              assetPolicyData?.inUseSubStatus?.forEach(subStatus => {
+                                                const field = initialData.fields?.find(f => f?.fieldName === `${camelCase(subStatus)}Price`)
                                                 if (field) {
-                                                  result[`${field?.fieldName}_${rentalManagementData?.currency?.toLowerCase()}`] = priceValue?.assetSubStatusPrice?.[`${camelCase(sf)}`] || 0
+                                                  result[`${field?.fieldName}_${rentalManagementData?.currency?.toLowerCase()}`] = priceValue?.assetSubStatusPrice?.[`${camelCase(subStatus)}`] || 0
                                                 }
                                               });
                                             }
@@ -521,7 +514,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             });
                                             if (!isBulkedit && name === 'estimateJobDuration') {
                                               let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
-                                              const durationPrice = getDurationBasedPrice({ ...values, estimateJobDuration: value, materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst)
+                                              const durationPrice = getDurationBasedPrice({
+                                                ...values,
+                                                estimateJobDuration: value,
+                                                materialId: rowData.materialId,
+                                                type: rowData?.type
+                                              }, priceConditionListConst)
                                               if (durationPrice) {
                                                 const result = autoCalculateSpecificFields(
                                                   { [priceFieldName]: durationPrice },
