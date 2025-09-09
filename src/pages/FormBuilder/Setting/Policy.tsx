@@ -58,7 +58,6 @@ const Policy = ({ values, setFieldValue, errors, touched, resource, initialValue
         return data;
       } catch (error) {
         toastConfig.setToastConfig(error);
-        throw error;
       }
     },
     [lookupCache, toastConfig]
