@@ -365,7 +365,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
       });
   };
 
-  const handleReplaceAssets = (data, replaceReason = '', replaceWithNewLineItems = false) => {
+  const handleReplaceAssets = (data) => {
     const assets = selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)
     data?.forEach(d => {
       const asset = assets?.find(a => a?._id === d?._id && a?.product === d?.product && !a?.isCounted)
@@ -376,7 +376,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
     });
     setIsSubmitting(true);
     axiosInstance().put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets/replace`,
-      { assets: data, reason: replaceReason, replaceWithNewLineItems })
+      { assets: data })
       .then(() => {
         fetchSerializedPackagesData()
         setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
