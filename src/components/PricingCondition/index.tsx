@@ -101,11 +101,6 @@ export const getPricingValue = (row: any, priceData: any, currency: any, fields:
         Object.assign(row, calValues);
       }
     }
-
-    if (rateList[0]?.minimumDuration && rateList[0]?.minimumDuration > row['estimateJobDuration']) {
-      const calValues = autoCalculateSpecificFields({ estimateJobDuration: rateList[0]?.minimumDuration }, row, fields);
-      Object.assign(row, calValues);
-    }
   }
   return row;
 };
@@ -160,7 +155,6 @@ export const getTaxList = async (user: any, referenceData: any, fields: any, mat
   }
   return data;
 };
-
 
 export const getTaxById = async (taxCode: any) => {
   let data = []
