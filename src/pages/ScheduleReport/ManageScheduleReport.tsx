@@ -713,7 +713,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                             size="small"
                             getOptionLabel={(option) => option.optionLabel}
                             isOptionEqualToValue={(option, value) => option.optionValue === value}
-                            value={sharepointOptions?.find((ops) => ops?.optionValue === values?.sharepointSite) || {}}
+                            value={sharepointOptions?.find((ops) => ops?.optionValue === values?.sharepointSite)}
                             onChange={(_, newVal) => setFieldValue('sharepointSite', newVal?.optionValue || '')}
                             renderInput={(params) => (
                               <TextField
