@@ -20,7 +20,7 @@ import {
   getObjKeysWithValues,
   displayDate,
   dateFormatToSend,
-  PACKAGE_TYPE
+  PACKAGE_TYPE,
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -767,8 +767,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         element.isAppliedBill = true;
         if (rentalResourceData?.policy?.subStatusDateWiseCapture && assetLogs?.find((e) => e?.uniqueId === element?.uniqueId && e?.inventory === element?.inventory)) {
           getMaterialLogs({ ...element, ...calValues }, assetLogs, rows)
-        }
-        else {
+        } else {
           rows.push({ ...element, ...calValues });
         }
         if (extraRows?.length) {
