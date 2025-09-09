@@ -608,6 +608,23 @@ export const resourcePolicy = [
       }
     ]
   },
+  {
+    resource: sidebarResource.fleetDispatch,
+    policy: [
+      {
+        fieldName: 'fleetCategory',
+        fieldLabel: 'Fleet Category',
+        type: 'multiSelect',
+        lookupResource: sidebarResource.productCategory,
+      },
+      {
+        fieldName: 'prsCategory',
+        fieldLabel: 'PRS Category',
+        type: 'multiSelect',
+        lookupResource: sidebarResource.productCategory,
+      },
+    ]
+  },
 ];
 
 export const DATE_VALUE = {

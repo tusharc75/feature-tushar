@@ -36,16 +36,20 @@ const FleetDispatch = () => {
 
   const fetchData = () => {
     axiosInstance()
-      .get(`/fleet-dispatch/available-job-fleet`)
+      .get('/fleet-dispatch/available-fleet').then(({ data: { data } }) => {
+        setFleets(data?.fleetAssets || []);
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+    axiosInstance()
+      .get(`/fleet-dispatch/available-job`)
       .then(({ data: { data } }) => {
-        setFleets(data?.fleets || []);
-        setJobs(data?.jobs || []);
+        setJobs(data?.fleetJobs || []);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
-
   const handleDispatch = (fleet, job) => {
     setDispatchDialogOpen({ open: true, fleet: fleet, job: { ...job, _id: job.jobId } });
   };
