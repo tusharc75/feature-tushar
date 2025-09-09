@@ -62,7 +62,7 @@ const AssignPackageDialog = ({
   }, []);
 
   useEffect(() => {
-    if (permissions?.packageCategory?.isRead) {
+    if (permissions?.packageCategory?.isRead || permissions?.warehouse?.isRead) {
       axiosInstance()
         .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.packageCategory},${sidebarResource.warehouse}`)
         .then(({ data: { data: lookupResource } }) => {
