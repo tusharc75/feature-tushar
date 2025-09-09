@@ -211,7 +211,7 @@ function OpportunityDetailsPage() {
   };
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.warehouse)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.opportunity)
     if (data) {
       const policyFields = data?.policy?.outcomeFields;
       const processSteps = opportunityFields?.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
