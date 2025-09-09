@@ -106,6 +106,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
               ? details?.packageName
               : details?.competencyName)
       );
+
       currency.forEach((_currency) => {
         if (conditionData.materialType === 'competency') {
           if (conditionData['mrp' + '_' + _currency.toLowerCase()] === undefined) conditionData['mrp' + '_' + _currency.toLowerCase()] = 0;
@@ -118,18 +119,18 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
             if (conditionData['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] === undefined)
               conditionData['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] = 0;
             details?.pricingMethod?.map((_pricingMethod) => {
-              const _fieldName = `rent_${camelCase(_pricingMethod.toLowerCase())}_${_currency.toLowerCase()}_${camelCase(_unit.toLowerCase())}`
-              if (conditionData[_fieldName] == undefined) {
-                conditionData[_fieldName] = 0;
+              const _fieldName = `rent_${camelCase(_pricingMethod.toLowerCase())}`
+              const __fieldName = `${_fieldName}_${_currency.toLowerCase()}_${camelCase(_unit.toLowerCase())}`
+              if (conditionData[__fieldName] == undefined) {
+                conditionData[__fieldName] = 0;
               }
 
-              if (conditionData?.minimumPrice?.[_fieldName] == undefined) {
-                if (!conditionData?.minimumPrice) {
-                  conditionData.minimumPrice = {}
+              if (conditionData?.minimumDuration?.[_fieldName] == undefined) {
+                if (!conditionData?.minimumDuration) {
+                  conditionData.minimumDuration = {}
                 }
-                conditionData.minimumPrice[_fieldName] = 0
+                conditionData.minimumDuration[_fieldName] = 0
               }
-
             });
           });
         }
@@ -157,20 +158,21 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
           }
           v.conditionType?.includes('Rent') &&
             v['pricingMethod']?.map((_pricingMethod) => {
-              const _fieldName = `rent_${camelCase(_pricingMethod.toLowerCase())}_${_currency.toLowerCase()}_${camelCase(_unit.toLowerCase())}`
-              updatedData[_fieldName] = v[_fieldName];
-              if (v?.enableMinimumPrice) {
-                if (!updatedData['minimumPrice']) {
-                  updatedData['minimumPrice'] = {}
+              const _fieldName = `rent_${camelCase(_pricingMethod.toLowerCase())}`
+              const __fieldName = `${_fieldName}_${_currency.toLowerCase()}_${camelCase(_unit.toLowerCase())}`
+              updatedData[__fieldName] = v[__fieldName];
+              if (v?.enableMinimumDuration) {
+                if (!updatedData['minimumDuration']) {
+                  updatedData['minimumDuration'] = {}
                 }
-                updatedData['minimumPrice'][_fieldName] = v?.minimumPrice?.[_fieldName]
+                updatedData['minimumDuration'][_fieldName] = v?.minimumDuration?.[_fieldName]
               }
             });
         });
       }
     });
 
-    delete v?.minimumPrice
+    delete v?.minimumDuration
 
     Object.keys(v).forEach((key) => {
       if (!(key.indexOf('_') !== -1 && key !== '_id' && key?.split('_')?.length)) {
@@ -564,28 +566,21 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                           <FormControlLabel
                             control={
                               <Checkbox
-                                checked={values['enableMinimumPrice']}
+                                checked={values['enableMinimumDuration']}
                                 onChange={(e) => {
-                                  setFieldValue('enableMinimumPrice', e?.target?.checked);
+                                  setFieldValue('enableMinimumDuration', e?.target?.checked);
                                   if (!e?.target?.checked) {
-                                    setFieldValue('minimumPrice', {})
+                                    setFieldValue('minimumDuration', {})
                                   }
                                 }}
-                                name="enableMinimumPrice"
+                                name="enableMinimumDuration"
                                 color="primary"
                               />
                             }
-                            label="Enable Minimum Price"
+                            label="Enable Minimum Duration"
                           />
-                          {values['enableMinimumPrice'] && values['pricingMethod']?.length > 0 && values['unit']?.length > 0 && (
-                            <RentPriceBox
-                              conditionData={conditionData}
-                              values={values}
-                              setFieldValue={setFieldValue}
-                              currency={currency}
-                              allowedToEdit={allowedToEdit}
-                              minimumPrice={true}
-                            />
+                          {values['enableMinimumDuration'] && values['pricingMethod']?.length > 0 && (
+                            <RentalMinimumDuration values={values} setFieldValue={setFieldValue} />
                           )}
                         </div>
                         <div className='mt-2 border p-2'>
@@ -1044,7 +1039,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
-                    submitForm();
+                    submitForm()
                   }}
                   onClose={() => {
                     setShowConfirmDialog(false);
@@ -1062,8 +1057,8 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
 
 export default ConditionDialog;
 
-const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedToEdit, touched = null, errors = null, minimumPrice = false, status = '' }) => {
-  const value = minimumPrice ? values?.minimumPrice || {} : status ? values['assetStatusWisePricing']?.find(a => a?.status === status) || {} : values
+const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedToEdit, touched = null, errors = null, status = '' }) => {
+  const value = status ? values['assetStatusWisePricing']?.find(a => a?.status === status) || {} : values
   return (
     <div className={`mt-2 p-2 ${status ? 'border' : ''}`}>
       {status && <div>{status}</div>}
@@ -1111,8 +1106,6 @@ const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedT
                                     }
                                   });
                                   setFieldValue('assetStatusWisePricing', assetStatusWisePricing)
-                                } else if (minimumPrice) {
-                                  setFieldValue(`minimumPrice.${__fieldName}`, parseFloat(e.target.value));
                                 } else {
                                   setFieldValue(__fieldName, parseFloat(e.target.value));
                                 }
@@ -1179,6 +1172,35 @@ const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedT
             ))}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+const RentalMinimumDuration = ({ values, setFieldValue }) => {
+  const value = values?.minimumDuration || {}
+  return (
+    <div className='mt-2 p-2'>
+      {values['pricingMethod'] && values['pricingMethod']?.map((_pricingMethod, i) => {
+        const _fieldName = `rent_${camelCase(_pricingMethod.toLowerCase())}}`
+        return (
+          <div className='flex gap-5 items-center'>
+            <p className='min-w-[100px]'>{startCase(_pricingMethod)}</p>
+            <TextField
+              name={'duration'}
+              variant="outlined"
+              margin="dense"
+              size="small"
+              type="number"
+              fullWidth
+              style={{ maxWidth: '250px' }}
+              value={value[_fieldName]}
+              onChange={(e) => {
+                setFieldValue(`minimumDuration.${_fieldName}`, parseFloat(e.target.value));
+              }}
+            />
+          </div>
+        )
+      })}
     </div>
   )
 }

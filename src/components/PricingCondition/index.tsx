@@ -71,6 +71,7 @@ export const getPricingValue = (row: any, priceData: any, currency: any, fields:
     row[priceFieldName] = rateList[0].mrp;
     row['pricingCondition'] = rateList[0].conditionId;
     row['pricingMethod'] = rateList[0].pricingMethod?.trim();
+
     if (subStatusFields?.length > 0) {
       subStatusFields?.forEach(sf => {
         const field = fields?.find(f => f?.fieldName === `${camelCase(sf)}Price`)
@@ -100,6 +101,11 @@ export const getPricingValue = (row: any, priceData: any, currency: any, fields:
         Object.assign(row, calValues);
       }
     }
+
+    if (rateList[0]?.minimumDuration && rateList[0]?.minimumDuration > row['estimateJobDuration']) {
+      const calValues = autoCalculateSpecificFields({ estimateJobDuration: rateList[0]?.minimumDuration }, row, fields);
+      Object.assign(row, calValues);
+    }
   }
   return row;
 };
@@ -107,6 +113,7 @@ export const getPricingValue = (row: any, priceData: any, currency: any, fields:
 export const getDurationBasedPrice = (row: any, pricingList: any[]) => {
   let price = 0
   const priceValue = pricingList?.find(d => row?.materialId === d?.materialId && row?.type === d?.materialType && d.conditionId === row['pricingCondition'] && d.pricingMethod === row['pricingMethod'] && d.unit === row['unit'])
+
   if (priceValue && priceValue?.durationBasedPricing?.length > 0) {
     const durationBasedPricing = orderBy(priceValue?.durationBasedPricing, ['duration'], ['asc'])
     for (let i = 0; i < durationBasedPricing?.length; i++) {
