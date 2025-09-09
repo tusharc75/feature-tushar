@@ -54,7 +54,7 @@ const CreatePlanningDialog = ({ onClose, handleSucess, selectedRange, productIds
   }
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.serializedAsset);
+    const data = await getResourcePolicy(user, permissions, sidebarResource.planningView);
     setSubStatusOptions(data?.policy?.inUseSubStatus || []);
   };
 
