@@ -375,16 +375,15 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
       }
     });
     setIsSubmitting(true);
-    axiosInstance()
-      .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets/replace`, { assets: data, reason: replaceReason, replaceWithNewLineItems })
+    axiosInstance().put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets/replace`,
+      { assets: data, reason: replaceReason, replaceWithNewLineItems })
       .then(() => {
         fetchSerializedPackagesData()
         setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
         setShowReplaceAssetWarnings({ replaceAssetReasonDialog: false, replaceAssetReason: '', data: null, confirmationAddNewLineItemsDialog: false })
         setIsSubmitting(false);
         fetchData();
-      })
-      .catch((err) => {
+      }).catch((err) => {
         setIsSubmitting(false);
         setToastConfig(err);
       });
@@ -575,7 +574,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
       {showReplaceAssetWarnings.confirmationAddNewLineItemsDialog && (
         <SelectionConfirmationDialog
           open={showReplaceAssetWarnings.confirmationAddNewLineItemsDialog}
-          message={`Would you like to add the replacement assets as a new line item? Click Yes to add it as a new line item, or No to keep it under the same line item.`}
+          message={`Would you like to add the replacement assets as a new line item in ${resources?.rentalManagement?.titleSingular}? Click Yes to add it as a new line item, or No to keep it under the same line item.`}
           onOk={(type) => {
             handleReplaceAssets(showReplaceAssetWarnings.data, showReplaceAssetWarnings.replaceAssetReason, type === 'Yes' ? true : false)
           }}
