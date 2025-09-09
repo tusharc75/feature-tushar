@@ -1028,10 +1028,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                   {'Close'}
                 </ThemeButton>
                 {allowedToEdit && (
-                  <ThemeButton isLoading={loading} buttonType="theme" onClick={() => {
-                    console.log('aaaaa')
-                    submitForm()
-                  }}>
+                  <ThemeButton isLoading={loading} buttonType="theme" onClick={submitForm}>
                     {' '}
                     Save
                   </ThemeButton>
