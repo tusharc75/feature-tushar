@@ -23,7 +23,9 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import axios, { CancelTokenSource } from 'axios';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 
-const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleClose, handleSucess, ids, isAssigning, selectedProducts = [], checkCertificateExpiry = false, showWarehouseFilter = false }) => {
+const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleClose, handleSucess, ids, isAssigning, selectedProducts = [],
+  checkCertificateExpiry = false, showWarehouseFilter = false }) => {
+
   const renderedFrom = `${sidebarResource?.serializedAsset}`;
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -56,13 +58,11 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
   }, []);
 
   const fetchWarehouse = () => {
-    axiosInstance()
-      .get('/sa-formbuilder/lookup?lookupResource=Warehouse')
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.warehouse}`)
       .then(({ data: { data } }) => {
-        setWarehouseOption(data['Warehouse']);
+        setWarehouseOption(data[sidebarResource.warehouse]);
       });
   };
-
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -208,28 +208,19 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
   };
 
   const handleAddAssetToTransferAsset = (transferAssetId) => {
-    axiosInstance()
-      .put(`${transferAsset.api}/add-asset-complete-transfer-asset/${transferAssetId}`, {
-        assets: selectedRecords?.map((s) => {
-          return {
-            _id: s._id,
-            currentStatus: s.status
-          };
-        })
+    axiosInstance().put(`${transferAsset.api}/add-asset-complete-transfer-asset/${transferAssetId}`, {
+      assets: selectedRecords?.map((s) => {
+        return {
+          _id: s._id,
+          currentStatus: s.status
+        };
       })
-      .then(({ data }) => {
-        const transferAssetData = selectedProducts.map((record) => ({
-          product: record.product,
-          _id: record._id[0],
-          asset: transferAssetId
-        }));
-
-        handleSucess(transferAssetData);
-        setShowTransferAssetDialog({ open: false, data: null });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    }).then(({ data }) => {
+      setShowTransferAssetDialog({ open: false, data: null });
+      handleAdd();
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   useEffect(() => {
@@ -249,7 +240,8 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
   }, [selectedRecords]);
 
   const handleAdd = () => {
-    if (checkCertificateExpiry && user?.user?.brandPolicy?.serializedAssetCertification && selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())) {
+    if (checkCertificateExpiry && user?.user?.brandPolicy?.serializedAssetCertification
+      && selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())) {
       setCertificateExpireAlert({
         open: true,
         asset: selectedRecords
@@ -259,7 +251,6 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
       });
       return
     }
-
     if (selectedProducts?.length) {
       const data = [];
       selectedProducts?.forEach((ele) => {
@@ -321,7 +312,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
   };
 
   const warehouseDropdown = () => {
-    return (reference === 'serializedPackages' && showWarehouseFilter) ? (
+    return showWarehouseFilter && permissions?.transferAsset?.isCreate ? (
       <div className="flex flex-wrap items-center gap-2">
         <div className="min-w-[230px] flex-grow md:flex-grow-0">
           <Autocomplete
@@ -335,6 +326,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
                 : ''
             }
             onChange={(e, val) => {
+              dispatch({ type: 'selection', selectedRecords: [] });
               setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
             }}
             renderInput={(params) => (
@@ -352,37 +344,36 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
             )}
           />
         </div>
-        {selectedWarehouse && selectedRecords?.length > 0 && permissions?.transferAsset?.isCreate && selectedWarehouse !== referenceData?.warehouse && (
-          <ThemeButton
-            buttonType="theme"
-            onClick={() => {
-              if (
-                checkCertificateExpiry &&
-                user?.user?.brandPolicy?.serializedAssetCertification &&
-                selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
-              ) {
-                setCertificateExpireAlert({
-                  open: true,
-                  asset: selectedRecords
-                    ?.filter((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
-                    ?.map((e) => e.assetNumber)
-                    ?.toString()
-                });
-                return;
-              }
-              setShowTransferAssetDialog({ open: true, data: null });
-            }}
-            disabled={isAssigning}
-            isLoading={isAssigning}
-          >
-            {`Transfer to ${warehouseOption.find(w => w.optionValue === referenceData.warehouse)?.optionLabel || 'selected warehouse'
-              }`}
-            {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-          </ThemeButton>
-        )}
       </div>
     ) : null;
   };
+
+  const transferAssetButton = () => {
+    return (selectedWarehouse && selectedRecords?.length > 0 && selectedWarehouse !== referenceData?.warehouse) ? (
+      <ThemeButton
+        buttonType="theme"
+        onClick={() => {
+          if (checkCertificateExpiry && user?.user?.brandPolicy?.serializedAssetCertification
+            && selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())) {
+            setCertificateExpireAlert({
+              open: true,
+              asset: selectedRecords
+                ?.filter((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+                ?.map((e) => e.assetNumber)
+                ?.toString()
+            });
+            return
+          }
+          setShowTransferAssetDialog({ open: true, data: null });
+        }}
+        disabled={isAssigning}
+        isLoading={isAssigning}
+      >
+        {`Transfer to ${warehouseOption.find(w => w.optionValue === referenceData.warehouse)?.optionLabel || 'selected warehouse'}`}
+        {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
+      </ThemeButton>
+    ) : null
+  }
 
   return (
     <Dialog
@@ -415,6 +406,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
             text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
             textAddShow: true
           }}
+          rightSideContentsBeforeAction={transferAssetButton()}
           addButtonOnclick={() => {
             if (checkMTRValidation) {
               if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
@@ -426,10 +418,9 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
               handleAdd();
             }
           }}
-          isAddButtonVisible
+          isAddButtonVisible={selectedWarehouse && selectedRecords?.length > 0 && selectedWarehouse !== referenceData?.warehouse ? false : true}
           setQueryString={false}
         />
-
         {products.length > 0 && products.some((s) => s.qty < 0) ? (
           <div className="text-error font-weight-bold">You have selected more assets than required</div>
         ) : null}
