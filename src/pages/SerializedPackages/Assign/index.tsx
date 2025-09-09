@@ -540,7 +540,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
             warehouse: serializedPackagesData?.warehouse?.optionValue
           }}
           checkCertificateExpiry={true}
-          serializedPackagesData={serializedPackagesData}
+          showWarehouseFilter={true}
         />
       )}
       {assignDialog.open && assignDialog.type === OTHER_MATERIAL_TYPE.serialNumber && (
