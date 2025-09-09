@@ -12,7 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { MATERIAL_TYPE, OTHER_MATERIAL_TYPE, SERIALIZED_PACKAGE_STATUS, sidebarResource } from 'src/constants/helpers';
+import { MATERIAL_TYPE, OTHER_MATERIAL_TYPE, rentalManagement, SERIALIZED_PACKAGE_STATUS, sidebarResource } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@mui/icons-material';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -380,14 +380,58 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
       .then(() => {
         fetchSerializedPackagesData()
         setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
-        setShowReplaceAssetWarnings({ replaceAssetReasonDialog: false, replaceAssetReason: '', data: null, confirmationAddNewLineItemsDialog: false })
         setIsSubmitting(false);
         fetchData();
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Assets Replaced Successfully`
+        });
       }).catch((err) => {
         setIsSubmitting(false);
         setToastConfig(err);
       });
   }
+
+  const handleReplaceAssetsInUse = (data, replaceReason = '', replaceWithNewLineItems = false) => {
+    const selectedAssets = selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)
+    const assets: any = []
+    data?.forEach(d => {
+      const asset = selectedAssets?.find(a => a?._id === d?._id && a?.product === d?.product && !a?.isCounted)
+      if (asset) {
+        assets.push({
+          oldAsset: asset?.asset,
+          asset: d?.asset
+        })
+        asset.isCounted = true
+      }
+    });
+
+    setIsSubmitting(true);
+    axiosInstance()
+      .post(`${rentalManagement.api}/replace-inuse-assets`, {
+        assets,
+        rentalJob: serializedPackagesData?.rentalJob,
+        reason: replaceReason,
+        replaceWithNewLineItems: replaceWithNewLineItems
+      })
+      .then(() => {
+        fetchSerializedPackagesData()
+        setShowReplaceAssetWarnings({ replaceAssetReasonDialog: false, replaceAssetReason: '', data: null, confirmationAddNewLineItemsDialog: false })
+        setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
+        setIsSubmitting(false);
+        fetchData();
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Assets Replaced Successfully`
+        });
+      })
+      .catch((err) => {
+        setIsSubmitting(false);
+        setToastConfig(err);
+      });
+  };
 
   const getProducts = (type = MATERIAL_TYPE.serializedAsset, action = '') => {
     const productsMap = new Map();
@@ -580,7 +624,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
           open={showReplaceAssetWarnings.confirmationAddNewLineItemsDialog}
           message={`Would you like to add the replacement assets as a new line item in ${resources?.rentalManagement?.titleSingular}? Click Yes to add it as a new line item, or No to keep it under the same line item.`}
           onOk={(type) => {
-            handleReplaceAssets(showReplaceAssetWarnings.data, showReplaceAssetWarnings.replaceAssetReason, type === 'Yes' ? true : false)
+            handleReplaceAssetsInUse(showReplaceAssetWarnings.data, showReplaceAssetWarnings.replaceAssetReason, type === 'Yes' ? true : false)
           }}
           onClose={() => {
             setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: false, replaceAssetReason: '', data: null }))
