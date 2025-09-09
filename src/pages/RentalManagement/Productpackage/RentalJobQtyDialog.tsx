@@ -521,7 +521,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             });
                                             if (!isBulkedit && name === 'estimateJobDuration') {
                                               let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
-                                              const durationPrice = getDurationBasedPrice({ ...values, estimateJobDuration: value, materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst, 'estimateJobDuration')
+                                              const durationPrice = getDurationBasedPrice({ ...values, estimateJobDuration: value, materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst)
                                               if (durationPrice) {
                                                 const result = autoCalculateSpecificFields(
                                                   { [priceFieldName]: durationPrice },

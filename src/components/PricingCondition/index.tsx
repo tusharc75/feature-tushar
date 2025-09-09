@@ -110,7 +110,7 @@ export const getPricingValue = (row: any, priceData: any, currency: any, fields:
   return row;
 };
 
-export const getDurationBasedPrice = (row: any, pricingList: any[], fieldName = '') => {
+export const getDurationBasedPrice = (row: any, pricingList: any[]) => {
   let price = 0
   const priceValue = pricingList?.find(d => row?.materialId === d?.materialId && row?.type === d?.materialType && d.conditionId === row['pricingCondition'] && d.pricingMethod === row['pricingMethod'] && d.unit === row['unit'])
 
