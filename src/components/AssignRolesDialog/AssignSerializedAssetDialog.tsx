@@ -218,8 +218,6 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
         })
       })
       .then(({ data }) => {
-        fetchData();
-
         const transferAssetData = selectedProducts.map((record) => ({
           product: record.product,
           _id: record._id[0],
