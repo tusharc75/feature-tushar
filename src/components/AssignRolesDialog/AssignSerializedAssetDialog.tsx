@@ -23,7 +23,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import axios, { CancelTokenSource } from 'axios';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 
-const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleClose, handleSucess, ids, isAssigning, selectedProducts = [],
+const AssignSerializedAssetDialog = ({ reference, customTitle = null, referenceData = null, handleClose, handleSucess, ids, isAssigning, selectedProducts = [],
   checkCertificateExpiry = false, showWarehouseFilter = false }) => {
 
   const renderedFrom = `${sidebarResource?.serializedAsset}`;
@@ -386,7 +386,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Add ${resources?.serializedAsset?.titlePlural}`}
+        title={`${customTitle || 'Add'} ${resources?.serializedAsset?.titlePlural}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}
@@ -404,7 +404,8 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
             disabled: isAssigning || disableSaveButton || selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0),
             loading: isAssigning,
             text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
-            textAddShow: true
+            textAddShow: true,
+            customTextAdd: customTitle
           }}
           rightSideContentsBeforeAction={transferAssetButton()}
           addButtonOnclick={() => {

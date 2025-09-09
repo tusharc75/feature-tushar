@@ -376,8 +376,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
     });
     setIsSubmitting(true);
     axiosInstance().put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets/replace`,
-      { assets: data })
-      .then(() => {
+      { assets: data }).then(() => {
         fetchSerializedPackagesData()
         setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
         setIsSubmitting(false);
@@ -584,6 +583,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
           }}
           checkCertificateExpiry={true}
           showWarehouseFilter={true}
+          customTitle={assignDialog.replaceAsset ? 'Replace' : 'Assign'}
         />
       )}
       {assignDialog.open && assignDialog.type === OTHER_MATERIAL_TYPE.serialNumber && (
