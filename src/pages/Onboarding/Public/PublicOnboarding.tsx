@@ -35,16 +35,14 @@ const PublicOnboarding = () => {
     try {
       const { data: { data: onboardingResponse } } = await axiosInstance().get(`${routes.onboarding.path}/public/${id}`);
       setOnboardingData(onboardingResponse);
-      console.log("onboardingResponse : ", onboardingResponse)
+
       if (onboardingResponse.onboardingTemplateData) {
         setOnboardingTemplateData(onboardingResponse.onboardingTemplateData);
         
-        // Determine which steps are editable
         const editableStepsArray = onboardingResponse.onboardingTemplateData.tabs?.[0]?.steps.map(
           step => step.properties?.filledByCandidate === true
         ) || [];
         setEditableSteps(editableStepsArray);
-        console.log("editableStepsArray : ", editableStepsArray)
 
         const initialStepsData = onboardingResponse.onboardingTemplateData.tabs?.[0]?.steps.map(step => {
           const existingStepData = onboardingResponse.stepsData?.find(sd => sd.stepId === step._id);
@@ -80,32 +78,30 @@ const PublicOnboarding = () => {
   const handleSubmit = async (values) => {
     const currentStepId = onboardingTemplateData.tabs[0].steps[activeStepIndex]._id;
     
+    let updatedStepsData = [...stepsData];
     if (editableSteps[activeStepIndex]) {
-      setStepsData(prev => {
-        const newStepsData = [...prev];
-        const stepIndex = newStepsData.findIndex(step => step.stepId === currentStepId);
+        const stepIndex = updatedStepsData.findIndex(step => step.stepId === currentStepId);
         
-        if (stepIndex === -1) {
-          newStepsData.push({
+        const newStepData = {
+            ...(stepIndex !== -1 ? updatedStepsData[stepIndex] : {}),
+            ...values,
             stepId: currentStepId,
-            ...values
-          });
+        };
+
+        if (stepIndex === -1) {
+            updatedStepsData.push(newStepData);
         } else {
-          newStepsData[stepIndex] = {
-            ...newStepsData[stepIndex],
-            ...values
-          };
+            updatedStepsData[stepIndex] = newStepData;
         }
-        return newStepsData;
-      });
     }
+    setStepsData(updatedStepsData);
+
     if (activeStepIndex === onboardingTemplateData.tabs[0].steps.length - 1) {
       try {
         const submitData = {
           ...onboardingData,
-          stepsData: stepsData
+          stepsData: updatedStepsData
         };
-        
         await axiosInstance().put(`${routes.onboarding.path}/public/${id}`, submitData);
         toastConfig.setToastConfig({
           open: true,
@@ -116,7 +112,6 @@ const PublicOnboarding = () => {
         toastConfig.setToastConfig(error);
       }
     } else {
-      // Move to next step
       handleStepChange(activeStepIndex + 1);
     }
   };
@@ -252,7 +247,7 @@ const PublicOnboarding = () => {
                     variant="contained"
                     onClick={submitForm}
                   >
-                    {activeStepIndex === steps.length - 1 ? 'Submit' : 'Next'}
+                    {activeStepIndex === steps.length - 1 ? 'Submit' : 'Save & Next'}
                   </Button>
                 </Box>
               </Form>
