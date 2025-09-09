@@ -482,8 +482,8 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
           onSuccess={(data) => {
             handleAddAssetToTransferAsset(data?._id);
           }}
-          referenceId={referenceData._id}
-          referenceType={reference}
+          referenceId={referenceData?._id}
+          referenceType={reference || ''}
           assets={selectedRecords?.map((e) => e._id)}
           referenceData={{
             transferFromPlant: selectedRecords[0]?.warehouseId,
