@@ -8,7 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import DispatchDialog from './DispatchDialog';
+import DispatchDialog from './DispatchReceiveDialog';
 import DispatchList from './DispatchList';
 import MapView from './Map';
 
@@ -36,20 +36,23 @@ const FleetDispatch = () => {
 
   const fetchData = () => {
     axiosInstance()
-      .get('/fleet-dispatch/available-fleet').then(({ data: { data } }) => {
-        setFleets(data?.fleetAssets || []);
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      })
-    axiosInstance()
-      .get(`/fleet-dispatch/available-job`)
+      .get('/fleet-dispatch')
       .then(({ data: { data } }) => {
-        setJobs(data?.fleetJobs || []);
+        setFleets(data || []);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    axiosInstance()
+      .get(`/fleet-dispatch/jobs`)
+      .then(({ data: { data } }) => {
+        setJobs(data || []);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
+
   const handleDispatch = (fleet, job) => {
     setDispatchDialogOpen({ open: true, fleet: fleet, job: { ...job, _id: job.jobId } });
   };
@@ -106,7 +109,12 @@ const FleetDispatch = () => {
                   <DispatchList activity={fleets} cardType="fleet" />
                 </div>
                 <div>
-                  <DispatchList activity={jobs?.map((e) => { return { ...e, jobId: e._id, _id: e?.asset?._id } })} cardType="job" />
+                  <DispatchList
+                    activity={jobs?.map((e) => {
+                      return { ...e, jobId: e?._id?.jobId, _id: e?.asset?.optionValue };
+                    })}
+                    cardType="job"
+                  />
                 </div>
               </ul>
               <DragOverlay dropAnimation={null}>{activeItem && <FleetDispatchBox {...activeItem} />}</DragOverlay>
@@ -126,21 +134,11 @@ const FleetDispatch = () => {
             handleClose={() => {
               setDispatchDialogOpen({ open: false, fleet: null, job: null });
             }}
-            fleet={dispatchDialogOpen.fleet}
-            job={dispatchDialogOpen.job}
-          />
-        )}
-        {dispatchDialogOpen.open && (
-          <DispatchDialog
-            handleSucess={() => {
-              setDispatchDialogOpen({ open: false, fleet: null, job: null });
-              fetchData();
+            referenceData={{
+              rentalJob: dispatchDialogOpen?.job?.jobId,
+              asset: dispatchDialogOpen?.job?.asset?.optionValue,
+              fleet: dispatchDialogOpen?.fleet?._id
             }}
-            handleClose={() => {
-              setDispatchDialogOpen({ open: false, fleet: null, job: null });
-            }}
-            fleet={dispatchDialogOpen.fleet}
-            job={dispatchDialogOpen.job}
           />
         )}
         {showMapView && (
