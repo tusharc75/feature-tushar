@@ -70,7 +70,6 @@ const Invoice = () => {
   const [pdfColumns, setPdfColumns] = useState([]);
   const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<'proforma' | 'invoices' | null>(null);
-  const [hasProformaInPage, setHasProformaInPage] = useState(false);
 
   const types = [
     {
@@ -145,7 +144,8 @@ const Invoice = () => {
               INVOICE_STATUS.cancelled,
               INVOICE_STATUS.acceptedbyDOA,
               INVOICE_STATUS.rejectedbyDOA,
-              INVOICE_STATUS.sentForDoa
+              INVOICE_STATUS.sentForDoa,
+              INVOICE_STATUS.proforma
             ].includes(e.optionValue)
         );
         setStatusOptions(statusOps);
@@ -354,10 +354,6 @@ const Invoice = () => {
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
-        const hasProforma = rows?.some(r => r?.status === INVOICE_STATUS.proforma);
-        if (invoiceTypeFilter === null || hasProforma) {
-          setHasProformaInPage(hasProforma);
-        }
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
@@ -500,7 +496,6 @@ const Invoice = () => {
             <LeftSideContents
               accountDetails={accountDetails}
               setAccountDetails={setAccountDetails}
-              hasProformaInPage={hasProformaInPage}
               invoiceTypeFilter={invoiceTypeFilter}
               handleInvoiceTypeChange={handleInvoiceTypeChange}
               resources={resources}
@@ -579,7 +574,6 @@ export default Invoice;
 const LeftSideContents = ({ 
   accountDetails, 
   setAccountDetails, 
-  hasProformaInPage, 
   invoiceTypeFilter, 
   handleInvoiceTypeChange,
   resources 
@@ -606,24 +600,22 @@ const LeftSideContents = ({
         />
       ) : null}
 
-      {hasProformaInPage ? (
-        <Autocomplete
-          className="ml-3 min-w-[200px]"
-          size="small"
-          options={invoiceTypeOptions}
-          value={
-            invoiceTypeOptions.find((opt) => opt.value === (invoiceTypeFilter ?? '')) || null
-          }
-          onChange={(event, newValue) => {
-            handleInvoiceTypeChange(newValue?.value || null);
-          }}
-          getOptionLabel={(option) => option.label || ''}
-          renderInput={(params) => (
-            <TextField {...params} label="Invoice Type" variant="outlined" />
-          )}
-          isOptionEqualToValue={(option, value) => option.value === value.value}
-        />
-      ) : null}
+      <Autocomplete
+        className="ml-3 min-w-[200px]"
+        size="small"
+        options={invoiceTypeOptions}
+        value={
+          invoiceTypeOptions.find((opt) => opt.value === (invoiceTypeFilter ?? '')) || null
+        }
+        onChange={(event, newValue) => {
+          handleInvoiceTypeChange(newValue?.value || null);
+        }}
+        getOptionLabel={(option) => option.label || ''}
+        renderInput={(params) => (
+          <TextField {...params} label="Invoice Type" variant="outlined" />
+        )}
+        isOptionEqualToValue={(option, value) => option.value === value.value}
+      />
     </>
   );
 };
