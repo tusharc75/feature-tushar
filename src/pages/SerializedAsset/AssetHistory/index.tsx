@@ -130,11 +130,6 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
     //   title: resources?.fieldTicket?.titlePlural,
     // },
     // {
-    //   key: INVENTORY_HISTORY_TYPE.job,
-    //   resource: sidebarResource.job,
-    //   title: resources?.job?.titlePlural,
-    // },
-    // {
     //   key: INVENTORY_HISTORY_TYPE.planning,
     //   resource: sidebarResource.planning,
     //   title: resources?.planning?.titlePlural,
@@ -265,16 +260,6 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
                     className="link"
                     title={row.original.reference}
                     to={`${routes.transferInventoryDetail.path}/${row.original.referenceId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {row.original.reference}
-                  </Link>
-                ) : row.original?.type === 'Job' ? (
-                  <Link
-                    className="link"
-                    title={row.original.reference}
-                    to={`${routes.jobDetail.path}/${row.original.referenceId}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
