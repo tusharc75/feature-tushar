@@ -147,11 +147,16 @@ const ProductDetailsPage = () => {
         );
         setCustomizedRoutes([{ ...routes.product, title: resources?.product?.titlePlural }, { title: `${data.productData.productName}` }]);
         if (data?.productData?.entity && data?.productData?.entity !== undefined) {
-          data.productData.entity = user.entity
-            ?.filter((d) => data?.productData?.entity?.some((e) => d._id === e))
-            ?.map((d) => {
-              return { optionValue: d._id, optionLabel: d.entityName };
-            });
+          const firstItem = data.productData.entity[0];
+          if (firstItem && typeof firstItem === 'object' && (firstItem.optionValue || firstItem._id)) {
+          } else {
+            data.productData.entity =
+              user.entity
+                ?.filter((d) => data?.productData?.entity?.some((e) => d._id === e))
+                ?.map((d) => {
+                  return { optionValue: d._id, optionLabel: d.entityName };
+                }) || [];
+          }
         }
         setProductData(data.productData);
         setLoading(false);
@@ -195,23 +200,29 @@ const ProductDetailsPage = () => {
 
   const getWarehouses = () => {
     setLoadingWarehouse(true);
-    axiosInstance().get(`${productInventory.api}/product/${id}`).then(async ({ data: { data } }) => {
-      setProductInventoryData(data);
-      setLoadingWarehouse(false);
-    }).catch((err) => {
-      setLoadingWarehouse(false);
-      toastConfig.setToastConfig(err);
-    });
-    if (productData?.serializedProduct) {
-      axiosInstance().get(`product/${id}/warehouse`).then(async ({ data: { data } }) => {
-        data = data?.filter((e) => e.warehouse);
-        setProductWarehouseData(data);
-        setInventoriesData(data);
+    axiosInstance()
+      .get(`${productInventory.api}/product/${id}`)
+      .then(async ({ data: { data } }) => {
+        setProductInventoryData(data);
         setLoadingWarehouse(false);
-      }).catch((err) => {
+      })
+      .catch((err) => {
         setLoadingWarehouse(false);
         toastConfig.setToastConfig(err);
       });
+    if (productData?.serializedProduct) {
+      axiosInstance()
+        .get(`product/${id}/warehouse`)
+        .then(async ({ data: { data } }) => {
+          data = data?.filter((e) => e.warehouse);
+          setProductWarehouseData(data);
+          setInventoriesData(data);
+          setLoadingWarehouse(false);
+        })
+        .catch((err) => {
+          setLoadingWarehouse(false);
+          toastConfig.setToastConfig(err);
+        });
     }
   };
 
