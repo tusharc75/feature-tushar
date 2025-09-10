@@ -12,7 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { MATERIAL_TYPE, OTHER_MATERIAL_TYPE, rentalManagement, SERIALIZED_PACKAGE_STATUS, sidebarResource } from 'src/constants/helpers';
+import { ASSET_STATUS, MATERIAL_TYPE, OTHER_MATERIAL_TYPE, rentalManagement, SERIALIZED_PACKAGE_STATUS, sidebarResource } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@mui/icons-material';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -483,6 +483,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
     return (
       fromInspection ? <>
         <MenuItem
+          disabled={selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)?.some(r => r?.status === ASSET_STATUS.inTransit)}
           onClick={() => {
             setAssignDialog({
               open: true,
