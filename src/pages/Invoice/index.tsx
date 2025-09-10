@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Chip, FormControl, IconButton, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { Autocomplete, Box, Chip, IconButton, MenuItem, TextField } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase, sortBy } from 'lodash';
