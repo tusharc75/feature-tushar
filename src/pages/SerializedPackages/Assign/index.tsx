@@ -53,7 +53,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
       setAllowedToEdit(false)
     }
     else if (fromInspection && permissions?.serializedPackagesInspection?.isUpdate) {
-      setAllowedToEdit(serializedPackagesData?.status === SERIALIZED_PACKAGE_STATUS.reserved ? false : true)
+      setAllowedToEdit([SERIALIZED_PACKAGE_STATUS.reserved, SERIALIZED_PACKAGE_STATUS.inTransit]?.includes(serializedPackagesData?.status) ? false : true)
     }
     else if (permissions?.serializedPackages?.isUpdate) {
       setAllowedToEdit(true)
