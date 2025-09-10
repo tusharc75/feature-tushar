@@ -524,6 +524,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           size="small"
                           label="Email Subject"
                           variant="outlined"
+                          disabled={values.reportAction === 'Sharepoint Upload'}
                           error={touched['emailSubject'] && Boolean(errors['emailSubject'])}
                           helperText={touched['emailSubject'] && errors['emailSubject']}
                         />
@@ -587,7 +588,12 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           getOptionLabel={(option) => option}
                           isOptionEqualToValue={(option, value) => option === value}
                           value={values.reportAction}
-                          onChange={(_, newVal) => setFieldValue('reportAction', newVal)}
+                          onChange={(_, newVal) => {
+                            setFieldValue('reportAction', newVal);
+                            if (newVal === 'Sharepoint Upload') {
+                              setFieldValue('emailSubject', '');
+                            }
+                          }}
                           renderInput={(params) => (
                             <TextField
                               {...params}
