@@ -29,6 +29,8 @@ import SoftHoldDialog from './SoftHold';
 import axios, { CancelTokenSource } from 'axios';
 import WarningIcon from '@mui/icons-material/Warning';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { RiExchangeLine } from "react-icons/ri";
+import TransferInventoryDialog from 'src/pages/ProductInventory/TransferInventoryDialog';
 
 const InventoryProduct = () => {
   const renderedFrom = camelCase(sidebarResource?.productInventory);
@@ -207,9 +209,9 @@ const InventoryProduct = () => {
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
-    minWidth: 150,
-    maxWidth: 180,
-    width: 150,
+    minWidth: 200,
+    maxWidth: 230,
+    width: 200,
     sticky: 'right',
     Cell: ({ row }) => (
       <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -285,6 +287,22 @@ const InventoryProduct = () => {
             </span>
           </HtmlTooltip>
         </Box>
+        {user?.user?.brandPolicy?.storageLocation && (
+          <Box pl={1}>
+            <HtmlTooltip title={!permissions?.productInventory?.isUpdate ? TOOLTIP_MESSAGE.remove : row?.original?.plantId === 'All' ? `Select ${resources?.warehouse?.titleSingular}` : !row?.original?.storageLocationId ? `Select ${resources?.storageLocation?.titleSingular}` : !row?.original?.availableInventory ? 'Inventory not available' : 'Transfer Inventory'}>
+              <IconButton
+                size="small"
+                aria-label="Transfer Inventory"
+                disabled={permissions?.productInventory?.isUpdate && row?.original?.plantId !== 'All' && row?.original?.storageLocationId && row?.original?.availableInventory ? false : true}
+                onClick={() => {
+                  setInventory({ open: true, product: [row?.original], type: 'transfer' });
+                }}
+              >
+                <RiExchangeLine size={19} />
+              </IconButton>
+            </HtmlTooltip>
+          </Box>
+        )}
         <Box pl={1}>
           <HtmlTooltip title="History">
             <IconButton
@@ -331,6 +349,9 @@ const InventoryProduct = () => {
             finalObject['availableInventory'] = (u?.inventory || 0) - (u?.softHold || 0);
             if (finalObject['availableInventory'] < 0 && u?.inventory) {
               finalObject['availableInventory'] = 0;
+            }
+            if (storageLocationId) {
+              finalObject['storageLocationId'] = storageLocationId
             }
             return {
               ...finalObject
@@ -635,7 +656,7 @@ const InventoryProduct = () => {
         />
       )}
 
-      {inventory.open && (
+      {inventory.open && inventory.type !== 'transfer' && (
         <AddRemoveDialog
           handleClose={() => setInventory({ open: false, product: [], type: '' })}
           handleSuccess={() => {
@@ -647,6 +668,17 @@ const InventoryProduct = () => {
           type={inventory.type}
           warehouse={plantId}
           storageLocation={storageLocationId}
+        />
+      )}
+
+      {inventory.open && inventory.type === 'transfer' && (
+        <TransferInventoryDialog
+          handleClose={() => setInventory({ open: false, product: [], type: '' })}
+          handleSuccess={() => {
+            setInventory({ open: false, product: [], type: '' })
+            fetchData()
+          }}
+          products={inventory.product}
         />
       )}
 
