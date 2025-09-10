@@ -146,18 +146,6 @@ const ProductDetailsPage = () => {
           data.productData?.productNumber ? `${data.productData?.productName} - ${data.productData?.productNumber}` : data.productData?.productName
         );
         setCustomizedRoutes([{ ...routes.product, title: resources?.product?.titlePlural }, { title: `${data.productData.productName}` }]);
-        if (data?.productData?.entity && data?.productData?.entity !== undefined) {
-          const firstItem = data.productData.entity[0];
-          if (firstItem && typeof firstItem === 'object' && (firstItem.optionValue || firstItem._id)) {
-          } else {
-            data.productData.entity =
-              user.entity
-                ?.filter((d) => data?.productData?.entity?.some((e) => d._id === e))
-                ?.map((d) => {
-                  return { optionValue: d._id, optionLabel: d.entityName };
-                }) || [];
-          }
-        }
         setProductData(data.productData);
         setLoading(false);
       })
