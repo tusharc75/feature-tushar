@@ -1100,7 +1100,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
         obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
       }
     } else if (key.type === 'counter' || key.type === 'multiFileUpload' || key.type === 'multiImageUpload') {
-      obj[key.fieldName] = [];
+      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : [];
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
     }
