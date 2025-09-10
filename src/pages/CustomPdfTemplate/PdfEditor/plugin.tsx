@@ -50,23 +50,58 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
                 const schemaWithDropdowns: any = {
                     ...baseSchema,
                 };
-
                 const head = props.activeSchema.head || [];
 
-                schemaWithDropdowns.headers = {
+                schemaWithDropdowns.headStyles = {
                     type: 'object',
-                    title: 'Headers Configuration',
-                    properties: {},
+                    title: 'Head Styles',
+                    properties: schemaWithDropdowns.headStyles.properties,
                     props: {
                         style: {
                             backgroundColor: '#ffffff',
-                            margin: '0px',
+                            marginBottom: '25px',
+                        },
+                    },
+                };
+
+                schemaWithDropdowns.bodyStyles = {
+                    type: 'object',
+                    title: 'Body Styles',
+                    properties: schemaWithDropdowns.bodyStyles.properties,
+                    props: {
+                        style: {
+                            backgroundColor: '#ffffff',
+                            marginBottom: '25px',
+                        },
+                    },
+                };
+
+                schemaWithDropdowns.tableStyles = {
+                    type: 'object',
+                    title: 'Table Styles',
+                    properties: schemaWithDropdowns.tableStyles.properties,
+                    props: {
+                        style: {
+                            backgroundColor: '#ffffff',
+                            marginBottom: '25px',
+                        },
+                    },
+                };
+
+                schemaWithDropdowns.columnStyles = {
+                    type: 'object',
+                    title: 'Column Styles',
+                    properties: schemaWithDropdowns.columnStyles.properties,
+                    props: {
+                        style: {
+                            backgroundColor: '#ffffff',
+                            marginBottom: '25px',
                         },
                     },
                 };
 
                 head.forEach((val: string, i: number) => {
-                    schemaWithDropdowns.headers.properties[`head.${i}`] = {
+                    schemaWithDropdowns[`head.${i}`] = {
                         title: `Header ${i + 1}`,
                         type: 'string',
                         widget: 'select',
