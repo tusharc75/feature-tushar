@@ -52,12 +52,26 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
                 };
 
                 const head = props.activeSchema.head || [];
+
+                schemaWithDropdowns.headers = {
+                    type: 'object',
+                    title: 'Headers Configuration',
+                    properties: {},
+                    props: {
+                        style: {
+                            backgroundColor: '#ffffff',
+                            margin: '0px',
+                        },
+                    },
+                };
+
                 head.forEach((val: string, i: number) => {
-                    schemaWithDropdowns[`head.${i}`] = {
+                    schemaWithDropdowns.headers.properties[`head.${i}`] = {
                         title: `Header ${i + 1}`,
                         type: 'string',
                         widget: 'select',
                         default: val,
+                        span: 24,
                         props: {
                             options: headerOptions,
                         },
