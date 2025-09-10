@@ -170,8 +170,6 @@ import IotDataPoints from './pages/IotDataPoints';
 import IotDataPointsDetail from './pages/IotDataPoints/IotDataPointsDetail';
 import IrtTicket from './pages/IrtTicket';
 import IrtTicketDetail from './pages/IrtTicket/IrtTicketDetail';
-import Job from './pages/Job';
-import JobDetail from './pages/Job/JobDetail';
 import Leads from './pages/Leads';
 import LeadDetailsPage from './pages/Leads/LeadDetailsPage';
 import MarketSegment from './pages/MarketSegment';
@@ -275,8 +273,6 @@ import TransferInventoryDetailPage from './pages/TransferInventory/TransferInven
 import TriggerNotificationHistory from './pages/TriggerNotificationHistory';
 import TriggerNotificationMaster from './pages/TriggerNotificationMaster';
 import TriggerNotificationMasterDetail from './pages/TriggerNotificationMaster/TriggerNotificationMasterDetail';
-import TruckMaster from './pages/TruckMaster';
-import TruckMasterDetail from './pages/TruckMaster/TruckMasterDetail';
 import Units from './pages/Units';
 import UnitDetail from './pages/Units/UnitDetail';
 import User from './pages/User';
@@ -1067,18 +1063,6 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fleetDispatch.path}`}>
               <FleetDispatch />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.truckMaster.path}`}>
-              <TruckMaster />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.truckMasterDetail.path}/:id`}>
-              <TruckMasterDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.job.path}`}>
-              <Job />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.jobDetail.path}/:id`}>
-              <JobDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fleetReceiver.path}`}>
               <FleetReceiver />
