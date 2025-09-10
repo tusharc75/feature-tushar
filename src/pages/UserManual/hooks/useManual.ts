@@ -1,6 +1,6 @@
 import { useMediaQuery } from '@mui/material';
 import { kebabCase, uniq } from 'lodash';
-import { useCallback, useContext, useEffect, useReducer } from 'react';
+import { useCallback, useContext, useEffect, useReducer, useRef } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { pageTitle } from 'src/pages/UserManual/constants';
 import { ManualActions, Resource, SearchData, Section, SubSection, UseManualState } from 'src/pages/UserManual/type';
@@ -59,6 +59,7 @@ const useManual = () => {
   const [state, setState] = useReducer(reducer, initialState);
   const { isSidebarOpen, manualData } = state;
   const isMobile = useMediaQuery('(max-width:1024px)');
+  const currentRoute = useRef<string>('');
 
   const toggleSidebar = useCallback(() => {
     setState({ type: 'setIsSidebarOpen', payload: !isSidebarOpen });
@@ -109,6 +110,7 @@ const useManual = () => {
   const navigate = useCallback((url, hash?: string) => {
     if (url) {
       const parsedUrl = createURl(url, hash);
+      currentRoute.current = parsedUrl;
       setState({ type: 'setCurrentRoute', payload: parsedUrl });
       window.history.pushState(null, '', parsedUrl);
     }
@@ -117,6 +119,8 @@ const useManual = () => {
   useEffect(() => {
     const handlePopstate = () => {
       const url = getCurrentManualUrl();
+      if (currentRoute.current === url) return;
+      currentRoute.current = url;
       setState({ type: 'setCurrentRoute', payload: url });
     };
     window.addEventListener('popstate', handlePopstate);
@@ -126,6 +130,7 @@ const useManual = () => {
   useEffect(() => {
     if (manualData) {
       const url = getCurrentManualUrl();
+      currentRoute.current = url;
       setState({ type: 'setCurrentRoute', payload: url });
     } else {
       document.title = pageTitle;
