@@ -535,18 +535,6 @@ const routes = {
   fleetDispatch: {
     path: '/fleet-dispatch'
   },
-  truckMaster: {
-    path: '/truck-master'
-  },
-  truckMasterDetail: {
-    path: '/truck-master/detail'
-  },
-  job: {
-    path: '/job'
-  },
-  jobDetail: {
-    path: '/job/detail'
-  },
   fleetReceiver: {
     path: '/fleet-receiver'
   },

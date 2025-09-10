@@ -99,7 +99,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
-const FleetDispatchBox = ({ data, id, index, cardType }) => {
+const FleetDispatchBox = ({ data, id, index, cardType, cols }) => {
   const classes = useStyles();
 
   const { setNodeRef, attributes, listeners, transform, transition, isDragging, active, over } = useSortable({
@@ -136,7 +136,7 @@ const FleetDispatchBox = ({ data, id, index, cardType }) => {
         >
           <div>
             <div className="mb-[14px] md:mb-[24px]">
-              <Typography className={classes.primaryText}>{resources?.truckMaster?.titleSingular} : {data?.assetNumber}</Typography>
+              <Typography className={classes.primaryText}>{cols?.find((e) => e?.fieldName === 'fleet')?.fieldLabel || 'Fleet'} : {data?.assetNumber}</Typography>
               <Typography className={classes.secondaryText}>
                 <strong>Location :</strong> {data?.currentLocation?.optionLabel}
               </Typography>
@@ -158,7 +158,7 @@ const FleetDispatchBox = ({ data, id, index, cardType }) => {
             <Box>
               <Typography className={classes.primaryText}>{data?.rentalJobName}</Typography>
               <Typography className={classes.primaryText}>
-                <strong>{resources?.serializedAsset?.titleSingular}  :</strong>  {data?.asset?.optionLabel}
+                <strong>{cols?.find((e) => e?.fieldName === 'asset')?.fieldLabel || resources?.serializedAsset?.titleSingular}  :</strong>  {data?.asset?.optionLabel}
               </Typography>
               <Typography className={classes.secondaryText}>
                 <strong>Customer :</strong> {data?.customerAccount?.optionLabel}
