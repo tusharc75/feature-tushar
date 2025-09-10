@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, MenuItem } from '@mui/material';
+import { Autocomplete, Box, Chip, IconButton, MenuItem, TextField } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase, sortBy } from 'lodash';
@@ -69,6 +69,7 @@ const Invoice = () => {
 
   const [pdfColumns, setPdfColumns] = useState([]);
   const [resourcePolicyData, setResourcePolicyData] = useState(null);
+  const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<'proforma' | 'invoices' | null>(null);
 
   const types = [
     {
@@ -143,7 +144,8 @@ const Invoice = () => {
               INVOICE_STATUS.cancelled,
               INVOICE_STATUS.acceptedbyDOA,
               INVOICE_STATUS.rejectedbyDOA,
-              INVOICE_STATUS.sentForDoa
+              INVOICE_STATUS.sentForDoa,
+              INVOICE_STATUS.proforma
             ].includes(e.optionValue)
         );
         setStatusOptions(statusOps);
@@ -195,7 +197,7 @@ const Invoice = () => {
       fetchData(cancelTokenSource);
       return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly, invoiceTypeFilter]);
 
   const handleDelete = () => {
     setIsSubmitting(true);
@@ -303,6 +305,18 @@ const Invoice = () => {
       }
     }
 
+    if (invoiceTypeFilter === 'proforma') {
+      deepFilters.push({
+        field: 'status',
+        term: [INVOICE_STATUS.proforma]
+      });
+    } else if (invoiceTypeFilter === 'invoices') {
+      deepFilters.push({
+        field: 'status',
+        term: { $nin: [INVOICE_STATUS.proforma] }
+      });
+    }
+
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
@@ -361,6 +375,10 @@ const Invoice = () => {
   const validateStatus = (status) => {
     const currIdx = statusOptions.findIndex((status) => status.optionValue === selectedRecords[0].status);
     return statusOptions[currIdx + 1]?.optionValue !== status;
+  };
+
+  const handleInvoiceTypeChange = (value: 'proforma' | 'invoices' | null) => {
+    setInvoiceTypeFilter(value);
   };
 
   const ActionMenuItems = () => {
@@ -475,20 +493,13 @@ const Invoice = () => {
           selectedType={selectedType}
           setSelectedType={setSelectedType}
           leftSideContents={
-            accountDetails.accountId ? (
-              <Chip
-                className="ml-3"
-                color="primary"
-                label={`Account: ${accountDetails.accountName}`}
-                onDelete={() => {
-                  setAccountDetails({
-                    accountId: null,
-                    accountName: null,
-                    resource: null
-                  });
-                }}
-              />
-            ) : null
+            <LeftSideContents
+              accountDetails={accountDetails}
+              setAccountDetails={setAccountDetails}
+              invoiceTypeFilter={invoiceTypeFilter}
+              handleInvoiceTypeChange={handleInvoiceTypeChange}
+              resources={resources}
+            />
           }
           searchValue={search}
           onSearch={handleSearch}
@@ -559,3 +570,52 @@ const Invoice = () => {
 };
 
 export default Invoice;
+
+const LeftSideContents = ({ 
+  accountDetails, 
+  setAccountDetails, 
+  invoiceTypeFilter, 
+  handleInvoiceTypeChange,
+  resources 
+}) => {
+  const invoiceTypeOptions = [
+    { label: 'Proforma', value: 'proforma' },
+    { label: 'Invoices', value: 'invoices' }
+  ];
+
+  return (
+    <>
+      {accountDetails.accountId ? (
+        <Chip
+          className="ml-3"
+          color="primary"
+          label={`Account: ${accountDetails.accountName}`}
+          onDelete={() => {
+            setAccountDetails({
+              accountId: null,
+              accountName: null,
+              resource: null
+            });
+          }}
+        />
+      ) : null}
+
+      <Autocomplete
+        className="ml-3 min-w-[200px]"
+        size="small"
+        options={invoiceTypeOptions}
+        value={
+          invoiceTypeOptions.find((opt) => opt.value === (invoiceTypeFilter ?? '')) || null
+        }
+        onChange={(event, newValue) => {
+          handleInvoiceTypeChange(newValue?.value || null);
+        }}
+        getOptionLabel={(option) => option.label || ''}
+        renderInput={(params) => (
+          <TextField {...params} label="Invoice Type" variant="outlined" />
+        )}
+        isOptionEqualToValue={(option, value) => option.value === value.value}
+      />
+    </>
+  );
+};
