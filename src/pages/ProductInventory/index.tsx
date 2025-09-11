@@ -31,6 +31,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import { RiExchangeLine } from "react-icons/ri";
 import TransferInventoryDialog from 'src/pages/ProductInventory/TransferInventoryDialog';
+import StarIcon from '@mui/icons-material/Star';
 
 const InventoryProduct = () => {
   const renderedFrom = camelCase(sidebarResource?.productInventory);
@@ -61,13 +62,26 @@ const InventoryProduct = () => {
     product: history.location?.state?.product,
     productName: history.location?.state?.productName
   });
+  const [favoritePlant, setFavoritePlant] = useState(null);
+  const [favoriteStorageLocation, setFavoriteStorageLocation] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   useEffect(() => {
-    getPlants();
+    axiosInstance()
+      .get('/user-default-selections?resource=productInventory')
+      .then(({ data }) => {
+        const favorite = data?.data?.warehouse;
+        const favoriteStorageLoc = data?.data?.storageLocation;
+        setFavoritePlant(favorite);
+        setFavoriteStorageLocation(favoriteStorageLoc);
+        getPlants(favorite, favoriteStorageLoc);
+      })
+      .catch(() => {
+        getPlants();
+      });
   }, [selectedEntity]);
 
   useEffect(() => {
@@ -89,15 +103,69 @@ const InventoryProduct = () => {
     showExpenseItem
   ]);
 
-  const getPlants = () => {
+  const getPlants = (initialPlantId = null, initialStorageLocationId = null) => {
     axiosInstance()
       .get('/sa-formbuilder/lookup?lookupResource=Warehouse,Storage Location')
       .then(({ data: { data } }) => {
-        setPlantOptions([{ optionLabel: 'All', optionValue: 'All' }, ...data.Warehouse]);
+        const warehouses = [{ optionLabel: 'All', optionValue: 'All' }, ...data.Warehouse];
+        setPlantOptions(warehouses);
         setStorageLocationOptions(data['Storage Location']);
-        if (plantId === null && data?.Warehouse.length) {
+
+        let selectedPlantId = initialPlantId;
+        if (initialPlantId && warehouses.some(p => p.optionValue === initialPlantId)) {
+          setPlantId(initialPlantId);
+        } else if (plantId === null && data?.Warehouse.length) {
+          selectedPlantId = 'All';
           setPlantId('All');
         }
+        if (initialStorageLocationId && selectedPlantId  && selectedPlantId  !== 'All') {
+          const storageLocation = data['Storage Location'].find(
+            loc => loc.optionValue === initialStorageLocationId && loc.warehouse === selectedPlantId 
+          );
+          if (storageLocation) {
+            setStorageLocationId(initialStorageLocationId);
+          }
+        }
+      });
+  };
+
+  const handleSetFavoritePlant = (newFavoriteId) => {
+    const currentFavorite = favoritePlant;
+    setFavoritePlant(newFavoriteId);
+
+    axiosInstance()
+      .post('/user-default-selections', {
+        resource: 'productInventory',
+        warehouse: newFavoriteId,
+        storageLocation: favoriteStorageLocation
+      })
+      .catch(() => {
+        setFavoritePlant(currentFavorite);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Failed to update favorite selection.',
+        });
+      });
+  };
+
+  const handleSetFavoriteStorageLocation = (newFavoriteId) => {
+    const currentFavorite = favoriteStorageLocation;
+    setFavoriteStorageLocation(newFavoriteId);
+
+    axiosInstance()
+      .post('/user-default-selections', {
+        resource: 'productInventory',
+        warehouse: favoritePlant,
+        storageLocation: newFavoriteId
+      })
+      .catch(() => {
+        setFavoriteStorageLocation(currentFavorite);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Failed to update favorite selection.',
+        });
       });
   };
 
@@ -564,7 +632,11 @@ const InventoryProduct = () => {
                 setExpenseItemValue,
                 fromProductMaster,
                 setFromProductMaster,
-                resources
+                resources,
+                favoritePlant,
+                handleSetFavoritePlant,
+                favoriteStorageLocation,
+                handleSetFavoriteStorageLocation
               }}
             />
           }
@@ -702,7 +774,11 @@ const LeftSideContents = ({
   setExpenseItemValue,
   fromProductMaster,
   setFromProductMaster,
-  resources
+  resources,
+  favoritePlant,
+  handleSetFavoritePlant,
+  favoriteStorageLocation,
+  handleSetFavoriteStorageLocation
 }) => {
   return (
     <>
@@ -726,6 +802,29 @@ const LeftSideContents = ({
         renderInput={(params) => (
           <TextField {...params} margin="none" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
         )}
+        renderOption={(props, option) => {
+          const isFavorite = favoritePlant === option.optionValue;
+          if (option.optionValue === 'All') {
+            return <li {...props}>{option.optionLabel}</li>;
+          }
+          return (
+            <li {...props}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                {option.optionLabel}
+                <IconButton
+                  size="small"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleSetFavoritePlant(isFavorite ? null : option.optionValue);
+                  }}
+                  aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                  <StarIcon sx={{ color: isFavorite ? 'gold' : 'grey.400' }} />
+                </IconButton>
+              </Box>
+            </li>
+          );
+        }}
       />
       {user?.user?.brandPolicy?.storageLocation && (
         <Autocomplete
@@ -746,6 +845,26 @@ const LeftSideContents = ({
           renderInput={(params) => (
             <TextField {...params} margin="none" size="small" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
           )}
+          renderOption={(props, option) => {
+            const isFavorite = favoriteStorageLocation === option.optionValue;
+            return (
+              <li {...props}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                  {option.optionLabel}
+                  <IconButton
+                    size="small"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleSetFavoriteStorageLocation(isFavorite ? null : option.optionValue);
+                    }}
+                    aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                  >
+                    <StarIcon sx={{ color: isFavorite ? 'gold' : 'grey.400' }} />
+                  </IconButton>
+                </Box>
+              </li>
+            );
+          }}
         />
       )}
       {showExpenseItem && (
