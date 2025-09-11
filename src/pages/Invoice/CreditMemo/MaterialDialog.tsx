@@ -1,4 +1,4 @@
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, INVOICE_STATUS } from 'src/constants/helpers';
 import CreditMemoMaterial from 'src/pages/CreditMemo/Material';
 import { Box, Dialog } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -8,8 +8,13 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { useData } from 'src/StateProvider/Provider';
 
 const MaterialDialog = ({ id, handleClose, allowedToEdit }) => {
+
+  const {
+    state: { permissions }
+  }: any = useData();
 
   useEffect(() => {
     fetchData();
@@ -44,10 +49,10 @@ const MaterialDialog = ({ id, handleClose, allowedToEdit }) => {
             <CreditMemoMaterial
               creditMemoData={creditMemoData}
               creditMemoFields={[]}
-              allowedToEdit={allowedToEdit}
+              allowedToEdit={permissions?.creditMemo?.isUpdate && allowedToEdit
+                && ![INVOICE_STATUS.invoiced, INVOICE_STATUS.reconciled, INVOICE_STATUS.closed]?.includes(creditMemoData?.status)}
               fetchCreditMemoData={fetchData}
               fromInvoice={true}
-
             />
             : <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />

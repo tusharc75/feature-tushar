@@ -30,16 +30,18 @@ const Invoice = ({ invoiceData, invoiceFields, setPrevStep, handleChangeStatus, 
   }: any = useData();
 
   useEffect(() => {
-    if (
-      statusOptions.findIndex((d) => d.optionLabel === INVOICE_STATUS.readyToInvoice) >
-      statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)
-    ) {
+    if (statusOptions.findIndex((d) => d.optionLabel === INVOICE_STATUS.readyToInvoice) > statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)) {
       handleChangeStatus(INVOICE_STATUS.readyToInvoice);
     }
   }, []);
 
   useEffect(() => {
-    setPrevStep(true)
+    if ([INVOICE_STATUS.invoiced, INVOICE_STATUS.reconciled]?.includes(invoiceData?.status)) {
+      setPrevStep(false)
+    }
+    else {
+      setPrevStep(true)
+    }
     fetchFields();
   }, []);
 

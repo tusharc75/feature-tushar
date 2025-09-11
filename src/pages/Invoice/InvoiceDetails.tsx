@@ -146,7 +146,7 @@ const InvoiceDetails = () => {
       setStepList(tempStepList);
       setStepNames(tempStepList?.map((item) => item.name));
 
-      if ([INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(data?.status)) {
+      if ([INVOICE_STATUS.closed, INVOICE_STATUS.cancelled, INVOICE_STATUS.invoiced, INVOICE_STATUS.reconciled]?.includes(data?.status)) {
         setCurrentStep(tempStepList?.length - 1);
       } else {
         setCurrentStep(getIndex(data?.processStatus, tempStepList));
