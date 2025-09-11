@@ -102,6 +102,7 @@ const RentalManagementDetailsPage = () => {
   const [assets, setAssets] = useState(null);
   const [assetStatusOptions, setAssetStatusOptions] = useState([]);
   const [isQuotationStep, setIsQuotationStep] = useState(false);
+  const [fleetDispatchPolicyData, setFleetDispatchPolicyData] = useState(null);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -261,12 +262,15 @@ const RentalManagementDetailsPage = () => {
   };
 
   const fetchPolicy = async () => {
-    const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.rentalManagement},${sidebarResource.serializedAsset}`)
+    const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.rentalManagement},${sidebarResource.serializedAsset},${sidebarResource.fleetDispatch}`)
     if (data?.find((e) => e.resource === sidebarResource.rentalManagement)) {
       setResourcePolicyData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
     }
     if (data?.find((e) => e.resource === sidebarResource.serializedAsset)) {
       setAssetPolicyData(data?.find((e) => e.resource === sidebarResource.serializedAsset));
+    }
+    if (data?.find((e) => e.resource === sidebarResource.fleetDispatch)) {
+      setFleetDispatchPolicyData(data?.find((e) => e.resource === sidebarResource.fleetDispatch));
     }
   };
 
@@ -678,6 +682,7 @@ const RentalManagementDetailsPage = () => {
                   assetStatusOptions={assetStatusOptions}
                   setAssetStatusOptions={setAssetStatusOptions}
                   assetPolicyData={assetPolicyData}
+                  fleetDispatchPolicyData={fleetDispatchPolicyData}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Final Slip' && rentalManagementData && (
