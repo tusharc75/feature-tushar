@@ -1,5 +1,6 @@
 import { Autocomplete, Box, CircularProgress, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
+import FieldList from "src/components/FormBuilder/FieldList";
 import { getResourceField } from "src/components/FormBuilder/helper";
 
 const CopyFromHeaderFieldDropdown = ({ values, setFieldValue, resource }) => {
@@ -14,9 +15,9 @@ const CopyFromHeaderFieldDropdown = ({ values, setFieldValue, resource }) => {
   const getResourceFields = async () => {
     setLoading(true)
     try {
-      const data: any = await getResourceField(resource);
+      const data: any = await getResourceField(resource, true);
       if (data?.length > 0) {
-        setResourceFields(data);
+        setResourceFields(data?.filter((e) => e.type === FieldList.PERCENT.type));
       }
       setLoading(false)
     } catch (e) {
@@ -25,7 +26,7 @@ const CopyFromHeaderFieldDropdown = ({ values, setFieldValue, resource }) => {
   };
 
   return (
-    <Box mt={2}>
+    <Box mt={1}>
       <Autocomplete
         value={resourceFields?.some(f => f?.fieldName === values['copyFromHeaderField']) ? resourceFields?.find(f => f?.fieldName === values['copyFromHeaderField']) : ''}
         fullWidth
