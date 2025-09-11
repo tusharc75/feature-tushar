@@ -8,7 +8,7 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { useHistory, Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -62,25 +62,20 @@ const InventoryProduct = () => {
     product: history.location?.state?.product,
     productName: history.location?.state?.productName
   });
-  const [favoritePlant, setFavoritePlant] = useState(null);
-  const [favoriteStorageLocation, setFavoriteStorageLocation] = useState(null);
+
+  const [defaultSelectedData, setDefaultSelectedData] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   useEffect(() => {
-    axiosInstance()
-      .get('/user-default-selections?resource=productInventory')
-      .then(({ data }) => {
-        const favorite = data?.data?.warehouse;
-        const favoriteStorageLoc = data?.data?.storageLocation;
-        setFavoritePlant(favorite);
-        setFavoriteStorageLocation(favoriteStorageLoc);
-        getPlants(favorite, favoriteStorageLoc);
+    axiosInstance().get(`/user-default-selections?resource=${sidebarResource.productInventory}`)
+      .then(({ data: { data } }) => {
+        setDefaultSelectedData(data)
+        getPlants(data?.warehouse || null, data?.storageLocation || null);
       })
       .catch(() => {
-        getPlants();
       });
   }, [selectedEntity]);
 
@@ -103,73 +98,23 @@ const InventoryProduct = () => {
     showExpenseItem
   ]);
 
-  const getPlants = (initialPlantId = null, initialStorageLocationId = null) => {
-    axiosInstance()
-      .get('/sa-formbuilder/lookup?lookupResource=Warehouse,Storage Location')
+  const getPlants = (defaultWarehouse = null, defaultStorageLocation = null) => {
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.warehouse},${sidebarResource.storageLocation}`)
       .then(({ data: { data } }) => {
-        const warehouses = [{ optionLabel: 'All', optionValue: 'All' }, ...data.Warehouse];
-        setPlantOptions(warehouses);
-        setStorageLocationOptions(data['Storage Location']);
-
-        let selectedPlantId = initialPlantId;
-        if (initialPlantId && warehouses.some(p => p.optionValue === initialPlantId)) {
-          setPlantId(initialPlantId);
-        } else if (plantId === null && data?.Warehouse.length) {
-          selectedPlantId = 'All';
+        const warehouseOptions = [{ optionLabel: 'All', optionValue: 'All' }, ...data?.[sidebarResource.warehouse]];
+        const storageLocationOptions = data[sidebarResource.storageLocation];
+        setPlantOptions(warehouseOptions);
+        setStorageLocationOptions(storageLocationOptions);
+        if (defaultWarehouse && warehouseOptions.find(p => p.optionValue === defaultWarehouse)) {
+          setPlantId(defaultWarehouse);
+        }
+        else if (plantId === null && data?.[sidebarResource.warehouse]?.length) {
           setPlantId('All');
         }
-        if (initialStorageLocationId && selectedPlantId  && selectedPlantId  !== 'All') {
-          const storageLocation = data['Storage Location'].find(
-            loc => loc.optionValue === initialStorageLocationId && loc.warehouse === selectedPlantId 
-          );
-          if (storageLocation) {
-            setStorageLocationId(initialStorageLocationId);
-          }
+        if (defaultWarehouse && defaultStorageLocation && storageLocationOptions.find(p => p.optionValue === defaultStorageLocation)) {
+          setStorageLocationId(defaultStorageLocation);
         }
       });
-  };
-
-  const updateUserDefaultSelections = async ({
-    warehouse = favoritePlant,
-    storageLocation = favoriteStorageLocation,
-    onOptimisticUpdate,
-    onRollback
-  }) => {
-    onOptimisticUpdate();
-    try {
-      await axiosInstance().post('/user-default-selections', {
-        resource: 'productInventory',
-        warehouse,
-        storageLocation
-      });
-    } catch (err) {
-      onRollback();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'error',
-        message: 'Failed to update favorite selection.'
-      });
-    }
-  };
-
-  const handleSetFavoritePlant = (newFavoriteId: string | null) => {
-    const prev = favoritePlant;
-    updateUserDefaultSelections({
-      warehouse: newFavoriteId,
-      storageLocation: favoriteStorageLocation,
-      onOptimisticUpdate: () => setFavoritePlant(newFavoriteId),
-      onRollback: () => setFavoritePlant(prev)
-    });
-  };
-
-  const handleSetFavoriteStorageLocation = (newFavoriteId: string | null) => {
-    const prev = favoriteStorageLocation;
-    updateUserDefaultSelections({
-      warehouse: favoritePlant,
-      storageLocation: newFavoriteId,
-      onOptimisticUpdate: () => setFavoriteStorageLocation(newFavoriteId),
-      onRollback: () => setFavoriteStorageLocation(prev)
-    });
   };
 
   const fetchGridColumns = async () => {
@@ -599,6 +544,17 @@ const InventoryProduct = () => {
     );
   };
 
+  const handleSetDefaultSelected = async (data) => {
+    axiosInstance().put(`/user-default-selections`, {
+      resource: sidebarResource.productInventory,
+      ...data
+    }).then(({ data: { data } }) => {
+      setDefaultSelectedData(data)
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -640,10 +596,8 @@ const InventoryProduct = () => {
                 fromProductMaster,
                 setFromProductMaster,
                 resources,
-                favoritePlant,
-                handleSetFavoritePlant,
-                favoriteStorageLocation,
-                handleSetFavoriteStorageLocation
+                defaultSelectedData,
+                handleSetDefaultSelected
               }}
             />
           }
@@ -781,10 +735,8 @@ const LeftSideContents = ({
   fromProductMaster,
   setFromProductMaster,
   resources,
-  favoritePlant,
-  handleSetFavoritePlant,
-  favoriteStorageLocation,
-  handleSetFavoriteStorageLocation
+  defaultSelectedData,
+  handleSetDefaultSelected
 }) => {
   return (
     <>
@@ -807,26 +759,26 @@ const LeftSideContents = ({
           <TextField {...params} margin="none" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
         )}
         renderOption={(props, option) => {
-          const isFavorite = favoritePlant === option.optionValue;
-          if (option.optionValue === 'All') {
-            return <li {...props}>{option.optionLabel}</li>;
-          }
+          const isFavorite = defaultSelectedData?.warehouse === option.optionValue;
           return (
             <li {...props}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                 {option.optionLabel}
-                <IconButton
-                  size="small"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleSetFavoritePlant(isFavorite ? null : option.optionValue);
-                  }}
-                  aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                >
-                  <StarIcon sx={{ color: isFavorite ? 'gold' : 'grey.400' }} />
-                </IconButton>
+                {option.optionValue !== 'All' &&
+                  <HtmlTooltip title={isFavorite ? 'Remove from default' : 'Set as default'}>
+                    <IconButton
+                      size="small"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleSetDefaultSelected({ warehouse: isFavorite ? null : option.optionValue });
+                      }}
+                    >
+                      <StarIcon sx={{ color: isFavorite ? 'gold' : 'grey.400' }} />
+                    </IconButton>
+                  </HtmlTooltip>
+                }
               </Box>
-            </li>
+            </li >
           );
         }}
       />
@@ -850,21 +802,26 @@ const LeftSideContents = ({
             <TextField {...params} margin="none" size="small" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
           )}
           renderOption={(props, option) => {
-            const isFavorite = favoriteStorageLocation === option.optionValue;
+            const isFavorite = defaultSelectedData?.storageLocation === option.optionValue;
             return (
               <li {...props}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                   {option.optionLabel}
-                  <IconButton
-                    size="small"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleSetFavoriteStorageLocation(isFavorite ? null : option.optionValue);
-                    }}
-                    aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                  >
-                    <StarIcon sx={{ color: isFavorite ? 'gold' : 'grey.400' }} />
-                  </IconButton>
+                  <HtmlTooltip title={isFavorite ? 'Remove from default' : 'Set as default'}>
+                    <IconButton
+                      size="small"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleSetDefaultSelected(isFavorite ? { storageLocation: null } : {
+                          warehouse: plantId,
+                          storageLocation: option.optionValue
+                        });
+                      }}
+                      aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                      <StarIcon sx={{ color: isFavorite ? 'gold' : 'grey.400' }} />
+                    </IconButton>
+                  </HtmlTooltip>
                 </Box>
               </li>
             );
@@ -886,17 +843,20 @@ const LeftSideContents = ({
           }
           label="Expense Item"
         />
-      )}
-      {fromProductMaster?.product && (
-        <Chip
-          className="ml-3"
-          color="primary"
-          label={`Product : ${fromProductMaster?.productName}`}
-          onDelete={() => {
-            setFromProductMaster(null);
-          }}
-        />
-      )}
+      )
+      }
+      {
+        fromProductMaster?.product && (
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`Product : ${fromProductMaster?.productName}`}
+            onDelete={() => {
+              setFromProductMaster(null);
+            }}
+          />
+        )
+      }
     </>
   );
 };
