@@ -17,9 +17,9 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isArray } from 'lodash';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { cn } from 'src/constants/helpers';
+import { cn, TAB_VIEWS } from 'src/constants/helpers';
 
-const recordOptions: string[] = ['All', 'My', 'Open'];
+const recordOptions: string[] = Object.values(TAB_VIEWS);
 
 const UiPreference = ({ userData, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -95,7 +95,7 @@ const UiPreference = ({ userData, onSuccess }) => {
   return (
     <Box style={{ marginTop: '16px' }}>
       {initialValues?.data?.length ? (
-        <Formik initialValues={initialValues} onSubmit={updateData}>
+        <Formik initialValues={initialValues} onSubmit={updateData} enableReinitialize>
           {({ values, submitForm }) => (
             <Form>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} >
@@ -128,8 +128,8 @@ const UiPreference = ({ userData, onSuccess }) => {
                 >
                   <TableHead>
                     <TableRow>
-                      <TableCell className="pl-4 h-12"><strong>Resource</strong></TableCell>
-                      <TableCell className="pl-4 h-12"><strong>By Default Records</strong></TableCell>
+                      <TableCell sx={{ width: '50%', fontWeight: 'bold' }}><strong>Resource</strong></TableCell>
+                      <TableCell sx={{ width: '50%', fontWeight: 'bold' }}><strong>By Default Records</strong></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -148,7 +148,7 @@ const UiPreference = ({ userData, onSuccess }) => {
                                   onChange={(e, val) => {
                                     arrayHelpers.replace(index, {
                                       ...values?.data[index],
-                                      ['type']: val
+                                      type: val
                                     });
                                     const res = initialValues.data;
                                     res.forEach((r) => {
@@ -178,8 +178,9 @@ const UiPreference = ({ userData, onSuccess }) => {
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-      )}
-    </Box>
+      )
+      }
+    </Box >
   );
 };
 

@@ -1280,7 +1280,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length; ) {
+        for (let i = 0; i < validationFields?.length;) {
           const field = validationFields[i];
           const condition =
             field?.type === 'section'
@@ -1687,7 +1687,7 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
         });
       }
       return { permissions, resources };
-    } catch (e) {}
+    } catch (e) { }
   }
 };
 
@@ -2205,6 +2205,13 @@ export const DELIVERY_TICKET_STATUS = {
   inTransit: 'In-Transit',
   delivered: 'Delivered',
   cancelled: 'Cancelled'
+};
+
+export const TAB_VIEWS = {
+  1: 'My',
+  2: 'Open',
+  3: 'All',
+  4: 'Closed'
 };
 
 export const RENTAL_STATUS = {
@@ -3736,8 +3743,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
-  if (typeof callBack !== 'function') callBack = (text) => {};
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
+  if (typeof callBack !== 'function') callBack = (text) => { };
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
