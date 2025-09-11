@@ -488,9 +488,6 @@ const Material = ({
       element.taxCode = taxCodeData?.optionValue;
       element.taxPercentage = taxCodeData?.taxRate || 0;
     }
-    if (allFields?.some(f => f?.fieldName === 'environmentalSurchargePercentage') && fieldTicketData['environmentalSurchargePercentage']) {
-      element.environmentalSurchargePercentage = fieldTicketData['environmentalSurchargePercentage']
-    }
     const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
     Object.assign(element, calValues);
     element = { ...getObjKeysWithValues(element, allFields) };
