@@ -22,7 +22,12 @@ const TransferInventoryDialog = ({ handleClose, handleSuccess, products }) => {
 
   const [loading, setLoading] = useState(false)
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [initialValues] = useState({ warehouse: products[0]?.plantId, transferFromStorageLocation: products[0]?.storageLocationId, transferToStorageLocation: '', products: products?.map(p => ({ _id: p?._id, qty: 1 })) })
+  const [initialValues] = useState({
+    warehouse: products[0]?.plantId,
+    transferFromStorageLocation: products[0]?.storageLocationId,
+    transferToStorageLocation: '',
+    products: products?.map(p => ({ _id: p?._id, qty: 1 }))
+  })
   const [storageLocationOptions, setStorageLocationOptions] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -36,7 +41,8 @@ const TransferInventoryDialog = ({ handleClose, handleSuccess, products }) => {
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
       .then(({ data: { data } }) => {
         if (data[sidebarResource.storageLocation]) {
-          const storageLocationOption = data[sidebarResource.storageLocation]?.filter((e) => e.warehouse === products[0]?.plantId && e?.optionValue !== products[0]?.storageLocationId);
+          const storageLocationOption = data[sidebarResource.storageLocation]?.filter((e) => e.warehouse === products[0]?.plantId
+            && e?.optionValue !== products[0]?.storageLocationId);
           setStorageLocationOptions(storageLocationOption);
         }
         setLoading(false);
@@ -73,18 +79,15 @@ const TransferInventoryDialog = ({ handleClose, handleSuccess, products }) => {
         }
         errors.products[i] = { qty: 'Qty must be less than or equal to Inventory' };
       }
-
       if (parseInt(d?.qty) <= 0) {
         if (!errors?.products) {
           errors['products'] = [];
         }
         errors.products[i] = { qty: 'Qty must be greater than 0' };
       }
-
     });
-
     if (!values?.transferToStorageLocation) {
-      errors['transferToStorageLocation'] = `To ${resources?.storageLocation?.titleSingular} is required`;
+      errors['transferToStorageLocation'] = `${resources?.storageLocation?.titleSingular} is required`;
     }
     return errors;
   };

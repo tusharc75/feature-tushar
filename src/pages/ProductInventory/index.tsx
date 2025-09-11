@@ -289,16 +289,21 @@ const InventoryProduct = () => {
         </Box>
         {user?.user?.brandPolicy?.storageLocation && (
           <Box pl={1}>
-            <HtmlTooltip title={!permissions?.productInventory?.isUpdate ? TOOLTIP_MESSAGE.remove : row?.original?.plantId === 'All' ? `Select ${resources?.warehouse?.titleSingular}` : !row?.original?.storageLocationId ? `Select ${resources?.storageLocation?.titleSingular}` : !row?.original?.availableInventory ? 'Inventory not available' : 'Transfer Inventory'}>
+            <HtmlTooltip title={!permissions?.productInventory?.isUpdate ?
+              TOOLTIP_MESSAGE.remove : row?.original?.plantId === 'All'
+                ? `Select ${resources?.warehouse?.titleSingular}` :
+                !row?.original?.storageLocationId ? `Select ${resources?.storageLocation?.titleSingular}` :
+                  !row?.original?.availableInventory ? 'Inventory not available' : 'Transfer Inventory'}>
               <IconButton
                 size="small"
                 aria-label="Transfer Inventory"
-                disabled={permissions?.productInventory?.isUpdate && row?.original?.plantId !== 'All' && row?.original?.storageLocationId && row?.original?.availableInventory ? false : true}
+                disabled={permissions?.productInventory?.isUpdate
+                  && row?.original?.plantId !== 'All' && row?.original?.storageLocationId && row?.original?.availableInventory ? false : true}
                 onClick={() => {
                   setInventory({ open: true, product: [row?.original], type: 'transfer' });
                 }}
               >
-                <RiExchangeLine size={19} />
+                <RiExchangeLine size={19} color='primary' />
               </IconButton>
             </HtmlTooltip>
           </Box>
