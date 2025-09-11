@@ -129,44 +129,47 @@ const InventoryProduct = () => {
       });
   };
 
-  const handleSetFavoritePlant = (newFavoriteId) => {
-    const currentFavorite = favoritePlant;
-    setFavoritePlant(newFavoriteId);
-
-    axiosInstance()
-      .post('/user-default-selections', {
+  const updateUserDefaultSelections = async ({
+    warehouse = favoritePlant,
+    storageLocation = favoriteStorageLocation,
+    onOptimisticUpdate,
+    onRollback
+  }) => {
+    onOptimisticUpdate();
+    try {
+      await axiosInstance().post('/user-default-selections', {
         resource: 'productInventory',
-        warehouse: newFavoriteId,
-        storageLocation: favoriteStorageLocation
-      })
-      .catch(() => {
-        setFavoritePlant(currentFavorite);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'error',
-          message: 'Failed to update favorite selection.',
-        });
+        warehouse,
+        storageLocation
       });
+    } catch (err) {
+      onRollback();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: 'Failed to update favorite selection.'
+      });
+    }
   };
 
-  const handleSetFavoriteStorageLocation = (newFavoriteId) => {
-    const currentFavorite = favoriteStorageLocation;
-    setFavoriteStorageLocation(newFavoriteId);
+  const handleSetFavoritePlant = (newFavoriteId: string | null) => {
+    const prev = favoritePlant;
+    updateUserDefaultSelections({
+      warehouse: newFavoriteId,
+      storageLocation: favoriteStorageLocation,
+      onOptimisticUpdate: () => setFavoritePlant(newFavoriteId),
+      onRollback: () => setFavoritePlant(prev)
+    });
+  };
 
-    axiosInstance()
-      .post('/user-default-selections', {
-        resource: 'productInventory',
-        warehouse: favoritePlant,
-        storageLocation: newFavoriteId
-      })
-      .catch(() => {
-        setFavoriteStorageLocation(currentFavorite);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'error',
-          message: 'Failed to update favorite selection.',
-        });
-      });
+  const handleSetFavoriteStorageLocation = (newFavoriteId: string | null) => {
+    const prev = favoriteStorageLocation;
+    updateUserDefaultSelections({
+      warehouse: favoritePlant,
+      storageLocation: newFavoriteId,
+      onOptimisticUpdate: () => setFavoriteStorageLocation(newFavoriteId),
+      onRollback: () => setFavoriteStorageLocation(prev)
+    });
   };
 
   const fetchGridColumns = async () => {
