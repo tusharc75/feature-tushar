@@ -4075,6 +4075,7 @@ export const reverseLookupDependentOn = (lookupDependentOn, options = [], value,
   }
   return option[lookupDependentOn];
 };
+
 export function calculateRatio(a: number, b: number, c: number): number {
   if (b === 0 || c === 0) {
     throw new Error('Denominators cannot be zero.');
