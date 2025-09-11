@@ -234,22 +234,22 @@ interface SectionTOC {
   toc: TOCItem[];
 }
 
+const hash = window.location.hash.split('#')[1];
+
+const renderTOCItems = (items: TOCItem[]) => (
+  <ul className="mt-1 pl-4">
+    {items.map((item) => (
+      <li key={item.id} className="m-1.5 list-none">
+        <a href={`#${item.id}`} className={cn('text-[12px] hover:text-[var(--link)]', hash === item.id && 'font-bold')}>
+          {item.text}
+        </a>
+        {item.children.length > 0 && renderTOCItems(item.children)}
+      </li>
+    ))}
+  </ul>
+);
+
 const OnThisPageImpl = ({ pageData, autoTOC }: { pageData: Section[]; autoTOC: SectionTOC[] }) => {
-  const hash = window.location.hash.split('#')[1];
-
-  const renderTOCItems = (items: TOCItem[]) => (
-    <ul className="mt-1 pl-4">
-      {items.map((item) => (
-        <li key={item.id} className="m-1.5 list-none">
-          <a href={`#${item.id}`} className={cn('text-[12px] hover:text-[var(--link)]', hash === item.id && 'font-bold')}>
-            {item.text}
-          </a>
-          {item.children.length > 0 && renderTOCItems(item.children)}
-        </li>
-      ))}
-    </ul>
-  );
-
   return (
     <ul className="sticky top-[--manual-head-height] h-[calc(100vh-2rem)] list-none overflow-y-auto pb-2 pl-2 pr-0 pt-2 lg:[border-left:1px_solid_var(--common-border-color)]">
       {pageData.map((section) => {
