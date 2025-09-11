@@ -324,7 +324,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
     data = response?.data?.data;
 
-    if (rentalResourceData?.policy?.subStatusDateWiseCapture) {
+    if (rentalResourceData?.policy?.subStatusDateWiseCapture && data?.inventory?.length) {
       const logs: any = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData?._id}/inventory/logs?assets=${JSON.stringify(data?.inventory?.map(m => ({ asset: m?.inventory, uniqueId: m?._id })))}`);
       setAsetLogs(logs?.data?.data)
     }
