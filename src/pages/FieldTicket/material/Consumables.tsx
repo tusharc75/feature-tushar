@@ -473,6 +473,9 @@ const Consumables = ({
             element.taxCode = taxCodeData?.optionValue;
             element.taxPercentage = taxCodeData?.taxRate || 0;
           }
+          if (allFields?.some(f => f?.fieldName === 'environmentalSurchargePercentage') && fieldTicketData['environmentalSurchargePercentage']) {
+            element.environmentalSurchargePercentage = fieldTicketData['environmentalSurchargePercentage']
+          }
           element = { ...getObjKeysWithValues(element, allFields) };
           element.materialId = d._id;
           element.type = MATERIAL_TYPE.product;
