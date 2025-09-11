@@ -20,9 +20,9 @@ import Autocomplete from '@mui/material/Autocomplete';
 import History from './History';
 import Tabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
-import { fieldLabelToFieldName } from 'src/constants/helpers';
+import { fieldLabelToFieldName, sidebarResource } from 'src/constants/helpers';
 import DynamicTabs from 'src/components/FormBuilder/Tabs';
-import { Settings } from '@mui/icons-material';
+import { ElectricBolt, Settings } from '@mui/icons-material';
 import Setting from './Setting';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -30,6 +30,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddAlertIcon from '@mui/icons-material/AddAlert';
 import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
 import { CancelTokenSource } from 'axios';
+import { RESOURCE_ACTION_TYPE } from 'src/components/FormBuilder/Tabs/helper';
+import UpdateResourceActions from 'src/components/FormBuilder/Tabs/UpdateResourceActions';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -100,6 +102,7 @@ const CreateFormBuilder = () => {
   const [settingDialog, setSettingDialog] = useState(false);
   const [openNotifications, setOpenNotifications] = useState(false);
   const [resourceData, setResourceData] = useState(null);
+  const [resourceTriggerDialog, setResourceTriggerDialog] = useState(false);
 
   const [isNew, setIsNew] = useState(resource === '0' ? true : false);
 
@@ -225,7 +228,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => { });
+          .catch((error) => {});
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -488,6 +491,18 @@ const CreateFormBuilder = () => {
                         <Settings fontSize="small" />
                       </IconButton>
                     </HtmlTooltip>
+                    {[sidebarResource.serializedAsset, sidebarResource.quotation]?.includes(resource) && (
+                      <HtmlTooltip title={'Resource Triggers'}>
+                        <IconButton
+                          aria-label="Actions"
+                          onClick={() => {
+                            setResourceTriggerDialog(true);
+                          }}
+                        >
+                          <ElectricBolt fontSize="small" color={'primary'} />
+                        </IconButton>
+                      </HtmlTooltip>
+                    )}
                     <HtmlTooltip title={'Notifications'}>
                       <IconButton
                         aria-label="Notifications"
@@ -561,6 +576,20 @@ const CreateFormBuilder = () => {
                   resource={resource}
                   resourceData={resourceData}
                   permissions={permissions}
+                />
+              )}
+              {resourceTriggerDialog && (
+                <UpdateResourceActions
+                  onClose={() => {
+                    setResourceTriggerDialog(false);
+                  }}
+                  onSuccess={() => {
+                    fetchData();
+                    setResourceTriggerDialog(false);
+                  }}
+                  resource={resource}
+                  resourceData={resourceData}
+                  type={RESOURCE_ACTION_TYPE.triggers}
                 />
               )}
             </Fragment>
