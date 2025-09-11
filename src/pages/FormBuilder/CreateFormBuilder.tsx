@@ -103,6 +103,7 @@ const CreateFormBuilder = () => {
   const [openNotifications, setOpenNotifications] = useState(false);
   const [resourceData, setResourceData] = useState(null);
   const [resourceTriggerDialog, setResourceTriggerDialog] = useState(false);
+  const [formData, setFormData] = useState(null)
 
   const [isNew, setIsNew] = useState(resource === '0' ? true : false);
 
@@ -161,6 +162,7 @@ const CreateFormBuilder = () => {
       axiosInstance()
         .get(`/sa-formbuilder/resourcedata/` + resource)
         .then(({ data: { data } }) => {
+          setFormData(data)
           data?.section?.forEach((s: any) => {
             s?.field?.forEach((f: any) => {
               if (!isEmpty(f?.sectionProperties)) {
@@ -228,7 +230,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => {});
+          .catch((error) => { });
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -538,6 +540,7 @@ const CreateFormBuilder = () => {
                     module="form-builder"
                     resource={resource}
                     brandId={user.user.brand}
+                    formData={formData}
                   />
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>

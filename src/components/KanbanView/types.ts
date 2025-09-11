@@ -60,6 +60,7 @@ export type Column<D> = {
   enableServicesAddOnBasedOnValue?: boolean;
   lookupPreFilterFields?: any[];
   operationOnLineItems?: string;
+  copyFromHeaderField?: string;
   requiredDependentOn?: any[];
   restrictBackDate?: boolean;
   restrictCurrentDateAutoSelect?: boolean;
