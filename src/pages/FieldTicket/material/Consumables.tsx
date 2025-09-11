@@ -10,6 +10,7 @@ import {
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
   fieldTicket,
+  getDataFromHeader,
   getObjKeysWithValues,
   restoreObjKeysWithValues,
   sidebarResource
@@ -461,7 +462,7 @@ const Consumables = ({
           taxCodeData = taxCodeOptions[0];
         }
         rows.forEach((d) => {
-          let element: any = {};
+          let element: any = { ...getDataFromHeader(allFields, fieldTicketData) };
           element.qty = d.qty ? parseFloat(d.qty) : 1;
           element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
           element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';

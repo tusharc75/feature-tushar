@@ -22,12 +22,15 @@ const TransferInventoryDialog = ({ handleClose, handleSuccess, products }) => {
 
   const [loading, setLoading] = useState(false)
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
   const [initialValues] = useState({
     warehouse: products[0]?.plantId,
     transferFromStorageLocation: products[0]?.storageLocationId,
     transferToStorageLocation: '',
     products: products?.map(p => ({ _id: p?._id, qty: 1 }))
   })
+
+  const [currentInventory, setCurrentInventory] = useState(null);
   const [storageLocationOptions, setStorageLocationOptions] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -35,18 +38,19 @@ const TransferInventoryDialog = ({ handleClose, handleSuccess, products }) => {
     fetchStorageLocation();
   }, []);
 
+  useEffect(() => {
+    getCurrentInventory(initialValues?.transferFromStorageLocation);
+  }, []);
+
   const fetchStorageLocation = () => {
     setLoading(true);
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
-      .then(({ data: { data } }) => {
-        if (data[sidebarResource.storageLocation]) {
-          const storageLocationOption = data[sidebarResource.storageLocation]?.filter((e) => e.warehouse === products[0]?.plantId
-            && e?.optionValue !== products[0]?.storageLocationId);
-          setStorageLocationOptions(storageLocationOption);
-        }
-        setLoading(false);
-      });
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`).then(({ data: { data } }) => {
+      if (data[sidebarResource.storageLocation]) {
+        const storageLocationOption = data[sidebarResource.storageLocation]?.filter((e) => e.warehouse === products[0]?.plantId);
+        setStorageLocationOptions(storageLocationOption);
+      }
+      setLoading(false);
+    });
   };
 
   const handleSubmit = (values) => {
@@ -72,8 +76,8 @@ const TransferInventoryDialog = ({ handleClose, handleSuccess, products }) => {
   const validate = (values) => {
     const errors: any = {};
     values?.products?.forEach((d, i) => {
-      const product = products?.find(p => p?._id === d?._id)
-      if (parseInt(d?.qty) > product?.availableInventory, parseInt(d?.qty) > product?.availableInventory) {
+      const inv = currentInventory?.find(p => p?._id === d?._id)?.availableInventory
+      if (parseInt(d?.qty) > inv) {
         if (!errors?.products) {
           errors['products'] = [];
         }
@@ -90,6 +94,18 @@ const TransferInventoryDialog = ({ handleClose, handleSuccess, products }) => {
       errors['transferToStorageLocation'] = `${resources?.storageLocation?.titleSingular} is required`;
     }
     return errors;
+  };
+
+  const getCurrentInventory = (transferFromStorageLocation) => {
+    let api = `${productInventory.api}/current-inventory?warehouse=${initialValues.warehouse}&products=${products?.map((e) => e._id)?.toString()}`
+    if (transferFromStorageLocation) {
+      api = `${api}&storageLocation=${transferFromStorageLocation}`;
+    }
+    axiosInstance().get(api).then(({ data: { data } }) => {
+      setCurrentInventory(data);
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+    });
   };
 
   return (
@@ -133,7 +149,7 @@ const TransferInventoryDialog = ({ handleClose, handleSuccess, products }) => {
                               <div className="flex items-center justify-between">
                                 <div className="flex flex-column gap-1">
                                   <p>{product?.productName}</p>
-                                  <p className="text-sm text-gray-400">Inventory : {product?.availableInventory}</p>
+                                  <p className="text-sm text-gray-400">Available Inventory : {currentInventory?.find(p => p?._id === data?._id)?.availableInventory}</p>
                                 </div>
                                 <TextField
                                   margin="dense"
@@ -144,6 +160,7 @@ const TransferInventoryDialog = ({ handleClose, handleSuccess, products }) => {
                                   required
                                   variant="outlined"
                                   value={data['qty']}
+                                  sx={{ width: 200 }}
                                   error={
                                     touched?.products &&
                                     touched?.products[index]?.qty &&
@@ -170,10 +187,40 @@ const TransferInventoryDialog = ({ handleClose, handleSuccess, products }) => {
                         </>
                       )}
                     />
-
-                    <div className="mt-5">
+                    <div className="mt-6">
                       <Autocomplete
                         options={storageLocationOptions}
+                        getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                        isOptionEqualToValue={(option: any, val) => option?.optionValue === val}
+                        value={
+                          storageLocationOptions.filter((o) => o?.optionValue === values['transferFromStorageLocation']).length
+                            ? storageLocationOptions.filter((o) => o?.optionValue === values['transferFromStorageLocation'])[0]
+                            : ''
+                        }
+                        onChange={(e, val) => {
+                          setFieldValue('transferFromStorageLocation', val?.optionValue);
+                          getCurrentInventory(val?.optionValue);
+                          setFieldValue('transferToStorageLocation', '');
+                        }}
+                        disableClearable
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            size="small"
+                            name="transferFromStorageLocation"
+                            label={`From ${resources?.storageLocation?.titleSingular}`}
+                            variant="outlined"
+                            fullWidth
+                            required
+                            error={touched['transferFromStorageLocation'] && Boolean(errors['transferFromStorageLocation'])}
+                            helperText={touched['transferFromStorageLocation'] && errors['transferFromStorageLocation']}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="mt-5">
+                      <Autocomplete
+                        options={storageLocationOptions?.filter((e) => e.optionValue !== values['transferFromStorageLocation'])}
                         getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                         isOptionEqualToValue={(option: any, val) => option?.optionValue === val}
                         value={

@@ -22,7 +22,7 @@ const FieldSchema = object().shape({
   fieldLabel: string().required('please enter field label')
 });
 
-export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields, isCalculativeField, brandId }) => {
+export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields, isCalculativeField, brandId, formData = null }) => {
   const [initialValues, setInitialValues] = useState({ ...fieldData });
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -134,6 +134,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         if (!values.operationOnLineItems) {
           values.operationOnLineItems = '';
         }
+        if (!values.copyFromHeaderField) {
+          values.copyFromHeaderField = ''
+        }
         setInitialValues(values);
       }
       if (values.requiredDependentOn?.length > 0) {
@@ -218,6 +221,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.showAdditionalInfoPopup = values.showAdditionalInfoPopup;
             ele.additionalInfoSection = values.additionalInfoSection;
             ele.operationOnLineItems = values?.operationOnLineItems || '';
+            ele.copyFromHeaderField = values?.copyFromHeaderField || '';
             ele.isDefaultValue = values.isDefaultValue;
             ele.disableOnEdit = values.disableOnEdit;
             ele.unique = values.unique;
@@ -247,12 +251,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.requiredDependentOn =
               values?.requiredDependentOn && values?.requiredDependentOnField && values?.requiredDependentOnFieldValue
                 ? [
-                    {
-                      lookupField: values?.requiredDependentOn,
-                      field: values?.requiredDependentOnField,
-                      value: values?.requiredDependentOnFieldValue
-                    }
-                  ]
+                  {
+                    lookupField: values?.requiredDependentOn,
+                    field: values?.requiredDependentOnField,
+                    value: values?.requiredDependentOnFieldValue
+                  }
+                ]
                 : [];
             ele.restrictFutureDate = values.restrictFutureDate || false;
             ele.restrictBackDate = values.restrictBackDate || false;
@@ -513,7 +517,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         errors['requiredDependentOnField'] = 'Please select Required Dependent On Field';
       }
       if (!values?.requiredDependentOnFieldValue) {
-        errors['requiredDependentOnFieldValue'] =  `Required Dependent On Field value can't be empty`;
+        errors['requiredDependentOnFieldValue'] = `Required Dependent On Field value can't be empty`;
       }
     }
 
@@ -710,6 +714,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           errors={errors}
                           module={module}
                           brandId={brandId}
+                          formData={formData}
                         />
                       </TabPanel>
                     </Box>
