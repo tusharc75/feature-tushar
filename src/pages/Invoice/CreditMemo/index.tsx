@@ -4,11 +4,10 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, INVOICE_STATUS, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { checkIsAllowedToDelete, CHILD_RESOURCE, INVOICE_STATUS, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { Add, ExpandMore } from '@mui/icons-material';
+import { Add, Delete, ExpandMore } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -22,6 +21,7 @@ import MaterialDialog from './MaterialDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { RiExchange2Line } from 'react-icons/ri';
+import { deleteDisable } from 'src/constants/messageHelpers';
 
 function CreditMemo({ invoiceData, allowedToEdit }) {
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_credit_memo`;
@@ -182,20 +182,21 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
                 </IconButton>
               </HtmlTooltip>
             )}
-            {allowedToEdit && permissions?.creditMemo?.isDelete && (
+            <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
               <IconButton
                 size="small"
-                aria-label="Details"
+                aria-label="Delete"
                 onClick={() => {
                   setShowDeleteConfirmBox({
                     open: true,
                     ids: [row.original._id]
                   });
                 }}
+                disabled={row?.original?.canDelete ? false : true}
               >
-                <DeleteIcon fontSize="small" color="error" />
+                <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
               </IconButton>
-            )}
+            </HtmlTooltip>
           </>
         )
       });
@@ -226,9 +227,10 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
       .get(`${routes?.creditMemo.path}${query}`)
       .then(({ data: { data } }) => {
         let rows = data?.data?.map((u, i) => {
-          let finalObject = prepareDataForGrid(u, user);
+          let finalObject: any = prepareDataForGrid(u, user);
           finalObject['orignalData'] = u;
           finalObject['index'] = i + 1;
+          finalObject['canDelete'] = permissions?.creditMemo?.isDelete && checkIsAllowedToDelete(user, sidebarResource.creditMemo, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -405,7 +407,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
           }}
         >
           <MenuItem
-            disabled={selectedRecords.length === 0 || isDeleting}
+            disabled={!selectedRecords?.every((d) => d?.canDelete)}
             onClick={() => {
               setShowDeleteConfirmBox({
                 open: true,

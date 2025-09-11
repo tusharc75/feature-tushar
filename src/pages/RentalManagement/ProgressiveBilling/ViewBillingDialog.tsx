@@ -9,6 +9,7 @@ import {
   ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   CustomDialogTransition,
+  INVOICE_STATUS,
   MATERIAL_TYPE,
   PACKAGE_TYPE,
   checkIsAllowedToDelete,
@@ -92,7 +93,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
       let data;
       const response: any = await axiosInstance().get(`${invoice.api}/${invoiceId}`);
       data = response?.data?.data;
-      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data) && permissions?.invoice?.isUpdate && allowCreateInvoice);
+      setAllowedToEdit(
+        checkIsAllowedToEdit(user, sidebarResource.invoice, data) && permissions?.invoice?.isUpdate && allowCreateInvoice
+        && ![INVOICE_STATUS.invoiced, INVOICE_STATUS.reconciled, INVOICE_STATUS.closed]?.includes(data?.status));
       setAllowedToDelete(
         permissions?.invoice?.isDelete &&
         checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue) &&
