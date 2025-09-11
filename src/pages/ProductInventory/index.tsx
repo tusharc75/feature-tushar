@@ -444,8 +444,7 @@ const InventoryProduct = () => {
       minInventory: data?.minInventory && parseInt(data?.minInventory),
       maxInventory: data?.maxInventory && parseInt(data?.maxInventory)
     };
-    axiosInstance()
-      .put(`${productInventory.api}`, inputData)
+    axiosInstance().put(`${productInventory.api}`, inputData)
       .then((res) => {
         fetchData();
       });
@@ -586,7 +585,7 @@ const InventoryProduct = () => {
               : TOOLTIP_MESSAGE.add
           }}
           actionMenuItems={
-            <ActionMenuItems {...{ permissions, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder }} />
+            <ActionMenuItems {...{ permissions, user, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder }} />
           }
           isAddButtonVisible={false}
         />
@@ -675,18 +674,17 @@ const InventoryProduct = () => {
           storageLocation={storageLocationId}
         />
       )}
-
       {inventory.open && inventory.type === 'transfer' && (
         <TransferInventoryDialog
           handleClose={() => setInventory({ open: false, product: [], type: '' })}
           handleSuccess={() => {
-            setInventory({ open: false, product: [], type: '' })
-            fetchData()
+            dispatch({ type: 'selection', selectedRecords: [] });
+            fetchData();
+            setInventory({ open: false, product: [], type: '' });
           }}
           products={inventory.product}
         />
       )}
-
       {settingDialogOpen && <SettingsDialog warehouse={plantId} onClose={() => setSettingDialogOpen(false)} />}
     </section>
   );
@@ -715,12 +713,10 @@ const LeftSideContents = ({
         style={{ minWidth: '200px', flexGrow: 1 }}
         className="md:max-w-[250px]"
         options={plantOptions}
-        getOptionLabel={(option: any) => option.optionLabel}
+        getOptionLabel={(option: any) => option?.optionLabel || ''}
         disableClearable
         isOptionEqualToValue={(option: any, val) => option.optionValue === val}
-        value={
-          plantOptions.filter((data) => data.optionValue === plantId).length ? plantOptions.filter((data) => data.optionValue === plantId)[0] : ''
-        }
+        value={plantOptions.filter((data) => data.optionValue === plantId).length ? plantOptions.filter((data) => data.optionValue === plantId)[0] : ''}
         onChange={(e, val) => {
           if (val !== null) {
             setPlantId(val && val.optionValue ? val.optionValue : '');
@@ -783,7 +779,7 @@ const LeftSideContents = ({
   );
 };
 
-const ActionMenuItems = ({ permissions, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder }) => {
+const ActionMenuItems = ({ permissions, user, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder }) => {
   return (
     <>
       <MenuItem
@@ -802,6 +798,16 @@ const ActionMenuItems = ({ permissions, setInventory, selectedRecords, plantId, 
       >
         Remove
       </MenuItem>
+      {user?.user?.brandPolicy?.storageLocation &&
+        <MenuItem
+          disabled={permissions?.productInventory?.isUpdate && selectedRecords?.every((e) => e?.availableInventory) ? false : true}
+          onClick={() => {
+            setInventory({ open: true, product: selectedRecords, type: 'transfer' });
+          }}
+        >
+          Transfer
+        </MenuItem>
+      }
       <MenuItem
         disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
         style={{ display: 'none' }}
