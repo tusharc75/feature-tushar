@@ -19,6 +19,7 @@ type SingleSectionPorps = {
   extraFields: any;
   isCalculativeField: any;
   brandId: any;
+  formData?: any
 };
 
 const SingleSection = ({
@@ -32,7 +33,8 @@ const SingleSection = ({
   module,
   extraFields,
   isCalculativeField,
-  brandId
+  brandId,
+  formData = null
 }: SingleSectionPorps) => {
   const fieldIdList = useMemo(() => section.field?.map((f) => f._id) || [], [section.field]);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -110,11 +112,10 @@ const SingleSection = ({
       <div
         ref={setNodeRef}
         style={style}
-        className={`p-2 ${
-          isDragging
-            ? "bg-[var(--dark-secondary,theme('colors.cyan.100'))] [border:1px_dashed_var(--common-border-color)]"
-            : 'border border-[var(--common-border-color)] bg-[var(--dark-primary,white)]'
-        }   transition-all duration-300`}
+        className={`p-2 ${isDragging
+          ? "bg-[var(--dark-secondary,theme('colors.cyan.100'))] [border:1px_dashed_var(--common-border-color)]"
+          : 'border border-[var(--common-border-color)] bg-[var(--dark-primary,white)]'
+          }   transition-all duration-300`}
       >
         <div className={isDragging ? 'opacity-40' : ''}>
           <div className="mb-2 flex items-center justify-between gap-2">
@@ -182,6 +183,7 @@ const SingleSection = ({
                         brandId={brandId}
                         sectionId={section.sectionId}
                         data={f}
+                        formData={formData}
                       />
                     );
                   })}

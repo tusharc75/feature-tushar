@@ -37,6 +37,7 @@ export type ColumnData = {
   warningTooltipMessage?: string;
   addBulkOptions?: boolean;
   operationOnLineItems?: string;
+  copyFromHeaderField?: string,
   columnSize?: number;
   dataList?: boolean;
   dataListId?: string;

@@ -24,6 +24,7 @@ type ItemPorps = {
   brandId: any;
   sectionId: number | string;
   data: any;
+  formData?: any
 };
 
 const Field = ({
@@ -39,7 +40,8 @@ const Field = ({
   isCalculativeField,
   brandId,
   data,
-  sectionId
+  sectionId,
+  formData = null
 }: ItemPorps) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -224,6 +226,7 @@ const Field = ({
                     extraFields={extraFields}
                     isCalculativeField={isCalculativeField}
                     brandId={brandId}
+                    formData={formData}
                   />
                 ) : null}
               </div>

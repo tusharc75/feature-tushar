@@ -103,6 +103,7 @@ const CreateFormBuilder = () => {
   const [openNotifications, setOpenNotifications] = useState(false);
   const [resourceData, setResourceData] = useState(null);
   const [resourceTriggerDialog, setResourceTriggerDialog] = useState(false);
+  const [formData, setFormData] = useState(null)
 
   const [isNew, setIsNew] = useState(resource === '0' ? true : false);
 
@@ -175,6 +176,8 @@ const CreateFormBuilder = () => {
           setHomePageLabel(data?.homePageLabel || '');
           setOriSection(JSON.parse(JSON.stringify(data.section)));
           setSteppers(data?.resourcePolicy?.steppers || []);
+          setFormData({ childResource: data?.childResource, parentResource: data?.parentResource })
+
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -228,7 +231,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => {});
+          .catch((error) => { });
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -538,6 +541,7 @@ const CreateFormBuilder = () => {
                     module="form-builder"
                     resource={resource}
                     brandId={user.user.brand}
+                    formData={formData}
                   />
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>

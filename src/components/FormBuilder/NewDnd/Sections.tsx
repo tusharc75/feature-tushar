@@ -14,6 +14,7 @@ type SectionPorps = {
   extraFields: any;
   isCalculativeField: any;
   brandId: any;
+  formData?: any
 };
 
 export default function Sections({
@@ -25,7 +26,8 @@ export default function Sections({
   module,
   extraFields,
   isCalculativeField,
-  brandId
+  brandId,
+  formData = null
 }: SectionPorps) {
   const sectionIds = useMemo(() => sections.map((s) => `${s.sectionId}`), [sections]);
 
@@ -57,6 +59,7 @@ export default function Sections({
                 extraFields={extraFields}
                 isCalculativeField={isCalculativeField}
                 brandId={brandId}
+                formData={formData}
               />
             ))}
           </>
