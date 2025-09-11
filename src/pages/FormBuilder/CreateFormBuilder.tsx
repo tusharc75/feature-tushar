@@ -162,7 +162,6 @@ const CreateFormBuilder = () => {
       axiosInstance()
         .get(`/sa-formbuilder/resourcedata/` + resource)
         .then(({ data: { data } }) => {
-          setFormData(data)
           data?.section?.forEach((s: any) => {
             s?.field?.forEach((f: any) => {
               if (!isEmpty(f?.sectionProperties)) {
@@ -177,6 +176,8 @@ const CreateFormBuilder = () => {
           setHomePageLabel(data?.homePageLabel || '');
           setOriSection(JSON.parse(JSON.stringify(data.section)));
           setSteppers(data?.resourcePolicy?.steppers || []);
+          setFormData({ childResource: data?.childResource, parentResource: data?.parentResource })
+
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
