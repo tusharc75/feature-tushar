@@ -73,7 +73,7 @@ const ListingPageHeader = ({
   actionButtonProps = {},
   actionMenuItems,
   showSearchInMobile = false,
-  resource
+  resource = null
 }: ListingPageHeaderProps) => {
   // const walkmeInstance = useGetWalkmeInstance();
   const isMobile = useMediaQuery('(max-width:600px)');
