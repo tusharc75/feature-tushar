@@ -318,7 +318,6 @@ const Job = () => {
           toggleButtonList={JobType}
           onToggle={onTypeChange}
           selectedType={selectedType}
-          resource={sidebarResource.job}
           setSelectedType={setSelectedType}
           leftSideContents={<LeftSideContent />}
           searchValue={search}
