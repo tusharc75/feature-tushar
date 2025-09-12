@@ -4094,8 +4094,8 @@ export function calculateRatio(a: number, b: number, c: number): number {
 
 export const getDataFromHeader = (fields: any[], referenceData: any) => {
   const data: any = {}
-  fields?.forEach(ele => {
-    if (ele?.copyFromHeaderField && referenceData[ele?.copyFromHeaderField]) {
+  fields?.filter((ele) => ele?.copyFromHeaderField)?.forEach(ele => {
+    if (referenceData[ele?.copyFromHeaderField]) {
       data[ele?.fieldName] = referenceData[ele?.copyFromHeaderField]
     }
   });
