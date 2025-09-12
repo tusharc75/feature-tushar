@@ -29,7 +29,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import MaterialQtyDialog from 'src/pages/AssemblyOrder/Material/MaterialQtyDialog';
 import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
-import { orderBy } from 'lodash';
+import { groupBy, orderBy } from 'lodash';
 
 const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, fetchAssembleOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -94,7 +94,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
           <div className="flex items-center gap-2">
-            {allowedToEdit && ![MATERIAL_TYPE.serializedPackage]?.includes(row?.original?.type) ? (
+            {allowedToEdit && ![MATERIAL_TYPE.serializedPackage]?.includes(row?.original?.type) && !row?.original?.isDummy ? (
               <h5
                 onClick={() => {
                   setMaterialEdit({ open: true, data: row?.original });
@@ -114,7 +114,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
                     <span>({row.original?.subRows?.length})</span>
                   </Box>
                 )}
-                {!row?.original?.workOrder && (
+                {!row?.original?.workOrder && !row?.original?.isDummy && (
                   <Box>
                     <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
                       <IconButton
@@ -169,16 +169,16 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       Cell: ({ row, table }) => (
         <>
           {row?.original?.type != MATERIAL_TYPE.serializedPackage && (
-            <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
+            <HtmlTooltip title={allowedToEdit && !row?.original?.isDummy ? 'Edit' : ''}>
               <IconButton
                 size="small"
                 aria-label="Details"
-                disabled={allowedToEdit ? false : true}
+                disabled={allowedToEdit && !row?.original?.isDummy ? false : true}
                 onClick={() => {
                   setMaterialEdit({ open: true, data: row?.original });
                 }}
               >
-                <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                <EditIcon fontSize="small" color={allowedToEdit && !row?.original?.isDummy ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
           )}
@@ -204,6 +204,36 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     fetchData();
   }, [isFilesUploading]);
 
+  const processMaterial = (material) => {
+    const grouped = groupBy(material?.filter(item => item?.parentId && item?.type === MATERIAL_TYPE.package), item => `${item.parentId}_${item.materialId}`);
+    const result = [...material];
+
+    Object.keys(grouped)?.forEach((_key, i) => {
+      const items = grouped[_key]
+
+      if (items?.length > 1) {
+        const ele: any = {
+          _id: `${Date.now()}` + i,
+          type: MATERIAL_TYPE.package,
+          parentId: items[0]?.parentId,
+          materialId: items[0]?.materialId,
+          detail: items[0]?.detail || items[0]?.type === MATERIAL_TYPE.package ? items[0]?.packageDetail?.packageName : '',
+          qty: items?.length,
+          isDummy: true,
+        }
+
+        result.push(ele);
+
+        items.forEach(item => {
+          item.parentId = ele?._id;
+        });
+      }
+    });
+
+    return result;
+  }
+
+
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -215,7 +245,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
 
     setOriMaterial(JSON.parse(JSON.stringify(data.material)));
 
-    const material = data?.material
+    const material = processMaterial(data?.material)
     const serializedPackages = data?.serializedPackages || [];
 
     let rows = material?.filter((e) => e.parentId === null);
@@ -248,7 +278,8 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   };
 
   const generateNestedData = (material, serializedPackages, parent) => {
-    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    const subRows: any = material?.filter((e) => e.parentId === parent._id)
+
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = _subRow?.detail || (_subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
@@ -257,7 +288,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         ? _subRow?.productDetail?.productDescription : _subRow.type === MATERIAL_TYPE.package
           ? _subRow.packageDetail?.packageDescription : '');
       _subRow.qty = _subRow.qty;
-      _subRow.canDelete = _subRow?.workOrder ? false : true;
+      _subRow.canDelete = _subRow?.isDummy ? false : _subRow?.workOrder ? false : true;
       _subRow.subRows = generateNestedData(material, serializedPackages, _subRow);
     });
 
@@ -459,7 +490,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         {permissions?.serializedPackages?.isRead &&
           selectedRecords?.filter((e) => e?.workOrderType === WORK_ORDER_TYPE.disassemblyOrder)?.length > 0 && (
             <MenuItem
-              disabled={checkUniqueWarehouse(selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.package))}
+              disabled={checkUniqueWarehouse(selectedRecords?.filter((e) => !e?.isDummy && e?.type === MATERIAL_TYPE.package))}
               onClick={() => {
                 setOpenSerializedPackagesDialog(true);
               }}
@@ -573,7 +604,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           referenceData={{ warehouse: assemblyOrderData?.warehouse }}
           extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGE_STATUS.available, SERIALIZED_PACKAGE_STATUS.underReview] }]}
           isSubmitting={isSubmitting}
-          ids={dataRows?.map((d) => d?.serializedPackageId)}
+          ids={dataRows?.filter(d => d?.serializedPackageId)?.map((d) => d?.serializedPackageId)}
           selectedPackages={selectedRecords
             ?.filter((r) => [WORK_ORDER_TYPE.disassemblyOrder]?.includes(r?.workOrderType))
             ?.map((r) => ({
