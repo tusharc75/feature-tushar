@@ -424,6 +424,7 @@ const Quotation = () => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.quotation}
           setSelectedType={setSelectedType}
           leftSideContents={<LeftSideContent />}
           searchValue={search}
@@ -457,12 +458,11 @@ const Quotation = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
+            message={`Are you sure you want to delete ${deleteRecord
                 ? `${resources?.quotation?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.quotationNumber}`
                 : `selected ${resources?.quotation?.titlePlural?.toLowerCase()}`
-            } ?`}
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

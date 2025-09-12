@@ -302,6 +302,7 @@ const SubcontractAssembly = () => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.subcontractAssembly}
           setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}
@@ -334,12 +335,11 @@ const SubcontractAssembly = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
+            message={`Are you sure you want to delete ${deleteRecord
                 ? `${resources?.subcontractAssembly?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.subcontractAssemblyNumber || ''}`
                 : `selected ${resources?.subcontractAssembly?.titlePlural?.toLowerCase()}`
-            } ?`}
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

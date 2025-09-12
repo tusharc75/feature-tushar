@@ -345,6 +345,7 @@ const PurchaseOrder = () => {
           toggleButtonList={PurchaseOrderType}
           onToggle={handleFilter}
           selectedType={selectedType}
+          resource={sidebarResource.purchaseOrder}
           setSelectedType={setSelectedType}
           leftSideContents={
             <LeftSideContents

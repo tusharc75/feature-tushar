@@ -501,6 +501,7 @@ const Opportunities = () => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.opportunity}
           setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}

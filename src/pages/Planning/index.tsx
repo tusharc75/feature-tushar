@@ -344,6 +344,7 @@ const Planning = () => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.planning}
           setSelectedType={setSelectedType}
           leftSideContents={<LeftSideContents {...{ permissions, history, selectedPlanningType, setSelectedPlanningType }} />}
           searchValue={search}
