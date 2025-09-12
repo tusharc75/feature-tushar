@@ -18,6 +18,8 @@ import { useLocation } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Star, StarBorder } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
+import { useData } from 'src/StateProvider/Provider';
+import { SET_USER } from 'src/StateProvider/actionTypes';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -254,6 +256,11 @@ const RenderTabs = ({
     }
   ) => void;
 } & Pick<ListingPageHeaderProps, 'toggleButtonList' | 'selectedType' | 'resource'>) => {
+  const {
+    state,
+    dispatch
+  }: any = useData();
+  const { user } = state;
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
   const [defaultType, setDefaultType] = React.useState<number | null>(selectedType);
 
@@ -268,12 +275,25 @@ const RenderTabs = ({
   const open = Boolean(anchorEl);
 
   const handleSetDefault = async (value: number) => {
+    setDefaultType(value);
     try {
       await axiosInstance().put('/user/resource-ui-preference', {
         resource: resource,
         type: TAB_VIEWS[value],
-      });
-      setDefaultType(value);
+      }).then(({ data: { data } }) => {
+        dispatch({
+          type: SET_USER, payload: {
+            ...user,
+            user: {
+              ...user.user,
+              uiPreference: {
+                ...user.uiPreference,
+                byDefaultRecord: data,
+              },
+            },
+          },
+        });
+      })
     } catch (err) {
       console.error(err);
     }
