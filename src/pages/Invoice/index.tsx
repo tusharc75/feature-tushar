@@ -491,6 +491,7 @@ const Invoice = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
+          resource={sidebarResource.invoice}
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}

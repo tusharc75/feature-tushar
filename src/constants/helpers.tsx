@@ -2203,6 +2203,13 @@ export const DELIVERY_TICKET_STATUS = {
   cancelled: 'Cancelled'
 };
 
+export const TAB_VIEWS = {
+  1: 'My',
+  2: 'Open',
+  3: 'All',
+  4: 'Closed'
+};
+
 export const RENTAL_STATUS = {
   new: 'New',
   cancelled: 'Cancelled',
@@ -3462,6 +3469,8 @@ export const getDefaultMyRecordType = (user, resource) => {
         return 3;
       } else if (byDefaultRecord?.type === 'Open') {
         return 2;
+      } else if (byDefaultRecord?.type === 'Closed') {
+        return 4;
       } else {
         return 1;
       }
