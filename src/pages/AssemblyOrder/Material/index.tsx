@@ -205,7 +205,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   }, [isFilesUploading]);
 
   const processMaterial = (material) => {
-    const grouped = groupBy(material?.filter(item => item?.parentId && item?.orignalId), item => `${item.parentId}_${item.materialId}`);
+    const grouped = groupBy(material?.filter(item => item?.parentId && item?.type === MATERIAL_TYPE.package), item => `${item.parentId}_${item.materialId}`);
     const result = [...material];
 
     Object.keys(grouped)?.forEach((_key, i) => {
@@ -220,13 +220,12 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           detail: items[0]?.detail || items[0]?.type === MATERIAL_TYPE.package ? items[0]?.packageDetail?.packageName : '',
           qty: items?.length,
           isDummy: true,
-          hideSelection: true
         }
 
         result.push(ele);
 
         items.forEach(item => {
-          item.tempParentId = ele?._id;
+          item.parentId = ele?._id;
         });
       }
     });
@@ -246,7 +245,6 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
 
     setOriMaterial(JSON.parse(JSON.stringify(data.material)));
 
-    // const material = data?.material
     const material = processMaterial(data?.material)
     const serializedPackages = data?.serializedPackages || [];
 
@@ -280,12 +278,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   };
 
   const generateNestedData = (material, serializedPackages, parent) => {
-    const subRows: any = material?.filter((e) => {
-      if (e?.tempParentId) {
-        return e.tempParentId === parent._id
-      }
-      return e.parentId === parent._id
-    });
+    const subRows: any = material?.filter((e) => e.parentId === parent._id)
 
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
@@ -497,7 +490,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         {permissions?.serializedPackages?.isRead &&
           selectedRecords?.filter((e) => e?.workOrderType === WORK_ORDER_TYPE.disassemblyOrder)?.length > 0 && (
             <MenuItem
-              disabled={checkUniqueWarehouse(selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.package))}
+              disabled={checkUniqueWarehouse(selectedRecords?.filter((e) => !e?.isDummy && e?.type === MATERIAL_TYPE.package))}
               onClick={() => {
                 setOpenSerializedPackagesDialog(true);
               }}

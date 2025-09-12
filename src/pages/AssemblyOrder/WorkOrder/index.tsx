@@ -413,7 +413,7 @@ const WorkOrder = ({
   };
 
   const processMaterial = (material) => {
-    const grouped = groupBy(material?.filter(item => item?.parentId && item?.orignalId), item => `${item.parentId}_${item.materialId}`);
+    const grouped = groupBy(material?.filter(item => item?.parentId && item?.type === MATERIAL_TYPE.package), item => `${item.parentId}_${item.materialId}`);
     const result = [...material];
 
     Object.keys(grouped)?.forEach((_key, i) => {
@@ -428,13 +428,12 @@ const WorkOrder = ({
           detail: items[0]?.detail || items[0]?.type === MATERIAL_TYPE.package ? items[0]?.packageDetail?.packageName : '',
           qty: items?.length,
           isDummy: true,
-          hideSelection: true
         }
 
         result.push(ele);
 
         items.forEach(item => {
-          item.tempParentId = ele?._id;
+          item.parentId = ele?._id;
         });
       }
     });
@@ -500,10 +499,7 @@ const WorkOrder = ({
   };
 
   const generateNestedData = (material, parent) => {
-    var subPackage: any = material.filter((e) => {
-      let isMatched = e?.tempParentId ? e?.tempParentId === parent?._id : e?.parentId === parent?._id
-      return isMatched && e?.type === MATERIAL_TYPE.package
-    });
+    var subPackage: any = material.filter((e) => e?.parentId === parent?._id && e?.type === MATERIAL_TYPE.package)
     subPackage.forEach((_subPackage, index) => {
       _subPackage.index = parent.index + '.' + `${index + 1}`;
       _subPackage.detail = _subPackage?.detail || _subPackage.packageDetail?.packageName || '';
