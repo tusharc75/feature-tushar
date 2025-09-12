@@ -678,6 +678,7 @@ const Leads = () => {
           toggleButtonList={LeadTypes}
           onToggle={handleFilter}
           selectedType={selectedType}
+          resource={sidebarResource.lead}
           setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}

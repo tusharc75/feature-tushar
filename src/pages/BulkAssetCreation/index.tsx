@@ -297,6 +297,7 @@ const BulkAssetCreation = () => {
         <ListingPageHeader
           toggleButtonList={types}
           onToggle={handleFilter}
+          resource={sidebarResource.bulkAssetCreation}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
           leftSideContents={
@@ -348,12 +349,11 @@ const BulkAssetCreation = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
+          message={`Are you sure you want to delete ${deleteRecord
               ? `${resources?.bulkAssetCreation?.titleSingular?.toLowerCase()} :
              ${deleteRecord?.baNumber}`
               : `selected ${resources?.bulkAssetCreation?.titlePlural?.toLowerCase()}`
-          } ?`}
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

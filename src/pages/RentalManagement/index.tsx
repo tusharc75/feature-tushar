@@ -528,6 +528,7 @@ const RentalManagement = () => {
           toggleButtonList={types}
           onToggle={() => dispatch({ type: 'pageChange', page: 0 })}
           selectedType={selectedType}
+          resource={sidebarResource.rentalManagement}
           setSelectedType={setSelectedType}
           leftSideContents={<LeftSideButtons />}
           searchValue={search}
