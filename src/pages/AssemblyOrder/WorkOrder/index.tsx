@@ -413,12 +413,10 @@ const WorkOrder = ({
   };
 
   const processMaterial = (material) => {
-    const grouped = groupBy(material?.filter(item => item?.parentId && item?.type === MATERIAL_TYPE.package), item => `${item.parentId}_${item.materialId}`);
     const result = [...material];
-
+    const grouped = groupBy(material?.filter(item => item?.parentId && item?.type === MATERIAL_TYPE.package), item => `${item.parentId}_${item.materialId}`);
     Object.keys(grouped)?.forEach((_key, i) => {
       const items = grouped[_key]
-
       if (items?.length > 1) {
         const ele: any = {
           _id: `${Date.now()}` + i,
@@ -429,15 +427,12 @@ const WorkOrder = ({
           qty: items?.length,
           isDummy: true,
         }
-
         result.push(ele);
-
         items.forEach(item => {
           item.parentId = ele?._id;
         });
       }
     });
-
     return result;
   }
 

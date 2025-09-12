@@ -42,7 +42,12 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
       let inputValues = {};
       values['inputFields'] &&
         values['inputFields'].forEach((_input) => {
-          inputValues[_input] = 1;
+          const tempField = fields?.find((e) => e.fieldName === _input)
+          if (['singleLine', 'multiLine']?.includes(tempField?.type)) {
+            inputValues[_input] = '';
+          } else {
+            inputValues[_input] = 1;
+          }
         });
       values['counterFieldInputFields'] &&
         values['counterFieldInputFields']?.forEach((_input) => {
