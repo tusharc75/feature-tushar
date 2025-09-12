@@ -264,6 +264,7 @@ const AssemblyOrder = () => {
         <ListingPageHeader
           toggleButtonList={types}
           onToggle={onTypeChange}
+          resource={sidebarResource.assemblyOrder}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
           searchValue={search}
@@ -318,12 +319,11 @@ const AssemblyOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
+          message={`Are you sure you want to delete ${deleteRecord
               ? `${resources?.assemblyOrder?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.assemblyOrderNumber}`
               : `selected ${resources?.assemblyOrder?.titlePlural?.toLowerCase()}`
-          } ?`}
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -389,6 +389,7 @@ export default function Contact(props) {
         <ListingPageHeader
           toggleButtonList={types}
           onToggle={onTypeChange}
+          resource={sidebarResource[contactResource]}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
           leftSideContents={<LeftSideContents />}

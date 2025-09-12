@@ -283,6 +283,7 @@ const PurchaseRequisition = () => {
           toggleButtonList={PurchaseRequisitionType}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.purchaseRequisition}
           setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}

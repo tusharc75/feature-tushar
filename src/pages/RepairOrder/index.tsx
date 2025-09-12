@@ -316,6 +316,7 @@ const RepairOrder = () => {
           onToggle={onTypeChange}
           setQueryString={false}
           selectedType={selectedType}
+          resource={sidebarResource.repairOrder}
           setSelectedType={setSelectedType}
           leftSideContents={
             referenceType && <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} />
@@ -363,12 +364,11 @@ const RepairOrder = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
+            message={`Are you sure you want to delete ${deleteRecord
                 ? `${resources?.repairOrder?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.repairOrderNumber}`
                 : `selected ${resources?.repairOrder?.titlePlural?.toLowerCase()}`
-            } ?`}
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

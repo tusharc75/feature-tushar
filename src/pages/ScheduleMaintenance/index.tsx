@@ -555,6 +555,7 @@ const ScheduleMaintenance = () => {
         <ListingPageHeader
           toggleButtonList={types}
           selectedType={selectedType}
+          resource={sidebarResource.schedulingMaintenance}
           setSelectedType={setSelectedType}
           leftSideContents={<LeftSideContent />}
           leftSideContentsOfSearchFilter={<LeftSideContentOfSearchFilter />}

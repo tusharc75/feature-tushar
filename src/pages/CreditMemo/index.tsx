@@ -329,6 +329,7 @@ const CreditMemo = () => {
         <ListingPageHeader
           toggleButtonList={allFields?.filter((f) => ['owner', 'collaborator']?.includes(f?.fieldData?.fieldName))?.length === 2 ? types : null}
           onToggle={onTypeChange}
+          resource={sidebarResource.creditMemo}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
           searchValue={search}

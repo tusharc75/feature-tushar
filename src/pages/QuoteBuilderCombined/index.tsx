@@ -524,6 +524,7 @@ const QuoteBuilders = () => {
           toggleButtonList={types}
           onToggle={handleFilter}
           selectedType={selectedType}
+          resource={sidebarResource.quoteBuilder}
           setSelectedType={setSelectedType}
           leftSideContents={LeftSideContents}
           searchValue={search}

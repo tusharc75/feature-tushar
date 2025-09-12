@@ -428,6 +428,7 @@ const ProjectSales: FC = () => {
           toggleButtonList={types}
           onToggle={handleFilter}
           selectedType={selectedType}
+          resource={sidebarResource.projectSales}
           setSelectedType={setselectedType}
           searchValue={search}
           onSearch={handleSearch}
@@ -463,12 +464,11 @@ const ProjectSales: FC = () => {
       {showDeleteConfirmBox ? (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
+          message={`Are you sure you want to delete ${deleteRecord
               ? `${resources?.projectSales?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.projectName}`
               : `selected ${resources?.projectSales?.titlePlural?.toLowerCase()}`
-          } ?`}
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

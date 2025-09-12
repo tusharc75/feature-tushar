@@ -385,6 +385,7 @@ const ListView = ({ topRightSlot }) => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.contentPostPlanning}
           setSelectedType={setSelectedType}
           leftSideContents={
             <ButtonMenu
