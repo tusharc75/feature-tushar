@@ -2203,6 +2203,13 @@ export const DELIVERY_TICKET_STATUS = {
   cancelled: 'Cancelled'
 };
 
+export const TAB_VIEWS = {
+  1: 'My',
+  2: 'Open',
+  3: 'All',
+  4: 'Closed'
+};
+
 export const RENTAL_STATUS = {
   new: 'New',
   cancelled: 'Cancelled',
