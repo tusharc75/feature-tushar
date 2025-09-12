@@ -47,7 +47,7 @@ const SupportTicket = () => {
     },
     {
       key: `All Support Tickets`,
-      value: 2
+      value: 3
     }
   ];
 
@@ -343,9 +343,9 @@ const SupportTicket = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord
-              ? `support ticket :
+            ? `support ticket :
             ${deleteRecord?.supportTicketNumber || ''}`
-              : `selected support tickets`
+            : `selected support tickets`
             } ?`}
           onClose={() => {
             setDeleteRecord(null);

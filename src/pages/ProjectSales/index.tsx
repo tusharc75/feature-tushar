@@ -428,7 +428,6 @@ const ProjectSales: FC = () => {
           toggleButtonList={types}
           onToggle={handleFilter}
           selectedType={selectedType}
-          resource={sidebarResource.projectSales}
           setSelectedType={setselectedType}
           searchValue={search}
           onSearch={handleSearch}

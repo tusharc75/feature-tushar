@@ -358,7 +358,6 @@ const DynamicForm = () => {
           toggleButtonList={showToggleButtons ? DynamicFormType : null}
           onToggle={onTypeChange}
           selectedType={selectedType}
-          resource={resource}
           setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}
