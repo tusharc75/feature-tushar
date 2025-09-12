@@ -60,11 +60,11 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
 
   useEffect(() => {
     fetchFields();
-  }, [invoiceData]);
+  }, []);
 
   useEffect(() => {
     fetchData();
-  }, [columns]);
+  }, [columns, invoiceData]);
 
   const fetchFields = async () => {
     let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, allowedToEdit);
