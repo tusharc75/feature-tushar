@@ -386,7 +386,13 @@ export const resourcePolicy = [
         fieldLabel: 'Auto Upload Pdf In Workspace',
         type: 'checkBox',
         defaultValue: false
-      }
+      },
+      {
+        fieldName: 'editRestrictionStatus',
+        fieldLabel: 'Edit Restriction Status',
+        type: 'multiSelect',
+        fieldOption: 'status'
+      },
     ]
   },
   {
