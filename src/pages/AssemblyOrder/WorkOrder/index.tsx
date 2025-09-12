@@ -1,6 +1,6 @@
 import { Box, IconButton, MenuItem, Typography } from '@mui/material';
 import { CheckCircle, Delete, Edit } from '@mui/icons-material';
-import { flatMap, map, orderBy, uniq } from 'lodash';
+import { flatMap, groupBy, map, orderBy, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
@@ -412,6 +412,30 @@ const WorkOrder = ({
     setColumns(coloum);
   };
 
+  const processMaterial = (material) => {
+    const result = [...material];
+    const grouped = groupBy(material?.filter(item => item?.parentId && item?.type === MATERIAL_TYPE.package), item => `${item.parentId}_${item.materialId}`);
+    Object.keys(grouped)?.forEach((_key, i) => {
+      const items = grouped[_key]
+      if (items?.length > 1) {
+        const ele: any = {
+          _id: `${Date.now()}` + i,
+          type: MATERIAL_TYPE.package,
+          parentId: items[0]?.parentId,
+          materialId: items[0]?.materialId,
+          detail: items[0]?.detail || items[0]?.type === MATERIAL_TYPE.package ? items[0]?.packageDetail?.packageName : '',
+          qty: items?.length,
+          isDummy: true,
+        }
+        result.push(ele);
+        items.forEach(item => {
+          item.parentId = ele?._id;
+        });
+      }
+    });
+    return result;
+  }
+
   const fetchData = async () => {
     setNextStep(false);
 
@@ -424,7 +448,9 @@ const WorkOrder = ({
 
     setMaterial(JSON.parse(JSON.stringify(data)));
 
-    let rows = data?.filter((e) => e.parentId === null);
+    const material = processMaterial(data)
+
+    let rows = material?.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent?.type === MATERIAL_TYPE.serializedPackage ?
@@ -447,7 +473,7 @@ const WorkOrder = ({
           }
         }
       }
-      parent.subRows = generateNestedData(data, parent);
+      parent.subRows = generateNestedData(material, parent);
       parent.canDelete = false;
       if (parent?.workOrder) {
         if (parent?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
@@ -468,7 +494,7 @@ const WorkOrder = ({
   };
 
   const generateNestedData = (material, parent) => {
-    var subPackage: any = material.filter((e) => e?.parentId === parent?._id && e?.type === MATERIAL_TYPE.package);
+    var subPackage: any = material.filter((e) => e?.parentId === parent?._id && e?.type === MATERIAL_TYPE.package)
     subPackage.forEach((_subPackage, index) => {
       _subPackage.index = parent.index + '.' + `${index + 1}`;
       _subPackage.detail = _subPackage?.detail || _subPackage.packageDetail?.packageName || '';
@@ -492,7 +518,7 @@ const WorkOrder = ({
       }
       _subPackage.subRows = generateNestedData(material, _subPackage);
       _subPackage.canDelete = false;
-      if (_subPackage?.workOrder) {
+      if (_subPackage?.workOrder && !_subPackage?.isDummy) {
         if (_subPackage?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
           _subPackage.canDelete = _subPackage.subRows.length === 0 ? true : false;
           if (_subPackage.subRows?.length && _subPackage.subRows?.find((e) => !e?.canDelete)) {
