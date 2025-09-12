@@ -21,7 +21,6 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
-  INVOICE_STATUS,
   SALES_ORDER_STATUS,
   checkIsAllowedToEdit,
   salesOrder,
@@ -117,7 +116,7 @@ const SalesOrderDetails = () => {
       let data;
       const response: any = await axiosInstance().get(`${salesOrder.api}/${id}`);
       data = response?.data?.data;
-      if ([INVOICE_STATUS.invoiced, INVOICE_STATUS.closed]?.includes(data?.status)) {
+      if ([SALES_ORDER_STATUS.invoiced, SALES_ORDER_STATUS.closed]?.includes(data?.status)) {
         setCurrentStep(steps?.length - 1);
       } else {
         setCurrentStep(getIndex(data?.processStatus, steps));
