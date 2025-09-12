@@ -893,7 +893,7 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
       if (key?.visibilityCondition?.length || key?.lookupDependentOn) {
         obj[key.fieldName] = '';
       } else {
-        obj[key.fieldName] = value ? value : option ? option.optionValue : '';
+        obj[key.fieldName] = value && key?.option?.find((e: any) => e?.optionValue === value) ? value : option ? option.optionValue : '';
       }
     } else if (key.type === 'multiSelect') {
       let defaultOptions = key.option?.filter((item: any) => item.default === true);
