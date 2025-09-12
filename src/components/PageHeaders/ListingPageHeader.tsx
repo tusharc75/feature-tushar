@@ -1,7 +1,7 @@
 import { AddOutlined } from '@mui/icons-material';
 import { ButtonProps, CircularProgress, Popover, useMediaQuery } from '@mui/material';
 import queryString from 'query-string';
-import React, { ReactNode, useEffect, useMemo } from 'react';
+import React, { ReactNode, useContext, useEffect, useMemo } from 'react';
 import { BiChevronDown } from 'react-icons/bi';
 import { useHistory } from 'react-router-dom';
 // import { useGetWalkmeInstance } from 'src/components/CustomIntro';
@@ -20,6 +20,7 @@ import { Star, StarBorder } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 import { useData } from 'src/StateProvider/Provider';
 import { SET_USER } from 'src/StateProvider/actionTypes';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -268,6 +269,8 @@ const RenderTabs = ({
     setAnchorEl(event.currentTarget);
   };
 
+  const toastConfig = useContext(CustomToastContext);
+
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -276,27 +279,24 @@ const RenderTabs = ({
 
   const handleSetDefault = async (value: number) => {
     setDefaultType(value);
-    try {
-      await axiosInstance().put('/user/resource-ui-preference', {
-        resource: resource,
-        type: TAB_VIEWS[value],
-      }).then(({ data: { data } }) => {
-        dispatch({
-          type: SET_USER, payload: {
-            ...user,
-            user: {
-              ...user.user,
-              uiPreference: {
-                ...user.uiPreference,
-                byDefaultRecord: data,
-              },
+    axiosInstance().put('/user/resource-ui-preference', {
+      resource: resource, type: TAB_VIEWS[value]
+    }).then(({ data: { data } }) => {
+      dispatch({
+        type: SET_USER, payload: {
+          ...user,
+          user: {
+            ...user.user,
+            uiPreference: {
+              ...user.uiPreference,
+              byDefaultRecord: data,
             },
           },
-        });
-      })
-    } catch (err) {
-      console.error(err);
-    }
+        },
+      });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });;
   };
 
   return (
@@ -333,24 +333,28 @@ const RenderTabs = ({
                 >
                   {d.key}
                 </RippleButton>
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSetDefault(d.value);
-                  }}
-                >
-                  {defaultType === d.value ? (
-                    <Star sx={{ color: 'gold' }} fontSize="small" />
-                  ) : (
-                    <StarBorder fontSize="small" />
-                  )}
-                </IconButton>
+                {resource &&
+                  <HtmlTooltip title={defaultType === d.value ? '' : 'Set as default'}>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSetDefault(d.value);
+                      }}
+                    >
+                      {defaultType === d.value ? (
+                        <Star sx={{ color: 'gold' }} fontSize="small" />
+                      ) : (
+                        <StarBorder fontSize="small" />
+                      )}
+                    </IconButton>
+                  </HtmlTooltip>
+                }
               </li>
             );
           })}
         </ul>
-      </Popover>
+      </Popover >
     </>
   );
 };

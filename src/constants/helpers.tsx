@@ -3469,6 +3469,8 @@ export const getDefaultMyRecordType = (user, resource) => {
         return 3;
       } else if (byDefaultRecord?.type === 'Open') {
         return 2;
+      } else if (byDefaultRecord?.type === 'Closed') {
+        return 4;
       } else {
         return 1;
       }
