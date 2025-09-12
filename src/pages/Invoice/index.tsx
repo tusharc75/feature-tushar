@@ -69,7 +69,11 @@ const Invoice = () => {
 
   const [pdfColumns, setPdfColumns] = useState([]);
   const [resourcePolicyData, setResourcePolicyData] = useState(null);
-  const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<'proforma' | 'invoices' | null>(null);
+
+  const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<'proforma' | 'invoices' | null>(() => {
+    return (localStorage.getItem(`${user?.user?._id}_invoice_type`) as 'proforma' | 'invoices' | null) || null;
+  });
+  const [isInvoiceTypeFilterVisible, setIsInvoiceTypeFilterVisible] = useState(false);
 
   const types = [
     {
@@ -101,7 +105,6 @@ const Invoice = () => {
   useEffect(() => {
     fetchPolicy();
   }, []);
-
 
   const fetchPolicy = async () => {
     const data = await getResourcePolicy(user, permissions, sidebarResource.invoice)
@@ -136,6 +139,7 @@ const Invoice = () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.invoice, permissions?.invoice?.isUpdate);
     fieldsDataForRead?.forEach((d) => {
       if (d?.fieldData?.fieldName === 'status') {
+        setIsInvoiceTypeFilterVisible(d?.fieldData?.option?.find((e) => e.optionValue === INVOICE_STATUS.proforma) ? true : false)
         const statusOps = d?.fieldData?.option?.filter(
           (e) =>
             ![
@@ -207,20 +211,18 @@ const Invoice = () => {
     } else {
       ids = selectedRecords?.map((d) => d._id);
     }
-    axiosInstance()
-      .put(`${invoice.api}/remove`, { ids: ids })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        dispatch({ type: 'selection', selectedRecords: [] });
-        fetchData();
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
-        setIsSubmitting(false);
-      })
+    axiosInstance().put(`${invoice.api}/remove`, { ids: ids }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+      dispatch({ type: 'selection', selectedRecords: [] });
+      fetchData();
+      setShowDeleteConfirmBox(false);
+      setDeleteRecord(null);
+      setIsSubmitting(false);
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
@@ -342,7 +344,6 @@ const Invoice = () => {
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     axiosInstance()
       .get(`${invoice.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
@@ -379,6 +380,8 @@ const Invoice = () => {
 
   const handleInvoiceTypeChange = (value: 'proforma' | 'invoices' | null) => {
     setInvoiceTypeFilter(value);
+    localStorage.setItem(`${user.user._id}_invoice_type`, value);
+
   };
 
   const ActionMenuItems = () => {
@@ -498,7 +501,7 @@ const Invoice = () => {
               setAccountDetails={setAccountDetails}
               invoiceTypeFilter={invoiceTypeFilter}
               handleInvoiceTypeChange={handleInvoiceTypeChange}
-              resources={resources}
+              isInvoiceTypeFilterVisible={isInvoiceTypeFilterVisible}
             />
           }
           searchValue={search}
@@ -571,13 +574,14 @@ const Invoice = () => {
 
 export default Invoice;
 
-const LeftSideContents = ({ 
-  accountDetails, 
-  setAccountDetails, 
-  invoiceTypeFilter, 
+const LeftSideContents = ({
+  accountDetails,
+  setAccountDetails,
+  invoiceTypeFilter,
   handleInvoiceTypeChange,
-  resources 
+  isInvoiceTypeFilterVisible
 }) => {
+
   const invoiceTypeOptions = [
     { label: 'Proforma', value: 'proforma' },
     { label: 'Invoices', value: 'invoices' }
@@ -599,23 +603,22 @@ const LeftSideContents = ({
           }}
         />
       ) : null}
-
-      <Autocomplete
-        className="ml-3 min-w-[200px]"
-        size="small"
-        options={invoiceTypeOptions}
-        value={
-          invoiceTypeOptions.find((opt) => opt.value === (invoiceTypeFilter ?? '')) || null
-        }
-        onChange={(event, newValue) => {
-          handleInvoiceTypeChange(newValue?.value || null);
-        }}
-        getOptionLabel={(option) => option.label || ''}
-        renderInput={(params) => (
-          <TextField {...params} label="Invoice Type" variant="outlined" />
-        )}
-        isOptionEqualToValue={(option, value) => option.value === value.value}
-      />
+      {isInvoiceTypeFilterVisible &&
+        <Autocomplete
+          className="ml-3 min-w-[200px]"
+          size="small"
+          options={invoiceTypeOptions}
+          value={invoiceTypeOptions.find((opt) => opt.value === (invoiceTypeFilter ?? '')) || null}
+          onChange={(event, newValue) => {
+            handleInvoiceTypeChange(newValue?.value || null);
+          }}
+          getOptionLabel={(option) => option.label || ''}
+          renderInput={(params) => (
+            <TextField {...params} label="Invoice Type" variant="outlined" />
+          )}
+          isOptionEqualToValue={(option, value) => option.value === value.value}
+        />
+      }
     </>
   );
 };
