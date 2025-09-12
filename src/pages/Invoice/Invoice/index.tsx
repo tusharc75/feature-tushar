@@ -36,14 +36,17 @@ const Invoice = ({ invoiceData, invoiceFields, setPrevStep, handleChangeStatus, 
   }, []);
 
   useEffect(() => {
-    if ([INVOICE_STATUS.invoiced, INVOICE_STATUS.reconciled]?.includes(invoiceData?.status)) {
+    fetchFields();
+  }, []);
+
+  useEffect(() => {
+    if ((resourcePolicyData?.policy?.editRestrictionStatus || [])?.includes(invoiceData?.status)) {
       setPrevStep(false)
     }
     else {
       setPrevStep(true)
     }
-    fetchFields();
-  }, []);
+  }, [resourcePolicyData]);
 
   const fetchFields = async () => {
     try {
