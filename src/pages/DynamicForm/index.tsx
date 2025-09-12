@@ -357,6 +357,7 @@ const DynamicForm = () => {
         <ListingPageHeader
           toggleButtonList={showToggleButtons ? DynamicFormType : null}
           onToggle={onTypeChange}
+          selectedType={selectedType}
           resource={resource}
           setSelectedType={setSelectedType}
           searchValue={search}
