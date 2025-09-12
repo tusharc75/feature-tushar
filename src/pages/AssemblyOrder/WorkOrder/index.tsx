@@ -206,7 +206,7 @@ const WorkOrder = ({
       },
       {
         accessor: 'workOrderNumber',
-        Header: 'Work Order',
+        Header: resources?.workOrder?.titleSingular || 'Work Order',
         width: 200,
         Cell: ({ row }) =>
           row.original.workOrderNumber ? (
@@ -232,6 +232,14 @@ const WorkOrder = ({
         show: false,
         Cell: ({ row }) => {
           return row.original['status'] ? <h5 className="text-truncate">{row.original.status}</h5> : <NoDataCell />;
+        }
+      }, {
+        accessor: 'workOrderCompletQty',
+        Header: `${resources?.workOrder?.titleSingular || 'Work Order'} Completed`,
+        width: 200,
+        show: false,
+        Cell: ({ row }) => {
+          return row.original['workOrderCompletQty'] ? <h5 className="text-truncate">{row.original.workOrderCompletQty}</h5> : <NoDataCell />;
         }
       }
     ];
@@ -518,6 +526,9 @@ const WorkOrder = ({
       }
       _subPackage.subRows = generateNestedData(material, _subPackage);
       _subPackage.canDelete = false;
+      if (_subPackage?.isDummy) {
+        _subPackage.workOrderCompletQty = `${_subPackage?.subRows?.filter((e) => e?.workOrder?.status === WORK_ORDER_STATUS.completed)?.length} / ${_subPackage?.qty}`
+      }
       if (_subPackage?.workOrder && !_subPackage?.isDummy) {
         if (_subPackage?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
           _subPackage.canDelete = _subPackage.subRows.length === 0 ? true : false;
