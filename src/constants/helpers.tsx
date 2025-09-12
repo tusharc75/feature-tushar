@@ -364,8 +364,6 @@ export const sidebarResource = {
   fieldServiceTechnician: `Field Service Technician`,
   resourceLogs: `Resource Logs`,
   userDownloadRequest: 'User Download Request',
-  truckMaster: `Truck Master`,
-  job: 'Job',
   fleetDispatch: 'Fleet Dispatch',
   fleetReceiver: 'Fleet Receiver',
   storageLocation: 'Storage Location',
@@ -466,7 +464,6 @@ export const CHILD_RESOURCE = {
   fieldTicketCost: 'Field Ticket Cost',
   fieldTicketSubmit: 'Field Ticket Submit',
   fieldTicketMateial: 'Field Ticket Material',
-  jobDetail: 'Job Detail',
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
   productionOrderDetail: 'Production Order Detail',
@@ -2194,7 +2191,6 @@ export const INVENTORY_HISTORY_TYPE = {
   productionOrder: 'Production Order',
   fieldServiceOrder: 'Field Service Order',
   fieldTicket: 'Field Ticket',
-  job: 'Job',
   planning: 'Planning',
   deals: 'Deals',
   assemblyOrder: 'Assembly Order'
@@ -2385,8 +2381,6 @@ export const ACTIVITY_RESOURCE = {
   workOrder: 'workOrder',
   demandOrder: 'demandOrder',
   fieldTicket: 'fieldTicket',
-  truckMaster: 'truckMaster',
-  job: 'Job',
   purchaseRequisition: 'purchaseRequisition',
   planning: 'planning',
   productCategory: 'productCategory',
@@ -2415,8 +2409,6 @@ export const ACTIVITY_RESOURCE = {
 export const LOG_RESOURCE = {
   serializedAsset: sidebarResource.serializedAsset,
   serviceMaster: sidebarResource.serviceMaster,
-  truckMaster: sidebarResource.truckMaster,
-  job: sidebarResource.job,
   quotation: sidebarResource.quotation,
   lead: sidebarResource.lead,
   opportunity: sidebarResource.opportunity,
@@ -2586,7 +2578,6 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.productionOrder, value: sidebarResource.productionOrder, key: 'productionOrder' },
   { title: sidebarResource.fieldServiceOrder, value: sidebarResource.fieldServiceOrder, key: 'fieldServiceOrder' },
   { title: sidebarResource.fieldTicket, value: sidebarResource.fieldTicket, key: 'fieldTicket' },
-  { title: sidebarResource.job, value: sidebarResource.job, key: 'job' },
   { title: sidebarResource.purchaseRequisition, value: sidebarResource.purchaseRequisition, key: 'purchaseRequisition' },
   { title: sidebarResource.planning, value: sidebarResource.planning, key: 'planning' },
   { title: sidebarResource.subcontractAssembly, value: sidebarResource.subcontractAssembly, key: 'subcontractAssembly' },
@@ -3163,6 +3154,7 @@ export const SERIALIZED_PACKAGE_STATUS = {
   reserved: 'Reserved',
   underReview: 'Under Review',
   inUse: 'In-Use',
+  inTransit: 'In-Transit',
   customerPossession: 'Customer Possession',
   disassembled: 'Disassembled'
 };
@@ -3477,6 +3469,8 @@ export const getDefaultMyRecordType = (user, resource) => {
         return 3;
       } else if (byDefaultRecord?.type === 'Open') {
         return 2;
+      } else if (byDefaultRecord?.type === 'Closed') {
+        return 4;
       } else {
         return 1;
       }
@@ -4090,9 +4084,20 @@ export const reverseLookupDependentOn = (lookupDependentOn, options = [], value,
   }
   return option[lookupDependentOn];
 };
+
 export function calculateRatio(a: number, b: number, c: number): number {
   if (b === 0 || c === 0) {
     throw new Error('Denominators cannot be zero.');
   }
   return c * (b / a);
+}
+
+export const getDataFromHeader = (fields: any[], referenceData: any) => {
+  const data: any = {}
+  fields?.forEach(ele => {
+    if (ele?.copyFromHeaderField && referenceData[ele?.copyFromHeaderField]) {
+      data[ele?.fieldName] = referenceData[ele?.copyFromHeaderField]
+    }
+  });
+  return data
 }

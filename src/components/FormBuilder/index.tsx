@@ -30,7 +30,8 @@ export const FormBuilder = ({
   extraFields,
   resource,
   onAddRemoveField = null,
-  brandId
+  brandId,
+  formData = null
 }) => {
   const addSection = (sectionHoverIndex) => {
     let data = [...section];
@@ -163,6 +164,7 @@ export const FormBuilder = ({
             extraFields={extraFields}
             isCalculativeField={isCalculativeField}
             brandId={brandId}
+            formData={formData}
           />
         </div>
         <DndOverlayWrapper />

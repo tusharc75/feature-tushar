@@ -510,6 +510,7 @@ const Service = ({
   const isAllowedToServiceEdit =
     !completed &&
     quotationData?.status != QUOTATION_STATUS.sentToCustomer &&
+    workOrderData?.status != WORK_ORDER_STATUS.draft &&
     (allowedToEdit ||
       selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) ||
       (!selectedService?.assignedUsers?.length && !selectedService?.competencies?.length) ||
