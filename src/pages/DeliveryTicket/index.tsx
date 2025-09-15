@@ -360,6 +360,7 @@ const DeliveryTicket = () => {
           <ListingPageHeader
             toggleButtonList={types}
             onToggle={onTypeChange}
+            resource={sidebarResource.deliveryTicket}
             selectedType={selectedType}
             setSelectedType={setSelectedType}
             leftSideContents={

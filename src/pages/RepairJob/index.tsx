@@ -401,6 +401,7 @@ const RepairJob = () => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.repairJob}
           setSelectedType={setSelectedType}
           leftSideContents={<LeftSideContent />}
           searchValue={search}
@@ -436,12 +437,11 @@ const RepairJob = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
+            message={`Are you sure you want to delete ${deleteRecord
                 ? `${resources?.repairJob?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.repairJobName}`
                 : `selected ${resources?.repairJob?.titlePlural?.toLowerCase()}`
-            } ?`}
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

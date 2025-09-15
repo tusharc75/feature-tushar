@@ -2,7 +2,7 @@ import { Dialog, IconButton, Menu, MenuItem, Theme } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
-import { ExpandMore, Visibility } from '@mui/icons-material';
+import { ExpandMore, Visibility, History } from '@mui/icons-material';
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
 import Edit from '@mui/icons-material/Edit';
 import HelpIcon from '@mui/icons-material/HelpOutline';
@@ -87,8 +87,9 @@ import { flattenArray } from 'src/constants/columns';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
-import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
-import SubStatusLog from 'src/pages/RentalManagement/LoadingTicket/SubStatusLog';
+import SubStatusDatesDialog from '../LoadingTicket/SubStatusDatesDialog';
+import SubStatusLog from '../LoadingTicket/SubStatusLog';
+import FleetDispatchHistory from './FleetDispatchHistory';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -118,7 +119,8 @@ const ReceivingTicket = ({
   rentalPolicyData,
   assetStatusOptions,
   setAssetStatusOptions,
-  assetPolicyData
+  assetPolicyData,
+  fleetDispatchPolicyData
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
@@ -190,6 +192,7 @@ const ReceivingTicket = ({
   const [fieldLabels, setFieldLabels] = useState(null);
   const [rentalJobChildFields, setRentalJobChildFields] = useState(null);
   const [subStatusLog, setSubStatusLog] = useState({ open: false, data: null })
+  const [fleetDispatchLog, setFleetDispatchLog] = useState({ open: false, data: null })
 
   const {
     state: { user, permissions, resources }
@@ -2000,6 +2003,18 @@ const ReceivingTicket = ({
                 </IconButton>
               </HtmlTooltip>
             )}
+            {fleetDispatchPolicyData?.policy?.['prsCategory']?.includes(row?.original?.productCategory?.optionValue) && (
+              <HtmlTooltip title={'Fleet Dispatch History'}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setFleetDispatchLog({ open: true, data: row?.original })
+                  }}
+                >
+                  <History fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
           </>
         );
       }
@@ -3450,6 +3465,13 @@ const ReceivingTicket = ({
           ids={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map((r) => r?._id)}
           onSuccess={handleAssetData}
           loading={isSubmitting}
+        />
+      )}
+      {fleetDispatchLog.open && (
+        <FleetDispatchHistory
+          rentalId={rentalManagementData?._id}
+          data={fleetDispatchLog.data}
+          onClose={() => setFleetDispatchLog({ open: false, data: null })}
         />
       )}
     </>

@@ -22,7 +22,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, invoice, sidebarResource } from '../../../constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, getDataFromHeader, invoice, sidebarResource } from '../../../constants/helpers';
 import MaterialDialog from './MaterialDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -64,7 +64,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
 
   useEffect(() => {
     fetchData();
-  }, [columns]);
+  }, [columns, invoiceData]);
 
   const fetchFields = async () => {
     let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, allowedToEdit);
@@ -352,7 +352,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
       });
     } else {
       rows.forEach((d) => {
-        const element: any = {};
+        const element: any = { ...getDataFromHeader(allFields, invoiceData) };
         element.materialId = d._id;
         element.type = addDialog.type;
         element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';

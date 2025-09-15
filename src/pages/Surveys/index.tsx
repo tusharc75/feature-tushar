@@ -32,7 +32,6 @@ const Survey = () => {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
-  const [selectedType, setSelectedType] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -48,7 +47,7 @@ const Survey = () => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.surveys, permissions?.surveys?.isUpdate);
@@ -259,12 +258,11 @@ const Survey = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.surveys?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.surveys?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.surveyName || ''}`
-              : `selected ${resources?.surveys?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.surveys?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

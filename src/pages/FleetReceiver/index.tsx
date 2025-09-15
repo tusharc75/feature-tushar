@@ -8,8 +8,9 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { useData } from 'src/StateProvider/Provider';
-import { prepareDataForGrid } from 'src/constants/helpers';
+import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import FleetReceiverDialog from '../FleetDispatch/DispatchReceiveDialog';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const useStyles = makeStyles((theme: Theme) => ({
   fleetBox: {
@@ -73,10 +74,25 @@ const FleetReceiver = () => {
   const [fleets, setFleets] = useState(null);
   const [loading, setLoading] = useState(false);
   const [receiverDialogOpen, setReceiverDialogOpen] = useState({ open: false, _id: null });
+  const [columns, setColumns] = useState(null);
 
   useEffect(() => {
     fetchData();
+    fetchFields();
   }, []);
+
+
+  const fetchFields = async () => {
+    try {
+      setLoading(true);
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.fleetDispatch, true);
+      setColumns(fieldsDataForRead?.map((e) => e?.fieldData));
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchData = () => {
     setLoading(true);
@@ -121,12 +137,15 @@ const FleetReceiver = () => {
                         <LocalShippingIcon className="w-full" />
                       </Box>
                       <Box className="basis-[calc(100%-calc(30px+16px))]">
-                        <Typography className={classes.primaryText}>Name : {data?.dispatchNumber}</Typography>
+                        <Typography className={classes.primaryText}>{columns?.find((e) => e?.primaryField)?.fieldLabel || 'Dispatch Number'} : {data?.dispatchNumber}</Typography>
                         <Typography className={classes.secondaryText}>
-                          <strong>{resources?.serializedAsset?.titleSingular} :</strong> {data?.asset}
+                          <strong>{columns?.find((e) => e?.fieldName === 'fleet')?.fieldLabel || 'Fleet'} :</strong> {data?.fleet}
                         </Typography>
                         <Typography className={classes.secondaryText}>
-                          <strong>Job :</strong> {data?.rentalJob}
+                          <strong>{columns?.find((e) => e?.fieldName === 'asset')?.fieldLabel || resources?.serializedAsset?.titleSingular} :</strong> {data?.asset}
+                        </Typography>
+                        <Typography className={classes.secondaryText}>
+                          <strong>{columns?.find((e) => e?.fieldName === 'rentalJob')?.fieldLabel || resources?.rentalManagement?.titleSingular} :</strong> {data?.rentalJob}
                         </Typography>
                       </Box>
                     </Box>

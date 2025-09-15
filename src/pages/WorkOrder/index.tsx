@@ -366,6 +366,7 @@ const WorkOrder = () => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.workOrder}
           setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}
@@ -444,12 +445,11 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${
-              deleteRecord
+            message={`Are you sure you want to delete ${deleteRecord
                 ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.workOrderNumber || ''}`
                 : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
-            } ?`}
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

@@ -364,8 +364,6 @@ export const sidebarResource = {
   fieldServiceTechnician: `Field Service Technician`,
   resourceLogs: `Resource Logs`,
   userDownloadRequest: 'User Download Request',
-  truckMaster: `Truck Master`,
-  job: 'Job',
   fleetDispatch: 'Fleet Dispatch',
   fleetReceiver: 'Fleet Receiver',
   storageLocation: 'Storage Location',
@@ -466,7 +464,6 @@ export const CHILD_RESOURCE = {
   fieldTicketCost: 'Field Ticket Cost',
   fieldTicketSubmit: 'Field Ticket Submit',
   fieldTicketMateial: 'Field Ticket Material',
-  jobDetail: 'Job Detail',
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
   productionOrderDetail: 'Production Order Detail',
@@ -896,7 +893,7 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
       if (key?.visibilityCondition?.length || key?.lookupDependentOn) {
         obj[key.fieldName] = '';
       } else {
-        obj[key.fieldName] = value ? value : option ? option.optionValue : '';
+        obj[key.fieldName] = value && key?.option?.find((e: any) => e?.optionValue === value) ? value : option ? option.optionValue : '';
       }
     } else if (key.type === 'multiSelect') {
       let defaultOptions = key.option?.filter((item: any) => item.default === true);
@@ -1280,7 +1277,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length; ) {
+        for (let i = 0; i < validationFields?.length;) {
           const field = validationFields[i];
           const condition =
             field?.type === 'section'
@@ -1687,7 +1684,7 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
         });
       }
       return { permissions, resources };
-    } catch (e) {}
+    } catch (e) { }
   }
 };
 
@@ -2194,7 +2191,6 @@ export const INVENTORY_HISTORY_TYPE = {
   productionOrder: 'Production Order',
   fieldServiceOrder: 'Field Service Order',
   fieldTicket: 'Field Ticket',
-  job: 'Job',
   planning: 'Planning',
   deals: 'Deals',
   assemblyOrder: 'Assembly Order'
@@ -2205,6 +2201,13 @@ export const DELIVERY_TICKET_STATUS = {
   inTransit: 'In-Transit',
   delivered: 'Delivered',
   cancelled: 'Cancelled'
+};
+
+export const TAB_VIEWS = {
+  1: 'My',
+  2: 'Open',
+  3: 'All',
+  4: 'Closed'
 };
 
 export const RENTAL_STATUS = {
@@ -2378,8 +2381,6 @@ export const ACTIVITY_RESOURCE = {
   workOrder: 'workOrder',
   demandOrder: 'demandOrder',
   fieldTicket: 'fieldTicket',
-  truckMaster: 'truckMaster',
-  job: 'Job',
   purchaseRequisition: 'purchaseRequisition',
   planning: 'planning',
   productCategory: 'productCategory',
@@ -2408,8 +2409,6 @@ export const ACTIVITY_RESOURCE = {
 export const LOG_RESOURCE = {
   serializedAsset: sidebarResource.serializedAsset,
   serviceMaster: sidebarResource.serviceMaster,
-  truckMaster: sidebarResource.truckMaster,
-  job: sidebarResource.job,
   quotation: sidebarResource.quotation,
   lead: sidebarResource.lead,
   opportunity: sidebarResource.opportunity,
@@ -2579,7 +2578,6 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.productionOrder, value: sidebarResource.productionOrder, key: 'productionOrder' },
   { title: sidebarResource.fieldServiceOrder, value: sidebarResource.fieldServiceOrder, key: 'fieldServiceOrder' },
   { title: sidebarResource.fieldTicket, value: sidebarResource.fieldTicket, key: 'fieldTicket' },
-  { title: sidebarResource.job, value: sidebarResource.job, key: 'job' },
   { title: sidebarResource.purchaseRequisition, value: sidebarResource.purchaseRequisition, key: 'purchaseRequisition' },
   { title: sidebarResource.planning, value: sidebarResource.planning, key: 'planning' },
   { title: sidebarResource.subcontractAssembly, value: sidebarResource.subcontractAssembly, key: 'subcontractAssembly' },
@@ -3156,6 +3154,7 @@ export const SERIALIZED_PACKAGE_STATUS = {
   reserved: 'Reserved',
   underReview: 'Under Review',
   inUse: 'In-Use',
+  inTransit: 'In-Transit',
   customerPossession: 'Customer Possession',
   disassembled: 'Disassembled'
 };
@@ -3470,6 +3469,8 @@ export const getDefaultMyRecordType = (user, resource) => {
         return 3;
       } else if (byDefaultRecord?.type === 'Open') {
         return 2;
+      } else if (byDefaultRecord?.type === 'Closed') {
+        return 4;
       } else {
         return 1;
       }
@@ -3736,8 +3737,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
-  if (typeof callBack !== 'function') callBack = (text) => {};
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
+  if (typeof callBack !== 'function') callBack = (text) => { };
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
@@ -4083,9 +4084,32 @@ export const reverseLookupDependentOn = (lookupDependentOn, options = [], value,
   }
   return option[lookupDependentOn];
 };
+
 export function calculateRatio(a: number, b: number, c: number): number {
   if (b === 0 || c === 0) {
     throw new Error('Denominators cannot be zero.');
   }
   return c * (b / a);
+}
+
+export const getDataFromHeader = (fields: any[], referenceData: any) => {
+  const data: any = {}
+  fields?.filter((ele) => ele?.copyFromHeaderField)?.forEach(ele => {
+    if (referenceData[ele?.copyFromHeaderField]) {
+      data[ele?.fieldName] = referenceData[ele?.copyFromHeaderField]
+    }
+  });
+  return data
+}
+
+export const getValueOfMatchedFieldName = (fields: any, referenceData: any) => {
+  const data: any = {}
+  if (fields?.length > 0 && referenceData) {
+    fields?.forEach(f => {
+      if (f?.fieldName && referenceData[f?.fieldName]) {
+        data[f?.fieldName] = referenceData[f?.fieldName]
+      }
+    });
+  }
+  return data
 }

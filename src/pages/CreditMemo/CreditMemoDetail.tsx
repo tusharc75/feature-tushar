@@ -170,10 +170,8 @@ const CreditMemoDetail = () => {
           <Box className="control-buttons-v1">
             {creditMemoData ? (
               <>
-                {permissions?.creditMemo?.isUpdate &&
-                  allowedToEdit &&
-                  statusOptions?.length > 0 &&
-                  ![INVOICE_STATUS.closed]?.includes(creditMemoData?.status) && (
+                {permissions?.creditMemo?.isUpdate && allowedToEdit &&
+                  statusOptions?.length > 0 && ![INVOICE_STATUS.closed]?.includes(creditMemoData?.status) && (
                     <ThemeButton
                       iconForMobile={<RiExchangeBoxFill size={24} style={{ color: 'var(--primary-text)' }} />}
                       onClick={openActions}
@@ -222,13 +220,11 @@ const CreditMemoDetail = () => {
                     Re-Open
                   </ThemeButton>
                 )}
-                {permissions?.creditMemo?.isUpdate &&
-                  allowedToEdit &&
-                  ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(creditMemoData?.status) && (
-                    <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
-                      {'Edit'}
-                    </ThemeButton>
-                  )}
+                {permissions?.creditMemo?.isUpdate && allowedToEdit && ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(creditMemoData?.status) && (
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
+                )}
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
             ) : (
@@ -268,7 +264,8 @@ const CreditMemoDetail = () => {
             <Material
               creditMemoData={creditMemoData}
               creditMemoFields={fields}
-              allowedToEdit={permissions?.creditMemo?.isUpdate}
+              allowedToEdit={permissions?.creditMemo?.isUpdate && allowedToEdit
+                && ![INVOICE_STATUS.invoiced, INVOICE_STATUS.reconciled, INVOICE_STATUS.closed]?.includes(creditMemoData?.status)}
               fetchCreditMemoData={fetchData}
             />
           </Box>

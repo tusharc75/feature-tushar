@@ -8,7 +8,7 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { useHistory, Link } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -29,6 +29,9 @@ import SoftHoldDialog from './SoftHold';
 import axios, { CancelTokenSource } from 'axios';
 import WarningIcon from '@mui/icons-material/Warning';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { RiExchangeLine } from "react-icons/ri";
+import TransferInventoryDialog from 'src/pages/ProductInventory/TransferInventoryDialog';
+import StarIcon from '@mui/icons-material/Star';
 
 const InventoryProduct = () => {
   const renderedFrom = camelCase(sidebarResource?.productInventory);
@@ -60,12 +63,21 @@ const InventoryProduct = () => {
     productName: history.location?.state?.productName
   });
 
+  const [defaultSelectedData, setDefaultSelectedData] = useState(null);
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   useEffect(() => {
-    getPlants();
+    axiosInstance().get(`/user-default-selections?resource=${sidebarResource.productInventory}`)
+      .then(({ data: { data } }) => {
+        setDefaultSelectedData(data)
+        getPlants(data?.warehouse || null, data?.storageLocation || null);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   }, [selectedEntity]);
 
   useEffect(() => {
@@ -87,14 +99,21 @@ const InventoryProduct = () => {
     showExpenseItem
   ]);
 
-  const getPlants = () => {
-    axiosInstance()
-      .get('/sa-formbuilder/lookup?lookupResource=Warehouse,Storage Location')
+  const getPlants = (defaultWarehouse = null, defaultStorageLocation = null) => {
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.warehouse},${sidebarResource.storageLocation}`)
       .then(({ data: { data } }) => {
-        setPlantOptions([{ optionLabel: 'All', optionValue: 'All' }, ...data.Warehouse]);
-        setStorageLocationOptions(data['Storage Location']);
-        if (plantId === null && data?.Warehouse.length) {
+        const warehouseOptions = [{ optionLabel: 'All', optionValue: 'All' }, ...data?.[sidebarResource.warehouse]];
+        const storageLocationOptions = data[sidebarResource.storageLocation];
+        setPlantOptions(warehouseOptions);
+        setStorageLocationOptions(storageLocationOptions);
+        if (defaultWarehouse && warehouseOptions.find(p => p.optionValue === defaultWarehouse)) {
+          setPlantId(defaultWarehouse);
+        }
+        else if (plantId === null && data?.[sidebarResource.warehouse]?.length) {
           setPlantId('All');
+        }
+        if (defaultWarehouse && defaultStorageLocation && storageLocationOptions.find(p => p.optionValue === defaultStorageLocation && p.warehouse === defaultWarehouse)) {
+          setStorageLocationId(defaultStorageLocation);
         }
       });
   };
@@ -207,9 +226,9 @@ const InventoryProduct = () => {
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
-    minWidth: 150,
-    maxWidth: 180,
-    width: 150,
+    minWidth: 200,
+    maxWidth: 230,
+    width: 200,
     sticky: 'right',
     Cell: ({ row }) => (
       <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -285,6 +304,27 @@ const InventoryProduct = () => {
             </span>
           </HtmlTooltip>
         </Box>
+        {user?.user?.brandPolicy?.storageLocation && (
+          <Box pl={1}>
+            <HtmlTooltip title={!permissions?.productInventory?.isUpdate ?
+              TOOLTIP_MESSAGE.remove : row?.original?.plantId === 'All'
+                ? `Select ${resources?.warehouse?.titleSingular}` :
+                !row?.original?.storageLocationId ? `Select ${resources?.storageLocation?.titleSingular}` :
+                  !row?.original?.availableInventory ? 'Inventory not available' : 'Transfer Inventory'}>
+              <IconButton
+                size="small"
+                aria-label="Transfer Inventory"
+                disabled={permissions?.productInventory?.isUpdate
+                  && row?.original?.plantId !== 'All' && row?.original?.storageLocationId && row?.original?.availableInventory ? false : true}
+                onClick={() => {
+                  setInventory({ open: true, product: [row?.original], type: 'transfer' });
+                }}
+              >
+                <RiExchangeLine size={19} color='primary' />
+              </IconButton>
+            </HtmlTooltip>
+          </Box>
+        )}
         <Box pl={1}>
           <HtmlTooltip title="History">
             <IconButton
@@ -331,6 +371,9 @@ const InventoryProduct = () => {
             finalObject['availableInventory'] = (u?.inventory || 0) - (u?.softHold || 0);
             if (finalObject['availableInventory'] < 0 && u?.inventory) {
               finalObject['availableInventory'] = 0;
+            }
+            if (storageLocationId) {
+              finalObject['storageLocationId'] = storageLocationId
             }
             return {
               ...finalObject
@@ -418,8 +461,7 @@ const InventoryProduct = () => {
       minInventory: data?.minInventory && parseInt(data?.minInventory),
       maxInventory: data?.maxInventory && parseInt(data?.maxInventory)
     };
-    axiosInstance()
-      .put(`${productInventory.api}`, inputData)
+    axiosInstance().put(`${productInventory.api}`, inputData)
       .then((res) => {
         fetchData();
       });
@@ -503,6 +545,17 @@ const InventoryProduct = () => {
     );
   };
 
+  const handleSetDefaultSelected = async (data) => {
+    axiosInstance().put(`/user-default-selections`, {
+      resource: sidebarResource.productInventory,
+      ...data
+    }).then(({ data: { data } }) => {
+      setDefaultSelectedData(data)
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -543,7 +596,9 @@ const InventoryProduct = () => {
                 setExpenseItemValue,
                 fromProductMaster,
                 setFromProductMaster,
-                resources
+                resources,
+                defaultSelectedData,
+                handleSetDefaultSelected
               }}
             />
           }
@@ -560,7 +615,7 @@ const InventoryProduct = () => {
               : TOOLTIP_MESSAGE.add
           }}
           actionMenuItems={
-            <ActionMenuItems {...{ permissions, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder }} />
+            <ActionMenuItems {...{ permissions, user, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder }} />
           }
           isAddButtonVisible={false}
         />
@@ -635,7 +690,7 @@ const InventoryProduct = () => {
         />
       )}
 
-      {inventory.open && (
+      {inventory.open && inventory.type !== 'transfer' && (
         <AddRemoveDialog
           handleClose={() => setInventory({ open: false, product: [], type: '' })}
           handleSuccess={() => {
@@ -649,7 +704,17 @@ const InventoryProduct = () => {
           storageLocation={storageLocationId}
         />
       )}
-
+      {inventory.open && inventory.type === 'transfer' && (
+        <TransferInventoryDialog
+          handleClose={() => setInventory({ open: false, product: [], type: '' })}
+          handleSuccess={() => {
+            dispatch({ type: 'selection', selectedRecords: [] });
+            fetchData();
+            setInventory({ open: false, product: [], type: '' });
+          }}
+          products={inventory.product}
+        />
+      )}
       {settingDialogOpen && <SettingsDialog warehouse={plantId} onClose={() => setSettingDialogOpen(false)} />}
     </section>
   );
@@ -670,7 +735,9 @@ const LeftSideContents = ({
   setExpenseItemValue,
   fromProductMaster,
   setFromProductMaster,
-  resources
+  resources,
+  defaultSelectedData,
+  handleSetDefaultSelected
 }) => {
   return (
     <>
@@ -678,12 +745,10 @@ const LeftSideContents = ({
         style={{ minWidth: '200px', flexGrow: 1 }}
         className="md:max-w-[250px]"
         options={plantOptions}
-        getOptionLabel={(option: any) => option.optionLabel}
+        getOptionLabel={(option: any) => option?.optionLabel || ''}
         disableClearable
         isOptionEqualToValue={(option: any, val) => option.optionValue === val}
-        value={
-          plantOptions.filter((data) => data.optionValue === plantId).length ? plantOptions.filter((data) => data.optionValue === plantId)[0] : ''
-        }
+        value={plantOptions.filter((data) => data.optionValue === plantId).length ? plantOptions.filter((data) => data.optionValue === plantId)[0] : ''}
         onChange={(e, val) => {
           if (val !== null) {
             setPlantId(val && val.optionValue ? val.optionValue : '');
@@ -694,6 +759,29 @@ const LeftSideContents = ({
         renderInput={(params) => (
           <TextField {...params} margin="none" size="small" name="plant" label={resources?.warehouse?.titleSingular} variant="outlined" fullWidth />
         )}
+        renderOption={(props, option) => {
+          const isFavorite = defaultSelectedData?.warehouse === option.optionValue;
+          return (
+            <li {...props}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                {option.optionLabel}
+                {option.optionValue !== 'All' &&
+                  <HtmlTooltip title={isFavorite ? 'Remove from default' : 'Set as default'}>
+                    <IconButton
+                      size="small"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleSetDefaultSelected({ warehouse: isFavorite ? null : option.optionValue });
+                      }}
+                    >
+                      <StarIcon sx={{ color: isFavorite ? 'gold' : 'grey.400' }} />
+                    </IconButton>
+                  </HtmlTooltip>
+                }
+              </Box>
+            </li >
+          );
+        }}
       />
       {user?.user?.brandPolicy?.storageLocation && (
         <Autocomplete
@@ -714,6 +802,30 @@ const LeftSideContents = ({
           renderInput={(params) => (
             <TextField {...params} margin="none" size="small" name="storageLocation" label="Storage Location" variant="outlined" fullWidth />
           )}
+          renderOption={(props, option) => {
+            const isFavorite = defaultSelectedData?.storageLocation === option.optionValue;
+            return (
+              <li {...props}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                  {option.optionLabel}
+                  <HtmlTooltip title={isFavorite ? 'Remove from default' : 'Set as default'}>
+                    <IconButton
+                      size="small"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleSetDefaultSelected(isFavorite ? { storageLocation: null } : {
+                          warehouse: plantId,
+                          storageLocation: option.optionValue
+                        });
+                      }}
+                    >
+                      <StarIcon sx={{ color: isFavorite ? 'gold' : 'grey.400' }} />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
+              </li>
+            );
+          }}
         />
       )}
       {showExpenseItem && (
@@ -731,22 +843,25 @@ const LeftSideContents = ({
           }
           label="Expense Item"
         />
-      )}
-      {fromProductMaster?.product && (
-        <Chip
-          className="ml-3"
-          color="primary"
-          label={`Product : ${fromProductMaster?.productName}`}
-          onDelete={() => {
-            setFromProductMaster(null);
-          }}
-        />
-      )}
+      )
+      }
+      {
+        fromProductMaster?.product && (
+          <Chip
+            className="ml-3"
+            color="primary"
+            label={`Product : ${fromProductMaster?.productName}`}
+            onDelete={() => {
+              setFromProductMaster(null);
+            }}
+          />
+        )
+      }
     </>
   );
 };
 
-const ActionMenuItems = ({ permissions, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder }) => {
+const ActionMenuItems = ({ permissions, user, setInventory, selectedRecords, plantId, checkReport, handleRemap, handleRemapPurchaseOrder }) => {
   return (
     <>
       <MenuItem
@@ -765,6 +880,16 @@ const ActionMenuItems = ({ permissions, setInventory, selectedRecords, plantId, 
       >
         Remove
       </MenuItem>
+      {user?.user?.brandPolicy?.storageLocation &&
+        <MenuItem
+          disabled={permissions?.productInventory?.isUpdate && selectedRecords?.every((e) => e?.availableInventory) ? false : true}
+          onClick={() => {
+            setInventory({ open: true, product: selectedRecords, type: 'transfer' });
+          }}
+        >
+          Transfer
+        </MenuItem>
+      }
       <MenuItem
         disabled={permissions?.productInventory?.isUpdate && plantId !== 'All' ? false : true}
         style={{ display: 'none' }}

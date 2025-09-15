@@ -87,7 +87,12 @@ function ReportRunLogs({ scheduleReportData, handleClose }) {
         accessor: 'fileName',
         Header: 'File Name',
         Cell: ({ row }) => (row?.original?.fileName ? <p className="text-truncate">{row.original.fileName}</p> : <NoDataCell />)
-      }
+      },
+      {
+        accessor: 'comment',
+        Header: 'Comment',
+        Cell: ({ row }) => (row?.original?.comment ? <p className="text-truncate">{row.original.comment}</p> : <NoDataCell />)
+      },
     ];
     setColumns(columns);
   };

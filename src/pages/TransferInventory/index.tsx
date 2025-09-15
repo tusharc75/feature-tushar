@@ -275,6 +275,7 @@ const TransferInventory = () => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.transferInventory}
           setSelectedType={setSelectedType}
           // leftSideContents
           searchValue={search}
@@ -323,12 +324,11 @@ const TransferInventory = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.transferInventory?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.transferInventory?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.transferNumber || '' : ''}`
-              : `selected ${resources?.transferInventory?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.transferInventory?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

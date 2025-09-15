@@ -76,7 +76,7 @@ export default function Contact(props) {
     },
     {
       key: `All ${resources[contactResource]?.titlePlural}`,
-      value: 2
+      value: 3
     }
   ];
 
@@ -389,6 +389,7 @@ export default function Contact(props) {
         <ListingPageHeader
           toggleButtonList={types}
           onToggle={onTypeChange}
+          resource={sidebarResource[contactResource]}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
           leftSideContents={<LeftSideContents />}

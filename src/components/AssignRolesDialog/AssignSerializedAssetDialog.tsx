@@ -120,9 +120,6 @@ const AssignSerializedAssetDialog = ({ reference, customTitle = null, referenceD
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
     let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
 
-    if (reference === 'job') {
-      deepFilter += '&job=1';
-    }
     if (reference === 'repairOrder') {
       deepFilter = `${deepFilter}`;
       deepFilter += '&repairOrder=1';

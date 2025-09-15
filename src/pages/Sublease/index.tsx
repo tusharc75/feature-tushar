@@ -314,6 +314,7 @@ const Sublease = () => {
           onToggle={onTypeChange}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
+          resource={sidebarResource.sublease}
           searchValue={search}
           onSearch={handleSearch}
           // rightSideContents
@@ -361,12 +362,11 @@ const Sublease = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
+          message={`Are you sure you want to delete ${deleteRecord
               ? `${resources?.sublease?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.subleaseName || ''}`
               : `selected ${resources?.sublease?.titlePlural?.toLowerCase()}`
-          } ?`}
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

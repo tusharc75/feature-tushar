@@ -304,6 +304,7 @@ const ProductionOrder = () => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.productionOrder}
           setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}
@@ -338,12 +339,11 @@ const ProductionOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
+          message={`Are you sure you want to delete ${deleteRecord
               ? `${resources?.productionOrder?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.productionOrderNumber || ''}`
               : `selected ${resources?.productionOrder?.titlePlural?.toLowerCase()}`
-          } ?`}
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

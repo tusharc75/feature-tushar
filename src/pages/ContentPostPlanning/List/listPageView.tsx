@@ -13,7 +13,7 @@ import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomContainer from 'src/components/CustomContainer';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { sidebarResource, prepareDataForGrid, CONTENT_POST_PLANNING_STATUS, checkIsAllowedToEdit, checkIsAllowedToDelete } from 'src/constants/helpers';
+import { sidebarResource, prepareDataForGrid, CONTENT_POST_PLANNING_STATUS, checkIsAllowedToEdit, checkIsAllowedToDelete, getDefaultMyRecordType } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import ManageContentPostPlanning from '../ManageContentPostPlanning';
@@ -37,7 +37,7 @@ const ListView = ({ topRightSlot }) => {
   const [columns, setColumns] = useState<any>(null);
   const pageTitle = camelCase(`${resources?.contentPostPlanning?.titlePlural}`);
   const { generateColumns, checkStaticField } = useColumns();
-  const [selectedType, setSelectedType] = useState(2);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.contentPostPlanning));
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -54,7 +54,7 @@ const ListView = ({ topRightSlot }) => {
     },
     {
       key: `All ${resources?.contentPostPlanning?.titlePlural}`,
-      value: 2
+      value: 3
     }
   ];
 
@@ -172,12 +172,10 @@ const ListView = ({ topRightSlot }) => {
     )
   };
 
-  const getQueryString = (isExport = false) => {
+  const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    } else if (selectedType === 2) {
-      deepFilter = deepFilter + `&openRecords=1`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
@@ -265,11 +263,6 @@ const ListView = ({ topRightSlot }) => {
           setDeleteLoading(false);
         });
     }
-  };
-
-  const validateStatus = (status) => {
-    const currIdx = statusOptions.findIndex((status) => status.optionValue === selectedRecords[0].status);
-    return statusOptions[currIdx + 1]?.optionValue !== status;
   };
 
   const handleChangeStatus = (status) => {
@@ -385,6 +378,7 @@ const ListView = ({ topRightSlot }) => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.contentPostPlanning}
           setSelectedType={setSelectedType}
           leftSideContents={
             <ButtonMenu

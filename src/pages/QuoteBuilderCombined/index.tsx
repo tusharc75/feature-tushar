@@ -58,7 +58,7 @@ const QuoteBuilders = () => {
     },
     {
       key: `All ${resources?.quoteBuilder?.titlePlural}`,
-      value: 2
+      value: 3
     }
   ];
 
@@ -524,6 +524,7 @@ const QuoteBuilders = () => {
           toggleButtonList={types}
           onToggle={handleFilter}
           selectedType={selectedType}
+          resource={sidebarResource.quoteBuilder}
           setSelectedType={setSelectedType}
           leftSideContents={LeftSideContents}
           searchValue={search}

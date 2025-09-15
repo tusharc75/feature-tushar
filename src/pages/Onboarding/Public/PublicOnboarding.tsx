@@ -1,4 +1,4 @@
-import { Box, Typography, Stepper, Step, StepLabel, Card, CardContent, Grid, Button, Chip, CircularProgress, AppBar, Toolbar } from '@mui/material';
+import { Box, Typography, Stepper, Step, StepLabel, Card, CardContent, Grid, Chip, CircularProgress, AppBar, Toolbar, Stack } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Form, Formik } from 'formik';
@@ -10,6 +10,7 @@ import InputField from 'src/components/Helpers/InputField';
 import { sidebarResource, yupSchema } from 'src/constants/helpers';
 import { useScrollDirection } from 'src/hooks/useScroll';
 import styles from 'src/components/Header/Header.module.scss';
+import ThemeButton from 'src/components/Helpers/Buttons/ThemeButton';
 
 const PublicOnboarding = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -23,6 +24,7 @@ const PublicOnboarding = () => {
   const [stepsData, setStepsData] = useState([]);
   const [initialValues, setInitialValues] = useState({});
   const [editableSteps, setEditableSteps] = useState([]);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -75,43 +77,65 @@ const PublicOnboarding = () => {
     setInitialValues(currentStepData);
   };
 
-  const handleSubmit = async (values) => {
-    const currentStepId = onboardingTemplateData.tabs[0].steps[activeStepIndex]._id;
-    
-    let updatedStepsData = [...stepsData];
-    if (editableSteps[activeStepIndex]) {
-        const stepIndex = updatedStepsData.findIndex(step => step.stepId === currentStepId);
-        
-        const newStepData = {
-            ...(stepIndex !== -1 ? updatedStepsData[stepIndex] : {}),
-            ...values,
-            stepId: currentStepId,
-        };
+  const saveCurrentStep = async (values) => {
+    setSaving(true);
+    try {
+      const currentStepId = onboardingTemplateData.tabs[0].steps[activeStepIndex]._id;
+      
+      let updatedStepsData = [...stepsData];
+      const stepIndex = updatedStepsData.findIndex(step => step.stepId === currentStepId);
+      
+      const newStepData = {
+        ...(stepIndex !== -1 ? updatedStepsData[stepIndex] : {}),
+        ...values,
+        stepId: currentStepId,
+      };
 
-        if (stepIndex === -1) {
-            updatedStepsData.push(newStepData);
-        } else {
-            updatedStepsData[stepIndex] = newStepData;
-        }
-    }
-    setStepsData(updatedStepsData);
-
-    if (activeStepIndex === onboardingTemplateData.tabs[0].steps.length - 1) {
-      try {
-        const submitData = {
-          ...onboardingData,
-          stepsData: updatedStepsData
-        };
-        await axiosInstance().put(`${routes.onboarding.path}/public/${id}`, submitData);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: 'Onboarding submitted successfully!'
-        });
-      } catch (error) {
-        toastConfig.setToastConfig(error);
+      if (stepIndex === -1) {
+        updatedStepsData.push(newStepData);
+      } else {
+        updatedStepsData[stepIndex] = newStepData;
       }
-    } else {
+      
+      setStepsData(updatedStepsData);
+
+      // Save to database
+      const submitData = {
+        ...onboardingData,
+        stepsData: updatedStepsData
+      };
+      await axiosInstance().put(`${routes.onboarding.path}/public/${id}`, submitData);
+      
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: 'Progress saved successfully!'
+      });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveAndNext = async (values) => {
+    await saveCurrentStep(values);
+    if (activeStepIndex < onboardingTemplateData.tabs[0].steps.length - 1) {
+      handleStepChange(activeStepIndex + 1);
+    }
+  };
+
+  const handleFinalSubmit = async (values) => {
+    await saveCurrentStep(values);
+    toastConfig.setToastConfig({
+      open: true,
+      type: 'success',
+      message: 'Onboarding submitted successfully!'
+    });
+  };
+
+  const handleNextWithoutSave = () => {
+    if (activeStepIndex < onboardingTemplateData.tabs[0].steps.length - 1) {
       handleStepChange(activeStepIndex + 1);
     }
   };
@@ -136,6 +160,7 @@ const PublicOnboarding = () => {
   const activeStepData = steps[activeStepIndex];
   const fieldsData = activeStepData?.fields || [];
   const isCurrentStepEditable = editableSteps[activeStepIndex];
+  const isLastStep = activeStepIndex === steps.length - 1;
 
   const modifiedFieldsData = isCurrentStepEditable
     ? fieldsData
@@ -143,7 +168,7 @@ const PublicOnboarding = () => {
       ...field,
       isUneditable: true,
       disableOnEdit: true
-    }))
+    }));
 
   return (
     <Box className="main-container-v1" sx={{ p: { xs: 2, md: 4 }, minHeight: '100vh' }}>
@@ -215,10 +240,10 @@ const PublicOnboarding = () => {
           <Formik
             initialValues={initialValues}
             validationSchema={yupSchema(fieldsData)}
-            onSubmit={handleSubmit}
+            onSubmit={isLastStep ? handleFinalSubmit : handleSaveAndNext}
             enableReinitialize
           >
-            {({ values, errors, touched, setFieldValue, submitForm }) => (
+            {({ values, errors, touched, setFieldValue, submitForm, isValid, dirty }) => (
               <Form>
                 <Card sx={{ mb: 3 }}>
                   <CardContent>
@@ -237,18 +262,55 @@ const PublicOnboarding = () => {
                 </Card>
                 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-                  <Button
-                    disabled={activeStepIndex === 0}
+                  <ThemeButton
                     onClick={() => handleStepChange(activeStepIndex - 1)}
+                    disabled={activeStepIndex === 0}
+                    buttonType="theme"
                   >
                     Back
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={submitForm}
-                  >
-                    {activeStepIndex === steps.length - 1 ? 'Submit' : 'Save & Next'}
-                  </Button>
+                  </ThemeButton>
+                  
+                  <Stack direction="row" spacing={2}>
+                    {isCurrentStepEditable && (
+                      <ThemeButton
+                        onClick={() => saveCurrentStep(values)}
+                        disabled={saving || !isValid}
+                        buttonType="theme"
+                        isLoading={saving}
+                      >
+                        Save
+                      </ThemeButton>
+                    )}
+                    
+                    {!isLastStep && (
+                      <ThemeButton
+                        onClick={handleNextWithoutSave}
+                        buttonType="theme"
+                      >
+                        Next
+                      </ThemeButton>
+                    )}
+                    
+                    {isCurrentStepEditable && (
+                      <ThemeButton
+                        onClick={submitForm}
+                        disabled={saving || !isValid}
+                        buttonType="theme"
+                        isLoading={saving}
+                      >
+                        {isLastStep ? 'Submit' : 'Save & Next'}
+                      </ThemeButton>
+                    )}
+                    
+                    {!isCurrentStepEditable && isLastStep && (
+                      <ThemeButton
+                        onClick={submitForm}
+                        buttonType="theme"
+                      >
+                        Submit
+                      </ThemeButton>
+                    )}
+                  </Stack>
                 </Box>
               </Form>
             )}

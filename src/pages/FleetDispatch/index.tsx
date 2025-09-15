@@ -1,21 +1,20 @@
 import { Box, IconButton } from '@mui/material';
 import { Map } from '@mui/icons-material';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import update from 'immutability-helper';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import routes from 'src/components/Helpers/Routes';
 import DispatchDialog from './DispatchReceiveDialog';
 import DispatchList from './DispatchList';
 import MapView from './Map';
-
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import FleetDispatchBox from './DispatchCard';
 import { useDndSensors } from 'src/hooks';
 import { useData } from 'src/StateProvider/Provider';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { sidebarResource } from 'src/constants/helpers';
 
 const FleetDispatch = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -25,10 +24,21 @@ const FleetDispatch = () => {
   const [dispatchDialogOpen, setDispatchDialogOpen] = useState({ open: false, fleet: null, job: null });
   const [showMapView, setShowMapView] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
+  const [columns, setColumns] = useState(null);
 
   useEffect(() => {
     fetchData();
+    fetchFields();
   }, []);
+
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.fleetDispatch, true);
+      setColumns(fieldsDataForRead?.map((e) => e?.fieldData));
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const {
     state: { resources }
@@ -106,7 +116,7 @@ const FleetDispatch = () => {
             <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
               <ul className="grid grid-cols-2 min-[725px]:grid-cols-2 min-[1195px]:md:grid-cols-2">
                 <div>
-                  <DispatchList activity={fleets} cardType="fleet" />
+                  <DispatchList activity={fleets} cardType="fleet" cols={columns} />
                 </div>
                 <div>
                   <DispatchList
@@ -114,6 +124,7 @@ const FleetDispatch = () => {
                       return { ...e, jobId: e?._id?.jobId, _id: e?.asset?.optionValue };
                     })}
                     cardType="job"
+                    cols={columns}
                   />
                 </div>
               </ul>
