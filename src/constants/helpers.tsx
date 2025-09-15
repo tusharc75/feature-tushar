@@ -4101,3 +4101,15 @@ export const getDataFromHeader = (fields: any[], referenceData: any) => {
   });
   return data
 }
+
+export const getValueOfMatchedFieldName = (fields: any, referenceData: any) => {
+  const data: any = {}
+  if (fields?.length > 0 && referenceData) {
+    fields?.forEach(f => {
+      if (f?.fieldName && referenceData[f?.fieldName]) {
+        data[f?.fieldName] = referenceData[f?.fieldName]
+      }
+    });
+  }
+  return data
+}

@@ -113,6 +113,7 @@ const ManageSerializedAsset = ({
                 certificateAttached,
                 certificateIssueDate,
                 certificateExpiryDate,
+                serializedPackage,
                 ...rest
               } = data;
               setCloneHeading(assetNumber);
