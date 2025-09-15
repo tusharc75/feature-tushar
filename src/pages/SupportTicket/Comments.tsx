@@ -67,28 +67,47 @@ const Comments = ({ uniqueId, supportTicketData }) => {
       {data ? (<>
         <div className="[scrollbar-gutter: stable] relative mb-2 max-h-[calc(100vh-250px)] min-h-[300px] space-y-2 overflow-y-auto ">
           {data.length > 0 ? (
-            data.map((item: any) => (
-              <div key={item._id} className="rounded-md border p-2">
-                <p className="mb-2 flex flex-wrap gap-[10px] text-[13px] text-[var(--primary-text)] ">
-                  <span className="font-semibold">{item?.user?.optionLabel}</span>
-                  <span className="ml-2 text-[#969696] dark:text-gray-400">{displayDateTime(item.date)}</span>
-                </p>
-                <div className="max-image [&_*:last-child]:mb-0"
-                  dangerouslySetInnerHTML={{
-                    __html: item?.comment
-                  }}
-                />
-                {item?.attachments && item.attachments.length > 0 && (
-                  <div className='mt-3'>
-                    <AttachmentThumbnail
-                      attachments={item.attachments}
-                      handleDeleteAttachment={() => { }}
-                      allowedToEdit={false}
-                    />
+            data.map((item: any) => {
+              const isCustomer = item?.sendFrom === "customer";
+              return (
+                <div key={item._id} className="relative border-b p-2">
+                  <div className="flex items-center mb-2">
+                    <span
+                      className={`h-3 w-3 rounded-full mr-2 ${
+                        isCustomer ? "bg-green-500" : "bg-blue-500"
+                      }`}
+                    ></span>
+                    <p className="font-medium mr-2">{item?.user?.optionLabel}</p>
+                    {!isCustomer && (
+                      <span className="px-2 py-[2px] rounded-md text-xs font-medium bg-blue-100 text-blue-600">
+                        Support
+                      </span>
+                    )}
+                    <Box
+                      component="span"
+                      className="ml-3 text-gray-500"
+                      sx={{ fontSize: '0.625rem' }}
+                    >
+                      {displayDateTime(item.date)}
+                    </Box>
                   </div>
-                )}
-              </div>
-            ))
+                  <div className="ml-5 text-sm text-gray-800 support-ticket-html [&_*:last-child]:mb-0"
+                    dangerouslySetInnerHTML={{
+                      __html: item?.comment
+                    }}
+                  />
+                  {item?.attachments && item.attachments.length > 0 && (
+                    <div className='mt-3'>
+                      <AttachmentThumbnail
+                        attachments={item.attachments}
+                        handleDeleteAttachment={() => { }}
+                        allowedToEdit={false}
+                      />
+                    </div>
+                  )}
+                </div>
+              )
+            })
           ) : (
             <div className="absolute left-1/2 top-1/2 select-none text-gray-500 [transform:translate(-50%,-50%)]">There are no comments yet</div>
           )}
