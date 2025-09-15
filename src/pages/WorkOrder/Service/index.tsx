@@ -60,8 +60,6 @@ import Steps from './Steps';
 import StepsInOtherServices from './StepsInOtherService';
 import ViewServiceStepDataDialog from './ViewServiceStepDataDialog';
 
-type InnerTabs = 'steps' | 'productsConsumables' | 'drawing';
-
 const Service = ({
   workOrderId,
   allowedToEdit,
@@ -107,7 +105,6 @@ const Service = ({
   const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [addServiceAnchorEl, setAddServiceAnchorEl] = useState({ anchor: null, tabId: null });
-  const [innerTabs, setInnerTabs] = useState<InnerTabs>('steps');
 
   const prevOrder = useRef(0);
 
@@ -132,7 +129,7 @@ const Service = ({
     const workOrderDetailResponce: any = await axiosInstance().get(`${workOrder.api}/${workOrderId}/detail`);
     const workOrderDetail = workOrderDetailResponce?.data?.data;
 
-    if (workOrderDetail.type === 'Repair Order' && workOrderDetail?.repairOrder) {
+    if (workOrderDetail.type === WORK_ORDER_TYPE.repairOrder && workOrderDetail?.repairOrder) {
       if (workOrderDetail?.repairOrder?.addQuotationStep) {
         isQuotation = true;
         if (workOrderDetail?.quotation?.version) {
