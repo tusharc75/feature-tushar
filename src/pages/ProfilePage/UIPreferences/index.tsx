@@ -31,9 +31,9 @@ const UiPreference = ({ userData, onSuccess }) => {
 
   useEffect(() => {
     const userByDefaultRecord = userData?.uiPreference?.byDefaultRecord;
-    const userRecord = {};
+    const userRecord: Record<string, string> = {};
     if (isArray(userByDefaultRecord)) {
-      userByDefaultRecord?.forEach((e) => {
+      userByDefaultRecord.forEach((e) => {
         userRecord[e.resource] = e.type;
       });
     }
@@ -46,7 +46,7 @@ const UiPreference = ({ userData, onSuccess }) => {
         };
       })
     });
-  }, [resources]);
+  }, [resources, userData]);
 
   useEffect(() => {
     fetchData();
@@ -65,7 +65,7 @@ const UiPreference = ({ userData, onSuccess }) => {
 
   const updateData = (values) => {
     setIsSubmitting(true);
-    let data = {
+    const data = {
       byDefaultRecord: values.data?.map((e) => {
         return { resource: e.resource, type: e.type };
       })
@@ -136,27 +136,22 @@ const UiPreference = ({ userData, onSuccess }) => {
                     <FieldArray
                       name="data"
                       render={(arrayHelpers) =>
-                        values.data
-                          ?.filter((d) => d.resourceLabel.toLowerCase().includes(searchQuery.toLowerCase()))
-                          .map((data, index) => (
-                            <TableRow key={data.resource}>
-                              <TableCell className='pl-4'>{data.resourceLabel}</TableCell>
+                        values.data?.map((rowData, index) => {
+                          if (!rowData.resourceLabel.toLowerCase().includes(searchQuery.toLowerCase())) {
+                            return null;
+                          }
+                          return (
+                            <TableRow key={rowData.resource}>
+                              <TableCell className='pl-4'>{rowData.resourceLabel}</TableCell>
                               <TableCell className='pl-4'>
                                 <Autocomplete
                                   disabled={!isEdit}
-                                  value={data.type}
+                                  value={rowData.type}
                                   onChange={(e, val) => {
                                     arrayHelpers.replace(index, {
-                                      ...values?.data[index],
+                                      ...values.data[index],
                                       type: val
                                     });
-                                    const res = initialValues.data;
-                                    res.forEach((r) => {
-                                      if (r.resource === data.resource) {
-                                        r.type = val;
-                                      }
-                                    });
-                                    setInitialValues({ data: res });
                                   }}
                                   disableClearable
                                   options={recordOptions}
@@ -165,7 +160,8 @@ const UiPreference = ({ userData, onSuccess }) => {
                                 />
                               </TableCell>
                             </TableRow>
-                          ))
+                          );
+                        })
                       }
                     />
                   </TableBody>

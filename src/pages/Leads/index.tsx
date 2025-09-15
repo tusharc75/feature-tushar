@@ -51,11 +51,11 @@ const Leads = () => {
     },
     {
       key: `All ${resources?.lead?.titlePlural}`,
-      value: 2
+      value: 3
     },
     {
       key: `Converted ${resources?.lead?.titlePlural}`,
-      value: 3
+      value: 4
     }
   ];
   const { state, dispatch } = useTableReducer({ renderedFrom });
