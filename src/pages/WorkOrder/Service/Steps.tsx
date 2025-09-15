@@ -448,7 +448,7 @@ const Steps = ({
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
           orignalValues: tempServiceData,
-          values: isDataAlreadyAdded ? getObjKeysWithValues(tempServiceData, fieldsDataForCreate, true) : getObjKeys('', fieldsDataForCreate)
+          values: isDataAlreadyAdded ? getObjKeysWithValues(tempServiceData, fieldsDataForCreate, true) : getObjKeysWithValues(getValueOfMatchedFieldName(fieldsDataForCreate, productData), fieldsDataForCreate)
         };
       }
     } else {
@@ -457,7 +457,7 @@ const Steps = ({
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
           orignalValues: {},
-          values: getObjKeys('', fieldsDataForCreate)
+          values: getObjKeysWithValues(getValueOfMatchedFieldName(fieldsDataForCreate, productData), fieldsDataForCreate)
         };
       }
     }
@@ -1965,7 +1965,7 @@ const Steps = ({
               <ServiceFieldValueDialog
                 workOrderId={workOrderId}
                 fields={serviceDetails?.fields || []}
-                fieldsValue={serviceDetails?.serviceFieldsValue || getValueOfMatchedFieldName(serviceDetails?.fields || [], productData)}
+                fieldsValue={serviceDetails?.serviceFieldsValue || {}}
                 service={selectedService}
                 handleClose={() => {
                   setOpenServiceFieldValueDialig(false);
