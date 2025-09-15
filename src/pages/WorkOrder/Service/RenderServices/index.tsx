@@ -111,7 +111,7 @@ const RenderService = ({
     if (policy && policy.enableServicesOnConsumables && products?.length > 0) {
       return products?.map((p) => ({
         _id: p?._id,
-        product: p?.product?.optionLabel,
+        product: p?.productDetail?.productName,
         serviceSteps: allServices?.filter((s) => s?.parentId === p?._id)
       }));
     }

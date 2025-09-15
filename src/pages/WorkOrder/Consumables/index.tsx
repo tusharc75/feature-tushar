@@ -424,17 +424,18 @@ const Consumables = ({
         } else {
           data = data?.filter(e => !('subType' in e) || !e?.subType || e?.subType === materialSubType)
         }
-        let rows = orderBy(data, 'product.serializedProduct')
+        let rows = orderBy(data, 'productDetail.serializedProduct')
           ?.filter((d) => !([MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(d?.type) && d?.parentId))
           ?.map((u, i) => {
             let res: any = {
               ...prepareDataForGrid(u)
             };
             res.index = i + 1;
-            res.productName = u?.product?.optionLabel;
-            res.productDescription = u?.product?.productDescription;
-            res.productNumber = u?.product?.productNumber;
-            res.serializedProduct = u?.product?.serializedProduct || false;
+            res.productName = u?.productDetail?.productName;
+            res.productDescription = u?.productDetail?.productDescription;
+            res.productNumber = u?.productDetail?.productNumber;
+            res.productId = u?.productDetail?._id;
+            res.serializedProduct = u?.productDetail?.serializedProduct || false;
             res.assignedAssetQty =
               data?.filter((d) => d?.parentId === u?._id && [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(d?.type))
                 ?.length || 0;
@@ -445,7 +446,6 @@ const Consumables = ({
             res.canDelete = u?.consumedQty || u?.requestedQty || res.assignedAssetQty ? false : true;
             return res;
           });
-
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
       })
