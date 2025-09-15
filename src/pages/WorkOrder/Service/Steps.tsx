@@ -24,6 +24,7 @@ import {
   getChipColor,
   getObjKeys,
   getObjKeysWithValues,
+  getValueOfMatchedFieldName,
   MATERIAL_SUB_TYPE,
   repairJob,
   setFieldsInAscendingOrder,
@@ -196,7 +197,8 @@ const Steps = ({
   isMobile,
   fetchWorkOrderData = null,
   headerPadding = true,
-  workOrderPolicyData = null
+  workOrderPolicyData = null,
+  productData = null
 }) => {
   const workOrderId = workOrderData?._id;
   const classes = useStyles();
@@ -1963,7 +1965,7 @@ const Steps = ({
               <ServiceFieldValueDialog
                 workOrderId={workOrderId}
                 fields={serviceDetails?.fields || []}
-                fieldsValue={serviceDetails?.serviceFieldsValue || {}}
+                fieldsValue={serviceDetails?.serviceFieldsValue || getValueOfMatchedFieldName(serviceDetails?.fields || [], productData)}
                 service={selectedService}
                 handleClose={() => {
                   setOpenServiceFieldValueDialig(false);

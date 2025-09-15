@@ -639,6 +639,7 @@ const Service = ({
                               minHeightClass={' '}
                               isMobile={mobScreen}
                               fetchWorkOrderData={fetchWorkOrderData}
+                              productData={selectedService?.parentId && products?.some(p => p?._id === selectedService?.parentId && p?.productDetail) ? products?.find(p => p?._id === selectedService?.parentId)?.productDetail : null}
                             />
                           ) : (
                             <Quotation />
