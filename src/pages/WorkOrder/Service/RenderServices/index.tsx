@@ -111,7 +111,7 @@ const RenderService = ({
     if (policy && policy.enableServicesOnConsumables && products?.length > 0) {
       return products?.map((p) => ({
         _id: p?._id,
-        product: p?.product?.optionLabel,
+        product: p?.productDetail?.productName,
         serviceSteps: allServices?.filter((s) => s?.parentId === p?._id)
       }));
     }
@@ -196,6 +196,31 @@ const RenderService = ({
               </IconButton>
             </div>
             <div className={`max-h-[calc(100vh-300px)] overflow-y-auto overflow-x-hidden p-[20px]`}>
+              {policy && policy.enableServicesOnConsumables && user?.brandPolicy?.servicePrePost && serviceSteps?.find((e) => e?.preWork) && (
+                <div className="mb-4">
+                  <RenderServiceGroup
+                    servicesButtons={servicesButtons}
+                    {...{
+                      serviceSteps: serviceSteps?.filter((e) => e?.preWork),
+                      isColapsed,
+                      stylesForEveryTab,
+                      selectedService,
+                      stepSubmitedData,
+                      setSelectedService,
+                      user,
+                      handleOpenMenu,
+                      resource,
+                      quotationData,
+                      allowedToEdit,
+                      setShowConfirmBox,
+                      getFieldsWithOtherDetails,
+                      isMobile,
+                      completed,
+                      preWork: true
+                    }}
+                  />
+                </div>
+              )}
               {group && (
                 <div className="mb-4 grid gap-4 ">
                   {group.map((d) => (
@@ -227,7 +252,7 @@ const RenderService = ({
                 <RenderServiceGroup
                   servicesButtons={servicesButtons}
                   {...{
-                    serviceSteps,
+                    serviceSteps: serviceSteps?.filter((e) => !e?.preWork),
                     isColapsed,
                     stylesForEveryTab,
                     selectedService,
@@ -241,7 +266,8 @@ const RenderService = ({
                     setShowConfirmBox,
                     getFieldsWithOtherDetails,
                     isMobile,
-                    completed
+                    completed,
+                    preWork: false
                   }}
                 />
               ) : (

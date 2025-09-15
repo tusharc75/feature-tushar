@@ -1,6 +1,7 @@
 import { Info, KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import { Collapse } from '@mui/material';
 import { useState } from 'react';
+import { PostWorkIcon, PreWorkIcon } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn } from 'src/constants/helpers';
@@ -23,7 +24,8 @@ const RenderServiceGroup = ({
   setShowConfirmBox,
   getFieldsWithOtherDetails,
   isMobile,
-  completed
+  completed,
+  preWork
 }) => {
   const [expanded, setExpanded] = useState(true);
 
@@ -46,8 +48,19 @@ const RenderServiceGroup = ({
           </HtmlTooltip>
         ) : (
           <>
-            <h6 className={'text-base font-medium leading-[24px]'}>Services</h6>
-
+            <div className='flex gap-2'>
+              <h6 className={'text-base font-medium leading-[24px]'}>Services</h6>
+              {user?.brandPolicy?.servicePrePost ?
+                preWork ? (
+                  <HtmlTooltip enterTouchDelay={0} title="Pre Work Service" arrow placement="top">
+                    <PreWorkIcon />
+                  </HtmlTooltip>
+                ) : (
+                  <HtmlTooltip enterTouchDelay={0} title="Post Work Service" arrow placement="top">
+                    <PostWorkIcon />
+                  </HtmlTooltip>
+                ) : null}
+            </div>
             {expanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </>
         )}
@@ -88,7 +101,7 @@ const RenderServiceGroup = ({
           />
         </div>
       </Collapse>
-    </div>
+    </div >
   );
 };
 

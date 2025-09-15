@@ -16,7 +16,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { getResourceLabel, gridLoadingTimeout, HIDDEN_FIELD_TYPE, prepareDataForGrid } from '../../constants/helpers';
+import { getDefaultMyRecordType, getResourceLabel, gridLoadingTimeout, HIDDEN_FIELD_TYPE, prepareDataForGrid } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ManageDynamicForm from './ManageDynamicForm';
 import PreviewDownload from 'src/components/PreviewDownload';
@@ -44,7 +44,7 @@ const DynamicForm = () => {
     },
     {
       key: `All ${resourceLabel?.titlePlural}`,
-      value: 2
+      value: 3
     }
   ];
 
@@ -55,7 +55,7 @@ const DynamicForm = () => {
   const { generateColumns } = useColumns();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, resource));
   const [showToggleButtons, setShowToggleButtons] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -355,6 +355,7 @@ const DynamicForm = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
+          resource={resource}
           toggleButtonList={showToggleButtons ? DynamicFormType : null}
           onToggle={onTypeChange}
           selectedType={selectedType}

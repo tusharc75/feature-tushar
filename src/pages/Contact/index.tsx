@@ -76,7 +76,7 @@ export default function Contact(props) {
     },
     {
       key: `All ${resources[contactResource]?.titlePlural}`,
-      value: 2
+      value: 3
     }
   ];
 

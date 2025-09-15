@@ -305,7 +305,7 @@ const RenderTabs = ({
         className="flex items-center gap-1 rounded-[6px] bg-theme p-[4px_5px_4px_10px] text-[13px] font-medium leading-[22.4px] text-[white] outline-transparent focus-within:outline-transparent focus-visible:outline-transparent "
         onClick={handleClick}
       >
-        {toggleButtonList[selectedType - 1]?.key || toggleButtonList[0]?.key}
+        {toggleButtonList.find(button => button.value === selectedType)?.key || toggleButtonList[0]?.key}
         <BiChevronDown size={22} className={cn('transition-transform', open ? '[transform:rotate(180deg)]' : '')} />
       </RippleButton>
       <Popover
@@ -319,7 +319,7 @@ const RenderTabs = ({
       >
         <ul className="list-none py-1">
           {toggleButtonList?.map((d) => {
-            const isActive = toggleButtonList[selectedType - 1]?.value === d.value;
+            const isActive = selectedType === d.value;
             return (
               <li key={d.value}
                 className={cn("flex items-center justify-between px-2", "hover:bg-gray-200 dark:hover:bg-gray-900", isActive ? "bg-gray-200 dark:bg-gray-900" : "")}

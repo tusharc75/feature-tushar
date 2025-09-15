@@ -54,7 +54,7 @@ const ListView = ({ topRightSlot }) => {
     },
     {
       key: `All ${resources?.contentPostPlanning?.titlePlural}`,
-      value: 2
+      value: 3
     }
   ];
 
@@ -172,12 +172,10 @@ const ListView = ({ topRightSlot }) => {
     )
   };
 
-  const getQueryString = (isExport = false) => {
+  const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    } else if (selectedType === 2) {
-      deepFilter = deepFilter + `&openRecords=1`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
@@ -265,11 +263,6 @@ const ListView = ({ topRightSlot }) => {
           setDeleteLoading(false);
         });
     }
-  };
-
-  const validateStatus = (status) => {
-    const currIdx = statusOptions.findIndex((status) => status.optionValue === selectedRecords[0].status);
-    return statusOptions[currIdx + 1]?.optionValue !== status;
   };
 
   const handleChangeStatus = (status) => {

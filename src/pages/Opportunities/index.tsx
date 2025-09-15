@@ -49,11 +49,11 @@ const Opportunities = () => {
     },
     {
       key: `All ${resources?.opportunity?.titlePlural}`,
-      value: 2
+      value: 3
     },
     {
       key: `Closed ${resources?.opportunity?.titlePlural}`,
-      value: 3
+      value: 4
     }
   ];
 
@@ -222,7 +222,7 @@ const Opportunities = () => {
       }
     }
 
-    if (selectedType === 3) {
+    if (selectedType === 4) {
       deepFilters.push({
         field: 'outcome',
         term: ['Won', 'Lost']

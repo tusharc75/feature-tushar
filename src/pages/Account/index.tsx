@@ -63,7 +63,7 @@ export default function Account(props) {
     },
     {
       key: `All ${resources[accountResource]?.titlePlural}`,
-      value: 2
+      value: 3
     }
   ];
 

@@ -24,6 +24,7 @@ import {
   getChipColor,
   getObjKeys,
   getObjKeysWithValues,
+  getValueOfMatchedFieldName,
   MATERIAL_SUB_TYPE,
   repairJob,
   setFieldsInAscendingOrder,
@@ -196,7 +197,8 @@ const Steps = ({
   isMobile,
   fetchWorkOrderData = null,
   headerPadding = true,
-  workOrderPolicyData = null
+  workOrderPolicyData = null,
+  productData = null
 }) => {
   const workOrderId = workOrderData?._id;
   const classes = useStyles();
@@ -446,7 +448,7 @@ const Steps = ({
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
           orignalValues: tempServiceData,
-          values: isDataAlreadyAdded ? getObjKeysWithValues(tempServiceData, fieldsDataForCreate, true) : getObjKeys('', fieldsDataForCreate)
+          values: isDataAlreadyAdded ? getObjKeysWithValues(tempServiceData, fieldsDataForCreate, true) : { ...getObjKeys('', fieldsDataForCreate), ...getValueOfMatchedFieldName(fieldsDataForCreate, productData) }
         };
       }
     } else {
@@ -455,7 +457,7 @@ const Steps = ({
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
           orignalValues: {},
-          values: getObjKeys('', fieldsDataForCreate)
+          values: { ...getObjKeys('', fieldsDataForCreate), ...getValueOfMatchedFieldName(fieldsDataForCreate, productData) }
         };
       }
     }
