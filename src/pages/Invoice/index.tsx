@@ -615,7 +615,7 @@ const LeftSideContents = ({
           }}
           getOptionLabel={(option) => option.label || ''}
           renderInput={(params) => (
-            <TextField {...params} label="Invoice Type" variant="outlined" />
+            <TextField {...params} label="Document Type" variant="outlined" />
           )}
           isOptionEqualToValue={(option, value) => option.value === value.value}
         />
