@@ -380,7 +380,19 @@ export const resourcePolicy = [
         fieldLabel: 'Custom Download File Name',
         type: 'singleLine',
         defaultValue: ''
-      }
+      },
+      {
+        fieldName: 'autoUploadPdfInWorkspace',
+        fieldLabel: 'Auto Upload Pdf In Workspace',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'editRestrictionStatus',
+        fieldLabel: 'Edit Restriction Status',
+        type: 'multiSelect',
+        fieldOption: 'status'
+      },
     ]
   },
   {

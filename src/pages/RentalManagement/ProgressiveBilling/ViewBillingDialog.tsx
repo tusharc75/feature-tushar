@@ -73,8 +73,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
   }, []);
 
   useEffect(() => {
-    fetchInvoiceData();
-  }, [invoiceId]);
+    if (resourcePolicyData) {
+      fetchInvoiceData();
+    }
+  }, [invoiceId, resourcePolicyData]);
 
   useEffect(() => {
     if (invoiceData) {
@@ -93,9 +95,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
       let data;
       const response: any = await axiosInstance().get(`${invoice.api}/${invoiceId}`);
       data = response?.data?.data;
-      setAllowedToEdit(
-        checkIsAllowedToEdit(user, sidebarResource.invoice, data) && permissions?.invoice?.isUpdate && allowCreateInvoice
-        && ![INVOICE_STATUS.invoiced, INVOICE_STATUS.reconciled, INVOICE_STATUS.closed]?.includes(data?.status));
+
+      const statusEnd = [INVOICE_STATUS.closed, INVOICE_STATUS.cancelled, ...(resourcePolicyData?.policy?.editRestrictionStatus || [])]
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data) && permissions?.invoice?.isUpdate && allowCreateInvoice
+        && !statusEnd?.includes(data?.status));
       setAllowedToDelete(
         permissions?.invoice?.isDelete &&
         checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue) &&

@@ -893,7 +893,7 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
       if (key?.visibilityCondition?.length || key?.lookupDependentOn) {
         obj[key.fieldName] = '';
       } else {
-        obj[key.fieldName] = value ? value : option ? option.optionValue : '';
+        obj[key.fieldName] = value && key?.option?.find((e: any) => e?.optionValue === value) ? value : option ? option.optionValue : '';
       }
     } else if (key.type === 'multiSelect') {
       let defaultOptions = key.option?.filter((item: any) => item.default === true);
@@ -4094,8 +4094,8 @@ export function calculateRatio(a: number, b: number, c: number): number {
 
 export const getDataFromHeader = (fields: any[], referenceData: any) => {
   const data: any = {}
-  fields?.forEach(ele => {
-    if (ele?.copyFromHeaderField && referenceData[ele?.copyFromHeaderField]) {
+  fields?.filter((ele) => ele?.copyFromHeaderField)?.forEach(ele => {
+    if (referenceData[ele?.copyFromHeaderField]) {
       data[ele?.fieldName] = referenceData[ele?.copyFromHeaderField]
     }
   });

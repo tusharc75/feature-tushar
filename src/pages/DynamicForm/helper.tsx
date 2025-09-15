@@ -13,7 +13,7 @@ export const dynamicFormUpdateProcessStatus = async (resource: string, processSt
 export const getResourcePolicy = async (user: any, permissions: any, resource: string) => {
   let resourceData: any = null
   const { data: { data } } = await axiosInstance().get(`/dynamic-form/policy?resource=${resource}`);
-  if (data) {
+  if (data && data?.tabs?.length) {
     let { tabs, ...rest } = data;
     tabs = tabs?.filter(t => {
       if (!t?.steps?.length) {
@@ -25,6 +25,9 @@ export const getResourcePolicy = async (user: any, permissions: any, resource: s
       return true
     })
     resourceData = { ...rest, tabs: tabs }
+  }
+  else {
+    resourceData = data
   }
   return resourceData;
 }

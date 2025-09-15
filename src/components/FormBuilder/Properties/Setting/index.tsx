@@ -740,7 +740,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
           <Grid item xs={12} md={6}></Grid>
         </Grid>
       </Box>
-      {fieldData?.type === FieldList.PERCENT.type && (
+      {fieldData?.type === FieldList.PERCENT.type && !formData?.childResource && (
         <Box>
           <Autocomplete
             value={values['operationOnLineItems']}
@@ -759,7 +759,11 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
         </Box>
       )}
       {fieldData?.type === FieldList.PERCENT.type && formData?.childResource && formData?.parentResource && (
-        <CopyFromHeaderFieldDropdown values={values} setFieldValue={setFieldValue} resource={formData?.parentResource} />
+        <CopyFromHeaderFieldDropdown
+          values={values}
+          setFieldValue={setFieldValue}
+          resource={formData?.parentResource}
+        />
       )}
       <Box mt={1}>
         <FormControl component="fieldset">
