@@ -222,7 +222,7 @@ const Opportunities = () => {
       }
     }
 
-    if (selectedType === 3) {
+    if (selectedType === 4) {
       deepFilters.push({
         field: 'outcome',
         term: ['Won', 'Lost']
