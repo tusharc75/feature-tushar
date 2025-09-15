@@ -307,14 +307,11 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
               !['status', 'owner', 'pdfTemplate', 'invoiceNumber', 'creationDate'].includes(invoiceField.fieldName)
             ) {
               const rowData = allResourceData?.current?.find((r) => r?._id === row?._id);
-              console.log('invoiceField', invoiceField);
               const referenceData: any = cloneResourceData(invoiceFields, selectedResourceFields, rowData, user.user?.brandCurrency);
-              if (invoiceField?.fieldName === 'fieldTicket') {
-                if (invoiceField?.type === 'dropDown') {
-                  referenceData['fieldTicket'] = rowData?._id;
-                } else {
-                  referenceData['fieldTicket'] = [rowData?._id];
-                }
+              if (invoiceFields?.find((f) => f?.fieldName === 'fieldTicket')?.type === 'dropDown') {
+                referenceData['fieldTicket'] = rowData?._id;
+              } else {
+                referenceData['fieldTicket'] = [rowData?._id];
               }
               setOpenManageInvoiceDialog({
                 open: true,
