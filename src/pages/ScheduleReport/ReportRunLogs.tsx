@@ -28,7 +28,9 @@ function ReportRunLogs({ scheduleReportData, handleClose }) {
       {
         accessor: 'date',
         Header: 'Date Time',
-        Cell: ({ row }) => (row?.original?.date ? <p className="text-truncate">{displayDateTime(row.original.date)}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.date ? <div>
+          <p className="text-truncate" title={displayDateTime(row.original.date)}>{displayDateTime(row.original.date)}</p>
+        </div> : <NoDataCell />)
       },
       {
         accessor: 'subject',
@@ -36,7 +38,7 @@ function ReportRunLogs({ scheduleReportData, handleClose }) {
         Cell: ({ row }) =>
           row?.original?.subject ? (
             <div>
-              <p className="text-truncate">{row.original.subject}</p>
+              <p className="text-truncate" title={row.original.subject}>{row.original.subject}</p>
             </div>
           ) : (
             <NoDataCell />
@@ -48,7 +50,6 @@ function ReportRunLogs({ scheduleReportData, handleClose }) {
         Cell: ({ row }) =>
           row?.original?.subscribeUsers?.length ? (
             <div>
-              {' '}
               <p className="text-truncate" title={row.original.subscribeUsers}>
                 {row.original.subscribeUsers}
               </p>
@@ -63,7 +64,6 @@ function ReportRunLogs({ scheduleReportData, handleClose }) {
         Cell: ({ row }) =>
           row?.original?.emails?.length ? (
             <div>
-              {' '}
               <p className="text-truncate" title={row.original.emails}>
                 {row.original.emails}
               </p>
@@ -76,22 +76,32 @@ function ReportRunLogs({ scheduleReportData, handleClose }) {
         accessor: 'reportAction',
         Header: 'Report Action',
         Cell: ({ row }) =>
-          row?.original?.reportAction ? <p className="text-truncate">{row.original.reportAction}</p> : <p className="text-truncate">{'Email'}</p>
+          row?.original?.reportAction ? <div>
+            <p className="text-truncate" title={row.original.reportAction}>{row.original.reportAction}</p>
+          </div> : <p className="text-truncate">{'Email'}</p>
       },
       {
         accessor: 'fileType',
         Header: 'File Type',
-        Cell: ({ row }) => (row?.original?.fileType ? <p className="text-truncate">{row.original.fileType}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.fileType ?
+          <div><p className="text-truncate" title={row.original.fileType}>{row.original.fileType}</p> </div> : <NoDataCell />)
       },
       {
         accessor: 'fileName',
         Header: 'File Name',
-        Cell: ({ row }) => (row?.original?.fileName ? <p className="text-truncate">{row.original.fileName}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.fileName ?
+          <div>
+            <p className="text-truncate" title={row.original.fileName}>{row.original.fileName}</p>
+          </div>
+          : <NoDataCell />)
       },
       {
         accessor: 'comment',
         Header: 'Comment',
-        Cell: ({ row }) => (row?.original?.comment ? <p className="text-truncate">{row.original.comment}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.comment ?
+          <div>
+            <p className="text-truncate" title={row.original.comment}>{row.original.comment}</p>
+          </div> : <NoDataCell />)
       },
     ];
     setColumns(columns);
