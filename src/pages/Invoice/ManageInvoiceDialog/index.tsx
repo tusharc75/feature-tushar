@@ -24,12 +24,21 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
 import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
-const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, onSuccess }) => {
+const ManageInvoiceDialog = ({
+  isClone,
+  invoiceId,
+  invoiceData = null,
+  onClose,
+  onSuccess,
+  referenceData = null,
+  referenceIds = [],
+  referenceResource = ''
+}) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -63,7 +72,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
             rest.status = INVOICE_STATUS.new;
             rest.invoiceNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(invoiceNumber);
-            setIsMaterialAvailable(!data?.canDelete)
+            setIsMaterialAvailable(!data?.canDelete);
             setInitialData({
               fields: fieldsDataForCreate,
               values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
@@ -76,7 +85,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                   f.disableOnEdit = true;
                   f.isUneditable = true;
                 }
-              })
+              });
             }
             setInvoiceNumber(data?.invoiceNumber);
             setInitialData({
@@ -91,6 +100,19 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate), currency: user.user?.brandCurrency || '' };
         initialData['invoiceNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        if (!isEmpty(referenceData)) {
+          for (const field of fieldsDataForCreate) {
+            if (referenceData?.[field?.fieldName]) {
+              initialData[field?.fieldName] = referenceData[field?.fieldName];
+              field.disableOnEdit = true;
+              field.isUneditable = true;
+            }
+            if (field?.fieldName === 'creationDate') {
+              field.disableOnEdit = true;
+              field.isUneditable = true;
+            }
+          }
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData
@@ -122,15 +144,24 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
           toastConfig.setToastConfig(error);
         });
     } else {
+      let api = invoice.api, payload = values;
+      if (referenceResource && referenceIds?.length) {
+        api = `/generate-invoice/create`;
+        payload = {
+          resource: referenceResource,
+          referenceIds: referenceIds,
+          extraInvoiceData: values
+        };
+      }
       axiosInstance()
-        .post(`${invoice.api}`, values)
+        .post(api, payload)
         .then(({ data: { data, message } }) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: message
           });
-          setShowConfirmCloneDetailsDialog(false)
+          setShowConfirmCloneDetailsDialog(false);
           history.push(`${routes.invoiceDetail.path}/${data?._id}`);
           setLoading(false);
         })
@@ -182,11 +213,11 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
             onSubmit={(values) => {
               if (invoiceId && isClone && isMaterialAvailable && !showConfirmCloneDetailsDialog) {
                 setShowConfirmCloneDetailsDialog(true);
-              }
-              else {
-                handleSubmit(values)
+              } else {
+                handleSubmit(values);
               }
             }}
+            enableReinitialize
           >
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
@@ -279,7 +310,9 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                 {showConfirmCloneDetailsDialog && (
                   <SelectionConfirmationDialog
                     open={showConfirmCloneDetailsDialog}
-                    message={"Would you like to clone this with all line items? Click 'Yes' to clone both the header and its line items, or 'No' to clone only the header."}
+                    message={
+                      "Would you like to clone this with all line items? Click 'Yes' to clone both the header and its line items, or 'No' to clone only the header."
+                    }
                     onOk={(type) => {
                       if (type === 'Yes') {
                         setFieldValue('invoiceId', invoiceId);
@@ -287,7 +320,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                       submitForm();
                     }}
                     onClose={() => {
-                      setShowConfirmCloneDetailsDialog(false)
+                      setShowConfirmCloneDetailsDialog(false);
                     }}
                     selection1={'Yes'}
                     selection2={'No'}

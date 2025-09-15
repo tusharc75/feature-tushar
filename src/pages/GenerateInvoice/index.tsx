@@ -4,7 +4,7 @@ import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase, map, uniq } from 'lodash';
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -14,7 +14,14 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { FIELD_TICKET_STATUS, INVOICE_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import {
+  FIELD_TICKET_STATUS,
+  INVOICE_STATUS,
+  cloneResourceData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource
+} from 'src/constants/helpers';
 import ViewInvoice from '../Invoice/ViewInvoice';
 import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBillingDialog';
 import CreateInvoiceDialog from './CreateInvoice';
@@ -34,6 +41,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   }: any = useData();
 
   const [selectedResource, setSelectedResource] = useState(null);
+  const [selectedResourceFields, setSelectedResourceFields] = useState(null);
   const renderedFrom = resourceRendered
     ? `${camelCase(routes[`${resourceRendered}Invoice`].title + ' Invoice')}`
     : `${selectedResource?.key + camelCase(sidebarResource.generateInvoice)}`;
@@ -50,34 +58,42 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const [resourceList, setResourceList] = useState([]);
   const [isDownloading, setIsDownloading] = useState(false);
   const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState({ open: false, data: null });
-  const [openManageInvoiceDialog, setOpenManageInvoiceDialog] = useState({ open: false, _id: null });
+  const [openManageInvoiceDialog, setOpenManageInvoiceDialog] = useState({
+    open: false,
+    _id: null,
+    referenceData: null,
+    referenceIds: [],
+    referenceResource: ''
+  });
+  const [invoiceFields, setInvoiceFields] = useState(null);
+  const allResourceData = useRef(null);
 
   const GENERATE_RESOURCE = [
     ...(user?.user?.brandPolicy?.rentalProgressiveBilling && permissions?.invoice?.isRead
       ? [
-        {
-          key: 'rentalManagement',
-          resource: sidebarResource.rentalManagement,
-          fieldName: 'rentalJobName',
-          invoiceFieldName: 'rentalJob',
-          progressiveBilling: true,
-          path: routes.rentalManagementDetail.path,
-          title: resources?.rentalManagement?.titlePlural
-        }
-      ]
+          {
+            key: 'rentalManagement',
+            resource: sidebarResource.rentalManagement,
+            fieldName: 'rentalJobName',
+            invoiceFieldName: 'rentalJob',
+            progressiveBilling: true,
+            path: routes.rentalManagementDetail.path,
+            title: resources?.rentalManagement?.titlePlural
+          }
+        ]
       : []),
     ...(user?.user?.brandPolicy?.subleaseProgressiveBilling && permissions?.invoice?.isRead
       ? [
-        {
-          key: 'sublease',
-          resource: sidebarResource.sublease,
-          fieldName: 'subleaseName',
-          invoiceFieldName: 'sublease',
-          progressiveBilling: true,
-          path: routes.subleaseDetail.path,
-          title: resources?.sublease?.titlePlural
-        }
-      ]
+          {
+            key: 'sublease',
+            resource: sidebarResource.sublease,
+            fieldName: 'subleaseName',
+            invoiceFieldName: 'sublease',
+            progressiveBilling: true,
+            path: routes.subleaseDetail.path,
+            title: resources?.sublease?.titlePlural
+          }
+        ]
       : []),
     {
       key: 'repairOrder',
@@ -108,6 +124,15 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     }
   ];
 
+  const fetchInvoiceFields = async () => {
+    try {
+      const { fieldsDataAll } = await fetch_resource_view_fields(sidebarResource.invoice, false);
+      setInvoiceFields(fieldsDataAll?.map((e) => e.fieldData));
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   useEffect(() => {
     const options: any = [];
     GENERATE_RESOURCE?.forEach((item) => {
@@ -123,6 +148,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         setSelectedResource(options[0]);
       }
     }
+    fetchInvoiceFields();
   }, []);
 
   useEffect(() => {
@@ -133,7 +159,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     if (selectedResource) {
       fetchGridColumns();
     }
-  }, [selectedResource]);
+  }, [selectedResource, invoiceFields]);
 
   useEffect(() => {
     if (selectedResource) {
@@ -145,7 +171,8 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
 
   const fetchGridColumns = async () => {
     setColumns(null);
-    const { fieldsDataForRead } = await fetch_resource_view_fields(selectedResource.resource, false);
+    const { fieldsDataForRead, fieldsDataAll } = await fetch_resource_view_fields(selectedResource.resource, false);
+    setSelectedResourceFields(fieldsDataAll?.map((e) => e.fieldData));
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, selectedResource?.path);
     let extraColumns = [];
     if (selectedResource?.resource === sidebarResource.fieldTicket) {
@@ -182,12 +209,14 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   };
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
+    allResourceData.current = null;
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
       .get(`${routes?.generateInvoice.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
+        allResourceData.current = data;
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
@@ -251,7 +280,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
           message: data.message
         });
         if (selectedResource?.resource === sidebarResource.fieldTicket) {
-          setOpenManageInvoiceDialog({ open: true, _id: data?.data?._id });
+          setOpenManageInvoiceDialog({ open: true, _id: data?.data?._id, referenceData: null, referenceIds: [], referenceResource: '' });
         } else {
           window.open(`${routes.invoiceDetail.path}/${data?.data?._id}`);
         }
@@ -270,6 +299,34 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       if (invoicePolicyRef?.current?.policy?.fieldTicketInvoiceFields?.length > 0) {
         setOpenInvoiceDataDialog({ open: true, data: rows });
       } else {
+        for (const invoiceField of invoiceFields) {
+          for (const row of rows) {
+            if (
+              !row?.[invoiceField?.fieldName] &&
+              invoiceField?.required &&
+              !['status', 'owner', 'pdfTemplate', 'invoiceNumber', 'creationDate'].includes(invoiceField.fieldName)
+            ) {
+              const rowData = allResourceData?.current?.find((r) => r?._id === row?._id);
+              console.log('invoiceField', invoiceField);
+              const referenceData: any = cloneResourceData(invoiceFields, selectedResourceFields, rowData, user.user?.brandCurrency);
+              if (invoiceField?.fieldName === 'fieldTicket') {
+                if (invoiceField?.type === 'dropDown') {
+                  referenceData['fieldTicket'] = rowData?._id;
+                } else {
+                  referenceData['fieldTicket'] = [rowData?._id];
+                }
+              }
+              setOpenManageInvoiceDialog({
+                open: true,
+                _id: null,
+                referenceData: referenceData,
+                referenceIds: [row?._id],
+                referenceResource: selectedResource.resource
+              });
+              return;
+            }
+          }
+        }
         createInvoice(rows);
       }
     } else {
@@ -288,7 +345,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {selectedResource?.progressiveBilling ? (
+        {selectedResource?.progressiveBilling && invoiceFields?.length > 0 ? (
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             <HtmlTooltip title="Create Invoice">
               <span>
@@ -319,7 +376,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
               </Box>
             ) : null}
           </div>
-        ) : row?.original?.status === INVOICE_STATUS.readyToInvoice ? (
+        ) : row?.original?.status === INVOICE_STATUS.readyToInvoice && invoiceFields?.length > 0 ? (
           <HtmlTooltip title="Create Invoice">
             <span>
               <IconButton
@@ -332,19 +389,21 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
               </IconButton>
             </span>
           </HtmlTooltip>
-        ) : (row?.original?.invoiceId || row?.original?.invoice) && (
-          <HtmlTooltip title="View Invoice">
-            <span>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  setViewSingleInvoiceDialog({ open: true, invoice: row?.original?.invoiceId || row?.original?.invoice });
-                }}
-              >
-                <VisibilityIcon fontSize="small" color="primary" />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
+        ) : (
+          (row?.original?.invoiceId || row?.original?.invoice) && (
+            <HtmlTooltip title="View Invoice">
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setViewSingleInvoiceDialog({ open: true, invoice: row?.original?.invoiceId || row?.original?.invoice });
+                  }}
+                >
+                  <VisibilityIcon fontSize="small" color="primary" />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          )
         )}
       </>
     )
@@ -575,12 +634,15 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             isClone={false}
             invoiceId={openManageInvoiceDialog?._id}
             onClose={() => {
-              setOpenManageInvoiceDialog({ open: false, _id: null });
+              setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null, referenceIds: [], referenceResource: '' });
             }}
             onSuccess={() => {
-              setOpenManageInvoiceDialog({ open: false, _id: null });
+              setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null, referenceIds: [], referenceResource: '' });
               fetchData();
             }}
+            referenceData={openManageInvoiceDialog?.referenceData}
+            referenceIds={openManageInvoiceDialog?.referenceIds}
+            referenceResource={openManageInvoiceDialog?.referenceResource}
           />
         )}
       </div>
