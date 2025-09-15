@@ -225,7 +225,7 @@ const Leads = () => {
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (selectedType === 3) {
+    if (selectedType === 4) {
       deepFilters.push({
         field: 'staticData.convertedToOpportunity',
         term: 'Yes'
