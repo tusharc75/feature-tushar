@@ -75,7 +75,8 @@ const InventoryProduct = () => {
         setDefaultSelectedData(data)
         getPlants(data?.warehouse || null, data?.storageLocation || null);
       })
-      .catch(() => {
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
   }, [selectedEntity]);
 
@@ -111,7 +112,7 @@ const InventoryProduct = () => {
         else if (plantId === null && data?.[sidebarResource.warehouse]?.length) {
           setPlantId('All');
         }
-        if (defaultWarehouse && defaultStorageLocation && storageLocationOptions.find(p => p.optionValue === defaultStorageLocation)) {
+        if (defaultWarehouse && defaultStorageLocation && storageLocationOptions.find(p => p.optionValue === defaultStorageLocation && p.warehouse === defaultWarehouse)) {
           setStorageLocationId(defaultStorageLocation);
         }
       });
@@ -817,7 +818,6 @@ const LeftSideContents = ({
                           storageLocation: option.optionValue
                         });
                       }}
-                      aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
                     >
                       <StarIcon sx={{ color: isFavorite ? 'gold' : 'grey.400' }} />
                     </IconButton>
