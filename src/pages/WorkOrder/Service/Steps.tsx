@@ -24,7 +24,6 @@ import {
   getChipColor,
   getObjKeys,
   getObjKeysWithValues,
-  getValueOfMatchedFieldName,
   MATERIAL_SUB_TYPE,
   repairJob,
   setFieldsInAscendingOrder,
@@ -448,7 +447,7 @@ const Steps = ({
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
           orignalValues: tempServiceData,
-          values: isDataAlreadyAdded ? getObjKeysWithValues(tempServiceData, fieldsDataForCreate, true) : getObjKeysWithValues(getValueOfMatchedFieldName(fieldsDataForCreate, productData), fieldsDataForCreate)
+          values: isDataAlreadyAdded ? getObjKeysWithValues(tempServiceData, fieldsDataForCreate, true) : productData ? getObjKeysWithValues(productData, fieldsDataForCreate) : getObjKeys('', fieldsDataForCreate)
         };
       }
     } else {
@@ -457,7 +456,7 @@ const Steps = ({
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
           orignalValues: {},
-          values: getObjKeysWithValues(getValueOfMatchedFieldName(fieldsDataForCreate, productData), fieldsDataForCreate)
+          values: productData ? getObjKeysWithValues(productData, fieldsDataForCreate) : getObjKeys('', fieldsDataForCreate)
         };
       }
     }
