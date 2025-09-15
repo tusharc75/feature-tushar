@@ -319,7 +319,7 @@ const RenderTabs = ({
       >
         <ul className="list-none py-1">
           {toggleButtonList?.map((d) => {
-            const isActive = toggleButtonList[selectedType - 1]?.value === d.value;
+            const isActive = selectedType === d.value;
             return (
               <li key={d.value}
                 className={cn("flex items-center justify-between px-2", "hover:bg-gray-200 dark:hover:bg-gray-900", isActive ? "bg-gray-200 dark:bg-gray-900" : "")}
