@@ -58,7 +58,7 @@ const QuoteBuilders = () => {
     },
     {
       key: `All ${resources?.quoteBuilder?.titlePlural}`,
-      value: 2
+      value: 3
     }
   ];
 

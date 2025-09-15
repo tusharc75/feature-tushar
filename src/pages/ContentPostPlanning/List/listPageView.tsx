@@ -54,7 +54,7 @@ const ListView = ({ topRightSlot }) => {
     },
     {
       key: `All ${resources?.contentPostPlanning?.titlePlural}`,
-      value: 2
+      value: 3
     }
   ];
 
