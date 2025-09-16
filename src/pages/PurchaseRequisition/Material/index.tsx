@@ -17,7 +17,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, DOA_STATUS, getEmailsFromContacts, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, DOA_STATUS, getEmailsFromContacts, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import CostDialog from './CostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -648,7 +648,7 @@ const Material = ({
           referenceId={purchaseRequisitionData?._id}
           uniqueId={showAttachmentDialog?._id}
           referenceLabel={showAttachmentDialog.label}
-          resource={ACTIVITY_RESOURCE.purchaseRequisition}
+          resource={sidebarResource.purchaseRequisition}
           handleClose={() => {
             setShowAttachmentDialog({ open: false, _id: null, label: '' });
           }}

@@ -27,7 +27,6 @@ import IconButtonTabs from 'src/components/IconButtonTabs';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 import {
-  ACTIVITY_RESOURCE,
   ATTACHMENT_TYPE,
   WORKORDER_SERVICE_STATUS,
   WORKORDER_TECHNICIAN_SERVICE_STATUS,
@@ -224,9 +223,8 @@ const WorkOrderTechnician = () => {
                     <Box ml={1}>
                       <HtmlTooltip title={`${row?.original?.priority} Priority`}>
                         <span
-                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${
-                            row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
-                          } `}
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
+                            } `}
                         >
                           {row?.original?.priority}
                         </span>
@@ -482,9 +480,9 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-            selectedRecords?.filter(
-              (s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.status !== WORK_ORDER_STATUS.onHold && s?.canPerform
-            )?.length === selectedRecords?.length
+              selectedRecords?.filter(
+                (s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.status !== WORK_ORDER_STATUS.onHold && s?.canPerform
+              )?.length === selectedRecords?.length
               ? false
               : true,
           label: `Complete Service(s)`,
@@ -705,7 +703,7 @@ const WorkOrderTechnician = () => {
           handleClose={() => {
             setShowDrawingDialog({ open: false, workOrder: null });
           }}
-          resource={ACTIVITY_RESOURCE.workOrder}
+          resource={sidebarResource.workOrder}
           attachmentType={ATTACHMENT_TYPE.drawing}
         />
       )}

@@ -26,7 +26,6 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import {
-  ACTIVITY_RESOURCE,
   ATTACHMENT_TYPE,
   CHILD_RESOURCE,
   MATERIAL_SUB_TYPE,
@@ -1100,7 +1099,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       {showDrawingDialog.open && (
         <DiagramDialog
           referenceId={showDrawingDialog?.workOrder}
-          resource={ACTIVITY_RESOURCE.workOrder}
+          resource={sidebarResource.workOrder}
           handleClose={() => {
             setShowDrawingDialog({ open: false, workOrder: null, label: '', uniqueId: null });
           }}

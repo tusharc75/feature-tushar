@@ -1233,7 +1233,7 @@ const Service = ({
           referenceLabel={attchmentsDialog.serviceName}
           uniqueId={attchmentsDialog.uniqueServiceId}
           stepId={attchmentsDialog.stepId}
-          resource={ACTIVITY_RESOURCE.workOrder}
+          resource={sidebarResource.workOrder}
         />
       )}
       {showManagePurchaseOrder && (
