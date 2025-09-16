@@ -192,7 +192,7 @@ const ReceivingTicket = ({
   const [fieldLabels, setFieldLabels] = useState(null);
   const [rentalJobChildFields, setRentalJobChildFields] = useState(null);
   const [subStatusLog, setSubStatusLog] = useState({ open: false, data: null })
-  const [fleetDispatchLog, setFleetDispatchLog] = useState({ open: false, data: null })
+  const [fleetDispatchLog, setFleetDispatchLog] = useState({ open: false, assetData: null })
 
   const {
     state: { user, permissions, resources }
@@ -2003,18 +2003,19 @@ const ReceivingTicket = ({
                 </IconButton>
               </HtmlTooltip>
             )}
-            {fleetDispatchPolicyData?.policy?.['prsCategory']?.includes(row?.original?.productCategory?.optionValue) && (
-              <HtmlTooltip title={'Fleet Dispatch History'}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setFleetDispatchLog({ open: true, data: row?.original })
-                  }}
-                >
-                  <History fontSize="small" color="primary" />
-                </IconButton>
-              </HtmlTooltip>
-            )}
+            {fleetDispatchPolicyData?.policy?.['prsCategory']?.includes(row?.original?.productCategory?.optionValue)
+              && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
+                <HtmlTooltip title={'Fleet Dispatch History'}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setFleetDispatchLog({ open: true, assetData: row?.original })
+                    }}
+                  >
+                    <History fontSize="small" color="primary" />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
           </>
         );
       }
@@ -3470,8 +3471,8 @@ const ReceivingTicket = ({
       {fleetDispatchLog.open && (
         <FleetDispatchHistory
           rentalId={rentalManagementData?._id}
-          data={fleetDispatchLog.data}
-          onClose={() => setFleetDispatchLog({ open: false, data: null })}
+          assetData={fleetDispatchLog.assetData}
+          onClose={() => setFleetDispatchLog({ open: false, assetData: null })}
         />
       )}
     </>

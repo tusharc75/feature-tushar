@@ -5,13 +5,14 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import { CustomDialogTransition, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { camelCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
-const FleetDispatchHistory = ({ rentalId, data, onClose }) => {
+const FleetDispatchHistory = ({ rentalId, assetData, onClose }) => {
+
   const renderedFrom = `${camelCase(sidebarResource?.fleetDispatch)}_history_logs`;
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -21,7 +22,7 @@ const FleetDispatchHistory = ({ rentalId, data, onClose }) => {
 
   useEffect(() => {
     fetchData();
-  }, [rentalId, data?._id]);
+  }, [rentalId, assetData?._id]);
 
   useEffect(() => {
     fetchFields();
@@ -30,9 +31,8 @@ const FleetDispatchHistory = ({ rentalId, data, onClose }) => {
   const fetchData = async () => {
     try {
       dispatch({ type: 'loading', loading: true });
-      const response = await axiosInstance().get(`${routes.fleetDispatch.path}/history?rentalId=${rentalId}&asset=${data?._id}`);
+      const response = await axiosInstance().get(`${routes.fleetDispatch.path}/history?rentalId=${rentalId}&asset=${assetData?._id}`);
       const rows = response?.data?.data?.map((e) => prepareDataForGrid(e));
-
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
@@ -46,8 +46,9 @@ const FleetDispatchHistory = ({ rentalId, data, onClose }) => {
   const fetchFields = async () => {
     try {
       const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.fleetDispatch, true);
-      const cols = generateColumns(renderedFrom, fieldsDataForRead);
-      setColumns(cols);
+      const column = generateColumns(renderedFrom, fieldsDataForRead?.filter((e) => !['rentalJob', 'asset']?.includes(e?.fieldData?.fieldName)));
+      let staticFields: any = getStaticFields();
+      setColumns([...column, ...staticFields]);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -66,7 +67,7 @@ const FleetDispatchHistory = ({ rentalId, data, onClose }) => {
       maxWidth="sm"
       fullWidth
     >
-      <CustomDialogHeader title={`${data?.assetNumber || ''} - History`} onClose={onClose} showRequiredLabel={false} />
+      <CustomDialogHeader title={`${assetData?.assetNumber || ''} - Dispatch History`} onClose={onClose} showRequiredLabel={false} />
       <CustomDialogContent>
         {columns ? (
           <CustomReactTable
