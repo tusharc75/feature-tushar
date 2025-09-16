@@ -73,6 +73,7 @@ const Invoice = () => {
 
   const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<'proforma' | 'invoices' | null>(null);
   const [defaultSelectedData, setDefaultSelectedData] = useState(null);
+  const [isLoadingDefaultSelectedData, setIsLoadingDefaultSelectedData] = useState(true);
   const [isInvoiceTypeFilterVisible, setIsInvoiceTypeFilterVisible] = useState(false);
 
   const types = [
@@ -107,13 +108,16 @@ const Invoice = () => {
   }, []);
 
   useEffect(() => {
+    setIsLoadingDefaultSelectedData(true)
     axiosInstance().get(`/user-default-selections?resource=${sidebarResource.invoice}`)
       .then(({ data: { data } }) => {
         setDefaultSelectedData(data);
         setInvoiceTypeFilter(data?.documentType || null);
+        setIsLoadingDefaultSelectedData(false)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setIsLoadingDefaultSelectedData(false)
       });
   }, []);
 
@@ -196,22 +200,26 @@ const Invoice = () => {
   };
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (invoiceTimeout) {
-      clearTimeout(invoiceTimeout);
+    if (!isLoadingDefaultSelectedData) {
+      let millisec = Object.keys(search).length > 0 ? 600 : 5;
+      if (invoiceTimeout) {
+        clearTimeout(invoiceTimeout);
+      }
+      invoiceTimeout = setTimeout(() => {
+        fetchData();
+      }, millisec);
     }
-    invoiceTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
+  }, [search, isLoadingDefaultSelectedData]);
 
   useEffect(() => {
-    if (renderCount > 0) {
-      const cancelTokenSource = axios.CancelToken.source();
-      fetchData(cancelTokenSource);
-      return () => cancelTokenSource.cancel();
-    } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly, invoiceTypeFilter]);
+    if (!isLoadingDefaultSelectedData) {
+      if (renderCount > 0) {
+        const cancelTokenSource = axios.CancelToken.source();
+        fetchData(cancelTokenSource);
+        return () => cancelTokenSource.cancel();
+      } else setRenderCount((preCount) => preCount + 1);
+    }
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly, isLoadingDefaultSelectedData, invoiceTypeFilter]);
 
   const handleDelete = () => {
     setIsSubmitting(true);
