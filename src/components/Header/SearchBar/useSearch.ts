@@ -1,6 +1,7 @@
 import { kebabCase } from 'lodash';
 import React, { useCallback, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { createDmsUrl } from 'src/components/Header/DMSRedirect';
 import { UseSearchActions, UseSearchState } from 'src/components/Header/SearchBar/types';
 import routes from 'src/components/Helpers/Routes';
 import { staticHiddenResource } from 'src/constants/helpers';
@@ -116,12 +117,20 @@ const useSearch = () => {
       switch (item.name) {
         case 'Pos':
           return routes.pos.path;
+        case 'Attachment': {
+          return createDmsUrl();
+        }
         default:
           return `/${kebabCase(item.name)}`;
       }
     };
     if (state.optionValue) {
-      history.push(handleRoutes(state.optionValue));
+      const targetLink = handleRoutes(state.optionValue);
+      if (targetLink.startsWith('http')) {
+        window.open(targetLink, '_blank', 'noopener,noreferrer');
+      } else {
+        history.push(handleRoutes(state.optionValue));
+      }
       setOptionValue(null);
     }
   }, [history, setOptionValue, state.optionValue]);
