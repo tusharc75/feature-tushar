@@ -644,14 +644,6 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
         }
         else if (action === fieldServiceOrderActions.deleteServiceLog) {
           const serviceLogCount = e?.serviceLog?.length;
-          // const recentServiceLogStartDate = serviceLogCount ? e?.serviceLog[serviceLogCount - 1]?.startDate : null;
-          // const recentServiceLogEndDate = serviceLogCount ? e?.serviceLog[serviceLogCount - 1]?.endDate : null;
-          // const maxInvoiceDate = e?.maxInvoiceDate;
-          // const cannotDelete =
-          //   !serviceLogCount ||
-          //   (recentServiceLogEndDate && recentServiceLogEndDate >= maxInvoiceDate && recentServiceLogStartDate <= maxInvoiceDate) ||
-          //   (recentServiceLogEndDate && recentServiceLogEndDate <= maxInvoiceDate) ||
-          //   (!recentServiceLogEndDate && maxInvoiceDate >= recentServiceLogStartDate);
           if (!serviceLogCount) {
             errorMessages.push({ index: e.index, message: fieldServiceOrderMessages.serviceNotStarted });
           }
@@ -735,7 +727,6 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
             </MenuItem>
           </>
         )}
-        {/* delete logs */}
         <MenuItem
           onClick={() => {
             if (!validateAction(fieldServiceOrderActions.deleteServiceLog)) {
@@ -925,7 +916,6 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
           fetchRecords={fetchData}
         />
       )}
-      {/* delete logs */}
       {deleteServiceLogConfirmDialog.open && (
         <ConfirmationDialog
           open={deleteServiceLogConfirmDialog.open}
