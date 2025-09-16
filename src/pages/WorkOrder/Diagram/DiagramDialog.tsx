@@ -1,15 +1,13 @@
 import { Dialog } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { ACTIVITY_RESOURCE, CustomDialogTransition, sidebarResource, workOrder } from 'src/constants/helpers';
+import { CustomDialogTransition, sidebarResource, workOrder } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import Diagram from '.';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
-import { startCase } from 'lodash';
 
 const DiagramDialog = ({
   handleClose,
@@ -27,7 +25,7 @@ const DiagramDialog = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (resource === ACTIVITY_RESOURCE.workOrder) {
+    if (resource === sidebarResource.workOrder) {
       setLoading(true);
       axiosInstance()
         .get(`${workOrder.api}/current-version/${referenceId}`)
@@ -65,13 +63,13 @@ const DiagramDialog = ({
         {!loading ? (
           <DiagramNew
             height={'calc(100vh - 150px)'}
-            resource={sidebarResource[resource] || startCase(resource)}
+            resource={resource}
             referenceId={referenceId}
             resourceLabel={resourceLabel}
             referenceLabel={referenceLabel}
             uniqueId={uniqueId}
             stepId={stepId}
-            currentVersion={resource === ACTIVITY_RESOURCE.workOrder ? resourceData?.currentVersion : null}
+            currentVersion={resource === sidebarResource.workOrder ? resourceData?.currentVersion : null}
             attachmentType={attachmentType}
             showMaterialFilter={showMaterialFilter}
             showContainer={false}

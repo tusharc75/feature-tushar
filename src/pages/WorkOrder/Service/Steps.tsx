@@ -3,7 +3,7 @@ import { Box, Checkbox, Chip, IconButton, Menu, MenuItem, useMediaQuery } from '
 import Grid from '@mui/material/Grid2';
 import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
-import { isArray, isEmpty, isEqual } from 'lodash';
+import { isArray, isEqual } from 'lodash';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { AiOutlinePlus } from 'react-icons/ai';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -1861,7 +1861,7 @@ const Steps = ({
                 referenceLabel={attchmentsDialog.serviceName}
                 uniqueId={attchmentsDialog.uniqueServiceId}
                 stepId={attchmentsDialog.stepId}
-                resource={ACTIVITY_RESOURCE.workOrder}
+                resource={sidebarResource.workOrder}
               />
             )}
             {consumablesDialog.open && (
@@ -2038,7 +2038,7 @@ const Steps = ({
           handleClose={() => {
             setShowDrawing(false);
           }}
-          resource={ACTIVITY_RESOURCE.workOrder}
+          resource={sidebarResource.workOrder}
           attachmentType={ATTACHMENT_TYPE.drawing}
         />
       )}

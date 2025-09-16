@@ -19,7 +19,6 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
-  ACTIVITY_RESOURCE,
   ATTACHMENT_TYPE,
   PACKAGE_TYPE,
   packages,
@@ -375,7 +374,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
           referenceId={packageId}
           uniqueId={showDiagramDialog?._id}
           referenceLabel={showDiagramDialog.label}
-          resource={ACTIVITY_RESOURCE.packages}
+          resource={sidebarResource.packages}
           handleClose={() => {
             setShowDiagramDialog({ open: false, _id: null, label: '' });
           }}

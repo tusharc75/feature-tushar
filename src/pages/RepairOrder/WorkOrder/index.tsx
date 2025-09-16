@@ -37,7 +37,6 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import {
-  ACTIVITY_RESOURCE,
   ASSET_STATUS,
   CHILD_RESOURCE,
   MATERIAL_SUB_TYPE,
@@ -1402,7 +1401,7 @@ const WorkOrder = ({
               handleClose={() => {
                 setShowAttachmentDialog({ open: false, workOrder: null, label: '', uniqueId: null, type: null });
               }}
-              resource={ACTIVITY_RESOURCE.workOrder}
+              resource={sidebarResource.workOrder}
               uniqueId={showAttachmentDialog.uniqueId}
               referenceLabel={showAttachmentDialog?.label}
               showMaterialFilter={[MATERIAL_TYPE.service, MATERIAL_TYPE.product]?.includes(showAttachmentDialog?.type) ? false : true}

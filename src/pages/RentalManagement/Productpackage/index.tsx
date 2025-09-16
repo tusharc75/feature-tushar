@@ -28,7 +28,6 @@ import {
 } from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
-  ACTIVITY_RESOURCE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
@@ -1264,7 +1263,7 @@ const Productpackage = ({
           referenceId={rentalManagementData?._id}
           uniqueId={showAttachmentDialog?._id}
           referenceLabel={showAttachmentDialog.label}
-          resource={ACTIVITY_RESOURCE.rentalManagement}
+          resource={sidebarResource.rentalManagement}
           resourceLabel={rentalManagementData?.rentalJobName}
           handleClose={() => {
             setShowAttachmentDialog({ open: false, _id: null, label: '' });
