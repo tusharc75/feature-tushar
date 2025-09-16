@@ -1,6 +1,5 @@
 import { Typography } from '@mui/material';
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import DashboardModal from 'src/components/DashboardModal';
 import UserFavoriteIcon from 'src/components/UserFavouriteIcon';
 import { useFavorites } from 'src/hooks';
@@ -12,6 +11,7 @@ import userFavoriteImage from 'src/assets/dashboard_images/sidebar/user-favorite
 import SideCard from 'src/pages/Home/SideCard';
 import { useData } from 'src/StateProvider/Provider';
 import styles from './Dashboard.module.scss';
+import Link from 'src/components/Link';
 
 const UserFavouriteCard = () => {
   const {
@@ -66,12 +66,7 @@ const UserFavouriteCard = () => {
         />
       )}
 
-      <DashboardModal
-        modalHead={modalContent}
-        style={{ width: 'min(468px, calc(100vw - 64px))' }}
-        handleClose={handleClose}
-        handleRoutes={handleRoutes}
-      >
+      <DashboardModal modalHead={modalContent} style={{ width: 'min(468px, calc(100vw - 64px))' }} handleClose={handleClose}>
         <ul className={styles.linkList}>
           {modalContent?.items
             ?.filter((item) => !item?.isHidden)

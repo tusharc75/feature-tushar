@@ -1,21 +1,20 @@
 import { Typography } from '@mui/material';
 import { Fragment, useState } from 'react';
 import { HiArrowRight } from 'react-icons/hi';
-import { Link } from 'react-router-dom';
 import { DynamicIcon } from 'src/assets/IconGenerator';
 import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import DashboardModal from 'src/components/DashboardModal';
+import Link from 'src/components/Link';
 import UserFavoriteIcon from 'src/components/UserFavouriteIcon';
-import { Item, Section } from 'src/pages/Home/types';
+import { Section } from 'src/pages/Home/types';
 import styles from './Dashboard.module.scss';
-import { getColors } from './helpers';
+import { getColors, handleRoutes } from './helpers';
 
 type DisplayCardGridProps = {
   sections: Section[];
-  handleRoutes: (item: Item) => string;
 };
 
-const DisplayCardGrid = ({ sections, handleRoutes }: DisplayCardGridProps) => {
+const DisplayCardGrid = ({ sections }: DisplayCardGridProps) => {
   const [modalContent, setModalContent] = useState(null);
 
   const handleClose = () => {
@@ -89,12 +88,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }: DisplayCardGridProps) => {
           );
         })}
       </div>
-      <DashboardModal
-        modalHead={modalContent}
-        style={{ width: 'min(468px, calc(100vw - 64px))' }}
-        handleClose={handleClose}
-        handleRoutes={handleRoutes}
-      >
+      <DashboardModal modalHead={modalContent} style={{ width: 'min(468px, calc(100vw - 64px))' }} handleClose={handleClose}>
         <ul className={styles.linkList}>
           {modalContent?.items
             ?.filter((item) => !item?.isHidden)
@@ -102,7 +96,11 @@ const DisplayCardGrid = ({ sections, handleRoutes }: DisplayCardGridProps) => {
               <li key={item.name}>
                 <Typography component="span">
                   <div className="flex justify-between gap-2">
-                    <Link to={handleRoutes(item)} className={styles.dialogLinks}>
+                    <Link
+                      to={handleRoutes(item)}
+                      target={handleRoutes(item).startsWith('http') ? '__blank' : '__self'}
+                      className={styles.dialogLinks}
+                    >
                       <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 13 13" fill="none">
                         <path
                           d="M6.50049 0H13.0005V6.5H12.188V1.39014L0.59082 12.981L0.0195312 12.4097L11.6104 0.8125H6.50049V0Z"
