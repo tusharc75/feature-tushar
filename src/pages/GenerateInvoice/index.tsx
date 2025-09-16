@@ -270,7 +270,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     axiosInstance()
       .post(`/generate-invoice/create`, {
         resource: selectedResource?.resource,
-        referenceIds: resourceData?.map((e) => e._id),
+        referenceIds: resourceData?.map((e) => e?._id),
         extraInvoiceData: invoiceData
       })
       .then(({ data }) => {
@@ -640,7 +640,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             referenceData={openManageInvoiceDialog?.referenceData}
             {...(!isEmpty(openManageInvoiceDialog?.referenceData) && {
               handleGenerateInvoice: (values: any) => {
-                createInvoice([{ _id: openManageInvoiceDialog?._id }], values, true);
+                createInvoice([{ _id: openManageInvoiceDialog?.referenceData?._id }], values, true);
               }
             })}
             isLoading={isLoading}
