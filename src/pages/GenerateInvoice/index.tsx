@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid2';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import Autocomplete from '@mui/material/Autocomplete';
-import { camelCase, map, uniq } from 'lodash';
+import { camelCase, isEmpty, map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -61,11 +61,10 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const [openManageInvoiceDialog, setOpenManageInvoiceDialog] = useState({
     open: false,
     _id: null,
-    referenceData: null,
-    referenceIds: [],
-    referenceResource: ''
+    referenceData: null
   });
   const [invoiceFields, setInvoiceFields] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const allResourceData = useRef(null);
 
   const GENERATE_RESOURCE = [
@@ -266,7 +265,8 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     return deepFilter;
   };
 
-  const createInvoice = (resourceData, invoiceData = null) => {
+  const createInvoice = (resourceData, invoiceData = null, hideInvoiceDialog = false) => {
+    setIsLoading(true);
     axiosInstance()
       .post(`/generate-invoice/create`, {
         resource: selectedResource?.resource,
@@ -274,13 +274,14 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         extraInvoiceData: invoiceData
       })
       .then(({ data }) => {
+        setIsLoading(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
-        if (selectedResource?.resource === sidebarResource.fieldTicket) {
-          setOpenManageInvoiceDialog({ open: true, _id: data?.data?._id, referenceData: null, referenceIds: [], referenceResource: '' });
+        if (selectedResource?.resource === sidebarResource.fieldTicket && !hideInvoiceDialog) {
+          setOpenManageInvoiceDialog({ open: true, _id: data?.data?._id, referenceData: null });
         } else {
           window.open(`${routes.invoiceDetail.path}/${data?.data?._id}`);
         }
@@ -290,6 +291,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         fetchData();
       })
       .catch((error) => {
+        setIsLoading(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -316,9 +318,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
               setOpenManageInvoiceDialog({
                 open: true,
                 _id: null,
-                referenceData: referenceData,
-                referenceIds: [row?._id],
-                referenceResource: selectedResource.resource
+                referenceData: referenceData
               });
               return;
             }
@@ -631,15 +631,19 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             isClone={false}
             invoiceId={openManageInvoiceDialog?._id}
             onClose={() => {
-              setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null, referenceIds: [], referenceResource: '' });
+              setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null });
             }}
             onSuccess={() => {
-              setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null, referenceIds: [], referenceResource: '' });
+              setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null });
               fetchData();
             }}
             referenceData={openManageInvoiceDialog?.referenceData}
-            referenceIds={openManageInvoiceDialog?.referenceIds}
-            referenceResource={openManageInvoiceDialog?.referenceResource}
+            {...(!isEmpty(openManageInvoiceDialog?.referenceData) && {
+              handleGenerateInvoice: (values: any) => {
+                createInvoice([{ _id: openManageInvoiceDialog?._id }], values, true);
+              }
+            })}
+            isLoading={isLoading}
           />
         )}
       </div>

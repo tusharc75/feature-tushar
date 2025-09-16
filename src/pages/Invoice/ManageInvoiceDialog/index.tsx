@@ -29,16 +29,7 @@ import InputField from 'src/components/Helpers/InputField';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
 import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
-const ManageInvoiceDialog = ({
-  isClone,
-  invoiceId,
-  invoiceData = null,
-  onClose,
-  onSuccess,
-  referenceData = null,
-  referenceIds = [],
-  referenceResource = ''
-}) => {
+const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, onSuccess, referenceData = null, handleGenerateInvoice = null, isLoading = false }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -104,12 +95,10 @@ const ManageInvoiceDialog = ({
           for (const field of fieldsDataForCreate) {
             if (referenceData?.[field?.fieldName]) {
               initialData[field?.fieldName] = referenceData[field?.fieldName];
-              field.disableOnEdit = true;
-              field.isUneditable = true;
-            }
-            if (field?.fieldName === 'creationDate') {
-              field.disableOnEdit = true;
-              field.isUneditable = true;
+              if (field?.fieldName === 'fieldTicket') {
+                field.disableOnEdit = true;
+                field.isUneditable = true;
+              }
             }
           }
         }
@@ -126,7 +115,9 @@ const ManageInvoiceDialog = ({
 
   const handleSubmit = (values) => {
     setLoading(true);
-    if (invoiceId && isClone === false) {
+    if (handleGenerateInvoice) {
+      handleGenerateInvoice(values);
+    } else if (invoiceId && isClone === false) {
       values._id = invoiceId;
       axiosInstance()
         .put(`${invoice.api}`, values)
@@ -144,17 +135,8 @@ const ManageInvoiceDialog = ({
           toastConfig.setToastConfig(error);
         });
     } else {
-      let api = invoice.api, payload = values;
-      if (referenceResource && referenceIds?.length) {
-        api = `/generate-invoice/create`;
-        payload = {
-          resource: referenceResource,
-          referenceIds: referenceIds,
-          extraInvoiceData: values
-        };
-      }
       axiosInstance()
-        .post(api, payload)
+        .post(`${invoice.api}`, values)
         .then(({ data: { data, message } }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -281,9 +263,9 @@ const ManageInvoiceDialog = ({
                     Cancel
                   </ThemeButton>
                   <ThemeButton
-                    isLoading={loading}
+                    isLoading={loading || isLoading}
                     buttonType="theme"
-                    disabled={loading}
+                    disabled={loading || isLoading}
                     onClick={(e) => {
                       e.preventDefault();
                       handleScroll(errors);
