@@ -288,6 +288,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         setCreateInvoiceDialog({ open: false, data: null });
         dispatch({ type: 'selection', selectedRecords: [] });
         setOpenInvoiceDataDialog({ open: false, data: null });
+        setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null });
         fetchData();
       })
       .catch((error) => {
@@ -315,6 +316,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
               } else {
                 referenceData['fieldTicket'] = [rowData?._id];
               }
+              referenceData['_id'] = rowData?._id;
               setOpenManageInvoiceDialog({
                 open: true,
                 _id: null,
@@ -640,7 +642,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             referenceData={openManageInvoiceDialog?.referenceData}
             {...(!isEmpty(openManageInvoiceDialog?.referenceData) && {
               handleGenerateInvoice: (values: any) => {
-                createInvoice([{ _id: openManageInvoiceDialog?.referenceData?._id }], values, true);
+                createInvoice([openManageInvoiceDialog?.referenceData], values, true);
               }
             })}
             isLoading={isLoading}
