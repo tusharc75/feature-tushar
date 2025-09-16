@@ -5,7 +5,7 @@ import { useContext, useEffect, useState } from "react";
 import { isMobile, isTablet } from "react-device-detect";
 import { CiFileOn } from "react-icons/ci";
 import axiosInstance from "src/axios/axiosInstance";
-import { allAttachmentsAreFromUser, getTitle, sortFileStructure, TNestedTree, unflatten } from "src/components/Activity/AttachmentsNew/helper";
+import { allAttachmentsAreFromUser, download, getTitle, sortFileStructure, TNestedTree, unflatten } from "src/components/Activity/AttachmentsNew/helper";
 import ManageFile from "src/components/Activity/AttachmentsNew/ManageFile";
 import ManageFolder from "src/components/Activity/AttachmentsNew/ManageFolder";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
@@ -394,7 +394,11 @@ const DiagramNew = ({
                 setAttachemntDialog({ open: false, type: '', data: null, isUpdate: false });
                 setFullScreen(false);
               }}
-              fetchData={fetchData}
+              onSuccess={() => {
+                fetchData()
+                setAttachemntDialog({ open: false, type: '', data: null, isUpdate: false });
+                setFullScreen(false);
+              }}
               relatedTo={getRelatedTo()}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
@@ -600,32 +604,6 @@ const RenderFolder = ({ node, setAttachemntDialog, disableEdit, setOpenDelete, s
 
   const [open, setOpen] = useState(false);
 
-  const downloadZip = (folder) => {
-    toastConfig.setToastConfig({
-      open: true,
-      type: 'info',
-      message: `Downloading, Please wait...`
-    });
-    axiosInstance()
-      .get(`/attachment-new/download/zip/${folder?._id}`, { responseType: 'blob' })
-      .then(({ data }) => {
-        const url = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', folder?.name ? `${folder?.name}.zip` : 'download.zip');
-        document.body.appendChild(link);
-        link.click();
-        toastConfig.setToastConfig({
-          message: 'Downloaded Successfully',
-          open: true,
-          type: 'success'
-        });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
-
   return (
     <div
       key={node?._id}
@@ -687,7 +665,7 @@ const RenderFolder = ({ node, setAttachemntDialog, disableEdit, setOpenDelete, s
               color="inherit"
               onClick={(e) => {
                 e.stopPropagation();
-                downloadZip(node);
+                download(node, toastConfig);
               }}
             >
               <GetAppIcon fontSize="small" color="primary" />
@@ -752,38 +730,6 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
   }: any = useData();
 
   const [open, setOpen] = useState(false);
-
-  const downloadFile = (file) => {
-    toastConfig.setToastConfig({
-      open: true,
-      type: 'info',
-      message: `File is Downloading, Please wait...`
-    });
-    axiosInstance()
-      .get(`user/download`, {
-        params: {
-          fileName: file?.fileName
-        },
-        responseType: 'blob',
-        onDownloadProgress: (progressEvent) => {
-          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-          if (percentCompleted === 100) {
-            toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
-          }
-        }
-      })
-      .then(({ data }) => {
-        const url = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', file.name);
-        document.body.appendChild(link);
-        link.click();
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
 
   const viewFile = (fileName) => {
     toastConfig.setToastConfig({
@@ -857,7 +803,7 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
               color="inherit"
               onClick={(e) => {
                 e.stopPropagation();
-                downloadFile(node);
+                download(node, toastConfig);
               }}
             >
               <GetAppIcon fontSize="small" color="primary" />
