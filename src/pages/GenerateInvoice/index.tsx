@@ -31,7 +31,7 @@ import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
 import ManageInvoiceDialog from '../Invoice/ManageInvoiceDialog';
-import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { fetch_resource_fields, fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const GenerateInvoice = ({ resourceRendered = null }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -121,8 +121,8 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
 
   const fetchInvoiceFields = async () => {
     try {
-      const { fieldsDataAll } = await fetch_resource_view_fields(sidebarResource.invoice, false);
-      setInvoiceFields(fieldsDataAll?.map((e) => e.fieldData));
+      const { fieldsDataAll } = await fetch_resource_fields(sidebarResource.invoice);
+      setInvoiceFields(fieldsDataAll);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -151,7 +151,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   }, []);
 
   useEffect(() => {
-    if (selectedResource) {
+    if (selectedResource && invoiceFields) {
       fetchGridColumns();
     }
   }, [selectedResource, invoiceFields]);
