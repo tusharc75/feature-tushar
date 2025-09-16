@@ -51,7 +51,7 @@ const DropDown = ({
         }
         let query = `sa-field/options?resource=${fieldData?.lookupResource}&limit=25&page=${page}&entity=${selectedEntity}&search=${searchVal}`;
         if (fieldData?.lookupDependentOn && filterByIds?.some((f) => f?.field === fieldData?.lookupDependentOn && f?.term?.length > 0)) {
-          query = `${query}&lookupDependentOn=${fieldData?.lookupDependentOn}&lookupDependentOnValue=${filterByIds?.find((f) => f?.field === fieldData?.lookupDependentOn)?.term?.map((t) => t?.optionValue)}`;
+          query = `${query}&lookupDependentOn=${fieldData?.lookupDependentOn}&lookupDependentOnValue=${filterByIds?.find((f) => f?.field === fieldData?.lookupDependentOn)?.term?.map((t) => t?.optionValue)}&resourceOfLookupDependentOn=${fieldData?.resource}`;
           if (fieldData?.lookupDependentOnField) {
             query = `${query}&lookupDependentOnField=${fieldData?.lookupDependentOnField}`;
           }
