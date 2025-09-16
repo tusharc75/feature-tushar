@@ -470,7 +470,6 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
       });
   };
 
-  //deletelogs
   const handleDeleteServiceLogs = (data: any[]) => {
     setDeleting(true);
     dispatch({ type: 'loading', loading: true });
