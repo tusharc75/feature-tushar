@@ -471,6 +471,11 @@ const AssemblyOrderDetail = () => {
             setOpenUploadFile({ open: false });
             setFullScreen(false);
           }}
+          onSuccess={() => {
+            fetchData()
+            setOpenUploadFile({ open: false });
+            setFullScreen(false);
+          }}
           relatedTo={[{ resource: sidebarResource.assemblyOrder, referenceId: assemblyOrderData?._id, label: assemblyOrderData?.assemblyOrderNumber }]}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {

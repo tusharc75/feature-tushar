@@ -45,7 +45,7 @@ const Activity = (props) => {
     resourceLabel = '',
     resourceData = null,
     resource = '',
-    close = () => {}
+    close = () => { }
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -298,8 +298,8 @@ const Activity = (props) => {
                     />
                   ) : null}
                   {(type === 'Attachment' || type === 'AttachmentFolder') &&
-                  data === 'Attachment' &&
-                  import.meta.env.VITE_APP_ATTACHMENT === 'new' ? (
+                    data === 'Attachment' &&
+                    import.meta.env.VITE_APP_ATTACHMENT === 'new' ? (
                     <AttachmentsNew
                       resource={sidebarResource[resource] || startCase(resource)}
                       referenceId={resourceId}
@@ -443,6 +443,10 @@ const Activity = (props) => {
           {type === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT === 'new' && (
             <ManageFile
               onClose={() => {
+                setOpen(false)
+                setFullScreen(false);
+              }}
+              onSuccess={() => {
                 handleClose();
                 setFullScreen(false);
               }}
