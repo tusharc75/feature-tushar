@@ -445,6 +445,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'enableStartStopService',
+        fieldLabel: 'Enable Start Stop Service',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'packageMaterialAdd',
         fieldLabel: 'Package Material Add',
         type: 'multiSelect',
