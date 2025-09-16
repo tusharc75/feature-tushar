@@ -294,21 +294,20 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       if (invoicePolicyRef?.current?.policy?.fieldTicketInvoiceFields?.length > 0) {
         setOpenInvoiceDataDialog({ open: true, data: rows });
       } else {
-        const rowData = rows[0]?.orignalData
-        let invoiceDataNew = getObjKeys('', invoiceFields)
+        const rowData = rows[0]?.orignalData;
+        let invoiceDataNew = getObjKeys('', invoiceFields);
         const clonedData: any = cloneResourceData(invoiceFields, selectedResourceFields, rowData, user.user?.brandCurrency);
-        invoiceDataNew = { ...invoiceDataNew, ...clonedData }
+        invoiceDataNew = { ...invoiceDataNew, ...clonedData };
         invoiceDataNew['fieldTicket'] = rows?.map((e) => e?._id);
         let allDataAutoFill = true;
         invoiceFields?.filter((e) => e?.required)?.forEach((e) => {
-          if (!invoiceDataNew[e?.fieldName] || invoiceDataNew[e?.fieldName] === '') {
+          if (!invoiceDataNew?.[e?.fieldName]) {
             allDataAutoFill = false;
           }
         })
         if (!allDataAutoFill) {
           setOpenManageInvoiceDialog({ open: true, _id: null, referenceData: invoiceDataNew, selectedRows: rows });
-        }
-        else {
+        } else {
           createInvoice(rows);
         }
       }
@@ -577,6 +576,8 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
                 dispatch({ type: 'selection', selectedRecords: [] });
                 fetchData();
               }}
+              invoiceFields={invoiceFields}
+              selectedResourceFields={selectedResourceFields}
             />
           ))}
         {viewInvoiceDialog.open && (
