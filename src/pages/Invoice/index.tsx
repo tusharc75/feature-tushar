@@ -71,6 +71,7 @@ const Invoice = () => {
   const [pdfColumns, setPdfColumns] = useState([]);
   const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
+  const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<'proforma' | 'invoices' | null>(null);
   const [defaultSelectedData, setDefaultSelectedData] = useState(null);
   const [isInvoiceTypeFilterVisible, setIsInvoiceTypeFilterVisible] = useState(false);
 
@@ -114,6 +115,12 @@ const Invoice = () => {
         toastConfig.setToastConfig(error);
       });
   }, [selectedEntity]);
+
+  useEffect(() => {
+    if (defaultSelectedData) {
+      setInvoiceTypeFilter(defaultSelectedData.documentType || null);
+    }
+  }, [defaultSelectedData]);
 
   const fetchPolicy = async () => {
     const data = await getResourcePolicy(user, permissions, sidebarResource.invoice)
@@ -210,7 +217,7 @@ const Invoice = () => {
       fetchData(cancelTokenSource);
       return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly, defaultSelectedData]);
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly, invoiceTypeFilter]);
 
   const handleDelete = () => {
     setIsSubmitting(true);
@@ -316,12 +323,12 @@ const Invoice = () => {
       }
     }
 
-    if (defaultSelectedData?.documentType === 'proforma') {
+    if (invoiceTypeFilter === 'proforma') {
       deepFilters.push({
         field: 'status',
         term: [INVOICE_STATUS.proforma]
       });
-    } else if (defaultSelectedData?.documentType === 'invoices') {
+    } else if (invoiceTypeFilter === 'invoices') {
       deepFilters.push({
         field: 'status',
         term: { $nin: [INVOICE_STATUS.proforma] }
@@ -403,6 +410,10 @@ const Invoice = () => {
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
+  };
+
+  const handleInvoiceTypeChange = (value: 'proforma' | 'invoices' | null) => {
+    setInvoiceTypeFilter(value);
   };
 
   const ActionMenuItems = () => {
@@ -522,7 +533,8 @@ const Invoice = () => {
               accountDetails={accountDetails}
               setAccountDetails={setAccountDetails}
               defaultSelectedData={defaultSelectedData}
-              setDefaultSelectedData={setDefaultSelectedData}
+              invoiceTypeFilter={invoiceTypeFilter}
+              handleInvoiceTypeChange={handleInvoiceTypeChange}
               isInvoiceTypeFilterVisible={isInvoiceTypeFilterVisible}
               handleSetDefaultSelected={handleSetDefaultSelected}
             />
@@ -600,8 +612,9 @@ export default Invoice;
 const LeftSideContents = ({
   accountDetails,
   setAccountDetails,
+  invoiceTypeFilter,
+  handleInvoiceTypeChange,
   defaultSelectedData,
-  setDefaultSelectedData,
   isInvoiceTypeFilterVisible,
   handleSetDefaultSelected
 }) => {
@@ -632,14 +645,9 @@ const LeftSideContents = ({
           className="ml-3 min-w-[200px]"
           size="small"
           options={invoiceTypeOptions}
-          value={invoiceTypeOptions.find((opt) => opt.value === (defaultSelectedData?.documentType ?? '')) || null}
+          value={invoiceTypeOptions.find((opt) => opt.value === (invoiceTypeFilter ?? '')) || null}
           onChange={(event, newValue) => {
-            if (newValue) {
-              setDefaultSelectedData((prev) => ({
-                ...prev,
-                documentType: newValue.value
-              }));
-            }
+            handleInvoiceTypeChange(newValue?.value || null);
           }}
           getOptionLabel={(option) => option.label || ''}
           renderInput={(params) => (
