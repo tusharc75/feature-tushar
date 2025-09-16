@@ -63,35 +63,32 @@ const DiagramDialog = ({
       ></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
         {!loading ? (
-          import.meta.env.VITE_APP_ATTACHMENT === 'new' ? (
-            <DiagramNew
-              height={'calc(100vh - 150px)'}
-              resource={sidebarResource[resource] || startCase(resource)}
-              referenceId={referenceId}
-              resourceLabel={resourceLabel}
-              referenceLabel={referenceLabel}
-              uniqueId={uniqueId}
-              stepId={stepId}
-              currentVersion={resource === ACTIVITY_RESOURCE.workOrder ? resourceData?.currentVersion : null}
-              attachmentType={attachmentType}
-              showMaterialFilter={showMaterialFilter}
-              showContainer={false}
-            />
-          ) : (
-            <Diagram
-              height={'calc(100vh - 150px)'}
-              resource={resource}
-              referenceId={referenceId}
-              uniqueId={uniqueId}
-              stepId={stepId}
-              currentVersion={resource === ACTIVITY_RESOURCE.workOrder ? resourceData?.currentVersion : null}
-              resourceData={resourceData}
-              attachmentType={attachmentType}
-              referenceLabel={referenceLabel}
-              showMaterialFilter={showMaterialFilter}
-              showContainer={false}
-            />
-          )
+          <DiagramNew
+            height={'calc(100vh - 150px)'}
+            resource={sidebarResource[resource] || startCase(resource)}
+            referenceId={referenceId}
+            resourceLabel={resourceLabel}
+            referenceLabel={referenceLabel}
+            uniqueId={uniqueId}
+            stepId={stepId}
+            currentVersion={resource === ACTIVITY_RESOURCE.workOrder ? resourceData?.currentVersion : null}
+            attachmentType={attachmentType}
+            showMaterialFilter={showMaterialFilter}
+            showContainer={false}
+          />
+          // <Diagram
+          //   height={'calc(100vh - 150px)'}
+          //   resource={resource}
+          //   referenceId={referenceId}
+          //   uniqueId={uniqueId}
+          //   stepId={stepId}
+          //   currentVersion={resource === ACTIVITY_RESOURCE.workOrder ? resourceData?.currentVersion : null}
+          //   resourceData={resourceData}
+          //   attachmentType={attachmentType}
+          //   referenceLabel={referenceLabel}
+          //   showMaterialFilter={showMaterialFilter}
+          //   showContainer={false}
+          // />
         ) : (
           <Grid container spacing={2}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
