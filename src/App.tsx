@@ -74,7 +74,7 @@ import AccountDetailPage from './pages/Account/AccountDetailPage';
 import Account from './pages/Account/index';
 import Activity from './pages/Activity';
 import Activitydemo from './pages/Activity/activitydemo';
-// import Attachments from './pages/Activity/Attachments';
+import Attachments from './pages/Activity/Attachments';
 import Calender from './pages/Activity/Calendar';
 import Email from './pages/Activity/Email';
 import Note from './pages/Activity/Note';
@@ -626,9 +626,9 @@ function App() {
             <PrivateRoute exact path={routes.note.path}>
               <Note />
             </PrivateRoute>
-            {/* <PrivateRoute exact path={routes.attachment.path}>
+            <PrivateRoute exact path={routes.attachment.path}>
               <Attachments />
-            </PrivateRoute> */}
+            </PrivateRoute>
             <PrivateRoute exact path={routes.calendar.path}>
               <Calender />
             </PrivateRoute>
