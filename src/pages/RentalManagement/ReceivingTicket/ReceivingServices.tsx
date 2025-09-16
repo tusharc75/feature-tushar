@@ -232,7 +232,6 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
   };
 
   const handleDeleteServiceLogs = (data: any[]) => {
-    console.log(data);
     setOkBtnLoading(true);
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
