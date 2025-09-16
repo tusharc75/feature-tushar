@@ -21,7 +21,6 @@ import routes from 'src/components/Helpers/Routes';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import {
-  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   checkIsAllowedToDelete,
   getDefaultMyRecordType,
@@ -591,7 +590,7 @@ const RentalManagement = () => {
           <DiagramDialog
             referenceId={showAttachmentDialog?._id}
             referenceLabel={showAttachmentDialog.label}
-            resource={ACTIVITY_RESOURCE.rentalManagement}
+            resource={sidebarResource.rentalManagement}
             handleClose={() => {
               setShowAttachmentDialog({ open: false, _id: null, label: '' });
             }}

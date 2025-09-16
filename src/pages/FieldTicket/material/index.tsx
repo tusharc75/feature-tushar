@@ -20,7 +20,6 @@ import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManag
 import { flattenArray } from 'src/constants/columns';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import {
-  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   FIELD_TICKET_STATUS,
   MATERIAL_TYPE,
@@ -1244,7 +1243,7 @@ const Material = ({
           referenceId={fieldTicketData?._id}
           uniqueId={showAttachmentDialog?._id}
           referenceLabel={showAttachmentDialog.label}
-          resource={ACTIVITY_RESOURCE.fieldTicket}
+          resource={sidebarResource.fieldTicket}
           handleClose={() => {
             setShowAttachmentDialog({ open: false, _id: null, label: '' });
           }}

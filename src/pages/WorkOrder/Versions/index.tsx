@@ -21,7 +21,6 @@ import {
   sidebarResource,
   workOrder
 } from 'src/constants/helpers';
-import Diagram from '../Diagram';
 import ServiceStepsData from './ServiceStepsData';
 import { FiExternalLink } from 'react-icons/fi';
 import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
