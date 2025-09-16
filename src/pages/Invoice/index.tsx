@@ -110,17 +110,12 @@ const Invoice = () => {
     axiosInstance().get(`/user-default-selections?resource=${sidebarResource.invoice}`)
       .then(({ data: { data } }) => {
         setDefaultSelectedData(data);
+        setInvoiceTypeFilter(data?.documentType || null);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }, [selectedEntity]);
-
-  useEffect(() => {
-    if (defaultSelectedData) {
-      setInvoiceTypeFilter(defaultSelectedData.documentType || null);
-    }
-  }, [defaultSelectedData]);
+  }, []);
 
   const fetchPolicy = async () => {
     const data = await getResourcePolicy(user, permissions, sidebarResource.invoice)
@@ -205,7 +200,6 @@ const Invoice = () => {
     if (invoiceTimeout) {
       clearTimeout(invoiceTimeout);
     }
-
     invoiceTimeout = setTimeout(() => {
       fetchData();
     }, millisec);
@@ -401,11 +395,6 @@ const Invoice = () => {
         ...data
       }).then(({ data: { data } }) => {
         setDefaultSelectedData(data);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: 'Default selection updated successfully'
-        });
       });
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -664,8 +653,8 @@ const LeftSideContents = ({
                       size="small"
                       onClick={(event) => {
                         event.stopPropagation();
-                        handleSetDefaultSelected({ 
-                          documentType: isFavorite ? null : option.value 
+                        handleSetDefaultSelected({
+                          documentType: isFavorite ? null : option.value
                         });
                       }}
                     >
