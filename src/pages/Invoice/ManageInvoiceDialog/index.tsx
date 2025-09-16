@@ -29,7 +29,7 @@ import InputField from 'src/components/Helpers/InputField';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
 import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
-const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, onSuccess, referenceData = null, handleGenerateInvoice = null, isLoading = false }) => {
+const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, onSuccess, referenceData = null, handleCreate = null, isLoading = false }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -115,8 +115,8 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
 
   const handleSubmit = (values) => {
     setLoading(true);
-    if (handleGenerateInvoice) {
-      handleGenerateInvoice(values);
+    if (handleCreate) {
+      handleCreate(values);
     } else if (invoiceId && isClone === false) {
       values._id = invoiceId;
       axiosInstance()
