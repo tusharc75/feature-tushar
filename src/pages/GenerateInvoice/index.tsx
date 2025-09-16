@@ -18,6 +18,7 @@ import {
   FIELD_TICKET_STATUS,
   INVOICE_STATUS,
   cloneResourceData,
+  getObjKeys,
   gridLoadingTimeout,
   prepareDataForGrid,
   sidebarResource
@@ -58,41 +59,36 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const [resourceList, setResourceList] = useState([]);
   const [isDownloading, setIsDownloading] = useState(false);
   const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState({ open: false, data: null });
-  const [openManageInvoiceDialog, setOpenManageInvoiceDialog] = useState({
-    open: false,
-    _id: null,
-    referenceData: null
-  });
+  const [openManageInvoiceDialog, setOpenManageInvoiceDialog] = useState({ open: false, _id: null, referenceData: null, selectedRows: [] });
   const [invoiceFields, setInvoiceFields] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const allResourceData = useRef(null);
 
   const GENERATE_RESOURCE = [
     ...(user?.user?.brandPolicy?.rentalProgressiveBilling && permissions?.invoice?.isRead
       ? [
-          {
-            key: 'rentalManagement',
-            resource: sidebarResource.rentalManagement,
-            fieldName: 'rentalJobName',
-            invoiceFieldName: 'rentalJob',
-            progressiveBilling: true,
-            path: routes.rentalManagementDetail.path,
-            title: resources?.rentalManagement?.titlePlural
-          }
-        ]
+        {
+          key: 'rentalManagement',
+          resource: sidebarResource.rentalManagement,
+          fieldName: 'rentalJobName',
+          invoiceFieldName: 'rentalJob',
+          progressiveBilling: true,
+          path: routes.rentalManagementDetail.path,
+          title: resources?.rentalManagement?.titlePlural
+        }
+      ]
       : []),
     ...(user?.user?.brandPolicy?.subleaseProgressiveBilling && permissions?.invoice?.isRead
       ? [
-          {
-            key: 'sublease',
-            resource: sidebarResource.sublease,
-            fieldName: 'subleaseName',
-            invoiceFieldName: 'sublease',
-            progressiveBilling: true,
-            path: routes.subleaseDetail.path,
-            title: resources?.sublease?.titlePlural
-          }
-        ]
+        {
+          key: 'sublease',
+          resource: sidebarResource.sublease,
+          fieldName: 'subleaseName',
+          invoiceFieldName: 'sublease',
+          progressiveBilling: true,
+          path: routes.subleaseDetail.path,
+          title: resources?.sublease?.titlePlural
+        }
+      ]
       : []),
     {
       key: 'repairOrder',
@@ -208,17 +204,16 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   };
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
-    allResourceData.current = null;
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
       .get(`${routes?.generateInvoice.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
-        allResourceData.current = data;
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+          finalObject['orignalData'] = u;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -267,34 +262,31 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
 
   const createInvoice = (resourceData, invoiceData = null, hideInvoiceDialog = false) => {
     setIsLoading(true);
-    axiosInstance()
-      .post(`/generate-invoice/create`, {
-        resource: selectedResource?.resource,
-        referenceIds: resourceData?.map((e) => e?._id),
-        extraInvoiceData: invoiceData
-      })
-      .then(({ data }) => {
-        setIsLoading(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        if (selectedResource?.resource === sidebarResource.fieldTicket && !hideInvoiceDialog) {
-          setOpenManageInvoiceDialog({ open: true, _id: data?.data?._id, referenceData: null });
-        } else {
-          window.open(`${routes.invoiceDetail.path}/${data?.data?._id}`);
-        }
-        setCreateInvoiceDialog({ open: false, data: null });
-        dispatch({ type: 'selection', selectedRecords: [] });
-        setOpenInvoiceDataDialog({ open: false, data: null });
-        setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null });
-        fetchData();
-      })
-      .catch((error) => {
-        setIsLoading(false);
-        toastConfig.setToastConfig(error);
+    axiosInstance().post(`/generate-invoice/create`, {
+      resource: selectedResource?.resource,
+      referenceIds: resourceData?.map((e) => e?._id),
+      extraInvoiceData: invoiceData
+    }).then(({ data }) => {
+      setIsLoading(false);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
       });
+      if (selectedResource?.resource === sidebarResource.fieldTicket && !hideInvoiceDialog) {
+        setOpenManageInvoiceDialog({ open: true, _id: data?.data?._id, referenceData: null, selectedRows: [] });
+      } else {
+        window.open(`${routes.invoiceDetail.path}/${data?.data?._id}`);
+      }
+      setCreateInvoiceDialog({ open: false, data: null });
+      dispatch({ type: 'selection', selectedRecords: [] });
+      setOpenInvoiceDataDialog({ open: false, data: null });
+      setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null, selectedRows: [] });
+      fetchData();
+    }).catch((error) => {
+      setIsLoading(false);
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const handleCreateInvoice = (rows) => {
@@ -302,31 +294,22 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       if (invoicePolicyRef?.current?.policy?.fieldTicketInvoiceFields?.length > 0) {
         setOpenInvoiceDataDialog({ open: true, data: rows });
       } else {
-        for (const invoiceField of invoiceFields) {
-          for (const row of rows) {
-            if (
-              !row?.[invoiceField?.fieldName] &&
-              invoiceField?.required &&
-              !['status', 'owner', 'pdfTemplate', 'invoiceNumber', 'creationDate'].includes(invoiceField.fieldName)
-            ) {
-              const rowData = allResourceData?.current?.find((r) => r?._id === row?._id);
-              const referenceData: any = cloneResourceData(invoiceFields, selectedResourceFields, rowData, user.user?.brandCurrency);
-              if (invoiceFields?.find((f) => f?.fieldName === 'fieldTicket')?.type === 'dropDown') {
-                referenceData['fieldTicket'] = rowData?._id;
-              } else {
-                referenceData['fieldTicket'] = [rowData?._id];
-              }
-              referenceData['_id'] = rowData?._id;
-              setOpenManageInvoiceDialog({
-                open: true,
-                _id: null,
-                referenceData: referenceData
-              });
-              return;
-            }
+        const rowData = rows[0]?.orignalData;
+        let invoiceDataNew = getObjKeys('', invoiceFields);
+        const clonedData: any = cloneResourceData(invoiceFields, selectedResourceFields, rowData, user.user?.brandCurrency);
+        invoiceDataNew = { ...invoiceDataNew, ...clonedData };
+        invoiceDataNew['fieldTicket'] = rows?.map((e) => e?._id);
+        let allDataAutoFill = true;
+        invoiceFields?.filter((e) => e?.required)?.forEach((e) => {
+          if (!invoiceDataNew?.[e?.fieldName]) {
+            allDataAutoFill = false;
           }
+        })
+        if (!allDataAutoFill) {
+          setOpenManageInvoiceDialog({ open: true, _id: null, referenceData: invoiceDataNew, selectedRows: rows });
+        } else {
+          createInvoice(rows);
         }
-        createInvoice(rows);
       }
     } else {
       setCreateInvoiceDialog({ open: true, data: rows });
@@ -593,6 +576,8 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
                 dispatch({ type: 'selection', selectedRecords: [] });
                 fetchData();
               }}
+              invoiceFields={invoiceFields}
+              selectedResourceFields={selectedResourceFields}
             />
           ))}
         {viewInvoiceDialog.open && (
@@ -633,16 +618,16 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             isClone={false}
             invoiceId={openManageInvoiceDialog?._id}
             onClose={() => {
-              setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null });
+              setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null, selectedRows: [] });
             }}
             onSuccess={() => {
-              setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null });
+              setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null, selectedRows: [] });
               fetchData();
             }}
             referenceData={openManageInvoiceDialog?.referenceData}
             {...(!isEmpty(openManageInvoiceDialog?.referenceData) && {
-              handleGenerateInvoice: (values: any) => {
-                createInvoice([openManageInvoiceDialog?.referenceData], values, true);
+              handleCreate: (values: any) => {
+                createInvoice(openManageInvoiceDialog?.selectedRows, values, true);
               }
             })}
             isLoading={isLoading}
