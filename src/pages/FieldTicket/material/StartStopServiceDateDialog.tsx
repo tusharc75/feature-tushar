@@ -9,14 +9,15 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { useEffect, useState } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, loading, minStartDate = null, maxEndDate = null }) => {
+const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, loading, minStartDate = null, maxEndDate = null, childResource = null }) => {
     const [initialValues, setInitialValues] = useState(null);
 
     useEffect(() => {
         if (data) {
             setInitialValues({
                 startDate: new Date(data.startDate),
-                ...(data?.endDate && { endDate: new Date(data.endDate) })
+                ...(data?.endDate && { endDate: new Date(data.endDate) }),
+                ...(childResource === 'Services' && { notes: data.notes || '' }),
             });
         } else {
             setInitialValues({
@@ -63,7 +64,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                 {({ values, errors, touched, setFieldValue, submitForm }) => (
                     <Form>
                         <CustomDialogHeader
-                            title={`Set Actual ${type === 'start' ? 'Start' : type === 'startStop' ? 'Start/End' : 'End'} Date`}
+                            title={`Set Estimate ${type === 'start' ? 'Start' : type === 'startStop' ? 'Start/End' : 'End'} Date`}
                             onClose={onClose}
                         />
                         <CustomDialogContent>
@@ -79,7 +80,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                                                 errors={errors}
                                                 touched={touched}
                                                 type="date"
-                                                label={`Actual Start Date`}
+                                                label={`Estimate Start Date`}
                                                 name="startDate"
                                                 onChange={(date) => {
                                                     setFieldValue('startDate', date);
@@ -98,7 +99,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                                                 errors={errors}
                                                 touched={touched}
                                                 type="date"
-                                                label={`Actual End Date`}
+                                                label={`Estimate End Date`}
                                                 name="endDate"
                                                 onChange={(date) => {
                                                     setFieldValue('endDate', date);

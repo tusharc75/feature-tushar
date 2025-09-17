@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Dialog, Box, IconButton } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CustomDialogTransition, displayDate, fieldServiceOrder, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDate, fieldServiceOrder, fieldTicket, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { camelCase, isEmpty } from 'lodash';
 import { Link } from 'react-router-dom';
@@ -16,7 +16,7 @@ import { Delete } from '@mui/icons-material';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const ServiceLogDialog = ({ fieldServiceOrderId, id, serviceName, onClose, onSuccess, allowedToEdit, fetchRecords = null }) => {
+const ServiceLogDialog = ({ fieldTicketID, id, serviceName, onClose, onSuccess, allowedToEdit, fetchRecords = null }) => {
     const renderedFrom = `${camelCase(sidebarResource?.fieldServiceOrder)}_services_logs`;
 
     const {
@@ -29,12 +29,12 @@ const ServiceLogDialog = ({ fieldServiceOrderId, id, serviceName, onClose, onSuc
 
     useEffect(() => {
         fetchData();
-    }, [fieldServiceOrderId, id]);
+    }, [fieldTicketID, id]);
 
     const fetchData = async () => {
         try {
             dispatch({ type: 'loading', loading: true });
-            const response = await axiosInstance().get(`${fieldServiceOrder.api}/${fieldServiceOrderId}/material/${id}/service-log`);
+            const response = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketID}/material/${id}/service-log`);
             const serviceLogData = response?.data?.data;
             serviceLogData?.forEach((log) => {
                 log.canDelete = true;//condition to delete
@@ -172,7 +172,7 @@ const ServiceLogDialog = ({ fieldServiceOrderId, id, serviceName, onClose, onSuc
         setOkBtnLoading(true);
         dispatch({ type: 'loading', loading: true });
         axiosInstance()
-            .delete(`${fieldServiceOrder.api}/${fieldServiceOrderId}/material/service-log`, { data })
+            .delete(`${fieldTicket.api}/${fieldTicketID}/material/service-log`, { data })
             .then((response) => {
                 toastConfig.setToastConfig({
                     open: true,

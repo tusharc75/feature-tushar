@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { camelCase, isEmpty, startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -17,7 +17,6 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import {
   ACTIVITY_RESOURCE,
@@ -26,14 +25,13 @@ import {
   PRICING_SETUP_TYPE,
   SERVICE_ORDER_STATUS,
   SERVICE_TYPE,
-  dateFormatToSend,
   fieldServiceOrder,
   getObjKeysWithValues,
   sidebarResource
 } from 'src/constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
-import { ownerAndColaborator, fieldServiceOrderActions, fieldServiceOrderMessages } from 'src/constants/messageHelpers';
+import { ownerAndColaborator } from 'src/constants/messageHelpers';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
@@ -41,10 +39,6 @@ import MaterialQtyDialog from 'src/pages/FieldServiceOrder/Technicians/MaterialQ
 import AddQuotationDataDialog from 'src/pages/FieldTicket/material/AddQuotationDataDialog';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
-import StartStopServiceDateDialog from './StartStopServiceDateDialog';
-import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
-import CustomMessageDialog from 'src/components/MessageDialog';
-import ServiceLogDialog from './ServiceLogDialog';
 
 const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowedToEdit, handleChangeStatus, fetchData, setNextStep, resourcePolicy }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Services`;
@@ -62,20 +56,6 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
   const [refreshChild, setRefreshChild] = useState(false);
   const [addQuotationDataDialog, setAddQuotationDataDialog] = useState(false);
   const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
-  const [serviceConfirmationDialog, setServiceConfirmationDialog] = useState<{
-    open: boolean;
-    type: string | null;
-    minStartDate: Date | null;
-    loading?: boolean;
-  }>({
-    open: false,
-    type: null,
-    minStartDate: null,
-  });
-  const [isStartStopServiceEnabled, setIsStartStopServiceEnabled] = useState(false);
-  const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
-  const [deleteServiceLogConfirmDialog, setDeleteServiceLogConfirmDialog] = useState({ open: false, data: null });
-  const [serviceLogDialog, setServiceLogDialog] = useState({ open: false, data: null });
 
   const {
     state: { permissions, user, resources }
@@ -93,15 +73,6 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
       fetchMaterial();
     }
   }, [columns]);
-
-  useEffect(() => {
-    fetchPolicy();
-  }, []);
-
-  const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.fieldServiceOrder);
-    setIsStartStopServiceEnabled(data?.policy?.enableStartStopService);
-  };
 
   const fetchFields = async () => {
     let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldServiceOrderDetails, serviceOrderData?.currency, allowedToEdit);
@@ -124,25 +95,7 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
         Header: 'Index',
         width: 70,
         sticky: 'left',
-        Cell: ({ row }) =>
-        (<div className="d-flex align-items-center gap-2">
-          <h5 className="text-truncate">{row?.original?.index}</h5>
-          {row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length ? (
-            <HtmlTooltip title={'View Logs'}>
-              <span>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    console.log(row?.original)
-                    setServiceLogDialog({ open: true, data: row?.original });
-                  }}
-                >
-                  <VisibilityIcon fontSize="small" color="primary" />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-          ) : null}
-        </div>),
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
@@ -442,57 +395,6 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
     }
   };
 
-  const handleSubmitChangeDates = (values, type: string = '') => {
-    dispatch({ type: 'loading', loading: true });
-    let data;
-    setServiceConfirmationDialog({ ...serviceConfirmationDialog, loading: true });
-    console.log(selectedRecords)
-    data = { ids: selectedRecords?.map((s) => s?._id) };
-    data['type'] = type;
-    data['startDate'] = dateFormatToSend(values.startDate);
-    data['endDate'] = dateFormatToSend(values.endDate);
-    axiosInstance()
-      .put(`${fieldServiceOrder.api}/${serviceOrderData?._id}/start-end-date`, data)
-      .then((response) => {
-        toastConfig.setToastConfig({
-          open: true,
-          message: response?.data?.message,
-          type: 'success'
-        });
-        setServiceConfirmationDialog({ open: false, type: null, loading: false, minStartDate: null });
-        fetchMaterial();
-        fetchData();
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        dispatch({ type: 'loading', loading: false });
-        setServiceConfirmationDialog({ open: false, type: null, loading: false, minStartDate: null });
-      });
-  };
-
-  const handleDeleteServiceLogs = (data: any[]) => {
-    setDeleting(true);
-    dispatch({ type: 'loading', loading: true });
-    axiosInstance()
-      .delete(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material/service-log`, { data })
-      .then((response) => {
-        toastConfig.setToastConfig({
-          open: true,
-          message: response?.data?.message,
-          type: 'success'
-        });
-        setDeleting(false);
-        setDeleteServiceLogConfirmDialog({ open: false, data: null });
-        fetchMaterial();
-      })
-      .catch((err) => {
-        setDeleting(false);
-        setDeleteServiceLogConfirmDialog({ open: false, data: null });
-        toastConfig.setToastConfig(err);
-        dispatch({ type: 'loading', loading: false });
-      });
-  };
-
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
     if (priceData && allFields?.find((e) => e?.fieldName === 'pricingCondition')) {
@@ -625,123 +527,9 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
     );
   };
 
-
   const ActionButtonMenuItms = () => {
-    const validateAction = (action) => {
-      const errorMessages = [];
-      selectedRecords.forEach((e) => {
-        if (action === fieldServiceOrderActions.startService) {
-          const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
-          if (!isEmpty(serviceLogEntry)) {
-            errorMessages.push({ index: e.index, message: fieldServiceOrderMessages.serviceAlreadyStarted });
-          }
-        } else if (action === fieldServiceOrderActions.stopService) {
-          const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
-          if (!serviceLogEntry) {
-            errorMessages.push({ index: e.index, message: fieldServiceOrderMessages.serviceNotStarted });
-          }
-        }
-        else if (action === fieldServiceOrderActions.deleteServiceLog) {
-          const serviceLogCount = e?.serviceLog?.length;
-          if (!serviceLogCount) {
-            errorMessages.push({ index: e.index, message: fieldServiceOrderMessages.serviceNotStarted });
-          }
-        }
-      });
-      if (errorMessages?.length) {
-        setOpenMessageDialog({ open: true, errorMessages: errorMessages });
-        return true;
-      }
-      return false;
-    };
-
     return (
       <>
-        {isStartStopServiceEnabled && (
-          <>
-            <MenuItem
-              onClick={() => {
-                if (!validateAction(fieldServiceOrderActions.startService)) {
-                  const dates = [];
-                  selectedRecords?.forEach((d: any) => {
-                    d?.serviceLog?.forEach((l: any) => {
-                      if (l?.endDate) dates.push(new Date(l.endDate));
-                    });
-                  });
-                  let date = null;
-                  if (dates?.length) {
-                    date = new Date(Math.max(...dates));
-                    date.setDate(date.getDate() + 1);
-                  }
-                  setServiceConfirmationDialog({ open: true, type: 'start', minStartDate: date });
-                }
-              }}
-            >
-              Start Service(s)
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                if (!validateAction(fieldServiceOrderActions.stopService)) {
-                  const dates = [];
-                  selectedRecords?.forEach((d: any) => {
-                    const serviceLogEntry = d?.serviceLog?.find((log: any) => !log.endDate);
-                    dates.push(new Date(serviceLogEntry?.startDate));
-                  });
-                  let date = null;
-                  if (dates?.length) {
-                    date = new Date(Math.max(...dates));
-                  }
-                  date = selectedRecords?.reduce((maxDate, record) => {
-                    if (record?.maxInvoiceDate) {
-                      const recordDate = new Date(record.maxInvoiceDate);
-                      return recordDate > maxDate ? recordDate : maxDate;
-                    }
-                    return maxDate;
-                  }, date);
-                  setServiceConfirmationDialog({ open: true, type: 'stop', minStartDate: date });
-                }
-              }}
-            >
-              Stop Service(s)
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                if (!validateAction(fieldServiceOrderActions.startService)) {
-                  const dates = [];
-                  selectedRecords?.forEach((d: any) => {
-                    d?.serviceLog?.forEach((l: any) => {
-                      dates.push(new Date(l.endDate));
-                    });
-                  });
-                  let date = null;
-                  if (dates?.length) {
-                    date = new Date(Math.max(...dates));
-                    date.setDate(date.getDate() + 1);
-                  }
-                  setServiceConfirmationDialog({ open: true, type: 'startStop', minStartDate: date });
-                }
-              }}
-            >
-              Start/Stop Service(s)
-            </MenuItem>
-          </>
-        )}
-        <MenuItem
-          onClick={() => {
-            if (!validateAction(fieldServiceOrderActions.deleteServiceLog)) {
-              const data = [];
-              selectedRecords?.forEach((d: any) => {
-                data.push({
-                  _id: d?._id,
-                  serviceLogId: d?.serviceLog[d?.serviceLog?.length - 1]?._id
-                });
-              });
-              setDeleteServiceLogConfirmDialog({ open: true, data });
-            }
-          }}
-        >
-          Delete Service Log(s)
-        </MenuItem>
         <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
           <MenuItem
             onClick={() => {
@@ -862,21 +650,6 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
           okBtnLoading={isDeleting}
         />
       )}
-      {serviceConfirmationDialog.open && (
-        <StartStopServiceDateDialog
-          data={null}
-          type={serviceConfirmationDialog.type}
-          open={serviceConfirmationDialog.open}
-          onClose={() => {
-            setServiceConfirmationDialog({ open: false, type: null, loading: false, minStartDate: null });
-          }}
-          handleSubmit={(val) => {
-            handleSubmitChangeDates(val, serviceConfirmationDialog.type);
-          }}
-          loading={serviceConfirmationDialog.loading}
-          minStartDate={serviceConfirmationDialog.minStartDate}
-        />
-      )}
       {addQuotationDataDialog && (
         <AddQuotationDataDialog
           onClose={() => {
@@ -889,43 +662,6 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
           isSubmitting={isSubmitting}
           materialType={MATERIAL_TYPE.service}
           ids={dataRows?.map((row) => row?.materialId)}
-        />
-      )}
-      {openMessageDialog.open && (
-        <CustomMessageDialog
-          open={openMessageDialog.open}
-          errorMessages={openMessageDialog.errorMessages}
-          onClose={() => {
-            setOpenMessageDialog({ open: false, errorMessages: [] });
-          }}
-        />
-      )}
-      {serviceLogDialog.open && (
-        <ServiceLogDialog
-          fieldServiceOrderId={serviceOrderData?._id}
-          id={serviceLogDialog?.data?._id}
-          serviceName={serviceLogDialog?.data?.serviceDetail?.serviceName}
-          onClose={() => {
-            setServiceLogDialog({ open: false, data: null });
-          }}
-          onSuccess={() => {
-            fetchData();
-          }}
-          allowedToEdit={allowedToEdit}
-          fetchRecords={fetchData}
-        />
-      )}
-      {deleteServiceLogConfirmDialog.open && (
-        <ConfirmationDialog
-          open={deleteServiceLogConfirmDialog.open}
-          message={`Are you sure you want to delete recent log for selected service(s)?`}
-          onClose={() => {
-            setDeleteServiceLogConfirmDialog({ open: false, data: null });
-          }}
-          onOk={() => {
-            handleDeleteServiceLogs(deleteServiceLogConfirmDialog.data);
-          }}
-          okBtnLoading={isDeleting}
         />
       )}
       {showAttachmentDialog.open && (

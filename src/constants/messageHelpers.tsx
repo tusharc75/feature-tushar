@@ -44,12 +44,12 @@ export const rentalManagementActions = {
   changeSubStatus: 'Change Sub Status'
 };
 
-export const fieldServiceOrderActions = {
+export const fieldTicketActions = {
   startService: 'Start Service',
   stopService: 'Stop Service',
   deleteServiceLog: 'Delete Service Log',
 };
-export const fieldServiceOrderMessages = {
+export const fieldTicketMessages = {
   serviceAlreadyStarted: 'Service already started',
   serviceNotStarted: 'Service not started',
   serviceAlreadyStopped: 'Service already stopped',
