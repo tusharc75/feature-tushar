@@ -177,7 +177,6 @@ export default function CreateCustomPdfTemplate() {
         const {
           data: { data }
         } = res;
-        console.log(data.template)
         initialValuesData.name = !isClone ? data?.name : '';
         initialValuesData.entity = data?.entity ? data?.entity : [];
         initialValuesData.type = data?.type;
