@@ -1,23 +1,19 @@
 import { Close } from '@mui/icons-material';
-import { Box, IconButton, Typography, useMediaQuery } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
 import { useContext, useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { b64toBlob, cn } from 'src/constants/helpers';
 import Editor, { EditorRef } from 'src/pages/WorkOrder/Diagram/ImageEditor/Editor';
-import { SET_FILES_UPLOAD_PROGRESS } from 'src/StateProvider/actionTypes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null }) => {
+const ToastImageEditor = ({ data, handleClose = null }) => {
   const toastConfig = useContext(CustomToastContext);
-
-  const {
-    dispatch
-  }: any = useData();
 
   const editorRef = useRef<EditorRef>(null);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [imageUrl, setImageUrl] = useState(null);
 
   useEffect(() => {
@@ -25,18 +21,18 @@ const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null
   }, [data]);
 
   const loadImage = async () => {
-    try {
-      const response = await axiosInstance().get('/user/download?fileName=' + encodeURIComponent(data?.fileName), {
+    axiosInstance()
+      .get(`/attachment-new/download?id=${data?._id}`, {
         responseType: 'blob'
-      });
-      const blob = new Blob([response.data], { type: 'image/png' });
-      const url = URL.createObjectURL(blob);
-      setImageUrl(url);
-      setLoading(false);
-    } catch (err) {
-      console.error(err);
-      setLoading(false);
-    }
+      }).then(({ data }) => {
+        const blob = new Blob([data], { type: 'image/png' });
+        const url = URL.createObjectURL(blob);
+        setImageUrl(url);
+        setLoading(false);
+      }).catch(err => {
+        setLoading(false);
+        toastConfig.setToastConfig(err);
+      })
   };
 
   const handleSave = async () => {
@@ -46,51 +42,28 @@ const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null
     const blob: any = b64toBlob(imageData);
     const type = `image/${data?.fileName?.split('.')[1]}`;
     const file: any = new File([blob], data?.name, { type });
-
-    handleClose()
     if (file) {
-      const newUploads = [{ file, progress: 0, status: 'uploading', _id: Math.random().toString(36).substring(7) }]
-      dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: newUploads[0] })
+      setIsSubmitting(true)
 
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('_id', data?._id)
 
-      await Promise.allSettled(
-        newUploads.map(({ file, _id }) => {
-          return new Promise(async (resolve, reject) => {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('_id', data?._id)
-
-            let fake = 0;
-            const fakeInterval = setInterval(() => {
-              fake = Math.min(fake + Math.random() * 15, 90);
-              dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: { _id, progress: Math.round(fake) } })
-            }, 200);
-
-            axiosInstance()
-              .put(`/attachment-new/replace`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-              })
-              .then(({ data }) => {
-                clearInterval(fakeInterval);
-                dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: { _id, status: 'completed', progress: 100 } })
-                toastConfig.setToastConfig({
-                  open: true,
-                  type: 'success',
-                  message: data.message
-                });
-                resolve('success');
-              })
-              .catch((error) => {
-                clearInterval(fakeInterval);
-                dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: { _id, status: 'failed' } })
-                toastConfig.setToastConfig(error);
-                reject('failed');
-              });
-          });
-        })
-      );
+      axiosInstance().put(`/attachment-new/replace`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      }).then(() => {
+        setIsSubmitting(false)
+        loadImage()
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      }).catch(error => {
+        setIsSubmitting(false)
+        toastConfig.setToastConfig(error);
+      })
     }
-    fetchData()
   };
 
   const handleDownload = () => {
@@ -109,10 +82,10 @@ const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null
       <head className="flex items-center justify-between gap-2 border-b px-4 py-3">
         {data.name && <h6 className="line-clamp-1 text-base font-semibold">{data.name}</h6>}
         <div className="flex items-center gap-2">
-          <ThemeButton disabled={loading} isLoading={false} buttonType="theme" onClick={handleSave}>
+          <ThemeButton disabled={isSubmitting || loading} isLoading={isSubmitting} buttonType="theme" onClick={handleSave}>
             Save
           </ThemeButton>
-          <ThemeButton disabled={loading} onClick={handleDownload} buttonType="theme">
+          <ThemeButton disabled={isSubmitting || loading} onClick={handleDownload} buttonType="theme">
             Download
           </ThemeButton>
           {typeof handleClose === 'function' && (
