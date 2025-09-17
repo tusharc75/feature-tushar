@@ -85,10 +85,13 @@ const PublicOnboarding = () => {
       let updatedStepsData = [...stepsData];
       const stepIndex = updatedStepsData.findIndex(step => step.stepId === currentStepId);
       
+      const existingId = stepIndex !== -1 ? updatedStepsData[stepIndex]._id : undefined;
+      
       const newStepData = {
         ...(stepIndex !== -1 ? updatedStepsData[stepIndex] : {}),
         ...values,
         stepId: currentStepId,
+        ...(existingId && { _id: existingId })
       };
 
       if (stepIndex === -1) {
@@ -99,7 +102,6 @@ const PublicOnboarding = () => {
       
       setStepsData(updatedStepsData);
 
-      // Save to database
       const submitData = {
         ...onboardingData,
         stepsData: updatedStepsData
