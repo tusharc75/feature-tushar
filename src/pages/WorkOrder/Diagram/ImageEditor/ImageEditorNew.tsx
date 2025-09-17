@@ -72,7 +72,7 @@ const ToastImageEditor = ({ data, handleClose = null }) => {
     const dataUrl = instance.toDataURL();
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.setAttribute('download', data?.fileName);
+    link.setAttribute('download', data?.name);
     document.body.appendChild(link);
     link.click();
   };
