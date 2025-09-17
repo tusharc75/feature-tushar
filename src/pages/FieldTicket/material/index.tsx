@@ -1488,7 +1488,6 @@ const Material = ({
           serviceName={serviceLogDialog?.data?.serviceDetail?.serviceName}
           onClose={() => {
             setServiceLogDialog({ open: false, data: null });
-            fetchData();
           }}
           allowedToEdit={allowedToEdit}
           fetchRecords={fetchData}
