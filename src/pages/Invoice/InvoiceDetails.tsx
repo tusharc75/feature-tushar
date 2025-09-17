@@ -320,7 +320,7 @@ const InvoiceDetails = () => {
                     Versions
                   </ThemeButton>
                 )}
-                {permissions?.invoice?.isUpdate && allowedToEdit && statusOptions?.length > 0 && tabValue !== 2 && invoiceData?.status !== INVOICE_STATUS.closed && (
+                {permissions?.invoice?.isUpdate && allowedToEdit && statusOptions?.length > 0 && tabValue !== 2 && ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
                   invoiceData?.doasetup && DOAData?.status !== DOA_STATUS.approved ? null :
                     <ThemeButton
                       onClick={openActions}

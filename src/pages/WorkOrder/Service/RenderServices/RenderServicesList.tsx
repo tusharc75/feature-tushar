@@ -50,9 +50,12 @@ const RenderServicesList = ({
             className={cn(
               'bg-[var(--dark-primary,white)]',
               `transition-all duration-300`,
-              isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]',
+              isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] ',
               `min-w-[var(--tab-size)] max-w-[var(--tab-size)]`,
-              isColapsed ? 'p-1' : ''
+              isColapsed ? 'p-1' : '',
+              index === 0 && 'rounded-t-[5px]',
+              index === serviceSteps.length - 1 && 'rounded-b-[5px]',
+              serviceSteps.length === 1 && 'rounded-[5px]'
             )}
             style={{
               ...style

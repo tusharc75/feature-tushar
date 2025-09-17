@@ -23,9 +23,9 @@ const ManageFile = ({
   onMinimizeMaximize,
   showManimizeMaximize,
   onClose,
+  onSuccess,
   parentId = null,
-  attachmentType = null,
-  fetchData = null
+  attachmentType = null
 }) => {
 
   const toastConfig = useContext(CustomToastContext);
@@ -107,9 +107,7 @@ const ManageFile = ({
           });
         })
       );
-    }
-    if (fetchData) {
-      fetchData()
+      onSuccess()
     }
   }
 

@@ -13,7 +13,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import {
-  ACTIVITY_RESOURCE,
   ATTACHMENT_TYPE,
   CHILD_RESOURCE,
   CustomDialogTransition,
@@ -21,7 +20,6 @@ import {
   sidebarResource,
   workOrder
 } from 'src/constants/helpers';
-import Diagram from '../Diagram';
 import ServiceStepsData from './ServiceStepsData';
 import { FiExternalLink } from 'react-icons/fi';
 import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
@@ -344,26 +342,23 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
               <ServiceStepsData stepsData={stepData} servicesData={servicesData?.filter((s) => s.type === MATERIAL_TYPE.service)} />
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
-              {import.meta.env.VITE_APP_ATTACHMENT === 'new' ? (
-                <DiagramNew
-                  resource={sidebarResource.workOrder}
-                  referenceId={workOrderId}
-                  resourceLabel={workOrderData?.workOrderNumber}
-                  currentVersion={selectedVersionNumber}
-                  disableEdit={true}
-                  resourceData={workOrderData}
-                  attachmentType={ATTACHMENT_TYPE.drawing}
-                />
-              ) : (
-                <Diagram
-                  resource={ACTIVITY_RESOURCE.workOrder}
-                  referenceId={workOrderId}
-                  currentVersion={selectedVersionNumber}
-                  disableEdit={true}
-                  resourceData={workOrderData}
-                  attachmentType={ATTACHMENT_TYPE.drawing}
-                />
-              )}
+              <DiagramNew
+                resource={sidebarResource.workOrder}
+                referenceId={workOrderId}
+                resourceLabel={workOrderData?.workOrderNumber}
+                currentVersion={selectedVersionNumber}
+                disableEdit={true}
+                resourceData={workOrderData}
+                attachmentType={ATTACHMENT_TYPE.drawing}
+              />
+              {/* <Diagram
+                resource={ACTIVITY_RESOURCE.workOrder}
+                referenceId={workOrderId}
+                currentVersion={selectedVersionNumber}
+                disableEdit={true}
+                resourceData={workOrderData}
+                attachmentType={ATTACHMENT_TYPE.drawing}
+              /> */}
             </TabPanel>
           </Box>
         </CustomDialogContent>

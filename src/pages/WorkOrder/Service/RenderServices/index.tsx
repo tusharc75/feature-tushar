@@ -133,8 +133,9 @@ const RenderService = ({
                   if (!visible) return null;
                   return (
                     <span
-                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
-                        }`}
+                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${
+                        isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
+                      }`}
                       style={{ top: isMobileSlideOpen ? `-${(index + 1) * 32 + (index + 1) * 8}px` : '-24px', transition: `top 0.${index + 2}s` }}
                     >
                       <ThemeButton key={id} {...rest} className={`${isColapsed ? 'hidden' : ''} round`}>
@@ -180,7 +181,7 @@ const RenderService = ({
           <>
             <div className={`mb-1 flex flex-wrap gap-2 p-[20px_20px_0px] ${isColapsed ? 'justify-around' : 'justify-end'} items-center`}>
               {isColapsed ? null : <h6 className="mr-auto text-[16px]">Services</h6>}
-              {policy && policy.enableServicesOnConsumables ? null :
+              {policy && policy.enableServicesOnConsumables ? null : (
                 <div className="mb-2 mt-2 flex items-center justify-end gap-2">
                   {servicesButtons.map(({ id, children, visible, ...rest }) => {
                     if (!visible) return null;
@@ -190,12 +191,38 @@ const RenderService = ({
                       </ThemeButton>
                     );
                   })}
-                </div>}
+                </div>
+              )}
               <IconButton size={'small'} onClick={handleColapse}>
                 <ArrowForwardIos fontSize="small" className={cn('transition-all', isColapsed ? '' : '[transform:rotate(180deg)]')} />
               </IconButton>
             </div>
             <div className={`max-h-[calc(100vh-300px)] overflow-y-auto overflow-x-hidden p-[20px]`}>
+              {policy && policy.enableServicesOnConsumables && user?.brandPolicy?.servicePrePost && serviceSteps?.find((e) => e?.preWork) && (
+                <div className="mb-4">
+                  <RenderServiceGroup
+                    servicesButtons={servicesButtons}
+                    {...{
+                      serviceSteps: serviceSteps?.filter((e) => e?.preWork),
+                      isColapsed,
+                      stylesForEveryTab,
+                      selectedService,
+                      stepSubmitedData,
+                      setSelectedService,
+                      user,
+                      handleOpenMenu,
+                      resource,
+                      quotationData,
+                      allowedToEdit,
+                      setShowConfirmBox,
+                      getFieldsWithOtherDetails,
+                      isMobile,
+                      completed,
+                      preWork: true
+                    }}
+                  />
+                </div>
+              )}
               {group && (
                 <div className="mb-4 grid gap-4 ">
                   {group.map((d) => (
@@ -227,7 +254,7 @@ const RenderService = ({
                 <RenderServiceGroup
                   servicesButtons={servicesButtons}
                   {...{
-                    serviceSteps,
+                    serviceSteps: serviceSteps?.filter((e) => !e?.preWork),
                     isColapsed,
                     stylesForEveryTab,
                     selectedService,
@@ -241,7 +268,8 @@ const RenderService = ({
                     setShowConfirmBox,
                     getFieldsWithOtherDetails,
                     isMobile,
-                    completed
+                    completed,
+                    preWork: false
                   }}
                 />
               ) : (

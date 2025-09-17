@@ -5,7 +5,6 @@ import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
-  ACTIVITY_RESOURCE,
   ATTACHMENT_TYPE,
   CHILD_RESOURCE,
   MATERIAL_SUB_TYPE,
@@ -1011,7 +1010,7 @@ const Consumables = ({
           }}
           referenceLabel={showDrawingDialog?.data?.productName}
           uniqueId={showDrawingDialog?.data?._id}
-          resource={ACTIVITY_RESOURCE.workOrder}
+          resource={sidebarResource.workOrder}
           attachmentType={ATTACHMENT_TYPE.drawing}
           showMaterialFilter={false}
         />

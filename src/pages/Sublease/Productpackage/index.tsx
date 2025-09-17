@@ -19,12 +19,10 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
-  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   MATERIAL_TYPE,
   PACKAGE_TYPE,
   PRICING_SETUP_TYPE,
-  pricingCondition,
   sidebarResource,
   sublease
 } from '../../../constants/helpers';
@@ -589,7 +587,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           referenceId={subleaseData?._id}
           uniqueId={showAttachmentDialog?._id}
           referenceLabel={showAttachmentDialog.label}
-          resource={ACTIVITY_RESOURCE.sublease}
+          resource={sidebarResource.sublease}
           handleClose={() => {
             setShowAttachmentDialog({ open: false, _id: null, label: '' });
           }}

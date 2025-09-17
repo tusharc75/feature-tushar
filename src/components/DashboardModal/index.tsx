@@ -14,7 +14,6 @@ import { withStyles } from '@mui/styles';
 export interface ModalProps extends React.HTMLAttributes<HTMLDivElement> {
   modalHead?: ModalHead | null;
   handleClose: () => void;
-  handleRoutes?: (any) => string;
   dialogProps?: Omit<DialogProps, 'open'>;
   open?: boolean;
   contentMaxHeight?: string;
@@ -40,7 +39,6 @@ const DashboardModal: FC<ModalProps> = ({
   modalHead,
   dialogProps,
   handleClose,
-  handleRoutes,
   children = null,
   className = '',
   open = undefined,

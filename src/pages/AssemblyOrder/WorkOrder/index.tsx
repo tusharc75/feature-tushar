@@ -13,7 +13,6 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
-  ACTIVITY_RESOURCE,
   ATTACHMENT_TYPE,
   CHILD_RESOURCE,
   MATERIAL_SUB_TYPE,
@@ -156,13 +155,13 @@ const WorkOrder = ({
         width: 150,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (row.original['type'] ? <div>
-          <h5>{`${getMaterialLabel(row.original?.type, row.original?.parentId)}
+          <h5>{`${row.original?.type === MATERIAL_TYPE.package && row?.original?.workOrderNumber ? resources?.workOrder?.titleSingular : getMaterialLabel(row.original?.type, row.original?.parentId)}
           ${row.original?.type === MATERIAL_TYPE.product ? row.original?.productDetail?.serializedProduct ? ' (Serialized)' : ' (Non-Serialized)' :
               row.original.type === MATERIAL_TYPE.service ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                 : ''}`}</h5>
         </div> : <NoDataCell />),
         accessorFn: (original) => {
-          return getMaterialLabel(original?.type, original?.parentId);
+          return original?.type === MATERIAL_TYPE.package && original?.workOrderNumber ? resources?.workOrder?.titleSingular : getMaterialLabel(original?.type, original?.parentId);
         }
       },
       {
@@ -1108,7 +1107,7 @@ const WorkOrder = ({
           }}
           referenceLabel={showDrawingDialog?.data?.detail}
           uniqueId={[MATERIAL_TYPE.service, MATERIAL_TYPE.product]?.includes(showDrawingDialog?.data?.type) ? showDrawingDialog?.data?.uniqueId : null}
-          resource={ACTIVITY_RESOURCE.workOrder}
+          resource={sidebarResource.workOrder}
           attachmentType={showDrawingDialog?.data?.type === MATERIAL_TYPE.package ? ATTACHMENT_TYPE.drawing : null}
           showMaterialFilter={[MATERIAL_TYPE.service, MATERIAL_TYPE.product]?.includes(showDrawingDialog?.data?.type) ? false : true}
         />

@@ -21,7 +21,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { ACTIVITY_RESOURCE, ASSET_STATUS, CHILD_RESOURCE, getEmailsFromContacts, MATERIAL_TYPE, PACKAGE_TYPE, sidebarResource } from 'src/constants/helpers';
+import { ASSET_STATUS, CHILD_RESOURCE, getEmailsFromContacts, MATERIAL_TYPE, PACKAGE_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
@@ -691,7 +691,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
           referenceId={planningData?._id}
           uniqueId={showAttachmentDialog?._id}
           referenceLabel={showAttachmentDialog.label}
-          resource={ACTIVITY_RESOURCE.planning}
+          resource={sidebarResource.planning}
           handleClose={() => {
             setShowAttachmentDialog({ open: false, _id: null, label: '' });
           }}
