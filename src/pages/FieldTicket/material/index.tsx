@@ -209,7 +209,6 @@ const Material = ({
                 <IconButton
                   size="small"
                   onClick={() => {
-                    console.log(row?.original)
                     setServiceLogDialog({ open: true, data: row?.original });
                   }}
                 >
@@ -1489,8 +1488,6 @@ const Material = ({
           serviceName={serviceLogDialog?.data?.serviceDetail?.serviceName}
           onClose={() => {
             setServiceLogDialog({ open: false, data: null });
-          }}
-          onSuccess={() => {
             fetchData();
           }}
           allowedToEdit={allowedToEdit}

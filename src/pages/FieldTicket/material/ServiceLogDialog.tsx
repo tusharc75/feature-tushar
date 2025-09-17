@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Dialog, Box, IconButton } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CustomDialogTransition, displayDate, fieldServiceOrder, fieldTicket, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDate, fieldTicket, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { camelCase, isEmpty } from 'lodash';
 import { Link } from 'react-router-dom';
@@ -13,15 +13,10 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@mui/icons-material';
-import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const ServiceLogDialog = ({ fieldTicketID, id, serviceName, onClose, onSuccess, allowedToEdit, fetchRecords = null }) => {
+const ServiceLogDialog = ({ fieldTicketID, id, serviceName, onClose, allowedToEdit, fetchRecords = null }) => {
     const renderedFrom = `${camelCase(sidebarResource?.fieldServiceOrder)}_services_logs`;
-
-    const {
-        state: { user }
-    }: any = useData();
     const { state, dispatch } = useTableReducer({ renderedFrom });
     const toastConfig = useContext(CustomToastContext);
     const [deleteServiceLogConfirmDialog, setDeleteServiceLogConfirmDialog] = useState({ open: false, data: null });
@@ -37,7 +32,7 @@ const ServiceLogDialog = ({ fieldTicketID, id, serviceName, onClose, onSuccess, 
             const response = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketID}/material/${id}/service-log`);
             const serviceLogData = response?.data?.data;
             serviceLogData?.forEach((log) => {
-                log.canDelete = true;//condition to delete
+                log.canDelete = true;
             });
             dispatch({ type: 'initialize', data: serviceLogData, count: serviceLogData?.length });
             setTimeout(() => {
@@ -216,7 +211,7 @@ const ServiceLogDialog = ({ fieldTicketID, id, serviceName, onClose, onSuccess, 
                         renderedFrom={renderedFrom}
                         isClientSideGrid={true}
                         hideSelection={true}
-                        hideAction={!allowedToEdit || !user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
+                        hideAction={!allowedToEdit}
                         hideExportTable={true}
                         refreshGrid={fetchData}
                     />
