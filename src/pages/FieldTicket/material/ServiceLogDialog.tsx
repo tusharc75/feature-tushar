@@ -47,7 +47,7 @@ const ServiceLogDialog = ({ fieldTicketID, id, serviceName, onClose, allowedToEd
     const columns: any = [
         {
             accessor: 'startDate',
-            Header: 'Actual Start Date',
+            Header: 'Estimate Start Date',
             disabled: true,
             disableFilters: true,
             disableSortBy: true,
@@ -69,7 +69,7 @@ const ServiceLogDialog = ({ fieldTicketID, id, serviceName, onClose, allowedToEd
         },
         {
             accessor: 'endDate',
-            Header: 'Actual End Date',
+            Header: 'Estimate End Date',
             disableFilters: true,
             disableSortBy: true,
             disabled: true,
