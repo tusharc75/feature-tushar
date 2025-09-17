@@ -418,7 +418,9 @@ const Consumables = ({
             };
             res.index = i + 1;
             productFields?.forEach(_key => {
-              res[_key] = u?.productDetail?.[_key]
+              if (u?.productDetail?.[_key]) {
+                res[_key] = u?.productDetail?.[_key]
+              }
             });
             res.productId = u?.productDetail?._id;
             res.serializedProduct = u?.productDetail?.serializedProduct || false;
