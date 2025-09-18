@@ -178,6 +178,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
       data = response?.data?.data;
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
+        finalObject.original = u;
         finalObject['canDelete'] = permissions?.assetServiceTickets?.isDelete && u.status !== ASSET_SERVICE_TICKET_STATUS.inProgress;
         return finalObject;
       });
@@ -229,7 +230,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
   };
 
   const canCreateRepairOrder = () => {
-    const hasInvalidAssetStatus = selectedRecords.some((ticket) => SYSTEM_ASSET_STATUS.includes(ticket.asset?.status));
+    const hasInvalidAssetStatus = selectedRecords.some((ticket) => SYSTEM_ASSET_STATUS.includes(ticket.original?.asset?.status));
     if (hasInvalidAssetStatus) return false;
 
     const warehouses = selectedRecords.map((ticket) => ticket.warehouse);
