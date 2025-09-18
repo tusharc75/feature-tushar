@@ -90,7 +90,7 @@ function IotChart() {
         }}
         startIcon={<MdChevronLeft />}
       >
-        Go Back
+        View Locations
       </ThemeButton>
     ) : null;
   };
