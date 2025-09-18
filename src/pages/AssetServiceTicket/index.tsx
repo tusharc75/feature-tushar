@@ -15,15 +15,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import {
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  assetServiceTickets,
-  sidebarResource,
-  formatAmountWithCurrency,
-  SYSTEM_ASSET_STATUS,
-  repairOrder
-} from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, assetServiceTickets, sidebarResource, SYSTEM_ASSET_STATUS } from '../../constants/helpers';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -48,7 +40,6 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageTicketsDialog, setShowManageTicketsDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showRepairOrderDialog, setShowRepairOrderDialog] = useState({ open: false, tickets: [] });
-  const [showErrorDialog, setShowErrorDialog] = useState({ open: false, message: '' });
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
@@ -228,42 +219,24 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
     }
   };
 
-  const validateRepairOrderCreation = () => {
-    const invalidAssetStatusTickets = selectedRecords.filter((ticket) => SYSTEM_ASSET_STATUS.includes(ticket.asset?.status));
-
-    if (invalidAssetStatusTickets.length > 0) {
-      setShowErrorDialog({
-        open: true,
-        message: `Cannot create repair order. The following tickets have assets with restricted status: ${invalidAssetStatusTickets.map((t) => t.ticketId).join(', ')}`
-      });
-      return false;
-    }
+  const canCreateRepairOrder = () => {
+    const hasInvalidAssetStatus = selectedRecords.some((ticket) => SYSTEM_ASSET_STATUS.includes(ticket.asset?.status));
+    if (hasInvalidAssetStatus) return false;
 
     const warehouses = selectedRecords.map((ticket) => ticket.warehouse);
     const uniqueWarehouses = [...new Set(warehouses.filter(Boolean))];
-
-    if (uniqueWarehouses.length > 1) {
-      setShowErrorDialog({
-        open: true,
-        message: `Cannot create repair order. All selected tickets must be from the same ${resources?.warehouse?.titleSingular}.`
-      });
-      return false;
-    }
+    if (uniqueWarehouses.length > 1) return false;
 
     return true;
-  };
-
-  const handleCreateRepairOrder = () => {
-    if (validateRepairOrderCreation()) {
-      setShowRepairOrderDialog({ open: true, tickets: selectedRecords });
-    }
   };
 
   const ActionMenuItems = () => {
     return (
       <>
         {permissions?.repairOrder?.isCreate && (
-          <MenuItem onClick={handleCreateRepairOrder}>{'Create Repair Order'}</MenuItem>
+          <MenuItem disabled={!canCreateRepairOrder()} onClick={() => setShowRepairOrderDialog({ open: true, tickets: selectedRecords })}>
+            {'Create Repair Order'}
+          </MenuItem>
         )}
         <MenuItem
           disabled={selectedRecords.every((e) => e?.canDelete) ? false : true}
@@ -409,7 +382,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
         <ManageRepairOrder
           referenceType="assetServiceTickets"
           referenceData={{
-            warehouse: selectedRecords[0]?.warehouseId
+            warehouse: showRepairOrderDialog.tickets[0]?.warehouseId
           }}
           onClose={() => setShowRepairOrderDialog({ open: false, tickets: [] })}
           onSuccess={(data) => {
@@ -423,15 +396,6 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
             fetchData();
           }}
           isClone={false}
-        />
-      )}
-      {showErrorDialog.open && (
-        <ConfirmationDialog
-          open={showErrorDialog.open}
-          message={showErrorDialog.message}
-          onClose={() => setShowErrorDialog({ open: false, message: '' })}
-          onOk={() => setShowErrorDialog({ open: false, message: '' })}
-          forwardText="OK"
         />
       )}
     </>
