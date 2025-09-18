@@ -1151,7 +1151,7 @@ export const CURReplaceByCurrencySingle = (fields: any, currency: any) => {
 
 export const validateFields = (fields: any[], resource) => {
   if ([sidebarResource.product, sidebarResource.packages, sidebarResource.serviceMaster, sidebarResource.serializedAsset, sidebarResource.serializedPackages]?.includes(resource) && fields?.some(f => f?.fieldName === 'type')) {
-    return `Invalid input: 'type' is not allowed as a value for fieldName.`
+    return `The field name "type" cannot be used because it is reserved by the system.`
   }
   return ''
 };
