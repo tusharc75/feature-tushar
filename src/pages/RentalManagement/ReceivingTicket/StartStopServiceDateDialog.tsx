@@ -79,7 +79,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                         errors={errors}
                         touched={touched}
                         type="date"
-                        label={`Actual Start Date`}
+                        label={`${resource === sidebarResource.fieldTicket ? '' : 'Actual'} Start Date`}
                         name="startDate"
                         onChange={(date) => {
                           setFieldValue('startDate', date);
@@ -98,7 +98,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                         errors={errors}
                         touched={touched}
                         type="date"
-                        label={`Actual End Date`}
+                        label={`${resource === sidebarResource.fieldTicket ? '' : 'Actual'} End Date`}
                         name="endDate"
                         onChange={(date) => {
                           setFieldValue('endDate', date);
