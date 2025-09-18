@@ -338,6 +338,7 @@ const ServiceLogDialog = ({
             loading={editDateDialog.loading}
             minStartDate={editDateDialog.minStartDate}
             maxEndDate={editDateDialog.maxEndDate}
+            resource={resource}
           />
         )}
         {deleteServiceLogConfirmDialog.open && (
