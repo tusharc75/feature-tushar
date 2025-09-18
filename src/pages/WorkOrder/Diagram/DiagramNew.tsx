@@ -510,15 +510,11 @@ const DiagramNew = ({
             {checkImageUrl(selectedFile?.fileName) ? (
               <ImageEditor
                 data={selectedFile}
-                fetchData={fetchData}
-                setSelectedFile={setSelectedFile}
                 handleClose={() => setSelectedFile(null)}
               />
             ) : checkpdfType(selectedFile?.fileName?.split('.')[1]) ? (
               <PdfEditor
                 data={selectedFile}
-                fetchData={fetchData}
-                setSelectedFile={setSelectedFile}
                 handleClose={() => setSelectedFile(null)}
               />
             ) : (
@@ -883,58 +879,52 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
       </div>
       <Collapse in={open} unmountOnExit>
         {imageExtensions.includes(extension) && (
-          <ImagePreview name={node?.name} url={node?.fileName} onFileClick={() => setSelectedFile(node)} />
+          <ImagePreview file={node} setSelectedFile={setSelectedFile} />
         )}
       </Collapse>
     </div >
   );
 };
 
-type ImagePreviewProps = {
-  name: string;
-  url: string;
-  onFileClick: () => void;
-};
-
-const ImagePreview = ({ name, url, onFileClick }: ImagePreviewProps) => {
+const ImagePreview = ({ file, setSelectedFile }) => {
   const toastConfig = useContext(CustomToastContext);
   const [src, setSrc] = useState(null);
   const [progress, setProgress] = useState(-1);
 
-  useEffect(() => {
-    const viewFile = async () => {
-      try {
-        const { data } = await axiosInstance().get(`user/download?fileName=${encodeURIComponent(url)}`, {
-          responseType: 'blob',
-          onDownloadProgress: (progressEvent) => {
-            let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-            setProgress(percentCompleted);
-            if (percentCompleted === 100) {
-              setTimeout(() => {
-                setProgress(-1);
-              }, 100);
-            }
+  const viewFile = () => {
+    axiosInstance()
+      .get(`/attachment-new/download?id=${file?._id}`, {
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+          setProgress(percentCompleted);
+          if (percentCompleted === 100) {
+            setTimeout(() => {
+              setProgress(-1);
+            }, 100);
           }
-        });
+        }
+      }).then(({ data }) => {
         setSrc(URL.createObjectURL(new Blob([data])));
-      } catch (error) {
-        toastConfig.setToastConfig(error);
-      }
-    };
+      }).catch(err => {
+        toastConfig.setToastConfig(err);
+      })
+  }
 
-    viewFile();
-  }, [url, toastConfig]);
+  useEffect(() => {
+    viewFile()
+  }, [file]);
 
   return (
     <div
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        onFileClick();
+        setSelectedFile(file)
       }}
       className="mb-[--py] flex h-[500px]  max-w-fit items-center justify-center overflow-hidden px-[--px]"
     >
-      {src ? <img src={src} alt={name} className="mr-auto max-h-full max-w-full" /> : <p>Loading...{progress >= 0 ? progress : 0}%</p>}
+      {src ? <img src={src} alt={file?.name} className="mr-auto max-h-full max-w-full" /> : <p>Loading...{progress >= 0 ? progress : 0}%</p>}
     </div>
   );
 };

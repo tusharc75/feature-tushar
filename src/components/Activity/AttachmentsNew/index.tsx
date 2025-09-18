@@ -324,6 +324,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
                   tree={treeStructure}
                   folderButtons={(data) => folderIconButtons(data)}
                   fileButtons={(data) => fileIconButtons(data)}
+                  setShowPreview={setShowPreview}
                 />
                 <div
                   className="flex items-center justify-center btn-view"
@@ -463,7 +464,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
 
 export default AttachmentsNew;
 
-const RenderTree = ({ tree, folderButtons, fileButtons }) => {
+const RenderTree = ({ tree, folderButtons, fileButtons, setShowPreview }) => {
   return (
     <>
       {tree.sort(sortFileStructure).map((node) => {
@@ -473,12 +474,12 @@ const RenderTree = ({ tree, folderButtons, fileButtons }) => {
               key={node._id}
               node={node}
               iconButtons={() => folderButtons(node)}
-              childNodes={<RenderTree {...{ tree: node.children, folderButtons, fileButtons }} />}
+              childNodes={<RenderTree {...{ tree: node.children, folderButtons, fileButtons, setShowPreview }} />}
             />
           );
         }
         if (node.type === 'file' || !node.type) {
-          return <RenderFiles key={node._id} node={node} iconButtons={() => fileButtons(node)} />;
+          return <RenderFiles key={node._id} node={node} iconButtons={() => fileButtons(node)} setShowPreview={setShowPreview} />;
         }
         return null;
       })}
@@ -542,7 +543,7 @@ const RenderFolder = ({ node, iconButtons, childNodes }) => {
   );
 };
 
-const RenderFiles = ({ node, iconButtons }) => {
+const RenderFiles = ({ node, iconButtons, setShowPreview }) => {
   return (
     <div
       className={`${className}`}
@@ -554,7 +555,16 @@ const RenderFiles = ({ node, iconButtons }) => {
             <AiOutlineFile size={18} />
           </div>
           <h6 className=" line-clamp-1 flex-grow text-[14px] font-medium leading-[17px] text-[var(--dark-primary-text,#2A3042)]">
-            <span>{node?.name ?? ''}</span>
+            <span
+              className="cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                setShowPreview({ open: true, file: node })
+              }}
+            >
+              {node?.name ?? ''}
+            </span>
           </h6>
           {iconButtons(node)}
         </div>
