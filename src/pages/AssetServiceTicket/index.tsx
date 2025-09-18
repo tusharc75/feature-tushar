@@ -15,7 +15,15 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, assetServiceTickets, sidebarResource, formatAmountWithCurrency } from '../../constants/helpers';
+import {
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  assetServiceTickets,
+  sidebarResource,
+  formatAmountWithCurrency,
+  SYSTEM_ASSET_STATUS,
+  repairOrder
+} from '../../constants/helpers';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -23,6 +31,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ManageAssetServiceTicket from 'src/pages/AssetServiceTicket/ManageAssetServiceTicket';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 
 let assetServiceTicketsTimeout;
 
@@ -38,6 +47,8 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageTicketsDialog, setShowManageTicketsDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showRepairOrderDialog, setShowRepairOrderDialog] = useState({ open: false, tickets: [] });
+  const [showErrorDialog, setShowErrorDialog] = useState({ open: false, message: '' });
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
@@ -217,21 +228,57 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
     }
   };
 
+  const validateRepairOrderCreation = () => {
+    const invalidAssetStatusTickets = selectedRecords.filter((ticket) => SYSTEM_ASSET_STATUS.includes(ticket.asset?.status));
+
+    if (invalidAssetStatusTickets.length > 0) {
+      setShowErrorDialog({
+        open: true,
+        message: `Cannot create repair order. The following tickets have assets with restricted status: ${invalidAssetStatusTickets.map((t) => t.ticketId).join(', ')}`
+      });
+      return false;
+    }
+
+    const warehouses = selectedRecords.map((ticket) => ticket.warehouse);
+    const uniqueWarehouses = [...new Set(warehouses.filter(Boolean))];
+
+    if (uniqueWarehouses.length > 1) {
+      setShowErrorDialog({
+        open: true,
+        message: `Cannot create repair order. All selected tickets must be from the same ${resources?.warehouse?.titleSingular}.`
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleCreateRepairOrder = () => {
+    if (validateRepairOrderCreation()) {
+      setShowRepairOrderDialog({ open: true, tickets: selectedRecords });
+    }
+  };
+
   const ActionMenuItems = () => {
     return (
-      <MenuItem
-        disabled={selectedRecords.every((e) => e?.canDelete) ? false : true}
-        onClick={() => {
-          if (selectedRecords?.length === 1) {
-            setDeleteRecord(selectedRecords[0]);
-          } else {
-            setDeleteRecord(null);
-          }
-          setShowDeleteConfirmBox(true);
-        }}
-      >
-        {`Delete (${selectedRecords?.length})`}
-      </MenuItem>
+      <>
+        {permissions?.repairOrder?.isCreate && (
+          <MenuItem onClick={handleCreateRepairOrder}>{'Create Repair Order'}</MenuItem>
+        )}
+        <MenuItem
+          disabled={selectedRecords.every((e) => e?.canDelete) ? false : true}
+          onClick={() => {
+            if (selectedRecords?.length === 1) {
+              setDeleteRecord(selectedRecords[0]);
+            } else {
+              setDeleteRecord(null);
+            }
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
     );
   };
 
@@ -356,6 +403,35 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
             setShowManageTicketsDialog({ open: false, isClone: false, idToClone: null });
           }}
           initialAssetId={assetId}
+        />
+      )}
+      {showRepairOrderDialog.open && (
+        <ManageRepairOrder
+          referenceType="assetServiceTickets"
+          referenceData={{
+            warehouse: selectedRecords[0]?.warehouseId
+          }}
+          onClose={() => setShowRepairOrderDialog({ open: false, tickets: [] })}
+          onSuccess={(data) => {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: 'Repair order created successfully'
+            });
+            setShowRepairOrderDialog({ open: false, tickets: [] });
+            dispatch({ type: 'selection', selectedRecords: [] });
+            fetchData();
+          }}
+          isClone={false}
+        />
+      )}
+      {showErrorDialog.open && (
+        <ConfirmationDialog
+          open={showErrorDialog.open}
+          message={showErrorDialog.message}
+          onClose={() => setShowErrorDialog({ open: false, message: '' })}
+          onOk={() => setShowErrorDialog({ open: false, message: '' })}
+          forwardText="OK"
         />
       )}
     </>

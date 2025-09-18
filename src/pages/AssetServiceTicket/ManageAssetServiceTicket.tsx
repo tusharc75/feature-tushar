@@ -68,6 +68,13 @@ const ManageAssetServiceTicket = ({
               });
             } else {
               setTitle(`Edit - ${data.assetId}`);
+              if (data?.repairOrder) {
+                fieldsDataForUpdate?.forEach((e) => {
+                  if (['repairOrder']?.includes(e?.fieldName)) {
+                    e.isUneditable = true;
+                  }
+                });
+              }
               setInitialData({
                 fields: fieldsDataForUpdate,
                 values: { ...getObjKeysWithValues(data, fieldsDataAll) }
@@ -89,6 +96,12 @@ const ManageAssetServiceTicket = ({
             }
           });
         }
+
+        fieldsDataForCreate?.forEach((e) => {
+          if (['repairOrder']?.includes(e?.fieldName)) {
+            e.hiddenField = true;
+          }
+        });
 
         setInitialData({
           fields: fieldsDataForCreate,
