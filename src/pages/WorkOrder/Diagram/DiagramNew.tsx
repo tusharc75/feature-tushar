@@ -515,8 +515,6 @@ const DiagramNew = ({
             ) : checkpdfType(selectedFile?.fileName?.split('.')[1]) ? (
               <PdfEditor
                 data={selectedFile}
-                fetchData={fetchData}
-                setSelectedFile={setSelectedFile}
                 handleClose={() => setSelectedFile(null)}
               />
             ) : (
