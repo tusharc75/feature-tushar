@@ -1,5 +1,5 @@
 import { isArray, isEmpty, round, uniq } from 'lodash';
-import { checkValue, fieldLabelToFieldName, getObjKeys } from './helpers';
+import { checkValue, fieldLabelToFieldName, getObjKeys, sidebarResource } from './helpers';
 import { LOGIC } from 'src/components/FormBuilder/helper';
 import dayjs from 'dayjs';
 
@@ -1149,4 +1149,9 @@ export const CURReplaceByCurrencySingle = (fields: any, currency: any) => {
 //     return value
 // }
 
-export const validateFields = (fields) => { };
+export const validateFields = (fields: any[], resource) => {
+  if ([sidebarResource.product, sidebarResource.packages, sidebarResource.serviceMaster, sidebarResource.serializedAsset, sidebarResource.serializedPackages]?.includes(resource) && fields?.some(f => f?.fieldName === 'type')) {
+    return `The field name "type" cannot be used because it is reserved by the system.`
+  }
+  return ''
+};
