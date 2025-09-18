@@ -10,7 +10,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import axiosInstance from '../../axios/axiosInstance';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
-import { checkFormulaLoop, checkUniqueValidation } from '../../constants/formulaUtility';
+import { checkFormulaLoop, checkUniqueValidation, validateFields } from '../../constants/formulaUtility';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEmpty, isEqual, startCase, toLower } from 'lodash';
 import { IoIosArrowDropdown } from 'react-icons/io';
@@ -204,6 +204,7 @@ const CreateFormBuilder = () => {
     }
     let data = [];
     let order = 0;
+
     section.forEach((_section) => {
       _section.field.forEach((_field, index) => {
         _field.sectionProperties = {};
@@ -223,6 +224,17 @@ const CreateFormBuilder = () => {
         data.push(_field_data);
       });
     });
+
+    const errorMessage = validateFields(data, resource)
+    if (errorMessage) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: errorMessage
+      });
+      return
+    }
+
     if (resource.toString().toLowerCase() === 'product') {
       if (data.filter((e) => e.fieldName === 'productTemplate').length) {
         var otherField = [];
