@@ -15,7 +15,16 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, assetServiceTickets, sidebarResource, formatAmountWithCurrency } from '../../constants/helpers';
+import {
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  assetServiceTickets,
+  sidebarResource,
+  SYSTEM_ASSET_STATUS,
+  repairOrder,
+  MATERIAL_TYPE,
+  ASSET_SERVICE_TICKET_STATUS
+} from '../../constants/helpers';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -23,6 +32,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ManageAssetServiceTicket from 'src/pages/AssetServiceTicket/ManageAssetServiceTicket';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 
 let assetServiceTicketsTimeout;
 
@@ -38,6 +48,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageTicketsDialog, setShowManageTicketsDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showRepairOrderDialog, setShowRepairOrderDialog] = useState({ open: false, tickets: [] });
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
@@ -167,7 +178,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
       data = response?.data?.data;
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['canDelete'] = permissions?.assetServiceTickets?.isDelete;
+        finalObject['canDelete'] = permissions?.assetServiceTickets?.isDelete && u.status !== ASSET_SERVICE_TICKET_STATUS.inProgress;
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: response?.data?.count });
@@ -217,21 +228,71 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
     }
   };
 
+  const canCreateRepairOrder = () => {
+    const hasInvalidAssetStatus = selectedRecords.some((ticket) => SYSTEM_ASSET_STATUS.includes(ticket.asset?.status));
+    if (hasInvalidAssetStatus) return false;
+
+    const warehouses = selectedRecords.map((ticket) => ticket.warehouse);
+    const uniqueWarehouses = [...new Set(warehouses.filter(Boolean))];
+    if (uniqueWarehouses.length > 1) return false;
+
+    const hasExistingRepairOrder = selectedRecords.some((ticket) => ticket.repairOrder);
+    if (hasExistingRepairOrder) return false;
+
+    return true;
+  };
+
+  const handleAddTicketsToRepairOrder = async (repairOrderData: any) => {
+    let rows = showRepairOrderDialog.tickets?.map((ticket: any) => ({
+      materialId: ticket.assetId,
+      type: MATERIAL_TYPE.serializedAsset,
+      qty: 1,
+      parentId: null
+    }));
+
+    axiosInstance().post(`${repairOrder.api}/${repairOrderData._id}/product-package`, { material: rows });
+
+    const ticketIds = showRepairOrderDialog.tickets.map((ticket: any) => ticket._id);
+
+    axiosInstance().put(`${assetServiceTickets.api}/status`, {
+      ids: ticketIds,
+      repairOrderId: repairOrderData._id,
+      status: ASSET_SERVICE_TICKET_STATUS.inProgress
+    });
+
+    toastConfig.setToastConfig({
+      open: true,
+      type: 'success',
+      message: 'Tickets added to repair order successfully'
+    });
+
+    dispatch({ type: 'selection', selectedRecords: [] });
+    setShowRepairOrderDialog({ open: false, tickets: [] });
+    fetchData();
+  };
+
   const ActionMenuItems = () => {
     return (
-      <MenuItem
-        disabled={selectedRecords.every((e) => e?.canDelete) ? false : true}
-        onClick={() => {
-          if (selectedRecords?.length === 1) {
-            setDeleteRecord(selectedRecords[0]);
-          } else {
-            setDeleteRecord(null);
-          }
-          setShowDeleteConfirmBox(true);
-        }}
-      >
-        {`Delete (${selectedRecords?.length})`}
-      </MenuItem>
+      <>
+        {permissions?.repairOrder?.isCreate && (
+          <MenuItem disabled={!canCreateRepairOrder()} onClick={() => setShowRepairOrderDialog({ open: true, tickets: selectedRecords })}>
+            {`Create ${resources?.repairOrder?.titleSingular}`}
+          </MenuItem>
+        )}
+        <MenuItem
+          disabled={selectedRecords.every((e) => e?.canDelete) ? false : true}
+          onClick={() => {
+            if (selectedRecords?.length === 1) {
+              setDeleteRecord(selectedRecords[0]);
+            } else {
+              setDeleteRecord(null);
+            }
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
     );
   };
 
@@ -356,6 +417,19 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
             setShowManageTicketsDialog({ open: false, isClone: false, idToClone: null });
           }}
           initialAssetId={assetId}
+        />
+      )}
+      {showRepairOrderDialog.open && (
+        <ManageRepairOrder
+          referenceType="assetServiceTickets"
+          referenceData={{
+            warehouse: showRepairOrderDialog.tickets[0]?.warehouseId
+          }}
+          onClose={() => setShowRepairOrderDialog({ open: false, tickets: [] })}
+          onSuccess={(data) => {
+            handleAddTicketsToRepairOrder(data);
+          }}
+          isClone={false}
         />
       )}
     </>
