@@ -59,22 +59,25 @@ const ManageAssetServiceTicket = ({
           .get(`${assetServiceTickets.api}/` + assetTicketId)
           .then(({ data: { data } }) => {
             if (isClone) {
-              const { assetId, ...rest } = data;
-              setTitle(`Clone - ${assetId}`);
+              const { ticketId, ...rest } = data;
+              setTitle(`Clone - ${ticketId}`);
               rest.assetId = GenerateResourceLineNumber(fieldsDataForCreate);
+              fieldsDataForUpdate?.forEach((e) => {
+                if (['repairOrder']?.includes(e?.fieldName)) {
+                  e.hiddenField = true;
+                }
+              });
               setInitialData({
                 fields: fieldsDataForCreate,
                 values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
               });
             } else {
-              setTitle(`Edit - ${data.assetId}`);
-              if (data?.repairOrder) {
-                fieldsDataForUpdate?.forEach((e) => {
-                  if (['repairOrder']?.includes(e?.fieldName)) {
-                    e.isUneditable = true;
-                  }
-                });
-              }
+              setTitle(`Edit - ${data.ticketId}`);
+              fieldsDataForUpdate?.forEach((e) => {
+                if (['repairOrder']?.includes(e?.fieldName)) {
+                  e.hiddenField = true;
+                }
+              });
               setInitialData({
                 fields: fieldsDataForUpdate,
                 values: { ...getObjKeysWithValues(data, fieldsDataAll) }
