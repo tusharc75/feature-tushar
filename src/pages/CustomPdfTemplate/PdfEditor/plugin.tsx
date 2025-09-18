@@ -29,73 +29,66 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
                 headWidthPercentages: [30, 30, 40],
             },
             schema: (props) => {
-                const baseSchema = typeof table.propPanel.schema === 'function'
-                    ? table.propPanel.schema(props)
-                    : { ...table.propPanel.schema };
-
+                const baseSchema =
+                    typeof table.propPanel.schema === 'function'
+                        ? table.propPanel.schema(props)
+                        : { ...table.propPanel.schema };
                 const selectedTableName = props.activeSchema.name;
-
                 const headerOptions = resourceTables?.find((e) => e.value === selectedTableName)?.fields || [];
-
-                baseSchema.name = {
-                    title: 'Name',
-                    type: 'string',
-                    widget: 'select',
-                    default: resourceTables?.lenght ? resourceTables[0].label : '',
-                    props: {
-                        options: resourceTables,
-                    },
-                };
-
+                const head = props.activeSchema.head || [];
                 const schemaWithDropdowns: any = {
                     ...baseSchema,
-                };
-                const head = props.activeSchema.head || [];
-
-                schemaWithDropdowns.headStyles = {
-                    type: 'object',
-                    title: 'Head Styles',
-                    properties: schemaWithDropdowns.headStyles.properties,
-                    props: {
-                        style: {
-                            backgroundColor: '#ffffff',
-                            marginBottom: '25px',
+                    name: {
+                        title: 'Name',
+                        type: 'string',
+                        widget: 'select',
+                        default: resourceTables?.length ? resourceTables[0].label : '',
+                        props: {
+                            options: resourceTables,
                         },
                     },
-                };
-
-                schemaWithDropdowns.bodyStyles = {
-                    type: 'object',
-                    title: 'Body Styles',
-                    properties: schemaWithDropdowns.bodyStyles.properties,
-                    props: {
-                        style: {
-                            backgroundColor: '#ffffff',
-                            marginBottom: '25px',
+                    headStyles: {
+                        type: 'object',
+                        title: 'Head Styles',
+                        properties: baseSchema.headStyles?.properties || {},
+                        props: {
+                            style: {
+                                backgroundColor: '#ffffff',
+                                marginBottom: '25px',
+                            },
                         },
                     },
-                };
-
-                schemaWithDropdowns.tableStyles = {
-                    type: 'object',
-                    title: 'Table Styles',
-                    properties: schemaWithDropdowns.tableStyles.properties,
-                    props: {
-                        style: {
-                            backgroundColor: '#ffffff',
-                            marginBottom: '25px',
+                    bodyStyles: {
+                        type: 'object',
+                        title: 'Body Styles',
+                        properties: baseSchema.bodyStyles?.properties || {},
+                        props: {
+                            style: {
+                                backgroundColor: '#ffffff',
+                                marginBottom: '25px',
+                            },
                         },
                     },
-                };
-
-                schemaWithDropdowns.columnStyles = {
-                    type: 'object',
-                    title: 'Column Styles',
-                    properties: schemaWithDropdowns.columnStyles.properties,
-                    props: {
-                        style: {
-                            backgroundColor: '#ffffff',
-                            marginBottom: '25px',
+                    tableStyles: {
+                        type: 'object',
+                        title: 'Table Styles',
+                        properties: baseSchema.tableStyles?.properties || {},
+                        props: {
+                            style: {
+                                backgroundColor: '#ffffff',
+                                marginBottom: '25px',
+                            },
+                        },
+                    },
+                    columnStyles: {
+                        type: 'object',
+                        title: 'Column Styles',
+                        properties: baseSchema.columnStyles?.properties || {},
+                        props: {
+                            style: {
+                                backgroundColor: '#ffffff',
+                                marginBottom: '25px',
+                            },
                         },
                     },
                 };

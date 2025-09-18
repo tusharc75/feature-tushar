@@ -54,8 +54,8 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
         }
       });
     } else {
-      if (template && designerInstanceRef.current.getTemplate() !== template) {
-        designerInstanceRef.current.onChangeTemplate(template);
+      if (template) {
+        designerInstanceRef.current.updateTemplate(template);
       }
     }
 
