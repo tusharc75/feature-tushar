@@ -119,7 +119,7 @@ export default function StartStopDate({ resource, onClose, type, loading, handle
                       label="Notes"
                       value={values.notes}
                       onChange={(value) => {
-                        setFieldValue('notes',value);
+                        setFieldValue('notes', value);
                       }}
                     />
                   </Grid>

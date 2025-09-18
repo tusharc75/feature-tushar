@@ -5,7 +5,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { Box, Dialog, IconButton } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, cloneResourceData, CustomDialogTransition, getObjKeys, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -15,7 +15,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isEmpty, startCase } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
@@ -28,7 +28,7 @@ import ManageInvoiceDialog from 'src/pages/Invoice/ManageInvoiceDialog';
 
 const renderedFrom = `${camelCase(sidebarResource.generateInvoice)}_create`;
 
-const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progressiveBilling, invoiceResourceData, invoiceFields, selectedResourceFields }) => {
+const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progressiveBilling, invoiceResourceData, invoiceData, allRequiredFieldsFilled }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [isUpdating, setUpdating] = useState(false);
@@ -52,7 +52,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
   const [resourceFields, setResourceFields] = useState(null);
   const [finalPriceData, setFinalPriceData] = useState(null);
 
-  const [openManageInvoiceDialog, setOpenManageInvoiceDialog] = useState({ open: false, referenceData: null });
+  const [openManageInvoiceDialog, setOpenManageInvoiceDialog] = useState(false);
 
 
   const {
@@ -383,10 +383,18 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
     setIsDateApplying(false);
   };
 
-  const createInvoice = (invoiceData) => {
+  const createInvoice = (values, extraInvoiceData) => {
     setUpdating(true);
+    let payload = {
+      resource: resource,
+      referenceIds: resourceData?.map((e) => e._id),
+      ...values
+    }
+    if (!isEmpty(extraInvoiceData)) {
+      payload = { ...payload, ...extraInvoiceData };
+    }
     axiosInstance()
-    .post(`/generate-invoice/create`, { resource: resource, referenceIds: resourceData?.map((e) => e._id), extraInvoiceData: invoiceData })
+    .post(`/generate-invoice/create`, payload)
     .then(({ data }) => {
       setUpdating(false);
       toastConfig.setToastConfig({
@@ -403,7 +411,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
 
   }
 
-  const handleCreateInvoice = (invoiceData = null) => {
+  const handleCreateInvoice = (extraInvoiceData = null) => {
     if (progressiveBilling) {
       setUpdating(true);
       rowsApplied?.forEach((element) => {
@@ -434,24 +442,11 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
           toastConfig.setToastConfig(error);
         });
     } else {
-      const rowData = resourceData?.[0]?.orignalData;
-      let invoiceDataNew = getObjKeys('', invoiceFields);
-      const clonedData: any = cloneResourceData(invoiceFields, selectedResourceFields, rowData, user.user?.brandCurrency);
-      invoiceDataNew = { ...invoiceDataNew, ...clonedData };
-      const referenceField = invoiceFields?.find((e) => e?.lookupResource === resource);
-      invoiceDataNew[referenceField?.fieldName] = resourceData?.map((e) => e?._id);
-      let allDataAutoFill = true;
-      invoiceFields?.filter((e) => e?.required)?.forEach((e) => {
-        if (!invoiceDataNew?.[e?.fieldName]) {
-          allDataAutoFill = false;
-        }
-      })
-      if (!allDataAutoFill) {
-        setOpenManageInvoiceDialog({ open: true, referenceData: invoiceDataNew });
+      if (!allRequiredFieldsFilled) {
+        setOpenManageInvoiceDialog(true);
       } else {
-        createInvoice(invoiceData);
+        createInvoice(invoiceData, extraInvoiceData);
       }
-
     }
   };
 
@@ -593,18 +588,18 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
           }}
         />
       )}
-      {openManageInvoiceDialog.open && (
+      {openManageInvoiceDialog && (
         <ManageInvoiceDialog
           isClone={false}
           invoiceId={null}
           onClose={() => {
-            setOpenManageInvoiceDialog({ open: false, referenceData: null });
+            setOpenManageInvoiceDialog(false);
           }}
           onSuccess={() => {
-            setOpenManageInvoiceDialog({ open: false, referenceData: null });
+            setOpenManageInvoiceDialog(false);
             fetchData();
           }}
-          referenceData={openManageInvoiceDialog?.referenceData}
+          referenceData={invoiceData}
           handleCreate={createInvoice}
           isLoading={isUpdating}
         />
