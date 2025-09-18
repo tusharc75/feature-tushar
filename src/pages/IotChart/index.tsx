@@ -90,7 +90,7 @@ function IotChart() {
         }}
         startIcon={<MdChevronLeft />}
       >
-        View Locations
+        {`View ${showLocation && !showAsset ? 'Regions' : 'Locations'}`}
       </ThemeButton>
     ) : null;
   };
