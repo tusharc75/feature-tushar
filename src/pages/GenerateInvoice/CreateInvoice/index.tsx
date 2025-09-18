@@ -417,7 +417,7 @@ const CreateInvoiceDialog = ({
       });
   };
 
-  const handleCreateInvoice = (extraInvoiceData = null) => {
+  const handleCreateInvoice = (extraInvoiceData = null, checkRequiredFields = true) => {
     if (progressiveBilling) {
       setUpdating(true);
       rowsApplied?.forEach((element) => {
@@ -448,7 +448,7 @@ const CreateInvoiceDialog = ({
           toastConfig.setToastConfig(error);
         });
     } else {
-      if (requiredFieldsToFill?.length > 0) {
+      if (checkRequiredFields && requiredFieldsToFill?.length > 0) {
         setOpenManageInvoiceDialog(true);
       } else {
         createInvoice(invoiceData, extraInvoiceData);
@@ -588,7 +588,7 @@ const CreateInvoiceDialog = ({
           }}
           invoiceFields={[...invoiceResourceData?.policy?.fieldTicketInvoiceFields, ...(requiredFieldsToFill || [])]}
           onSuccess={(data) => {
-            handleCreateInvoice(data);
+            handleCreateInvoice(data, false);
           }}
         />
       )}
