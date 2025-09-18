@@ -80,8 +80,8 @@ const AssetServiceTicketDetail = () => {
     axiosInstance()
       .get(`${assetServiceTickets.api}/${id}`)
       .then(({ data: { data } }) => {
-        setAllowedToEdit(permissions?.assetServiceTickets?.isUpdate);
-        setAllowedToDelete(permissions?.assetServiceTickets?.isDelete);
+        setAllowedToEdit(permissions?.assetServiceTickets?.isUpdate && data.status !== 'In-Progress');
+        setAllowedToDelete(permissions?.assetServiceTickets?.isDelete && data.status !== 'In-Progress');
         setAssetTicketData(data);
       })
       .catch((err) => {
@@ -134,11 +134,11 @@ const AssetServiceTicketDetail = () => {
             </Fragment>
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton
-                referenceId={null}
-                resource={ACTIVITY_RESOURCE.assetServiceTicket}
-                resourceLabel={resources?.assetServiceTickets?.titlePlural}
-                resourceData={null}
-              />
+              referenceId={null}
+              resource={ACTIVITY_RESOURCE.assetServiceTicket}
+              resourceLabel={resources?.assetServiceTickets?.titlePlural}
+              resourceData={null}
+            />
           </Box>
         </Box>
       </Box>

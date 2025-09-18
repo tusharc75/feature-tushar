@@ -177,7 +177,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
       data = response?.data?.data;
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['canDelete'] = permissions?.assetServiceTickets?.isDelete;
+        finalObject['canDelete'] = permissions?.assetServiceTickets?.isDelete && u.status !== 'In-Progress';
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: response?.data?.count });
@@ -252,22 +252,16 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
     try {
       await axiosInstance().post(`${repairOrder.api}/${repairOrderData._id}/product-package`, { material: rows });
 
-      const updatePromises = showRepairOrderDialog.tickets?.map((ticket: any) =>
-        axiosInstance().put(`${assetServiceTickets.api}`, {
+      for (const ticket of showRepairOrderDialog.tickets) {
+        await axiosInstance().put(`${assetServiceTickets.api}`, {
           _id: ticket._id,
           repairOrder: repairOrderData._id
-        })
-      );
-
-      await Promise.all(updatePromises);
-
-      const statusUpdatePromises = showRepairOrderDialog.tickets?.map((ticket: any) =>
-        axiosInstance().put(`${assetServiceTickets.api}/status/${ticket._id}`, {
+        });
+        
+        await axiosInstance().put(`${assetServiceTickets.api}/status/${ticket._id}`, {
           status: 'In-Progress'
-        })
-      );
-
-      await Promise.all(statusUpdatePromises);
+        });
+      }
 
       toastConfig.setToastConfig({
         open: true,
