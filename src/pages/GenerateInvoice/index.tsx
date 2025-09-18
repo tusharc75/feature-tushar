@@ -49,13 +49,13 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
-  const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null, invoiceData: null, allRequiredFieldsFilled: false });
+  const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null, invoiceData: null, requiredFieldsToFill: [] });
   const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null });
   const [viewSingleInvoiceDialog, setViewSingleInvoiceDialog] = useState({ open: false, invoice: null });
 
   const [resourceList, setResourceList] = useState([]);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState({ open: false, data: null, invoiceData: null });
+  const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState({ open: false, data: null, invoiceData: null, requiredFieldsToFill: [] });
   const [openManageInvoiceDialog, setOpenManageInvoiceDialog] = useState({ open: false, _id: null, referenceData: null, selectedRows: [] });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -278,9 +278,9 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
       } else {
         window.open(`${routes.invoiceDetail.path}/${data?.data?._id}`);
       }
-      setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, allRequiredFieldsFilled: false });
+      setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, requiredFieldsToFill: [] });
       dispatch({ type: 'selection', selectedRecords: [] });
-      setOpenInvoiceDataDialog({ open: false, data: null, invoiceData: null });
+      setOpenInvoiceDataDialog({ open: false, data: null, invoiceData: null, requiredFieldsToFill: [] });
       setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null, selectedRows: [] });
       fetchData();
     } catch (error) {
@@ -291,19 +291,19 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
 
   const handleCreateInvoice = async (rows) => {
     try {
-      const { invoiceData, allRequiredFieldsFilled } = await fetchInvoiceData(rows);
+      const { invoiceData, requiredFieldsToFill } = await fetchInvoiceData(rows);
       if (selectedResource?.resource === sidebarResource.fieldTicket && invoicePolicyRef?.current?.policy?.hideFieldTicketInvoiceCreateDialog) {
         if (invoicePolicyRef?.current?.policy?.fieldTicketInvoiceFields?.length > 0) {
-          setOpenInvoiceDataDialog({ open: true, data: rows, invoiceData: invoiceData });
+          setOpenInvoiceDataDialog({ open: true, data: rows, invoiceData: invoiceData, requiredFieldsToFill });
         } else {
-          if (allRequiredFieldsFilled) {
+          if (!requiredFieldsToFill?.length) {
             createInvoice(rows, invoiceData);
           } else {
             setOpenManageInvoiceDialog({ open: true, _id: null, referenceData: invoiceData, selectedRows: rows });
           }
         }
       } else {
-        setCreateInvoiceDialog({ open: true, data: rows, invoiceData, allRequiredFieldsFilled });
+        setCreateInvoiceDialog({ open: true, data: rows, invoiceData, requiredFieldsToFill });
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -551,10 +551,10 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             <CreateBillingDialog
               rentalManagementData={createInvoiceDialog.data[0]}
               onClose={() => {
-                setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, allRequiredFieldsFilled: false });
+                setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, requiredFieldsToFill: [] });
               }}
               onSuccess={() => {
-                setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, allRequiredFieldsFilled: false });
+                setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, requiredFieldsToFill: [] });
                 fetchData();
               }}
             />
@@ -562,13 +562,13 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             <CreateInvoiceDialog
               resourceData={createInvoiceDialog?.data}
               invoiceData={createInvoiceDialog?.invoiceData}
-              allRequiredFieldsFilled={createInvoiceDialog?.allRequiredFieldsFilled}
-              onClose={() => setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, allRequiredFieldsFilled: false })}
+              requiredFieldsToFill={createInvoiceDialog?.requiredFieldsToFill}
+              onClose={() => setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, requiredFieldsToFill: [] })}
               resource={selectedResource.resource}
               progressiveBilling={selectedResource.progressiveBilling}
               invoiceResourceData={invoicePolicyRef.current}
               onSuccess={() => {
-                setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, allRequiredFieldsFilled: false });
+                setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, requiredFieldsToFill: [] });
                 dispatch({ type: 'selection', selectedRecords: [] });
                 fetchData();
               }}
@@ -599,9 +599,9 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         {openInvoiceDataDialog.open && (
           <InvoiceDataDialog
             onClose={() => {
-              setOpenInvoiceDataDialog({ open: false, data: null, invoiceData: null });
+              setOpenInvoiceDataDialog({ open: false, data: null, invoiceData: null, requiredFieldsToFill: [] });
             }}
-            invoiceFields={invoicePolicyRef?.current?.policy?.fieldTicketInvoiceFields}
+            invoiceFields={[...invoicePolicyRef?.current?.policy?.fieldTicketInvoiceFields, ...(openInvoiceDataDialog?.requiredFieldsToFill || [])]}
             onSuccess={(data) => {
               createInvoice(openInvoiceDataDialog.data, {...openInvoiceDataDialog.invoiceData, ...data});
             }}
