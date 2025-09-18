@@ -49,42 +49,42 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
-  const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null, invoiceData: null, allRequiredFieldsFilled: false });
+  const [createInvoiceDialog, setCreateInvoiceDialog] = useState({ open: false, data: null, invoiceData: null, pendingRequiredFields: [] });
   const [viewInvoiceDialog, setViewInvoiceDialog] = useState({ open: false, data: null });
   const [viewSingleInvoiceDialog, setViewSingleInvoiceDialog] = useState({ open: false, invoice: null });
 
   const [resourceList, setResourceList] = useState([]);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState({ open: false, data: null, invoiceData: null });
+  const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState({ open: false, data: null, invoiceData: null, pendingRequiredFields: [] });
   const [openManageInvoiceDialog, setOpenManageInvoiceDialog] = useState({ open: false, _id: null, referenceData: null, selectedRows: [] });
   const [isLoading, setIsLoading] = useState(false);
 
   const GENERATE_RESOURCE = [
     ...(user?.user?.brandPolicy?.rentalProgressiveBilling && permissions?.invoice?.isRead
       ? [
-          {
-            key: 'rentalManagement',
-            resource: sidebarResource.rentalManagement,
-            fieldName: 'rentalJobName',
-            invoiceFieldName: 'rentalJob',
-            progressiveBilling: true,
-            path: routes.rentalManagementDetail.path,
-            title: resources?.rentalManagement?.titlePlural
-          }
-        ]
+        {
+          key: 'rentalManagement',
+          resource: sidebarResource.rentalManagement,
+          fieldName: 'rentalJobName',
+          invoiceFieldName: 'rentalJob',
+          progressiveBilling: true,
+          path: routes.rentalManagementDetail.path,
+          title: resources?.rentalManagement?.titlePlural
+        }
+      ]
       : []),
     ...(user?.user?.brandPolicy?.subleaseProgressiveBilling && permissions?.invoice?.isRead
       ? [
-          {
-            key: 'sublease',
-            resource: sidebarResource.sublease,
-            fieldName: 'subleaseName',
-            invoiceFieldName: 'sublease',
-            progressiveBilling: true,
-            path: routes.subleaseDetail.path,
-            title: resources?.sublease?.titlePlural
-          }
-        ]
+        {
+          key: 'sublease',
+          resource: sidebarResource.sublease,
+          fieldName: 'subleaseName',
+          invoiceFieldName: 'sublease',
+          progressiveBilling: true,
+          path: routes.subleaseDetail.path,
+          title: resources?.sublease?.titlePlural
+        }
+      ]
       : []),
     {
       key: 'repairOrder',
@@ -245,9 +245,9 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     return deepFilter;
   };
 
-  const fetchInvoiceData = async (resourceData) => {
+  const getInvoicePrefilledData = async (resourceData) => {
     try {
-      const { data: { data } } = await axiosInstance().post(`/generate-invoice/fetch-invoice`, {
+      const { data: { data } } = await axiosInstance().post(`/generate-invoice/get-invoice-prefilled-data`, {
         resource: selectedResource?.resource,
         referenceIds: resourceData?.map((e) => e?._id)
       });
@@ -277,11 +277,11 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         setOpenManageInvoiceDialog({ open: true, _id: data?.data?._id, referenceData: null, selectedRows: [] });
       } else {
         window.open(`${routes.invoiceDetail.path}/${data?.data?._id}`);
+        setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null, selectedRows: [] });
       }
-      setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, allRequiredFieldsFilled: false });
+      setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, pendingRequiredFields: [] });
       dispatch({ type: 'selection', selectedRecords: [] });
-      setOpenInvoiceDataDialog({ open: false, data: null, invoiceData: null });
-      setOpenManageInvoiceDialog({ open: false, _id: null, referenceData: null, selectedRows: [] });
+      setOpenInvoiceDataDialog({ open: false, data: null, invoiceData: null, pendingRequiredFields: [] });
       fetchData();
     } catch (error) {
       setIsLoading(false);
@@ -291,19 +291,19 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
 
   const handleCreateInvoice = async (rows) => {
     try {
-      const { invoiceData, allRequiredFieldsFilled } = await fetchInvoiceData(rows);
+      const { invoiceData, pendingRequiredFields } = await getInvoicePrefilledData(rows);
       if (selectedResource?.resource === sidebarResource.fieldTicket && invoicePolicyRef?.current?.policy?.hideFieldTicketInvoiceCreateDialog) {
         if (invoicePolicyRef?.current?.policy?.fieldTicketInvoiceFields?.length > 0) {
-          setOpenInvoiceDataDialog({ open: true, data: rows, invoiceData: invoiceData });
+          setOpenInvoiceDataDialog({ open: true, data: rows, invoiceData: invoiceData, pendingRequiredFields });
         } else {
-          if (allRequiredFieldsFilled) {
+          if (!pendingRequiredFields?.length) {
             createInvoice(rows, invoiceData);
           } else {
             setOpenManageInvoiceDialog({ open: true, _id: null, referenceData: invoiceData, selectedRows: rows });
           }
         }
       } else {
-        setCreateInvoiceDialog({ open: true, data: rows, invoiceData, allRequiredFieldsFilled });
+        setCreateInvoiceDialog({ open: true, data: rows, invoiceData, pendingRequiredFields });
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -551,10 +551,10 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             <CreateBillingDialog
               rentalManagementData={createInvoiceDialog.data[0]}
               onClose={() => {
-                setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, allRequiredFieldsFilled: false });
+                setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, pendingRequiredFields: [] });
               }}
               onSuccess={() => {
-                setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, allRequiredFieldsFilled: false });
+                setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, pendingRequiredFields: [] });
                 fetchData();
               }}
             />
@@ -562,13 +562,13 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
             <CreateInvoiceDialog
               resourceData={createInvoiceDialog?.data}
               invoiceData={createInvoiceDialog?.invoiceData}
-              allRequiredFieldsFilled={createInvoiceDialog?.allRequiredFieldsFilled}
-              onClose={() => setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, allRequiredFieldsFilled: false })}
+              pendingRequiredFields={createInvoiceDialog?.pendingRequiredFields}
+              onClose={() => setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, pendingRequiredFields: [] })}
               resource={selectedResource.resource}
               progressiveBilling={selectedResource.progressiveBilling}
               invoiceResourceData={invoicePolicyRef.current}
               onSuccess={() => {
-                setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, allRequiredFieldsFilled: false });
+                setCreateInvoiceDialog({ open: false, data: null, invoiceData: null, pendingRequiredFields: [] });
                 dispatch({ type: 'selection', selectedRecords: [] });
                 fetchData();
               }}
@@ -599,11 +599,11 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         {openInvoiceDataDialog.open && (
           <InvoiceDataDialog
             onClose={() => {
-              setOpenInvoiceDataDialog({ open: false, data: null, invoiceData: null });
+              setOpenInvoiceDataDialog({ open: false, data: null, invoiceData: null, pendingRequiredFields: [] });
             }}
-            invoiceFields={invoicePolicyRef?.current?.policy?.fieldTicketInvoiceFields}
+            invoiceFields={[...invoicePolicyRef?.current?.policy?.fieldTicketInvoiceFields, ...(openInvoiceDataDialog?.pendingRequiredFields || [])]}
             onSuccess={(data) => {
-              createInvoice(openInvoiceDataDialog.data, {...openInvoiceDataDialog.invoiceData, ...data});
+              createInvoice(openInvoiceDataDialog.data, { ...openInvoiceDataDialog.invoiceData, ...data });
             }}
           />
         )}

@@ -53,21 +53,23 @@ const ManageAssetServiceTicket = ({
 
   const fetchFields = async () => {
     try {
-      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.assetServiceTickets);
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.assetServiceTickets, [
+        'repairOrder'
+      ]);
       if (assetTicketId) {
         axiosInstance()
           .get(`${assetServiceTickets.api}/` + assetTicketId)
           .then(({ data: { data } }) => {
             if (isClone) {
-              const { assetId, ...rest } = data;
-              setTitle(`Clone - ${assetId}`);
-              rest.assetId = GenerateResourceLineNumber(fieldsDataForCreate);
+              const { ticketId, ...rest } = data;
+              setTitle(`Clone - ${ticketId}`);
+              rest.ticketId = GenerateResourceLineNumber(fieldsDataForCreate);
               setInitialData({
                 fields: fieldsDataForCreate,
                 values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
               });
             } else {
-              setTitle(`Edit - ${data.assetId}`);
+              setTitle(`Edit - ${data.ticketId}`);
               setInitialData({
                 fields: fieldsDataForUpdate,
                 values: { ...getObjKeysWithValues(data, fieldsDataAll) }
@@ -80,7 +82,7 @@ const ManageAssetServiceTicket = ({
       } else {
         setTitle(`Create ${resources?.assetServiceTickets?.titleSingular}`);
         let initialData = getObjKeys('', fieldsDataForCreate);
-        initialData['assetId'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        initialData['ticketId'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (initialAssetId) {
           initialData['asset'] = initialAssetId;
           fieldsDataForUpdate?.forEach((e) => {
@@ -89,7 +91,6 @@ const ManageAssetServiceTicket = ({
             }
           });
         }
-
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData

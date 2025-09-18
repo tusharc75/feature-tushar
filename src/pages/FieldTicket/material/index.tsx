@@ -62,8 +62,8 @@ import AddQuotationDataDialog from './AddQuotationDataDialog';
 import AddFieldServiceOrderDataDialog from 'src/pages/FieldTicket/material/AddFieldServiceOrderDataDialog';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
-import StartStopServiceDateDialog from './StartStopServiceDateDialog';
-import ServiceLogDialog from './ServiceLogDialog';
+import StartStopServiceDateDialog from 'src/pages/RentalManagement/ReceivingTicket/StartStopServiceDateDialog';
+import ServiceLogDialog from 'src/pages/RentalManagement/ReceivingTicket/ServiceLogDialog';
 import CustomMessageDialog from 'src/components/MessageDialog';
 
 const Material = ({
@@ -168,7 +168,7 @@ const Material = ({
   }, []);
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.fieldServiceOrder);
+    const data = await getResourcePolicy(user, permissions, sidebarResource.fieldTicket);
     setIsStartStopServiceEnabled(data?.policy?.enableStartStopService);
   };
 
@@ -1478,18 +1478,23 @@ const Material = ({
           }}
           loading={serviceConfirmationDialog.loading}
           minStartDate={serviceConfirmationDialog.minStartDate}
+          resource={sidebarResource.fieldTicket}
         />
       )}
       {serviceLogDialog.open && (
         <ServiceLogDialog
-          fieldTicketID={fieldTicketData?._id}
+          referenceId={fieldTicketData?._id}
           id={serviceLogDialog?.data?._id}
           serviceName={serviceLogDialog?.data?.serviceDetail?.serviceName}
           onClose={() => {
             setServiceLogDialog({ open: false, data: null });
           }}
+          onSuccess={() => { 
+            fetchMaterial();
+          }}
           allowedToEdit={allowedToEdit}
           fetchRecords={fetchData}
+          resource={sidebarResource.fieldTicket}
         />
       )}
       {deleteServiceLogConfirmDialog.open && (
