@@ -53,7 +53,9 @@ const ManageAssetServiceTicket = ({
 
   const fetchFields = async () => {
     try {
-      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.assetServiceTickets);
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.assetServiceTickets, [
+        'repairOrder'
+      ]);
       if (assetTicketId) {
         axiosInstance()
           .get(`${assetServiceTickets.api}/` + assetTicketId)
@@ -61,23 +63,13 @@ const ManageAssetServiceTicket = ({
             if (isClone) {
               const { ticketId, ...rest } = data;
               setTitle(`Clone - ${ticketId}`);
-              rest.assetId = GenerateResourceLineNumber(fieldsDataForCreate);
-              fieldsDataForUpdate?.forEach((e) => {
-                if (['repairOrder']?.includes(e?.fieldName)) {
-                  e.hiddenField = true;
-                }
-              });
+              rest.ticketId = GenerateResourceLineNumber(fieldsDataForCreate);
               setInitialData({
                 fields: fieldsDataForCreate,
                 values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
               });
             } else {
               setTitle(`Edit - ${data.ticketId}`);
-              fieldsDataForUpdate?.forEach((e) => {
-                if (['repairOrder']?.includes(e?.fieldName)) {
-                  e.hiddenField = true;
-                }
-              });
               setInitialData({
                 fields: fieldsDataForUpdate,
                 values: { ...getObjKeysWithValues(data, fieldsDataAll) }
@@ -90,7 +82,7 @@ const ManageAssetServiceTicket = ({
       } else {
         setTitle(`Create ${resources?.assetServiceTickets?.titleSingular}`);
         let initialData = getObjKeys('', fieldsDataForCreate);
-        initialData['assetId'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        initialData['ticketId'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (initialAssetId) {
           initialData['asset'] = initialAssetId;
           fieldsDataForUpdate?.forEach((e) => {
@@ -99,13 +91,6 @@ const ManageAssetServiceTicket = ({
             }
           });
         }
-
-        fieldsDataForCreate?.forEach((e) => {
-          if (['repairOrder']?.includes(e?.fieldName)) {
-            e.hiddenField = true;
-          }
-        });
-
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData

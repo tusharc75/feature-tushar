@@ -22,7 +22,8 @@ import {
   sidebarResource,
   SYSTEM_ASSET_STATUS,
   repairOrder,
-  MATERIAL_TYPE
+  MATERIAL_TYPE,
+  ASSET_SERVICE_TICKET_STATUS
 } from '../../constants/helpers';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
@@ -177,7 +178,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
       data = response?.data?.data;
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['canDelete'] = permissions?.assetServiceTickets?.isDelete && u.status !== 'In-Progress';
+        finalObject['canDelete'] = permissions?.assetServiceTickets?.isDelete && u.status !== ASSET_SERVICE_TICKET_STATUS.inProgress;
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: response?.data?.count });
@@ -249,32 +250,25 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
       parentId: null
     }));
 
-    try {
-      await axiosInstance().post(`${repairOrder.api}/${repairOrderData._id}/product-package`, { material: rows });
+    axiosInstance().post(`${repairOrder.api}/${repairOrderData._id}/product-package`, { material: rows });
 
-      for (const ticket of showRepairOrderDialog.tickets) {
-        await axiosInstance().put(`${assetServiceTickets.api}`, {
-          _id: ticket._id,
-          repairOrder: repairOrderData._id
-        });
-        
-        await axiosInstance().put(`${assetServiceTickets.api}/status/${ticket._id}`, {
-          status: 'In-Progress'
-        });
-      }
+    const ticketIds = showRepairOrderDialog.tickets.map((ticket: any) => ticket._id);
 
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: 'Tickets added to repair order successfully'
-      });
+    axiosInstance().put(`${assetServiceTickets.api}/status`, {
+      ids: ticketIds,
+      repairOrderId: repairOrderData._id,
+      status: ASSET_SERVICE_TICKET_STATUS.inProgress
+    });
 
-      dispatch({ type: 'selection', selectedRecords: [] });
-      setShowRepairOrderDialog({ open: false, tickets: [] });
-      fetchData();
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    toastConfig.setToastConfig({
+      open: true,
+      type: 'success',
+      message: 'Tickets added to repair order successfully'
+    });
+
+    dispatch({ type: 'selection', selectedRecords: [] });
+    setShowRepairOrderDialog({ open: false, tickets: [] });
+    fetchData();
   };
 
   const ActionMenuItems = () => {
@@ -282,7 +276,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
       <>
         {permissions?.repairOrder?.isCreate && (
           <MenuItem disabled={!canCreateRepairOrder()} onClick={() => setShowRepairOrderDialog({ open: true, tickets: selectedRecords })}>
-            {'Create Repair Order'}
+            {`Create ${resources?.repairOrder?.titleSingular}`}
           </MenuItem>
         )}
         <MenuItem

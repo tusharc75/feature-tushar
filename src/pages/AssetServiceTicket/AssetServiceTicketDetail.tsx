@@ -13,7 +13,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { ACTIVITY_RESOURCE, assetServiceTickets, sidebarResource } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, ASSET_SERVICE_TICKET_STATUS, assetServiceTickets, sidebarResource } from '../../constants/helpers';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import ManageAssetServiceTicket from 'src/pages/AssetServiceTicket/ManageAssetServiceTicket';
@@ -80,8 +80,8 @@ const AssetServiceTicketDetail = () => {
     axiosInstance()
       .get(`${assetServiceTickets.api}/${id}`)
       .then(({ data: { data } }) => {
-        setAllowedToEdit(permissions?.assetServiceTickets?.isUpdate && data.status !== 'In-Progress');
-        setAllowedToDelete(permissions?.assetServiceTickets?.isDelete && data.status !== 'In-Progress');
+        setAllowedToEdit(permissions?.assetServiceTickets?.isUpdate && data.status !== ASSET_SERVICE_TICKET_STATUS.inProgress);
+        setAllowedToDelete(permissions?.assetServiceTickets?.isDelete && data.status !== ASSET_SERVICE_TICKET_STATUS.inProgress);
         setAssetTicketData(data);
       })
       .catch((err) => {
