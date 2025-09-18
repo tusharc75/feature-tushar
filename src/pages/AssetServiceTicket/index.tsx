@@ -15,7 +15,15 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, assetServiceTickets, sidebarResource, SYSTEM_ASSET_STATUS } from '../../constants/helpers';
+import {
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  assetServiceTickets,
+  sidebarResource,
+  SYSTEM_ASSET_STATUS,
+  repairOrder,
+  MATERIAL_TYPE
+} from '../../constants/helpers';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -227,7 +235,52 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
     const uniqueWarehouses = [...new Set(warehouses.filter(Boolean))];
     if (uniqueWarehouses.length > 1) return false;
 
+    const hasExistingRepairOrder = selectedRecords.some((ticket) => ticket.repairOrder);
+    if (hasExistingRepairOrder) return false;
+
     return true;
+  };
+
+  const handleAddTicketsToRepairOrder = async (repairOrderData: any) => {
+    let rows = showRepairOrderDialog.tickets?.map((ticket: any) => ({
+      materialId: ticket.assetId,
+      type: MATERIAL_TYPE.serializedAsset,
+      qty: 1,
+      parentId: null
+    }));
+
+    try {
+      await axiosInstance().post(`${repairOrder.api}/${repairOrderData._id}/product-package`, { material: rows });
+
+      const updatePromises = showRepairOrderDialog.tickets?.map((ticket: any) =>
+        axiosInstance().put(`${assetServiceTickets.api}`, {
+          _id: ticket._id,
+          repairOrder: repairOrderData._id
+        })
+      );
+
+      await Promise.all(updatePromises);
+
+      const statusUpdatePromises = showRepairOrderDialog.tickets?.map((ticket: any) =>
+        axiosInstance().put(`${assetServiceTickets.api}/status/${ticket._id}`, {
+          status: 'In-Progress'
+        })
+      );
+
+      await Promise.all(statusUpdatePromises);
+
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: 'Tickets added to repair order successfully'
+      });
+
+      dispatch({ type: 'selection', selectedRecords: [] });
+      setShowRepairOrderDialog({ open: false, tickets: [] });
+      fetchData();
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const ActionMenuItems = () => {
@@ -386,14 +439,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
           }}
           onClose={() => setShowRepairOrderDialog({ open: false, tickets: [] })}
           onSuccess={(data) => {
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: 'Repair order created successfully'
-            });
-            setShowRepairOrderDialog({ open: false, tickets: [] });
-            dispatch({ type: 'selection', selectedRecords: [] });
-            fetchData();
+            handleAddTicketsToRepairOrder(data);
           }}
           isClone={false}
         />
