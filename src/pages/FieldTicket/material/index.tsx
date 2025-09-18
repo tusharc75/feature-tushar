@@ -1489,7 +1489,9 @@ const Material = ({
           onClose={() => {
             setServiceLogDialog({ open: false, data: null });
           }}
-          onSuccess={() => { }}
+          onSuccess={() => { 
+            fetchMaterial();
+          }}
           allowedToEdit={allowedToEdit}
           fetchRecords={fetchData}
           resource={sidebarResource.fieldTicket}

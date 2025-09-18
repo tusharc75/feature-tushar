@@ -303,7 +303,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
       )}
       {serviceLogDialog.open && (
         <ServiceLogDialog
-          rentalId={rentalManagementData?._id}
+          referenceId={rentalManagementData?._id}
           id={serviceLogDialog?.data?.uniqueId}
           serviceName={serviceLogDialog?.data?.serviceName}
           onClose={() => {
