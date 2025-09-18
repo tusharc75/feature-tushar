@@ -44,6 +44,18 @@ export const rentalManagementActions = {
   changeSubStatus: 'Change Sub Status'
 };
 
+export const fieldTicketActions = {
+  startService: 'Start Service',
+  stopService: 'Stop Service',
+  deleteServiceLog: 'Delete Service Log',
+};
+export const fieldTicketMessages = {
+  serviceAlreadyStarted: 'Service already started',
+  serviceNotStarted: 'Service not started',
+  serviceAlreadyStopped: 'Service already stopped',
+  serviceNotStopped: 'Service not stopped',
+};
+
 export const rentalManagementMessage = {
   addProductPackage: 'Add Products or Packages to proceed',
   addServicePackage: 'Add Services or Packages to proceed',
