@@ -726,7 +726,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                 min: 1,
                 max: 20
             },
-
             tableBorderWidth: {
                 title: 'Table Border Width',
                 type: 'number',
@@ -810,19 +809,15 @@ function initializeResizer(
         const deltaPercent = (deltaPx / containerWidth) * 100;
         const wLeft = clamp(startWidths[colIndex] + deltaPercent, MIN_COL_PERCENT, 100 - MIN_COL_PERCENT * (state.cols - 1));
         const wRight = clamp(startWidths[colIndex + 1] - deltaPercent, MIN_COL_PERCENT, 100 - MIN_COL_PERCENT * (state.cols - 1));
-        // Keep others same, just update two columns proportionally
         const newWidths = [...startWidths];
         newWidths[colIndex] = wLeft;
         newWidths[colIndex + 1] = wRight;
-        // if small rounding drift adjust proportionally across all cols to sum 100
         const sum = newWidths.reduce((a, b) => a + b, 0);
         if (sum !== 100) {
             const factor = 100 / sum;
             for (let i = 0; i < newWidths.length; i++) newWidths[i] = newWidths[i] * factor;
         }
-        // apply to state and visually update grid-template-columns directly on container
         state.colWidths = newWidths.map(n => Math.round(n * 100) / 100);
-        // update all grid elements: we set style on every grid wrapper (header + row wrappers)
         const gridWrappers = rootEl.querySelectorAll<HTMLElement>('[style*="display: grid"]');
         const template = state.colWidths.map(w => `${w}%`).join(' ');
         gridWrappers.forEach(g => {
