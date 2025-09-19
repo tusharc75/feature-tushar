@@ -33,20 +33,23 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
                     typeof table.propPanel.schema === 'function'
                         ? table.propPanel.schema(props)
                         : { ...table.propPanel.schema };
-                const selectedTableName = props.activeSchema.name;
+                const selectedTableName = props.activeSchema.tableType;
                 const headerOptions = resourceTables?.find((e) => e.value === selectedTableName)?.fields || [];
                 const head = props.activeSchema.head || [];
                 const schemaWithDropdowns: any = {
-                    ...baseSchema,
-                    name: {
-                        title: 'Name',
+                    tableType: {
+                        title: 'Table Type',
                         type: 'string',
                         widget: 'select',
                         default: resourceTables?.length ? resourceTables[0].label : '',
                         props: {
                             options: resourceTables,
+                            style: {
+                                marginBottom: '20px',
+                            },
                         },
                     },
+                    ...baseSchema,
                     headStyles: {
                         type: 'object',
                         title: 'Head Styles',
