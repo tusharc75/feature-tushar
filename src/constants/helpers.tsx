@@ -3105,6 +3105,12 @@ export const EXPENSE_STATUS = {
   recalled: 'Recalled'
 };
 
+export const ASSET_SERVICE_TICKET_STATUS = {
+  open: 'Open',
+  inProgress: 'In-Progress',
+  closed: 'Closed'
+}
+
 export const PRICING_TYPE = [
   { optionLabel: 'Rent', optionValue: 'Rent' },
   { optionLabel: 'Sell', optionValue: 'Price' }

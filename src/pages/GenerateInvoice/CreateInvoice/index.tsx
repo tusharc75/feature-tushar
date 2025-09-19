@@ -36,7 +36,7 @@ const CreateInvoiceDialog = ({
   progressiveBilling,
   invoiceResourceData,
   invoiceData,
-  requiredFieldsToFill
+  pendingRequiredFields
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -130,27 +130,27 @@ const CreateInvoiceDialog = ({
       },
       ...(resource === sidebarResource.fieldTicket
         ? [
-            {
-              accessor: 'fieldTicketNumber',
-              Header: 'Field Ticket',
-              disabled: true,
-              Cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                  <p className="text-truncate">{row.original.fieldTicketNumber}</p>
-                  {permissions?.fieldTicket?.isRead && (
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  )}
-                </div>
-              )
-            }
-          ]
+          {
+            accessor: 'fieldTicketNumber',
+            Header: 'Field Ticket',
+            disabled: true,
+            Cell: ({ row }) => (
+              <div className="flex items-center gap-2">
+                <p className="text-truncate">{row.original.fieldTicketNumber}</p>
+                {permissions?.fieldTicket?.isRead && (
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                )}
+              </div>
+            )
+          }
+        ]
         : []),
       {
         accessor: 'detail',
@@ -448,7 +448,7 @@ const CreateInvoiceDialog = ({
           toastConfig.setToastConfig(error);
         });
     } else {
-      if (checkRequiredFields && requiredFieldsToFill?.length > 0) {
+      if (checkRequiredFields && pendingRequiredFields?.length > 0) {
         setOpenManageInvoiceDialog(true);
       } else {
         createInvoice(invoiceData, extraInvoiceData);
@@ -458,13 +458,10 @@ const CreateInvoiceDialog = ({
 
   const isDisabledApply = () => {
     if (!selectedRecords?.length) return true;
-
     if (!dayjs(endDate)?.isValid()) return true;
-
     if (resource === sidebarResource.sublease && selectedRecords?.every((r) => r?.type === MATERIAL_TYPE.serializedAsset)) {
       return true;
     }
-
     return isDateApplying;
   };
 
@@ -586,7 +583,7 @@ const CreateInvoiceDialog = ({
           onClose={() => {
             setOpenInvoiceDataDialog(false);
           }}
-          invoiceFields={[...invoiceResourceData?.policy?.fieldTicketInvoiceFields, ...(requiredFieldsToFill || [])]}
+          invoiceFields={[...invoiceResourceData?.policy?.fieldTicketInvoiceFields, ...(pendingRequiredFields || [])]}
           onSuccess={(data) => {
             handleCreateInvoice(data, false);
           }}

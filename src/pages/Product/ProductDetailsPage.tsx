@@ -188,23 +188,29 @@ const ProductDetailsPage = () => {
 
   const getWarehouses = () => {
     setLoadingWarehouse(true);
-    axiosInstance().get(`${productInventory.api}/product/${id}`).then(async ({ data: { data } }) => {
-      setProductInventoryData(data);
-      setLoadingWarehouse(false);
-    }).catch((err) => {
-      setLoadingWarehouse(false);
-      toastConfig.setToastConfig(err);
-    });
-    if (productData?.serializedProduct) {
-      axiosInstance().get(`product/${id}/warehouse`).then(async ({ data: { data } }) => {
-        data = data?.filter((e) => e.warehouse);
-        setProductWarehouseData(data);
-        setInventoriesData(data);
+    axiosInstance()
+      .get(`${productInventory.api}/product/${id}`)
+      .then(async ({ data: { data } }) => {
+        setProductInventoryData(data);
         setLoadingWarehouse(false);
-      }).catch((err) => {
+      })
+      .catch((err) => {
         setLoadingWarehouse(false);
         toastConfig.setToastConfig(err);
       });
+    if (productData?.serializedProduct) {
+      axiosInstance()
+        .get(`product/${id}/warehouse`)
+        .then(async ({ data: { data } }) => {
+          data = data?.filter((e) => e.warehouse);
+          setProductWarehouseData(data);
+          setInventoriesData(data);
+          setLoadingWarehouse(false);
+        })
+        .catch((err) => {
+          setLoadingWarehouse(false);
+          toastConfig.setToastConfig(err);
+        });
     }
   };
 

@@ -288,10 +288,11 @@ const DiagramNew = ({
                   <ThemeButton
                     buttonType="theme"
                     onClick={handleClickNew}
-                    iconForMobile={<Add />}
+                    iconForMobile={<Add fontSize="small" />}
                     mobileTooltip="New"
+                    startIcon={<Add fontSize="small" />}
                   >
-                    <Add /> New
+                    New
                   </ThemeButton>
                   <Menu
                     id="new-menu"
