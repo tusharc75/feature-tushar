@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Designer } from '@pdfme/ui';
 import { getFonts, getPlugins } from './plugin';
 import { Template } from '@pdfme/common';
-
+import { PLUGIN } from 'src/constants/helpers';
 interface PdfEditorProps {
   template?: any;
   onTemplateChange?: (tpl: Template) => void;
@@ -20,7 +20,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
   const [savedRange, setSavedRange] = useState<Range | null>(null);
   const [fontsReady, setFontsReady] = useState(false);
   const [fontObjects, setFontObjects] = useState({});
-
+  const activeInputRef = useRef<EventTarget | null>(null);
   const plugins = useMemo(() => getPlugins(variables, resourceTables), [variables, resourceTables]);
 
   useEffect(() => {
@@ -66,9 +66,16 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
         const rect = target.getBoundingClientRect?.();
         if (rect) {
           setDropdownPos({ x: rect.left - 75, y: rect.bottom - 250 });
-          const selection = window.getSelection();
-          if (selection && selection.rangeCount > 0) {
-            setSavedRange(selection.getRangeAt(0).cloneRange());
+          const sel = window.getSelection();
+          const activeGrid = sel?.anchorNode?.parentElement?.closest(`[plugin-type=${PLUGIN.CUSTOM_TABLE}]`);
+          if (activeGrid) {
+            activeInputRef.current = e.target;
+          }
+          else {
+            const selection = window.getSelection();
+            if (selection && selection.rangeCount > 0) {
+              setSavedRange(selection.getRangeAt(0).cloneRange());
+            }
           }
         }
       }
@@ -86,8 +93,21 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
     };
   }, [noOfPages, plugins, fontsReady]);
 
+  // const handleSelect = (value: string) => {
+
+  // };
+
   const handleSelect = (value: string) => {
-    if (savedRange) {
+    if (activeInputRef.current !== null) {
+      const event = new CustomEvent('insert-variable', {
+        detail: { value: `{${value}}` },
+        bubbles: true,
+        cancelable: true,
+      });
+      activeInputRef.current.dispatchEvent(event);
+      activeInputRef.current = null;
+    }
+    else if (savedRange) {
       const selection = window.getSelection();
       selection?.removeAllRanges();
       selection?.addRange(savedRange);

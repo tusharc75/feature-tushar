@@ -2,6 +2,7 @@ import { text, image, table, line, rectangle } from '@pdfme/schemas';
 import type { Plugin, Schema } from '@pdfme/common';
 import RobotoRegular from '../../../assets/font/Roboto-Regular.ttf';
 import RobotoBold from '../../../assets/font/Roboto-Bold.ttf';
+import myGridPlugin from './newcustomtable';
 
 type DesignerPluginSchema = Schema & {
     width: number;
@@ -18,21 +19,18 @@ type DesignerExpectedPlugin = Plugin<DesignerPluginSchema>;
 export const getPlugins = (variables: string[], resourceTables: any): Record<string, DesignerExpectedPlugin> => {
 
     const customTablePlugin = {
-        ...table,
+        ...myGridPlugin,
         propPanel: {
-            ...table.propPanel,
+            ...myGridPlugin.propPanel,
             defaultSchema: {
-                ...table.propPanel.defaultSchema,
-                content: '[]',
-                showHead: true,
-                head: ['col1', 'col2', 'col3'],
-                headWidthPercentages: [30, 30, 40],
+                ...myGridPlugin.propPanel.defaultSchema,
+                tableType: resourceTables?.length ? resourceTables[0].value : '',
             },
             schema: (props) => {
                 const baseSchema =
-                    typeof table.propPanel.schema === 'function'
-                        ? table.propPanel.schema(props)
-                        : { ...table.propPanel.schema };
+                    typeof myGridPlugin.propPanel.schema === 'function'
+                        ? myGridPlugin.propPanel.schema(props)
+                        : { ...myGridPlugin.propPanel.schema };
                 const selectedTableName = props.activeSchema.tableType;
                 const headerOptions = resourceTables?.find((e) => e.value === selectedTableName)?.fields || [];
                 const head = props.activeSchema.head || [];
@@ -50,50 +48,6 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
                         },
                     },
                     ...baseSchema,
-                    headStyles: {
-                        type: 'object',
-                        title: 'Head Styles',
-                        properties: baseSchema.headStyles?.properties || {},
-                        props: {
-                            style: {
-                                backgroundColor: '#ffffff',
-                                marginBottom: '25px',
-                            },
-                        },
-                    },
-                    bodyStyles: {
-                        type: 'object',
-                        title: 'Body Styles',
-                        properties: baseSchema.bodyStyles?.properties || {},
-                        props: {
-                            style: {
-                                backgroundColor: '#ffffff',
-                                marginBottom: '25px',
-                            },
-                        },
-                    },
-                    tableStyles: {
-                        type: 'object',
-                        title: 'Table Styles',
-                        properties: baseSchema.tableStyles?.properties || {},
-                        props: {
-                            style: {
-                                backgroundColor: '#ffffff',
-                                marginBottom: '25px',
-                            },
-                        },
-                    },
-                    columnStyles: {
-                        type: 'object',
-                        title: 'Column Styles',
-                        properties: baseSchema.columnStyles?.properties || {},
-                        props: {
-                            style: {
-                                backgroundColor: '#ffffff',
-                                marginBottom: '25px',
-                            },
-                        },
-                    },
                 };
 
                 head.forEach((val: string, i: number) => {
