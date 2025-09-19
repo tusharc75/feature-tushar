@@ -298,7 +298,9 @@ const LeadDetailsPage = () => {
     setShowAtLast(false);
     const currentStep = activeStep + 1;
 
-    if (currentStep == steps.length - 1 && showAdditionalField) {
+    let tempActiveStep = data && data?.isSetBackStep ? currentStep - 1 : currentStep < steps.length - 1 ? currentStep + 1 : currentStep;
+
+    if (tempActiveStep == steps.length - 1 && showAdditionalField) {
       setOpenAdditionalDialog(true);
     } else {
       let processFieldName = '';
@@ -311,7 +313,7 @@ const LeadDetailsPage = () => {
 
       const updatedData = {
         ...getObjKeysWithValues(leadData, leadFieldData),
-        [processFieldName]: steps[currentStep].text,
+        [processFieldName]: steps[tempActiveStep].text,
         _id: leadData._id
       };
 
