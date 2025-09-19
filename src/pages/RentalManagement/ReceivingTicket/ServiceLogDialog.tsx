@@ -271,7 +271,7 @@ const ServiceLogDialog = ({
     const api =
       resource === sidebarResource.fieldTicket
         ? `${fieldTicket.api}/${referenceId}/material/service-log`
-        : `${rentalManagement.api}/productpackage/${referenceId}/${id}/service-log`;
+        : `${rentalManagement.api}/productpackage/${referenceId}/service-log`;
     axiosInstance()
       .delete(api, { data })
       .then((response) => {
