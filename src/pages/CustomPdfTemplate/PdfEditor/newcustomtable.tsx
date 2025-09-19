@@ -72,7 +72,7 @@ const distributeEqual = (cols: number) => {
 
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 
-const myGridPlugin: Plugin<MyGridSchema> = {
+const CustomTablePlugin: Plugin<MyGridSchema> = {
     ui: async (props: UIRenderProps<MyGridSchema>) => {
         const { rootElement, onChange, mode, schema } = props;
         const incomingRows = (schema?.rows as string[][]) ?? [['']];
@@ -768,7 +768,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
     }
 };
 
-export default myGridPlugin;
+export default CustomTablePlugin;
 
 function initializeResizer(
     resEl: HTMLElement,

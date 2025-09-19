@@ -2,7 +2,7 @@ import { text, image, table, line, rectangle } from '@pdfme/schemas';
 import type { Plugin, Schema } from '@pdfme/common';
 import RobotoRegular from '../../../assets/font/Roboto-Regular.ttf';
 import RobotoBold from '../../../assets/font/Roboto-Bold.ttf';
-import myGridPlugin from './newcustomtable';
+import CustomTablePlugin from './newcustomtable';
 
 type DesignerPluginSchema = Schema & {
     width: number;
@@ -18,19 +18,19 @@ type DesignerExpectedPlugin = Plugin<DesignerPluginSchema>;
 
 export const getPlugins = (variables: string[], resourceTables: any): Record<string, DesignerExpectedPlugin> => {
 
-    const customTablePlugin = {
-        ...myGridPlugin,
+    const TablePlugin = {
+        ...CustomTablePlugin,
         propPanel: {
-            ...myGridPlugin.propPanel,
+            ...CustomTablePlugin.propPanel,
             defaultSchema: {
-                ...myGridPlugin.propPanel.defaultSchema,
+                ...CustomTablePlugin.propPanel.defaultSchema,
                 tableType: resourceTables?.length ? resourceTables[0].value : '',
             },
             schema: (props) => {
                 const baseSchema =
-                    typeof myGridPlugin.propPanel.schema === 'function'
-                        ? myGridPlugin.propPanel.schema(props)
-                        : { ...myGridPlugin.propPanel.schema };
+                    typeof CustomTablePlugin.propPanel.schema === 'function'
+                        ? CustomTablePlugin.propPanel.schema(props)
+                        : { ...CustomTablePlugin.propPanel.schema };
                 const selectedTableName = props.activeSchema.tableType;
                 const headerOptions = resourceTables?.find((e) => e.value === selectedTableName)?.fields || [];
                 const head = props.activeSchema.head || [];
@@ -142,7 +142,7 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
     const plugins: Record<string, DesignerExpectedPlugin> = {
         Text: customTextPlugin as DesignerExpectedPlugin,
         Variable: customVariablePlugin as unknown as DesignerExpectedPlugin,
-        Table: customTablePlugin as unknown as DesignerExpectedPlugin,
+        Table: TablePlugin as unknown as DesignerExpectedPlugin,
         Image: image as DesignerExpectedPlugin,
         Line: line as DesignerExpectedPlugin,
         Rectangle: rectangle as DesignerExpectedPlugin,
