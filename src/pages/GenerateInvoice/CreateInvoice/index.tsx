@@ -130,27 +130,27 @@ const CreateInvoiceDialog = ({
       },
       ...(resource === sidebarResource.fieldTicket
         ? [
-          {
-            accessor: 'fieldTicketNumber',
-            Header: 'Field Ticket',
-            disabled: true,
-            Cell: ({ row }) => (
-              <div className="flex items-center gap-2">
-                <p className="text-truncate">{row.original.fieldTicketNumber}</p>
-                {permissions?.fieldTicket?.isRead && (
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                )}
-              </div>
-            )
-          }
-        ]
+            {
+              accessor: 'fieldTicketNumber',
+              Header: 'Field Ticket',
+              disabled: true,
+              Cell: ({ row }) => (
+                <div className="flex items-center gap-2">
+                  <p className="text-truncate">{row.original.fieldTicketNumber}</p>
+                  {permissions?.fieldTicket?.isRead && (
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  )}
+                </div>
+              )
+            }
+          ]
         : []),
       {
         accessor: 'detail',
@@ -392,34 +392,7 @@ const CreateInvoiceDialog = ({
 
   const createInvoice = (values, extraInvoiceData) => {
     setUpdating(true);
-    let payload = {
-      resource: resource,
-      referenceIds: resourceData?.map((e) => e._id),
-      ...values
-    };
-    if (!isEmpty(extraInvoiceData)) {
-      payload = { ...payload, ...extraInvoiceData };
-    }
-    axiosInstance()
-      .post(`/generate-invoice/create`, payload)
-      .then(({ data }) => {
-        setUpdating(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        onSuccess();
-      })
-      .catch((error) => {
-        setUpdating(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const handleCreateInvoice = (extraInvoiceData = null, checkRequiredFields = true) => {
     if (progressiveBilling) {
-      setUpdating(true);
       rowsApplied?.forEach((element) => {
         delete element?.index;
         delete element?.detail;
@@ -436,8 +409,8 @@ const CreateInvoiceDialog = ({
       axiosInstance()
         .post(`/generate-invoice/create-progressive`, {
           resource: resource,
-          referenceId: resourceData[0]?._id,
-          material: rowsApplied
+          material: rowsApplied,
+          ...values
         })
         .then(() => {
           setUpdating(false);
@@ -448,11 +421,37 @@ const CreateInvoiceDialog = ({
           toastConfig.setToastConfig(error);
         });
     } else {
-      if (checkRequiredFields && pendingRequiredFields?.length > 0) {
-        setOpenManageInvoiceDialog(true);
-      } else {
-        createInvoice(invoiceData, extraInvoiceData);
+      let payload = {
+        resource: resource,
+        referenceIds: resourceData?.map((e) => e._id),
+        ...values
+      };
+      if (!isEmpty(extraInvoiceData)) {
+        payload = { ...payload, ...extraInvoiceData };
       }
+      axiosInstance()
+        .post(`/generate-invoice/create`, payload)
+        .then(({ data }) => {
+          setUpdating(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          onSuccess();
+        })
+        .catch((error) => {
+          setUpdating(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
+  const handleCreateInvoice = (extraInvoiceData = null, checkRequiredFields = true) => {
+    if (checkRequiredFields && pendingRequiredFields?.length > 0) {
+      setOpenManageInvoiceDialog(true);
+    } else {
+      createInvoice(invoiceData, extraInvoiceData);
     }
   };
 
