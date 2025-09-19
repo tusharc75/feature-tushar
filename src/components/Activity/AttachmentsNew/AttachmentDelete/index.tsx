@@ -114,7 +114,7 @@ const AttachmentDelete = ({ deleteRequest = false, attachments = [], onClose, on
     ) : (
       <ConfirmationDialog
         open={true}
-        message={`Are you sure you want to delete ${attachments?.map((e) => e?.name).join(', ')}?`}
+        message={`Are you sure you want to send this item to the recycle bin?`}
         okBtnLoading={isSubmitting}
         onClose={onClose}
         onOk={() => {

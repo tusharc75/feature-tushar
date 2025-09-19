@@ -1,5 +1,5 @@
 import { ComponentCommonProps } from 'src/pages/UserManual/type';
-import { ManualContentNew } from 'src/pages/UserManualNew/ManualContentNew';
+import ManualContentNew from 'src/pages/UserManual/ManualContent';
 import ManualSidebarNew from 'src/pages/UserManualNew/ManualSidebarNew';
 
 const ManualLayoutNew = ({ state }: ComponentCommonProps) => {
