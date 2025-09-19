@@ -26,6 +26,7 @@ import { MdOutlineVisibility } from "react-icons/md";
 import PreviewDialog from "src/components/Activity/AttachmentsNew/PreviewDialog";
 import { TbEdit } from "react-icons/tb";
 import UpdateDetailsDialog from "src/components/Activity/AttachmentsNew/UpdateDetailsDialog";
+import { VITE_APP_DMS_URL } from "src/config";
 
 const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -329,7 +330,9 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
                 <div
                   className="flex items-center justify-center btn-view"
                   onClick={() => {
-                    window.open(`${import.meta.env.VITE_APP_DMS_URL}/document?resource=${resource}&referenceId=${referenceId}`, '_blank', 'noopener,noreferrer');
+                    const token = localStorage.getItem('token');
+                    const redirectUrl = `/document?resource=${encodeURIComponent(resource)}&referenceId=${encodeURIComponent(referenceId)}`;
+                    window.open(`${VITE_APP_DMS_URL}/oauth?token=${encodeURIComponent(token)}&redirect=${encodeURIComponent(redirectUrl)}`, '_blank', 'noopener,noreferrer');
                   }}>
                   <div className="flex items-center gap-1 p-3">
                     <FaEye /> View All

@@ -216,10 +216,11 @@ const DiagramNew = ({
       });
   };
 
-  const handleClickNew = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClickFileOrFolderUpload = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleCloseNew = () => {
+
+  const handleCloseFileOrFolderUpload = () => {
     setAnchorEl(null);
   };
 
@@ -287,45 +288,13 @@ const DiagramNew = ({
                 <>
                   <ThemeButton
                     buttonType="theme"
-                    onClick={handleClickNew}
+                    onClick={handleClickFileOrFolderUpload}
                     iconForMobile={<Add fontSize="small" />}
                     mobileTooltip="New"
                     startIcon={<Add fontSize="small" />}
                   >
                     New
                   </ThemeButton>
-                  <Menu
-                    id="new-menu"
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={handleCloseNew}
-                    MenuListProps={{
-                      'aria-labelledby': 'new-button'
-                    }}
-                  >
-                    <MenuItem
-                      onClick={() => {
-                        setAttachemntDialog({ open: true, type: 'folder', data: null, isUpdate: false });
-                        handleCloseNew();
-                      }}
-                    >
-                      <ListItemIcon>
-                        <CreateNewFolderIcon color="primary" fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText>New Folder</ListItemText>
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        setAttachemntDialog({ open: true, type: 'file', data: null, isUpdate: false });
-                        handleCloseNew();
-                      }}
-                    >
-                      <ListItemIcon>
-                        <UploadFileIcon color="primary" fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText>File Upload</ListItemText>
-                    </MenuItem>
-                  </Menu>
                 </>
               )}
             </div>
@@ -355,24 +324,54 @@ const DiagramNew = ({
               {treeStructure?.length === 0 && (
                 <div className="mx-auto mt-4 h-full w-full rounded-md  border-2 border-dashed bg-transparent text-center">
                   <CiFileOn size={100} className="mx-auto mt-5 block select-none text-gray-400 dark:text-gray-500" />
-                  <p className="mb-5 select-none text-sm text-gray-400 dark:text-gray-500">No files uploaded</p>
+                  <p className="mb-5 select-none text-sm text-gray-400 dark:text-gray-500">No files or folders uploaded</p>
                   <span className="mx-auto block">
                     <ThemeButton
                       buttonType="theme"
                       startIcon={<Add />}
-                      onClick={() => {
-                        setAttachemntDialog({ open: true, type: 'file', data: null, isUpdate: false });
-                      }}
+                      onClick={handleClickFileOrFolderUpload}
                     >
                       Add
                     </ThemeButton>
                   </span>
-                  <p className="mb-5 mt-2 text-center text-sm text-gray-500 dark:text-gray-300">Click Add to upload files</p>
+                  <p className="mb-5 mt-2 text-center text-sm text-gray-500 dark:text-gray-300">Click Add to upload files or folders</p>
                 </div>
               )}
             </div>
           </Box>
         </Box>
+        <Menu
+          id="file-folder-menu"
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleCloseFileOrFolderUpload}
+          MenuListProps={{
+            'aria-labelledby': 'new-button'
+          }}
+        >
+          <MenuItem
+            onClick={() => {
+              setAttachemntDialog({ open: true, type: 'folder', data: null, isUpdate: false });
+              handleCloseFileOrFolderUpload();
+            }}
+          >
+            <ListItemIcon>
+              <CreateNewFolderIcon color="primary" fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>New Folder</ListItemText>
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setAttachemntDialog({ open: true, type: 'file', data: null, isUpdate: false });
+              handleCloseFileOrFolderUpload();
+            }}
+          >
+            <ListItemIcon>
+              <UploadFileIcon color="primary" fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>File Upload</ListItemText>
+          </MenuItem>
+        </Menu>
       </Box>
       {attachemntDialog.open && (
         <Dialog
