@@ -97,11 +97,11 @@ const ServiceLogDialog = ({
         return (
           <>
             {row?.original?.startDate ? (
-              <>
+              <div>
                 <h5 className="text-truncate" title={`${displayDate(row?.original?.startDate)}`}>
                   {displayDate(row?.original?.startDate)}
                 </h5>
-              </>
+              </div>
             ) : (
               <NoDataCell />
             )}
@@ -119,11 +119,11 @@ const ServiceLogDialog = ({
         return (
           <>
             {row?.original?.endDate ? (
-              <>
+              <div>
                 <h5 className="text-truncate" title={`${displayDate(row?.original?.endDate)}`}>
                   {displayDate(row?.original?.endDate)}
                 </h5>
-              </>
+              </div>
             ) : (
               <NoDataCell />
             )}
@@ -139,14 +139,16 @@ const ServiceLogDialog = ({
       disableSortBy: true,
       Cell: ({ row }) =>
         !isEmpty(row?.original?.startedBy) ? (
-          <Link
-            className="link text-truncate"
-            title={row?.original?.startedBy?.optionLabel}
-            to={`${routes.userDetail.path}/${row?.original?.startedBy?.optionValue}`}
-            target={'_blank'}
-          >
-            {row?.original?.startedBy?.optionLabel}
-          </Link>
+          <div>
+            <Link
+              className="link text-truncate"
+              title={row?.original?.startedBy?.optionLabel}
+              to={`${routes.userDetail.path}/${row?.original?.startedBy?.optionValue}`}
+              target={'_blank'}
+            >
+              {row?.original?.startedBy?.optionLabel}
+            </Link>
+          </div>
         ) : (
           <NoDataCell />
         )
@@ -159,14 +161,16 @@ const ServiceLogDialog = ({
       disableSortBy: true,
       Cell: ({ row }) =>
         !isEmpty(row?.original?.endedBy) ? (
-          <Link
-            className="link text-truncate"
-            title={row?.original?.endedBy?.optionLabel}
-            to={`${routes.userDetail.path}/${row?.original?.endedBy?.optionValue}`}
-            target={'_blank'}
-          >
-            {row?.original?.endedBy?.optionLabel}
-          </Link>
+          <div>
+            <Link
+              className="link text-truncate"
+              title={row?.original?.endedBy?.optionLabel}
+              to={`${routes.userDetail.path}/${row?.original?.endedBy?.optionValue}`}
+              target={'_blank'}
+            >
+              {row?.original?.endedBy?.optionLabel}
+            </Link>
+          </div>
         ) : (
           <NoDataCell />
         )

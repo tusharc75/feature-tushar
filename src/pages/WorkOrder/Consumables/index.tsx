@@ -17,7 +17,7 @@ import {
 } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Autocomplete, IconButton, Menu, MenuItem, TextField } from '@mui/material';
+import { Autocomplete, IconButton, MenuItem, TextField } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -853,7 +853,7 @@ const Consumables = ({
                   }))
               );
             }}
-            serialized={workOrderData?.type === WORK_ORDER_TYPE.repairOrder ? false : null}
+            serialized={materialSubType === MATERIAL_SUB_TYPE.childItem ? true : false}
             extraDeepFilter={getExtraDeepFilters()}
             isSubmitting={isSubmitting}
           />

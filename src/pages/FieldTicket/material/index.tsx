@@ -202,20 +202,6 @@ const Material = ({
         Cell: ({ row }) =>
         (<div className="d-flex align-items-center gap-2">
           <h5 className="text-truncate">{row?.original?.index}</h5>
-          {row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length ? (
-            <HtmlTooltip title={'View Logs'}>
-              <span>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setServiceLogDialog({ open: true, data: row?.original });
-                  }}
-                >
-                  <VisibilityIcon fontSize="small" color="primary" />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-          ) : null}
         </div>),
         Footer: () => {
           return <>Total</>;
@@ -367,8 +353,8 @@ const Material = ({
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 120,
-      width: 120,
+      minWidth: 130,
+      width: 130,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -389,6 +375,20 @@ const Material = ({
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
+            {row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length ? (
+              <HtmlTooltip title={'View Logs'}>
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setServiceLogDialog({ open: true, data: row?.original });
+                    }}
+                  >
+                    <VisibilityIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            ) : null}
             {permissions?.attachment?.isRead && row?.original?.type != MATERIAL_TYPE.manualEntry && !isOffline && (
               <HtmlTooltip title="Attachments">
                 <IconButton
@@ -1489,7 +1489,7 @@ const Material = ({
           onClose={() => {
             setServiceLogDialog({ open: false, data: null });
           }}
-          onSuccess={() => { 
+          onSuccess={() => {
             fetchMaterial();
           }}
           allowedToEdit={allowedToEdit}
