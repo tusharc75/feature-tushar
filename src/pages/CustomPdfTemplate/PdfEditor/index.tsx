@@ -93,10 +93,6 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
     };
   }, [noOfPages, plugins, fontsReady]);
 
-  // const handleSelect = (value: string) => {
-
-  // };
-
   const handleSelect = (value: string) => {
     if (activeInputRef.current !== null) {
       const event = new CustomEvent('insert-variable', {
