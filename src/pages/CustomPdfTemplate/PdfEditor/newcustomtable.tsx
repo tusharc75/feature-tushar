@@ -65,7 +65,6 @@ const focusCellIfNeeded = (root: HTMLElement) => {
 const distributeEqual = (cols: number) => {
     const base = Math.floor((10000 / cols)) / 100;
     const arr = Array(cols).fill(base);
-    // adjust last to make sum 100
     const sum = arr.reduce((a, b) => a + b, 0);
     arr[arr.length - 1] += (100 - sum);
     return arr;
@@ -93,9 +92,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             };
             stateMap.set(rootElement, state);
         } else {
-            // update cols/colWidths when incoming schema changes
             if (incomingCols !== state.cols) {
-                // adjust rows to new cols
                 state.cols = incomingCols;
                 state.rows = state.rows.map(r => {
                     const copy = [...r];
@@ -103,25 +100,20 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                     if (copy.length > state!.cols) copy.length = state!.cols;
                     return copy;
                 });
-                // adjust head length to match cols
                 state.head = state.head ?? [];
                 while (state.head.length < state.cols) state.head.push('');
                 if (state.head.length > state.cols) state.head.length = state.cols;
-                // adjust colWidths: if incoming provided use that, otherwise distribute equally
                 state.colWidths = (schema?.colWidths && Array.isArray(schema.colWidths)) ? JSON.parse(JSON.stringify(schema.colWidths)) : distributeEqual(state.cols);
             }
-            // update rows if shape changed from outside
             if (incomingRows.length !== state.rows.length || incomingRows.some((r, i) => !state!.rows[i] || state!.rows[i].length !== r.length)) {
                 state.rows = JSON.parse(JSON.stringify(incomingRows));
             }
-            // update head if changed from outside
             if (Array.isArray(schema?.head)) {
                 const incomingH = JSON.parse(JSON.stringify(schema!.head));
                 if (JSON.stringify(incomingH) !== JSON.stringify(state.head)) {
                     state.head = incomingH;
                 }
             }
-            // update colWidths if changed from outside
             if (Array.isArray(schema?.colWidths)) {
                 const incomingW = JSON.parse(JSON.stringify(schema!.colWidths));
                 if (JSON.stringify(incomingW) !== JSON.stringify(state.colWidths)) {
@@ -250,7 +242,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
 
                 cell.appendChild(input);
 
-                // add resizer for header cells (except last)
                 if (colIndex < state.cols - 1) {
                     const res = document.createElement('div');
                     Object.assign(res.style, {
@@ -487,16 +478,13 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                     copy.unshift('');
                     return copy;
                 });
-                // update head
                 state!.head = state!.head ?? [];
                 state!.head.unshift('');
-                // update colWidths: insert a new width splitting the column at index 0
                 state!.colWidths = state!.colWidths ?? distributeEqual(state!.cols);
                 const insertAt = 0;
                 const newWidth = state!.colWidths[insertAt] ? state!.colWidths[insertAt] / 2 : (100 / state!.cols);
                 state!.colWidths[insertAt] = newWidth;
                 state!.colWidths.splice(insertAt, 0, newWidth);
-                // normalize sum -> 100
                 const sum = state!.colWidths.reduce((a, b) => a + b, 0);
                 state!.colWidths = state!.colWidths.map(w => (w / sum) * 100);
                 onChange?.([
@@ -518,7 +506,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                 state!.rows = state!.rows.map(r => r.slice(1));
                 state!.head = (state!.head ?? []).slice(1);
                 state!.colWidths = (state!.colWidths ?? []).slice(1);
-                // normalize
                 const sum = state!.colWidths.reduce((a, b) => a + b, 0) || 1;
                 state!.colWidths = state!.colWidths.map(w => (w / sum) * 100);
                 onChange?.([
@@ -559,12 +546,10 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                 });
                 state!.head = state!.head ?? [];
                 while (state!.head.length < state!.cols) state!.head.push('');
-                // append equal share to colWidths
                 state!.colWidths = state!.colWidths ?? distributeEqual(state!.cols);
                 const newW = 100 / state!.cols;
                 state!.colWidths = state!.colWidths.map(w => (w / 100) * (100 - newW));
                 state!.colWidths.push(newW);
-                // normalize
                 const sum = state!.colWidths.reduce((a, b) => a + b, 0);
                 state!.colWidths = state!.colWidths.map(w => (w / sum) * 100);
                 onChange?.([
@@ -625,12 +610,11 @@ const myGridPlugin: Plugin<MyGridSchema> = {
         const scaledWidth = (width ?? 100) * scaleX;
         const scaledHeight = (height ?? 50) * scaleY;
         const x = scaledX;
-        const y = pageHeight - scaledY - scaledHeight; // bottom-left y
+        const y = pageHeight - scaledY - scaledHeight;
 
         const visualRows = rows.length + (showHeader ? 1 : 0);
         const cellHeight = scaledHeight / Math.max(1, visualRows);
 
-        // compute cell widths: if colWidths provided use percentages, else equal widths
         const widths = (Array.isArray(colWidths) && colWidths.length === cols) ? colWidths : distributeEqual(cols);
         const cellWidthsPx = widths.map(w => (w / 100) * scaledWidth);
 
@@ -658,13 +642,11 @@ const myGridPlugin: Plugin<MyGridSchema> = {
         page.drawLine({ start: { x, y }, end: { x: x, y: y + scaledHeight }, thickness: tableBorderWidth, color: tableColor });
         page.drawLine({ start: { x: x + scaledWidth, y }, end: { x: x + scaledWidth, y: y + scaledHeight }, thickness: tableBorderWidth, color: tableColor });
 
-        // horizontal interior lines
         for (let i = 1; i < visualRows; i++) {
             const lineY = y + scaledHeight - i * cellHeight;
             page.drawLine({ start: { x, y: lineY }, end: { x: x + scaledWidth, y: lineY }, thickness: colBorderWidth, color: colColor });
         }
 
-        // vertical interior lines using cellWidthsPx
         let accX = x;
         for (let i = 0; i < cols - 1; i++) {
             accX += cellWidthsPx[i];
@@ -676,7 +658,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
         const textColorStr = typeof schema?.textColor === 'string' ? schema.textColor : '#000000';
         const textColor = parseColor(textColorStr);
 
-        // draw header labels (topmost visual row)
         if (showHeader && Array.isArray(head)) {
             let acc = x;
             for (let colIndex = 0; colIndex < cols; colIndex++) {
@@ -692,7 +673,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             }
         }
 
-        // draw body rows
         for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
             const row = rows[rowIndex];
             const visualRowIndex = rowIndex + (showHeader ? 1 : 0);
@@ -716,13 +696,12 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             showHeader: {
                 title: 'Show Header',
                 type: 'boolean',
-                default: false,
-                widget: 'switch'
+                widget: 'switch',
+                default: false
             },
             cols: {
                 title: 'Columns',
                 type: 'number',
-                span: 24,
                 min: 1,
                 max: 20
             },
