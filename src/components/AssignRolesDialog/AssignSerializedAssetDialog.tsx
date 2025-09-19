@@ -363,7 +363,7 @@ const AssignSerializedAssetDialog = ({ reference, customTitle = null, referenceD
           }
           setShowTransferAssetDialog({ open: true, data: null });
         }}
-        disabled={isAssigning}
+        disabled={isAssigning || products?.some((d) => d?.qty < 0)}
         isLoading={isAssigning}
       >
         {`Transfer to ${warehouseOption.find(w => w.optionValue === referenceData.warehouse)?.optionLabel || 'selected warehouse'}`}
