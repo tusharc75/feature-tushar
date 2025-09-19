@@ -24,7 +24,6 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
             ...CustomTablePlugin.propPanel,
             defaultSchema: {
                 ...CustomTablePlugin.propPanel.defaultSchema,
-                tableType: resourceTables?.length ? resourceTables[0].value : '',
             },
             schema: (props) => {
                 const baseSchema =
@@ -49,7 +48,6 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
                     },
                     ...baseSchema,
                 };
-
                 head.forEach((val: string, i: number) => {
                     schemaWithDropdowns[`head.${i}`] = {
                         title: `Header ${i + 1}`,
