@@ -7,7 +7,6 @@ interface MyGridSchema extends Schema {
     rows: string[][];
     cols: number;
     basePdf?: { width: number; height: number };
-    // optional persisted sizes
     colWidths?: number[]; // px
     rowHeights?: number[]; // px
 }
@@ -16,8 +15,8 @@ const stateMap = new WeakMap<HTMLElement, {
     rows: string[][];
     cols: number;
     focusedId?: string | null;
-    colWidths?: number[]; // px per col
-    rowHeights?: number[]; // px per row
+    colWidths?: number[];
+    rowHeights?: number[];
 }>();
 
 const stopPropagationFor = (el: HTMLElement | HTMLTextAreaElement) => {
@@ -1034,7 +1033,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             position: { x: 50, y: 500 },
             width: 30,
             height: 20,
-            rows: [['', '']],
+            rows: [['', ''], ['', '']],
             cols: 2,
             tableBorderWidth: 1,
             tableBorderColor: '#000000',
@@ -1048,3 +1047,4 @@ const myGridPlugin: Plugin<MyGridSchema> = {
 };
 
 export default myGridPlugin;
+
