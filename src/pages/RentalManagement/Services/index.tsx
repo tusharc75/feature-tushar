@@ -42,7 +42,7 @@ import Technicians from './Technicians';
 import { FiExternalLink } from 'react-icons/fi';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getCostPriceConditions, getCostPriceValue, getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
@@ -549,15 +549,19 @@ const Services = ({
       }
       material.push(element);
     });
-    if (material.filter((d) => d.listPrice === null || d.listPrice === undefined || d.listPrice === 0).length === 0) {
-      AddMaterial(material, []);
+    let priceData: any = [];
+    if (material?.filter((d) => d?.listPrice === null || d?.listPrice === undefined || d?.listPrice === 0)?.length === 0) {
     } else {
-      let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, material, PRICING_SETUP_TYPE.rent);
-      AddMaterial(material, priceData);
+      priceData = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, material, PRICING_SETUP_TYPE.rent);
     }
+    let costPriceData: any= null;
+    if (user?.user?.brandPolicy?.materialCostPrice) {
+      costPriceData = await getCostPriceConditions(material, material[0]?.type);
+    }
+    AddMaterial(material, priceData, costPriceData);
   };
 
-  const AddMaterial = async (material, priceData) => {
+  const AddMaterial = async (material, priceData, costPriceData= null) => {
     const tempMaterial = [...material];
     if (priceData) {
       tempMaterial.forEach((element) => {
@@ -570,6 +574,12 @@ const Services = ({
           const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields, assetPolicyData?.inUseSubStatus);
           Object.assign(element, calValues);
         }
+      });
+    }
+    if (costPriceData) {
+      tempMaterial.forEach((element) => {
+        const calValues = getCostPriceValue(element, costPriceData, rentalManagementData?.currency, allFields);
+        Object.assign(element, calValues);
       });
     }
     axiosInstance()

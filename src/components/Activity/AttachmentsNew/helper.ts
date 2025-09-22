@@ -99,6 +99,9 @@ export const getTitle = (attachments: any[], user: any) => {
       : 'Delete Request'
 }
 
+export const IMAGE_EXTENSIONS = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
+export const PDF_EXTENSION = ['pdf'];
+
 export const download = async (file, toastConfig) => {
   toastConfig.setToastConfig({
     open: true,

@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { camelCase, isArray, uniqBy } from 'lodash';
+import { camelCase, isArray, isEmpty, uniqBy } from 'lodash';
 import { getObjKeysWithValues, getObjKeys, yupSchema, fieldLabelToFieldName, PRICING_SETUP_TYPE, sidebarResource } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '..//../../constants/helpers';
@@ -21,7 +21,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
-import { getPricingConditions, getTaxList, getDurationBasedPrice } from 'src/components/PricingCondition';
+import { getPricingConditions, getTaxList, getDurationBasedPrice, getCostPriceConditions } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 interface EditDialogProps {
@@ -74,6 +74,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   const [priceMethodListConst, setPriceMethodListConst] = useState([]);
   const [priceConditionList, setPriceConditionList] = useState([]);
   const [priceMethodList, setPriceMethodList] = useState([]);
+  const [costPriceConditionList, setCostPriceConditionList] = useState([]);
 
   const [submitState, setSubmitState] = useState({ open: false, values: null });
 
@@ -233,6 +234,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       ], PRICING_SETUP_TYPE.rent);
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);
+
+      if (user?.user?.brandPolicy?.materialCostPrice) {
+        let costPriceData: any = await getCostPriceConditions([{ materialId: rowData.materialId }], rowData.type);
+        setCostPriceConditionList(costPriceData || []);
+
+      }
     }
   }
 
@@ -443,6 +450,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                               }
                                             }
                                             let priceValue;
+                                            let costPrice;
                                             if (field.fieldName === 'pricingCondition') {
                                               priceValue = priceConditionListConst?.find((d) => d.conditionId === value
                                                 && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']);
@@ -459,14 +467,35 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                                 d.unit === value
                                               );
                                             }
+                                            if (field.fieldName === 'pricingMethod') {
+                                              costPrice = costPriceConditionList?.find(
+                                                (d) =>
+                                                  d?.pricingMethod === camelCase(value) && d.unit === camelCase(values?.['unit']?.toLowerCase())
+                                              );
+                                            } else if (field.fieldName === 'unit') {
+                                              costPrice = costPriceConditionList?.find(
+                                                (d) =>
+                                                  d?.pricingMethod === camelCase(values?.['pricingMethod']) && d.unit === camelCase(value?.toLowerCase())
+                                              );
+                                            }
                                             let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
+                                            let costPriceFieldName = 'costPrice_' + rentalManagementData?.currency?.toLowerCase();
 
                                             const durationPrice = getDurationBasedPrice({ ...values, ...(field.fieldName === 'pricingCondition' ? { pricingCondition: value } : field.fieldName === 'pricingMethod' ? { pricingMethod: value } : { unit: value }), materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst)
-                                            const result = autoCalculateSpecificFields(
+                                            let result = autoCalculateSpecificFields(
                                               { [priceFieldName]: durationPrice || priceValue?.mrp || 0, [field.fieldName]: value },
                                               values,
                                               initialData.fields
                                             );
+
+                                            if (!isEmpty(costPrice)) {
+                                              const costPriceResult = autoCalculateSpecificFields(
+                                                { [costPriceFieldName]: costPrice?.price || 0 },
+                                                values,
+                                                initialData.fields
+                                              );
+                                              result = { ...costPriceResult, ...result };
+                                            }
 
                                             if (assetPolicyData?.inUseSubStatus?.length > 0) {
                                               assetPolicyData?.inUseSubStatus?.forEach(subStatus => {
@@ -476,6 +505,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                                 }
                                               });
                                             }
+
 
                                             if (Object.keys(result).length >= 1) {
                                               for (var x in result) {

@@ -5,7 +5,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { isMobile, isTablet } from "react-device-detect";
 import { CiFileOn } from "react-icons/ci";
 import axiosInstance from "src/axios/axiosInstance";
-import { allAttachmentsAreFromUser, download, getTitle, sortFileStructure, TNestedTree, unflatten } from "src/components/Activity/AttachmentsNew/helper";
+import { allAttachmentsAreFromUser, download, getTitle, IMAGE_EXTENSIONS, PDF_EXTENSION, sortFileStructure, TNestedTree, unflatten } from "src/components/Activity/AttachmentsNew/helper";
 import ManageFile from "src/components/Activity/AttachmentsNew/ManageFile";
 import ManageFolder from "src/components/Activity/AttachmentsNew/ManageFolder";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
@@ -31,9 +31,6 @@ import PdfEditor from './ShowPdfNew/PdfEditor'
 import { FolderIcon } from "src/assets/FolderIcon"
 import AttachmentDelete from "src/components/Activity/AttachmentsNew/AttachmentDelete";
 import DeleteRequest, { DeleteRequestIcon } from "src/components/Activity/AttachmentsNew/DeleteRequest";
-
-const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
-const pdfExtensions = ['pdf'];
 
 const DiagramNew = ({
   resource,
@@ -779,9 +776,9 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
       .then(({ data }) => {
         const ext = fileName?.split('.').pop().toLowerCase();
         let mimeType = 'application/octet-stream';
-        if (pdfExtensions?.includes(ext)) {
+        if (PDF_EXTENSION?.includes(ext)) {
           mimeType = 'application/pdf';
-        } else if (imageExtensions?.includes(ext)) {
+        } else if (IMAGE_EXTENSIONS?.includes(ext)) {
           mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
         }
         const blob = new Blob([data], { type: mimeType });
@@ -802,7 +799,7 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
       className='cursor-pointer px-[18px] py-[8px] mt-[15px] rounded-md  border border-solid'
       onClick={(e) => {
         e.stopPropagation()
-        if (imageExtensions.includes(extension)) {
+        if (IMAGE_EXTENSIONS.includes(extension)) {
           setOpen((prev) => !prev);
         } else {
           setSelectedFile(node)
@@ -831,7 +828,7 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
               <GetAppIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
-          {[...imageExtensions, ...pdfExtensions]?.includes(extension?.toLowerCase()) && (
+          {[...IMAGE_EXTENSIONS, ...PDF_EXTENSION]?.includes(extension?.toLowerCase()) && (
             <HtmlTooltip title={'Preview'}>
               <IconButton
                 size="small"
@@ -886,7 +883,7 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
               }}
             />
           )}
-          {imageExtensions.includes(extension) ? (
+          {IMAGE_EXTENSIONS.includes(extension) ? (
             <IconButton
               size="small"
               color="primary"
@@ -904,7 +901,7 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
         </div>
       </div>
       <Collapse in={open} unmountOnExit>
-        {imageExtensions.includes(extension) && (
+        {IMAGE_EXTENSIONS.includes(extension) && (
           <ImagePreview file={node} setSelectedFile={setSelectedFile} />
         )}
       </Collapse>
