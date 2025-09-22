@@ -163,3 +163,24 @@ export const getTaxById = async (taxCode: any) => {
   return data;
 }
 
+export const getCostPriceConditions = async (material: any[], type: string) => {
+  const {
+    data: { data }
+  } = await axiosInstance().post(`cost-price/get`, {
+    materialIds: material?.map((e) => e?.materialId),
+    type: type
+  });
+  return data;
+};
+
+export const getCostPriceValue = (row: any, costPriceData: any, currency: any, fields: any[]) => {
+  let rateList = [];
+  rateList = costPriceData?.filter((e) => e.materialId === row.materialId && e.type === row.type && e.unit === camelCase(row?.unit?.toLowerCase()) && e.pricingMethod === camelCase(row.pricingMethod));
+  if (rateList?.length) {
+    const priceFieldName = `costPrice_${currency?.toLowerCase()}`;
+    row[priceFieldName] = rateList[0].price;
+    const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateList[0].price }, row, fields);
+    Object.assign(row, calValues);
+  }
+  return row;
+};
