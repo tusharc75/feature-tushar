@@ -5,11 +5,17 @@ import ManageCostPrice from './ManageCostPrice';
 import axiosInstance from 'src/axios/axiosInstance';
 import { camelCase, isEmpty } from 'lodash';
 import Grid from '@mui/material/Grid2';
+import { formatAmountWithCurrency } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
 
 const CostPrice = ({ referenceData, type }) => {
   const [costPriceData, setCostPriceData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [manageCostPrice, setManageCostPrice] = useState(false);
+
+  const {
+    state: { user }
+  } = useData();
 
   useEffect(() => {
     if (!isEmpty(referenceData)) {
@@ -44,7 +50,10 @@ const CostPrice = ({ referenceData, type }) => {
             }}
             disabled={loading || !referenceData?.pricingMethod?.length || !referenceData?.unit?.length}
           >
-            <AddCircleOutline fontSize="small" color={!referenceData?.pricingMethod?.length || !referenceData?.unit?.length || loading ? 'disabled' : 'primary'} />
+            <AddCircleOutline
+              fontSize="small"
+              color={!referenceData?.pricingMethod?.length || !referenceData?.unit?.length || loading ? 'disabled' : 'primary'}
+            />
           </IconButton>
         </Box>
         <Box className="formdata-v1" style={{ minHeight: '250px', maxHeight: '400px', overflow: 'auto' }}>
@@ -68,7 +77,10 @@ const CostPrice = ({ referenceData, type }) => {
                         <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
                         {referenceData?.pricingMethod?.map((method, colIndex) => (
                           <td key={colIndex} className="border border-gray-300 px-4 py-2">
-                            <p>{costPriceData?.[`${camelCase(method)}_${unit.toLowerCase()}`]}</p>
+                            <p>
+                              {formatAmountWithCurrency(user?.user?.brandCurrency, costPriceData?.[`${camelCase(method)}_${camelCase(unit.toLowerCase())}`])
+                                ?.fullFormatAmount || ''}
+                            </p>
                           </td>
                         ))}
                       </tr>
