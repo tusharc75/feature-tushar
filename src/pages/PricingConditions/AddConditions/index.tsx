@@ -740,7 +740,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                           <p>
                             {formatAmountWithCurrency(
                               detailData?.currency,
-                              openConditionDetails?.data[`rent_${camelCase(method)}_${detailData?.currency?.toLowerCase()}_${unit.toLowerCase()}`]
+                              openConditionDetails?.data[`rent_${camelCase(method)}_${detailData?.currency?.toLowerCase()}_${camelCase(unit.toLowerCase())}`]
                             )?.fullFormatAmount || ''}
                           </p>
                         </td>

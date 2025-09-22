@@ -1,4 +1,4 @@
-import { Dialog, TextField } from '@mui/material';
+import { Dialog, InputAdornment, TextField } from '@mui/material';
 import { Formik } from 'formik';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -8,9 +8,9 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { CustomDialogTransition, MATERIAL_TYPE } from 'src/constants/helpers';
+import { CustomDialogTransition, getUniqueCurrencies, MATERIAL_TYPE } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import { camelCase } from 'lodash';
+import { camelCase, find, result } from 'lodash';
 
 const ManageCostPrice = ({ onClose, onSuccess, referenceData, costPriceData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -18,7 +18,7 @@ const ManageCostPrice = ({ onClose, onSuccess, referenceData, costPriceData }) =
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
-    state: { resources }
+    state: { resources, user }
   } = useData();
   const [initialValues, setInitialValues] = useState({});
 
@@ -31,7 +31,7 @@ const ManageCostPrice = ({ onClose, onSuccess, referenceData, costPriceData }) =
 
     referenceData?.unit?.forEach((unit) => {
       referenceData?.pricingMethod?.forEach((method) => {
-        const fieldName = `${camelCase(method)}_${unit.toLowerCase()}`;
+        const fieldName = `${camelCase(method)}_${camelCase(unit.toLowerCase())}`;
         data[fieldName] = costPriceData?.[fieldName] || 0;
       });
     });
@@ -46,11 +46,13 @@ const ManageCostPrice = ({ onClose, onSuccess, referenceData, costPriceData }) =
   const handleSubmit = async (values) => {
     setIsSubmitting(true);
     try {
+      const id = values?._id || '';
+      delete values?._id;
       const { data } = await axiosInstance().post('/cost-price', {
         costPrice: values,
         type: referenceData?.type,
         materialId: referenceData?._id,
-        ...(values?._id && { _id: values?._id })
+        ...(id && { _id: id })
       });
       toastConfig.setToastConfig({
         open: true,
@@ -120,7 +122,7 @@ const ManageCostPrice = ({ onClose, onSuccess, referenceData, costPriceData }) =
                       <tr key={rowIndex}>
                         <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
                         {referenceData?.pricingMethod?.map((method, colIndex) => {
-                          const __fieldName = `${camelCase(method)}_${unit.toLowerCase()}`;
+                          const __fieldName = `${camelCase(method)}_${camelCase(unit.toLowerCase())}`;
                           return (
                             <td key={colIndex} className="border border-gray-300 px-4 py-2">
                               <TextField
@@ -138,6 +140,16 @@ const ManageCostPrice = ({ onClose, onSuccess, referenceData, costPriceData }) =
                                 }}
                                 slotProps={{
                                   input: {
+                                    startAdornment: (
+                                      <InputAdornment position="start">
+                                        {result(
+                                          find(getUniqueCurrencies(), function (obj) {
+                                            return obj.currencyCode === user?.user?.brandCurrency;
+                                          }),
+                                          'symbolNative'
+                                        )}
+                                      </InputAdornment>
+                                    ),
                                     inputProps: { min: 0, max: 9999999999 }
                                   }
                                 }}
