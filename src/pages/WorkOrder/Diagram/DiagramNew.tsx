@@ -358,7 +358,7 @@ const DiagramNew = ({
             <ListItemIcon>
               <CreateNewFolderIcon color="primary" fontSize="small" />
             </ListItemIcon>
-            <ListItemText>New Folder</ListItemText>
+            <ListItemText>Add Folder</ListItemText>
           </MenuItem>
           <MenuItem
             onClick={() => {
