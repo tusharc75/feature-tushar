@@ -14,6 +14,7 @@ import { CustomDialogTransition, displayDateTime, fieldTicket, sidebarResource }
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findAll, objectStore } from 'src/constants/indexdbhelper';
 import { isArray } from 'lodash';
+import ShowAttachemntsDialog from 'src/pages/FieldTicket/Submit/ShowAttachemntsDialog';
 
 function ViewLogs({ fieldTicketData, handleClose, fields }) {
 
@@ -24,7 +25,6 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
   }: any = useData();
 
   const [fullScreen, setFullScreen] = useState(true);
-  const [fullScreenAttachemnt, setFullScreenAttachemnt] = useState(false);
   const [columns, setColumns] = useState(null);
   const [openAttachment, setOpenAttachment] = useState({ open: false, attachments: null });
   const { isOffline } = useContext(CustomOfflineContext);
@@ -195,6 +195,14 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
             <Box p={2} height={500}>
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
+          )}
+          {openAttachment.open && (
+            <ShowAttachemntsDialog
+              onClose={() => {
+                setOpenAttachment({ open: false, attachments: null })
+              }}
+              attachments={openAttachment.attachments}
+            />
           )}
         </CustomDialogContent>
       </Dialog>
