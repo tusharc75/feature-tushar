@@ -67,6 +67,7 @@ const DiagramDialog = ({
             referenceId={referenceId}
             resourceLabel={resourceLabel}
             referenceLabel={referenceLabel}
+            resourceData={resourceData}
             uniqueId={uniqueId}
             stepId={stepId}
             currentVersion={resource === sidebarResource.workOrder ? resourceData?.currentVersion : null}

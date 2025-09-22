@@ -17,6 +17,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
+  ACTIVITY_RESOURCE,
   ATTACHMENT_TYPE,
   cn,
   convertMsToTime,
@@ -48,6 +49,7 @@ import CustomMessageDialog from 'src/components/MessageDialog';
 import Consumables from 'src/pages/WorkOrder/Consumables';
 import CustomCollapsible from 'src/components/CustomCollapsible';
 import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
+import Diagram from 'src/pages/WorkOrder/Diagram';
 
 export interface StepDataInterface {
   _id: string;
@@ -1616,6 +1618,7 @@ const Steps = ({
                               showMaterialFilter={false}
                               uniqueId={selectedService.uniqueId}
                               stepId={step._id}
+                              hideAddNewFolder={true}
                             />
                           </div>
                         </CustomCollapsible>
