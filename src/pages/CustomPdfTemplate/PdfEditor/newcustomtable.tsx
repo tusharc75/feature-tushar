@@ -1,14 +1,13 @@
 import type { Plugin, PDFRenderProps, Schema, UIRenderProps } from '@pdfme/common';
 import { rgb } from '@pdfme/pdf-lib';
 import { PLUGIN } from 'src/constants/helpers';
-
 interface MyGridSchema extends Schema {
     type: 'myGridType';
     rows: string[][];
     cols: number;
     basePdf?: { width: number; height: number };
-    colWidths?: number[]; // px
-    rowHeights?: number[]; // px
+    colWidths?: number[];
+    rowHeights?: number[];
 }
 
 const stateMap = new WeakMap<HTMLElement, {
@@ -29,7 +28,6 @@ const stopPropagationFor = (el: HTMLElement | HTMLTextAreaElement) => {
     el.addEventListener('keydown', (e) => (e as Event).stopPropagation());
 };
 
-// helper to safely parse numbers
 const ensureArrayLen = (arr: number[] | undefined, len: number, fill: number) => {
     const out = arr ? [...arr] : [];
     while (out.length < len) out.push(fill);
@@ -42,13 +40,6 @@ const persistRows = (root: HTMLElement, onChange: UIRenderProps<MyGridSchema>['o
     if (!s || !onChange) return;
     const payload = JSON.parse(JSON.stringify(s.rows));
     onChange({ key: 'rows', value: payload });
-};
-
-const persistSizes = (root: HTMLElement, onChange: UIRenderProps<MyGridSchema>['onChange']) => {
-    const s = stateMap.get(root);
-    if (!s || !onChange) return;
-    if (s.colWidths) onChange({ key: 'colWidths', value: JSON.parse(JSON.stringify(s.colWidths)) });
-    if (s.rowHeights) onChange({ key: 'rowHeights', value: JSON.parse(JSON.stringify(s.rowHeights)) });
 };
 
 const focusCellIfNeeded = (root: HTMLElement) => {
@@ -86,7 +77,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             state.focusedId = active.dataset.cellId;
         }
 
-        // reset DOM
         rootElement.innerHTML = '';
         rootElement.setAttribute('plugin-type', PLUGIN.CUSTOM_TABLE);
 
@@ -105,29 +95,49 @@ const myGridPlugin: Plugin<MyGridSchema> = {
 
         const rowsCount = Math.max(1, state.rows.length);
         const containerRect = rootElement.getBoundingClientRect();
-        // base width in px to distribute columns
         const availableWidthPx = Math.max(200, containerRect.width || (schema?.width ? (schema.width as number) * 3 : 400));
         const initialColPx = Math.floor(availableWidthPx / Math.max(1, state.cols));
         const rowMinHeightPx = (typeof schema?.height === 'number' && schema.height > 0)
             ? Math.max(28, Math.floor((schema.height as number) / rowsCount))
             : 34;
 
-        // init colWidths and rowHeights in state if missing (try persisted schema values first)
         if (!state.colWidths) {
-            const persisted = schema?.colWidths as number[] | undefined;
-            if (persisted && persisted.length === state.cols) {
-                state.colWidths = [...persisted];
+            const persistedFromSchema = schema?.colWidths as number[] | undefined;
+            if (persistedFromSchema && persistedFromSchema.length === state.cols) {
+                state.colWidths = [...persistedFromSchema];
             } else {
                 state.colWidths = Array(state.cols).fill(initialColPx);
             }
         } else {
-            // ensure length fits cols
             state.colWidths = ensureArrayLen(state.colWidths, state.cols, initialColPx);
         }
+
+        const resizeRowsToFitHeight = () => {
+            const totalHeight = rootElement.clientHeight;
+            const totalFixedHeight = totalHeight - (state!.rows.length - 1) * (typeof schema?.colBorderWidth === 'number' ? schema.colBorderWidth : 1);
+            const minHeightSum = state!.rows.length * MIN_ROW_PX;
+
+            let newHeights: number[];
+
+            if (totalFixedHeight > minHeightSum) {
+                const currentTotalHeight = state!.rowHeights!.reduce((sum, h) => sum + h, 0);
+                if (currentTotalHeight > 0) {
+                    const heightRatio = totalFixedHeight / currentTotalHeight;
+                    newHeights = state!.rowHeights!.map(h => h * heightRatio);
+                } else {
+                    newHeights = Array(state!.rows.length).fill(totalFixedHeight / state!.rows.length);
+                }
+            } else {
+                newHeights = Array(state!.rows.length).fill(MIN_ROW_PX);
+            }
+
+            state!.rowHeights = newHeights.map(h => Math.max(MIN_ROW_PX, h));
+        };
+
         if (!state.rowHeights) {
-            const persistedRows = schema?.rowHeights as number[] | undefined;
-            if (persistedRows && persistedRows.length === state.rows.length) {
-                state.rowHeights = [...persistedRows];
+            const persistedFromSchema = schema?.rowHeights as number[] | undefined;
+            if (persistedFromSchema && persistedFromSchema.length === state.rows.length) {
+                state.rowHeights = [...persistedFromSchema];
             } else {
                 state.rowHeights = state.rows.map(() => rowMinHeightPx);
             }
@@ -135,13 +145,13 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             state.rowHeights = ensureArrayLen(state.rowHeights, state.rows.length, rowMinHeightPx);
         }
 
-        // Ensure each row has correct number of columns
+        resizeRowsToFitHeight();
+
         state.rows.forEach(r => {
             while (r.length < state.cols) r.push('');
             if (r.length > state.cols) r.length = state.cols;
         });
 
-        // Container structure
         const mainContainer = document.createElement('div');
         Object.assign(mainContainer.style, {
             position: 'relative',
@@ -157,17 +167,14 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
-            position: 'relative' // needed for overlay resizers
+            position: 'relative'
         });
 
-        // create all rows
         const rowWrappers: HTMLDivElement[] = [];
         state.rows.forEach((row, rowIndex) => {
             const rowWrapper = document.createElement('div');
-            const gridTemplateCols = state.colWidths!.map(w => `${Math.max(MIN_COL_PX, Math.round(w))}px`).join(' ');
             Object.assign(rowWrapper.style, {
                 display: 'grid',
-                gridTemplateColumns: gridTemplateCols,
                 borderBottom: `${typeof schema?.colBorderWidth === 'number' ? schema.colBorderWidth : 1}px solid ${typeof schema?.colBorderColor === 'string' ? schema.colBorderColor : '#e6eefc'}`,
                 height: `${Math.max(MIN_ROW_PX, Math.round(state.rowHeights![rowIndex]))}px`,
                 alignItems: 'stretch',
@@ -175,8 +182,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                 width: '100%',
                 overflow: 'hidden'
             });
-
-            while (row.length < state.cols) row.push('');
 
             for (let colIndex = 0; colIndex < state.cols; colIndex++) {
                 const cellContent = row[colIndex] ?? '';
@@ -226,8 +231,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                 };
                 input.addEventListener('input', onInput);
                 input.addEventListener('blur', onBlur);
-
-                // VARIABLE insertion event
                 input.addEventListener('insert-variable', (e: Event) => {
                     e.stopPropagation();
                     const customEvent = e as CustomEvent;
@@ -253,8 +256,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             rowWrappers.push(rowWrapper);
         });
         mainContainer.appendChild(tableContainer);
-
-        // RESIZERS LAYER
         const resizerLayer = document.createElement('div');
         Object.assign(resizerLayer.style, {
             position: 'absolute',
@@ -262,38 +263,45 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             top: '0',
             right: '0',
             bottom: '0',
-            pointerEvents: 'none', // individual resizer handles will enable pointer events
+            pointerEvents: 'none',
             zIndex: '10001'
         });
-
-        // helper to update gridTemplateColumns for all row wrappers
+        const getColPercentTemplate = () => {
+            const total = (state!.colWidths!.reduce((a, b) => a + b, 0) || 1);
+            return state!.colWidths!.map(w => `${(w / total) * 100}%`).join(' ');
+        };
         const applyColWidthsToRows = () => {
-            const tpl = state!.colWidths!.map(w => `${Math.max(MIN_COL_PX, Math.round(w))}px`).join(' ');
+            const tpl = getColPercentTemplate();
             rowWrappers.forEach(rw => {
                 (rw.style as any).gridTemplateColumns = tpl;
             });
         };
-
-        // helper to update row heights
         const applyRowHeights = () => {
             rowWrappers.forEach((rw, idx) => {
                 rw.style.height = `${Math.max(MIN_ROW_PX, Math.round(state!.rowHeights![idx]))}px`;
-                // update contained textarea minHeight
                 const ta = rw.querySelector('textarea') as HTMLTextAreaElement | null;
                 if (ta) {
                     ta.style.minHeight = `${Math.max(24, Math.round(state!.rowHeights![idx]) - 8)}px`;
                 }
             });
         };
-
-        // create column resizers (vertical handles between columns)
+        const persistAll = () => {
+            if (!onChange) return;
+            onChange([
+                { key: 'rows', value: JSON.parse(JSON.stringify(state!.rows)) },
+                { key: 'cols', value: state!.cols },
+                { key: 'colWidths', value: JSON.parse(JSON.stringify(state!.colWidths)) },
+                { key: 'rowHeights', value: JSON.parse(JSON.stringify(state!.rowHeights)) }
+            ]);
+        };
         const createColResizers = () => {
-            // compute cumulative left positions based on colWidths
-            const tableRect = tableContainer.getBoundingClientRect();
-            let cumLeft = 0;
+            const totalWidthPx = state!.colWidths!.reduce((a, b) => a + b, 0) || 1;
+            let cumLeftPercent = 0;
+            resizerLayer.innerHTML = '';
             for (let ci = 0; ci < state!.cols; ci++) {
-                cumLeft += state!.colWidths![ci];
-                // create a resizer if not last column
+                const colPercent = (state!.colWidths![ci] / totalWidthPx) * 100;
+                cumLeftPercent += colPercent;
+
                 if (ci < state!.cols - 1) {
                     const handle = document.createElement('div');
                     Object.assign(handle.style, {
@@ -301,14 +309,13 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                         top: '0px',
                         height: '100%',
                         width: '10px',
-                        left: `${cumLeft - 5}px`,
-                        transform: 'translateX(0)',
+                        left: `${cumLeftPercent}%`,
+                        transform: 'translateX(-5px)',
                         cursor: 'col-resize',
                         zIndex: '10002',
                         pointerEvents: 'auto',
                         background: 'transparent'
                     });
-                    // visible thin line for affordance
                     const line = document.createElement('div');
                     Object.assign(line.style, {
                         position: 'absolute',
@@ -321,7 +328,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                         borderRadius: '2px'
                     });
                     handle.appendChild(line);
-
                     let startX = 0;
                     let startLeftWidth = 0;
                     let startRightWidth = 0;
@@ -333,10 +339,8 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                         const dx = clientX - startX;
                         let newLeft = Math.max(MIN_COL_PX, startLeftWidth + dx);
                         let newRight = Math.max(MIN_COL_PX, startRightWidth - dx);
-                        // if one side hits min, adjust the other accordingly
-                        if (newLeft + newRight < startLeftWidth + startRightWidth) {
-                            // keep total same, but enforce mins
-                            const total = startLeftWidth + startRightWidth;
+                        const total = startLeftWidth + startRightWidth;
+                        if (newLeft + newRight < total) {
                             if (newLeft < MIN_COL_PX) {
                                 newLeft = MIN_COL_PX;
                                 newRight = total - newLeft;
@@ -354,7 +358,8 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                         document.removeEventListener('mouseup', onUp);
                         document.removeEventListener('touchmove', onMove as any);
                         document.removeEventListener('touchend', onUp);
-                        persistSizes(rootElement, onChange!);
+                        persistAll();
+                        createColResizers();
                     };
 
                     handle.addEventListener('mousedown', (e) => {
@@ -382,9 +387,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             }
         };
 
-        // create horizontal row resizers
         const createRowResizers = () => {
-            // need cumulative top positions
             let cumTop = 0;
             for (let ri = 0; ri < state!.rowHeights!.length; ri++) {
                 const h = state!.rowHeights![ri];
@@ -445,7 +448,8 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                         document.removeEventListener('mouseup', onUp);
                         document.removeEventListener('touchmove', onMove as any);
                         document.removeEventListener('touchend', onUp);
-                        persistSizes(rootElement, onChange!);
+                        persistAll();
+                        createRowResizers();
                     };
 
                     handle.addEventListener('mousedown', (e) => {
@@ -473,19 +477,12 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             }
         };
 
-        // Build resizers after DOM insertion: append resizerLayer and create handles
         rootElement.appendChild(mainContainer);
-        // ensure initial sizes applied
         applyColWidthsToRows();
         applyRowHeights();
-
-        // create resizer handles
-        // Clear previous content in resizerLayer
-        resizerLayer.innerHTML = '';
         createColResizers();
         createRowResizers();
 
-        // append bottom/side controls (you had them appended directly to rootElement before)
         if (true) {
             const styleSmallBtn = (btn: HTMLButtonElement) => {
                 Object.assign(btn.style, {
@@ -528,16 +525,9 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             styleSmallBtn(addRowBtn);
             addRowBtn.onclick = () => {
                 state!.rows.push(Array(state!.cols).fill(''));
-                // new row height default
                 state!.rowHeights!.push(Math.max(rowMinHeightPx, rowMinHeightPx));
-                onChange?.([
-                    { key: 'rows', value: JSON.parse(JSON.stringify(state!.rows)) },
-                    { key: 'cols', value: state!.cols },
-                    { key: 'rowHeights', value: JSON.parse(JSON.stringify(state!.rowHeights)) }
-                ]);
-                // rerender: simply call plugin UI again by re-applying sizes and focus
+                persistAll();
                 applyRowHeights();
-                setTimeout(() => focusCellIfNeeded(rootElement), 0);
             };
 
             const removeRowBtn = document.createElement('button');
@@ -546,21 +536,15 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             removeRowBtn.title = 'Remove last row';
             styleSmallBtn(removeRowBtn);
             removeRowBtn.onclick = () => {
-                if (state!.rows.length <= 1) return; // keep at least one row
+                if (state!.rows.length <= 1) return;
                 state!.rows.pop();
                 state!.rowHeights!.pop();
-                onChange?.([
-                    { key: 'rows', value: JSON.parse(JSON.stringify(state!.rows)) },
-                    { key: 'cols', value: state!.cols },
-                    { key: 'rowHeights', value: JSON.parse(JSON.stringify(state!.rowHeights)) }
-                ]);
+                persistAll();
                 applyRowHeights();
             };
 
             bottomWrapper.appendChild(addRowBtn);
             bottomWrapper.appendChild(removeRowBtn);
-
-            // LEFT: add/remove column controls (stacked)
             const leftColWrapper = document.createElement('div');
             Object.assign(leftColWrapper.style, {
                 position: 'absolute',
@@ -581,21 +565,17 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             styleSmallBtn(addColLeft);
             addColLeft.onclick = () => {
                 state!.cols += 1;
-                // insert an empty cell at start of each row
                 state!.rows = state!.rows.map(r => {
                     const copy = [...r];
                     copy.unshift('');
                     return copy;
                 });
-                // adjust colWidths: add default width
-                const defaultWidth = Math.max(MIN_COL_PX, Math.floor((state!.colWidths!.reduce((a, b) => a + b, 0) / (state!.cols || 1))));
+                const totalWidth = state!.colWidths!.reduce((a, b) => a + b, 0);
+                const defaultWidth = Math.max(MIN_COL_PX, totalWidth / state!.cols);
                 state!.colWidths!.unshift(defaultWidth);
-                onChange?.([
-                    { key: 'cols', value: state!.cols },
-                    { key: 'rows', value: JSON.parse(JSON.stringify(state!.rows)) },
-                    { key: 'colWidths', value: JSON.parse(JSON.stringify(state!.colWidths)) }
-                ]);
+                persistAll();
                 applyColWidthsToRows();
+                createColResizers();
             };
 
             const removeColLeft = document.createElement('button');
@@ -604,22 +584,18 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             removeColLeft.title = 'Remove left column';
             styleSmallBtn(removeColLeft);
             removeColLeft.onclick = () => {
-                if (state!.cols <= 1) return; // keep at least one column
+                if (state!.cols <= 1) return;
                 state!.cols -= 1;
                 state!.rows = state!.rows.map(r => r.slice(1));
                 state!.colWidths!.shift();
-                onChange?.([
-                    { key: 'cols', value: state!.cols },
-                    { key: 'rows', value: JSON.parse(JSON.stringify(state!.rows)) },
-                    { key: 'colWidths', value: JSON.parse(JSON.stringify(state!.colWidths)) }
-                ]);
+                persistAll();
                 applyColWidthsToRows();
+                createColResizers();
             };
 
             leftColWrapper.appendChild(addColLeft);
             leftColWrapper.appendChild(removeColLeft);
 
-            // RIGHT: add/remove column controls (stacked)
             const rightColWrapper = document.createElement('div');
             Object.assign(rightColWrapper.style, {
                 position: 'absolute',
@@ -645,15 +621,12 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                     while (copy.length < state!.cols) copy.push('');
                     return copy;
                 });
-                // add default width
-                const defaultWidth = Math.max(MIN_COL_PX, Math.floor((state!.colWidths!.reduce((a, b) => a + b, 0) / (state!.cols || 1))));
+                const totalWidth = state!.colWidths!.reduce((a, b) => a + b, 0);
+                const defaultWidth = Math.max(MIN_COL_PX, totalWidth / state!.cols);
                 state!.colWidths!.push(defaultWidth);
-                onChange?.([
-                    { key: 'cols', value: state!.cols },
-                    { key: 'rows', value: JSON.parse(JSON.stringify(state!.rows)) },
-                    { key: 'colWidths', value: JSON.parse(JSON.stringify(state!.colWidths)) }
-                ]);
+                persistAll();
                 applyColWidthsToRows();
+                createColResizers();
             };
 
             const removeColRight = document.createElement('button');
@@ -666,153 +639,25 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                 state!.cols -= 1;
                 state!.rows = state!.rows.map(r => r.slice(0, state!.cols));
                 state!.colWidths!.pop();
-                onChange?.([
-                    { key: 'cols', value: state!.cols },
-                    { key: 'rows', value: JSON.parse(JSON.stringify(state!.rows)) },
-                    { key: 'colWidths', value: JSON.parse(JSON.stringify(state!.colWidths)) }
-                ]);
+                persistAll();
                 applyColWidthsToRows();
+                createColResizers();
             };
-
             rightColWrapper.appendChild(addColRight);
             rightColWrapper.appendChild(removeColRight);
-
-            // append the wrappers to rootElement (not mainContainer) to reduce clipping risk.
             rootElement.appendChild(bottomWrapper);
             rootElement.appendChild(leftColWrapper);
             rootElement.appendChild(rightColWrapper);
         }
-
-        // append resizer layer after adding controls so resizers sit above the table but below control buttons
         rootElement.appendChild(resizerLayer);
-
-        // Rebuild resizers when layout changes (simple approach: recreate them)
-        const rebuildResizers = () => {
-            resizerLayer.innerHTML = '';
-            createColResizers();
-            createRowResizers();
-        };
-
-        // Apply initial sizes and then rebuild resizers after DOM paints
         setTimeout(() => {
             applyColWidthsToRows();
             applyRowHeights();
-            rebuildResizers();
+            createColResizers();
+            createRowResizers();
             setTimeout(() => focusCellIfNeeded(rootElement), 0);
         }, 0);
     },
-
-    // PDF renderer left mostly untouched; you can extend to use colWidths/rowHeights later if needed
-    // pdf: async ({ page, schema }: PDFRenderProps<MyGridSchema>) => {
-    //     const { position, rows = [['']], cols = 1, width, height } = schema;
-    //     const pageWidth = page.getWidth();
-    //     const pageHeight = page.getHeight();
-    //     const baseWidth = schema.basePdf?.width ?? 210;
-    //     const baseHeight = schema.basePdf?.height ?? 297;
-
-    //     const scaleX = pageWidth / baseWidth;
-    //     const scaleY = pageHeight / baseHeight;
-
-    //     const scaledX = (position?.x ?? 0) * scaleX;
-    //     const scaledY = (position?.y ?? 0) * scaleY;
-    //     const scaledWidth = (width ?? 100) * scaleX;
-    //     const scaledHeight = (height ?? 50) * scaleY;
-    //     const x = scaledX;
-    //     const y = pageHeight - scaledY - scaledHeight;
-
-    //     const cellWidth = scaledWidth / Math.max(1, cols);
-    //     const cellHeight = scaledHeight / Math.max(1, rows.length);
-
-    //     const tableBorderWidth = ((typeof schema?.tableBorderWidth === 'number' ? schema.tableBorderWidth : 1));
-    //     const colBorderWidth = ((typeof schema?.colBorderWidth === 'number' ? schema.colBorderWidth : 1));
-
-    //     const tableBorderColor = typeof schema?.tableBorderColor === 'string' ? schema.tableBorderColor : '#000000';
-    //     const colBorderColor = typeof schema?.colBorderColor === 'string' ? schema.colBorderColor : '#e6e6e6';
-
-    //     const parseColor = (colorStr: string) => {
-    //         if (colorStr.startsWith('#')) {
-    //             const hex = colorStr.slice(1);
-    //             const r = parseInt(hex.slice(0, 2), 16) / 255;
-    //             const g = parseInt(hex.slice(2, 4), 16) / 255;
-    //             const b = parseInt(hex.slice(4, 6), 16) / 255;
-    //             return rgb(r, g, b);
-    //         }
-    //         return rgb(0, 0, 0);
-    //     };
-
-    //     const tableColor = parseColor(tableBorderColor);
-
-    //     page.drawLine({
-    //         start: { x, y: y + scaledHeight },
-    //         end: { x: x + scaledWidth, y: y + scaledHeight },
-    //         thickness: tableBorderWidth,
-    //         color: tableColor,
-    //     });
-
-    //     page.drawLine({
-    //         start: { x, y },
-    //         end: { x: x + scaledWidth, y },
-    //         thickness: tableBorderWidth,
-    //         color: tableColor,
-    //     });
-
-    //     page.drawLine({
-    //         start: { x, y },
-    //         end: { x, y: y + scaledHeight },
-    //         thickness: tableBorderWidth,
-    //         color: tableColor,
-    //     });
-
-    //     page.drawLine({
-    //         start: { x: x + scaledWidth, y },
-    //         end: { x: x + scaledWidth, y: y + scaledHeight },
-    //         thickness: tableBorderWidth,
-    //         color: tableColor,
-    //     });
-
-    //     const colColor = parseColor(colBorderColor);
-    //     for (let i = 1; i < rows.length; i++) {
-    //         const lineY = y + i * cellHeight;
-    //         page.drawLine({
-    //             start: { x, y: lineY },
-    //             end: { x: x + scaledWidth, y: lineY },
-    //             thickness: colBorderWidth,
-    //             color: colColor,
-    //         });
-    //     }
-
-    //     for (let i = 1; i < cols; i++) {
-    //         const lineX = x + i * cellWidth;
-    //         page.drawLine({
-    //             start: { x: lineX, y },
-    //             end: { x: lineX, y: y + scaledHeight },
-    //             thickness: colBorderWidth,
-    //             color: colColor,
-    //         });
-    //     }
-
-    //     const padding = 4;
-    //     const textSize = ((typeof schema?.textSize === 'number' ? schema.textSize : 9));
-    //     const textColorStr = typeof schema?.textColor === 'string' ? schema.textColor : '#000000';
-    //     const textColor = parseColor(textColorStr);
-
-    //     rows.forEach((row, rowIndex) => {
-    //         row.forEach((cellText, colIndex) => {
-    //             if (!cellText) return;
-    //             const textX = x + colIndex * cellWidth + padding;
-    //             const cellTopY = y + (rows.length - rowIndex) * cellHeight;
-    //             const textY = cellTopY - textSize - padding;
-
-    //             page.drawText(String(cellText), {
-    //                 x: textX,
-    //                 y: textY,
-    //                 size: textSize,
-    //                 color: textColor,
-    //                 maxWidth: cellWidth - padding * 2,
-    //             });
-    //         });
-    //     });
-    // },
     pdf: async ({ page, schema }: PDFRenderProps<MyGridSchema>) => {
         const { position, rows = [['']], cols = 1, width, height } = schema;
         const pageWidth = page.getWidth();
@@ -828,19 +673,16 @@ const myGridPlugin: Plugin<MyGridSchema> = {
         const scaledWidth = (width ?? 100) * scaleX;
         const scaledHeight = (height ?? 50) * scaleY;
         const x = scaledX;
-        const y = pageHeight - scaledY - scaledHeight; // bottom-left of table in PDF coord
+        const y = pageHeight - scaledY - scaledHeight;
 
-        // Use persisted colWidths / rowHeights from schema if available, otherwise equal division
         const uiColWidths = Array.isArray(schema.colWidths) && schema.colWidths.length === cols ? schema.colWidths : undefined;
         const uiRowHeights = Array.isArray(schema.rowHeights) && schema.rowHeights.length === rows.length ? schema.rowHeights : undefined;
 
-        // convert UI px sizes to proportional widths/heights in PDF space
         let colWidthsPdf: number[] = [];
         if (uiColWidths && uiColWidths.reduce((a, b) => a + b, 0) > 0) {
             const total = uiColWidths.reduce((a, b) => a + b, 0);
             colWidthsPdf = uiColWidths.map(w => (w / total) * scaledWidth);
         } else {
-            // equal division fallback
             const cw = scaledWidth / Math.max(1, cols);
             colWidthsPdf = Array.from({ length: cols }, () => cw);
         }
@@ -850,7 +692,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             const total = uiRowHeights.reduce((a, b) => a + b, 0);
             rowHeightsPdf = uiRowHeights.map(h => (h / total) * scaledHeight);
         } else {
-            // equal division fallback
             const rh = scaledHeight / Math.max(1, rows.length);
             rowHeightsPdf = Array.from({ length: rows.length }, () => rh);
         }
@@ -875,7 +716,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
         const tableColor = parseColor(tableBorderColor);
         const colColor = parseColor(colBorderColor);
 
-        // Outer rectangle borders
         page.drawLine({
             start: { x, y: y + scaledHeight },
             end: { x: x + scaledWidth, y: y + scaledHeight },
@@ -904,7 +744,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             color: tableColor,
         });
 
-        // Draw horizontal lines (row separators) — compute cumulative heights from top
         let cumH = 0;
         for (let i = 0; i < rowHeightsPdf.length - 1; i++) {
             cumH += rowHeightsPdf[i];
@@ -917,7 +756,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             });
         }
 
-        // Draw vertical lines (column separators) — compute cumulative x from left
         let cumW = 0;
         for (let i = 0; i < colWidthsPdf.length - 1; i++) {
             cumW += colWidthsPdf[i];
@@ -930,13 +768,11 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             });
         }
 
-        // Draw text using actual per-cell widths/heights
         const padding = 4;
         const textSize = ((typeof schema?.textSize === 'number' ? schema.textSize : 9));
         const textColorStr = typeof schema?.textColor === 'string' ? schema.textColor : '#000000';
         const textColor = parseColor(textColorStr);
 
-        // precompute cumulative lefts and cumulative tops
         const colLefts: number[] = [];
         (function () {
             let acc = x;
@@ -948,7 +784,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
 
         const rowTops: number[] = [];
         (function () {
-            let accFromTop = 0; // amount consumed from top
+            let accFromTop = 0;
             for (let i = 0; i < rowHeightsPdf.length; i++) {
                 const topY = y + scaledHeight - accFromTop;
                 rowTops.push(topY);
@@ -962,7 +798,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                 const cellLeftX = colLefts[colIndex];
                 const cellWidthPdf = colWidthsPdf[colIndex];
                 const cellTopY = rowTops[rowIndex];
-                // place text starting a bit below top within the cell
                 const textX = cellLeftX + padding;
                 const textY = cellTopY - padding - textSize;
                 page.drawText(String(cellText), {
@@ -975,9 +810,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             });
         });
     },
-
-
-
     propPanel: {
         schema: () => ({
             cols: {

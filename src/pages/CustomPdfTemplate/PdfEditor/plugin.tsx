@@ -2,7 +2,7 @@ import { text, image, table, line, rectangle } from '@pdfme/schemas';
 import type { Plugin, Schema } from '@pdfme/common';
 import RobotoRegular from '../../../assets/font/Roboto-Regular.ttf';
 import RobotoBold from '../../../assets/font/Roboto-Bold.ttf';
-import CustomTablePlugin from './newcustomtable';
+import myGridPlugin from './newcustomtable';
 
 type DesignerPluginSchema = Schema & {
     width: number;
@@ -18,36 +18,82 @@ type DesignerExpectedPlugin = Plugin<DesignerPluginSchema>;
 
 export const getPlugins = (variables: string[], resourceTables: any): Record<string, DesignerExpectedPlugin> => {
 
-    const TablePlugin = {
-        ...CustomTablePlugin,
+    const customTablePlugin = {
+        ...table,
         propPanel: {
-            ...CustomTablePlugin.propPanel,
+            ...table.propPanel,
             defaultSchema: {
-                ...CustomTablePlugin.propPanel.defaultSchema,
+                ...table.propPanel.defaultSchema,
+                content: '[]',
+                showHead: true,
+                head: ['col1', 'col2', 'col3'],
+                headWidthPercentages: [30, 30, 40],
             },
             schema: (props) => {
                 const baseSchema =
-                    typeof CustomTablePlugin.propPanel.schema === 'function'
-                        ? CustomTablePlugin.propPanel.schema(props)
-                        : { ...CustomTablePlugin.propPanel.schema };
-                const selectedTableName = props.activeSchema.tableType;
+                    typeof table.propPanel.schema === 'function'
+                        ? table.propPanel.schema(props)
+                        : { ...table.propPanel.schema };
+                const selectedTableName = props.activeSchema.name;
                 const headerOptions = resourceTables?.find((e) => e.value === selectedTableName)?.fields || [];
                 const head = props.activeSchema.head || [];
                 const schemaWithDropdowns: any = {
-                    tableType: {
-                        title: 'Table Type',
+                    ...baseSchema,
+                    name: {
+                        title: 'Name',
                         type: 'string',
                         widget: 'select',
                         default: resourceTables?.length ? resourceTables[0].label : '',
                         props: {
                             options: resourceTables,
+                        },
+                    },
+                    headStyles: {
+                        type: 'object',
+                        title: 'Head Styles',
+                        properties: baseSchema.headStyles?.properties || {},
+                        props: {
                             style: {
-                                marginBottom: '20px',
+                                backgroundColor: '#ffffff',
+                                marginBottom: '25px',
                             },
                         },
                     },
-                    ...baseSchema,
+                    bodyStyles: {
+                        type: 'object',
+                        title: 'Body Styles',
+                        properties: baseSchema.bodyStyles?.properties || {},
+                        props: {
+                            style: {
+                                backgroundColor: '#ffffff',
+                                marginBottom: '25px',
+                            },
+                        },
+                    },
+                    tableStyles: {
+                        type: 'object',
+                        title: 'Table Styles',
+                        properties: baseSchema.tableStyles?.properties || {},
+                        props: {
+                            style: {
+                                backgroundColor: '#ffffff',
+                                marginBottom: '25px',
+                            },
+                        },
+                    },
+                    columnStyles: {
+                        type: 'object',
+                        title: 'Column Styles',
+                        properties: baseSchema.columnStyles?.properties || {},
+                        props: {
+                            style: {
+                                backgroundColor: '#ffffff',
+                                marginBottom: '25px',
+                            },
+                        },
+                    },
                 };
+
                 head.forEach((val: string, i: number) => {
                     schemaWithDropdowns[`head.${i}`] = {
                         title: `Header ${i + 1}`,
@@ -140,7 +186,8 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
     const plugins: Record<string, DesignerExpectedPlugin> = {
         Text: customTextPlugin as DesignerExpectedPlugin,
         Variable: customVariablePlugin as unknown as DesignerExpectedPlugin,
-        Table: TablePlugin as unknown as DesignerExpectedPlugin,
+        Table: customTablePlugin as unknown as DesignerExpectedPlugin,
+        grid: myGridPlugin as unknown as DesignerExpectedPlugin,
         Image: image as DesignerExpectedPlugin,
         Line: line as DesignerExpectedPlugin,
         Rectangle: rectangle as DesignerExpectedPlugin,
