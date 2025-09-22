@@ -104,7 +104,11 @@ const DiagramNew = ({
     axiosInstance()
       .get(query)
       .then(({ data: { data: { data } } }) => {
-        setTreeStructure(data?.length > 0 ? unflatten(data) : [])
+        if (hideAddNewFolder) {
+          setTreeStructure(data?.length > 0 ? data?.filter(d => d?.type === 'file') : [])
+        } else {
+          setTreeStructure(data?.length > 0 ? unflatten(data) : [])
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -132,7 +136,8 @@ const DiagramNew = ({
   const getRelatedTo = () => {
     const extraData: any = {
       ...(uniqueId ? { uniqueId: uniqueId } : {}),
-      ...(stepId ? { stepId: stepId } : {})
+      ...(stepId ? { stepId: stepId } : {}),
+      ...(currentVersion ? { version: parseInt(currentVersion) } : {}),
     }
 
     const relatedTo: any = [
@@ -141,7 +146,6 @@ const DiagramNew = ({
         referenceId: referenceId,
         label: resourceLabel,
         ...extraData,
-        ...(currentVersion ? { version: parseInt(currentVersion) } : {}),
       }
     ];
 
