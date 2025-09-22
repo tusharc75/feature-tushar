@@ -17,6 +17,7 @@ import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import ShowAttachemntsDialog from 'src/pages/FieldTicket/Submit/ShowAttachemntsDialog';
 
 const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}_certificationHistory`;
 
@@ -26,7 +27,6 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
   const [columns, setColumns] = useState(null);
   const [openDialog, setOpenDialog] = useState({ open: false });
   const [openAttachment, setOpenAttachment] = useState({ open: false, attachments: null });
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -209,6 +209,14 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
           }}
           assetId={id}
           certificateExpiryDate={assetDetails?.certificateExpiryDate || null}
+        />
+      )}
+      {openAttachment.open && (
+        <ShowAttachemntsDialog
+          onClose={() => {
+            setOpenAttachment({ open: false, attachments: null })
+          }}
+          attachments={openAttachment.attachments}
         />
       )}
       {showConfirmBox.open && (
