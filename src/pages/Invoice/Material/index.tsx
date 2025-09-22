@@ -3,7 +3,7 @@ import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { camelCase, isArray, startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -22,7 +22,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, getDataFromHeader, invoice, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, getDataFromHeader, invoice, sidebarResource } from '../../../constants/helpers';
 import MaterialDialog from './MaterialDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -848,7 +848,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
           referenceId={invoiceData?._id}
           uniqueId={showAttachmentDialog?._id}
           referenceLabel={showAttachmentDialog.label}
-          resource={ACTIVITY_RESOURCE.invoice}
+          resource={sidebarResource.invoice}
           handleClose={() => {
             setShowAttachmentDialog({ open: false, _id: null, label: '' });
           }}

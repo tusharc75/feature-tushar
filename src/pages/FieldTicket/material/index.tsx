@@ -21,7 +21,6 @@ import { flattenArray } from 'src/constants/columns';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import {
-  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   FIELD_TICKET_STATUS,
   MATERIAL_TYPE,
@@ -63,8 +62,8 @@ import AddQuotationDataDialog from './AddQuotationDataDialog';
 import AddFieldServiceOrderDataDialog from 'src/pages/FieldTicket/material/AddFieldServiceOrderDataDialog';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
-import StartStopServiceDateDialog from './StartStopServiceDateDialog';
-import ServiceLogDialog from './ServiceLogDialog';
+import StartStopServiceDateDialog from 'src/pages/RentalManagement/ReceivingTicket/StartStopServiceDateDialog';
+import ServiceLogDialog from 'src/pages/RentalManagement/ReceivingTicket/ServiceLogDialog';
 import CustomMessageDialog from 'src/components/MessageDialog';
 
 const Material = ({
@@ -169,7 +168,7 @@ const Material = ({
   }, []);
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.fieldServiceOrder);
+    const data = await getResourcePolicy(user, permissions, sidebarResource.fieldTicket);
     setIsStartStopServiceEnabled(data?.policy?.enableStartStopService);
   };
 
@@ -203,20 +202,6 @@ const Material = ({
         Cell: ({ row }) =>
         (<div className="d-flex align-items-center gap-2">
           <h5 className="text-truncate">{row?.original?.index}</h5>
-          {row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length ? (
-            <HtmlTooltip title={'View Logs'}>
-              <span>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setServiceLogDialog({ open: true, data: row?.original });
-                  }}
-                >
-                  <VisibilityIcon fontSize="small" color="primary" />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-          ) : null}
         </div>),
         Footer: () => {
           return <>Total</>;
@@ -368,8 +353,8 @@ const Material = ({
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 120,
-      width: 120,
+      minWidth: 130,
+      width: 130,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -390,6 +375,20 @@ const Material = ({
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
+            {row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length ? (
+              <HtmlTooltip title={'View Logs'}>
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setServiceLogDialog({ open: true, data: row?.original });
+                    }}
+                  >
+                    <VisibilityIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            ) : null}
             {permissions?.attachment?.isRead && row?.original?.type != MATERIAL_TYPE.manualEntry && !isOffline && (
               <HtmlTooltip title="Attachments">
                 <IconButton
@@ -1451,7 +1450,7 @@ const Material = ({
           referenceId={fieldTicketData?._id}
           uniqueId={showAttachmentDialog?._id}
           referenceLabel={showAttachmentDialog.label}
-          resource={ACTIVITY_RESOURCE.fieldTicket}
+          resource={sidebarResource.fieldTicket}
           handleClose={() => {
             setShowAttachmentDialog({ open: false, _id: null, label: '' });
           }}
@@ -1479,18 +1478,23 @@ const Material = ({
           }}
           loading={serviceConfirmationDialog.loading}
           minStartDate={serviceConfirmationDialog.minStartDate}
+          resource={sidebarResource.fieldTicket}
         />
       )}
       {serviceLogDialog.open && (
         <ServiceLogDialog
-          fieldTicketID={fieldTicketData?._id}
+          referenceId={fieldTicketData?._id}
           id={serviceLogDialog?.data?._id}
           serviceName={serviceLogDialog?.data?.serviceDetail?.serviceName}
           onClose={() => {
             setServiceLogDialog({ open: false, data: null });
           }}
+          onSuccess={() => {
+            fetchMaterial();
+          }}
           allowedToEdit={allowedToEdit}
           fetchRecords={fetchData}
+          resource={sidebarResource.fieldTicket}
         />
       )}
       {deleteServiceLogConfirmDialog.open && (

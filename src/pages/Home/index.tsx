@@ -1,4 +1,3 @@
-import { kebabCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import dynamicFormImage from 'src/assets/dashboard_images/sidebar/dynamic-form.png';
 import equiptGenieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
@@ -40,21 +39,12 @@ function Dashboard() {
     setSections(data);
   }, [user, selectedEntity]);
 
-  const handleRoutes = (item) => {
-    switch (item.name) {
-      case 'Pos':
-        return routes.pos.path;
-      default:
-        return `/${kebabCase(item.name)}`;
-    }
-  };
-
   return (
     <Fragment>
       <div className={` ${styles.contentWrapper}`}>
         <div className={cn(styles.main, '[--gap:25px]')}>
           <div className={styles.leftContainer}>
-            <DisplayCardGrid sections={sections} handleRoutes={handleRoutes} />
+            <DisplayCardGrid sections={sections} />
             {!isOffline && <Chart />}
           </div>
           <div>
@@ -77,7 +67,7 @@ function Dashboard() {
                 />
               )}
               <UserFavouriteCard />
-              <WorkspaceCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} />
+              <WorkspaceCard objBySectionName={objBySectionName} />
               {formPermission && (
                 <SideCard
                   heading="Dynamic Forms"
@@ -91,8 +81,8 @@ function Dashboard() {
                   gradientColors={['#ffd064', '#f4fbff']}
                 />
               )}
-              <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setup & Administration" />
-              <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="User Manual" />
+              <DisplaySideCard objBySectionName={objBySectionName} mode="Setup & Administration" />
+              <DisplaySideCard objBySectionName={objBySectionName} mode="User Manual" />
             </div>
           </div>
         </div>

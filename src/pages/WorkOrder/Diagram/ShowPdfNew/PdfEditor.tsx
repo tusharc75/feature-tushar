@@ -7,8 +7,9 @@ import { cn, convertBlobToBase64 } from 'src/constants/helpers';
 import Editor, { EditorRef } from 'src/pages/WorkOrder/Diagram/ImageEditor/Editor';
 import { backendApi } from 'src/config';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { download } from 'src/components/Activity/AttachmentsNew/helper';
 
-const PdfEditor = ({ data, fetchData, setSelectedFile, handleClose = null }) => {
+const PdfEditor = ({ data, handleClose }) => {
   const editorRef = useRef<EditorRef>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setSubmitting] = useState(false);
@@ -35,7 +36,7 @@ const PdfEditor = ({ data, fetchData, setSelectedFile, handleClose = null }) => 
         Authorization: `Bearer ${localStorage.token}`
       };
 
-      const response = await fetch(`${backendApi}/user/pdf?fileName=${encodeURIComponent(data?.fileName)}`, {
+      const response = await fetch(`${backendApi}/user/pdf?id=${encodeURIComponent(data?._id)}`, {
         method: 'GET',
         headers
       });
@@ -140,37 +141,14 @@ const PdfEditor = ({ data, fetchData, setSelectedFile, handleClose = null }) => 
         }
       }
 
-      await axiosInstance().post('/user/pdf', {
-        images: imageData,
-        fileName: data?.fileName,
-        attachmentId: data?._id
-      });
-      await axiosInstance().put(`/attachment/replace/${data?._id}`, {
-        oldUrl: data?.fileName,
-        url: data?.fileName
-      });
-      setSelectedFile(null);
-      fetchData();
+      await axiosInstance().post('/user/pdf', { images: imageData, id: data?._id });
+      loadPdfPages()
+
     } catch (err) {
-      console.error('Save failed:', err);
+      toastConfig.setToastConfig(err)
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const handleDownload = () => {
-    axiosInstance()
-      .get(`/user/download?fileName=${encodeURIComponent(data?.fileName)}`, { responseType: 'blob' })
-      .then((res) => {
-        const blobData = new Blob([res.data], { type: 'application/pdf' });
-        const url = window.URL.createObjectURL(blobData);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `${data?.fileName}`);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-      });
   };
 
   const handleNextPage = async () => {
@@ -209,7 +187,9 @@ const PdfEditor = ({ data, fetchData, setSelectedFile, handleClose = null }) => 
           <ThemeButton disabled={isSubmitting || loading || !allPagesLoaded} isLoading={isSubmitting} buttonType="theme" onClick={handleSave}>
             Save
           </ThemeButton>
-          <ThemeButton disabled={loading || !allPagesLoaded} onClick={handleDownload} buttonType="theme">
+          <ThemeButton disabled={loading || !allPagesLoaded} onClick={() => {
+            download(data, toastConfig)
+          }} buttonType="theme">
             Download
           </ThemeButton>
           {typeof handleClose === 'function' && (

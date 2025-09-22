@@ -379,7 +379,7 @@ const RentalManagementDetailsPage = () => {
   const handleDownload = () => {
     setIsDownloading(true);
     axiosInstance()
-      .get(`/download-attachment?referenceType=rentalManagement&referenceId=${rentalManagementData?._id}`, {
+      .get(`/download-attachment?resource=${sidebarResource.rentalManagement}&referenceId=${rentalManagementData?._id}`, {
         responseType: 'blob'
       })
       .then(({ data }) => {

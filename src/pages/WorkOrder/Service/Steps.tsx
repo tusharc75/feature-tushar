@@ -3,7 +3,7 @@ import { Box, Checkbox, Chip, IconButton, Menu, MenuItem, useMediaQuery } from '
 import Grid from '@mui/material/Grid2';
 import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
-import { isArray, isEmpty, isEqual } from 'lodash';
+import { isArray, isEqual } from 'lodash';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { AiOutlinePlus } from 'react-icons/ai';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -17,7 +17,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
-  ACTIVITY_RESOURCE,
   ATTACHMENT_TYPE,
   cn,
   convertMsToTime,
@@ -46,9 +45,9 @@ import CompleteDialog from './CompleteDialog';
 import ServiceFieldValueDialog from './ServiceFieldValueDialog';
 import StepFieldsDialog from './StepFieldsDialog';
 import CustomMessageDialog from 'src/components/MessageDialog';
-import Diagram from 'src/pages/WorkOrder/Diagram';
 import Consumables from 'src/pages/WorkOrder/Consumables';
 import CustomCollapsible from 'src/components/CustomCollapsible';
+import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
 
 export interface StepDataInterface {
   _id: string;
@@ -1593,7 +1592,7 @@ const Steps = ({
                           className="border-b-0 border-t"
                         >
                           <div className="p-4">
-                            <Diagram
+                            {/* <Diagram
                               fullHeight={false}
                               showContainer={false}
                               resource={ACTIVITY_RESOURCE.workOrder}
@@ -1603,6 +1602,19 @@ const Steps = ({
                               attachmentType={ATTACHMENT_TYPE.drawing}
                               showMaterialFilter={false}
                               uniqueId={selectedService?.uniqueId}
+                              stepId={step._id}
+                            /> */}
+                            <DiagramNew
+                              fullHeight={false}
+                              showContainer={false}
+                              resource={sidebarResource.workOrder}
+                              referenceId={workOrderId}
+                              currentVersion={workOrderData?.versions?.length + 1 || 1}
+                              resourceData={workOrderData}
+                              resourceLabel={workOrderData?.workOrderNumber}
+                              attachmentType={ATTACHMENT_TYPE.drawing}
+                              showMaterialFilter={false}
+                              uniqueId={selectedService.uniqueId}
                               stepId={step._id}
                             />
                           </div>
@@ -1861,7 +1873,7 @@ const Steps = ({
                 referenceLabel={attchmentsDialog.serviceName}
                 uniqueId={attchmentsDialog.uniqueServiceId}
                 stepId={attchmentsDialog.stepId}
-                resource={ACTIVITY_RESOURCE.workOrder}
+                resource={sidebarResource.workOrder}
               />
             )}
             {consumablesDialog.open && (
@@ -2038,7 +2050,7 @@ const Steps = ({
           handleClose={() => {
             setShowDrawing(false);
           }}
-          resource={ACTIVITY_RESOURCE.workOrder}
+          resource={sidebarResource.workOrder}
           attachmentType={ATTACHMENT_TYPE.drawing}
         />
       )}

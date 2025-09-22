@@ -45,7 +45,7 @@ const Activity = (props) => {
     resourceLabel = '',
     resourceData = null,
     resource = '',
-    close = () => {}
+    close = () => { }
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -127,7 +127,7 @@ const Activity = (props) => {
     axiosInstance()
       .get(`/activity/resource/count?relatedTo=${JSON.stringify(viewRelatedTo)}`)
       .then(({ data: { data } }) => {
-        setTotalCount({ ...data, ...(import.meta.env.VITE_APP_ATTACHMENT === 'new' ? { Attachment: data?.AttachmentNew } : {}) });
+        setTotalCount(data);
         setCountFetched(true);
       })
       .catch((err) => {
@@ -288,7 +288,7 @@ const Activity = (props) => {
                   {type === 'Email' && data === 'Email' ? (
                     <Email relatedTo={viewRelatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
-                  {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT != 'new' ? (
+                  {/* {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' ? (
                     <Attachments
                       relatedTo={viewRelatedTo}
                       resourceLabel={resourceLabel}
@@ -296,10 +296,8 @@ const Activity = (props) => {
                       handleActivityRefresh={handleActivityRefresh}
                       onSetCount={handleSetCount}
                     />
-                  ) : null}
-                  {(type === 'Attachment' || type === 'AttachmentFolder') &&
-                  data === 'Attachment' &&
-                  import.meta.env.VITE_APP_ATTACHMENT === 'new' ? (
+                  ) : null} */}
+                  {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' ? (
                     <AttachmentsNew
                       resource={sidebarResource[resource] || startCase(resource)}
                       referenceId={resourceId}
@@ -332,7 +330,7 @@ const Activity = (props) => {
           TransitionComponent={CustomDialogTransition}
           open={open}
           aria-labelledby="customized-dialog-title"
-          maxWidth={type === 'AttachmentFolder' && import.meta.env.VITE_APP_ATTACHMENT === 'new' ? 'xs' : 'md'}
+          maxWidth={type === 'AttachmentFolder' ? 'xs' : 'md'}
           onClose={(e, reason) => {
             if (reason !== 'backdropClick') {
               handleClose();
@@ -422,7 +420,7 @@ const Activity = (props) => {
               showManimizeMaximize={true}
             />
           ) : null}
-          {type === 'AttachmentFolder' && import.meta.env.VITE_APP_ATTACHMENT === 'new' && (
+          {type === 'AttachmentFolder' && (
             <ManageFolder
               onClose={() => {
                 handleClose();
@@ -440,9 +438,13 @@ const Activity = (props) => {
               showManimizeMaximize={true}
             />
           )}
-          {type === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT === 'new' && (
+          {type === 'Attachment' && (
             <ManageFile
               onClose={() => {
+                setOpen(false)
+                setFullScreen(false);
+              }}
+              onSuccess={() => {
                 handleClose();
                 setFullScreen(false);
               }}
@@ -454,7 +456,7 @@ const Activity = (props) => {
               showManimizeMaximize={true}
             />
           )}
-          {type === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT != 'new' ? (
+          {/* {type === 'Attachment' ? (
             <ManageAttachment
               attachmentId={null}
               handleClose={() => {
@@ -469,7 +471,7 @@ const Activity = (props) => {
               showManimizeMaximize={true}
             />
           ) : null}
-          {type === 'AttachmentFolder' && import.meta.env.VITE_APP_ATTACHMENT != 'new' && (
+          {type === 'AttachmentFolder' && (
             <ManageAttachment
               attachmentId={null}
               handleClose={() => {
@@ -484,7 +486,7 @@ const Activity = (props) => {
               showManimizeMaximize={true}
               type="folder"
             />
-          )}
+          )} */}
         </Dialog>
       </Box>
       {showHistory ? (

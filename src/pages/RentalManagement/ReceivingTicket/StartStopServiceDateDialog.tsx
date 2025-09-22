@@ -4,12 +4,12 @@ import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { CustomDialogTransition, displayDate, normalizeDate } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDate, normalizeDate, sidebarResource } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { useEffect, useState } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, loading, minStartDate = null, maxEndDate = null }) => {
+const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, loading, minStartDate = null, maxEndDate = null, resource = null }) => {
   const [initialValues, setInitialValues] = useState(null);
 
   useEffect(() => {
@@ -32,10 +32,10 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
       errors['endDate'] = `Please enter valid end date`;
     }
     if (minStartDate && normalizeDate(values?.startDate) < normalizeDate(minStartDate)) {
-      errors['startDate'] = `Actual Start Date can't be less than ${displayDate(minStartDate)}`;
+      errors['startDate'] = `${resource === sidebarResource.fieldTicket ? '' : 'Actual'} Start Date can't be less than ${displayDate(minStartDate)}`;
     }
     if (maxEndDate && normalizeDate(values?.endDate) > normalizeDate(maxEndDate)) {
-      errors['endDate'] = `Actual End Date can't be greater than ${displayDate(maxEndDate)}`;
+      errors['endDate'] = `${resource === sidebarResource.fieldTicket ? '' : 'Actual'} End Date can't be greater than ${displayDate(maxEndDate)}`;
     }
     return errors;
   };
@@ -63,7 +63,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
         {({ values, errors, touched, setFieldValue, submitForm }) => (
           <Form>
             <CustomDialogHeader
-              title={`Set Actual ${type === 'start' ? 'Start' : type === 'startStop' ? 'Start/End' : 'End'} Date`}
+              title={`Set ${resource === sidebarResource.fieldTicket ? '' : 'Actual'} ${type === 'start' ? 'Start' : type === 'startStop' ? 'Start/End' : 'End'} Date`}
               onClose={onClose}
             />
             <CustomDialogContent>
@@ -79,7 +79,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                         errors={errors}
                         touched={touched}
                         type="date"
-                        label={`Actual Start Date`}
+                        label={`${resource === sidebarResource.fieldTicket ? '' : 'Actual'} Start Date`}
                         name="startDate"
                         onChange={(date) => {
                           setFieldValue('startDate', date);
@@ -98,7 +98,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                         errors={errors}
                         touched={touched}
                         type="date"
-                        label={`Actual End Date`}
+                        label={`${resource === sidebarResource.fieldTicket ? '' : 'Actual'} End Date`}
                         name="endDate"
                         onChange={(date) => {
                           setFieldValue('endDate', date);
@@ -112,18 +112,10 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
-              <ThemeButton
-                onClick={onClose}
-                buttonType='transparent'
-              >
+              <ThemeButton onClick={onClose} buttonType="transparent">
                 Close
               </ThemeButton>
-              <ThemeButton
-                onClick={submitForm}
-                disabled={loading}
-                buttonType='theme'
-                isLoading={loading}
-              >
+              <ThemeButton onClick={submitForm} disabled={loading} buttonType="theme" isLoading={loading}>
                 Save
               </ThemeButton>
             </CustomDialogFooter>

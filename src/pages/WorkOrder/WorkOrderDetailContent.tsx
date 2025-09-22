@@ -36,7 +36,6 @@ import {
   workOrder
 } from 'src/constants/helpers';
 import Consumables from './Consumables';
-import Diagram from './Diagram';
 import ManageWorkOrder from './ManageWorkOrder';
 import Service from './Service';
 import Versions from './Versions';
@@ -52,6 +51,7 @@ import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeReq
 import InfoIcon from '@mui/icons-material/Info';
 import PreviewDownloadNew from 'src/components/PreviewDownloadNew';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
 
 type ToolbarMenuItem = {
   type: 'menuItem';
@@ -835,11 +835,21 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
           {workOrderData && (
-            <Diagram
-              resource={ACTIVITY_RESOURCE.workOrder}
+            // <Diagram
+            //   resource={ACTIVITY_RESOURCE.workOrder}
+            //   referenceId={id}
+            //   currentVersion={workOrderData?.versions?.length + 1 || 1}
+            //   resourceData={workOrderData}
+            //   attachmentType={ATTACHMENT_TYPE.drawing}
+            //   showMaterialFilter={true}
+            //   defaultSelectedUniqueId={defaultSelectedService}
+            // />
+            <DiagramNew
+              resource={sidebarResource.workOrder}
               referenceId={id}
-              currentVersion={workOrderData?.versions?.length + 1 || 1}
               resourceData={workOrderData}
+              resourceLabel={workOrderData?.workOrderNumber}
+              currentVersion={workOrderData?.versions?.length + 1 || 1}
               attachmentType={ATTACHMENT_TYPE.drawing}
               showMaterialFilter={true}
               defaultSelectedUniqueId={defaultSelectedService}

@@ -28,7 +28,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import MenuWithGroupping, { ActionMenuItem } from 'src/components/MenuWithGroupping';
 import {
-  ACTIVITY_RESOURCE,
   ATTACHMENT_TYPE,
   MATERIAL_SUB_TYPE,
   MATERIAL_TYPE,
@@ -46,7 +45,6 @@ import ConfigureFields from 'src/pages/ServiceMaster/Fields';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
 import Consumables from 'src/pages/WorkOrder/Consumables';
-import Diagram from 'src/pages/WorkOrder/Diagram';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import Quotation from '../Quotation';
@@ -59,6 +57,7 @@ import RenderService, { ServicesButtons } from './RenderServices';
 import Steps from './Steps';
 import StepsInOtherServices from './StepsInOtherService';
 import ViewServiceStepDataDialog from './ViewServiceStepDataDialog';
+import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
 
 const Service = ({
   workOrderId,
@@ -701,13 +700,26 @@ const Service = ({
                       element="li"
                     >
                       <div className="p-4">
-                        <Diagram
+                        {/* <Diagram
                           fullHeight={false}
                           showContainer={false}
                           resource={ACTIVITY_RESOURCE.workOrder}
                           referenceId={workOrderId}
                           currentVersion={workOrderData?.versions?.length + 1 || 1}
                           resourceData={workOrderData}
+                          attachmentType={ATTACHMENT_TYPE.drawing}
+                          showMaterialFilter={false}
+                          uniqueId={selectedService.uniqueId}
+                          stepId={null}
+                        /> */}
+                        <DiagramNew
+                          fullHeight={false}
+                          showContainer={false}
+                          resource={sidebarResource.workOrder}
+                          referenceId={workOrderId}
+                          currentVersion={workOrderData?.versions?.length + 1 || 1}
+                          resourceData={workOrderData}
+                          resourceLabel={workOrderData?.workOrderNumber}
                           attachmentType={ATTACHMENT_TYPE.drawing}
                           showMaterialFilter={false}
                           uniqueId={selectedService.uniqueId}
@@ -1233,7 +1245,7 @@ const Service = ({
           referenceLabel={attchmentsDialog.serviceName}
           uniqueId={attchmentsDialog.uniqueServiceId}
           stepId={attchmentsDialog.stepId}
-          resource={ACTIVITY_RESOURCE.workOrder}
+          resource={sidebarResource.workOrder}
         />
       )}
       {showManagePurchaseOrder && (

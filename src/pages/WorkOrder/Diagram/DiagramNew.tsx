@@ -5,7 +5,7 @@ import { useContext, useEffect, useState } from "react";
 import { isMobile, isTablet } from "react-device-detect";
 import { CiFileOn } from "react-icons/ci";
 import axiosInstance from "src/axios/axiosInstance";
-import { allAttachmentsAreFromUser, getTitle, sortFileStructure, TNestedTree, unflatten } from "src/components/Activity/AttachmentsNew/helper";
+import { allAttachmentsAreFromUser, download, getTitle, sortFileStructure, TNestedTree, unflatten } from "src/components/Activity/AttachmentsNew/helper";
 import ManageFile from "src/components/Activity/AttachmentsNew/ManageFile";
 import ManageFolder from "src/components/Activity/AttachmentsNew/ManageFolder";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
@@ -216,10 +216,11 @@ const DiagramNew = ({
       });
   };
 
-  const handleClickNew = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClickFileOrFolderUpload = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleCloseNew = () => {
+
+  const handleCloseFileOrFolderUpload = () => {
     setAnchorEl(null);
   };
 
@@ -287,44 +288,13 @@ const DiagramNew = ({
                 <>
                   <ThemeButton
                     buttonType="theme"
-                    onClick={handleClickNew}
-                    iconForMobile={<Add />}
+                    onClick={handleClickFileOrFolderUpload}
+                    iconForMobile={<Add fontSize="small" />}
                     mobileTooltip="New"
+                    startIcon={<Add fontSize="small" />}
                   >
-                    <Add /> New
+                    New
                   </ThemeButton>
-                  <Menu
-                    id="new-menu"
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={handleCloseNew}
-                    MenuListProps={{
-                      'aria-labelledby': 'new-button'
-                    }}
-                  >
-                    <MenuItem
-                      onClick={() => {
-                        setAttachemntDialog({ open: true, type: 'folder', data: null, isUpdate: false });
-                        handleCloseNew();
-                      }}
-                    >
-                      <ListItemIcon>
-                        <CreateNewFolderIcon color="primary" fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText>New Folder</ListItemText>
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        setAttachemntDialog({ open: true, type: 'file', data: null, isUpdate: false });
-                        handleCloseNew();
-                      }}
-                    >
-                      <ListItemIcon>
-                        <UploadFileIcon color="primary" fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText>File Upload</ListItemText>
-                    </MenuItem>
-                  </Menu>
                 </>
               )}
             </div>
@@ -354,24 +324,54 @@ const DiagramNew = ({
               {treeStructure?.length === 0 && (
                 <div className="mx-auto mt-4 h-full w-full rounded-md  border-2 border-dashed bg-transparent text-center">
                   <CiFileOn size={100} className="mx-auto mt-5 block select-none text-gray-400 dark:text-gray-500" />
-                  <p className="mb-5 select-none text-sm text-gray-400 dark:text-gray-500">No files uploaded</p>
+                  <p className="mb-5 select-none text-sm text-gray-400 dark:text-gray-500">No files or folders uploaded</p>
                   <span className="mx-auto block">
                     <ThemeButton
                       buttonType="theme"
                       startIcon={<Add />}
-                      onClick={() => {
-                        setAttachemntDialog({ open: true, type: 'file', data: null, isUpdate: false });
-                      }}
+                      onClick={handleClickFileOrFolderUpload}
                     >
                       Add
                     </ThemeButton>
                   </span>
-                  <p className="mb-5 mt-2 text-center text-sm text-gray-500 dark:text-gray-300">Click Add to upload files</p>
+                  <p className="mb-5 mt-2 text-center text-sm text-gray-500 dark:text-gray-300">Click Add to upload files or folders</p>
                 </div>
               )}
             </div>
           </Box>
         </Box>
+        <Menu
+          id="file-folder-menu"
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleCloseFileOrFolderUpload}
+          MenuListProps={{
+            'aria-labelledby': 'new-button'
+          }}
+        >
+          <MenuItem
+            onClick={() => {
+              setAttachemntDialog({ open: true, type: 'folder', data: null, isUpdate: false });
+              handleCloseFileOrFolderUpload();
+            }}
+          >
+            <ListItemIcon>
+              <CreateNewFolderIcon color="primary" fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>New Folder</ListItemText>
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setAttachemntDialog({ open: true, type: 'file', data: null, isUpdate: false });
+              handleCloseFileOrFolderUpload();
+            }}
+          >
+            <ListItemIcon>
+              <UploadFileIcon color="primary" fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>File Upload</ListItemText>
+          </MenuItem>
+        </Menu>
       </Box>
       {attachemntDialog.open && (
         <Dialog
@@ -394,7 +394,11 @@ const DiagramNew = ({
                 setAttachemntDialog({ open: false, type: '', data: null, isUpdate: false });
                 setFullScreen(false);
               }}
-              fetchData={fetchData}
+              onSuccess={() => {
+                fetchData()
+                setAttachemntDialog({ open: false, type: '', data: null, isUpdate: false });
+                setFullScreen(false);
+              }}
               relatedTo={getRelatedTo()}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
@@ -506,15 +510,11 @@ const DiagramNew = ({
             {checkImageUrl(selectedFile?.fileName) ? (
               <ImageEditor
                 data={selectedFile}
-                fetchData={fetchData}
-                setSelectedFile={setSelectedFile}
                 handleClose={() => setSelectedFile(null)}
               />
             ) : checkpdfType(selectedFile?.fileName?.split('.')[1]) ? (
               <PdfEditor
                 data={selectedFile}
-                fetchData={fetchData}
-                setSelectedFile={setSelectedFile}
                 handleClose={() => setSelectedFile(null)}
               />
             ) : (
@@ -600,32 +600,6 @@ const RenderFolder = ({ node, setAttachemntDialog, disableEdit, setOpenDelete, s
 
   const [open, setOpen] = useState(false);
 
-  const downloadZip = (folder) => {
-    toastConfig.setToastConfig({
-      open: true,
-      type: 'info',
-      message: `Downloading, Please wait...`
-    });
-    axiosInstance()
-      .get(`/attachment-new/download/zip/${folder?._id}`, { responseType: 'blob' })
-      .then(({ data }) => {
-        const url = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', folder?.name ? `${folder?.name}.zip` : 'download.zip');
-        document.body.appendChild(link);
-        link.click();
-        toastConfig.setToastConfig({
-          message: 'Downloaded Successfully',
-          open: true,
-          type: 'success'
-        });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
-
   return (
     <div
       key={node?._id}
@@ -687,7 +661,7 @@ const RenderFolder = ({ node, setAttachemntDialog, disableEdit, setOpenDelete, s
               color="inherit"
               onClick={(e) => {
                 e.stopPropagation();
-                downloadZip(node);
+                download(node, toastConfig);
               }}
             >
               <GetAppIcon fontSize="small" color="primary" />
@@ -752,38 +726,6 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
   }: any = useData();
 
   const [open, setOpen] = useState(false);
-
-  const downloadFile = (file) => {
-    toastConfig.setToastConfig({
-      open: true,
-      type: 'info',
-      message: `File is Downloading, Please wait...`
-    });
-    axiosInstance()
-      .get(`user/download`, {
-        params: {
-          fileName: file?.fileName
-        },
-        responseType: 'blob',
-        onDownloadProgress: (progressEvent) => {
-          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-          if (percentCompleted === 100) {
-            toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
-          }
-        }
-      })
-      .then(({ data }) => {
-        const url = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', file.name);
-        document.body.appendChild(link);
-        link.click();
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
 
   const viewFile = (fileName) => {
     toastConfig.setToastConfig({
@@ -857,7 +799,7 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
               color="inherit"
               onClick={(e) => {
                 e.stopPropagation();
-                downloadFile(node);
+                download(node, toastConfig);
               }}
             >
               <GetAppIcon fontSize="small" color="primary" />
@@ -937,58 +879,52 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
       </div>
       <Collapse in={open} unmountOnExit>
         {imageExtensions.includes(extension) && (
-          <ImagePreview name={node?.name} url={node?.fileName} onFileClick={() => setSelectedFile(node)} />
+          <ImagePreview file={node} setSelectedFile={setSelectedFile} />
         )}
       </Collapse>
     </div >
   );
 };
 
-type ImagePreviewProps = {
-  name: string;
-  url: string;
-  onFileClick: () => void;
-};
-
-const ImagePreview = ({ name, url, onFileClick }: ImagePreviewProps) => {
+const ImagePreview = ({ file, setSelectedFile }) => {
   const toastConfig = useContext(CustomToastContext);
   const [src, setSrc] = useState(null);
   const [progress, setProgress] = useState(-1);
 
-  useEffect(() => {
-    const viewFile = async () => {
-      try {
-        const { data } = await axiosInstance().get(`user/download?fileName=${encodeURIComponent(url)}`, {
-          responseType: 'blob',
-          onDownloadProgress: (progressEvent) => {
-            let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-            setProgress(percentCompleted);
-            if (percentCompleted === 100) {
-              setTimeout(() => {
-                setProgress(-1);
-              }, 100);
-            }
+  const viewFile = () => {
+    axiosInstance()
+      .get(`/attachment-new/download?id=${file?._id}`, {
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+          setProgress(percentCompleted);
+          if (percentCompleted === 100) {
+            setTimeout(() => {
+              setProgress(-1);
+            }, 100);
           }
-        });
+        }
+      }).then(({ data }) => {
         setSrc(URL.createObjectURL(new Blob([data])));
-      } catch (error) {
-        toastConfig.setToastConfig(error);
-      }
-    };
+      }).catch(err => {
+        toastConfig.setToastConfig(err);
+      })
+  }
 
-    viewFile();
-  }, [url, toastConfig]);
+  useEffect(() => {
+    viewFile()
+  }, [file]);
 
   return (
     <div
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        onFileClick();
+        setSelectedFile(file)
       }}
       className="mb-[--py] flex h-[500px]  max-w-fit items-center justify-center overflow-hidden px-[--px]"
     >
-      {src ? <img src={src} alt={name} className="mr-auto max-h-full max-w-full" /> : <p>Loading...{progress >= 0 ? progress : 0}%</p>}
+      {src ? <img src={src} alt={file?.name} className="mr-auto max-h-full max-w-full" /> : <p>Loading...{progress >= 0 ? progress : 0}%</p>}
     </div>
   );
 };

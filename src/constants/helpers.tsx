@@ -883,7 +883,7 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
 
   const obj = {};
   for (const key of fields) {
-    let value = key.isDefaultValue ? (key.defaultValue === 'Current User' && user?.user?._id ? user?.user?._id : key.defaultValue) : val;
+    let value = key?.isDefaultValue ? (key?.defaultValue === 'Current User' && user?.user?._id ? user?.user?._id : key.defaultValue) : val;
 
     if (key.type === 'dropDown') {
       let option = key.option?.find((data: any) => data.default === true);
@@ -3108,6 +3108,12 @@ export const EXPENSE_STATUS = {
   draft: 'Draft',
   recalled: 'Recalled'
 };
+
+export const ASSET_SERVICE_TICKET_STATUS = {
+  open: 'Open',
+  inProgress: 'In-Progress',
+  closed: 'Closed'
+}
 
 export const PRICING_TYPE = [
   { optionLabel: 'Rent', optionValue: 'Rent' },

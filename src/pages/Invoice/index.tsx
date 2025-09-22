@@ -39,6 +39,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import StarIcon from '@mui/icons-material/Star';
 
 let invoiceTimeout;
 
@@ -70,9 +71,9 @@ const Invoice = () => {
   const [pdfColumns, setPdfColumns] = useState([]);
   const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
-  const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<'proforma' | 'invoices' | null>(() => {
-    return (localStorage.getItem(`${user?.user?._id}_invoice_type`) as 'proforma' | 'invoices' | null) || null;
-  });
+  const [invoiceTypeFilter, setInvoiceTypeFilter] = useState<'proforma' | 'invoices' | null>(null);
+  const [defaultSelectedData, setDefaultSelectedData] = useState(null);
+  const [isLoadingDefaultSelectedData, setIsLoadingDefaultSelectedData] = useState(true);
   const [isInvoiceTypeFilterVisible, setIsInvoiceTypeFilterVisible] = useState(false);
 
   const types = [
@@ -104,6 +105,20 @@ const Invoice = () => {
 
   useEffect(() => {
     fetchPolicy();
+  }, []);
+
+  useEffect(() => {
+    setIsLoadingDefaultSelectedData(true)
+    axiosInstance().get(`/user-default-selections?resource=${sidebarResource.invoice}`)
+      .then(({ data: { data } }) => {
+        setDefaultSelectedData(data);
+        setInvoiceTypeFilter(data?.documentType || null);
+        setIsLoadingDefaultSelectedData(false)
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsLoadingDefaultSelectedData(false)
+      });
   }, []);
 
   const fetchPolicy = async () => {
@@ -185,23 +200,26 @@ const Invoice = () => {
   };
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (invoiceTimeout) {
-      clearTimeout(invoiceTimeout);
+    if (!isLoadingDefaultSelectedData) {
+      let millisec = Object.keys(search).length > 0 ? 600 : 5;
+      if (invoiceTimeout) {
+        clearTimeout(invoiceTimeout);
+      }
+      invoiceTimeout = setTimeout(() => {
+        fetchData();
+      }, millisec);
     }
-
-    invoiceTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
+  }, [search, isLoadingDefaultSelectedData]);
 
   useEffect(() => {
-    if (renderCount > 0) {
-      const cancelTokenSource = axios.CancelToken.source();
-      fetchData(cancelTokenSource);
-      return () => cancelTokenSource.cancel();
-    } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly, invoiceTypeFilter]);
+    if (!isLoadingDefaultSelectedData) {
+      if (renderCount > 0) {
+        const cancelTokenSource = axios.CancelToken.source();
+        fetchData(cancelTokenSource);
+        return () => cancelTokenSource.cancel();
+      } else setRenderCount((preCount) => preCount + 1);
+    }
+  }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly, isLoadingDefaultSelectedData, invoiceTypeFilter]);
 
   const handleDelete = () => {
     setIsSubmitting(true);
@@ -378,10 +396,21 @@ const Invoice = () => {
     return statusOptions[currIdx + 1]?.optionValue !== status;
   };
 
+  const handleSetDefaultSelected = async (data) => {
+    try {
+      await axiosInstance().put(`/user-default-selections`, {
+        resource: sidebarResource.invoice,
+        ...data
+      }).then(({ data: { data } }) => {
+        setDefaultSelectedData(data);
+      });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   const handleInvoiceTypeChange = (value: 'proforma' | 'invoices' | null) => {
     setInvoiceTypeFilter(value);
-    localStorage.setItem(`${user.user._id}_invoice_type`, value);
-
   };
 
   const ActionMenuItems = () => {
@@ -500,9 +529,11 @@ const Invoice = () => {
             <LeftSideContents
               accountDetails={accountDetails}
               setAccountDetails={setAccountDetails}
+              defaultSelectedData={defaultSelectedData}
               invoiceTypeFilter={invoiceTypeFilter}
               handleInvoiceTypeChange={handleInvoiceTypeChange}
               isInvoiceTypeFilterVisible={isInvoiceTypeFilterVisible}
+              handleSetDefaultSelected={handleSetDefaultSelected}
             />
           }
           searchValue={search}
@@ -580,7 +611,9 @@ const LeftSideContents = ({
   setAccountDetails,
   invoiceTypeFilter,
   handleInvoiceTypeChange,
-  isInvoiceTypeFilterVisible
+  defaultSelectedData,
+  isInvoiceTypeFilterVisible,
+  handleSetDefaultSelected
 }) => {
 
   const invoiceTypeOptions = [
@@ -617,6 +650,29 @@ const LeftSideContents = ({
           renderInput={(params) => (
             <TextField {...params} label="Document Type" variant="outlined" />
           )}
+          renderOption={(props, option) => {
+            const isFavorite = defaultSelectedData?.documentType === option.value;
+            return (
+              <li {...props}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                  {option.label}
+                  <HtmlTooltip title={isFavorite ? 'Remove from default' : 'Set as default'}>
+                    <IconButton
+                      size="small"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleSetDefaultSelected({
+                          documentType: isFavorite ? null : option.value
+                        });
+                      }}
+                    >
+                      <StarIcon sx={{ color: isFavorite ? 'gold' : 'grey.400' }} />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
+              </li>
+            );
+          }}
           isOptionEqualToValue={(option, value) => option.value === value.value}
         />
       }
