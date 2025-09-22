@@ -226,7 +226,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                     state!.rows[rowIndex][colIndex] = val;
                 };
                 const onBlur = () => {
-                    persistRows(rootElement, onChange!);
+                    persistAll()
                     state!.focusedId = null;
                 };
                 input.addEventListener('input', onInput);
@@ -286,7 +286,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             });
         };
         const persistAll = () => {
-            if (!onChange) return;
+            if (!onChange && schema?.type !== 'myGridType') return;
             onChange([
                 { key: 'rows', value: JSON.parse(JSON.stringify(state!.rows)) },
                 { key: 'cols', value: state!.cols },
@@ -294,6 +294,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                 { key: 'rowHeights', value: JSON.parse(JSON.stringify(state!.rowHeights)) }
             ]);
         };
+
         const createColResizers = () => {
             const totalWidthPx = state!.colWidths!.reduce((a, b) => a + b, 0) || 1;
             let cumLeftPercent = 0;
