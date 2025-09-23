@@ -31,7 +31,6 @@ const DoaQuotationApproval = () => {
   const history = useHistory();
   const { id } = useParams();
   const [DOAData, setDOAData] = useState(null);
-  const [PDFName, setPDFName] = useState('');
   const [QStatus, setQStatus] = useState(true);
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
   const [quoteStatusChangeData, setQuoteStatusChangeData] = useState('');
