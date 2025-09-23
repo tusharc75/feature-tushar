@@ -71,7 +71,7 @@ import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubSt
 import SubStatusLog from 'src/pages/RentalManagement/LoadingTicket/SubStatusLog';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 import { TabPanel } from 'src/components/CustomTabs';
-import Technicians from 'src/pages/RentalManagement/TechnicianDispatchReturn';
+import TechnicianDispatchReturn from 'src/pages/RentalManagement/TechnicianDispatchReturn';
 
 const stepGlobalDataAdded = {
   createTicket: false,
@@ -1845,7 +1845,11 @@ const LoadingTicket = ({
         )}
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
-        <Technicians rentalManagementData={rentalManagementData} stepFullScreen={stepFullScreen} />
+        <TechnicianDispatchReturn
+          allowedToEdit={allowedToEdit}
+          rentalManagementData={rentalManagementData}
+          stepFullScreen={stepFullScreen}
+        />
       </TabPanel>
 
       <Menu
