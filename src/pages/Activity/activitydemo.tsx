@@ -22,10 +22,10 @@ const Activitydemo = () => {
 
   return (
     <Grid container spacing={3}>
-      <Grid size={{xs:4}}>
+      <Grid size={{ xs: 4 }}>
         <Activity relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} />
       </Grid>
-      <Grid size={{xs:4}}>
+      <Grid size={{ xs: 4 }}>
         {refresh && <UpcomingActivity relatedTo={relatedTo} />}
       </Grid>
     </Grid>

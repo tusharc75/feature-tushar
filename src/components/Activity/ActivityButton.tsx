@@ -64,14 +64,14 @@ const ActivityButton = ({
                   extraRelatedTo={
                     extraRelatedTo
                       ? {
-                          type: extraRelatedTo?.resource,
-                          referenceId: extraRelatedTo?.referenceId,
-                          access: true
-                        }
+                        type: extraRelatedTo?.resource,
+                        referenceId: extraRelatedTo?.referenceId,
+                        access: true
+                      }
                       : null
                   }
                   close={() => setActivityShow(false)}
-                  handleActivityRefresh={() => {}}
+                  handleActivityRefresh={() => { }}
                   emails={[]}
                   resourceData={resourceData}
                 />
