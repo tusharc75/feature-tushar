@@ -55,7 +55,7 @@ const useDesktopDM = () => {
         setLoading(false);
       }
     },
-    [toastConfig, user?._id]
+    [user?._id]
   );
 
   useEffect(() => {
