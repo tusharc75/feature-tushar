@@ -200,7 +200,7 @@ const DoaQuotationApproval = () => {
 
   const ViewQuote = () => {
     axiosInstance()
-      .get('/user/download?fileName=' + PDFName, {
+      .get(`/pdf/${DOAData.quotation}?resource=${sidebarResource.quotation}&uniqueId=${DOAData.versionId}`, {
         responseType: 'blob'
       })
       .then(({ data }) => {
