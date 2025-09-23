@@ -643,13 +643,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
                 ? ACTIVITY_RESOURCE.repairOrder
                 : workOrderData?.type === WORK_ORDER_TYPE.productionOrder
                   ? ACTIVITY_RESOURCE.productionOrder
-                  : ACTIVITY_RESOURCE.assemblyOrder,
-            label:
-              workOrderData?.type === WORK_ORDER_TYPE.repairOrder
-                ? workOrderData?.repairOrder?.optionLabel
-                : workOrderData?.type === WORK_ORDER_TYPE.productionOrder
-                  ? workOrderData?.productionOrder?.optionLabel
-                  : workOrderData?.assemblyOrder?.optionLabel,
+                  : ACTIVITY_RESOURCE.assemblyOrder
           }}
           resourceData={workOrderData}
         />

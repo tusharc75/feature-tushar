@@ -45,9 +45,7 @@ const Activity = (props) => {
     resourceLabel = '',
     resourceData = null,
     resource = '',
-    close = () => { },
-    newRelatedTo,
-    newExtraRelatedTo = []
+    close = () => { }
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -303,7 +301,7 @@ const Activity = (props) => {
                     <AttachmentsNew
                       resource={sidebarResource[resource] || startCase(resource)}
                       referenceId={resourceId}
-                      relatedTo={[...newRelatedTo, ...newExtraRelatedTo]}
+                      label={resourceLabel}
                       onSetCount={handleSetCount}
                     />
                   ) : null}
@@ -432,7 +430,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={[...newRelatedTo, ...newExtraRelatedTo]}
+              relatedTo={[{ resource: sidebarResource[resource] || startCase(resource), referenceId: resourceId, label: resourceLabel }]}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
@@ -450,7 +448,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={[...newRelatedTo, ...newExtraRelatedTo]}
+              relatedTo={[{ resource: sidebarResource[resource] || startCase(resource), referenceId: resourceId, label: resourceLabel }]}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
