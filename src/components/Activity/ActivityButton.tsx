@@ -5,7 +5,8 @@ import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Activity from '.';
 import HideWhenOffline from '../HideWhenOffline';
-import { cn } from 'src/constants/helpers';
+import { cn, sidebarResource } from 'src/constants/helpers';
+import { startCase } from 'lodash';
 
 const ActivityButton = ({
   referenceId,
@@ -64,14 +65,16 @@ const ActivityButton = ({
                   extraRelatedTo={
                     extraRelatedTo
                       ? {
-                          type: extraRelatedTo?.resource,
-                          referenceId: extraRelatedTo?.referenceId,
-                          access: true
-                        }
+                        type: extraRelatedTo?.resource,
+                        referenceId: extraRelatedTo?.referenceId,
+                        access: true
+                      }
                       : null
                   }
+                  newRelatedTo={[{ resource: sidebarResource[resource] || startCase(resource), referenceId: referenceId, label: resourceLabel, ...extraData }]}
+                  newExtraRelatedTo={extraRelatedTo ? [{ resource: sidebarResource[extraRelatedTo?.resource] || startCase(extraRelatedTo?.resource), referenceId: extraRelatedTo?.referenceId, label: extraRelatedTo?.label }] : []}
                   close={() => setActivityShow(false)}
-                  handleActivityRefresh={() => {}}
+                  handleActivityRefresh={() => { }}
                   emails={[]}
                   resourceData={resourceData}
                 />

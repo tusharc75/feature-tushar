@@ -7,6 +7,7 @@ const Activitydemo = () => {
   //current support type ["customerAccount","customerContact","supplierAccount","supplierContact","lead","opportunity"]
 
   const relatedTo = [{ type: 'customerAccount', referenceId: '605222343c58e828945d22db', access: true }];
+  const newRelatedTo = [{ resource: 'Customer Account', referenceId: '605222343c58e828945d22db', label: 'Demo' }];
 
   const [refresh, setRefresh] = useState(true);
   const handleActivityRefresh = () => {
@@ -22,10 +23,10 @@ const Activitydemo = () => {
 
   return (
     <Grid container spacing={3}>
-      <Grid size={{xs:4}}>
-        <Activity relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} />
+      <Grid size={{ xs: 4 }}>
+        <Activity relatedTo={relatedTo} newRelatedTo={newRelatedTo} handleActivityRefresh={handleActivityRefresh} />
       </Grid>
-      <Grid size={{xs:4}}>
+      <Grid size={{ xs: 4 }}>
         {refresh && <UpcomingActivity relatedTo={relatedTo} />}
       </Grid>
     </Grid>
