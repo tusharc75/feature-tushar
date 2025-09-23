@@ -23,10 +23,6 @@ const DMSRedirect = () => {
     window.open(createDmsUrl(), '_blank');
   };
 
-  if (!VITE_APP_DMS_URL) {
-    return null;
-  }
-
   return (
     <HtmlTooltip title={`Open EDrive`} className="inline-block">
       <span className="relative mx-2 inline-block rounded-full border border-blue-400 bg-blue-500/10 dark:border-blue-800">
