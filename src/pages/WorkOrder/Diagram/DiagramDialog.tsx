@@ -18,7 +18,8 @@ const DiagramDialog = ({
   resource,
   resourceLabel = '',
   attachmentType = null,
-  showMaterialFilter = false
+  showMaterialFilter = false,
+  hideAddNewFolder = false
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [resourceData, setResourceData] = useState(null);
@@ -74,20 +75,8 @@ const DiagramDialog = ({
             attachmentType={attachmentType}
             showMaterialFilter={showMaterialFilter}
             showContainer={false}
+            hideAddNewFolder={hideAddNewFolder}
           />
-          // <Diagram
-          //   height={'calc(100vh - 150px)'}
-          //   resource={resource}
-          //   referenceId={referenceId}
-          //   uniqueId={uniqueId}
-          //   stepId={stepId}
-          //   currentVersion={resource === ACTIVITY_RESOURCE.workOrder ? resourceData?.currentVersion : null}
-          //   resourceData={resourceData}
-          //   attachmentType={attachmentType}
-          //   referenceLabel={referenceLabel}
-          //   showMaterialFilter={showMaterialFilter}
-          //   showContainer={false}
-          // />
         ) : (
           <Grid container spacing={2}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />

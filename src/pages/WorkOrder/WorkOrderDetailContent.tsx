@@ -835,15 +835,6 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
           {workOrderData && (
-            // <Diagram
-            //   resource={ACTIVITY_RESOURCE.workOrder}
-            //   referenceId={id}
-            //   currentVersion={workOrderData?.versions?.length + 1 || 1}
-            //   resourceData={workOrderData}
-            //   attachmentType={ATTACHMENT_TYPE.drawing}
-            //   showMaterialFilter={true}
-            //   defaultSelectedUniqueId={defaultSelectedService}
-            // />
             <DiagramNew
               resource={sidebarResource.workOrder}
               referenceId={id}
