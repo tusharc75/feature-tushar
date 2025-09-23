@@ -127,7 +127,7 @@ const useDesktopDM = () => {
     let tokenSource = axios.CancelToken.source();
     socket?.on('newWorkSpaceChannel', () => {
       tokenSource = axios.CancelToken.source();
-      fetchData({ cancelToken: tokenSource.token });
+      //fetchData({ cancelToken: tokenSource.token });
     });
     socket?.on('newMessage', ({ channelId }) => {
       addNotifications(channelId, null);
