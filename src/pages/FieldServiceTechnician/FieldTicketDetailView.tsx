@@ -100,8 +100,7 @@ const FieldTicketDetailView = ({ id }) => {
             resourceLabel={fieldTicketData?.fieldTicketNumber}
             extraRelatedTo={{
               referenceId: fieldTicketData?.fieldServiceOrder?.optionValue,
-              resource: ACTIVITY_RESOURCE.fieldServiceOrder,
-              label: fieldTicketData?.fieldServiceOrder?.optionLabel
+              resource: ACTIVITY_RESOURCE.fieldServiceOrder
             }}
             resourceData={fieldTicketData}
           />
