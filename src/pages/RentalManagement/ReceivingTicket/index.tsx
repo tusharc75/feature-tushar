@@ -94,6 +94,7 @@ import FleetDispatchHistory from './FleetDispatchHistory';
 import Technicians from 'src/pages/RentalManagement/TechnicianDispatchReturn';
 import ResourceField from 'src/pages/DynamicForm/Step/View/ResourceField';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import FieldTicket from 'src/pages/FieldServiceOrder/FieldTicket';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -2941,12 +2942,14 @@ const ReceivingTicket = ({
       </TabPanel>
       <TabPanel value={tabValue} index={3}>
         <Box mt={1}>
-          <ResourceField
-            step={{ linkResourceField: 'rentalJob', linkResourceName: sidebarResource?.fieldTicket }}
-            renderedFrom={`${renderedFrom}_${camelCase(resources?.fieldTicket?.titlePlural)}`}
-            data={rentalManagementData}
-            referenceData={fetchReferenceData()}
-            stepFullScreen
+          <FieldTicket
+            resourceData={rentalManagementData}
+            resourceFields={rentalManagementFields}
+            allowedToEdit={allowedToEdit}
+            handleChangeStatus={() => { }}
+            resource={sidebarResource.rentalManagement}
+            fetchResourceData={fetchRentalData}
+            noQuotationCheck={true}
           />
         </Box>
       </TabPanel>
