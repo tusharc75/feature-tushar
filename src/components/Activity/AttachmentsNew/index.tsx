@@ -28,7 +28,7 @@ import { TbEdit } from "react-icons/tb";
 import UpdateDetailsDialog from "src/components/Activity/AttachmentsNew/UpdateDetailsDialog";
 import { VITE_APP_DMS_URL } from "src/config";
 
-const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
+const AttachmentsNew = ({ resource, referenceId, relatedTo, onSetCount }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -373,7 +373,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
               setOpen({ open: false, type: '', data: null, isUpdate: false });
               setFullScreen(false);
             }}
-            relatedTo={[{ resource: resource, referenceId: referenceId, label: label }]}
+            relatedTo={relatedTo}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);
@@ -393,7 +393,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
               setOpen({ open: false, type: '', data: null, isUpdate: false });
               setFullScreen(false);
             }}
-            relatedTo={[{ resource: resource, referenceId: referenceId, label: label }]}
+            relatedTo={relatedTo}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);
