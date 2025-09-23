@@ -39,7 +39,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
 
   useEffect(() => {
     fetchColumn();
-  }, [step]);
+  }, [step?.linkResourceName, step?.linkResourceField]);
 
   const fetchColumn = async () => {
     setColumns(null);
@@ -112,7 +112,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, step]);
+  }, [page, limit, filters, sorting, step?.linkResourceName, step?.linkResourceField, data?._id]);
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
