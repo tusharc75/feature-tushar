@@ -90,6 +90,7 @@ import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirm
 import SubStatusDatesDialog from '../LoadingTicket/SubStatusDatesDialog';
 import SubStatusLog from '../LoadingTicket/SubStatusLog';
 import FleetDispatchHistory from './FleetDispatchHistory';
+import Technicians from 'src/pages/RentalManagement/TechnicianDispatchReturn';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -193,6 +194,7 @@ const ReceivingTicket = ({
   const [rentalJobChildFields, setRentalJobChildFields] = useState(null);
   const [subStatusLog, setSubStatusLog] = useState({ open: false, data: null })
   const [fleetDispatchLog, setFleetDispatchLog] = useState({ open: false, assetData: null })
+  const [technicianDispatchReturn, setTechnicianDispatchReturn] = useState(false);
 
   const {
     state: { user, permissions, resources }
@@ -231,6 +233,9 @@ const ReceivingTicket = ({
   useEffect(() => {
     if (rentalPolicyData?.loadingReceivingDefaultView) {
       setView(rentalPolicyData?.loadingReceivingDefaultView);
+    }
+    if (rentalPolicyData?.enableTechnicianDispatchReturn) {
+      setTechnicianDispatchReturn(rentalPolicyData?.enableTechnicianDispatchReturn);
     }
   }, [rentalPolicyData]);
 
@@ -2832,6 +2837,7 @@ const ReceivingTicket = ({
         <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
           <ContainedTab value={0} label={'Assets/Products'} />
           <ContainedTab value={1} label={'Services'} />
+          {technicianDispatchReturn && <ContainedTab value={2} label={'Technicians'} />}
         </ContainedTabs>
       )}
       <TabPanel value={tabValue} index={0}>
@@ -2909,6 +2915,9 @@ const ReceivingTicket = ({
           stepFullScreen={stepFullScreen}
           rentalJobChildFields={rentalJobChildFields}
         />
+      </TabPanel>
+      <TabPanel value={tabValue} index={2}>
+        <Technicians rentalManagementData={rentalManagementData} stepFullScreen={stepFullScreen} receive={true} />
       </TabPanel>
       <Menu
         anchorEl={anchorLinkActionEl}
