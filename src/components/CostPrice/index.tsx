@@ -48,11 +48,25 @@ const CostPrice = ({ referenceData, type }) => {
             onClick={() => {
               setManageCostPrice(true);
             }}
-            disabled={loading || !referenceData?.pricingMethod?.length || !referenceData?.unit?.length}
+            disabled={
+              loading ||
+              !Array.isArray(referenceData?.pricingMethod) &&
+              !Array.isArray(referenceData?.unit) ||
+              !referenceData?.pricingMethod?.length ||
+              !referenceData?.unit?.length
+            }
           >
             <AddCircleOutline
               fontSize="small"
-              color={!referenceData?.pricingMethod?.length || !referenceData?.unit?.length || loading ? 'disabled' : 'primary'}
+              color={
+                !Array.isArray(referenceData?.pricingMethod) ||
+                !Array.isArray(referenceData?.unit) ||
+                !referenceData?.pricingMethod?.length ||
+                !referenceData?.unit?.length ||
+                loading
+                  ? 'disabled'
+                  : 'primary'
+              }
             />
           </IconButton>
         </Box>
@@ -78,8 +92,10 @@ const CostPrice = ({ referenceData, type }) => {
                         {referenceData?.pricingMethod?.map((method, colIndex) => (
                           <td key={colIndex} className="border border-gray-300 px-4 py-2">
                             <p>
-                              {formatAmountWithCurrency(user?.user?.brandCurrency, costPriceData?.[`${camelCase(method)}_${camelCase(unit.toLowerCase())}`])
-                                ?.fullFormatAmount || ''}
+                              {formatAmountWithCurrency(
+                                user?.user?.brandCurrency,
+                                costPriceData?.[`${camelCase(method)}_${camelCase(unit.toLowerCase())}`]
+                              )?.fullFormatAmount || ''}
                             </p>
                           </td>
                         ))}
