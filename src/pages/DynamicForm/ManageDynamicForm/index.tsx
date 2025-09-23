@@ -90,7 +90,7 @@ const ManageDynamicForm = ({
           tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);
         }
 
-        if (referenceData) {
+        if (!isEmpty(referenceData)) {
           const disabledFields: any = []
           Object.keys(referenceData)?.forEach((_r) => {
             fieldsDataForCreate?.forEach((_f) => {

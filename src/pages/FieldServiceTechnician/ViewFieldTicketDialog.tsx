@@ -33,10 +33,10 @@ export default function ViewFieldTicketDialog({ onClose, serviceOrderData }) {
         ></CustomDialogHeader>
         <CustomDialogContent>
           <FieldTicket
-            serviceOrderData={serviceOrderData}
+            resourceData={serviceOrderData}
             allowedToEdit={allowedToEdit}
             handleChangeStatus={() => { }}
-            fetchServiceOrderData={() => { }}
+            fetchResourceData={() => { }}
             resource={sidebarResource.fieldServiceTechnician}
           />
         </CustomDialogContent>

@@ -69,6 +69,9 @@ import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
 import SubStatusLog from 'src/pages/RentalManagement/LoadingTicket/SubStatusLog';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
+import { TabPanel } from 'src/components/CustomTabs';
+import Technicians from 'src/pages/RentalManagement/TechnicianDispatchReturn';
 
 const stepGlobalDataAdded = {
   createTicket: false,
@@ -139,12 +142,17 @@ const LoadingTicket = ({
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
   const [submitting, setSubmitting] = useState(false)
   const [subStatusLog, setSubStatusLog] = useState({ open: false, data: null })
+  const [technicianDispatchReturn, setTechnicianDispatchReturn] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
 
   const { generateColumns } = useColumns();
 
   useEffect(() => {
     if (rentalPolicyData?.loadingReceivingDefaultView) {
       setView(rentalPolicyData?.loadingReceivingDefaultView);
+    }
+    if (rentalPolicyData?.enableTechnicianDispatchReturn) {
+      setTechnicianDispatchReturn(rentalPolicyData?.enableTechnicianDispatchReturn);
     }
   }, [rentalPolicyData]);
 
@@ -1344,6 +1352,11 @@ const LoadingTicket = ({
     setAnchorEl(null);
   };
 
+  const handleMainTabChange = (event: any, newValue: number) => {
+    setTabValue(newValue);
+    dispatch({ type: 'selection', selectedRecords: [] });
+  };
+
   const handleClickChangeSubStatus = (event) => {
     setSubStatusAnchorEl(event.currentTarget);
   };
@@ -1775,54 +1788,65 @@ const LoadingTicket = ({
 
   return (
     <>
-      <DetailsPageHeader
-        isAddButtonVisible={false}
-        isActionButtonVisible={allowedToEdit || isProcessor}
-        actionButtonMenuItems={
-          <ActionButtonMenuItems
-            {...{
-              validateAction,
-              checkMTRValidation,
-              selectedRecords,
-              setMtrConfirmBox,
-              handleDeliveryTicketDialog,
-              user,
-              setOpenDateDialog,
-              handelProcessTickets,
-              setShowConformationRevertTicket,
-              setShowConformationCancleTicket,
-              hideDeliveryTicketDelivered,
-              permissions,
-              assetPolicyData,
-              setOpenAssetDataDialog,
-              resources,
-              getFilterSelectedRecords
-            }}
-          />
-        }
-        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-        rightSideContents={rightSideContents()}
-        rightSideContentsAfterAction={rightSideContentsAfterAction()}
-        hasXpadding
-      />
-      {columns ? (
-        <CustomReactTable
-          height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-          columns={columns}
-          state={state}
-          dispatch={dispatch}
-          renderedFrom={renderedFrom}
-          isClientSideGrid={true}
-          refreshGrid={fetchRecords}
-          hideAction={!(allowedToEdit || isProcessor)}
-          hideSelection={!(allowedToEdit || isProcessor)}
-          expander={view === 'flat' ? false : true}
-        />
-      ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
+      {technicianDispatchReturn && (
+        <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+          <ContainedTab value={0} label={'Assets/Products'} />
+          <ContainedTab value={1} label={'Technicians'} />
+        </ContainedTabs>
       )}
+      <TabPanel value={tabValue} index={0}>
+        <DetailsPageHeader
+          isAddButtonVisible={false}
+          isActionButtonVisible={allowedToEdit || isProcessor}
+          actionButtonMenuItems={
+            <ActionButtonMenuItems
+              {...{
+                validateAction,
+                checkMTRValidation,
+                selectedRecords,
+                setMtrConfirmBox,
+                handleDeliveryTicketDialog,
+                user,
+                setOpenDateDialog,
+                handelProcessTickets,
+                setShowConformationRevertTicket,
+                setShowConformationCancleTicket,
+                hideDeliveryTicketDelivered,
+                permissions,
+                assetPolicyData,
+                setOpenAssetDataDialog,
+                resources,
+                getFilterSelectedRecords
+              }}
+            />
+          }
+          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+          rightSideContents={rightSideContents()}
+          rightSideContentsAfterAction={rightSideContentsAfterAction()}
+          hasXpadding
+        />
+        {columns ? (
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            refreshGrid={fetchRecords}
+            hideAction={!(allowedToEdit || isProcessor)}
+            hideSelection={!(allowedToEdit || isProcessor)}
+            expander={view === 'flat' ? false : true}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </TabPanel>
+      <TabPanel value={tabValue} index={1}>
+        <Technicians rentalManagementData={rentalManagementData} stepFullScreen={stepFullScreen} />
+      </TabPanel>
 
       <Menu
         id="status-menu"

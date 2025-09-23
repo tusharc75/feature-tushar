@@ -8,7 +8,7 @@ import Edit from '@mui/icons-material/Edit';
 import HelpIcon from '@mui/icons-material/HelpOutline';
 import InfoIcon from '@mui/icons-material/Info';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq, uniqBy } from 'lodash';
+import { camelCase, groupBy, isArray, isEmpty, isObject, map, startCase, uniq, uniqBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { MdHandyman, MdHomeRepairService } from 'react-icons/md';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -43,6 +43,7 @@ import {
   RENTAL_STEPS,
   REPAIR_JOB_STATUS,
   REPAIR_ORDER_STATUS,
+  cloneResourceData,
   dateFormatToSend,
   deliveryTicket,
   displayDate,
@@ -90,6 +91,10 @@ import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirm
 import SubStatusDatesDialog from '../LoadingTicket/SubStatusDatesDialog';
 import SubStatusLog from '../LoadingTicket/SubStatusLog';
 import FleetDispatchHistory from './FleetDispatchHistory';
+import Technicians from 'src/pages/RentalManagement/TechnicianDispatchReturn';
+import ResourceField from 'src/pages/DynamicForm/Step/View/ResourceField';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import FieldTicket from 'src/pages/FieldServiceOrder/FieldTicket';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -120,7 +125,8 @@ const ReceivingTicket = ({
   assetStatusOptions,
   setAssetStatusOptions,
   assetPolicyData,
-  fleetDispatchPolicyData
+  fleetDispatchPolicyData,
+  rentalManagementFields = []
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
@@ -193,6 +199,8 @@ const ReceivingTicket = ({
   const [rentalJobChildFields, setRentalJobChildFields] = useState(null);
   const [subStatusLog, setSubStatusLog] = useState({ open: false, data: null })
   const [fleetDispatchLog, setFleetDispatchLog] = useState({ open: false, assetData: null })
+  const [technicianDispatchReturn, setTechnicianDispatchReturn] = useState(false);
+  const [fieldTicketFields, setFieldTicketFields] = useState([]);
 
   const {
     state: { user, permissions, resources }
@@ -231,6 +239,9 @@ const ReceivingTicket = ({
   useEffect(() => {
     if (rentalPolicyData?.loadingReceivingDefaultView) {
       setView(rentalPolicyData?.loadingReceivingDefaultView);
+    }
+    if (rentalPolicyData?.enableTechnicianDispatchReturn) {
+      setTechnicianDispatchReturn(rentalPolicyData?.enableTechnicianDispatchReturn);
     }
   }, [rentalPolicyData]);
 
@@ -586,6 +597,10 @@ const ReceivingTicket = ({
         ]
       });
       setFieldLabels(data);
+
+      const { fieldsDataAll } = await fetch_resource_view_fields(sidebarResource.fieldTicket, allowedToEdit);
+      setFieldTicketFields(fieldsDataAll || []);
+
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -2826,12 +2841,24 @@ const ReceivingTicket = ({
       });
   }
 
+  const fetchReferenceData = () => {
+    const referenceData: any = cloneResourceData(
+      rentalManagementFields?.map((e) => e?.fieldData),
+      fieldTicketFields?.map((e) => e?.fieldData),
+      rentalManagementData,
+      user.user?.brandCurrency
+    );
+    return referenceData;
+  };
+
   return (
     <>
       {serviceData?.length > 0 && (
         <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
           <ContainedTab value={0} label={'Assets/Products'} />
           <ContainedTab value={1} label={'Services'} />
+          {technicianDispatchReturn && <ContainedTab value={2} label={'Technicians'} />}
+          {technicianDispatchReturn && fieldTicketFields?.length > 0 && <ContainedTab value={3} label={resources?.fieldTicket?.titlePlural} />}
         </ContainedTabs>
       )}
       <TabPanel value={tabValue} index={0}>
@@ -2909,6 +2936,22 @@ const ReceivingTicket = ({
           stepFullScreen={stepFullScreen}
           rentalJobChildFields={rentalJobChildFields}
         />
+      </TabPanel>
+      <TabPanel value={tabValue} index={2}>
+        <Technicians rentalManagementData={rentalManagementData} stepFullScreen={stepFullScreen} receive={true} />
+      </TabPanel>
+      <TabPanel value={tabValue} index={3}>
+        <Box mt={1}>
+          <FieldTicket
+            resourceData={rentalManagementData}
+            resourceFields={rentalManagementFields}
+            allowedToEdit={allowedToEdit}
+            handleChangeStatus={() => { }}
+            resource={sidebarResource.rentalManagement}
+            fetchResourceData={fetchRentalData}
+            noQuotationCheck={true}
+          />
+        </Box>
       </TabPanel>
       <Menu
         anchorEl={anchorLinkActionEl}

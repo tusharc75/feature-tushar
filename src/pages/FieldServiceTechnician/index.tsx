@@ -454,12 +454,12 @@ const FieldServiceTechnician = () => {
                         <FieldTicketDetailView id={selectedData?._id} />
                       ) : (
                         <FieldTicket
-                          serviceOrderData={selectedData?.orignalData}
+                          resourceData={selectedData?.orignalData}
                           allowedToEdit={allowedToEdit}
                           handleChangeStatus={() => {}}
                           resource={sidebarResource.fieldServiceTechnician}
                           enableGlobalSearch={false}
-                          fetchServiceOrderData={() => {}}
+                          fetchResourceData={() => {}}
                         />
                       )
                     ) : (
