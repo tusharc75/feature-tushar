@@ -1,115 +1,77 @@
-import Box from '@mui/material/Box/Box';
-import { useState, useEffect, useContext } from 'react';
-import CommonSkeleton from '../../../../components/Helpers/CommonSkeleton';
-import routes from '../../../../components/Helpers/Routes';
-import Grid from '@mui/material/Grid2';
-import axiosInstance from 'src/axios/axiosInstance';
-import { prepareDataForGrid, PRICING_SETUP_TYPE, rentalManagement, sidebarResource } from 'src/constants/helpers';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { IconButton, Menu, MenuItem, Typography } from '@mui/material';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CustomReactTable, { AccessorFunction, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { useData } from 'src/StateProvider/Provider';
-import { BiChevronDown } from 'react-icons/bi';
-import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialog';
-import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
-import { displayDate } from 'src/constants/helpers';
-import { Add, Visibility } from '@mui/icons-material';
+import { Autocomplete, Box, IconButton, MenuItem, TextField } from "@mui/material";
+import { camelCase } from "lodash";
+import { useContext, useEffect, useState } from "react";
+import { FiExternalLink } from "react-icons/fi";
+import axiosInstance from "src/axios/axiosInstance";
+import CustomReactTable, { AccessorFunction, useColumns, useTableReducer } from "src/components/CustomReactTable";
+import DropdownCell from "src/components/CustomReactTable/Cells/DropdownCell";
+import HtmlTooltip from "src/components/CustomTooltipTitle";
+import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import NoDataCell from "src/components/Helpers/NoDataCell";
+import routes from "src/components/Helpers/Routes";
+import { fetch_rental_technician_fields } from "src/components/RentalManagment/helper";
+import { displayDate, prepareDataForGrid, PRICING_SETUP_TYPE, rentalManagement, sidebarResource } from "src/constants/helpers";
+import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
+import { CustomOfflineContext } from "src/StateProvider/OfflineContext/OfflineContext";
+import { useData } from "src/StateProvider/Provider";
 import EditIcon from '@mui/icons-material/Edit';
-import { CustomOfflineContext } from '../../../../StateProvider/OfflineContext/OfflineContext';
-import RentalTechnicianQtyDialog from './RentalTechnicianQtyDialog';
-import { camelCase } from 'lodash';
-import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
-import { FiExternalLink } from 'react-icons/fi';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { getCostPriceConditions, getCostPriceValue, getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
-import dayjs from 'dayjs';
-import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
-import TechnicianAssign from 'src/components/TechnicianAssign';
-import { RiUserShared2Fill, RiUserReceived2Fill } from 'react-icons/ri';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { RiUserReceived2Fill, RiUserShared2Fill } from "react-icons/ri";
+import { Add, Visibility } from "@mui/icons-material";
+import { DetailsPageHeader } from "src/components/PageHeaders";
+import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialog';
+import { ThemeButton } from "src/components/Helpers/Buttons";
+import AssignEmployeeDialog from "src/components/AssignRolesDialog/AssignEmployeeDialog";
+import dayjs from "dayjs";
+import { autoCalculateSpecificFields } from "src/constants/formulaUtility";
+import { getCostPriceConditions, getCostPriceValue, getPricingConditions, getPricingValue } from "src/components/PricingCondition";
+import TechnicianAssign from "src/components/TechnicianAssign";
+import RentalTechnicianQtyDialog from "src/pages/RentalManagement/SerializedAsset/Technicians/RentalTechnicianQtyDialog";
 import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDialog';
 import StartStopLogsDialog from 'src/pages/FieldTicket/material/StartStopLogsDialog';
 
-const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services, rentalPolicyData }) => {
+const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, rentalPolicyData, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_technician`;
+  const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_assign_technician`;
   const canDispatchReturn = rentalPolicyData?.enableTechnicianDispatchReturn;
 
   const {
-    state: { resources, user }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
-  const [deleteData, setDeleteData] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedService, setSelectedService] = useState<{ optionLabel: string; optionValue: string; _id?: string; }>({ optionLabel: 'All', optionValue: 'All' });
   const [technicianDialog, setTechnicianDialog] = useState(false);
   const [technicianAssign, setTechnicianAssign] = useState({ open: false, data: null });
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [isBulkEdit, setIsBulkEdit] = useState(false);
+  const [technicianEdit, setTechnicianEdit] = useState({ open: false, data: null, isBulkEdit: false, showSaveAndNext: false });
   const [isUpdating, setUpdating] = useState(false);
-  const [technicianEdit, setTechnicianEdit] = useState({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
-  const [startEndDateConfirmationDialog, setStartEndDateConfirmationDialog] = useState({
-    open: false,
-    type: null,
-    minDateTime: null,
-    notes: '',
-    _id: null
-  });
+  const [deleteData, setDeleteData] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [startEndDateConfirmationDialog, setStartEndDateConfirmationDialog] = useState({ open: false, type: null, minDateTime: null, notes: '', _id: null });
   const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, technicianId: null });
-  const open = Boolean(anchorEl);
+  const [allFields, setAllFields] = useState(null);
 
   const { isOffline } = useContext(CustomOfflineContext);
+  const { generateColumns } = useColumns();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
-  const { generateColumns } = useColumns();
-  const [allFields, setAllFields] = useState(null);
-
-  const {
-    state: { permissions }
-  }: any = useData();
-
   useEffect(() => {
     fetchColumns();
+  }, []);
+
+  useEffect(() => {
     fetchData();
-  }, [selectedService, services]);
+  }, [selectedService]);
 
   const openTechnician = (data, rows) => {
     setTechnicianEdit({
       open: true,
       data: data.original,
-      bulkedit: false,
+      isBulkEdit: false,
       showSaveAndNext: data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false
     });
-  };
-
-  const handleSaveData = async (rows: any, saveAndNext = false) => {
-    setUpdating(true);
-    axiosInstance()
-      .put(`${rentalManagement.api}/technician/${rentalManagementData._id}`, { technician: rows })
-      .then(() => {
-        setUpdating(false);
-        fetchData();
-        if (saveAndNext) {
-          const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
-          setTechnicianEdit({
-            open: true,
-            data: dataRows[rowIndex + 1],
-            bulkedit: false,
-            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
-          });
-        } else {
-          setTechnicianEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
-        }
-      })
-      .catch((error) => {
-        setUpdating(false);
-        toastConfig.setToastConfig(error);
-      });
   };
 
   const fetchColumns = async () => {
@@ -189,45 +151,45 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       },
       ...(technicianFields?.find((e) => e.fieldName === 'competencyType')
         ? [
-            {
-              accessor: 'competencyType',
-              Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencyType',
-                    lookupResource: sidebarResource.competencyType
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencyType')
-            }
-          ]
+          {
+            accessor: 'competencyType',
+            Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencyType',
+                  lookupResource: sidebarResource.competencyType
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencyType')
+          }
+        ]
         : []),
       ...(technicianFields?.find((e) => e.fieldName === 'competencies')
         ? [
-            {
-              accessor: 'competencies',
-              Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencies',
-                    lookupResource: sidebarResource.competencies
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencies')
-            }
-          ]
+          {
+            accessor: 'competencies',
+            Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencies',
+                  lookupResource: sidebarResource.competencies
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencies')
+          }
+        ]
         : []),
       {
         accessor: 'startDate',
@@ -364,13 +326,8 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
         );
       }
     });
-    const newColumns = generateColumns(
-      renderedFrom,
-      data?.filter((f) => f?.isRead && !['endDate', 'startDate'].includes(f?.fieldName)),
-      null,
-      false,
-      rentalManagementData?.currency
-    );
+
+    const newColumns = generateColumns(renderedFrom, data?.filter((f) => f?.isRead && !['endDate', 'startDate'].includes(f?.fieldName)), null, false, rentalManagementData?.currency);
     setAllFields(data);
     setColumns([...column, ...newColumns]);
   };
@@ -406,35 +363,6 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       });
   };
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleDelete = async (rows) => {
-    setIsDeleting(true);
-    axiosInstance()
-      .put(`/technician`, { ids: rows })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        setIsDeleting(false);
-        fetchData();
-        setDeleteData(null);
-      })
-      .catch((error) => {
-        setIsDeleting(false);
-        toastConfig.setToastConfig(error);
-        setDeleteData(null);
-      });
-  };
-
   const handleAssign = async (rows) => {
     const technician: any = [];
     rows.forEach((d) => {
@@ -462,14 +390,14 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
     });
 
     let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, technician, PRICING_SETUP_TYPE.rent);
-    let costPriceData: any= null;
+    let costPriceData: any = null;
     if (user?.user?.brandPolicy?.materialCostPrice) {
       costPriceData = await getCostPriceConditions(technician, sidebarResource.employeeMaster);
     }
     AddMaterial(technician, priceData, costPriceData);
   };
 
-  const AddMaterial = async (technician, priceData, costPriceData= null) => {
+  const AddMaterial = async (technician, priceData, costPriceData = null) => {
     const tempMaterial = [...technician];
     tempMaterial.forEach((element) => {
       const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields);
@@ -486,6 +414,52 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
     }
 
     setTechnicianAssign({ open: true, data: tempMaterial });
+  };
+
+  const handleSaveData = async (rows: any, saveAndNext = false) => {
+    setUpdating(true);
+    axiosInstance()
+      .put(`${rentalManagement.api}/technician/${rentalManagementData._id}`, { technician: rows })
+      .then(() => {
+        setUpdating(false);
+        fetchData();
+        if (saveAndNext) {
+          const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
+          setTechnicianEdit({
+            open: true,
+            data: dataRows[rowIndex + 1],
+            isBulkEdit: false,
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+          });
+        } else {
+          setTechnicianEdit({ open: false, data: null, isBulkEdit: false, showSaveAndNext: false });
+        }
+      })
+      .catch((error) => {
+        setUpdating(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleDelete = async (rows) => {
+    setIsDeleting(true);
+    axiosInstance()
+      .put(`/technician`, { ids: rows })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        setIsDeleting(false);
+        fetchData();
+        setDeleteData(null);
+      })
+      .catch((error) => {
+        setIsDeleting(false);
+        toastConfig.setToastConfig(error);
+        setDeleteData(null);
+      });
   };
 
   const handleUpdateStartEndDate = (values, type, _id = null) => {
@@ -520,82 +494,79 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       });
   };
 
+  const leftSideContents = () => {
+    return (
+      allowedToEdit ?
+        <ThemeButton startIcon={<Add />} onClick={() => setTechnicianDialog(true)}>
+          Assign
+        </ThemeButton>
+        :
+        null
+    );
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={selectedRecords?.some((e) => !e?.canDelete)}
+        onClick={() => {
+          setDeleteData(selectedRecords?.map((d) => d?._id));
+        }}
+      >
+        Delete
+      </MenuItem>
+    );
+  };
+
+
   return (
-    <>
-      <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-        <Box mb={1}>
-          <Typography variant="subtitle2">Technicians</Typography>
-        </Box>
-        {allowedToEdit && (
-          <Box display="flex" justifyContent="space-between" mb={2}>
-            <Box display="flex" gap={'8px'} flexWrap={'wrap'}>
-              <ThemeButton startIcon={<Add />} onClick={() => setTechnicianDialog(true)}>
-                Assign
-              </ThemeButton>
-            </Box>
-            <Box display="flex" ml={1}>
-              <ThemeButton
-                mobileTooltip="Actions"
-                buttonType="yellow"
-                iconForMobile={<BiChevronDown />}
-                id="demo-positioned-button"
-                onClick={handleClick}
-                disabled={!Boolean(selectedRecords?.length)}
-                endIcon={<BiChevronDown />}
-              >
-                Actions
-              </ThemeButton>
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                open={open}
-                onClose={handleClose}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right'
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right'
-                }}
-              >
-                <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
-                  <MenuItem
-                    disabled={isDeleting || selectedRecords?.some((e) => !e?.canDelete)}
-                    onClick={() => {
-                      setDeleteData(selectedRecords?.map((d) => d?._id));
-                      handleClose();
-                    }}
-                  >
-                    Delete
-                  </MenuItem>
-                </HtmlTooltip>
-              </Menu>
-            </Box>
+    <div>
+      <Autocomplete
+        size="small"
+        style={{ width: '300px' }}
+        fullWidth
+        options={serviceOption}
+        autoHighlight
+        value={selectedService}
+        getOptionLabel={(option: any) => option?.optionLabel || ''}
+        isOptionEqualToValue={(option, val) => (option ? option?.optionValue === val?.optionValue : false)}
+        onChange={(_, val) => {
+          let value = val;
+          if (!val) {
+            value = { optionLabel: 'All', optionValue: 'All' };
+          }
+          setSelectedService(value);
+        }}
+        renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" margin="dense" />}
+      />
+      <div>
+        <DetailsPageHeader
+          isAddButtonVisible={false}
+          isActionButtonVisible={allowedToEdit}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+          leftSideContents={leftSideContents()}
+          hasXpadding
+        />
+        {columns ? (
+          <CustomReactTable
+            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchData}
+            renderedFrom={renderedFrom}
+            isClientSideGrid={true}
+            hideSelection={!allowedToEdit}
+            hideAction={!allowedToEdit}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 12, sm: 12 }}>
-            {columns && dataRows ? (
-              <CustomReactTable
-                height={'300px'}
-                columns={columns}
-                state={state}
-                dispatch={dispatch}
-                refreshGrid={fetchData}
-                renderedFrom={renderedFrom}
-                isClientSideGrid={true}
-                hideSelection={!allowedToEdit}
-                hideAction={!allowedToEdit}
-              />
-            ) : (
-              <Box p={2} height={300}>
-                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Box>
-            )}
-          </Grid>
-        </Grid>
-      </Box>
+      </div>
+
       {technicianDialog && (
         <AssignEmployeeDialog
           onSuccess={(data) => {
@@ -607,34 +578,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           warehouse={rentalManagementData?.warehouse?.optionValue}
         />
       )}
-      {deleteData && (
-        <ConfirmationDialog
-          open={true}
-          message={`Are you sure you want to delete the record(s)?`}
-          onClose={() => setDeleteData(null)}
-          onOk={() => handleDelete(deleteData)}
-          okBtnLoading={isDeleting}
-        />
-      )}
-      {technicianEdit.open && (
-        <RentalTechnicianQtyDialog
-          onClose={() => {
-            setTechnicianEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
-            setIsBulkEdit(false);
-          }}
-          technicianData={{
-            ...technicianEdit.data,
-            pricingCondition: technicianEdit.data?.pricingConditionId,
-            competence: technicianEdit.data?.competenceId
-          }}
-          rentalManagementData={rentalManagementData}
-          handleUpdate={handleSaveData}
-          loadingEdit={isUpdating}
-          bulkEdit={isBulkEdit}
-          showSaveAndNext={technicianEdit.showSaveAndNext}
-          rentalPolicyData={rentalPolicyData}
-        />
-      )}
+
       {technicianAssign.open && (
         <TechnicianAssign
           allData={technicianAssign?.data}
@@ -649,6 +593,36 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           }}
         />
       )}
+
+      {technicianEdit.open && (
+        <RentalTechnicianQtyDialog
+          onClose={() => {
+            setTechnicianEdit({ open: false, data: null, isBulkEdit: false, showSaveAndNext: false });
+          }}
+          technicianData={{
+            ...technicianEdit.data,
+            pricingCondition: technicianEdit.data?.pricingConditionId,
+            competence: technicianEdit.data?.competenceId
+          }}
+          rentalManagementData={rentalManagementData}
+          handleUpdate={handleSaveData}
+          loadingEdit={isUpdating}
+          bulkEdit={technicianEdit.isBulkEdit}
+          showSaveAndNext={technicianEdit.showSaveAndNext}
+          rentalPolicyData={rentalPolicyData}
+        />
+      )}
+
+      {deleteData && (
+        <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to delete the record(s)?`}
+          onClose={() => setDeleteData(null)}
+          onOk={() => handleDelete(deleteData)}
+          okBtnLoading={isDeleting}
+        />
+      )}
+
       {startEndDateConfirmationDialog.open && (
         <StartStopDateDialog
           type={startEndDateConfirmationDialog.type}
@@ -668,6 +642,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           notes={startEndDateConfirmationDialog.notes}
         />
       )}
+
       {viewStartStopLog?.open && (
         <StartStopLogsDialog
           onClose={() => {
@@ -680,8 +655,9 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           resource={sidebarResource.rentalManagement}
         />
       )}
-    </>
-  );
-};
+
+    </div>
+  )
+}
 
 export default Technicians;
