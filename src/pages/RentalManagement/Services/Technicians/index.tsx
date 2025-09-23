@@ -25,7 +25,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
 import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getCostPriceConditions, getCostPriceValue, getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import dayjs from 'dayjs';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import TechnicianAssign from 'src/components/TechnicianAssign';
@@ -39,7 +39,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
   const canDispatchReturn = rentalPolicyData?.enableTechnicianDispatchReturn;
 
   const {
-    state: { resources }
+    state: { resources, user }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -451,6 +451,8 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       element.warehouse = rentalManagementData?.warehouse?.optionValue;
       element.estimateStartDate = rentalManagementData?.estimateStartDate || dayjs.tz().toDate();
       element.estimateEndDate = rentalManagementData?.estimateEndDate || dayjs.tz().toDate();
+      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
+      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
       const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
       element.duration = 1;
       if (calValues && calValues['duration']) {
@@ -460,10 +462,14 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
     });
 
     let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, technician, PRICING_SETUP_TYPE.rent);
-    AddMaterial(technician, priceData);
+    let costPriceData: any= null;
+    if (user?.user?.brandPolicy?.materialCostPrice) {
+      costPriceData = await getCostPriceConditions(technician, sidebarResource.employeeMaster);
+    }
+    AddMaterial(technician, priceData, costPriceData);
   };
 
-  const AddMaterial = async (technician, priceData) => {
+  const AddMaterial = async (technician, priceData, costPriceData= null) => {
     const tempMaterial = [...technician];
     tempMaterial.forEach((element) => {
       const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields);
@@ -472,6 +478,12 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       Object.assign(element, calValues);
       delete element.materialId;
     });
+    if (costPriceData) {
+      tempMaterial.forEach((element) => {
+        const calValues = getCostPriceValue(element, costPriceData, rentalManagementData?.currency, allFields, sidebarResource.employeeMaster);
+        Object.assign(element, calValues);
+      });
+    }
 
     setTechnicianAssign({ open: true, data: tempMaterial });
   };
