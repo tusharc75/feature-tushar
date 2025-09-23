@@ -101,7 +101,7 @@ const Service = ({
   const [assignSteps, setAssignSteps] = useState(false);
   const [setpsInOtherServices, setSetpsInOtherServices] = useState(false);
   const [quotationData, setQuotationData] = useState(null);
-  const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
+  const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueId: null, stepId: null, serviceName: null, stepName: null });
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [addServiceAnchorEl, setAddServiceAnchorEl] = useState({ anchor: null, tabId: null });
 
@@ -700,18 +700,6 @@ const Service = ({
                       element="li"
                     >
                       <div className="p-4">
-                        {/* <Diagram
-                          fullHeight={false}
-                          showContainer={false}
-                          resource={ACTIVITY_RESOURCE.workOrder}
-                          referenceId={workOrderId}
-                          currentVersion={workOrderData?.versions?.length + 1 || 1}
-                          resourceData={workOrderData}
-                          attachmentType={ATTACHMENT_TYPE.drawing}
-                          showMaterialFilter={false}
-                          uniqueId={selectedService.uniqueId}
-                          stepId={null}
-                        /> */}
                         <DiagramNew
                           fullHeight={false}
                           showContainer={false}
@@ -724,6 +712,7 @@ const Service = ({
                           showMaterialFilter={false}
                           uniqueId={selectedService.uniqueId}
                           stepId={null}
+                          hideAddNewFolder={true}
                         />
                       </div>
                     </CustomCollapsible>
@@ -929,7 +918,7 @@ const Service = ({
               onClick={() => {
                 setAttchmentsDialog({
                   open: true,
-                  uniqueServiceId: selectedService.uniqueId,
+                  uniqueId: selectedService.uniqueId,
                   stepId: null,
                   serviceName: selectedService.serviceName,
                   stepName: selectedService?.serviceName || ''
@@ -1240,12 +1229,13 @@ const Service = ({
         <DiagramDialog
           referenceId={workOrderId}
           handleClose={() => {
-            setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
+            setAttchmentsDialog({ open: false, uniqueId: null, stepId: null, serviceName: null, stepName: null });
           }}
           referenceLabel={attchmentsDialog.serviceName}
-          uniqueId={attchmentsDialog.uniqueServiceId}
+          uniqueId={attchmentsDialog.uniqueId}
           stepId={attchmentsDialog.stepId}
           resource={sidebarResource.workOrder}
+          hideAddNewFolder={true}
         />
       )}
       {showManagePurchaseOrder && (
