@@ -41,7 +41,8 @@ const ManageFieldTicket = ({
   id = null,
   referenceData = null,
   fullScreenView = false,
-  isRedirectTodetailPage = true
+  isRedirectTodetailPage = true,
+  referenceResource = null
 }) => {
   const {
     state: { user, resources }
@@ -100,6 +101,7 @@ const ManageFieldTicket = ({
   const fetchFields = async () => {
     try {
       let data;
+      const referenceFieldName = referenceResource === sidebarResource.rentalManagement ? 'rentalJob' : 'fieldServiceOrder';
       if (isOffline) {
         data = await findOne(objectStore.resource, sidebarResource.fieldTicket);
       } else {
@@ -135,7 +137,7 @@ const ManageFieldTicket = ({
         } else {
           if (referenceData) {
             fields?.forEach((e) => {
-              if (e.fieldName === 'fieldServiceOrder') {
+              if (e.fieldName === referenceFieldName) {
                 e.disableOnEdit = true;
                 e.isUneditable = true;
               }
@@ -164,7 +166,7 @@ const ManageFieldTicket = ({
             }
           }
           fieldsDataForCreate?.forEach((e) => {
-            if (e.fieldName === 'fieldServiceOrder') {
+            if (e.fieldName === referenceFieldName) {
               e.disableOnEdit = true;
               e.isUneditable = true;
             }
