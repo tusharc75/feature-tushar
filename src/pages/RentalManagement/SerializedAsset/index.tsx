@@ -487,11 +487,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       setAllLoadingTicketProducts(loadingTicketProducts);
       const material = data.material;
 
-      const services = material?.filter(m => m?.type === MATERIAL_TYPE.service)
-
-      if (permissions?.employeeMaster?.isRead && services?.length > 0) {
-        setServiceOption([{ optionLabel: 'All', optionValue: 'All' }, ...services?.map(s => ({ optionLabel: s?.serviceDetail?.serviceName, optionValue: s?.serviceDetail?._id, _id: s?._id }))])
-      }
+      setServiceOption([{ optionLabel: 'All', optionValue: 'All' }, ...material?.filter(m => m?.type === MATERIAL_TYPE.service)?.map(s => ({ optionLabel: s?.serviceDetail?.serviceName, optionValue: s?.serviceDetail?._id, _id: s?._id }))])
 
       let rows = data.material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material) === true);
 
@@ -1268,7 +1264,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
   return (
     <Fragment>
-      {serviceOption?.length > 0 && (
+      {permissions?.employeeMaster?.isRead && (
         <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
           <ContainedTab value={0} label={'Assets'} />
           <ContainedTab value={1} label={'Technicians'} />
@@ -1314,7 +1310,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             serviceOption={serviceOption}
             allowedToEdit={allowedToEdit}
             rentalManagementData={rentalManagementData}
-            rentalPolicyData={rentalPolicyData}
             stepFullScreen={stepFullScreen}
           />
         </div>
