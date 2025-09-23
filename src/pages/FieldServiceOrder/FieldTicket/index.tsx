@@ -399,6 +399,7 @@ const FieldTicket = ({
             fetchData();
           }}
           referenceResource={resource}
+          isRedirectTodetailPage={false}
         />
       )}
       {showDeleteConfirmBox && (

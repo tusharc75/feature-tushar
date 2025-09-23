@@ -6,7 +6,7 @@ import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { IconButton } from '@mui/material';
+import { IconButton, MenuItem } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomReactTable, { AccessorFunction, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -21,8 +21,9 @@ import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { RiUserShared2Fill, RiUserReceived2Fill } from 'react-icons/ri';
 import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDialog';
 import StartStopLogsDialog from 'src/pages/FieldTicket/material/StartStopLogsDialog';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
-const Technicians = ({ rentalManagementData, stepFullScreen, receive = false }) => {
+const TechnicianDispatchReturn = ({ rentalManagementData, stepFullScreen, allowedToEdit, receive = false }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_technician`;
 
@@ -124,45 +125,45 @@ const Technicians = ({ rentalManagementData, stepFullScreen, receive = false }) 
       },
       ...(technicianFields?.find((e) => e.fieldName === 'competencyType')
         ? [
-            {
-              accessor: 'competencyType',
-              Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencyType',
-                    lookupResource: sidebarResource.competencyType
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencyType')
-            }
-          ]
+          {
+            accessor: 'competencyType',
+            Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencyType',
+                  lookupResource: sidebarResource.competencyType
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencyType')
+          }
+        ]
         : []),
       ...(technicianFields?.find((e) => e.fieldName === 'competencies')
         ? [
-            {
-              accessor: 'competencies',
-              Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencies',
-                    lookupResource: sidebarResource.competencies
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencies')
-            }
-          ]
+          {
+            accessor: 'competencies',
+            Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencies',
+                  lookupResource: sidebarResource.competencies
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencies')
+          }
+        ]
         : []),
       {
         accessor: 'startDate',
@@ -202,54 +203,54 @@ const Technicians = ({ rentalManagementData, stepFullScreen, receive = false }) 
         disableFilters: true,
         disableSortBy: true,
         canDrag: false,
-        Cell: ({ row, table }) => {
+        Cell: ({ row }) => {
           return (
             <>
-              {(row?.original?.endDate || (!row?.original?.startDate && !row?.original?.endDate)) && !receive && (
-                <HtmlTooltip title={'Dispatch'}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      let date = null;
-                      if (row?.original?.endDate) {
-                        date = new Date(row?.original?.endDate);
-                        date.setMinutes(date.getMinutes() + 1);
-                      }
-
-                      setStartEndDateConfirmationDialog({
-                        open: true,
-                        type: 'start',
-                        minDateTime: date,
-                        notes: '',
-                        _id: row?.original?._id
-                      });
-                    }}
-                    color={'primary'}
-                  >
-                    <RiUserShared2Fill fontSize={18} />
-                  </IconButton>
-                </HtmlTooltip>
-              )}
-              {row?.original?.startDate && !row?.original?.endDate && receive && (
-                <HtmlTooltip title={'Return'}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setStartEndDateConfirmationDialog({
-                        open: true,
-                        type: 'stop',
-                        minDateTime: new Date(row?.original?.maxStartDate),
-                        notes: row?.original?.notes,
-                        _id: row?.original?._id
-                      });
-                    }}
-                    color={'primary'}
-                  >
-                    <RiUserReceived2Fill fontSize={18} />
-                  </IconButton>
-                </HtmlTooltip>
-              )}
-
+              {allowedToEdit && <>
+                {(row?.original?.endDate || (!row?.original?.startDate && !row?.original?.endDate)) && !receive && (
+                  <HtmlTooltip title={'Dispatch'}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        let date = null;
+                        if (row?.original?.endDate) {
+                          date = new Date(row?.original?.endDate);
+                          date.setMinutes(date.getMinutes() + 1);
+                        }
+                        setStartEndDateConfirmationDialog({
+                          open: true,
+                          type: 'start',
+                          minDateTime: date,
+                          notes: '',
+                          _id: row?.original?._id
+                        });
+                      }}
+                      color={'primary'}
+                    >
+                      <RiUserShared2Fill fontSize={18} />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
+                {row?.original?.startDate && !row?.original?.endDate && receive && (
+                  <HtmlTooltip title={'Return'}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setStartEndDateConfirmationDialog({
+                          open: true,
+                          type: 'stop',
+                          minDateTime: new Date(row?.original?.maxStartDate),
+                          notes: row?.original?.notes,
+                          _id: row?.original?._id
+                        });
+                      }}
+                      color={'primary'}
+                    >
+                      <RiUserReceived2Fill fontSize={18} />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
+              </>}
               <HtmlTooltip title={'View Logs'}>
                 <IconButton
                   size="small"
@@ -265,20 +266,13 @@ const Technicians = ({ rentalManagementData, stepFullScreen, receive = false }) 
         }
       }
     ];
-    const newColumns = generateColumns(
-      renderedFrom,
-      data?.filter((f) => f?.isRead && !['endDate', 'startDate'].includes(f?.fieldName)),
-      null,
-      false,
-      rentalManagementData?.currency
-    );
+    const newColumns = generateColumns(renderedFrom, data?.filter((f) => f?.isRead && !['endDate', 'startDate'].includes(f?.fieldName)), null, false, rentalManagementData?.currency);
     setColumns([...column, ...newColumns]);
   };
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-
     let api = `/technician?referenceId=${rentalManagementData?._id}&referenceType=${sidebarResource.rentalManagement}`;
     axiosInstance()
       .get(api)
@@ -334,8 +328,74 @@ const Technicians = ({ rentalManagementData, stepFullScreen, receive = false }) 
       });
   };
 
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        {!receive ?
+          <MenuItem
+            disabled={selectedRecords?.every((r) => r?.endDate || (!r?.startDate && !r?.endDate)) ? false : true}
+            onClick={() => {
+              const dates = [];
+              selectedRecords?.forEach((d: any) => {
+                if (d?.endDate) {
+                  dates.push(new Date(d?.endDate));
+                }
+              });
+              let date = null;
+              if (dates?.length) {
+                date = new Date(Math.max(...dates));
+                date.setMinutes(date.getMinutes() + 1);
+              }
+              setStartEndDateConfirmationDialog({
+                open: true,
+                type: 'start',
+                minDateTime: date,
+                notes: '',
+                _id: null
+              });
+            }}
+          >
+            Dispatch
+          </MenuItem>
+          : <MenuItem
+            disabled={selectedRecords?.every((r) => r?.startDate && !r?.endDate) ? false : true}
+            onClick={() => {
+              const dates = [];
+              selectedRecords?.forEach((d: any) => {
+                dates.push(new Date(d?.maxStartDate));
+              });
+              let date = null;
+              if (dates?.length) {
+                date = new Date(Math.max(...dates));
+              }
+              setStartEndDateConfirmationDialog({
+                open: true,
+                type: 'stop',
+                minDateTime: date,
+                notes: selectedRecords?.length === 1 ? selectedRecords[0]?.notes : '',
+                _id: null
+              });
+            }}
+          >
+            Return
+          </MenuItem>
+        }
+      </>
+    );
+  };
+
   return (
     <>
+      {allowedToEdit && (
+        <>
+          <DetailsPageHeader
+            isAddButtonVisible={false}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+          />
+        </>
+      )}
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns && dataRows ? (
@@ -347,7 +407,7 @@ const Technicians = ({ rentalManagementData, stepFullScreen, receive = false }) 
               refreshGrid={fetchData}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
-              hideSelection={true}
+              hideSelection={!allowedToEdit}
             />
           ) : (
             <Box p={2} height={300}>
@@ -387,4 +447,4 @@ const Technicians = ({ rentalManagementData, stepFullScreen, receive = false }) 
   );
 };
 
-export default Technicians;
+export default TechnicianDispatchReturn;
