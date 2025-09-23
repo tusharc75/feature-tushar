@@ -20,7 +20,6 @@ import Products from './Products';
 import Services from './Services';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import LeadTime from 'src/components/LeadTime';
-import Diagram from 'src/pages/WorkOrder/Diagram';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
 import CostPrice from 'src/components/CostPrice';
@@ -171,7 +170,6 @@ const PackageDetails = () => {
               {tabValue === 4 && <Packages packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
             <TabPanel value={tabValue} index={5}>
-              {/* <Diagram resource={ACTIVITY_RESOURCE.packages} referenceId={id} attachmentType={ATTACHMENT_TYPE.drawing} /> */}
               <DiagramNew
                 resource={sidebarResource.packages}
                 referenceId={id}
