@@ -30,18 +30,23 @@ const Invoice = ({ invoiceData, invoiceFields, setPrevStep, handleChangeStatus, 
   }: any = useData();
 
   useEffect(() => {
-    if (
-      statusOptions.findIndex((d) => d.optionLabel === INVOICE_STATUS.readyToInvoice) >
-      statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)
-    ) {
+    if (statusOptions.findIndex((d) => d.optionLabel === INVOICE_STATUS.readyToInvoice) > statusOptions.findIndex((d) => d.optionLabel === invoiceData?.status)) {
       handleChangeStatus(INVOICE_STATUS.readyToInvoice);
     }
   }, []);
 
   useEffect(() => {
-    setPrevStep(true)
     fetchFields();
   }, []);
+
+  useEffect(() => {
+    if ((resourcePolicyData?.policy?.editRestrictionStatus || [])?.includes(invoiceData?.status)) {
+      setPrevStep(false)
+    }
+    else {
+      setPrevStep(true)
+    }
+  }, [resourcePolicyData]);
 
   const fetchFields = async () => {
     try {

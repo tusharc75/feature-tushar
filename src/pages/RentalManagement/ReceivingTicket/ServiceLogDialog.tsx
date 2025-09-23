@@ -2,7 +2,15 @@ import { useContext, useEffect, useState } from 'react';
 import { Dialog, Box, IconButton } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CustomDialogTransition, dateFormatToSend, displayDate, gridLoadingTimeout, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import {
+  CustomDialogTransition,
+  dateFormatToSend,
+  displayDate,
+  fieldTicket,
+  gridLoadingTimeout,
+  rentalManagement,
+  sidebarResource
+} from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { camelCase, isEmpty } from 'lodash';
 import { Link } from 'react-router-dom';
@@ -17,8 +25,18 @@ import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allowedToEdit, fetchRecords, maxInvoiceDate = null }) => {
-  const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_services_logs`;
+const ServiceLogDialog = ({
+  referenceId,
+  id,
+  serviceName,
+  onClose,
+  onSuccess,
+  allowedToEdit,
+  fetchRecords,
+  maxInvoiceDate = null,
+  resource = null
+}) => {
+  const renderedFrom = `${camelCase(resource === sidebarResource.fieldTicket ? sidebarResource.fieldTicket : sidebarResource.rentalManagement)}_services_logs`;
 
   const {
     state: { user }
@@ -32,12 +50,16 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
 
   useEffect(() => {
     fetchData();
-  }, [rentalId, id]);
+  }, [referenceId, id]);
 
   const fetchData = async () => {
     try {
       dispatch({ type: 'loading', loading: true });
-      const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalId}/${id}/service-log`);
+      const api =
+        resource === sidebarResource.fieldTicket
+          ? `${fieldTicket.api}/${referenceId}/material/${id}/service-log`
+          : `${rentalManagement.api}/productpackage/${referenceId}/${id}/service-log`;
+      const response = await axiosInstance().get(api);
       const serviceLogData = response?.data?.data;
       serviceLogData?.forEach((log, index) => {
         if (index === 0) {
@@ -67,7 +89,7 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
   const columns: any = [
     {
       accessor: 'startDate',
-      Header: 'Actual Start Date',
+      Header: `${resource === sidebarResource.fieldTicket ? '' : 'Actual'} Start Date`,
       disabled: true,
       disableFilters: true,
       disableSortBy: true,
@@ -75,11 +97,11 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
         return (
           <>
             {row?.original?.startDate ? (
-              <>
+              <div>
                 <h5 className="text-truncate" title={`${displayDate(row?.original?.startDate)}`}>
                   {displayDate(row?.original?.startDate)}
                 </h5>
-              </>
+              </div>
             ) : (
               <NoDataCell />
             )}
@@ -89,7 +111,7 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
     },
     {
       accessor: 'endDate',
-      Header: 'Actual End Date',
+      Header: `${resource === sidebarResource.fieldTicket ? '' : 'Actual'} End Date`,
       disableFilters: true,
       disableSortBy: true,
       disabled: true,
@@ -97,11 +119,11 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
         return (
           <>
             {row?.original?.endDate ? (
-              <>
+              <div>
                 <h5 className="text-truncate" title={`${displayDate(row?.original?.endDate)}`}>
                   {displayDate(row?.original?.endDate)}
                 </h5>
-              </>
+              </div>
             ) : (
               <NoDataCell />
             )}
@@ -117,14 +139,16 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
       disableSortBy: true,
       Cell: ({ row }) =>
         !isEmpty(row?.original?.startedBy) ? (
-          <Link
-            className="link text-truncate"
-            title={row?.original?.startedBy?.optionLabel}
-            to={`${routes.userDetail.path}/${row?.original?.startedBy?.optionValue}`}
-            target={'_blank'}
-          >
-            {row?.original?.startedBy?.optionLabel}
-          </Link>
+          <div>
+            <Link
+              className="link text-truncate"
+              title={row?.original?.startedBy?.optionLabel}
+              to={`${routes.userDetail.path}/${row?.original?.startedBy?.optionValue}`}
+              target={'_blank'}
+            >
+              {row?.original?.startedBy?.optionLabel}
+            </Link>
+          </div>
         ) : (
           <NoDataCell />
         )
@@ -137,14 +161,16 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
       disableSortBy: true,
       Cell: ({ row }) =>
         !isEmpty(row?.original?.endedBy) ? (
-          <Link
-            className="link text-truncate"
-            title={row?.original?.endedBy?.optionLabel}
-            to={`${routes.userDetail.path}/${row?.original?.endedBy?.optionValue}`}
-            target={'_blank'}
-          >
-            {row?.original?.endedBy?.optionLabel}
-          </Link>
+          <div>
+            <Link
+              className="link text-truncate"
+              title={row?.original?.endedBy?.optionLabel}
+              to={`${routes.userDetail.path}/${row?.original?.endedBy?.optionValue}`}
+              target={'_blank'}
+            >
+              {row?.original?.endedBy?.optionLabel}
+            </Link>
+          </div>
         ) : (
           <NoDataCell />
         )
@@ -219,13 +245,13 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
     setEditDateDialog({ ...editDateDialog, loading: true });
     let data = { ids: [id], serviceLogId: editDateDialog?.data?._id, ...values };
     if (data?.startDate) {
-      data.startDate = dateFormatToSend(data.startDate)
+      data.startDate = dateFormatToSend(data.startDate);
     }
     if (data?.endDate) {
-      data.endDate = dateFormatToSend(data.endDate)
+      data.endDate = dateFormatToSend(data.endDate);
     }
     axiosInstance()
-      .put(`${rentalManagement.api}/${rentalId}/start-end-date`, data)
+      .put(`${resource === sidebarResource.fieldTicket ? fieldTicket.api : rentalManagement.api}/${referenceId}/start-end-date`, data)
       .then((response) => {
         toastConfig.setToastConfig({
           open: true,
@@ -245,8 +271,13 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
   const handleDeleteServiceLogs = (data: any[]) => {
     setOkBtnLoading(true);
     dispatch({ type: 'loading', loading: true });
+
+    const api =
+      resource === sidebarResource.fieldTicket
+        ? `${fieldTicket.api}/${referenceId}/material/service-log`
+        : `${rentalManagement.api}/productpackage/${referenceId}/service-log`;
     axiosInstance()
-      .delete(`${rentalManagement.api}/productpackage/${rentalId}/service-log`, { data })
+      .delete(api, { data })
       .then((response) => {
         toastConfig.setToastConfig({
           open: true,
@@ -311,6 +342,7 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
             loading={editDateDialog.loading}
             minStartDate={editDateDialog.minStartDate}
             maxEndDate={editDateDialog.maxEndDate}
+            resource={resource}
           />
         )}
         {deleteServiceLogConfirmDialog.open && (

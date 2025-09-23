@@ -76,7 +76,7 @@ const ManageFolder = ({ onClose, onSuccess, relatedTo, isMinimized, onMinimizeMa
         <>
           <CustomDialogHeader
             onClose={onClose}
-            title={`${folderData && isRename ? 'Rename' : 'New'} Folder`}
+            title={`${folderData && isRename ? 'Rename' : 'Create'} Folder`}
             isMinimized={isMinimized}
             onMinimizeMaximize={onMinimizeMaximize}
             showManimizeMaximize={showManimizeMaximize}

@@ -278,7 +278,8 @@ const PackageList = () => {
               title: 'Sub-Package Export',
               api: `${packages.api}/unknown/package/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
                 }`,
-              type: 'export'
+              type: 'export',
+              subResource: sidebarResource.packages
             },
             {
               title: 'Sub-Package Import',

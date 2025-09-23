@@ -5,11 +5,11 @@ import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
-  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
   fieldTicket,
+  getDataFromHeader,
   getObjKeysWithValues,
   restoreObjKeysWithValues,
   sidebarResource
@@ -461,7 +461,7 @@ const Consumables = ({
           taxCodeData = taxCodeOptions[0];
         }
         rows.forEach((d) => {
-          let element: any = {};
+          let element: any = { ...getDataFromHeader(allFields, fieldTicketData) };
           element.qty = d.qty ? parseFloat(d.qty) : 1;
           element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
           element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -728,7 +728,7 @@ const Consumables = ({
         >
           {`Add Products/Consumables`}
         </MenuItem>
-        {!isOffline && resourcePolicy?.showRentalAddMaterial && fieldTicketData?.rentalJob?.optionValue && (
+        {!isOffline && resourcePolicy?.showRentalAddMaterial && fieldTicketData?.rentalJob?.optionValue && fieldTicketData?.isConsumablesInRentalJob && (
           <>
             <MenuItem
               onClick={() => {
@@ -988,7 +988,7 @@ const Consumables = ({
           referenceId={fieldTicketData?._id}
           uniqueId={showAttachmentDialog?._id}
           referenceLabel={showAttachmentDialog.label}
-          resource={ACTIVITY_RESOURCE.fieldTicket}
+          resource={sidebarResource.fieldTicket}
           handleClose={() => {
             setShowAttachmentDialog({ open: false, _id: null, label: '' });
           }}

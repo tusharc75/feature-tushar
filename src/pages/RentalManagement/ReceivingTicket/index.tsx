@@ -2,7 +2,7 @@ import { Dialog, IconButton, Menu, MenuItem, Theme } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
-import { ExpandMore, Visibility } from '@mui/icons-material';
+import { ExpandMore, Visibility, History } from '@mui/icons-material';
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
 import Edit from '@mui/icons-material/Edit';
 import HelpIcon from '@mui/icons-material/HelpOutline';
@@ -87,8 +87,9 @@ import { flattenArray } from 'src/constants/columns';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
-import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
-import SubStatusLog from 'src/pages/RentalManagement/LoadingTicket/SubStatusLog';
+import SubStatusDatesDialog from '../LoadingTicket/SubStatusDatesDialog';
+import SubStatusLog from '../LoadingTicket/SubStatusLog';
+import FleetDispatchHistory from './FleetDispatchHistory';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -118,7 +119,8 @@ const ReceivingTicket = ({
   rentalPolicyData,
   assetStatusOptions,
   setAssetStatusOptions,
-  assetPolicyData
+  assetPolicyData,
+  fleetDispatchPolicyData
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
@@ -137,6 +139,7 @@ const ReceivingTicket = ({
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: null, message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
+  const [subStatusAnchorEl, setSubStatusAnchorEl] = useState(null);
   const [showQtyDialog, setShowQtyDialog] = useState({ open: false, data: null });
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: '', data: {} });
   const { isOffline } = useContext(CustomOfflineContext);
@@ -153,9 +156,16 @@ const ReceivingTicket = ({
   const [repairJobCount, setRepairJobCount] = useState(0);
   const [repairOrderCount, setRepairOrderCount] = useState(0);
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
-  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [], type: '' });
-  const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
-  const [subStatusToUpdate, setSubStatusToUpdate] = useState(false);
+  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
+  const [subStatusToUpdate, setSubStatusToUpdate] = useState({ open: false, status: null });
+  const [showReplaceAssetWarnings, setShowReplaceAssetWarnings] = useState({
+    replaceAssetReasonDialog: false,
+    replaceAssetReason: '',
+    confirmationDirectSendToSupplierDialog: false,
+    data: null,
+    confirmationAddNewLineItemsDialog: false,
+    confirmationAddNewLineItems: ''
+  })
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
@@ -181,8 +191,8 @@ const ReceivingTicket = ({
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
   const [fieldLabels, setFieldLabels] = useState(null);
   const [rentalJobChildFields, setRentalJobChildFields] = useState(null);
-  const [confirmationDirectSendToSupplier, setConfirmationDirectSendToSupplier] = useState({ open: false, data: null })
   const [subStatusLog, setSubStatusLog] = useState({ open: false, data: null })
+  const [fleetDispatchLog, setFleetDispatchLog] = useState({ open: false, assetData: null })
 
   const {
     state: { user, permissions, resources }
@@ -196,6 +206,14 @@ const ReceivingTicket = ({
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleClickChangeSubStatus = (event) => {
+    setSubStatusAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseChangeSubStatusMenu = () => {
+    setSubStatusAnchorEl(null);
   };
 
   const openLinkActions = (event) => {
@@ -302,22 +320,22 @@ const ReceivingTicket = ({
         });
       }
     }
+    if (action === rentalManagementActions.transferToAnotherRental) {
+      const serializedPackageIds = uniq(map(getFilterSelectedRecords()?.filter((e) => e?.serializedPackageId), 'serializedPackageId'));
+      const allRecord = getFilterSelectedRecords(null, flattenArray(dataRows));
+      records = [...getFilterSelectedRecords()?.filter((e) => !e?.serializedPackageId), ...allRecord?.filter((e) => serializedPackageIds?.includes(e?.serializedPackageId))];
+
+      if (records?.length != getFilterSelectedRecords()?.length) {
+        errorMessages.push({ index: 1, message: rentalManagementMessage.selectAllAssetOfSerializedPackage });
+      }
+    }
+
     records.forEach((e) => {
       if (action === rentalManagementActions.deliveredToCustomer) {
         if (!e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
         } else if (e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingAlreadyDelivered });
-        }
-      } else if (action === rentalManagementActions.replaceAsset) {
-        if (e?.type !== MATERIAL_TYPE.serializedAsset) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.productsCanNotReplace });
-        } else if (!e.hasOwnProperty('loadingTicketId')) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
-        } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingDeliveredForReplace });
-        } else if (e?.status !== ASSET_STATUS.inUse || e?.rentalAssetStatus !== ASSET_STATUS.inUse) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyReplaceInUse });
         }
       } else if (action === rentalManagementActions.createReceivingTicket) {
         if (
@@ -450,26 +468,32 @@ const ReceivingTicket = ({
           });
         }
       } else if (action === rentalManagementActions.transferToAnotherRental) {
-        if ([ASSET_STATUS.lost]?.includes(e?.status)) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketNotForLost });
-        } else if (!e?.hasOwnProperty('loadingTicketId')) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
-        } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
-        } else if (
-          ([ASSET_STATUS.inUse].includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(e.rentalAssetStatus)) ||
-          ([ASSET_STATUS.available, ASSET_STATUS.underReview].includes(e.status) &&
-            [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(e.rentalAssetStatus))
-        ) {
+        if (e?.type === MATERIAL_TYPE.product) {
+          if (e?.rentalAssetStatus != RENTAL_INTERNAL_ASSET_STATUS.inUse) {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
+          }
         } else {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
+          if ([ASSET_STATUS.lost]?.includes(e?.status)) {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketNotForLost });
+          } else if (!e?.hasOwnProperty('loadingTicketId')) {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
+          } else if (e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered) {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotDelivered });
+          } else if (
+            ([ASSET_STATUS.inUse].includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(e.rentalAssetStatus)) ||
+            ([ASSET_STATUS.available, ASSET_STATUS.underReview].includes(e.status) &&
+              [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(e.rentalAssetStatus))
+          ) {
+          } else {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAsset });
+          }
         }
-      } else if (action === rentalManagementActions.swapInUseAssets) {
+      } else if (action === rentalManagementActions.replaceInUseAssets) {
         if (e.type !== MATERIAL_TYPE.serializedAsset) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlySwapAssets });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyReplacedAssets });
         } else if ([ASSET_STATUS.inUse].includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(e.rentalAssetStatus)) {
         } else {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlySwapInUseAssets });
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyReplacedInUseAssets });
         }
       } else if (action === rentalManagementActions.updateStartDateEndDate) {
         if (!e.isAllowedStartDate && !e.isAllowedEndDate) {
@@ -495,7 +519,12 @@ const ReceivingTicket = ({
       } else {
         if (records?.find((e) => [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus))) {
           if (
-            records?.filter((e) => [ASSET_STATUS.inUse]?.includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus))
+            records?.filter((e) => {
+              if (e?.type === MATERIAL_TYPE.product) {
+                return [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus)
+              }
+              return [ASSET_STATUS.inUse]?.includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus)
+            })
               ?.length !== records?.length
           ) {
             records?.forEach((e) => {
@@ -622,6 +651,7 @@ const ReceivingTicket = ({
         productSerialNumbers?.forEach((e) => {
           e.warehouse = e?.productSerialNumberDetail?.warehouse
           e.storageLocation = e?.productSerialNumberDetail?.storageLocation
+          e.serializedPackages = e?.productSerialNumberDetail?.serializedPackages
         })
         nonSerializedInventory = productResponse?.data?.data?.nonSerializedInventory;
         setOnReceiveAssetDataCapture(productResponse?.data?.data?.defaultDeliveryTicketStatus === DELIVERY_TICKET_STATUS.inTransit ? true : false);
@@ -854,6 +884,7 @@ const ReceivingTicket = ({
             newRows.push(parent);
           }
           parent.serializedPackageId = parent?.serializedPackage?.optionValue
+          parent.serializedPackageStatus = parent?.serializedPackage?.status;
           parent.serializedPackage = parent?.serializedPackage?.optionLabel;
         });
       }
@@ -999,6 +1030,7 @@ const ReceivingTicket = ({
             _subRow.rentalAssetStatus = '';
           }
           _subRow.serializedPackageId = _subRow?.serializedPackage?.optionValue
+          _subRow.serializedPackageStatus = _subRow?.serializedPackage?.status;
           _subRow.serializedPackage = _subRow?.serializedPackage?.optionLabel;
           _subRow.subRows = generateNestedData(
             _subRow,
@@ -1050,6 +1082,9 @@ const ReceivingTicket = ({
       obj.warehouseId = _subRow?.inventory?.warehouse?.optionValue;
       obj.currentOwner = _subRow?.inventory?.currentOwner;
       obj.currentLocation = _subRow?.inventory?.currentLocation?.optionValue;
+      obj.serializedPackageId = _subRow?.inventory?.serializedPackage?.optionValue;
+      obj.serializedPackageStatus = _subRow?.inventory?.serializedPackage?.status;
+      obj.serializedPackage = _subRow?.inventory?.serializedPackage?.optionLabel;
       const loadingTicket = loadingTicketAssets?.find((e) => e?.asset === obj?._id && e?.uniqueId === obj?.uniqueId);
       if (loadingTicket) {
         obj.loadingTicket = loadingTicket?.loadingTicket;
@@ -1097,12 +1132,6 @@ const ReceivingTicket = ({
       obj.isAllowedEndDate = obj?.manualEndDate ? true : false;
       if (obj?.isAllowedEndDate && invoiceMaterial) {
         obj.minEndDate = new Date(invoiceMaterial?.endDate);
-      }
-
-      const serializedPackage = material?.find(m => m?._id === obj?.uniqueId && m?.materialId === obj?.materialId)?.serializedPackage
-      if (serializedPackage) {
-        obj.serializedPackage = serializedPackage?.optionLabel;
-        obj.serializedPackageId = serializedPackage?.optionValue
       }
 
       rows.push({ ..._subRow?.inventory, ...obj });
@@ -1262,6 +1291,7 @@ const ReceivingTicket = ({
         obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
         obj.storageLocation = element?.storageLocation?.optionLabel;
         obj.storageLocationId = element?.storageLocation?.optionValue;
+        obj.serializedPackage = element?.serializedPackage;
         obj.consumeQty = consumeQty;
         obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicket?.qty || receiveTicket?.qty || 0 : 0;
         obj.status = ASSET_STATUS.notApplied;
@@ -1329,6 +1359,7 @@ const ReceivingTicket = ({
         obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
         obj.storageLocation = element?.storageLocation?.optionLabel;
         obj.storageLocationId = element?.storageLocation?.optionValue;
+        obj.serializedPackage = element?.serializedPackage;
         obj.status = ASSET_STATUS.notApplied;
         obj.rentalAssetStatus = element?.productDetail?.serializedProduct ? element?.status : '';
         obj.currentLocation =
@@ -1359,6 +1390,7 @@ const ReceivingTicket = ({
         element.minEndDate = new Date(invoiceMaterial?.endDate);
       }
       element.serializedPackageId = element?.serializedPackage?.optionValue
+      element.serializedPackageStatus = element?.serializedPackage?.status;
       element.serializedPackage = element?.serializedPackage?.optionLabel;
     });
 
@@ -1709,6 +1741,17 @@ const ReceivingTicket = ({
             ) : (
               <NoDataCell />
             )
+        }, {
+          accessor: 'serializedPackageStatus',
+          Header: `${resources?.serializedPackages?.titleSingular} Status`,
+          cell: ({ row }) =>
+            row?.original?.serializedPackageStatus ? (
+              <div className="flex items-center gap-2">
+                <h5 className="text-truncate" title={row?.original?.serializedPackageStatus}>{row?.original?.serializedPackageStatus}</h5>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
         }] : []),
       {
         accessor: 'loadingTicket',
@@ -1960,6 +2003,19 @@ const ReceivingTicket = ({
                 </IconButton>
               </HtmlTooltip>
             )}
+            {fleetDispatchPolicyData?.policy?.['prsCategory']?.includes(row?.original?.productCategory?.optionValue)
+              && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
+                <HtmlTooltip title={'Fleet Dispatch History'}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setFleetDispatchLog({ open: true, assetData: row?.original })
+                    }}
+                  >
+                    <History fontSize="small" color="primary" />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
           </>
         );
       }
@@ -2563,49 +2619,7 @@ const ReceivingTicket = ({
       });
   };
 
-  const handleOpenReplaceAssetReason = (rows) => {
-    const data: any = {};
-    data.referenceType = 'rentalJob';
-    data.referenceId = rentalManagementData._id;
-    const assets: any = [];
-    getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.forEach((element: any) => {
-      const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
-      if (result.length) {
-        assets.push({
-          _id: element._id,
-          uniqueId: element.uniqueId,
-          status: element.status,
-          deliveryTicketId: element.loadingTicketId,
-          newId: result[0]._id
-        });
-        result[0].isCounted = true;
-      }
-    });
-    data.assets = assets;
-    setShowReplaceReason({ open: true, data: data });
-  };
-
-  const handleReplaceAsset = (reason) => {
-    setIsSubmitting(true);
-    axiosInstance()
-      .post(`${deliveryTicket.api}/replace-assets`, { ...showReplaceReason.data, reason: reason })
-      .then(({ data }) => {
-        setShowReplaceReason({ open: false, data: [] });
-        setAddSerializedAssetDialog({ open: false, products: [], type: '' });
-        setIsSubmitting(false);
-        fetchRecords();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Assets Replaced Successfully`
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const handleSwapAssets = (rows, directSendToSupplier = false) => {
+  const handleSwapAssets = (rows, replaceReason = '', replaceWithNewLineItems = false, directSendToSupplier = false) => {
     const data = [];
     getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.forEach((element: any) => {
       const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
@@ -2616,24 +2630,25 @@ const ReceivingTicket = ({
     });
     setIsSubmitting(true);
     axiosInstance()
-      .post(`${rentalManagement.api}/swap-inuse-assets`, {
-        assets: data?.map((e) => e._id),
-        newAssets: data?.map((e) => {
-          return { asset: e.newId, oldAssetParentId: e?.parentId };
+      .post(`${rentalManagement.api}/replace-inuse-assets`, {
+        assets: data?.map((e) => {
+          return { asset: e.newId, oldAssetParentId: e?.parentId, oldAsset: e?._id };
         }),
         rentalJob: rentalManagementData?._id,
+        reason: replaceReason,
+        replaceWithNewLineItems: replaceWithNewLineItems,
         directSendToSupplier: directSendToSupplier
       })
       .then(({ data }) => {
-        setAddSerializedAssetDialog({ open: false, products: [], type: '' });
-        setConfirmationDirectSendToSupplier({ open: false, data: null });
+        setAddSerializedAssetDialog({ open: false, products: [] });
+        setShowReplaceAssetWarnings({ replaceAssetReason: '', replaceAssetReasonDialog: false, data: null, confirmationAddNewLineItems: '', confirmationAddNewLineItemsDialog: false, confirmationDirectSendToSupplierDialog: false });
         setIsSubmitting(false);
         setOkBtnLoading(false)
         fetchRecords();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Assets Swapped Successfully`
+          message: `Assets Replaced Successfully`
         });
       })
       .catch((error) => {
@@ -2691,6 +2706,17 @@ const ReceivingTicket = ({
             {'Change Status'}
           </ThemeButton>
         )}
+        {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
+          (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) &&
+          assetPolicyData?.policy?.inUseSubStatus?.length > 0 && (
+            <ThemeButton
+              disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0}
+              onClick={handleClickChangeSubStatus}
+              endIcon={<ExpandMore />}
+            >
+              {'Change Sub Status'}
+            </ThemeButton>
+          )}
         {(repairJobCount > 0 || repairOrderCount > 0) && (
           <ThemeButton onClick={openLinkActions} endIcon={<ExpandMore fontSize="inherit" />}>
             Order(s)
@@ -2781,14 +2807,11 @@ const ReceivingTicket = ({
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData?._id}/inventory/update-sub-status`,
         {
-          assets: getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => ({
-            _id: a?._id,
-            uniqueId: a?.uniqueId,
-          })),
+          assets: getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => a?._id),
           dates: dates
         })
       .then(({ data }) => {
-        setSubStatusToUpdate(false);
+        setSubStatusToUpdate({ open: false, status: null });
         fetchRecords();
         setIsSubmitting(false)
         toastConfig.setToastConfig({
@@ -2839,7 +2862,6 @@ const ReceivingTicket = ({
                 currentStep,
                 columns,
                 rentalManagementData,
-                rentalPolicyData,
                 setTransferAnotherPackageialog,
                 hideDeliveryTicketDelivered,
                 openChangeActualDateDialog,
@@ -2848,9 +2870,7 @@ const ReceivingTicket = ({
                 assetPolicyData,
                 validateAction,
                 resources,
-                getFilterSelectedRecords,
-                setSubStatusToUpdate,
-                handleSubStatusChange
+                getFilterSelectedRecords
               }}
             />
           }
@@ -2947,6 +2967,42 @@ const ReceivingTicket = ({
               }}
             >
               {o.optionLabel}
+            </MenuItem>
+          )
+        })}
+      </Menu>
+      <Menu
+        id="sub-status-menu"
+        anchorEl={subStatusAnchorEl}
+        keepMounted
+        open={Boolean(subStatusAnchorEl)}
+        onClose={handleCloseChangeSubStatusMenu}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+      >
+        {assetPolicyData?.policy?.inUseSubStatus?.map((o, i) => {
+          return (
+            <MenuItem
+              key={`${i}`}
+              disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every(s => s?.subStatus === o) ? true : false}
+              onClick={() => {
+                if (validateAction(rentalManagementActions.changeSubStatus)) {
+                  if (rentalPolicyData?.subStatusDateWiseCapture) {
+                    setSubStatusToUpdate({ open: true, status: o })
+                  } else {
+                    handleSubStatusChange([{ startDate: null, endDate: null, subStatus: o }])
+                  }
+                }
+                handleCloseChangeSubStatusMenu()
+              }}
+            >
+              {o}
             </MenuItem>
           )
         })}
@@ -3064,6 +3120,7 @@ const ReceivingTicket = ({
             fetchRecords();
           }}
           assetPolicyData={assetPolicyData}
+          productSerialNumber={getFilterSelectedRecords(MATERIAL_TYPE.product)}
         />
       )}
       {showRemoveAssetFromReceivingTicketDialog && (
@@ -3100,19 +3157,38 @@ const ReceivingTicket = ({
           okBtnLoading={okBtnLoading}
         />
       )}
-      {confirmationDirectSendToSupplier.open && (
+      {showReplaceAssetWarnings.confirmationAddNewLineItemsDialog && (
         <SelectionConfirmationDialog
-          open={confirmationDirectSendToSupplier.open}
-          message={`Would you like to send the sublease assets (${getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter(a => a?.subleaseAsset)?.map(a => a?.assetNumber).join(', ')}) directly to the supplier? Click 'Yes' to proceed, or 'No' to keep them internal.`}
+          open={showReplaceAssetWarnings.confirmationAddNewLineItemsDialog}
+          message={`Would you like to add the replacement assets as a new line item? Click Yes to add it as a new line item, or No to keep it under the same line item.`}
           onOk={(type) => {
-            setOkBtnLoading(true)
-            handleSwapAssets(confirmationDirectSendToSupplier.data, type === 'Yes' ? true : false)
+            if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some(d => d?.subleaseAsset)) {
+              setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: false, confirmationAddNewLineItems: type, confirmationDirectSendToSupplierDialog: true }))
+            } else {
+              handleSwapAssets(showReplaceAssetWarnings.data, showReplaceAssetWarnings.replaceAssetReason, type === 'Yes' ? true : false)
+            }
           }}
           onClose={() => {
-            setConfirmationDirectSendToSupplier({ open: false, data: null });
+            setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: false, replaceAssetReason: '', data: null }))
           }}
           selection1={'Yes'}
           selection2={'No'}
+          okBtnLoading={isSubmitting}
+        />
+      )}
+      {showReplaceAssetWarnings.confirmationDirectSendToSupplierDialog && (
+        <SelectionConfirmationDialog
+          open={showReplaceAssetWarnings.confirmationDirectSendToSupplierDialog}
+          message={`Would you like to send the sublease assets (${getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter(a => a?.subleaseAsset)?.map(a => a?.assetNumber).join(', ')}) directly to the supplier? Click 'Yes' to proceed, or 'No' to keep them internal.`}
+          onOk={(type) => {
+            handleSwapAssets(showReplaceAssetWarnings.data, showReplaceAssetWarnings.replaceAssetReason, showReplaceAssetWarnings.confirmationAddNewLineItems === 'Yes' ? true : false, type === 'Yes' ? true : false)
+          }}
+          onClose={() => {
+            setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationDirectSendToSupplierDialog: false, replaceAssetReason: '', data: null, confirmationAddNewLineItems: '' }))
+          }}
+          selection1={'Yes'}
+          selection2={'No'}
+          okBtnLoading={isSubmitting}
         />
       )}
       {statusToUpdate.open && (
@@ -3201,17 +3277,17 @@ const ReceivingTicket = ({
           isClone={false}
         />
       )}
-      {subStatusToUpdate && (
+      {subStatusToUpdate.open && (
         <SubStatusDatesDialog
           handleClose={() => {
-            setSubStatusToUpdate(false)
+            setSubStatusToUpdate({ open: false, status: null })
           }}
           options={assetPolicyData?.policy?.inUseSubStatus}
+          selectedOption={subStatusToUpdate.status}
           onSuccess={handleSubStatusChange}
           submitting={isSubmitting}
           rentalId={rentalManagementData?._id}
-          assets={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => ({ _id: a?._id, uniqueId: a?.uniqueId }))}
-          showDates={rentalPolicyData?.subStatusDateWiseCapture}
+          assets={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => a?._id)}
         />
       )}
       {subStatusLog.open && (
@@ -3306,20 +3382,12 @@ const ReceivingTicket = ({
       {addSerializedAssetDialog.open && (
         <AddSerializedAsset
           addSerializedAsset={(rows) => {
-            if (addSerializedAssetDialog.type === 'RentalJobReplaceAsset') {
-              handleOpenReplaceAssetReason(rows);
-            } else {
-              if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some(d => d?.subleaseAsset)) {
-                setConfirmationDirectSendToSupplier({ open: true, data: rows })
-              } else {
-                handleSwapAssets(rows);
-              }
-            }
+            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: true, data: rows }))
           }}
           handleSerializedAssetClose={() => {
-            setAddSerializedAssetDialog({ open: false, products: [], type: '' });
+            setAddSerializedAssetDialog({ open: false, products: [] });
           }}
-          referenceType={addSerializedAssetDialog.type}
+          referenceType={'RentalJobReplaceAsset'}
           referenceData={{
             _id: rentalManagementData?._id,
             warehouse: rentalManagementData?.warehouse?.optionValue
@@ -3327,6 +3395,7 @@ const ReceivingTicket = ({
           isAdding={isSubmitting}
           selectedProducts={addSerializedAssetDialog.products}
           filterByPlant={rentalManagementData?.warehouse}
+          replaceAssets={true}
         />
       )}
       {openDateDialog.open && (
@@ -3359,12 +3428,12 @@ const ReceivingTicket = ({
           assets={openDateDialog.assets}
         />
       )}
-      {showReplaceReason.open && (
+      {showReplaceAssetWarnings.replaceAssetReasonDialog && (
         <ReplaceAssetReason
-          handleClose={() => setShowReplaceReason({ open: false, data: {} })}
+          handleClose={() => setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, data: null }))}
           loading={isSubmitting}
           handleSucess={(data) => {
-            handleReplaceAsset(data?.reason);
+            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, replaceAssetReason: data?.reason, confirmationAddNewLineItemsDialog: true }))
           }}
         />
       )}
@@ -3399,6 +3468,13 @@ const ReceivingTicket = ({
           loading={isSubmitting}
         />
       )}
+      {fleetDispatchLog.open && (
+        <FleetDispatchHistory
+          rentalId={rentalManagementData?._id}
+          assetData={fleetDispatchLog.assetData}
+          onClose={() => setFleetDispatchLog({ open: false, assetData: null })}
+        />
+      )}
     </>
   );
 };
@@ -3427,7 +3503,6 @@ const ActionButtonMenuItems = ({
   currentStep,
   columns,
   rentalManagementData,
-  rentalPolicyData,
   setTransferAnotherPackageialog,
   hideDeliveryTicketDelivered,
   openChangeActualDateDialog,
@@ -3437,8 +3512,6 @@ const ActionButtonMenuItems = ({
   validateAction,
   resources,
   getFilterSelectedRecords,
-  setSubStatusToUpdate,
-  handleSubStatusChange
 }) => {
   const checkUniqStatus = () => {
     if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset).length === 0) {
@@ -3738,39 +3811,13 @@ const ActionButtonMenuItems = ({
             {`Transfer to another Package`}
           </MenuItem>
         )}
-      {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && (
-        <MenuItem
-          id={'replace-asset-menu-item'}
-          onClick={() => {
-            if (validateAction(rentalManagementActions.replaceAsset)) {
-              const products = [];
-              getFilterSelectedRecords()?.forEach((element) => {
-                const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
-                if (foundProduct.length) {
-                  foundProduct[0].qty += 1;
-                } else {
-                  products.push({
-                    _id: element?.product?.optionValue,
-                    id: element?.product?.optionValue,
-                    productName: element?.product?.optionLabel,
-                    qty: 1
-                  });
-                }
-              });
-              setAddSerializedAssetDialog({ open: true, products: products, type: 'RentalJobReplaceAsset' });
-            }
-          }}
-        >
-          Replace Asset
-        </MenuItem>
-      )}
       {!isOffline &&
         ((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
           (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
           <MenuItem
-            id={'swap-in-use-assets-menu-item'}
+            id={'replace-in-use-assets-menu-item'}
             onClick={() => {
-              if (validateAction(rentalManagementActions.swapInUseAssets)) {
+              if (validateAction(rentalManagementActions.replaceInUseAssets)) {
                 const products = [];
                 getFilterSelectedRecords()?.forEach((element) => {
                   const foundProduct = products.filter((e) => e._id === element?.product?.optionValue);
@@ -3785,11 +3832,11 @@ const ActionButtonMenuItems = ({
                     });
                   }
                 });
-                setAddSerializedAssetDialog({ open: true, products: products, type: 'RentalJobSwapAsset' });
+                setAddSerializedAssetDialog({ open: true, products: products });
               }
             }}
           >
-            {`Swap In-Use Assets`}
+            Replace In-Use Assets
           </MenuItem>
         )}
       {permissions?.repairJob?.isCreate && !isOffline && currentStep === RENTAL_STEPS.receiving && (
@@ -3952,29 +3999,6 @@ const ActionButtonMenuItems = ({
             id={'change-asset-data-menu-item'}
           >
             Change Assets Data
-          </MenuItem>
-        )}
-      {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
-        (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) &&
-        assetPolicyData?.policy?.inUseSubStatus?.length > 0 && getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length > 0 && (
-          <MenuItem
-            onClick={() => {
-              if (validateAction(rentalManagementActions.changeSubStatus)) {
-                if (!rentalPolicyData?.subStatusDateWiseCapture && assetPolicyData?.policy?.inUseSubStatus?.length === 1) {
-                  handleSubStatusChange([{ startDate: null, endDate: null, subStatus: assetPolicyData?.policy?.inUseSubStatus[0] }])
-                } else {
-                  setSubStatusToUpdate(true)
-                }
-              }
-            }}
-            id={'change-sub-status-menu-item'}
-            disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0 ||
-              !rentalPolicyData?.subStatusDateWiseCapture &&
-              assetPolicyData?.policy?.inUseSubStatus?.length === 1 &&
-              getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every(s => s?.subStatus === assetPolicyData?.policy?.inUseSubStatus[0]) ? true : false
-            }
-          >
-            {`Change Sub Status${!rentalPolicyData?.subStatusDateWiseCapture && assetPolicyData?.policy?.inUseSubStatus?.length === 1 ? ` - ${assetPolicyData?.policy?.inUseSubStatus[0]}` : ''}`}
           </MenuItem>
         )}
     </>

@@ -47,9 +47,9 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
         Header: 'Type',
         width: 150,
         sticky: isMobile || isTablet ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type)}`}</h5> : <NoDataCell />),
+        Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type, row.original?.parentId)}`}</h5> : <NoDataCell />),
         accessorFn: (original) => {
-          return getMaterialLabel(original?.type);
+          return getMaterialLabel(original?.type, original?.parentId);
         }
       },
       {

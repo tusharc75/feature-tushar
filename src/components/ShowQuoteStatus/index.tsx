@@ -28,6 +28,11 @@ const getStatusWithIcon = (status: any) => {
       data.message = `${sidebarResource?.quotation} has been rejected by customer`;
       data.style = styles.rejectedQuote;
       break;
+    case QUOTATION_STATUS.expired:
+      data.icon = <BsFillXCircleFill size={20} />;
+      data.message = `${sidebarResource?.quotation} has been expired`;
+      data.style = styles.expiredQuote;
+      break;
     default:
       data = null;
       break;

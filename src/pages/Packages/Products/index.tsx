@@ -42,7 +42,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [tabValue, setTabValue] = useState(0);
-  const [selectedResource, setSelectedResource] = useState('');
+  const [selectedResource, setSelectedResource] = useState(WORK_ORDER_TYPE.assemblyOrder);
   const [deleteRecord, setDeleteRecord] = useState(null);
 
   useEffect(() => {
@@ -268,13 +268,13 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
 
   const handleMainTabChange = (event: any, newValue: number) => {
     setSelectedResource(
-      newValue === 1
+      newValue === 0
         ? WORK_ORDER_TYPE.assemblyOrder
-        : newValue === 2
+        : newValue === 1
           ? WORK_ORDER_TYPE.preInspectionOrder
-          : newValue === 3
+          : newValue === 2
             ? WORK_ORDER_TYPE.postInspectionOrder
-            : newValue === 4
+            : newValue === 3
               ? WORK_ORDER_TYPE.disassemblyOrder
               : ''
     );
@@ -283,26 +283,27 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
 
   return (
     <>
-      {permissions?.assemblyOrder?.isRead && !childItem && (
+      {!childItem && (
         <>
           <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-2">
-            <ContainedTab value={0} label={`Field`} />
-            <ContainedTab value={1} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]}-WO`} />
-            <ContainedTab value={2} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]}-WO`} />
-            <ContainedTab value={3} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]}-WO`} />
-            <ContainedTab value={4} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]}-WO`} />
+            <ContainedTab value={0} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]}-WO`} />
+            <ContainedTab value={1} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]}-WO`} />
+            <ContainedTab value={2} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]}-WO`} />
+            <ContainedTab value={3} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]}-WO`} />
           </ContainedTabs>
         </>
       )}
-      <DetailsPageHeader
-        isAddButtonVisible={allowedToEdit}
-        addButtonMenuItems={addButtonMenuItems()}
-        rightSideContents={rightSideContents()}
-        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        isActionButtonVisible={allowedToEdit}
-        hasXpadding
-      />
+      {allowedToEdit &&
+        <DetailsPageHeader
+          isAddButtonVisible={allowedToEdit}
+          addButtonMenuItems={addButtonMenuItems()}
+          rightSideContents={rightSideContents()}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          isActionButtonVisible={allowedToEdit}
+          hasXpadding
+        />
+      }
       {columns ? (
         <CustomReactTable
           height={fullHeight ? 'calc(100vh - 250px)' : 'calc(100vh - 393px)'}

@@ -12,10 +12,10 @@ function getLastPart(url: string): string | null {
   return lastPart;
 }
 
-export const createURl = (url: string) => {
+export const createURl = (url: string, hash?: string) => {
   if (!url) return '/';
   const cleanedUrl = url.startsWith('/') ? url : `/${url}`;
-  return `${homeLinkNew}${encodeURI(cleanedUrl)}`;
+  return `${homeLinkNew}${encodeURI(cleanedUrl)}${hash ? hash : ''}`;
 };
 
 export const getCurrentManualUrl = () => {

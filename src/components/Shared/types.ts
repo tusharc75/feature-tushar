@@ -86,6 +86,7 @@ export type FieldData = {
   lookUpFieldDisplay?: string;
   additionalInfoSection?: string;
   operationOnLineItems?: string;
+  copyFromHeaderField?: string;
   showAdditionalInfoPopup?: boolean;
   dropdowDependentOn?: string;
   isFormula?: boolean;

@@ -19,7 +19,7 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import Steps from './Steps';
 import Actions from 'src/components/FormBuilder/Tabs/Actions';
-import { AddOutlined, ElectricBolt, ExpandLess, ExpandMore } from '@mui/icons-material';
+import { AddOutlined, ExpandLess, ExpandMore } from '@mui/icons-material';
 import UpdateIcon from '@mui/icons-material/Update';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import routes from 'src/components/Helpers/Routes';
@@ -160,18 +160,6 @@ const DynamicTabs = ({ workflowId = null, onboardingTemplateId = null, resource 
                   }}
                 >
                   <UpdateIcon fontSize="small" color={'primary'} />
-                </IconButton>
-              </HtmlTooltip>
-            )}
-            {[sidebarResource.serializedAsset]?.includes(resource) && (
-              <HtmlTooltip title={'Resource Triggers'}>
-                <IconButton
-                  aria-label="Actions"
-                  onClick={() => {
-                    setOpenUpdateResourceActions({ open: true, type: RESOURCE_ACTION_TYPE.triggers });
-                  }}
-                >
-                  <ElectricBolt fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}

@@ -63,7 +63,7 @@ export default function Account(props) {
     },
     {
       key: `All ${resources[accountResource]?.titlePlural}`,
-      value: 2
+      value: 3
     }
   ];
 
@@ -504,6 +504,7 @@ export default function Account(props) {
       <CustomContainer>
         <ListingPageHeader
           toggleButtonList={types}
+          resource={sidebarResource[accountResource]}
           onToggle={onTypeChange}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
@@ -567,8 +568,8 @@ export default function Account(props) {
           <ConfirmationDialog
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${deleteRecord
-                ? `${resources?.[accountResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.accountName}`
-                : `selected ${resources?.[accountResource]?.titlePlural?.toLowerCase()}`
+              ? `${resources?.[accountResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.accountName}`
+              : `selected ${resources?.[accountResource]?.titlePlural?.toLowerCase()}`
               } ?`}
             onClose={() => {
               setShowDeleteConfirmBox(false);

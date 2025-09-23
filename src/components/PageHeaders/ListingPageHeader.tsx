@@ -1,7 +1,7 @@
 import { AddOutlined } from '@mui/icons-material';
 import { ButtonProps, CircularProgress, Popover, useMediaQuery } from '@mui/material';
 import queryString from 'query-string';
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import React, { ReactNode, useContext, useEffect, useMemo } from 'react';
 import { BiChevronDown } from 'react-icons/bi';
 import { useHistory } from 'react-router-dom';
 // import { useGetWalkmeInstance } from 'src/components/CustomIntro';
@@ -10,11 +10,17 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ActionButtonWithMenu from 'src/components/PageHeaders/ActionButtonWithMenu';
 import RippleButton from 'src/components/RippleButton';
 import { SearchFilter } from 'src/components/SearchFilter';
-import { cn } from 'src/constants/helpers';
+import { cn, TAB_VIEWS } from 'src/constants/helpers';
 import HtmlTooltip from '../CustomTooltipTitle';
 import SearchBox from '../Helpers/SearchBox';
 import HideWhenOffline from '../HideWhenOffline';
 import { useLocation } from 'react-router-dom';
+import axiosInstance from 'src/axios/axiosInstance';
+import { Star, StarBorder } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
+import { useData } from 'src/StateProvider/Provider';
+import { SET_USER } from 'src/StateProvider/actionTypes';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -46,6 +52,7 @@ type ListingPageHeaderProps = {
   isAddButtonVisible: boolean;
   setQueryString?: boolean;
   showSearchInMobile?: boolean;
+  resource?: string;
 } & React.ComponentProps<'div'>;
 
 const ListingPageHeader = ({
@@ -54,32 +61,27 @@ const ListingPageHeader = ({
   setQueryString = true,
   selectedType,
   setSelectedType,
-
   leftSideContents,
   rightSideContents,
   rightSideContentsBeforeAction,
   leftSideContentsOfSearchFilter,
-
   searchValue,
   onSearch,
-
   searchFilter,
   handleSearchFilter,
-
   addButtonOnclick,
   isAddButtonVisible,
   addButtonProps = {},
-
   isActionButtonVisible,
   actionButtonProps = {},
   actionMenuItems,
-  showSearchInMobile = false
+  showSearchInMobile = false,
+  resource = null
 }: ListingPageHeaderProps) => {
   // const walkmeInstance = useGetWalkmeInstance();
   const isMobile = useMediaQuery('(max-width:600px)');
   const history = useHistory();
   const { search: locationSearch } = useLocation();
-
   const { setGlobalSearch } = useSearch();
 
   const {
@@ -155,17 +157,15 @@ const ListingPageHeader = ({
             <div className={'flex flex-grow flex-wrap items-center gap-2'}>
               {toggleButtonList ? (
                 <HideWhenOffline>
-                  <RenderTabs handleToggle={handleToggle} selectedType={selectedType} toggleButtonList={toggleButtonList} />
+                  <RenderTabs handleToggle={handleToggle} selectedType={selectedType} toggleButtonList={toggleButtonList} resource={resource} />
                 </HideWhenOffline>
               ) : null}
               {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
             </div>
           </>
         ) : null}
-        <div
-          className={`flex flex-grow ${shouldNotFlexWrap && !leftSideContentsOfSearchFilter ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${
-            !isLeftSidePresent && isMobile ? '-mt-2' : ''
-          }`}
+        <div className={`flex flex-grow ${shouldNotFlexWrap
+          && !leftSideContentsOfSearchFilter ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${!isLeftSidePresent && isMobile ? '-mt-2' : ''}`}
         >
           {Boolean(leftSideContentsOfSearchFilter) ? leftSideContentsOfSearchFilter : null}
           {onSearch ? (
@@ -246,7 +246,8 @@ export default ListingPageHeader;
 const RenderTabs = ({
   toggleButtonList,
   handleToggle,
-  selectedType
+  selectedType,
+  resource
 }: {
   handleToggle: (
     event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>,
@@ -255,25 +256,56 @@ const RenderTabs = ({
       value: number;
     }
   ) => void;
-} & Pick<ListingPageHeaderProps, 'toggleButtonList' | 'selectedType'>) => {
+} & Pick<ListingPageHeaderProps, 'toggleButtonList' | 'selectedType' | 'resource'>) => {
+  const {
+    state,
+    dispatch
+  }: any = useData();
+  const { user } = state;
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+  const [defaultType, setDefaultType] = React.useState<number | null>(selectedType);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
+
+  const toastConfig = useContext(CustomToastContext);
 
   const handleClose = () => {
     setAnchorEl(null);
   };
 
   const open = Boolean(anchorEl);
+
+  const handleSetDefault = async (value: number) => {
+    setDefaultType(value);
+    axiosInstance().put('/user/resource-ui-preference', {
+      resource: resource, type: TAB_VIEWS[value]
+    }).then(({ data: { data } }) => {
+      dispatch({
+        type: SET_USER, payload: {
+          ...user,
+          user: {
+            ...user.user,
+            uiPreference: {
+              ...user.uiPreference,
+              byDefaultRecord: data,
+            },
+          },
+        },
+      });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });;
+  };
+
   return (
     <>
       <RippleButton
         className="flex items-center gap-1 rounded-[6px] bg-theme p-[4px_5px_4px_10px] text-[13px] font-medium leading-[22.4px] text-[white] outline-transparent focus-within:outline-transparent focus-visible:outline-transparent "
         onClick={handleClick}
       >
-        {toggleButtonList[selectedType - 1]?.key || toggleButtonList[0]?.key}
+        {toggleButtonList.find(button => button.value === selectedType)?.key || toggleButtonList[0]?.key}
         <BiChevronDown size={22} className={cn('transition-transform', open ? '[transform:rotate(180deg)]' : '')} />
       </RippleButton>
       <Popover
@@ -286,21 +318,43 @@ const RenderTabs = ({
         }}
       >
         <ul className="list-none py-1">
-          {toggleButtonList?.map((d) => (
-            <RippleButton
-              className="list-none px-4 py-2 hover:bg-gray-200 data-[active=true]:bg-gray-200 dark:hover:bg-gray-900  data-[active=true]:dark:bg-gray-900"
-              component="li"
-              onClick={(e) => {
-                handleClose();
-                handleToggle(e, d);
-              }}
-              data-active={toggleButtonList[selectedType - 1]?.value === d.value}
-            >
-              {d.key}
-            </RippleButton>
-          ))}
+          {toggleButtonList?.map((d) => {
+            const isActive = selectedType === d.value;
+            return (
+              <li key={d.value}
+                className={cn("flex items-center justify-between px-2", "hover:bg-gray-200 dark:hover:bg-gray-900", isActive ? "bg-gray-200 dark:bg-gray-900" : "")}
+              >
+                <RippleButton className="flex-1 text-left px-2 py-2"
+                  component="div"
+                  onClick={(e) => {
+                    handleClose();
+                    handleToggle(e, d);
+                  }}
+                >
+                  {d.key}
+                </RippleButton>
+                {resource &&
+                  <HtmlTooltip title={defaultType === d.value ? '' : 'Set as default'}>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSetDefault(d.value);
+                      }}
+                    >
+                      {defaultType === d.value ? (
+                        <Star sx={{ color: 'gold' }} fontSize="small" />
+                      ) : (
+                        <StarBorder fontSize="small" />
+                      )}
+                    </IconButton>
+                  </HtmlTooltip>
+                }
+              </li>
+            );
+          })}
         </ul>
-      </Popover>
+      </Popover >
     </>
   );
 };

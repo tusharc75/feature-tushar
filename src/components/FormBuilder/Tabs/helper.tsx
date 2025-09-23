@@ -106,6 +106,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'enableStartStopService',
+        fieldLabel: 'Enable Start Stop Service',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'packageMaterialAdd',
         fieldLabel: 'Package Material Add',
         type: 'multiSelect',
@@ -325,6 +331,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'enableTechnicianDispatchReturn',
+        fieldLabel: 'Enable Technician Dispatch Return',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'loadingReceivingDefaultView',
         fieldLabel: 'Loading Receiving Default View',
         type: 'dropDown',
@@ -333,6 +345,12 @@ export const resourcePolicy = [
           { optionValue: 'parentChild', optionLabel: 'Parent Child', order: 1 }
         ],
         defaultValue: ''
+      },
+      {
+        fieldName: 'autoCreateFolderInWorkSpace',
+        fieldLabel: 'Auto Create Folder In Work Space',
+        type: 'freeStyleMultiSelect',
+        defaultValue: []
       }
     ]
   },
@@ -368,7 +386,19 @@ export const resourcePolicy = [
         fieldLabel: 'Custom Download File Name',
         type: 'singleLine',
         defaultValue: ''
-      }
+      },
+      {
+        fieldName: 'autoUploadPdfInWorkspace',
+        fieldLabel: 'Auto Upload Pdf In Workspace',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'editRestrictionStatus',
+        fieldLabel: 'Edit Restriction Status',
+        type: 'multiSelect',
+        fieldOption: 'status'
+      },
     ]
   },
   {
@@ -594,6 +624,23 @@ export const resourcePolicy = [
         type: 'checkBox',
         defaultValue: false
       }
+    ]
+  },
+  {
+    resource: sidebarResource.fleetDispatch,
+    policy: [
+      {
+        fieldName: 'fleetCategory',
+        fieldLabel: 'Fleet Category',
+        type: 'multiSelect',
+        lookupResource: sidebarResource.productCategory,
+      },
+      {
+        fieldName: 'prsCategory',
+        fieldLabel: 'PRS Category',
+        type: 'multiSelect',
+        lookupResource: sidebarResource.productCategory,
+      },
     ]
   },
 ];

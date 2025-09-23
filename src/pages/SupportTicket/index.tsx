@@ -47,7 +47,7 @@ const SupportTicket = () => {
     },
     {
       key: `All Support Tickets`,
-      value: 2
+      value: 3
     }
   ];
 
@@ -291,7 +291,7 @@ const SupportTicket = () => {
           permissions={{ isCreate: true, isUpdate: true, isRead: true }}
           module={'Support Tickets'}
           api={routes.supportTicket.path}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
@@ -308,6 +308,7 @@ const SupportTicket = () => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.supportTicket}
           setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}
@@ -341,12 +342,11 @@ const SupportTicket = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `support ticket :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `support ticket :
             ${deleteRecord?.supportTicketNumber || ''}`
-              : `selected support tickets`
-          } ?`}
+            : `selected support tickets`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

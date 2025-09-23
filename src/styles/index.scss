@@ -4841,9 +4841,13 @@ td.google-visualization-orgchart-node {
     user-select: auto !important;
     -webkit-user-drag: auto !important;
     .vis-labelset {
-      border-left: 1px solid var(--common-border-color) !important;
+      // border-left: 1px solid var(--common-border-color) !important;
+      border-bottom: 1px solid var(--common-border-color) !important;
     }
   }
+}
+.vis-foreground {
+  border-bottom: 1px solid var(--common-border-color) !important;
 }
 
 .vis-text.vis-major {

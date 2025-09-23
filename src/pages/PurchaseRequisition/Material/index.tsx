@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isEmpty, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -17,7 +17,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, DOA_STATUS, getEmailsFromContacts, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, DOA_STATUS, getEmailsFromContacts, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import CostDialog from './CostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -540,7 +540,7 @@ const Material = ({
   const rightSideContents = () => {
     return (
       <>
-        {!DOAData && currentStep === 'DOA' && (
+        {(isEmpty(DOAData) || DOAData?.status === DOA_STATUS.rejected) && currentStep === 'DOA' && (
           <RequestButton
             resource={sidebarResource.purchaseRequisition}
             id={purchaseRequisitionData._id}
@@ -648,7 +648,7 @@ const Material = ({
           referenceId={purchaseRequisitionData?._id}
           uniqueId={showAttachmentDialog?._id}
           referenceLabel={showAttachmentDialog.label}
-          resource={ACTIVITY_RESOURCE.purchaseRequisition}
+          resource={sidebarResource.purchaseRequisition}
           handleClose={() => {
             setShowAttachmentDialog({ open: false, _id: null, label: '' });
           }}

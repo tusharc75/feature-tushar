@@ -19,7 +19,6 @@ import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManag
 import { flattenArray } from 'src/constants/columns';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import {
-  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
@@ -669,7 +668,7 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
           referenceId={serviceOrderData?._id}
           uniqueId={showAttachmentDialog?._id}
           referenceLabel={showAttachmentDialog.label}
-          resource={ACTIVITY_RESOURCE.fieldServiceOrder}
+          resource={sidebarResource.fieldServiceOrder}
           handleClose={() => {
             setShowAttachmentDialog({ open: false, _id: null, label: '' });
           }}

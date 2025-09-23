@@ -3,13 +3,14 @@ import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ManageFleetReceiverDialog from './ReceiverDialog';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { useData } from 'src/StateProvider/Provider';
+import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import FleetReceiverDialog from '../FleetDispatch/DispatchReceiveDialog';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const useStyles = makeStyles((theme: Theme) => ({
   fleetBox: {
@@ -72,18 +73,37 @@ const FleetReceiver = () => {
 
   const [fleets, setFleets] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [receiverDialogOpen, setReceiverDialogOpen] = useState({ open: false, fleet: null });
+  const [receiverDialogOpen, setReceiverDialogOpen] = useState({ open: false, _id: null });
+  const [columns, setColumns] = useState(null);
 
   useEffect(() => {
     fetchData();
+    fetchFields();
   }, []);
+
+
+  const fetchFields = async () => {
+    try {
+      setLoading(true);
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.fleetDispatch, true);
+      setColumns(fieldsDataForRead?.map((e) => e?.fieldData));
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchData = () => {
     setLoading(true);
     axiosInstance()
-      .get(`/fleet-receiver`)
+      .get(`/fleet-dispatch?receiver=true`)
       .then(({ data: { data } }) => {
-        setFleets(data?.data || []);
+        const rows = data?.map((e) => {
+          const finalObject = prepareDataForGrid(e);
+          return finalObject;
+        });
+        setFleets(rows || []);
         setLoading(false);
       })
       .catch((error) => {
@@ -109,7 +129,7 @@ const FleetReceiver = () => {
                     key={index}
                     className={`${classes.fleetBox} p-[15px] md:p-[27px_20px_45px]`}
                     onClick={() => {
-                      setReceiverDialogOpen({ open: true, fleet: data });
+                      setReceiverDialogOpen({ open: true, _id: data?._id });
                     }}
                   >
                     <Box className={`flex flex-wrap gap-[16px]`}>
@@ -117,18 +137,15 @@ const FleetReceiver = () => {
                         <LocalShippingIcon className="w-full" />
                       </Box>
                       <Box className="basis-[calc(100%-calc(30px+16px))]">
-                        <Typography className={classes.primaryText}>Name : {data?.fleet?.fleetNumber}</Typography>
+                        <Typography className={classes.primaryText}>{columns?.find((e) => e?.primaryField)?.fieldLabel || 'Dispatch Number'} : {data?.dispatchNumber}</Typography>
                         <Typography className={classes.secondaryText}>
-                          <strong>{resources?.serializedAsset?.titleSingular}  :</strong> {data?.asset?.assetNumber}
+                          <strong>{columns?.find((e) => e?.fieldName === 'fleet')?.fieldLabel || 'Fleet'} :</strong> {data?.fleet}
                         </Typography>
                         <Typography className={classes.secondaryText}>
-                          <strong>Job :</strong> {data?.job?.jobNumber}
+                          <strong>{columns?.find((e) => e?.fieldName === 'asset')?.fieldLabel || resources?.serializedAsset?.titleSingular} :</strong> {data?.asset}
                         </Typography>
                         <Typography className={classes.secondaryText}>
-                          <strong>Customer :</strong> {data?.job?.customerAccount?.optionLabel}
-                        </Typography>
-                        <Typography className={classes.secondaryText}>
-                          <strong>Location :</strong> {data?.job?.billingAddress?.optionLabel}
+                          <strong>{columns?.find((e) => e?.fieldName === 'rentalJob')?.fieldLabel || resources?.rentalManagement?.titleSingular} :</strong> {data?.rentalJob}
                         </Typography>
                       </Box>
                     </Box>
@@ -148,15 +165,16 @@ const FleetReceiver = () => {
         )}
       </Box>
       {receiverDialogOpen?.open && (
-        <ManageFleetReceiverDialog
+        <FleetReceiverDialog
           handleClose={() => {
-            setReceiverDialogOpen({ open: false, fleet: null });
+            setReceiverDialogOpen({ open: false, _id: null });
           }}
           handleSucess={() => {
-            setReceiverDialogOpen({ open: false, fleet: null });
+            setReceiverDialogOpen({ open: false, _id: null });
             fetchData();
           }}
-          data={receiverDialogOpen?.fleet}
+          _id={receiverDialogOpen?._id}
+          type="receiver"
         />
       )}
     </Box>

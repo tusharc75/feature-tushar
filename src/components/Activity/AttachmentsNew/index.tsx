@@ -2,7 +2,7 @@ import { Box, Collapse, Dialog, IconButton, ListItemIcon, ListItemText, Menu, Me
 import { useContext, useEffect, useState } from "react";
 import { AiOutlineDelete, AiOutlineFile } from "react-icons/ai";
 import axiosInstance from "src/axios/axiosInstance";
-import { allAttachmentsAreFromUser, getTitle, sortFileStructure, TNestedTree, unflatten } from "src/components/Activity/AttachmentsNew/helper";
+import { allAttachmentsAreFromUser, download, getTitle, sortFileStructure, TNestedTree, unflatten } from "src/components/Activity/AttachmentsNew/helper";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
 import ActivityLoader from "src/components/Helpers/ActivityLoader";
 import { CustomDialogTransition, displayDateTime } from "src/constants/helpers";
@@ -17,10 +17,16 @@ import ManageFile from "src/components/Activity/AttachmentsNew/ManageFile";
 import ManageFolder from "src/components/Activity/AttachmentsNew/ManageFolder";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { useData } from "src/StateProvider/Provider";
-import { FiEdit2 } from "react-icons/fi";
+import { FiDownload, FiEdit2 } from "react-icons/fi";
 import AttachmentDelete from "src/components/Activity/AttachmentsNew/AttachmentDelete";
 import { isEmpty } from "lodash";
 import DeleteRequest, { DeleteRequestIcon } from "src/components/Activity/AttachmentsNew/DeleteRequest";
+import { FaEye } from "react-icons/fa";
+import { MdOutlineVisibility } from "react-icons/md";
+import PreviewDialog from "src/components/Activity/AttachmentsNew/PreviewDialog";
+import { TbEdit } from "react-icons/tb";
+import UpdateDetailsDialog from "src/components/Activity/AttachmentsNew/UpdateDetailsDialog";
+import { VITE_APP_DMS_URL } from "src/config";
 
 const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -37,6 +43,8 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
   const [anchorElFile, setAnchorElFile] = useState({ anchor: null, data: null });
   const [openDelete, setOpenDelete] = useState({ open: false, request: false, attachment: null })
   const [openDeleteRequest, setOpenDeleteRequest] = useState({ ancherEl: null, attachment: null })
+  const [showPreview, setShowPreview] = useState({ open: false, file: null })
+  const [updateDetailDialog, setUpdateDetailDialog] = useState({ open: false, data: null })
 
   useEffect(() => {
     fetchData();
@@ -46,7 +54,8 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
     setLoading(true);
     let api = `/attachment-new?resource=${resource}&referenceId=${referenceId}`
     axiosInstance().get(api).then(({ data: { data: { data, count } } }) => {
-      setTreeStructure(unflatten(data?.length > 0 ? data : []))
+      const treeStructure = unflatten(data?.length > 0 ? data : [])
+      setTreeStructure(treeStructure?.slice(0, 5))
       setLoading(false);
       onSetCount('Attachment', count || 0);
     }).catch((error) => {
@@ -74,7 +83,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
   const folderIconButtons = (attachment) => {
     return (
       <div className="flex items-center gap-2">
-        <HtmlTooltip title={'Create File'}>
+        <HtmlTooltip title={'File Upload'}>
           <IconButton
             size="small"
             color="primary"
@@ -87,11 +96,11 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
             <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
           </IconButton>
         </HtmlTooltip>
-        <HtmlTooltip title={'Create Folder'}>
+        <HtmlTooltip title={'Add Folder'}>
           <IconButton
             size="small"
             color="primary"
-            aria-label="Create Folder"
+            aria-label="Add Folder"
             onClick={(e) => {
               e.stopPropagation();
               setOpen({ open: true, type: 'folder', data: attachment, isUpdate: false });
@@ -184,6 +193,18 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
             <ListItemText>Rename</ListItemText>
           </MenuItem>
         )}
+        <MenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            download(anchorElFolder.data, toastConfig)
+            handleFolderMenuClose()
+          }}
+        >
+          <ListItemIcon style={{ minWidth: '30px' }}>
+            <FiDownload />
+          </ListItemIcon>
+          <ListItemText>Download</ListItemText>
+        </MenuItem>
         {permissions['attachment']?.isDelete && (
           <HtmlTooltip
             title={getTitle([anchorElFolder?.data], user)}
@@ -202,7 +223,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
               }}
             >
               <ListItemIcon style={{ minWidth: '30px' }}>
-                <AiOutlineDelete />
+                <AiOutlineDelete className="text-red-600" />
               </ListItemIcon>
               <ListItemText>Delete</ListItemText>
             </MenuItem>
@@ -227,6 +248,42 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
           'aria-labelledby': 'basic-button'
         }}
       >
+        <MenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowPreview({ open: true, file: anchorElFile.data })
+            handleFileMenuClose()
+          }}
+        >
+          <ListItemIcon style={{ minWidth: '30px' }}>
+            <MdOutlineVisibility />
+          </ListItemIcon>
+          <ListItemText>Preview</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            download(anchorElFile.data, toastConfig)
+            handleFileMenuClose()
+          }}
+        >
+          <ListItemIcon style={{ minWidth: '30px' }}>
+            <FiDownload />
+          </ListItemIcon>
+          <ListItemText>Download</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            setUpdateDetailDialog({ open: true, data: anchorElFile.data })
+            handleFileMenuClose()
+          }}
+        >
+          <ListItemIcon style={{ minWidth: '30px' }}>
+            <TbEdit />
+          </ListItemIcon>
+          <ListItemText>Update Details</ListItemText>
+        </MenuItem>
         <HtmlTooltip
           title={getTitle([anchorElFile?.data], user)}
           placement="top"
@@ -244,7 +301,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
             }}
           >
             <ListItemIcon style={{ minWidth: '30px' }}>
-              <AiOutlineDelete />
+              <AiOutlineDelete className="text-red-600" />
             </ListItemIcon>
             <ListItemText>Delete</ListItemText>
           </MenuItem>
@@ -268,7 +325,19 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
                   tree={treeStructure}
                   folderButtons={(data) => folderIconButtons(data)}
                   fileButtons={(data) => fileIconButtons(data)}
+                  setShowPreview={setShowPreview}
                 />
+                <div
+                  className="flex items-center justify-center btn-view"
+                  onClick={() => {
+                    const token = localStorage.getItem('token');
+                    const redirectUrl = `/document?resource=${encodeURIComponent(resource)}&referenceId=${encodeURIComponent(referenceId)}`;
+                    window.open(`${VITE_APP_DMS_URL}/oauth?token=${encodeURIComponent(token)}&redirect=${encodeURIComponent(redirectUrl)}`, '_blank', 'noopener,noreferrer');
+                  }}>
+                  <div className="flex items-center gap-1 p-3">
+                    <FaEye /> View All
+                  </div>
+                </div>
               </>
             ) : (
               <Box p={1} border={1} borderColor="var(--common-border-color)" textAlign="center">
@@ -296,6 +365,10 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
         {open?.type === 'file' && (
           <ManageFile
             onClose={() => {
+              setOpen({ open: false, type: '', data: null, isUpdate: false });
+              setFullScreen(false);
+            }}
+            onSuccess={() => {
               fetchData()
               setOpen({ open: false, type: '', data: null, isUpdate: false });
               setFullScreen(false);
@@ -367,6 +440,26 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
           />
         </div>
       </Popover>
+      {showPreview.open && (
+        <PreviewDialog
+          onClose={() => {
+            setShowPreview({ open: false, file: null })
+          }}
+          file={showPreview.file}
+        />
+      )}
+      {updateDetailDialog.open && (
+        <UpdateDetailsDialog
+          onClose={() => {
+            setUpdateDetailDialog({ open: false, data: null })
+          }}
+          onSuccess={() => {
+            fetchData()
+            setUpdateDetailDialog({ open: false, data: null })
+          }}
+          data={updateDetailDialog.data}
+        />
+      )}
     </Box >
   )
 
@@ -374,7 +467,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
 
 export default AttachmentsNew;
 
-const RenderTree = ({ tree, folderButtons, fileButtons }) => {
+const RenderTree = ({ tree, folderButtons, fileButtons, setShowPreview }) => {
   return (
     <>
       {tree.sort(sortFileStructure).map((node) => {
@@ -384,12 +477,12 @@ const RenderTree = ({ tree, folderButtons, fileButtons }) => {
               key={node._id}
               node={node}
               iconButtons={() => folderButtons(node)}
-              childNodes={<RenderTree {...{ tree: node.children, folderButtons, fileButtons }} />}
+              childNodes={<RenderTree {...{ tree: node.children, folderButtons, fileButtons, setShowPreview }} />}
             />
           );
         }
         if (node.type === 'file' || !node.type) {
-          return <RenderFiles key={node._id} node={node} iconButtons={() => fileButtons(node)} />;
+          return <RenderFiles key={node._id} node={node} iconButtons={() => fileButtons(node)} setShowPreview={setShowPreview} />;
         }
         return null;
       })}
@@ -453,7 +546,7 @@ const RenderFolder = ({ node, iconButtons, childNodes }) => {
   );
 };
 
-const RenderFiles = ({ node, iconButtons }) => {
+const RenderFiles = ({ node, iconButtons, setShowPreview }) => {
   return (
     <div
       className={`${className}`}
@@ -465,7 +558,16 @@ const RenderFiles = ({ node, iconButtons }) => {
             <AiOutlineFile size={18} />
           </div>
           <h6 className=" line-clamp-1 flex-grow text-[14px] font-medium leading-[17px] text-[var(--dark-primary-text,#2A3042)]">
-            <span>{node?.name ?? ''}</span>
+            <span
+              className="cursor-pointer"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                setShowPreview({ open: true, file: node })
+              }}
+            >
+              {node?.name ?? ''}
+            </span>
           </h6>
           {iconButtons(node)}
         </div>

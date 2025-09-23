@@ -1,18 +1,18 @@
 import { Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import adminSetupImage from 'src/assets/dashboard_images/sidebar/admin-setup.png';
 import userManualImage from 'src/assets/dashboard_images/sidebar/user-manual.png';
 import workspaceImage from 'src/assets/dashboard_images/sidebar/workspace.png';
 import styles from './Dashboard.module.scss';
+import { handleRoutes } from 'src/pages/Home/helpers';
 
 import DashboardModal from 'src/components/DashboardModal';
 import { userManual } from 'src/pages/Home';
 import SideCard, { SideCardProps } from 'src/pages/Home/SideCard';
+import Link from 'src/components/Link';
 
 interface sidecardInterface extends React.HTMLAttributes<HTMLDivElement> {
   objBySectionName: any;
-  handleRoutes: any;
   mode: 'Workspace' | 'Setup & Administration' | 'User Manual';
 }
 
@@ -45,7 +45,6 @@ const getProps = (mode: 'Workspace' | 'Setup & Administration' | 'User Manual', 
       };
     }
     default: {
-      const token = localStorage.getItem('token');
       const href = `${userManual.link}`;
       return {
         heading: 'User Manual',
@@ -63,7 +62,7 @@ const getProps = (mode: 'Workspace' | 'Setup & Administration' | 'User Manual', 
   }
 };
 
-const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Workspace', ...others }: sidecardInterface) => {
+const DisplaySideCard = ({ objBySectionName, mode = 'Workspace', ...others }: sidecardInterface) => {
   const [modalContent, setModalContent] = useState(null);
   const [colabData, setColabData] = useState(null);
 
@@ -92,12 +91,7 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Workspace', .
         </>
       ) : null}
       {mode !== 'User Manual' && (
-        <DashboardModal
-          style={{ width: 'min(468px, calc(100vw - 64px))' }}
-          modalHead={modalContent}
-          handleClose={handleClose}
-          handleRoutes={handleRoutes}
-        >
+        <DashboardModal style={{ width: 'min(468px, calc(100vw - 64px))' }} modalHead={modalContent} handleClose={handleClose}>
           <ul className={styles.linkList}>
             {modalContent?.items
               ?.filter((item) => !item?.isHidden)

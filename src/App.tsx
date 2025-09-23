@@ -58,7 +58,15 @@ import routes from './components/Helpers/Routes';
 import PrivateRoute from './components/PrivateRoute';
 import ScreenOrientationOverlay from './components/ScreenMessages/ScreenOrientationOverlay';
 import ColorModeProvider from './constants/AppConfig';
-import { compareVersions, customerAccount, customerContact, handleHardReload, sidebarResource, supplierAccount, supplierContact } from './constants/helpers';
+import {
+  compareVersions,
+  customerAccount,
+  customerContact,
+  handleHardReload,
+  sidebarResource,
+  supplierAccount,
+  supplierContact
+} from './constants/helpers';
 import ErrorBoundaryComponent from './ErrorBoundary';
 import { firebaseConfig } from './firebase';
 import { useLiveLocationTracking } from './hooks/useLiveLocationTracking';
@@ -66,7 +74,7 @@ import AccountDetailPage from './pages/Account/AccountDetailPage';
 import Account from './pages/Account/index';
 import Activity from './pages/Activity';
 import Activitydemo from './pages/Activity/activitydemo';
-import Attachments from './pages/Activity/Attachments';
+// import Attachments from './pages/Activity/Attachments';
 import Calender from './pages/Activity/Calendar';
 import Email from './pages/Activity/Email';
 import Note from './pages/Activity/Note';
@@ -162,8 +170,6 @@ import IotDataPoints from './pages/IotDataPoints';
 import IotDataPointsDetail from './pages/IotDataPoints/IotDataPointsDetail';
 import IrtTicket from './pages/IrtTicket';
 import IrtTicketDetail from './pages/IrtTicket/IrtTicketDetail';
-import Job from './pages/Job';
-import JobDetail from './pages/Job/JobDetail';
 import Leads from './pages/Leads';
 import LeadDetailsPage from './pages/Leads/LeadDetailsPage';
 import MarketSegment from './pages/MarketSegment';
@@ -267,8 +273,6 @@ import TransferInventoryDetailPage from './pages/TransferInventory/TransferInven
 import TriggerNotificationHistory from './pages/TriggerNotificationHistory';
 import TriggerNotificationMaster from './pages/TriggerNotificationMaster';
 import TriggerNotificationMasterDetail from './pages/TriggerNotificationMaster/TriggerNotificationMasterDetail';
-import TruckMaster from './pages/TruckMaster';
-import TruckMasterDetail from './pages/TruckMaster/TruckMasterDetail';
 import Units from './pages/Units';
 import UnitDetail from './pages/Units/UnitDetail';
 import User from './pages/User';
@@ -304,6 +308,10 @@ import OnboardingTemplateDetail from 'src/pages/OnboardingTemplate/OnboardingTem
 import QuickBookProxy from 'src/pages/Integration/QuickBookProxy';
 import Onboarding from 'src/pages/Onboarding';
 import OnboardingDetail from 'src/pages/Onboarding/OnboardingDetail';
+import BrandSupportTicket from './pages/BrandSupportTicket';
+import AssetServiceTickets from 'src/pages/AssetServiceTicket';
+import AssetServiceTicketDetail from 'src/pages/AssetServiceTicket/AssetServiceTicketDetail';
+import PublicOnboarding from 'src/pages/Onboarding/Public/PublicOnboarding';
 
 var notificationInterval: any = null;
 
@@ -381,7 +389,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -478,7 +486,6 @@ function App() {
       <AnimatePresence initial={false} exitBeforeEnter>
         <ErrorBoundaryComponent>
           <Switch>
-
             <Route exact path="/login/mfa" render={({ location }) => conditionalRedirect(LoginMFA, location)} />
             <Route
               // exact
@@ -619,9 +626,9 @@ function App() {
             <PrivateRoute exact path={routes.note.path}>
               <Note />
             </PrivateRoute>
-            <PrivateRoute exact path={routes.attachment.path}>
+            {/* <PrivateRoute exact path={routes.attachment.path}>
               <Attachments />
-            </PrivateRoute>
+            </PrivateRoute> */}
             <PrivateRoute exact path={routes.calendar.path}>
               <Calender />
             </PrivateRoute>
@@ -970,6 +977,9 @@ function App() {
             <PrivateRoute exact path={`${routes.contactUsDetail.path}/:id`}>
               <ContactUsDetail />
             </PrivateRoute>
+            <PrivateRoute exact path={routes.brandSupportTicket.path}>
+              <BrandSupportTicket />
+            </PrivateRoute>
             <PrivateRoute exact path={routes.supportTicket.path}>
               <SupportTicket />
             </PrivateRoute>
@@ -1053,18 +1063,6 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fleetDispatch.path}`}>
               <FleetDispatch />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.truckMaster.path}`}>
-              <TruckMaster />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.truckMasterDetail.path}/:id`}>
-              <TruckMasterDetail />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.job.path}`}>
-              <Job />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.jobDetail.path}/:id`}>
-              <JobDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fleetReceiver.path}`}>
               <FleetReceiver />
@@ -1333,7 +1331,10 @@ function App() {
             <PrivateRoute exact path={`${routes.fieldView.path}/:padId/:wellId`}>
               <FieldView />
             </PrivateRoute>
-             <PrivateRoute exact path={`${routes.onboarding.path}`}>
+            <Route exact path={'/public/onboarding/:id'}>
+              <PublicOnboarding />
+            </Route>
+            <PrivateRoute exact path={`${routes.onboarding.path}`}>
               <Onboarding />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.onboardingDetail.path}/:id`}>
@@ -1344,6 +1345,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.onboardingTemplateDetail.path}/:id`}>
               <OnboardingTemplateDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.assetServiceTickets.path}`}>
+              <AssetServiceTickets />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.assetServiceTicketsDetail.path}/:id`}>
+              <AssetServiceTicketDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

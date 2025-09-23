@@ -44,17 +44,14 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
   }, []);
 
   const fetchData = () => {
-    setLoading(true);
     axiosInstance()
       .get(`${productInventory.api}/serial-number?products=${product[0]._id}&warehouse=${warehouse}`)
       .then(({ data: { data } }) => {
         if (data?.length) {
           setSerialNumbers(data);
         }
-        setLoading(false);
       })
       .catch((err) => {
-        setLoading(false);
         setToastConfig(err);
       });
   };
@@ -86,18 +83,16 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
 
   const getCurrentInventory = () => {
     setLoadingInitialData(true);
-    let api = `${productInventory.api}/current-inventory?warehouse=${warehouse}&product=${product[0]._id}`;
-    if (selectedStorageLocation) {
-      api = `${api}&storageLocation=${selectedStorageLocation}`;
-    }
     if (product?.length === 1) {
-      axiosInstance()
-        .get(api)
+      let api = `${productInventory.api}/current-inventory?warehouse=${warehouse}&products=${product[0]._id}`;
+      if (selectedStorageLocation) {
+        api = `${api}&storageLocation=${selectedStorageLocation}`;
+      }
+      axiosInstance().get(api)
         .then(({ data: { data } }) => {
-          setCurrentInventory(data);
+          setCurrentInventory(data[0]?.availableInventory || 0);
           setLoadingInitialData(false);
-        })
-        .catch((err) => {
+        }).catch((err) => {
           setToastConfig(err);
           setLoadingInitialData(false);
         });
@@ -212,128 +207,128 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
       }}
       aria-labelledby="assign-roles-dialog"
     >
-      {!loadingInitialData ? (
-        <Formik initialValues={initialData} onSubmit={handleSubmit} validateOnMount validate={validate}>
-          {({ touched, errors, setFieldValue, values, submitForm }) => (
-            <Form autoComplete="off" autoCorrect="off" className="flex min-h-full flex-col">
-              <CustomDialogHeader
-                title={`Convert Inventory`}
-                showRequiredLabel={true}
-                onClose={handleClose}
-                isMinimized={!fullScreen}
-                onMinimizeMaximize={() => {
-                  setFullScreen((prevState) => !prevState);
-                }}
-                showManimizeMaximize={true}
-              />
-              <CustomDialogContent>
-                <List style={{ padding: 0 }}>
-                  <ListItem key={product[0]?._id}>
-                    {product?.length === 1 ? (
-                      <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${currentInventory}`} />
-                    ) : (
-                      <ListItemText primary={`${product?.length} Products`} />
-                    )}
-                    <TextField
-                      margin="dense"
-                      size="small"
-                      type="number"
-                      label="Qty"
-                      name="qty"
-                      variant="outlined"
-                      value={values['qty']}
-                      error={touched['qty'] && Boolean(errors['qty'])}
-                      helperText={touched['qty'] && errors['qty']}
-                      onChange={(e) => {
-                        setFieldValue('qty', e.target.value);
-                      }}
-                      required={true}
-                    />
-                  </ListItem>
-                </List>
-                {user?.user?.brandPolicy?.storageLocation && (
-                  <Box m={1}>
-                    <Autocomplete
-                      disableClearable
-                      options={storageLocationOptions}
-                      getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                      isOptionEqualToValue={(option: any, val) => option.optionValue === val}
-                      value={
-                        storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length
-                          ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0]
-                          : ''
-                      }
-                      onChange={(e, val) => {
-                        setFieldValue('storageLocation', val?.optionValue);
-                        setSelectedStorageLocation(val?.optionValue);
-                      }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          margin="dense"
-                          size="small"
-                          name="storageLocation"
-                          label="Storage Location"
-                          variant="outlined"
-                          fullWidth
-                          required
-                          error={touched['storageLocation'] && Boolean(errors['storageLocation'])}
-                          helperText={touched['storageLocation'] && errors['storageLocation']}
-                        />
+      <Formik initialValues={initialData} onSubmit={handleSubmit} validateOnMount validate={validate}>
+        {({ touched, errors, setFieldValue, values, submitForm }) => (
+          <Form autoComplete="off" autoCorrect="off" className="flex min-h-full flex-col">
+            <CustomDialogHeader
+              title={`Convert Inventory`}
+              showRequiredLabel={true}
+              onClose={handleClose}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
+              }}
+              showManimizeMaximize={true}
+            />
+            <CustomDialogContent>
+              {!loadingInitialData ?
+                <>
+                  <List style={{ padding: 0 }}>
+                    <ListItem key={product[0]?._id}>
+                      {product?.length === 1 ? (
+                        <ListItemText primary={product[0]?.productName} secondary={`Inventory : ${currentInventory}`} />
+                      ) : (
+                        <ListItemText primary={`${product?.length} Products`} />
                       )}
-                    />
-                  </Box>
-                )}
-                {product?.length === 1 ? (
-                  <Fragment>
-                    <Box my={2} mx={1}>
-                      <Divider />
-                    </Box>
+                      <TextField
+                        margin="dense"
+                        size="small"
+                        type="number"
+                        label="Qty"
+                        name="qty"
+                        variant="outlined"
+                        value={values['qty']}
+                        error={touched['qty'] && Boolean(errors['qty'])}
+                        helperText={touched['qty'] && errors['qty']}
+                        onChange={(e) => {
+                          setFieldValue('qty', e.target.value);
+                        }}
+                        required={true}
+                      />
+                    </ListItem>
+                  </List>
+                  {user?.user?.brandPolicy?.storageLocation && (
                     <Box m={1}>
                       <Autocomplete
-                        size="small"
-                        options={serialNumbers.map((item: any) => item?.serialNumber)}
-                        multiple={true}
-                        disableCloseOnSelect
-                        value={values['serialNumbers']}
-                        onChange={(_, val) => {
-                          setFieldValue('serialNumbers', val);
+                        disableClearable
+                        options={storageLocationOptions}
+                        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+                        value={
+                          storageLocationOptions.filter((data) => data.optionValue === values['storageLocation']).length
+                            ? storageLocationOptions.filter((data) => data.optionValue === values['storageLocation'])[0]
+                            : ''
+                        }
+                        onChange={(e, val) => {
+                          setFieldValue('storageLocation', val?.optionValue);
+                          setSelectedStorageLocation(val?.optionValue);
                         }}
-                        isOptionEqualToValue={(item, current) => item === current}
-                        getOptionLabel={(option) => option}
-                        renderInput={(props) => (
+                        renderInput={(params) => (
                           <TextField
-                            {...props}
-                            placeholder={'Select Serial Numbers'}
+                            {...params}
+                            margin="dense"
+                            size="small"
+                            name="storageLocation"
+                            label="Storage Location"
                             variant="outlined"
-                            name="serialNumbers"
-                            label={'Select Serial Numbers'}
-                            error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
-                            helperText={touched['serialNumbers'] && errors['serialNumbers']}
-                            required={user?.user?.brandPolicy?.productInventorySerialNumberRequired ? true : false}
+                            fullWidth
+                            required
+                            error={touched['storageLocation'] && Boolean(errors['storageLocation'])}
+                            helperText={touched['storageLocation'] && errors['storageLocation']}
                           />
                         )}
                       />
                     </Box>
-                  </Fragment>
-                ) : null}
-              </CustomDialogContent>
-              <CustomDialogFooter>
-                <ThemeButton buttonType="transparent" onClick={handleClose}>
-                  Cancel
-                </ThemeButton>
-                <ThemeButton onClick={submitForm} isLoading={loading} disabled={loading} buttonType="theme">
-                  Convert
-                </ThemeButton>
-              </CustomDialogFooter>
-            </Form>
-          )}
-        </Formik>
-      ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
+                  )}
+                  {product?.length === 1 ? (
+                    <Fragment>
+                      <Box my={2} mx={1}>
+                        <Divider />
+                      </Box>
+                      <Box m={1}>
+                        <Autocomplete
+                          size="small"
+                          options={serialNumbers.map((item: any) => item?.serialNumber)}
+                          multiple={true}
+                          disableCloseOnSelect
+                          value={values['serialNumbers']}
+                          onChange={(_, val) => {
+                            setFieldValue('serialNumbers', val);
+                          }}
+                          isOptionEqualToValue={(item, current) => item === current}
+                          getOptionLabel={(option) => option}
+                          renderInput={(props) => (
+                            <TextField
+                              {...props}
+                              placeholder={'Select Serial Numbers'}
+                              variant="outlined"
+                              name="serialNumbers"
+                              label={'Select Serial Numbers'}
+                              error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
+                              helperText={touched['serialNumbers'] && errors['serialNumbers']}
+                              required={user?.user?.brandPolicy?.productInventorySerialNumberRequired ? true : false}
+                            />
+                          )}
+                        />
+                      </Box>
+                    </Fragment>
+                  ) : null}
+                </> :
+                <Box p={2} height={500}>
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>}
+            </CustomDialogContent>
+            <CustomDialogFooter>
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
+                Cancel
+              </ThemeButton>
+              <ThemeButton onClick={submitForm} isLoading={loading} disabled={loading} buttonType="theme">
+                Convert
+              </ThemeButton>
+            </CustomDialogFooter>
+          </Form>
+        )}
+      </Formik>
       {assetNumberDialog.open && (
         <CustomAssetDialog
           handleClose={() => setAssetNumberDialog({ open: false, products: [], qty: 0, warehouse: null, storageLocation: null })}

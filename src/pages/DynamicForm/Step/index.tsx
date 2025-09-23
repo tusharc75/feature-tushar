@@ -14,8 +14,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
 import { camelCase } from 'lodash';
 
-const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, resource, data, allowedToEdit, referenceData = null }) => {
-
+const Step = ({ tab, resourcePolicyId = null, workflowId = null, onboardingTemplateId = null, resourceId, resource, data, allowedToEdit, referenceData = null }) => {
   const {
     state: { user, permissions }
   }: any = useData();
@@ -34,6 +33,7 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, res
     setStepLoading(true);
     let api = `/dynamic-form/steps?resourcePolicyId=${resourcePolicyId}&tabId=${tab?._id}`;
     if (workflowId) api = `${routes.workflow.path}/tabs/steps/${workflowId}/${tab?._id}`;
+    if (onboardingTemplateId) api = `${routes.onboardingTemplate.path}/tabs/steps/${onboardingTemplateId}/${tab?._id}`;
     axiosInstance()
       .get(api)
       .then((res) => {
@@ -57,10 +57,10 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, res
   };
 
   useEffect(() => {
-    if (tab?._id && (resourcePolicyId || workflowId)) {
+    if (tab?._id && (resourcePolicyId || workflowId || onboardingTemplateId)) {
       findSteps();
     }
-  }, [tab, resourcePolicyId, workflowId]);
+  }, [tab, resourcePolicyId, workflowId, onboardingTemplateId]);
 
   useEffect(() => {
     if (steps?.length && tab?.stepsStyle === STEPS_STYLE.sideBar) setIndex(steps[0]);

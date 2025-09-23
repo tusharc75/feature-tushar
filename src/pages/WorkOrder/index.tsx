@@ -28,8 +28,6 @@ import ManageWorkOrder from './ManageWorkOrder';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios, { CancelTokenSource } from 'axios';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { AddOutlined } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
 import ButtonMenu from 'src/components/ButtonMenu';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
@@ -366,6 +364,7 @@ const WorkOrder = () => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.workOrder}
           setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}
@@ -444,12 +443,11 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.workOrderNumber || ''}`
-                : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

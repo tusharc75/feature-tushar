@@ -537,9 +537,9 @@ export function useColumns() {
     [gridMetaData, permissions, user?.user?.brandCurrency]
   );
 
-  const getMaterialLabel = (materialType) => {
+  const getMaterialLabel = (materialType, parentId = null) => {
     if (materialType === MATERIAL_TYPE.package) {
-      return resources?.packages?.titleSingular || startCase(materialType);
+      return `${parentId ? 'Child ' : ''}${resources?.packages?.titleSingular || startCase(materialType)}`;
     }
     return startCase(materialType);
   };

@@ -1,7 +1,7 @@
 import { isArray, isEmpty, round, uniq } from 'lodash';
-import { camelCase } from 'lodash';
-import { checkValue, fieldLabelToFieldName, getObjKeys } from './helpers';
+import { checkValue, fieldLabelToFieldName, getObjKeys, sidebarResource } from './helpers';
 import { LOGIC } from 'src/components/FormBuilder/helper';
+import dayjs from 'dayjs';
 
 const removeBracket = (string) => {
   return string.replace(/{/g, '').replace(/}/g, '');
@@ -26,6 +26,10 @@ export const checkFormula = (formula, inputFields) => {
   try {
     let argument = [];
     let values = [];
+
+    argument.push('dayjs');
+    values.push(dayjs);
+
     for (var x in inputFields) {
       if (x.includes('/')) {
         argument.push(x.replace('/', ''));
@@ -58,6 +62,10 @@ export const getFormulaValue = (formula, inputFields, returnType, decimalPlaces)
     let argument = [];
     let values = [];
     const replaceFieldName = [];
+
+    argument.push('dayjs');
+    values.push(dayjs);
+
     for (var x in inputFields) {
       if (x.includes('/')) {
         argument.push(x.replace('/', ''));
@@ -1141,4 +1149,9 @@ export const CURReplaceByCurrencySingle = (fields: any, currency: any) => {
 //     return value
 // }
 
-export const validateFields = (fields) => { };
+export const validateFields = (fields: any[], resource) => {
+  if ([sidebarResource.product, sidebarResource.packages, sidebarResource.serviceMaster, sidebarResource.serializedAsset, sidebarResource.serializedPackages]?.includes(resource) && fields?.some(f => f?.fieldName === 'type')) {
+    return `The field name "type" cannot be used because it is reserved by the system.`
+  }
+  return ''
+};

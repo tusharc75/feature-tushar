@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import workspaceImage from 'src/assets/dashboard_images/sidebar/workspace.png';
 import { getCollaborateIconBasedOnName } from 'src/assets/svg/CollaborateSidebar';
 import DashboardModal from 'src/components/DashboardModal';
+import Link from 'src/components/Link';
+import { handleRoutes } from 'src/pages/Home/helpers';
 import { SideCardProps } from 'src/pages/Home/SideCard';
 
 import SideCard from 'src/pages/Home/SideCard';
@@ -18,7 +19,7 @@ const workSpaceProps = {
   gradientColors: ['#925cb4', '#64b9fc']
 } as SideCardProps;
 
-const WorkspaceCard = ({ handleRoutes, objBySectionName }) => {
+const WorkspaceCard = ({ objBySectionName }) => {
   const [modalContent, setModalContent] = useState(null);
 
   const handleOpenModal = () => {
@@ -37,7 +38,6 @@ const WorkspaceCard = ({ handleRoutes, objBySectionName }) => {
         style={{ width: 'min(468px, calc(100vw - 64px))' }}
         modalHead={modalContent}
         handleClose={() => setModalContent(null)}
-        handleRoutes={handleRoutes}
         contentMaxHeight="300px"
       >
         <ul className={'grid grid-cols-2 gap-2'}>

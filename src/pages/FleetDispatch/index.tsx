@@ -1,21 +1,20 @@
 import { Box, IconButton } from '@mui/material';
 import { Map } from '@mui/icons-material';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import update from 'immutability-helper';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import routes from 'src/components/Helpers/Routes';
-import DispatchDialog from './DispatchDialog';
+import DispatchDialog from './DispatchReceiveDialog';
 import DispatchList from './DispatchList';
 import MapView from './Map';
-
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import FleetDispatchBox from './DispatchCard';
 import { useDndSensors } from 'src/hooks';
 import { useData } from 'src/StateProvider/Provider';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { sidebarResource } from 'src/constants/helpers';
 
 const FleetDispatch = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -25,10 +24,21 @@ const FleetDispatch = () => {
   const [dispatchDialogOpen, setDispatchDialogOpen] = useState({ open: false, fleet: null, job: null });
   const [showMapView, setShowMapView] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
+  const [columns, setColumns] = useState(null);
 
   useEffect(() => {
     fetchData();
+    fetchFields();
   }, []);
+
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.fleetDispatch, true);
+      setColumns(fieldsDataForRead?.map((e) => e?.fieldData));
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const {
     state: { resources }
@@ -36,10 +46,17 @@ const FleetDispatch = () => {
 
   const fetchData = () => {
     axiosInstance()
-      .get(`/fleet-dispatch/available-job-fleet`)
+      .get('/fleet-dispatch')
       .then(({ data: { data } }) => {
-        setFleets(data?.fleets || []);
-        setJobs(data?.jobs || []);
+        setFleets(data || []);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    axiosInstance()
+      .get(`/fleet-dispatch/jobs`)
+      .then(({ data: { data } }) => {
+        setJobs(data || []);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -99,10 +116,16 @@ const FleetDispatch = () => {
             <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
               <ul className="grid grid-cols-2 min-[725px]:grid-cols-2 min-[1195px]:md:grid-cols-2">
                 <div>
-                  <DispatchList activity={fleets} cardType="fleet" />
+                  <DispatchList activity={fleets} cardType="fleet" cols={columns} />
                 </div>
                 <div>
-                  <DispatchList activity={jobs?.map((e) => { return { ...e, jobId: e._id, _id: e?.asset?._id } })} cardType="job" />
+                  <DispatchList
+                    activity={jobs?.map((e) => {
+                      return { ...e, jobId: e?._id?.jobId, _id: e?.asset?.optionValue };
+                    })}
+                    cardType="job"
+                    cols={columns}
+                  />
                 </div>
               </ul>
               <DragOverlay dropAnimation={null}>{activeItem && <FleetDispatchBox {...activeItem} />}</DragOverlay>
@@ -122,21 +145,11 @@ const FleetDispatch = () => {
             handleClose={() => {
               setDispatchDialogOpen({ open: false, fleet: null, job: null });
             }}
-            fleet={dispatchDialogOpen.fleet}
-            job={dispatchDialogOpen.job}
-          />
-        )}
-        {dispatchDialogOpen.open && (
-          <DispatchDialog
-            handleSucess={() => {
-              setDispatchDialogOpen({ open: false, fleet: null, job: null });
-              fetchData();
+            referenceData={{
+              rentalJob: dispatchDialogOpen?.job?.jobId,
+              asset: dispatchDialogOpen?.job?.asset?.optionValue,
+              fleet: dispatchDialogOpen?.fleet?._id
             }}
-            handleClose={() => {
-              setDispatchDialogOpen({ open: false, fleet: null, job: null });
-            }}
-            fleet={dispatchDialogOpen.fleet}
-            job={dispatchDialogOpen.job}
           />
         )}
         {showMapView && (

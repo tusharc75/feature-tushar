@@ -15,15 +15,7 @@ import { DEFAULT_TIME_ZONE } from 'src/constants/helpers';
 
 export const Calendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
   (
-    {
-      events,
-      isLoading,
-      initialView = 'dayGridMonth',
-      getEventStyle,
-      onNavigate,
-      height = 'max(calc(100vh - 250px), 700px)',
-      ...rest
-    },
+    { events, isLoading, initialView = 'dayGridMonth', getEventStyle, onNavigate, select, height = 'max(calc(100vh - 250px), 700px)', ...rest },
     ref
   ) => {
     const {
@@ -56,7 +48,6 @@ export const Calendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
       };
     }, [storeData]);
 
-
     return (
       <div className="relative">
         <FullCalendar
@@ -88,6 +79,20 @@ export const Calendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
                 setAnchorEl(e.currentTarget as HTMLButtonElement);
               }
             }
+          }}
+          select={(d) => {
+            select?.({
+              ...d,
+              start: dayjs
+                .utc(d.start)
+                .tz(user?.user?.timezone || DEFAULT_TIME_ZONE, true)
+                .toDate(),
+              end: dayjs
+                .utc(d.end)
+                .tz(user?.user?.timezone || DEFAULT_TIME_ZONE, true)
+                .subtract(1, 'millisecond')
+                .toDate()
+            });
           }}
           headerToolbar={{
             left: 'prev,today,next',

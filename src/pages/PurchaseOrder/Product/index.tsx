@@ -18,7 +18,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, getEmailsFromContacts, purchaseOrder, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, getEmailsFromContacts, purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import CostDialog from './CostDialog';
 import InventoryStatesDialog from './InventoryStatesDialog';
 import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
@@ -818,6 +818,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
               : []
           }
           isSubmitting={isAddingProducts}
+          serialized={user?.user?.brandPolicy?.purchaseOrderShowSerializedProduct ? null : false}
         />
       )}
       {showProductDialog.open && (
@@ -908,7 +909,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
           referenceId={purchaseOrderData?._id}
           uniqueId={showAttachmentDialog?._id}
           referenceLabel={showAttachmentDialog.label}
-          resource={ACTIVITY_RESOURCE.purchaseOrder}
+          resource={sidebarResource.purchaseOrder}
           handleClose={() => {
             setShowAttachmentDialog({ open: false, _id: null, label: '' });
           }}

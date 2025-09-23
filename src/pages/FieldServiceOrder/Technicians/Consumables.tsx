@@ -12,7 +12,6 @@ import {
   fieldServiceOrder,
   getObjKeysWithValues,
   sidebarResource,
-  ACTIVITY_RESOURCE
 } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, MenuItem, TextField, Typography } from '@mui/material';
@@ -619,7 +618,7 @@ const Consumables = ({
               referenceId={serviceOrderData?._id}
               uniqueId={showAttachmentDialog?._id}
               referenceLabel={showAttachmentDialog.label}
-              resource={ACTIVITY_RESOURCE.fieldServiceOrder}
+              resource={sidebarResource.fieldServiceOrder}
               handleClose={() => {
                 setShowAttachmentDialog({ open: false, _id: null, label: '' });
               }}

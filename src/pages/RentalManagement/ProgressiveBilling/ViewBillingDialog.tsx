@@ -9,6 +9,7 @@ import {
   ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   CustomDialogTransition,
+  INVOICE_STATUS,
   MATERIAL_TYPE,
   PACKAGE_TYPE,
   checkIsAllowedToDelete,
@@ -72,8 +73,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
   }, []);
 
   useEffect(() => {
-    fetchInvoiceData();
-  }, [invoiceId]);
+    if (resourcePolicyData) {
+      fetchInvoiceData();
+    }
+  }, [invoiceId, resourcePolicyData]);
 
   useEffect(() => {
     if (invoiceData) {
@@ -92,7 +95,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
       let data;
       const response: any = await axiosInstance().get(`${invoice.api}/${invoiceId}`);
       data = response?.data?.data;
-      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data) && permissions?.invoice?.isUpdate && allowCreateInvoice);
+
+      const statusEnd = [INVOICE_STATUS.closed, INVOICE_STATUS.cancelled, ...(resourcePolicyData?.policy?.editRestrictionStatus || [])]
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data) && permissions?.invoice?.isUpdate && allowCreateInvoice
+        && !statusEnd?.includes(data?.status));
       setAllowedToDelete(
         permissions?.invoice?.isDelete &&
         checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue) &&

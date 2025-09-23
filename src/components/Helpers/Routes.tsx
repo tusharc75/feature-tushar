@@ -23,6 +23,12 @@ const routes = {
   supplierContactDetail: {
     path: '/supplier-contact/detail'
   },
+  assetServiceTickets: {
+    path: '/asset-service-tickets'
+  },
+  assetServiceTicketsDetail: {
+    path: '/asset-service-tickets/detail'
+  },
   lead: {
     path: '/lead',
     data: {}
@@ -464,6 +470,10 @@ const routes = {
   contactUsDetail: {
     path: '/contact-us/detail'
   },
+  brandSupportTicket: {
+    path: '/brand-support-tickets',
+    title: 'Brand Support Tickets'
+  },
   supportTicket: {
     path: '/support-ticket',
     title: 'Support Ticket'
@@ -524,18 +534,6 @@ const routes = {
   },
   fleetDispatch: {
     path: '/fleet-dispatch'
-  },
-  truckMaster: {
-    path: '/truck-master'
-  },
-  truckMasterDetail: {
-    path: '/truck-master/detail'
-  },
-  job: {
-    path: '/job'
-  },
-  jobDetail: {
-    path: '/job/detail'
   },
   fleetReceiver: {
     path: '/fleet-receiver'
@@ -812,7 +810,7 @@ const routes = {
   },
   contentPostPlanningDetail: {
     path: '/content-post-planning/detail'
-  },
+  }
 };
 
 export default routes;

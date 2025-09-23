@@ -1,10 +1,8 @@
 import { Box, Dialog, IconButton } from '@mui/material';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -15,8 +13,11 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, displayDateTime, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { findAll, objectStore } from 'src/constants/indexdbhelper';
+import { isArray } from 'lodash';
+import ShowAttachemntsDialog from 'src/pages/FieldTicket/Submit/ShowAttachemntsDialog';
 
 function ViewLogs({ fieldTicketData, handleClose, fields }) {
+
   const renderedFrom = `${sidebarResource.fieldTicket}_logs`;
 
   const {
@@ -24,9 +25,8 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
   }: any = useData();
 
   const [fullScreen, setFullScreen] = useState(true);
-  const [fullScreenAttachemnt, setFullScreenAttachemnt] = useState(false);
   const [columns, setColumns] = useState(null);
-  const [openAttachment, setOpenAttachment] = useState({ open: false, attachmentId: null });
+  const [openAttachment, setOpenAttachment] = useState({ open: false, attachments: null });
   const { isOffline } = useContext(CustomOfflineContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
@@ -59,27 +59,27 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
       },
       ...(permissions?.invoice?.isRead
         ? [
-            {
-              accessor: 'invoice',
-              Header: 'Invoice',
-              width: 200,
-              disabled: true,
-              Cell: ({ row }) => {
-                return row?.original['invoice'] ? (
-                  <a
-                    className="link text-truncate"
-                    href={`${routes.invoiceDetail.path}/${row?.original['invoiceId']}`}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {row?.original['invoice']}
-                  </a>
-                ) : (
-                  <NoDataCell />
-                );
-              }
+          {
+            accessor: 'invoice',
+            Header: 'Invoice',
+            width: 200,
+            disabled: true,
+            Cell: ({ row }) => {
+              return row?.original['invoice'] ? (
+                <a
+                  className="link text-truncate"
+                  href={`${routes.invoiceDetail.path}/${row?.original['invoiceId']}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {row?.original['invoice']}
+                </a>
+              ) : (
+                <NoDataCell />
+              );
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'user',
@@ -109,13 +109,13 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
       disableSortBy: true,
       canDrag: false,
       Cell: ({ row }) =>
-        row.original.attachmentId ? (
+        row?.original?.attachments && isArray(row?.original?.attachments) && row?.original?.attachments?.length ? (
           <HtmlTooltip title="View Attachment">
             <IconButton
               size="small"
               aria-label="Issue"
               onClick={() => {
-                setOpenAttachment({ open: true, attachmentId: row.original.attachmentId });
+                setOpenAttachment({ open: true, attachments: row.original.attachments });
               }}
             >
               <AttachFileIcon color="primary" />
@@ -196,41 +196,16 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </Box>
           )}
+          {openAttachment.open && (
+            <ShowAttachemntsDialog
+              onClose={() => {
+                setOpenAttachment({ open: false, attachments: null })
+              }}
+              attachments={openAttachment.attachments}
+            />
+          )}
         </CustomDialogContent>
       </Dialog>
-
-      {openAttachment.open && (
-        <Dialog
-          open={true}
-          aria-labelledby="customized-dialog-title"
-          maxWidth="md"
-          onClose={(e, reason) => {
-            if (reason !== 'backdropClick') {
-              setFullScreenAttachemnt(false);
-              setOpenAttachment({ open: false, attachmentId: null });
-            }
-          }}
-          fullWidth
-          fullScreen={fullScreenAttachemnt || isMobile || isTablet}
-          TransitionComponent={CustomDialogTransition}
-        >
-          <ManageAttachment
-            attachmentId={openAttachment.attachmentId?._id}
-            handleClose={() => {
-              setFullScreenAttachemnt(false);
-              setOpenAttachment({ open: false, attachmentId: null });
-            }}
-            relatedTo={openAttachment.attachmentId?.relatedTo}
-            isMinimized={!fullScreenAttachemnt}
-            onMinimizeMaximize={() => {
-              setFullScreenAttachemnt((prevState) => !prevState);
-            }}
-            showManimizeMaximize={true}
-            parentFolder={openAttachment.attachmentId?.parentFolder}
-            type={openAttachment.attachmentId?.type}
-          />
-        </Dialog>
-      )}
     </>
   );
 }

@@ -347,6 +347,7 @@ const FieldTicket = () => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.fieldTicket}
           setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}

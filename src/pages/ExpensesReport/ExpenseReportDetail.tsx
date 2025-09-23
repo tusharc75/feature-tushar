@@ -94,7 +94,7 @@ const ExpenseReportDetail = () => {
   };
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.expenses);
+    const data = await getResourcePolicy(user, permissions, sidebarResource.expenseReport);
     setResourcePolicyData(data);
   };
 

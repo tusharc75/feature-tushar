@@ -261,7 +261,7 @@ const SingleStep = ({ step, setOpen, setDeleteData, index, onboardingTemplateId,
                     setSettingsOpen({ open: true, data: step });
                   }}
                 >
-                  <SettingsIcon fontSize="small" color={'action'} />
+                  <SettingsIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
               )}

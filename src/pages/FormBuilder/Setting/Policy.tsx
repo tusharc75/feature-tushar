@@ -1,16 +1,21 @@
 import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
-import { Autocomplete, Box, Checkbox, FormControlLabel, IconButton, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, Checkbox, Chip, FormControlLabel, IconButton, TextField, Typography } from '@mui/material';
 import { isArray } from 'lodash';
-import { useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Grid from '@mui/material/Grid2';
 import { FieldArray } from 'formik';
+import { getLabel } from 'src/components/Helpers/FormTypes';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const Policy = ({ values, setFieldValue, errors, touched, resource, initialValues }) => {
   const [fields, setFields] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [lookupCache, setLookupCache] = useState({});
+
+  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     if (resource) {
@@ -24,41 +29,106 @@ const Policy = ({ values, setFieldValue, errors, touched, resource, initialValue
     }
   }, [resource]);
 
+  const lookupResources = useMemo(() => {
+    return (
+      values?.policies?.reduce((acc, policy) => {
+        if (policy?.lookupResource) {
+          acc.push(policy.lookupResource);
+        }
+        return acc;
+      }, []) || []
+    );
+  }, [values?.policies]);
+
+  const lookupString = useMemo(() => {
+    return lookupResources.length > 0 ? lookupResources.join(',') : '';
+  }, [lookupResources]);
+
+  const fetchLookupData = useCallback(
+    async (lookupStr) => {
+      if (lookupCache?.[lookupStr]) {
+        return lookupCache[lookupStr];
+      }
+
+      try {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${lookupStr}`);
+        setLookupCache((prev) => ({ ...prev, [lookupStr]: data }));
+        return data;
+      } catch (error) {
+        toastConfig.setToastConfig(error);
+      }
+    },
+    [lookupCache, toastConfig]
+  );
+
+  const policies = useMemo(() => {
+    if (!values?.policies) return null;
+
+    if (lookupString && lookupCache?.[lookupString]) {
+      const lookupData = lookupCache[lookupString];
+      return values.policies.map((policy) => {
+        if (policy.lookupResource && lookupData[policy.lookupResource]) {
+          return {
+            ...policy,
+            option: lookupData[policy.lookupResource]
+          };
+        }
+        return policy;
+      });
+    }
+
+    return values.policies;
+  }, [values?.policies, lookupString, lookupCache]);
+
+  useEffect(() => {
+    if (lookupString && !lookupCache[lookupString]) {
+      fetchLookupData(lookupString);
+    }
+  }, [lookupString, lookupCache, fetchLookupData]);
+
   return (
     <div className="flex flex-col gap-1">
-      <FieldArray
-        name="policies"
-        render={(arrayHelpers) =>
-          values.policies?.map((data, index) => {
-            return (
-              <RenderFormFields
-                key={index}
-                data={data}
-                idx={index}
-                type={data.type}
-                errors={errors}
-                touched={touched}
-                resource={resource}
-                setFieldValue={setFieldValue}
-                onChange={(e, val) => {
-                  arrayHelpers.replace(index, {
-                    ...values?.policies[index],
-                    ['data']: val
-                  });
-                  const res = initialValues.policies;
-                  res.forEach((r) => {
-                    if (r.fieldName === data.fieldName) {
-                      r.data = val;
-                    }
-                  });
-                }}
-                fields={fields}
-                loading={loading}
-              />
-            );
-          })
-        }
-      />
+      {Array.isArray(policies) ? (
+        <FieldArray
+          name="policies"
+          render={(arrayHelpers) =>
+            policies?.map((data, index) => {
+              return (
+                <RenderFormFields
+                  key={index}
+                  data={data}
+                  idx={index}
+                  type={data.type}
+                  errors={errors}
+                  touched={touched}
+                  resource={resource}
+                  setFieldValue={setFieldValue}
+                  onChange={(e, val) => {
+                    arrayHelpers.replace(index, {
+                      ...values?.policies[index],
+                      ['data']: val
+                    });
+                    const res = initialValues.policies;
+                    res.forEach((r) => {
+                      if (r.fieldName === data.fieldName) {
+                        r.data = val;
+                      }
+                    });
+                  }}
+                  fields={fields}
+                  loading={loading}
+                />
+              );
+            })
+          }
+        />
+      ) : (
+        <Box className="h-fit" p={2}>
+          <CommonSkeleton lenArray={[...Array(2).keys()]} />
+        </Box>
+      )}
     </div>
   );
 };
@@ -85,15 +155,17 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
     const options =
       data?.option && data?.option?.length
         ? data?.option
-        : data?.fieldOption ? fields?.find((e) => e?.fieldData?.fieldName === data?.fieldOption)?.fieldData?.option || [] : fields
-          ?.filter((ele) => !ele.fieldData?.primaryField)
-          ?.map((e) => {
-            return {
-              optionLabel: e?.fieldData?.fieldLabel,
-              optionValue: e?.fieldData?.fieldName,
-              order: e?.fieldData?.order
-            };
-          });
+        : data?.fieldOption
+          ? fields?.find((e) => e?.fieldData?.fieldName === data?.fieldOption)?.fieldData?.option || []
+          : fields
+              ?.filter((ele) => !ele.fieldData?.primaryField)
+              ?.map((e) => {
+                return {
+                  optionLabel: e?.fieldData?.fieldLabel,
+                  optionValue: e?.fieldData?.fieldName,
+                  order: e?.fieldData?.order
+                };
+              });
     return (
       <>
         {!loading ? (
@@ -190,6 +262,48 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
         </Grid>
       </Grid>
     );
+  } else if (type === 'freeStyleMultiSelect') {
+    return (
+      <Grid container spacing={2}>
+        <Grid size={{ lg: 6, md: 6, sm: 6, xs: 12 }}>
+          <Autocomplete
+            limitTags={2}
+            multiple
+            disableCloseOnSelect={true}
+            freeSolo
+            options={[]}
+            renderTags={(value, getTagProps) => value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                margin="dense"
+                size="small"
+                helperText='Type and press Enter to add'
+                label={getLabel(data?.fieldLabel)}
+                name={data?.fieldName}
+                required={false}
+              />
+            )}
+            value={data?.data}
+            onBlur={(e: any) => {
+              if (e.target.value && e.target.value.trim() !== '') {
+                onChange(null, [...data?.data, e.target.value]);
+              }
+            }}
+            onChange={(e, value: any) => {
+              let valuesToInsert = [];
+              for (var val of value) {
+                if (val && val.trim() !== '') {
+                  valuesToInsert.push(val);
+                }
+              }
+              onChange(null, valuesToInsert);
+            }}
+          />
+        </Grid>
+      </Grid>
+    );
   }
   return null;
 };
@@ -232,7 +346,6 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, touc
 };
 
 const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resource, setFieldValue, fields }) => {
-
   const [fieldOptions, setFieldOptions] = useState([]);
 
   const [statusOptions, setStatusOptions] = useState([]);
@@ -298,9 +411,9 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
     if (Data?.fieldName === 'statusColor') {
       subStatusOptions?.forEach((e) => {
         if (!statusTemp?.find((ele) => ele?.optionLabel === e?.optionLabel)) {
-          statusTemp.push(e)
+          statusTemp.push(e);
         }
-      })
+      });
     }
     return statusTemp;
   };
@@ -309,7 +422,6 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
     const options = subStatusOptions?.filter((ele) => !data?.some((e) => e?.status === ele.optionValue));
     return options ? options : subStatusOptions;
   };
-
 
   return (
     <>
@@ -426,8 +538,8 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                                 ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))
                                 : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
                           : field?.fieldName === 'subStatus'
-                            ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))[0] :
-                            getStatusOptions(initialData?.fieldsData)?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
+                            ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))[0]
+                            : getStatusOptions(initialData?.fieldsData)?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
                       }
                       multiple={field?.type === 'multiSelect'}
                       fieldLabel={field?.fieldLabel}

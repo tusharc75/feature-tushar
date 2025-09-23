@@ -102,6 +102,7 @@ const RentalManagementDetailsPage = () => {
   const [assets, setAssets] = useState(null);
   const [assetStatusOptions, setAssetStatusOptions] = useState([]);
   const [isQuotationStep, setIsQuotationStep] = useState(false);
+  const [fleetDispatchPolicyData, setFleetDispatchPolicyData] = useState(null);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -166,14 +167,14 @@ const RentalManagementDetailsPage = () => {
           const index = findIndex(versionsArray, { converted: true });
           setCurrentVersion(versionNumber ? versionNumber : index !== -1 ? index + 1 : parseInt(keys[keys.length - 1]));
           const lastQuoteVersion = data?.versions[versionNumber ? versionNumber : index !== -1 ? index + 1 : parseInt(keys[keys.length - 1])];
-          if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(lastQuoteVersion?.status)) {
+          if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired].includes(lastQuoteVersion?.status)) {
             setVersionNotClonned(true);
           } else {
             setVersionNotClonned(false);
           }
           for (let i = 0; i < keys.length; i++) {
             if (
-              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.expired].includes(
                 data?.versions[keys[i]]?.status
               )
             ) {
@@ -261,12 +262,15 @@ const RentalManagementDetailsPage = () => {
   };
 
   const fetchPolicy = async () => {
-    const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.rentalManagement},${sidebarResource.serializedAsset}`)
+    const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.rentalManagement},${sidebarResource.serializedAsset},${sidebarResource.fleetDispatch}`)
     if (data?.find((e) => e.resource === sidebarResource.rentalManagement)) {
       setResourcePolicyData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
     }
     if (data?.find((e) => e.resource === sidebarResource.serializedAsset)) {
       setAssetPolicyData(data?.find((e) => e.resource === sidebarResource.serializedAsset));
+    }
+    if (data?.find((e) => e.resource === sidebarResource.fleetDispatch)) {
+      setFleetDispatchPolicyData(data?.find((e) => e.resource === sidebarResource.fleetDispatch));
     }
   };
 
@@ -375,7 +379,7 @@ const RentalManagementDetailsPage = () => {
   const handleDownload = () => {
     setIsDownloading(true);
     axiosInstance()
-      .get(`/download-attachment?referenceType=rentalManagement&referenceId=${rentalManagementData?._id}`, {
+      .get(`/download-attachment?resource=${sidebarResource.rentalManagement}&referenceId=${rentalManagementData?._id}`, {
         responseType: 'blob'
       })
       .then(({ data }) => {
@@ -547,7 +551,7 @@ const RentalManagementDetailsPage = () => {
                 handlePrev={
                   rentalSteps[currentStep]?.name === 'Quotation' &&
                     allowedToEdit &&
-                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
+                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired].includes(quotationData?.versions[currentVersion]?.status)
                     ? () => {
                       setShowCancelConfirmBox({ open: true, isQuote: true });
                     }
@@ -578,6 +582,7 @@ const RentalManagementDetailsPage = () => {
                       [
                         QUOTATION_STATUS.acceptByCustomer,
                         QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.expired,
                         QUOTATION_STATUS.sentToCustomer,
                         QUOTATION_STATUS.waitingForSupplierPrice
                       ].includes(quotationData?.versions[currentVersion]?.status)
@@ -606,6 +611,7 @@ const RentalManagementDetailsPage = () => {
                       [
                         QUOTATION_STATUS.acceptByCustomer,
                         QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.expired,
                         QUOTATION_STATUS.sentToCustomer,
                         QUOTATION_STATUS.waitingForSupplierPrice
                       ].includes(quotationData?.versions[currentVersion]?.status)
@@ -676,6 +682,7 @@ const RentalManagementDetailsPage = () => {
                   assetStatusOptions={assetStatusOptions}
                   setAssetStatusOptions={setAssetStatusOptions}
                   assetPolicyData={assetPolicyData}
+                  fleetDispatchPolicyData={fleetDispatchPolicyData}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Final Slip' && rentalManagementData && (

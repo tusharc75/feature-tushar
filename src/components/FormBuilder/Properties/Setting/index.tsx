@@ -5,8 +5,10 @@ import Autocomplete from '@mui/material/Autocomplete';
 import CheckboxDropdown from 'src/components/FormBuilder/Properties/CheckboxDropdown';
 import FieldList from 'src/components/FormBuilder/FieldList';
 import { NOT_ALLOW_INLINE_EDIT_FIELD_TYPE, OPERATION_ON_LINE_ITEMS } from 'src/components/FormBuilder/helper';
+import CopyFromHeaderFieldDropdown from 'src/components/FormBuilder/Properties/Setting/CopyFromHeaderFieldDropdown';
 
-const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, section, touched, errors, module, brandId }) => {
+const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, section, touched, errors, module, brandId, formData = null }) => {
+
   return (
     <Box pb={1}>
       <Box>
@@ -597,7 +599,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
-            {(fieldData.type === 'number' || fieldData.type === 'decimal') && (
+            {(fieldData.type === 'number' || fieldData.type === 'decimal' || fieldData.type === 'currencyAmount' || fieldData.type === 'currencyNumber') && (
               <FormControlLabel
                 control={
                   <Checkbox
@@ -738,7 +740,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
           <Grid item xs={12} md={6}></Grid>
         </Grid>
       </Box>
-      {fieldData?.type === FieldList.PERCENT.type && (
+      {fieldData?.type === FieldList.PERCENT.type && !formData?.childResource && (
         <Box>
           <Autocomplete
             value={values['operationOnLineItems']}
@@ -755,6 +757,13 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
             )}
           />
         </Box>
+      )}
+      {fieldData?.type === FieldList.PERCENT.type && formData?.childResource && formData?.parentResource && (
+        <CopyFromHeaderFieldDropdown
+          values={values}
+          setFieldValue={setFieldValue}
+          resource={formData?.parentResource}
+        />
       )}
       <Box mt={1}>
         <FormControl component="fieldset">

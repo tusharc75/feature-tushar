@@ -161,7 +161,7 @@ const SupportTicketDetail = () => {
       <Box className={'detail-container-v1'}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Details</CustomTab>
-          <CustomTab value={1}>Activity</CustomTab>
+          <CustomTab value={1}>Comments</CustomTab>
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -177,7 +177,7 @@ const SupportTicketDetail = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          {supportTicketData && <Comments uniqueId={id} />}
+          {supportTicketData && <Comments uniqueId={id} supportTicketData={supportTicketData} />}
         </TabPanel>
       </Box>
       {showConfirmBox && (

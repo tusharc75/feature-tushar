@@ -103,11 +103,11 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
             <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
           </IconButton>
         </HtmlTooltip>
-        <HtmlTooltip title={'Create Folder'}>
+        <HtmlTooltip title={'Add Folder'}>
           <IconButton
             size="small"
             color="primary"
-            aria-label="Create Folder"
+            aria-label="Add Folder"
             onClick={(e) => {
               e.stopPropagation();
               setOpen({ open: true, type: 'folder', parentFolder: attachment._id, purpose: 'add' });

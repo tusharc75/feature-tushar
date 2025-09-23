@@ -5,6 +5,7 @@ import React from 'react';
 import { Calendar } from 'src/components/CustomCalendar/Calendar';
 import { MobileCalendar } from 'src/components/CustomCalendar/MobileCalendar';
 import { Event, View } from 'src/components/CustomCalendar/types';
+import { cn } from 'src/constants/helpers';
 
 export type CustomCalednerProps = {
   events: Event[];
@@ -19,16 +20,7 @@ export type CustomCalednerProps = {
 
 const CustomCalendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
   (
-    {
-      events,
-      isLoading,
-      initialView = 'dayGridMonth',
-      getEventStyle,
-
-      onNavigate,
-      height = 'max(calc(100vh - 250px), 700px)',
-      ...rest
-    },
+    { events, isLoading, initialView = 'dayGridMonth', getEventStyle, selectable, onNavigate, height = 'max(calc(100vh - 250px), 700px)', ...rest },
     ref
   ) => {
     const isMobile = useMediaQuery('(max-width:768px)');
@@ -45,16 +37,19 @@ const CustomCalendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
         {...rest}
       />
     ) : (
-      <Calendar
-        events={events}
-        ref={ref}
-        isLoading={isLoading}
-        initialView={initialView}
-        getEventStyle={getEventStyle}
-        onNavigate={onNavigate}
-        height={height}
-        {...rest}
-      />
+      <div className={cn(selectable ? '[&_:is(.fc-daygrid-day,.fc-timegrid-slot-lane)]:cursor-cell' : '')}>
+        <Calendar
+          events={events}
+          ref={ref}
+          isLoading={isLoading}
+          initialView={initialView}
+          getEventStyle={getEventStyle}
+          onNavigate={onNavigate}
+          height={height}
+          selectable={selectable}
+          {...rest}
+        />
+      </div>
     );
   }
 );

@@ -28,7 +28,6 @@ import {
 } from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
-  ACTIVITY_RESOURCE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
@@ -58,7 +57,7 @@ import {
 } from 'src/pages/RentalManagement/walkmeSteps';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getCostPriceConditions, getCostPriceValue, getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
@@ -664,7 +663,11 @@ const Productpackage = ({
       material.push(element);
     });
     let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, material, PRICING_SETUP_TYPE.rent);
-    AddMaterial(material, priceData);
+    let costPriceData: any= null;
+    if (user?.user?.brandPolicy?.materialCostPrice) {
+      costPriceData = await getCostPriceConditions(material, material[0]?.type);
+    }
+    AddMaterial(material, priceData, costPriceData);
   };
 
   const handleAddSerializedPackages = async (rows) => {
@@ -685,7 +688,7 @@ const Productpackage = ({
       });
   };
 
-  const AddMaterial = async (material, priceData) => {
+  const AddMaterial = async (material, priceData, costPriceData= null) => {
     const tempMaterial = [...material];
     if (priceData) {
       tempMaterial.forEach((element) => {
@@ -699,6 +702,12 @@ const Productpackage = ({
           Object.assign(element, calValues);
         }
         delete element.listPrice;
+      });
+    }
+    if (costPriceData) {
+      tempMaterial.forEach((element) => {
+        const calValues = getCostPriceValue(element, costPriceData, rentalManagementData?.currency, allFields);
+        Object.assign(element, calValues);
       });
     }
     axiosInstance()
@@ -1264,7 +1273,7 @@ const Productpackage = ({
           referenceId={rentalManagementData?._id}
           uniqueId={showAttachmentDialog?._id}
           referenceLabel={showAttachmentDialog.label}
-          resource={ACTIVITY_RESOURCE.rentalManagement}
+          resource={sidebarResource.rentalManagement}
           resourceLabel={rentalManagementData?.rentalJobName}
           handleClose={() => {
             setShowAttachmentDialog({ open: false, _id: null, label: '' });

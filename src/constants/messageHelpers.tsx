@@ -19,6 +19,7 @@ export const addDisable = 'You do not have permission to Add';
 export const updateDisable = 'You do not have permission to Update';
 export const childDisable = 'You do not have permission to View Child';
 export const mobileNotSupported = 'Mobile device not supported.Kindly open this page in Laptop/Desktop browser.'
+export const approveDisable = 'You do not have permission to Approve';
 
 
 export const rentalManagementActions = {
@@ -26,7 +27,6 @@ export const rentalManagementActions = {
   deliveredToCustomer: 'Delivered to Customer',
   cancelInTransitLoadingTicket: 'Cancel In-Transit Loading Ticket',
   cancelLoadingTicket: 'Cancel Loading Ticket',
-  replaceAsset: 'Replace Asset',
   createReceivingTicket: 'Create Receiving Ticket',
   createReturnTicket: 'Create Return Ticket',
   receiveItems: 'Receive Items',
@@ -36,12 +36,24 @@ export const rentalManagementActions = {
   createRepairJob: 'Create Repair Job',
   createRepairOrder: 'Create Repair Order',
   transferToAnotherRental: 'Transfer to another Rental',
-  swapInUseAssets: 'Swap In-Use Assets',
+  replaceInUseAssets: 'Replace In-Use Assets',
   updateStartDateEndDate: 'Update Start Date/End Date',
   startService: 'Start Service',
   stopService: 'Stop Service',
   deleteServiceLog: 'Delete Service Log',
   changeSubStatus: 'Change Sub Status'
+};
+
+export const fieldTicketActions = {
+  startService: 'Start Service',
+  stopService: 'Stop Service',
+  deleteServiceLog: 'Delete Service Log',
+};
+export const fieldTicketMessages = {
+  serviceAlreadyStarted: 'Service already started',
+  serviceNotStarted: 'Service not started',
+  serviceAlreadyStopped: 'Service already stopped',
+  serviceNotStopped: 'Service not stopped',
 };
 
 export const rentalManagementMessage = {
@@ -93,8 +105,8 @@ export const rentalManagementMessage = {
   loadSameStorageLocation: `Selected records must be at same ${sidebarResource?.storageLocation} to perform this action`,
   transferRentalForAsset: 'Only In-Use, Available and Under Review assets can be transfered',
   transferRentalForAssetSame: 'Only all In-Use or Available/Under Review assets can be transfered at a time',
-  onlySwapAssets: 'Only Assets can be swapped',
-  onlySwapInUseAssets: 'Only In-Use assets can be swapped',
+  onlyReplacedAssets: 'Only Assets can be Replaced',
+  onlyReplacedInUseAssets: 'Only In-Use assets can be Replaced',
   onlyAssetsCanBeRepaired: 'Only assets can be repaired',
   serviceAlreadyStarted: 'Service already started',
   serviceNotstarted: 'Service not started yet',
@@ -103,6 +115,7 @@ export const rentalManagementMessage = {
   canNotChangeEndDate: `Can not change End Date`,
   invoiceCreated: `Invoice already created`,
   sameAssetsSelected: `Same Assets Selected`,
+  selectAllAssetOfSerializedPackage: `Please select the all asset or serial numbers of serializedPackage`,
   onlyInUseAssetsChangeSubStatus: `Sub status can be changed only In-Use assets`
 };
 

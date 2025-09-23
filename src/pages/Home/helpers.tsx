@@ -25,6 +25,7 @@ import { DynamicIcon } from 'src/assets/IconGenerator';
 import { ItemData } from 'src/pages/Home/types';
 import { kebabCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
+import { createDmsUrl } from 'src/components/Header/DMSRedirect';
 
 // CREATE OBJECT FROM LIST GROUPED BY KEYGETTER
 export const groupByKey = (arr = [], keyGetter) => {
@@ -307,6 +308,9 @@ export const handleRoutes = (item) => {
   switch (item.name) {
     case 'Pos':
       return routes.pos.path;
+    case 'Attachment': {
+      return createDmsUrl();
+    }
     default:
       return `/${kebabCase(item.name)}`;
   }

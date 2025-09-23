@@ -571,7 +571,7 @@ const QuotationDetails = () => {
                 </div>
               </div>
             )}
-            {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
+            {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired]?.includes(
               quotationData?.versions[currentVersion]?.status
             ) && (
                 <Box className={`ml-auto max-w-max md:static md:-mt-[15px] `}>
@@ -585,7 +585,7 @@ const QuotationDetails = () => {
                 steps={stepList}
                 currentStep={currentStep}
                 setCurrentStep={setCurrentStep}
-                isStepEnded={[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
+                isStepEnded={[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired]?.includes(
                   quotationData?.versions[currentVersion]?.status
                 )}
                 stepFullScreen={stepFullScreen}

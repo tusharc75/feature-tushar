@@ -274,6 +274,7 @@ const SalesOrder = () => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.salesOrder}
           setSelectedType={setSelectedType}
           // leftSideContents
           searchValue={search}
@@ -310,12 +311,11 @@ const SalesOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
+          message={`Are you sure you want to delete ${deleteRecord
               ? `${resources?.salesOrder?.titleSingular?.toLowerCase()} :
              ${deleteRecord?.salesOrderNo}`
               : `selected ${resources?.salesOrder?.titlePlural?.toLowerCase()}`
-          } ?`}
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -403,6 +403,7 @@ const ServiceOrder = () => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.fieldServiceOrder}
           setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}

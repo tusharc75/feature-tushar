@@ -364,8 +364,6 @@ export const sidebarResource = {
   fieldServiceTechnician: `Field Service Technician`,
   resourceLogs: `Resource Logs`,
   userDownloadRequest: 'User Download Request',
-  truckMaster: `Truck Master`,
-  job: 'Job',
   fleetDispatch: 'Fleet Dispatch',
   fleetReceiver: 'Fleet Receiver',
   storageLocation: 'Storage Location',
@@ -427,7 +425,8 @@ export const sidebarResource = {
   customPdfTemplate: 'Custom Pdf Template',
   contentPostPlanning: 'Content Post Planning',
   onboardingTemplate: 'Onboarding Template',
-  onboarding: 'Onboarding'
+  onboarding: 'Onboarding',
+  assetServiceTickets: 'Asset Service Tickets'
 } as const;
 
 export const primaryFields = {
@@ -465,7 +464,6 @@ export const CHILD_RESOURCE = {
   fieldTicketCost: 'Field Ticket Cost',
   fieldTicketSubmit: 'Field Ticket Submit',
   fieldTicketMateial: 'Field Ticket Material',
-  jobDetail: 'Job Detail',
   workOrderService: 'Work Order Service',
   demandOrderDetail: 'Demand Order Detail',
   productionOrderDetail: 'Production Order Detail',
@@ -547,6 +545,11 @@ export const deliveryTicket = {
 export const repairJob = {
   resource: 'repairJob',
   api: '/repair-job'
+};
+
+export const assetServiceTickets = {
+  resource: 'assetServiceTickets',
+  api: '/asset-service-tickets'
 };
 
 export const expenses = {
@@ -880,7 +883,7 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
 
   const obj = {};
   for (const key of fields) {
-    let value = key.isDefaultValue ? (key.defaultValue === 'Current User' && user?.user?._id ? user?.user?._id : key.defaultValue) : val;
+    let value = key?.isDefaultValue ? (key?.defaultValue === 'Current User' && user?.user?._id ? user?.user?._id : key.defaultValue) : val;
 
     if (key.type === 'dropDown') {
       let option = key.option?.find((data: any) => data.default === true);
@@ -890,7 +893,7 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
       if (key?.visibilityCondition?.length || key?.lookupDependentOn) {
         obj[key.fieldName] = '';
       } else {
-        obj[key.fieldName] = value ? value : option ? option.optionValue : '';
+        obj[key.fieldName] = value && key?.option?.find((e: any) => e?.optionValue === value) ? value : option ? option.optionValue : '';
       }
     } else if (key.type === 'multiSelect') {
       let defaultOptions = key.option?.filter((item: any) => item.default === true);
@@ -974,7 +977,6 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
 
   return obj;
 };
-
 
 export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false, user: any = null, resetDateOnClone: any = true) => {
   const obj = {};
@@ -1094,6 +1096,8 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
       } else {
         obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
       }
+    } else if (key.type === 'counter' || key.type === 'multiFileUpload' || key.type === 'multiImageUpload') {
+      obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : [];
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
     }
@@ -2187,7 +2191,6 @@ export const INVENTORY_HISTORY_TYPE = {
   productionOrder: 'Production Order',
   fieldServiceOrder: 'Field Service Order',
   fieldTicket: 'Field Ticket',
-  job: 'Job',
   planning: 'Planning',
   deals: 'Deals',
   assemblyOrder: 'Assembly Order'
@@ -2198,6 +2201,13 @@ export const DELIVERY_TICKET_STATUS = {
   inTransit: 'In-Transit',
   delivered: 'Delivered',
   cancelled: 'Cancelled'
+};
+
+export const TAB_VIEWS = {
+  1: 'My',
+  2: 'Open',
+  3: 'All',
+  4: 'Closed'
 };
 
 export const RENTAL_STATUS = {
@@ -2371,8 +2381,6 @@ export const ACTIVITY_RESOURCE = {
   workOrder: 'workOrder',
   demandOrder: 'demandOrder',
   fieldTicket: 'fieldTicket',
-  truckMaster: 'truckMaster',
-  job: 'Job',
   purchaseRequisition: 'purchaseRequisition',
   planning: 'planning',
   productCategory: 'productCategory',
@@ -2394,14 +2402,13 @@ export const ACTIVITY_RESOURCE = {
   serializedPackages: 'serializedPackages',
   expenses: 'expenses',
   expenseReport: 'expenseReport',
-  contentPostPlanning: 'contentPostPlanning'
+  contentPostPlanning: 'contentPostPlanning',
+  assetServiceTicket: 'assetServiceTicket'
 };
 
 export const LOG_RESOURCE = {
   serializedAsset: sidebarResource.serializedAsset,
   serviceMaster: sidebarResource.serviceMaster,
-  truckMaster: sidebarResource.truckMaster,
-  job: sidebarResource.job,
   quotation: sidebarResource.quotation,
   lead: sidebarResource.lead,
   opportunity: sidebarResource.opportunity,
@@ -2571,7 +2578,6 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.productionOrder, value: sidebarResource.productionOrder, key: 'productionOrder' },
   { title: sidebarResource.fieldServiceOrder, value: sidebarResource.fieldServiceOrder, key: 'fieldServiceOrder' },
   { title: sidebarResource.fieldTicket, value: sidebarResource.fieldTicket, key: 'fieldTicket' },
-  { title: sidebarResource.job, value: sidebarResource.job, key: 'job' },
   { title: sidebarResource.purchaseRequisition, value: sidebarResource.purchaseRequisition, key: 'purchaseRequisition' },
   { title: sidebarResource.planning, value: sidebarResource.planning, key: 'planning' },
   { title: sidebarResource.subcontractAssembly, value: sidebarResource.subcontractAssembly, key: 'subcontractAssembly' },
@@ -2827,7 +2833,8 @@ export const QUOTATION_STATUS = {
   sentforDOA: 'Sent for DOA',
   acceptedbyDOA: 'Accepted by DOA',
   rejectedbyDOA: 'Rejected by DOA',
-  customerAcceptanceNotRequired: 'Customer Acceptance Not Required'
+  customerAcceptanceNotRequired: 'Customer Acceptance Not Required',
+  expired: 'Expired'
 };
 
 export const QUOTATION_TYPE = {
@@ -3098,6 +3105,12 @@ export const EXPENSE_STATUS = {
   recalled: 'Recalled'
 };
 
+export const ASSET_SERVICE_TICKET_STATUS = {
+  open: 'Open',
+  inProgress: 'In-Progress',
+  closed: 'Closed'
+}
+
 export const PRICING_TYPE = [
   { optionLabel: 'Rent', optionValue: 'Rent' },
   { optionLabel: 'Sell', optionValue: 'Price' }
@@ -3147,6 +3160,7 @@ export const SERIALIZED_PACKAGE_STATUS = {
   reserved: 'Reserved',
   underReview: 'Under Review',
   inUse: 'In-Use',
+  inTransit: 'In-Transit',
   customerPossession: 'Customer Possession',
   disassembled: 'Disassembled'
 };
@@ -3461,6 +3475,8 @@ export const getDefaultMyRecordType = (user, resource) => {
         return 3;
       } else if (byDefaultRecord?.type === 'Open') {
         return 2;
+      } else if (byDefaultRecord?.type === 'Closed') {
+        return 4;
       } else {
         return 1;
       }
@@ -4028,9 +4044,9 @@ export const getEmailsFromContacts = (data, field = 'customerContact') => {
 };
 
 export const getCustomInvoiceFileName = (customDownloadFileName, data) => {
-  const status = data?.status === INVOICE_STATUS.proforma ? data?.status : 'Invoice'
-  return customDownloadFileName.replace("{status}", status).replace("{invoiceNumber}", data?.invoiceNumber);
-}
+  const status = data?.status === INVOICE_STATUS.proforma ? data?.status : 'Invoice';
+  return customDownloadFileName.replace('{status}', status).replace('{invoiceNumber}', data?.invoiceNumber);
+};
 
 export const EQUIPT_BE_CONNECTED_WINDOW = 'equipt-beConnected-window';
 export const handleClearLocalStore = () => {
@@ -4074,9 +4090,32 @@ export const reverseLookupDependentOn = (lookupDependentOn, options = [], value,
   }
   return option[lookupDependentOn];
 };
+
 export function calculateRatio(a: number, b: number, c: number): number {
   if (b === 0 || c === 0) {
     throw new Error('Denominators cannot be zero.');
   }
   return c * (b / a);
+}
+
+export const getDataFromHeader = (fields: any[], referenceData: any) => {
+  const data: any = {}
+  fields?.filter((ele) => ele?.copyFromHeaderField)?.forEach(ele => {
+    if (referenceData[ele?.copyFromHeaderField]) {
+      data[ele?.fieldName] = referenceData[ele?.copyFromHeaderField]
+    }
+  });
+  return data
+}
+
+export const getValueOfMatchedFieldName = (fields: any, referenceData: any) => {
+  const data: any = {}
+  if (fields?.length > 0 && referenceData) {
+    fields?.forEach(f => {
+      if (f?.fieldName && referenceData[f?.fieldName]) {
+        data[f?.fieldName] = referenceData[f?.fieldName]
+      }
+    });
+  }
+  return data
 }

@@ -17,7 +17,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource, SUBCONTRACT_ASSEMBLY_STATUS } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource, SUBCONTRACT_ASSEMBLY_STATUS } from 'src/constants/helpers';
 import Consumables from 'src/pages/SubcontractAssembly/Material/Consumables';
 import MaterialDialog from 'src/pages/SubcontractAssembly/Material/MaterialDialog';
 import {
@@ -399,7 +399,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
           referenceId={subcontractAssemblyData?._id}
           uniqueId={showAttachmentDialog?._id}
           referenceLabel={showAttachmentDialog.label}
-          resource={ACTIVITY_RESOURCE.subcontractAssembly}
+          resource={sidebarResource.subcontractAssembly}
           handleClose={() => {
             setShowAttachmentDialog({ open: false, _id: null, label: '' });
           }}

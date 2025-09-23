@@ -41,6 +41,7 @@ import LeadTime from 'src/components/LeadTime';
 import Step from 'src/pages/DynamicForm/Step';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import CostPrice from 'src/components/CostPrice';
 
 const minHeight = '250px';
 
@@ -146,13 +147,6 @@ const ProductDetailsPage = () => {
           data.productData?.productNumber ? `${data.productData?.productName} - ${data.productData?.productNumber}` : data.productData?.productName
         );
         setCustomizedRoutes([{ ...routes.product, title: resources?.product?.titlePlural }, { title: `${data.productData.productName}` }]);
-        if (data?.productData?.entity && data?.productData?.entity !== undefined) {
-          data.productData.entity = user.entity
-            ?.filter((d) => data?.productData?.entity?.some((e) => d._id === e))
-            ?.map((d) => {
-              return { optionValue: d._id, optionLabel: d.entityName };
-            });
-        }
         setProductData(data.productData);
         setLoading(false);
       })
@@ -195,23 +189,29 @@ const ProductDetailsPage = () => {
 
   const getWarehouses = () => {
     setLoadingWarehouse(true);
-    axiosInstance().get(`${productInventory.api}/product/${id}`).then(async ({ data: { data } }) => {
-      setProductInventoryData(data);
-      setLoadingWarehouse(false);
-    }).catch((err) => {
-      setLoadingWarehouse(false);
-      toastConfig.setToastConfig(err);
-    });
-    if (productData?.serializedProduct) {
-      axiosInstance().get(`product/${id}/warehouse`).then(async ({ data: { data } }) => {
-        data = data?.filter((e) => e.warehouse);
-        setProductWarehouseData(data);
-        setInventoriesData(data);
+    axiosInstance()
+      .get(`${productInventory.api}/product/${id}`)
+      .then(async ({ data: { data } }) => {
+        setProductInventoryData(data);
         setLoadingWarehouse(false);
-      }).catch((err) => {
+      })
+      .catch((err) => {
         setLoadingWarehouse(false);
         toastConfig.setToastConfig(err);
       });
+    if (productData?.serializedProduct) {
+      axiosInstance()
+        .get(`product/${id}/warehouse`)
+        .then(async ({ data: { data } }) => {
+          data = data?.filter((e) => e.warehouse);
+          setProductWarehouseData(data);
+          setInventoriesData(data);
+          setLoadingWarehouse(false);
+        })
+        .catch((err) => {
+          setLoadingWarehouse(false);
+          toastConfig.setToastConfig(err);
+        });
     }
   };
 
@@ -521,6 +521,11 @@ const ProductDetailsPage = () => {
                       {user?.user?.brandPolicy?.leadTime && (
                         <Grid size={{ xs: 12, sm: 6, md: 6, xl: 4 }}>
                           <LeadTime referenceType={MATERIAL_TYPE.product} referenceId={id} referenceLabel={productData?.productName} />
+                        </Grid>
+                      )}
+                      {user?.user?.brandPolicy?.materialCostPrice && (
+                        <Grid size={{ xs: 12, sm: 6, md: 6, xl: 4 }}>
+                          <CostPrice referenceData={productData} type={MATERIAL_TYPE.product} />
                         </Grid>
                       )}
                     </Grid>

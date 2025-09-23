@@ -28,6 +28,7 @@ import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import dayjs from 'dayjs';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
+import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 const ManageQuotationDialog = ({
   isClone,
@@ -52,6 +53,8 @@ const ManageQuotationDialog = ({
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [cloneHeading, setCloneHeading] = useState('');
+  const [showConfirmCloneDetailsDialog, setShowConfirmCloneDetailsDialog] = useState(false);
+  const [isMaterialAvailable, setIsMaterialAvailable] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -72,6 +75,7 @@ const ManageQuotationDialog = ({
             rest.status = QUOTATION_STATUS.new;
             rest.quotationNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(quotationNumber);
+            setIsMaterialAvailable(!data?.canDelete)
             setInitialData({
               fields: fieldsDataForCreate,
               values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
@@ -238,7 +242,14 @@ const ManageQuotationDialog = ({
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
           validate={validate}
-          onSubmit={handleSubmit}
+          onSubmit={(values) => {
+            if (quotationId && isClone && isMaterialAvailable && !showConfirmCloneDetailsDialog) {
+              setShowConfirmCloneDetailsDialog(true);
+            }
+            else {
+              handleSubmit(values)
+            }
+          }}
         >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <>
@@ -318,6 +329,24 @@ const ManageQuotationDialog = ({
                   }}
                 />
               ) : null}
+              {showConfirmCloneDetailsDialog && (
+                <SelectionConfirmationDialog
+                  open={showConfirmCloneDetailsDialog}
+                  message={"Would you like to clone this with all line items? Click 'Yes' to clone both the header and its line items, or 'No' to clone only the header."}
+                  onOk={(type) => {
+                    if (type === 'Yes') {
+                      setFieldValue('quotationId', quotationId);
+                    }
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmCloneDetailsDialog(false)
+                  }}
+                  selection1={'Yes'}
+                  selection2={'No'}
+                  okBtnLoading={loading}
+                />
+              )}
             </>
           )}
         </Formik>

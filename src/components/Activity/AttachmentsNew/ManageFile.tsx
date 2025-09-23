@@ -23,9 +23,10 @@ const ManageFile = ({
   onMinimizeMaximize,
   showManimizeMaximize,
   onClose,
+  onSuccess,
   parentId = null,
   attachmentType = null,
-  fetchData = null
+  fromWorkOrderServiceStep = false
 }) => {
 
   const toastConfig = useContext(CustomToastContext);
@@ -81,6 +82,9 @@ const ManageFile = ({
               formData.append('parentId', parentId);
             }
             formData.append('relatedTo', JSON.stringify(relatedTo))
+            if (fromWorkOrderServiceStep) {
+              formData.append('fromWorkOrderServiceStep', '1')
+            }
             let fake = 0;
             const fakeInterval = setInterval(() => {
               fake = Math.min(fake + Math.random() * 15, 90);
@@ -107,9 +111,7 @@ const ManageFile = ({
           });
         })
       );
-    }
-    if (fetchData) {
-      fetchData()
+      onSuccess()
     }
   }
 

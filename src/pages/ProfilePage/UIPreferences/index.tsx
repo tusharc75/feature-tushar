@@ -17,9 +17,9 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isArray } from 'lodash';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { cn } from 'src/constants/helpers';
+import { cn, TAB_VIEWS } from 'src/constants/helpers';
 
-const recordOptions: string[] = ['All', 'My', 'Open'];
+const recordOptions: string[] = Object.values(TAB_VIEWS);
 
 const UiPreference = ({ userData, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -31,9 +31,9 @@ const UiPreference = ({ userData, onSuccess }) => {
 
   useEffect(() => {
     const userByDefaultRecord = userData?.uiPreference?.byDefaultRecord;
-    const userRecord = {};
+    const userRecord: Record<string, string> = {};
     if (isArray(userByDefaultRecord)) {
-      userByDefaultRecord?.forEach((e) => {
+      userByDefaultRecord.forEach((e) => {
         userRecord[e.resource] = e.type;
       });
     }
@@ -46,7 +46,7 @@ const UiPreference = ({ userData, onSuccess }) => {
         };
       })
     });
-  }, [resources]);
+  }, [resources, userData]);
 
   useEffect(() => {
     fetchData();
@@ -65,7 +65,7 @@ const UiPreference = ({ userData, onSuccess }) => {
 
   const updateData = (values) => {
     setIsSubmitting(true);
-    let data = {
+    const data = {
       byDefaultRecord: values.data?.map((e) => {
         return { resource: e.resource, type: e.type };
       })
@@ -95,7 +95,7 @@ const UiPreference = ({ userData, onSuccess }) => {
   return (
     <Box style={{ marginTop: '16px' }}>
       {initialValues?.data?.length ? (
-        <Formik initialValues={initialValues} onSubmit={updateData}>
+        <Formik initialValues={initialValues} onSubmit={updateData} enableReinitialize>
           {({ values, submitForm }) => (
             <Form>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} >
@@ -128,35 +128,30 @@ const UiPreference = ({ userData, onSuccess }) => {
                 >
                   <TableHead>
                     <TableRow>
-                      <TableCell className="pl-4 h-12"><strong>Resource</strong></TableCell>
-                      <TableCell className="pl-4 h-12"><strong>By Default Records</strong></TableCell>
+                      <TableCell sx={{ width: '50%', fontWeight: 'bold' }}><strong>Resource</strong></TableCell>
+                      <TableCell sx={{ width: '50%', fontWeight: 'bold' }}><strong>By Default Records</strong></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     <FieldArray
                       name="data"
                       render={(arrayHelpers) =>
-                        values.data
-                          ?.filter((d) => d.resourceLabel.toLowerCase().includes(searchQuery.toLowerCase()))
-                          .map((data, index) => (
-                            <TableRow key={data.resource}>
-                              <TableCell className='pl-4'>{data.resourceLabel}</TableCell>
+                        values.data?.map((rowData, index) => {
+                          if (!rowData.resourceLabel.toLowerCase().includes(searchQuery.toLowerCase())) {
+                            return null;
+                          }
+                          return (
+                            <TableRow key={rowData.resource}>
+                              <TableCell className='pl-4'>{rowData.resourceLabel}</TableCell>
                               <TableCell className='pl-4'>
                                 <Autocomplete
                                   disabled={!isEdit}
-                                  value={data.type}
+                                  value={rowData.type}
                                   onChange={(e, val) => {
                                     arrayHelpers.replace(index, {
-                                      ...values?.data[index],
-                                      ['type']: val
+                                      ...values.data[index],
+                                      type: val
                                     });
-                                    const res = initialValues.data;
-                                    res.forEach((r) => {
-                                      if (r.resource === data.resource) {
-                                        r.type = val;
-                                      }
-                                    });
-                                    setInitialValues({ data: res });
                                   }}
                                   disableClearable
                                   options={recordOptions}
@@ -165,7 +160,8 @@ const UiPreference = ({ userData, onSuccess }) => {
                                 />
                               </TableCell>
                             </TableRow>
-                          ))
+                          );
+                        })
                       }
                     />
                   </TableBody>
@@ -178,8 +174,9 @@ const UiPreference = ({ userData, onSuccess }) => {
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-      )}
-    </Box>
+      )
+      }
+    </Box >
   );
 };
 

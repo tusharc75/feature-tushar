@@ -192,8 +192,7 @@ const CreditMemo = () => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
           finalObject['allowedToEdit'] = permissions?.creditMemo?.isUpdate;
-          finalObject['canDelete'] =
-            permissions?.creditMemo?.isDelete && checkIsAllowedToDelete(user, sidebarResource.creditMemo, finalObject?.ownerId) && u?.canDelete;
+          finalObject['canDelete'] = permissions?.creditMemo?.isDelete && checkIsAllowedToDelete(user, sidebarResource.creditMemo, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -329,6 +328,7 @@ const CreditMemo = () => {
         <ListingPageHeader
           toggleButtonList={allFields?.filter((f) => ['owner', 'collaborator']?.includes(f?.fieldData?.fieldName))?.length === 2 ? types : null}
           onToggle={onTypeChange}
+          resource={sidebarResource.creditMemo}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
           searchValue={search}

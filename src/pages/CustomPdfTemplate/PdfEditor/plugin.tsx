@@ -29,35 +29,77 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
                 headWidthPercentages: [30, 30, 40],
             },
             schema: (props) => {
-                const baseSchema = typeof table.propPanel.schema === 'function'
-                    ? table.propPanel.schema(props)
-                    : { ...table.propPanel.schema };
-
+                const baseSchema =
+                    typeof table.propPanel.schema === 'function'
+                        ? table.propPanel.schema(props)
+                        : { ...table.propPanel.schema };
                 const selectedTableName = props.activeSchema.name;
-
                 const headerOptions = resourceTables?.find((e) => e.value === selectedTableName)?.fields || [];
-
-                baseSchema.name = {
-                    title: 'Name',
-                    type: 'string',
-                    widget: 'select',
-                    default: resourceTables?.lenght ? resourceTables[0].label : '',
-                    props: {
-                        options: resourceTables,
+                const head = props.activeSchema.head || [];
+                const schemaWithDropdowns: any = {
+                    ...baseSchema,
+                    name: {
+                        title: 'Name',
+                        type: 'string',
+                        widget: 'select',
+                        default: resourceTables?.length ? resourceTables[0].label : '',
+                        props: {
+                            options: resourceTables,
+                        },
+                    },
+                    headStyles: {
+                        type: 'object',
+                        title: 'Head Styles',
+                        properties: baseSchema.headStyles?.properties || {},
+                        props: {
+                            style: {
+                                backgroundColor: '#ffffff',
+                                marginBottom: '25px',
+                            },
+                        },
+                    },
+                    bodyStyles: {
+                        type: 'object',
+                        title: 'Body Styles',
+                        properties: baseSchema.bodyStyles?.properties || {},
+                        props: {
+                            style: {
+                                backgroundColor: '#ffffff',
+                                marginBottom: '25px',
+                            },
+                        },
+                    },
+                    tableStyles: {
+                        type: 'object',
+                        title: 'Table Styles',
+                        properties: baseSchema.tableStyles?.properties || {},
+                        props: {
+                            style: {
+                                backgroundColor: '#ffffff',
+                                marginBottom: '25px',
+                            },
+                        },
+                    },
+                    columnStyles: {
+                        type: 'object',
+                        title: 'Column Styles',
+                        properties: baseSchema.columnStyles?.properties || {},
+                        props: {
+                            style: {
+                                backgroundColor: '#ffffff',
+                                marginBottom: '25px',
+                            },
+                        },
                     },
                 };
 
-                const schemaWithDropdowns: any = {
-                    ...baseSchema,
-                };
-
-                const head = props.activeSchema.head || [];
                 head.forEach((val: string, i: number) => {
                     schemaWithDropdowns[`head.${i}`] = {
                         title: `Header ${i + 1}`,
                         type: 'string',
                         widget: 'select',
                         default: val,
+                        span: 24,
                         props: {
                             options: headerOptions,
                         },

@@ -41,8 +41,7 @@ const PackageInventory = () => {
   }, []);
 
   const getPlants = () => {
-    axiosInstance()
-      .get('/sa-formbuilder/lookup?lookupResource=Warehouse,Storage Location')
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.warehouse}`)
       .then(({ data: { data } }) => {
         setPlantOptions([{ optionLabel: 'All', optionValue: 'All' }, ...data.Warehouse]);
         if (plantId === null && data?.Warehouse.length) {
@@ -137,9 +136,9 @@ const PackageInventory = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-            .filter((d) => d.optionValue !== 'All')
-            .map((d) => d.optionValue)
-            .toString()
+          .filter((d) => d.optionValue !== 'All')
+          .map((d) => d.optionValue)
+          .toString()
         : plantId;
 
     let deepFilter = `?warehouse=${tempPlantId}&page=${page}&limit=${limit}`;
@@ -188,12 +187,12 @@ const PackageInventory = () => {
           module={resources?.packageInventory?.titlePlural}
           onlyExport={true}
           api={routes.packageInventory.path}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={() => {}}
+          onExportToExcelSuccess={() => { }}
         />
       </div>
       <CustomContainer>

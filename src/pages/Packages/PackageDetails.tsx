@@ -22,6 +22,8 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import LeadTime from 'src/components/LeadTime';
 import Diagram from 'src/pages/WorkOrder/Diagram';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
+import CostPrice from 'src/components/CostPrice';
 
 const PackageDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -127,9 +129,9 @@ const PackageDetails = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
-          <CustomTab value={1}>Services</CustomTab>
-          {permissions?.serializedPackages && <CustomTab value={2}>Child Items</CustomTab>}
-          <CustomTab value={3}>Consumables</CustomTab>
+          <CustomTab value={1}>Child Items</CustomTab>
+          {permissions?.assemblyOrder && <CustomTab value={2}>Consumables</CustomTab>}
+          <CustomTab value={3}>Services</CustomTab>
           <CustomTab value={4}>{`Sub ${resources?.packages?.titlePlural}`}</CustomTab>
           <CustomTab value={5}>Drawings</CustomTab>
         </CustomTabs>
@@ -146,21 +148,36 @@ const PackageDetails = () => {
                   </Grid>
                 </Box>
               )}
+              {user?.user?.brandPolicy?.materialCostPrice && (
+                <Box mb={2} mt={2}>
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                      <CostPrice referenceData={packageData} type={MATERIAL_TYPE.package} />
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-              {tabValue === 1 && <Services packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
-            </TabPanel>
-            <TabPanel value={tabValue} index={2}>
               <Products packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} childItem={true} />
             </TabPanel>
+            <TabPanel value={tabValue} index={2}>
+              {tabValue === 2 && <Products packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
+            </TabPanel>
             <TabPanel value={tabValue} index={3}>
-              {tabValue === 3 && <Products packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
+              {tabValue === 3 && <Services packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
             <TabPanel value={tabValue} index={4}>
               {tabValue === 4 && <Packages packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
             <TabPanel value={tabValue} index={5}>
-              <Diagram resource={ACTIVITY_RESOURCE.packages} referenceId={id} attachmentType={ATTACHMENT_TYPE.drawing} />
+              {/* <Diagram resource={ACTIVITY_RESOURCE.packages} referenceId={id} attachmentType={ATTACHMENT_TYPE.drawing} /> */}
+              <DiagramNew
+                resource={sidebarResource.packages}
+                referenceId={id}
+                resourceLabel={packageData?.packageName}
+                attachmentType={ATTACHMENT_TYPE.drawing}
+              />
             </TabPanel>
           </Grid>
         </Grid>

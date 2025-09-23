@@ -83,7 +83,7 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, storag
       errors['serialNumber'] = `Please enter serial number`;
     }
     if (values['serialNumber']?.length > serialNumberCount) {
-      errors['serialNumber'] = `serial number not more then inventory`;
+      errors['serialNumber'] = `Serial numbers cannot be more than available inventory`;
     }
     return errors;
   }

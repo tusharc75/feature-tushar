@@ -15,7 +15,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isEmpty, startCase } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
@@ -24,10 +24,20 @@ import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/Inv
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';
 import FinalPriceBox from 'src/components/FinalPriceBox';
+import ManageInvoiceDialog from 'src/pages/Invoice/ManageInvoiceDialog';
 
 const renderedFrom = `${camelCase(sidebarResource.generateInvoice)}_create`;
 
-const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progressiveBilling, invoiceResourceData }) => {
+const CreateInvoiceDialog = ({
+  onClose,
+  onSuccess,
+  resourceData,
+  resource,
+  progressiveBilling,
+  invoiceResourceData,
+  invoiceData,
+  pendingRequiredFields
+}) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [isUpdating, setUpdating] = useState(false);
@@ -51,9 +61,10 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
   const [resourceFields, setResourceFields] = useState(null);
   const [finalPriceData, setFinalPriceData] = useState(null);
 
+  const [openManageInvoiceDialog, setOpenManageInvoiceDialog] = useState(false);
 
   const {
-    state: { permissions }
+    state: { permissions, user }
   }: any = useData();
 
   useEffect(() => {
@@ -70,7 +81,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
     setColumns(null);
 
     const response = await axiosInstance().get(`/field?resource=${resource}&view=true`);
-    setResourceFields(response?.data?.data)
+    setResourceFields(response?.data?.data);
 
     let data;
 
@@ -119,27 +130,27 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       },
       ...(resource === sidebarResource.fieldTicket
         ? [
-          {
-            accessor: 'fieldTicketNumber',
-            Header: 'Field Ticket',
-            disabled: true,
-            Cell: ({ row }) => (
-              <div className="flex items-center gap-2">
-                <p className="text-truncate">{row.original.fieldTicketNumber}</p>
-                {permissions?.fieldTicket?.isRead && (
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                )}
-              </div>
-            )
-          }
-        ]
+            {
+              accessor: 'fieldTicketNumber',
+              Header: 'Field Ticket',
+              disabled: true,
+              Cell: ({ row }) => (
+                <div className="flex items-center gap-2">
+                  <p className="text-truncate">{row.original.fieldTicketNumber}</p>
+                  {permissions?.fieldTicket?.isRead && (
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  )}
+                </div>
+              )
+            }
+          ]
         : []),
       {
         accessor: 'detail',
@@ -219,6 +230,11 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
           let values: any = {};
           values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
           values['manualEndDate'] = element?.actualEndDate;
+          if (resource === sidebarResource.sublease) {
+            values.qty = data?.assets?.length || element?.qty;
+          } else {
+            values.qty = element?.qty;
+          }
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           newMaterial.push({ ...element, ...calValues });
         });
@@ -253,7 +269,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       newMaterial = data?.material;
     }
     setMaterial([...newMaterial, ...data?.manualEntry]);
-    setFinalPriceData(data?.finalPriceData)
+    setFinalPriceData(data?.finalPriceData);
     initializeTable([...newMaterial, ...data?.manualEntry]);
   };
 
@@ -374,9 +390,9 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
     setIsDateApplying(false);
   };
 
-  const handleCreateInvoice = (invoiceData = null) => {
+  const createInvoice = (values, extraInvoiceData) => {
+    setUpdating(true);
     if (progressiveBilling) {
-      setUpdating(true);
       rowsApplied?.forEach((element) => {
         delete element?.index;
         delete element?.detail;
@@ -393,8 +409,8 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       axiosInstance()
         .post(`/generate-invoice/create-progressive`, {
           resource: resource,
-          referenceId: resourceData[0]?._id,
-          material: rowsApplied
+          material: rowsApplied,
+          ...values
         })
         .then(() => {
           setUpdating(false);
@@ -405,9 +421,18 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
           toastConfig.setToastConfig(error);
         });
     } else {
+      let payload = {
+        resource: resource,
+        referenceIds: resourceData?.map((e) => e._id),
+        ...values
+      };
+      if (!isEmpty(extraInvoiceData)) {
+        payload = { ...payload, ...extraInvoiceData };
+      }
       axiosInstance()
-        .post(`/generate-invoice/create`, { resource: resource, referenceIds: resourceData?.map((e) => e._id), extraInvoiceData: invoiceData })
+        .post(`/generate-invoice/create`, payload)
         .then(({ data }) => {
+          setUpdating(false);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -416,9 +441,27 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
           onSuccess();
         })
         .catch((error) => {
+          setUpdating(false);
           toastConfig.setToastConfig(error);
         });
     }
+  };
+
+  const handleCreateInvoice = (extraInvoiceData = null, checkRequiredFields = true) => {
+    if (checkRequiredFields && pendingRequiredFields?.length > 0) {
+      setOpenManageInvoiceDialog(true);
+    } else {
+      createInvoice(invoiceData, extraInvoiceData);
+    }
+  };
+
+  const isDisabledApply = () => {
+    if (!selectedRecords?.length) return true;
+    if (!dayjs(endDate)?.isValid()) return true;
+    if (resource === sidebarResource.sublease && selectedRecords?.every((r) => r?.type === MATERIAL_TYPE.serializedAsset)) {
+      return true;
+    }
+    return isDateApplying;
   };
 
   return (
@@ -450,7 +493,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                             <ThemeButton
                               id="dialog-apply-button"
                               isLoading={isDateApplying}
-                              disabled={selectedRecords?.length && dayjs(endDate)?.isValid() ? isDateApplying : true}
+                              disabled={isDisabledApply()}
                               buttonType="theme"
                               onClick={() => {
                                 handleApplyDate();
@@ -491,8 +534,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Box>
             )}
-            {(finalPriceData && resourceFields) &&
-              <FinalPriceBox allFields={resourceFields} data={finalPriceData} />}
+            {finalPriceData && resourceFields && <FinalPriceBox allFields={resourceFields} data={finalPriceData} />}
           </Fragment>
         </CustomDialogContent>
         <CustomDialogFooter>
@@ -540,10 +582,26 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
           onClose={() => {
             setOpenInvoiceDataDialog(false);
           }}
-          invoiceFields={invoiceResourceData?.policy?.fieldTicketInvoiceFields}
+          invoiceFields={[...invoiceResourceData?.policy?.fieldTicketInvoiceFields, ...(pendingRequiredFields || [])]}
           onSuccess={(data) => {
-            handleCreateInvoice(data);
+            handleCreateInvoice(data, false);
           }}
+        />
+      )}
+      {openManageInvoiceDialog && (
+        <ManageInvoiceDialog
+          isClone={false}
+          invoiceId={null}
+          onClose={() => {
+            setOpenManageInvoiceDialog(false);
+          }}
+          onSuccess={() => {
+            setOpenManageInvoiceDialog(false);
+            fetchData();
+          }}
+          referenceData={invoiceData}
+          handleCreate={createInvoice}
+          isLoading={isUpdating}
         />
       )}
     </Fragment>

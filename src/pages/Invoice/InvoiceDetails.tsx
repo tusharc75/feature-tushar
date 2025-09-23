@@ -89,12 +89,15 @@ const InvoiceDetails = () => {
   };
 
   useEffect(() => {
-    if (id) {
-      fetchFields();
+    fetchPolicy();
+    fetchFields();
+  }, []);
+
+  useEffect(() => {
+    if (id && resourcePolicyData) {
       fetchInvoiceData();
-      fetchPolicy();
     }
-  }, [id]);
+  }, [id, resourcePolicyData]);
 
   const fetchPolicy = async () => {
     const data = await getResourcePolicy(user, permissions, sidebarResource.invoice)
@@ -146,7 +149,8 @@ const InvoiceDetails = () => {
       setStepList(tempStepList);
       setStepNames(tempStepList?.map((item) => item.name));
 
-      if ([INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(data?.status)) {
+      const statusEnd = [INVOICE_STATUS.closed, INVOICE_STATUS.cancelled, ...(resourcePolicyData?.policy?.editRestrictionStatus || [])]
+      if (statusEnd?.includes(data?.status)) {
         setCurrentStep(tempStepList?.length - 1);
       } else {
         setCurrentStep(getIndex(data?.processStatus, tempStepList));
@@ -316,7 +320,7 @@ const InvoiceDetails = () => {
                     Versions
                   </ThemeButton>
                 )}
-                {permissions?.invoice?.isUpdate && allowedToEdit && statusOptions?.length > 0 && tabValue !== 2 && invoiceData?.status !== INVOICE_STATUS.closed && (
+                {permissions?.invoice?.isUpdate && allowedToEdit && statusOptions?.length > 0 && tabValue !== 2 && ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status) && (
                   invoiceData?.doasetup && DOAData?.status !== DOA_STATUS.approved ? null :
                     <ThemeButton
                       onClick={openActions}
@@ -397,7 +401,7 @@ const InvoiceDetails = () => {
 
         <TabPanel value={tabValue} index={0}>
           <Box>
-            {loading || !invoiceFields.length ? (
+            {loading || !invoiceFields.length || !invoiceData ? (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>

@@ -3,17 +3,17 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import { useContext, useEffect, useMemo, useState } from 'react';
-import { camelCase, sortBy } from 'lodash';
+import { camelCase } from 'lodash';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
+import { approveDisable, deleteDisable, editDisable, updateDisable } from 'src/constants/messageHelpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomContainer from 'src/components/CustomContainer';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { sidebarResource, prepareDataForGrid, CONTENT_POST_PLANNING_STATUS } from 'src/constants/helpers';
+import { sidebarResource, prepareDataForGrid, CONTENT_POST_PLANNING_STATUS, checkIsAllowedToEdit, checkIsAllowedToDelete, getDefaultMyRecordType } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import ManageContentPostPlanning from '../ManageContentPostPlanning';
@@ -22,6 +22,7 @@ import routes from 'src/components/Helpers/Routes';
 import ButtonMenu from 'src/components/ButtonMenu';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 import { HourglassEmpty, CheckCircle, Schedule } from '@mui/icons-material';
+import PublishedWithChangesIcon from '@mui/icons-material/PublishedWithChanges';
 
 const ListView = ({ topRightSlot }) => {
   const renderedFrom = camelCase(sidebarResource?.contentPostPlanning);
@@ -36,34 +37,27 @@ const ListView = ({ topRightSlot }) => {
   const [columns, setColumns] = useState<any>(null);
   const pageTitle = camelCase(`${resources?.contentPostPlanning?.titlePlural}`);
   const { generateColumns, checkStaticField } = useColumns();
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.contentPostPlanning));
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isEdit: false, idToEdit: null });
-  const [selectedStatus, setSelectedStatus] = useState(CONTENT_POST_PLANNING_STATUS.pendingApproval);
+  const [selectedStatus, setSelectedStatus] = useState(localStorage.getItem('contentPostPlanningStatus') || CONTENT_POST_PLANNING_STATUS.pendingApproval);
   const [statusOptions, setStatusOptions] = useState(null);
-  const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null });
-  const [approvetRecord, setApproveRecord] = useState(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null, data: null });
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
 
   const types = [
     {
       key: `My ${resources?.contentPostPlanning?.titlePlural}`,
       value: 1
     },
-    // {
-    //     key: `Open ${resources?.contentPostPlanning?.titlePlural}`,
-    //     value: 2
-    // },
     {
       key: `All ${resources?.contentPostPlanning?.titlePlural}`,
-      value: 2
+      value: 3
     }
-    // {
-    //     key: `Closed ${resources?.contentPostPlanning?.titlePlural}`,
-    //     value: 4
-    // }
   ];
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -106,75 +100,82 @@ const ListView = ({ topRightSlot }) => {
     canDrag: false,
     Cell: ({ row }: any) => (
       <>
-        <HtmlTooltip
-          title={
-            permissions?.contentPostPlanning?.isUpdate && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? 'Edit' : editDisable
-          }
-        >
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Edit"
-              disabled={permissions?.contentPostPlanning?.isUpdate && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? false : true}
-              onClick={() => {
-                setShowManageDialog({ open: true, isEdit: true, idToEdit: row.original._id });
-              }}
-            >
-              <Edit
-                fontSize="small"
-                color={
-                  permissions?.contentPostPlanning?.isUpdate && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published
-                    ? 'primary'
-                    : 'disabled'
-                }
-              />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-        {row?.original?.status === CONTENT_POST_PLANNING_STATUS.pendingApproval && (
-          <HtmlTooltip title="Approve">
-            <span>
-              <IconButton
-                size="small"
-                aria-label="Approve"
-                onClick={() => {
-                  setApproveRecord(row?.original);
-                  setShowConfirmDialog({ open: true, status: CONTENT_POST_PLANNING_STATUS.scheduled });
-                }}
-              >
-                <CheckCircle fontSize="small" color="primary" />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-        )}
-        <HtmlTooltip title={row?.original?.canDelete && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? 'Delete' : deleteDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              disabled={row?.original?.canDelete && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? false : true}
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon
-                fontSize="small"
-                color={row?.original?.canDelete && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? 'error' : 'disabled'}
-              />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
+        {row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published &&
+          <>
+            <HtmlTooltip title={row?.original?.canEdit ? 'Edit' : editDisable}   >
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Edit"
+                  disabled={!row?.original?.canEdit}
+                  onClick={() => {
+                    setShowManageDialog({ open: true, isEdit: true, idToEdit: row.original._id });
+                  }}
+                >
+                  <Edit fontSize="small" color={row?.original?.canEdit ? 'primary' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+            {row?.original?.status === CONTENT_POST_PLANNING_STATUS.pendingApproval && (
+              <HtmlTooltip title={user?.role?.selectedEntity?.policy?.isApproveContent ? "Approve" : approveDisable}>
+                <span>
+                  <IconButton
+                    size="small"
+                    aria-label="Approve"
+                    disabled={!user?.role?.selectedEntity?.policy?.isApproveContent}
+                    onClick={() => {
+                      setShowConfirmDialog({ open: true, status: CONTENT_POST_PLANNING_STATUS.scheduled, data: row?.original });
+                    }}
+                  >
+                    <CheckCircle fontSize="small" color={!user?.role?.selectedEntity?.policy?.isApproveContent ? 'disabled' : 'primary'} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            )}
+            {row?.original?.status === CONTENT_POST_PLANNING_STATUS.scheduled &&
+              <HtmlTooltip title={row?.original?.canEdit ? "Publish" : updateDisable}>
+                <span>
+                  <IconButton
+                    size="small"
+                    aria-label="Published"
+                    disabled={!row?.original?.canEdit}
+                    onClick={() => {
+                      setShowConfirmDialog({ open: true, status: CONTENT_POST_PLANNING_STATUS.published, data: row?.original });
+                    }}
+                  >
+                    <PublishedWithChangesIcon fontSize="small" color={row?.original?.canEdit ? "primary" : "disabled"} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            }
+            <HtmlTooltip title={row?.original?.canDelete && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? 'Delete' : deleteDisable}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  disabled={row?.original?.canDelete && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? false : true}
+                  onClick={() => {
+                    setDeleteRecord(row.original);
+                    setShowDeleteConfirmBox(true);
+                  }}
+                >
+                  <DeleteIcon
+                    fontSize="small"
+                    color={row?.original?.canDelete && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? 'error' : 'disabled'}
+                  />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </>
+        }
       </>
     )
   };
 
-  const getQueryString = (isExport = false) => {
+  const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    } else if (selectedType === 2) {
-      deepFilter = deepFilter + `&openRecords=1`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
@@ -206,25 +207,24 @@ const ListView = ({ topRightSlot }) => {
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    const response: any = await axiosInstance()
-      .get(`/content-post-planning${queryString}`)
-      .then(
-        ({
-          data: {
-            data: { data, count }
-          }
-        }) => {
-          let rows = data.map((u: any) => {
-            let finalObject: any = prepareDataForGrid(u, user);
-            finalObject['isChecked'] = false;
-            finalObject['canDelete'] = permissions?.contentPostPlanning?.isDelete;
-            return finalObject;
-          });
-          dispatch({ type: 'initialize', data: rows, count: count });
-
-          dispatch({ type: 'loading', loading: false });
+    await axiosInstance().get(`/content-post-planning${queryString}`).then(
+      ({
+        data: {
+          data: { data, count }
         }
-      )
+      }) => {
+        let rows = data.map((u: any) => {
+          let finalObject: any = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = false;
+          finalObject['canDelete'] = permissions?.contentPostPlanning?.isDelete && checkIsAllowedToDelete(user, sidebarResource.contentPostPlanning, finalObject?.ownerId)
+          finalObject['canEdit'] = checkIsAllowedToEdit(user, sidebarResource.contentPostPlanning, u)
+          return finalObject;
+        });
+        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.contentPostPlanning, rows[0]));
+        dispatch({ type: 'initialize', data: rows, count: count });
+        dispatch({ type: 'loading', loading: false });
+      }
+    )
       .catch((error: any) => {
         dispatch({ type: 'loading', loading: false });
         toastConfig.setToastConfig(error);
@@ -247,18 +247,16 @@ const ListView = ({ topRightSlot }) => {
     }
     if (recordsToDelete.length > 0) {
       setDeleteLoading(true);
-      axiosInstance()
-        .put(`/content-post-planning/remove`, {
-          ids: recordsToDelete
-        })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
-          dispatch({ type: 'selection', selectedRecords: [] });
-          setShowDeleteConfirmBox(false);
-          setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord({});
-          fetchData();
-        })
+      axiosInstance().put(`/content-post-planning/remove`, {
+        ids: recordsToDelete
+      }).then(({ data }) => {
+        toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        setShowDeleteConfirmBox(false);
+        setDeleteLoading(false);
+        if (deleteRecord) setDeleteRecord({});
+        fetchData();
+      })
         .catch((error) => {
           toastConfig.setToastConfig(error);
           setShowDeleteConfirmBox(false);
@@ -267,15 +265,10 @@ const ListView = ({ topRightSlot }) => {
     }
   };
 
-  const validateStatus = (status) => {
-    const currIdx = statusOptions.findIndex((status) => status.optionValue === selectedRecords[0].status);
-    return statusOptions[currIdx + 1]?.optionValue !== status;
-  };
-
   const handleChangeStatus = (status) => {
     let _ids = [];
-    if (approvetRecord) {
-      _ids.push(approvetRecord?._id);
+    if (showConfirmDialog.data) {
+      _ids.push(showConfirmDialog.data?._id);
     } else {
       const isSameStatus = selectedRecords?.every((e) => e.status === selectedRecords[0].status);
       if (!isSameStatus) {
@@ -293,7 +286,7 @@ const ListView = ({ topRightSlot }) => {
     axiosInstance()
       .put('content-post-planning/update-status', { _id: _ids, status: status })
       .then(({ data: { data } }) => {
-        setShowConfirmDialog({ open: false, status: null });
+        setShowConfirmDialog({ open: false, status: null, data: null });
         fetchData();
         toastConfig.setToastConfig({
           open: true,
@@ -327,23 +320,32 @@ const ListView = ({ topRightSlot }) => {
           !selectedRecords?.some((s) => s.status === CONTENT_POST_PLANNING_STATUS.published) &&
           selectedRecords.every((e) => e.status === selectedRecords[0].status) && (
             <>
-              {statusOptions?.map((status) => {
-                return (
-                  <MenuItem
-                    onClick={() => {
-                      handleChangeStatus(status?.optionValue);
-                    }}
-                    disabled={validateStatus(status?.optionValue)}
-                  >
-                    {`Status Change - ${status?.optionLabel}`}
-                  </MenuItem>
-                );
-              })}
+              {selectedRecords[0]?.status === CONTENT_POST_PLANNING_STATUS.pendingApproval && (
+                <MenuItem
+                  onClick={() => {
+                    handleChangeStatus(CONTENT_POST_PLANNING_STATUS.scheduled);
+                  }}
+                  disabled={!user?.role?.selectedEntity?.policy?.isApproveContent}
+                >
+                  {`Approve `}
+                </MenuItem>
+              )}
+              {selectedRecords[0]?.status === CONTENT_POST_PLANNING_STATUS.scheduled && allowedToEdit && (
+                <MenuItem
+                  onClick={() => {
+                    handleChangeStatus(CONTENT_POST_PLANNING_STATUS.published);
+                  }}
+                  disabled={!user?.role?.selectedEntity?.policy?.isApproveContent}
+                >
+                  {`Publish `}
+                </MenuItem>
+              )}
             </>
           )}
       </>
     );
   };
+
   const resolvedTopRight = typeof topRightSlot === 'function' ? (topRightSlot as Function)() : topRightSlot;
 
   const statusMenuItems = useMemo(() => {
@@ -376,6 +378,7 @@ const ListView = ({ topRightSlot }) => {
           toggleButtonList={types}
           onToggle={onTypeChange}
           selectedType={selectedType}
+          resource={sidebarResource.contentPostPlanning}
           setSelectedType={setSelectedType}
           leftSideContents={
             <ButtonMenu
@@ -383,6 +386,7 @@ const ListView = ({ topRightSlot }) => {
               items={statusMenuItems}
               onItemClick={(e, item) => {
                 setSelectedStatus(item.value);
+                localStorage.setItem('contentPostPlanningStatus', item.value);
                 dispatch({ type: 'pageChange', page: 0 });
               }}
             >
@@ -438,9 +442,9 @@ const ListView = ({ topRightSlot }) => {
       {showConfirmDialog.open && (
         <ConfirmationDialog
           open={showConfirmDialog.open}
-          message={`Are you sure you want to approve this post ?`}
+          message={`${showConfirmDialog.status === CONTENT_POST_PLANNING_STATUS.published ? 'Are you sure you want to publish this post?' : 'Are you sure you want to approve this post?'}`}
           onClose={() => {
-            setShowConfirmDialog({ open: false, status: null });
+            setShowConfirmDialog({ open: false, status: null, data: null });
           }}
           onOk={() => {
             handleChangeStatus(showConfirmDialog.status);

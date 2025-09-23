@@ -51,11 +51,11 @@ const Leads = () => {
     },
     {
       key: `All ${resources?.lead?.titlePlural}`,
-      value: 2
+      value: 3
     },
     {
       key: `Converted ${resources?.lead?.titlePlural}`,
-      value: 3
+      value: 4
     }
   ];
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -225,7 +225,7 @@ const Leads = () => {
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (selectedType === 3) {
+    if (selectedType === 4) {
       deepFilters.push({
         field: 'staticData.convertedToOpportunity',
         term: 'Yes'
@@ -316,7 +316,7 @@ const Leads = () => {
 
     deepFilters.push({ field: pivotColumn.accessor, term: column });
 
-    if (selectedType === 3) {
+    if (selectedType === 4) {
       deepFilters.push({
         field: 'staticData.convertedToOpportunity',
         term: 'Yes'
@@ -678,6 +678,7 @@ const Leads = () => {
           toggleButtonList={LeadTypes}
           onToggle={handleFilter}
           selectedType={selectedType}
+          resource={sidebarResource.lead}
           setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}

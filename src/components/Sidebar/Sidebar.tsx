@@ -3,10 +3,12 @@ import { Collapse, CssBaseline, IconButton, List, ListItemButton, ListItemIcon, 
 import { kebabCase, lowerCase } from 'lodash';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { GoChevronDown, GoChevronUp } from 'react-icons/go';
-import { Link, useHistory, withRouter } from 'react-router-dom';
+import { useHistory, withRouter } from 'react-router-dom';
 import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
 import { SVG } from 'src/assets';
 import { DynamicIcon } from 'src/assets/IconGenerator';
+import { createDmsUrl } from 'src/components/Header/DMSRedirect';
+import Link from 'src/components/Link';
 import { cn } from 'src/constants/helpers';
 import { setDataBySectionName } from 'src/pages/Home/helpers';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
@@ -14,11 +16,22 @@ import { useData } from '../../StateProvider/Provider';
 import Header from '../Header/Header';
 import routes from '../Helpers/Routes';
 import styles from './sidebar.module.scss';
-import useStyles from './style';
 import { TResource, TSidebarItem, TSidebarSection } from './type';
 import { isSectionActive, isSectionVisible, staticSidebarData } from './utils';
 
 let toggleTimeout;
+
+const handleRoutes = (item) => {
+  switch (item.name) {
+    case 'Pos':
+      return routes.pos.path;
+    case 'Attachment': {
+      return createDmsUrl();
+    }
+    default:
+      return `/${kebabCase(item.name)}`;
+  }
+};
 
 function SideBar({ location }) {
   const [itemToAddActiveClass, setItemToAddActiveClass] = useState(NaN);
@@ -38,7 +51,6 @@ function SideBar({ location }) {
   const { isOffline } = useContext(CustomOfflineContext);
 
   const history = useHistory();
-  const classes = useStyles();
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split('/').filter((x) => x);
   const pathName = pathnames[0];
@@ -46,15 +58,6 @@ function SideBar({ location }) {
   const renderIcon = (sectionName: string) => {
     let { sideBarIcon } = setDataBySectionName(sectionName);
     return sideBarIcon;
-  };
-
-  const handleRoutes = (item) => {
-    switch (item.name) {
-      case 'Pos':
-        return routes.pos.path;
-      default:
-        return `/${kebabCase(item.name)}`;
-    }
   };
 
   useEffect(() => {
