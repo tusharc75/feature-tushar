@@ -238,7 +238,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       if (user?.user?.brandPolicy?.materialCostPrice) {
         let costPriceData: any = await getCostPriceConditions([{ materialId: rowData.materialId }], rowData.type);
         setCostPriceConditionList(costPriceData || []);
-
       }
     }
   }
