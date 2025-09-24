@@ -22,16 +22,19 @@ const useDesktopDM = () => {
   const socket = useSocket({ namespace: '/workspace/channel' });
 
   const fetchData = useCallback(
-    async ({ cancelToken, onSuccess = () => { } }: { cancelToken?: CancelToken; onSuccess?: () => void }) => {
+    async ({ cancelToken, onSuccess = () => {} }: { cancelToken?: CancelToken; onSuccess?: () => void }) => {
+      if (loading) return;
       setReplyingToMessage(null);
+
       try {
         setLoading(true);
-        let response: any = {}
+        let response: any = {};
         try {
-          const { data: { data } } = await axiosInstance().get('/work-space/channel/chats', { cancelToken });
+          const {
+            data: { data }
+          } = await axiosInstance().get('/work-space/channel/chats', { cancelToken });
           response = data;
-        }
-        catch (error) {
+        } catch (error) {
           toastConfig.setToastConfig(error);
         }
         const chats: Chat[] = [];
@@ -55,7 +58,7 @@ const useDesktopDM = () => {
         setLoading(false);
       }
     },
-    [user?._id]
+    [user?._id, loading]
   );
 
   useEffect(() => {
