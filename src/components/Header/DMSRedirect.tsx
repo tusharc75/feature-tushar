@@ -22,16 +22,22 @@ const DMSRedirect = () => {
   const handleRedirect = () => {
     window.open(createDmsUrl(), '_blank');
   };
+  if (!VITE_APP_DMS_URL) {
+    return null;
+  }
 
-  return VITE_APP_DMS_URL &&
-    (<HtmlTooltip title={`Open EDrive`} className="inline-block">
-      <span className="relative mx-2 inline-block rounded-full border border-blue-400 bg-blue-500/10 dark:border-blue-800">
-        <IconButton sx={{ padding: '5px', width: '30px', height: '30px' }} onClick={handleRedirect}>
-          <FiExternalLink className="absolute -right-[5px] -top-[5px] text-[#0000FF] dark:text-blue-600" size={14} />
-          <PiDatabaseBold size={18} className="text-[#2563EB]" />
-        </IconButton>
-      </span>
-    </HtmlTooltip>)
+  return (
+    VITE_APP_DMS_URL && (
+      <HtmlTooltip title={`Open EDrive`} className="inline-block">
+        <span className="relative mx-2 inline-block rounded-full border border-blue-400 bg-blue-500/10 dark:border-blue-800">
+          <IconButton sx={{ padding: '5px', width: '30px', height: '30px' }} onClick={handleRedirect}>
+            <FiExternalLink className="absolute -right-[5px] -top-[5px] text-[#0000FF] dark:text-blue-600" size={14} />
+            <PiDatabaseBold size={18} className="text-[#2563EB]" />
+          </IconButton>
+        </span>
+      </HtmlTooltip>
+    )
+  );
 };
 
 export default DMSRedirect;
