@@ -138,16 +138,6 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
                         <Add fontSize="small" style={{ fontSize: 17 }} />
                       </IconButton>
                     </HtmlTooltip>
-                    {/* <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
-                      <IconButton
-                        onClick={() => {
-                          setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: row.original?._id });
-                        }}
-                        size="small"
-                      >
-                        <Add fontSize="small" color="primary" />
-                      </IconButton>
-                    </HtmlTooltip> */}
                   </Box>
                 )}
               </>
