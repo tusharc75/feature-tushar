@@ -5,7 +5,7 @@ import { orderBy, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -27,6 +27,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState({ accept: false, reject: false });
 
+  const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { loading } = state;
 
@@ -35,7 +36,10 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
   }, [openAuthId]);
 
   const fetchFields = async (fields, currency) => {
-    var data = CURReplaceByCurrencySingle(fields, currency ? currency : 'USD');
+    const data = CURReplaceByCurrencySingle(fields, currency ? currency : "USD");
+
+    const newColumns: any = generateColumns(renderedFrom, data, null, false, currency);
+
     const coloum: any = [
       {
         accessor: 'index',
@@ -55,13 +59,13 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         width: 200,
         Cell: ({ row }) =>
           row.original['type'] ? (
-            <p>
+            <p className="text-truncate">
               {`${startCase(row.original?.type)} `}
-              {row.original['type'] === 'product'
+              {row.original['type'] === MATERIAL_TYPE.product
                 ? row.original?.productDetail?.serializedProduct
                   ? '(Serialized)'
                   : '(Non-Serialized)'
-                : row.original?.type === 'package'
+                : row.original?.type === MATERIAL_TYPE.package
                   ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
                     ? '(Product)' : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service ? '(Service)' : ''
                   : row.original.type === 'service'
@@ -103,122 +107,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         }
       }
     ];
-    data.forEach((element) => {
-      if (element.fieldName === 'price' && element.required) {
-        setIsRateRequired(true);
-      }
-      if (element.type === 'date') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          disableFilters: true,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{displayDate(row.original[element.fieldName])}</p> : <NoDataCell />)
-        });
-      } else if (element.fieldName === 'supplierAccount') {
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) =>
-            row.original[element.fieldName] ? (
-              <p className="text-truncate">{row.original[element.fieldName].map((d) => d?.optionLabel).toString()}</p>
-            ) : (
-              <NoDataCell />
-            )
-        });
-      } else if (element.type === 'converter' || element.type === 'currencyAmount' || element.isConverter === true) {
-        if (element.type !== 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            let fieldName = element.fieldName + '_' + _unit.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _unit;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) => (row.original[fieldName] ? <p>{row.original[fieldName]}</p> : <NoDataCell />)
-            });
-          });
-        } else if (element.type === 'currencyAmount' && (element.type === 'converter' || element.isConverter === true)) {
-          element.displayUnits.forEach((_unit) => {
-            element.displayCurrency.forEach((_currency) => {
-              let fieldName = element.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = element.fieldLabel + ' ' + _unit + '/' + _currency;
-              coloum.push({
-                accessor: fieldName,
-                Header: fieldLabel,
-                Cell: ({ row }) =>
-                  row.original[fieldName] ? (
-                    <p>{formatAmountWithCurrency(currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                  ) : (
-                    <NoDataCell />
-                  )
-              });
-            });
-          });
-        } else if (element.type === 'currencyAmount') {
-          element.displayCurrency.forEach((_currency) => {
-            let fieldName = element.fieldName + '_' + _currency.toLowerCase();
-            let fieldLabel = element.fieldLabel + ' ' + _currency;
-            coloum.push({
-              accessor: fieldName,
-              Header: fieldLabel,
-              Cell: ({ row }) =>
-                row.original[fieldName] ? (
-                  <p>{formatAmountWithCurrency(currency, row.original[fieldName])?.amountWithouCurrencyCode}</p>
-                ) : (
-                  <NoDataCell />
-                )
-            });
-          });
-        }
-      } else {
-        if (element.fieldName === 'qty') {
-          element.fieldName = 'qtyDisplay';
-        }
-        coloum.push({
-          accessor: element.fieldName,
-          Header: element.fieldLabel,
-          Cell: ({ row }) => {
-            const fieldValue = row.original[element.fieldName];
-            if (!fieldValue) return <NoDataCell />;
-            
-            if (typeof fieldValue === 'object' && fieldValue.optionLabel) {
-              return <p>{fieldValue.optionLabel}</p>;
-            }
-            
-            if (Array.isArray(fieldValue) && fieldValue.length > 0 && fieldValue[0]?.optionLabel) {
-              return <p className="text-truncate">{fieldValue.map((d) => d?.optionLabel).toString()}</p>;
-            }
-            
-            return <p>{fieldValue}</p>;
-          }
-        });
-      }
-    });
-    coloum.forEach((element) => {
-      if (element.accessor === 'qtyDisplay') {
-        element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            ?.filter((f) => f?.original?.parentId === null && f?.values?.hasOwnProperty(element?.accessor) && !isNaN(f?.values[element?.accessor]))
-            ?.reduce((sum, row) => row?.values[element?.accessor] + sum, 0);
-          return <>{qtyTotal}</>;
-        };
-      } else if (element.accessor.includes('finalPrice')) {
-        element['Footer'] = (info) => {
-          const rows = info?.table?.getRowModel?.()?.rows || info?.rows
-          const total = rows
-            ?.filter((f) => f?.original?.parentId === null && f?.original?.hasOwnProperty(element?.accessor) && !isNaN(f?.original[element?.accessor]))
-            ?.reduce((sum, row) => row?.original[element?.accessor] + sum, 0);
-                      
-          return (
-            <>
-              {getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative}{' '}
-              {formatAmountWithCurrency(currency, total)?.amountWithouCurrencyCode ?? total}
-            </>
-          );
-        };
-      }
-    });
-    const columnToShow = coloum?.filter((i) => i.accessor !== 'pricingCondition');
-    setColumns(columnToShow);
+    setColumns([...coloum, ...newColumns]);
     dispatch({ type: 'loading', loading: false });
   };
 
@@ -252,7 +141,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
             : parent.type === MATERIAL_TYPE.package
               ? parent?.packageDetail?.packageDescription || ''
               : '';
-      parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
+      parent.serializedProduct = parent.productDetail?.serializedProduct || false;
       // parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       // parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
@@ -317,6 +206,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
       .put(backendApi + `${quotation.api}/customer/customer-response`, dataObj)
       .then((res) => {
         setIsSubmited(true);
+        setIsSubmitting({ accept: false, reject: false })
         toastConfig.setToastConfig({
           open: true,
           type: 'success',

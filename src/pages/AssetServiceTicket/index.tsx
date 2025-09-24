@@ -36,7 +36,7 @@ import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 
 let assetServiceTicketsTimeout;
 
-const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
+const AssetServiceTickets = ({ assetId = null, refresh = null, isTabMode = false }) => {
   const renderedFrom = camelCase(sidebarResource?.assetServiceTickets);
 
   const toastConfig = useContext(CustomToastContext);
@@ -436,7 +436,7 @@ const AssetServiceTickets = ({ assetId, refresh, isTabMode = false }) => {
     </>
   );
 
-  return isTabMode ? content : <div className="main-container-v1">{content}</div>;
+  return <>{isTabMode ? content : <div className="main-container-v1">{content}</div>}</>;
 };
 
 export default AssetServiceTickets;
