@@ -11,7 +11,7 @@ import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomT
 
 function isImageFile(filename: string): boolean {
   if (!filename) return false;
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.svg', '.webp'];
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.heic', '.gif', '.bmp', '.tiff', '.svg', '.webp'];
   return imageExtensions.some((ext) => filename.toLowerCase().endsWith(ext));
 }
 function isPdf(fileName: string): boolean {
