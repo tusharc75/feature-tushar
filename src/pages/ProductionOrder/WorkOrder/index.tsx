@@ -228,6 +228,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       }
     });
     coloum.push({
+      accessor: 'workOrderStatus',
+      Header: 'Work Order Status',
+      width: 200,
+      Cell: ({ row }) => <div>{row.original['workOrderStatus'] ? <p> {row.original.workOrderStatus}</p> : <NoDataCell />}</div>
+    });
+    coloum.push({
       accessor: 'status',
       Header: 'Status',
       width: 200,
@@ -447,8 +453,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       parent.hideSelection = false;
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         parent.hideSelection = true;
-        parent.workOrderStatus = parent?.workOrder?.status;
       }
+      parent.workOrderStatus = parent?.workOrder?.status;
       parent.status = parent?.workOrder?.serviceProcessStatus || parent?.workOrder?.status;
       parent.subRows = generateNestedData(data.material, parent);
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
@@ -496,6 +502,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         _subRow.hideSelection = true;
       }
+      _subRow.workOrderStatus = _subRow?.workOrder?.status;
       _subRow.canDelete = false;
       if (_subRow?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
         if (_subRow.type === MATERIAL_TYPE.product) {
@@ -717,6 +724,19 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     if (showServiceActionConfirmBox.action === 'revert') {
       records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending);
     }
+    
+    const draftWorkOrders = records?.filter((record) => record?.workOrderStatus === WORK_ORDER_STATUS.draft);
+    if (draftWorkOrders?.length > 0) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: 'Cannot perform services on work orders with Draft status. Please update work order status to "Ready to Build" first.'
+      });
+      setSubmitting(false);
+      setShowServiceActionConfirmBox({ open: false, action: '' });
+      return;
+    }
+    
     const data = records?.map((e) => ({
       workOrder: e?.workOrder?._id,
       service: e?.serviceDetail?._id,
@@ -789,6 +809,10 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     if (records?.length !== selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service)?.length) {
       return true;
     }
+    const hasDraftWorkOrder = records?.some((record) => record?.workOrderStatus === WORK_ORDER_STATUS.draft);
+    if (hasDraftWorkOrder) {
+      return true;
+    }
     const data = [];
     records?.forEach((record) => {
       let disabled = false;
@@ -811,6 +835,18 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       }
     });
     return !(data?.length === records?.length);
+  };
+
+  const isDisabledRevertService = () => {
+    const records = selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending);
+    if (records?.length === 0) {
+      return true;
+    }
+    const hasDraftWorkOrder = records?.some((record) => record?.workOrderStatus === WORK_ORDER_STATUS.draft);
+    if (hasDraftWorkOrder) {
+      return true;
+    }
+    return false;
   };
 
   const leftSideContents = () => {
@@ -909,6 +945,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               setCompleteConfirmBox,
               setShowServiceActionConfirmBox,
               isDisabledCompleteService,
+              isDisabledRevertService,
               setDeleteData,
               setShowConfirmBox,
               setShowCloseReopenConfirmation,
@@ -1131,6 +1168,7 @@ const ActionButtonMenuItems = ({
   setCompleteConfirmBox,
   setShowServiceActionConfirmBox,
   isDisabledCompleteService,
+  isDisabledRevertService,
   setDeleteData,
   setShowConfirmBox,
   setShowCloseReopenConfirmation,
@@ -1276,11 +1314,7 @@ const ActionButtonMenuItems = ({
         Skip Service
       </MenuItem>
       <MenuItem
-        disabled={
-          selectedRecords?.length && selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending)
-            ? false
-            : true
-        }
+        disabled={isDisabledRevertService()}
         onClick={() => {
           setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
         }}
