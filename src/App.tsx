@@ -4,7 +4,7 @@ import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import CustomIntro from 'src/components/CustomIntro';
-import DesktopDM from 'src/components/DesktopDM';
+// import DesktopDM from 'src/components/DesktopDM';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
 import RenderAllInfoButtons from 'src/components/InfoSidebar/RenderAllInfoButtons';
 import RenderInfoInspector from 'src/components/InfoSidebar/RenderInfoInspector';
