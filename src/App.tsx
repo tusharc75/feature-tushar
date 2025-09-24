@@ -1371,7 +1371,7 @@ function App() {
           <CustomIntro />
           {/* <Walkme /> */}
           {/* <CustomIntroNew />  // the new component*/}
-          {user && <DesktopDM />}
+          {/* {user && <DesktopDM />} */}
           <RenderAllInfoButtons />
           <RenderInfoInspector />
         </ErrorBoundaryComponent>
