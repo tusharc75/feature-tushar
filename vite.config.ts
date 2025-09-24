@@ -19,7 +19,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*'],
-        globIgnores: ['**/*.map', '**/*pdfme*.js'],
+        globIgnores: ['**/*pdfme*.js'],
         maximumFileSizeToCacheInBytes: 26 * 1024 * 1024, // 26 MB
         importScripts: ['/firebase-messaging-sw.js']
       },
@@ -46,8 +46,7 @@ export default defineConfig({
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
   },
   build: {
-    outDir: 'build',
-    sourcemap: true
+    outDir: 'build'
   },
   server: {
     open: true,
