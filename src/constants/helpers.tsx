@@ -4085,10 +4085,10 @@ export const reverseLookupDependentOn = (lookupDependentOn, options = [], value,
   const field = fields?.find((f) => f?.fieldName === lookupDependentOn);
   const option = options?.find((f) => f?.optionValue === value);
 
-  if (option[lookupDependentOn] && field?.type === 'multiSelect' && typeof option[lookupDependentOn] === 'string') {
-    return [option[lookupDependentOn]];
+  if (option?.[lookupDependentOn] && field?.type === 'multiSelect' && typeof option?.[lookupDependentOn] === 'string') {
+    return [option?.[lookupDependentOn]];
   }
-  return option[lookupDependentOn];
+  return option?.[lookupDependentOn];
 };
 
 export function calculateRatio(a: number, b: number, c: number): number {

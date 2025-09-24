@@ -20,7 +20,7 @@ import { useData } from 'src/StateProvider/Provider';
 
 const rateChangeFields = ['pricingMethod', 'pricingCondition', 'unit'];
 
-const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext, rentalPolicyData }) => {
+const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
@@ -45,15 +45,6 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     let data = await fetch_rental_technician_fields(rentalManagementData?.currency, isOffline);
-    if (rentalPolicyData?.enableTechnicianDispatchReturn) {
-      data?.forEach((e: any) => {
-        if (e.fieldName === 'startDate' || e.fieldName === 'endDate') {
-          e.fieldLabel = e.fieldName === 'startDate' ? 'Dispatched Date' : 'Returned Date';
-          e.isUneditable = true;
-          e.disableOnEdit = true;
-        }
-      })
-    }
     if (bulkEdit) {
       data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
       setInitialData({

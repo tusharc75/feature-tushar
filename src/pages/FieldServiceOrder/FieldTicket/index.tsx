@@ -35,9 +35,9 @@ import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddFieldTicket, generateFieldTicketActions } from '../walkmeSteps';
 
 const FieldTicket = ({
-  serviceOrderData,
-  serviceOrderFields = [],
-  fetchServiceOrderData,
+  resourceData,
+  resourceFields = [],
+  fetchResourceData,
   allowedToEdit,
   handleChangeStatus,
   resource,
@@ -84,7 +84,7 @@ const FieldTicket = ({
     fetchData(cancelToken);
     return () => cancelToken.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedEntity, serviceOrderData]);
+  }, [selectedEntity, resourceData]);
 
   const fetchGridColumns = async (cancelToken?: CancelTokenSource) => {
     try {
@@ -150,8 +150,9 @@ const FieldTicket = ({
       let data, count;
 
       if (isOffline) {
+        const fieldName = resource === sidebarResource.rentalManagement ? 'rentalJob' : 'fieldServiceOrder';
         data = await findAll(objectStore.fieldTicket);
-        data = data?.filter((d) => d?.fieldServiceOrder?.optionValue === serviceOrderData?._id);
+        data = data?.filter((d) => d?.[fieldName]?.optionValue === resourceData?._id);
         count = data.length;
       } else {
         const queryString = getQueryString();
@@ -191,7 +192,9 @@ const FieldTicket = ({
     }
     // const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    const filterByIds = [{ field: 'fieldServiceOrder', term: serviceOrderData?._id }];
+    const fieldName = resource === sidebarResource.rentalManagement ? 'rentalJob' : 'fieldServiceOrder';
+
+    const filterByIds = [{ field: fieldName, term: resourceData?._id }];
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}&filterType=and`;
@@ -226,7 +229,7 @@ const FieldTicket = ({
       .put(`${routes.fieldTicket.path}/remove`, { ids })
       .then(() => {
         fetchData();
-        fetchServiceOrderData();
+        fetchResourceData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
       })
@@ -262,7 +265,7 @@ const FieldTicket = ({
           </span>
         </HtmlTooltip>
         <HideWhenOffline>
-          {(!serviceOrderData?.quotation || noQuotationCheck) && (
+          {(!resourceData?.quotation || noQuotationCheck) && (
             <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? 'Clone' : cloneDisable}>
               <span>
                 <IconButton
@@ -336,24 +339,25 @@ const FieldTicket = ({
 
   const getRefrenceData = () => {
     const referenceData: any = cloneResourceData(
-      serviceOrderFields?.map((f) => f?.fieldData),
+      resourceFields?.map((f) => f?.fieldData),
       allFields?.map((f) => f?.fieldData),
-      serviceOrderData,
+      resourceData,
       user.user?.brandCurrency
     );
-    referenceData['fieldServiceOrder'] = serviceOrderData?._id;
+    const resourceField = allFields?.find((f) => f?.fieldData?.lookupResource === resource);
+    referenceData[resourceField?.fieldData?.fieldName] = resourceData?._id;
     return referenceData;
   };
 
   return (
     <Fragment>
-      {resource === sidebarResource.fieldServiceOrder && (
+      {[sidebarResource.fieldServiceOrder, sidebarResource.rentalManagement].includes(resource) && (
         <DetailsPageHeader
           isAddButtonVisible={true}
           addButtonProps={{
-            disabled: allowedToEdit && (!serviceOrderData?.quotation || noQuotationCheck) ? false : true,
+            disabled: allowedToEdit && (!resourceData?.quotation || noQuotationCheck) ? false : true,
             tooltip: !allowedToEdit ? ownerAndColaborator :
-              (serviceOrderData?.quotation && !noQuotationCheck) ? `Converted from ${resources?.quotation?.titleSingular} you can not perform this action` : ''
+              (resourceData?.quotation && !noQuotationCheck) ? `Converted from ${resources?.quotation?.titleSingular} you can not perform this action` : ''
           }}
           addButtonMenuItems={addButtonMenuItems()}
           isActionButtonVisible={!isOffline}
@@ -364,7 +368,7 @@ const FieldTicket = ({
       )}
       {columns ? (
         <CustomReactTable
-          height={resource === sidebarResource.fieldServiceOrder ? 'calc(100vh - 300px)' : 'calc(100vh - 200px)'}
+          height={[sidebarResource.fieldServiceOrder, sidebarResource.rentalManagement].includes(resource) ? 'calc(100vh - 300px)' : 'calc(100vh - 200px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
@@ -372,8 +376,8 @@ const FieldTicket = ({
           refreshGrid={fetchData}
           enableGlobalSearch={enableGlobalSearch}
           isClientSideGrid={true}
-          hideAction={resource === sidebarResource.fieldServiceOrder ? !allowedToEdit : true}
-          hideSelection={resource === sidebarResource.fieldServiceOrder ? !allowedToEdit : true}
+          hideAction={[sidebarResource.fieldServiceOrder, sidebarResource.rentalManagement].includes(resource) ? !allowedToEdit : true}
+          hideSelection={[sidebarResource.fieldServiceOrder, sidebarResource.rentalManagement].includes(resource) ? !allowedToEdit : true}
         />
       ) : (
         <Box p={2} height={500}>
@@ -387,13 +391,15 @@ const FieldTicket = ({
           onClose={() => setOpenDialog({ open: false, isClone: false, id: null })}
           referenceData={getRefrenceData()}
           onSuccess={() => {
-            if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
+            if (resourceData?.status === SERVICE_ORDER_STATUS.new && resource === sidebarResource.fieldServiceOrder) {
               handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
             }
-            fetchServiceOrderData();
+            fetchResourceData();
             setOpenDialog({ open: false, isClone: false, id: null });
             fetchData();
           }}
+          referenceResource={resource}
+          isRedirectTodetailPage={false}
         />
       )}
       {showDeleteConfirmBox && (

@@ -23,14 +23,22 @@ const useDesktopDM = () => {
 
   const fetchData = useCallback(
     async ({ cancelToken, onSuccess = () => {} }: { cancelToken?: CancelToken; onSuccess?: () => void }) => {
+      if (loading) return;
       setReplyingToMessage(null);
+
       try {
         setLoading(true);
-        const {
-          data: { data }
-        } = await axiosInstance().get('/work-space/channel/chats', { cancelToken });
+        let response: any = {};
+        try {
+          const {
+            data: { data }
+          } = await axiosInstance().get('/work-space/channel/chats', { cancelToken });
+          response = data;
+        } catch (error) {
+          toastConfig.setToastConfig(error);
+        }
         const chats: Chat[] = [];
-        for (const d of data?.chats) {
+        for (const d of response?.chats) {
           d.notifications = d.notifications || 0;
           const toUser = d?.members?.find((m) => m?.optionValue !== user?._id);
           if (toUser) {
@@ -41,7 +49,7 @@ const useDesktopDM = () => {
         }
         setState({
           chats: chats.sort((a, b) => new Date(b.recentMessage?.date).getTime() - new Date(a.recentMessage?.date).getTime()),
-          users: data.users
+          users: response?.users || []
         });
         onSuccess();
       } catch (error) {
@@ -50,7 +58,7 @@ const useDesktopDM = () => {
         setLoading(false);
       }
     },
-    [toastConfig, user?._id]
+    [user?._id, loading]
   );
 
   useEffect(() => {
