@@ -183,16 +183,14 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
     coloum.forEach((element) => {
       if (element.accessor === 'qtyDisplay') {
         element['Footer'] = (info) => {
-          const qtyTotal = info.rows
-            ?.filter((f) => f?.original?.parentId === null && f?.values?.hasOwnProperty(element?.accessor) && !isNaN(f?.values[element?.accessor]))
-            ?.reduce((sum, row) => row?.values[element?.accessor] + sum, 0);
+          const rows = info?.table?.getExpandedRowModel()?.rows;
+          const qtyTotal = rows?.filter((f => !f.original.parentId && f?.original?.hasOwnProperty(element?.accessor) && !isNaN(f?.original[element?.accessor])))?.reduce((sum, row) => Number(row?.original[element?.accessor]) + sum, 0)
           return <>{qtyTotal}</>;
         };
       } else if (element.accessor.includes('finalPrice')) {
         element['Footer'] = (info) => {
-          const total = info?.rows
-            ?.filter((f) => f?.original?.parentId === null && f?.values?.hasOwnProperty(element?.accessor) && !isNaN(f?.values[element?.accessor]))
-            ?.reduce((sum, row) => row?.values[element?.accessor] + sum, 0);
+          const rows = info?.table?.getExpandedRowModel()?.rows;
+          const total = rows?.filter((f) => !f?.original?.parentId && f?.original?.hasOwnProperty(element?.accessor) && !isNaN(f?.original[element?.accessor]))?.reduce((sum, row) => Number(row?.original[element?.accessor]) + sum, 0);
           return (
             <>
               {getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative}{' '}
@@ -302,6 +300,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
       .put(backendApi + `${quotation.api}/customer/customer-response`, dataObj)
       .then((res) => {
         setIsSubmited(true);
+        setIsSubmitting({ accept: false, reject: false })
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
