@@ -12,23 +12,19 @@ class ErrorBoundary extends React.Component<any, any> {
   }
 
   componentDidCatch(error, errorInfo) {
-    // if (VITE_APP_ENV !== 'local') {
-    //   if (error instanceof TypeError || error instanceof ReferenceError) {
-    //     this.setState({
-    //       error: error,
-    //       errorInfo: errorInfo
-    //     });
-    //   }
-    // } else {
-    //   this.setState({
-    //     error: error,
-    //     errorInfo: errorInfo
-    //   });
-    // }
-    this.setState({
-      error: error,
-      errorInfo: errorInfo
-    });
+    if (VITE_APP_ENV !== 'local') {
+      if (error instanceof TypeError || error instanceof ReferenceError) {
+        this.setState({
+          error: error,
+          errorInfo: errorInfo
+        });
+      }
+    } else {
+      this.setState({
+        error: error,
+        errorInfo: errorInfo
+      });
+    }
   }
 
   render() {

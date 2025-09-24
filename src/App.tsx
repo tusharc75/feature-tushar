@@ -3,8 +3,8 @@ import { AnimatePresence } from 'framer-motion';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-// import CustomIntro from 'src/components/CustomIntro';
-// import DesktopDM from 'src/components/DesktopDM';
+import CustomIntro from 'src/components/CustomIntro';
+import DesktopDM from 'src/components/DesktopDM';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
 import RenderAllInfoButtons from 'src/components/InfoSidebar/RenderAllInfoButtons';
 import RenderInfoInspector from 'src/components/InfoSidebar/RenderInfoInspector';
@@ -1368,10 +1368,10 @@ function App() {
           </Switch>
           <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
-          {/* <CustomIntro /> */}
+          <CustomIntro />
           {/* <Walkme /> */}
           {/* <CustomIntroNew />  // the new component*/}
-          {/* {user && <DesktopDM />} */}
+          {user && <DesktopDM />}
           <RenderAllInfoButtons />
           <RenderInfoInspector />
         </ErrorBoundaryComponent>
