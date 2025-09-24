@@ -2835,7 +2835,7 @@ const ReceivingTicket = ({
 
   return (
     <>
-      {serviceData?.length > 0 || technicianDispatchReturn && (
+      {(serviceData?.length > 0 || technicianDispatchReturn) && (
         <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
           <ContainedTab value={0} label={'Assets/Products'} />
           {serviceData?.length > 0 && <ContainedTab value={1} label={'Services'} />}
