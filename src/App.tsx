@@ -1368,7 +1368,7 @@ function App() {
           </Switch>
           <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
-          <CustomIntro />
+          {/* <CustomIntro /> */}
           {/* <Walkme /> */}
           {/* <CustomIntroNew />  // the new component*/}
           {/* {user && <DesktopDM />} */}
