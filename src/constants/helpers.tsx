@@ -4077,7 +4077,7 @@ export const getDeviceFingerprint = async () => {
 
 export const checkImageUrl = (url) => {
   let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
-  let imageExtensions = ['.tif', '.tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
+  let imageExtensions = ['.tif', '.tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.heic', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
   return imageExtensions.indexOf(extension) >= 0;
 };
 
