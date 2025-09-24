@@ -176,7 +176,20 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         coloum.push({
           accessor: element.fieldName,
           Header: element.fieldLabel,
-          Cell: ({ row }) => (row.original[element.fieldName] ? <p>{row.original[element.fieldName]}</p> : <NoDataCell />)
+          Cell: ({ row }) => {
+            const fieldValue = row.original[element.fieldName];
+            if (!fieldValue) return <NoDataCell />;
+            
+            if (typeof fieldValue === 'object' && fieldValue.optionLabel) {
+              return <p>{fieldValue.optionLabel}</p>;
+            }
+            
+            if (Array.isArray(fieldValue) && fieldValue.length > 0 && fieldValue[0]?.optionLabel) {
+              return <p className="text-truncate">{fieldValue.map((d) => d?.optionLabel).toString()}</p>;
+            }
+            
+            return <p>{fieldValue}</p>;
+          }
         });
       }
     });
