@@ -42,7 +42,7 @@ class ErrorBoundary extends React.Component<any, any> {
             <Typography variant="h4" className={styles.message}>
               Our team has been notified. If the problem persists, please contact Equipt support.
             </Typography>
-            <ThemeButton buttonType='transparent' onClick={() => (window.location.href = '/')}>
+            <ThemeButton buttonType="transparent" onClick={() => (window.location.href = '/')}>
               Try again
             </ThemeButton>
             {['local', 'master', 'development'].includes(VITE_APP_ENV) ? (
