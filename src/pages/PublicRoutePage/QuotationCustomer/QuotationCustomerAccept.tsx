@@ -190,9 +190,11 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         };
       } else if (element.accessor.includes('finalPrice')) {
         element['Footer'] = (info) => {
-          const total = info?.rows
-            ?.filter((f) => f?.original?.parentId === null && f?.values?.hasOwnProperty(element?.accessor) && !isNaN(f?.values[element?.accessor]))
-            ?.reduce((sum, row) => row?.values[element?.accessor] + sum, 0);
+          const rows = info?.table?.getRowModel?.()?.rows || info?.rows
+          const total = rows
+            ?.filter((f) => f?.original?.parentId === null && f?.original?.hasOwnProperty(element?.accessor) && !isNaN(f?.original[element?.accessor]))
+            ?.reduce((sum, row) => row?.original[element?.accessor] + sum, 0);
+                      
           return (
             <>
               {getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative}{' '}
