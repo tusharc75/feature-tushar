@@ -49,6 +49,9 @@ import { generateAssignStepAssignSerializedAsset, nextButtonStep } from 'src/pag
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ScanButtons from 'src/components/ScanButtons';
 import ShowAssignInventory from 'src/pages/RentalManagement/SerializedAsset/ShowAssignInventory';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
+import { TabPanel } from 'src/components/CustomTabs';
+import Technicians from 'src/pages/RentalManagement/SerializedAsset/Technicians';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit, rentalPolicyData, assetPolicyData }) => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -66,6 +69,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [nonSerializedProduct, setNonSerializedProduct] = useState([]);
   const [deleteData, setDeleteData] = useState([]);
   const [columns, setColumns] = useState(null);
+  const [serviceOption, setServiceOption] = useState([]);
+  const [tabValue, setTabValue] = useState(0);
   const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], type: '' });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
   const [purchaseOrderCount, setPurchaseOrderCount] = useState(0);
@@ -481,6 +486,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       }
       setAllLoadingTicketProducts(loadingTicketProducts);
       const material = data.material;
+
+      setServiceOption([{ optionLabel: 'All', optionValue: 'All' }, ...material?.filter(m => m?.type === MATERIAL_TYPE.service)?.map(s => ({ optionLabel: s?.serviceDetail?.serviceName, optionValue: s?.serviceDetail?._id, _id: s?._id }))])
 
       let rows = data.material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material) === true);
 
@@ -1250,16 +1257,64 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     );
   };
 
+  const handleMainTabChange = (event: any, newValue: number) => {
+    setTabValue(newValue);
+    dispatch({ type: 'selection', selectedRecords: [] });
+  };
+
   return (
     <Fragment>
-      <DetailsPageHeader
-        isAddButtonVisible={false}
-        isActionButtonVisible={true}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-        rightSideContents={rightSideContents()}
-        hasXpadding
-      />
+      {permissions?.employeeMaster?.isRead && (
+        <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+          <ContainedTab value={0} label={'Assets'} />
+          <ContainedTab value={1} label={'Technicians'} />
+        </ContainedTabs>
+      )}
+      <TabPanel value={tabValue} index={0}>
+        <DetailsPageHeader
+          isAddButtonVisible={false}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          rightSideContents={rightSideContents()}
+          hasXpadding
+        />
+        {columns ? (
+          <Box zIndex={5}>
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              setWholeRowsCellColor={(rowData) => {
+                if (!rowData.isValid) return 'error';
+                return '';
+              }}
+              refreshGrid={fetchData}
+              hideSelection={!allowedToEdit}
+              hideAction={!allowedToEdit}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={true}
+              expander={true}
+            />
+          </Box>
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </TabPanel>
+      <TabPanel value={tabValue} index={1}>
+        <div className='mt-4'>
+          <Technicians
+            serviceOption={serviceOption}
+            allowedToEdit={allowedToEdit}
+            rentalManagementData={rentalManagementData}
+            stepFullScreen={stepFullScreen}
+          />
+        </div>
+      </TabPanel>
+
       <Menu
         anchorEl={anchorLinkActionEl}
         keepMounted
@@ -1317,30 +1372,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           </MenuItem>
         )}
       </Menu>
-      {columns ? (
-        <Box zIndex={5}>
-          <CustomReactTable
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            setWholeRowsCellColor={(rowData) => {
-              if (!rowData.isValid) return 'error';
-              return '';
-            }}
-            refreshGrid={fetchData}
-            hideSelection={!allowedToEdit}
-            hideAction={!allowedToEdit}
-            renderedFrom={renderedFrom}
-            isClientSideGrid={true}
-            expander={true}
-          />
-        </Box>
-      ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
+
       {addSerializedAssetDialog.open && (
         <AddSerializedAsset
           assetPolicyData={assetPolicyData}

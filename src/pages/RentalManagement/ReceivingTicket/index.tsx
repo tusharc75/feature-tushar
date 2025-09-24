@@ -90,6 +90,8 @@ import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirm
 import SubStatusDatesDialog from '../LoadingTicket/SubStatusDatesDialog';
 import SubStatusLog from '../LoadingTicket/SubStatusLog';
 import FleetDispatchHistory from './FleetDispatchHistory';
+import TechnicianDispatchReturn from 'src/pages/RentalManagement/TechnicianDispatchReturn';
+import FieldTicket from 'src/pages/FieldServiceOrder/FieldTicket';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -120,7 +122,8 @@ const ReceivingTicket = ({
   assetStatusOptions,
   setAssetStatusOptions,
   assetPolicyData,
-  fleetDispatchPolicyData
+  fleetDispatchPolicyData,
+  rentalManagementFields = []
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
@@ -193,6 +196,7 @@ const ReceivingTicket = ({
   const [rentalJobChildFields, setRentalJobChildFields] = useState(null);
   const [subStatusLog, setSubStatusLog] = useState({ open: false, data: null })
   const [fleetDispatchLog, setFleetDispatchLog] = useState({ open: false, assetData: null })
+  const [technicianDispatchReturn, setTechnicianDispatchReturn] = useState(false);
 
   const {
     state: { user, permissions, resources }
@@ -231,6 +235,9 @@ const ReceivingTicket = ({
   useEffect(() => {
     if (rentalPolicyData?.loadingReceivingDefaultView) {
       setView(rentalPolicyData?.loadingReceivingDefaultView);
+    }
+    if (rentalPolicyData?.enableTechnicianDispatchReturn) {
+      setTechnicianDispatchReturn(rentalPolicyData?.enableTechnicianDispatchReturn);
     }
   }, [rentalPolicyData]);
 
@@ -2828,10 +2835,12 @@ const ReceivingTicket = ({
 
   return (
     <>
-      {serviceData?.length > 0 && (
+      {(serviceData?.length > 0 || technicianDispatchReturn) && (
         <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
           <ContainedTab value={0} label={'Assets/Products'} />
-          <ContainedTab value={1} label={'Services'} />
+          {serviceData?.length > 0 && <ContainedTab value={1} label={'Services'} />}
+          {technicianDispatchReturn && <ContainedTab value={2} label={'Technicians'} />}
+          {(technicianDispatchReturn && permissions?.fieldTicket?.isRead) && <ContainedTab value={3} label={resources?.fieldTicket?.titlePlural} />}
         </ContainedTabs>
       )}
       <TabPanel value={tabValue} index={0}>
@@ -2909,6 +2918,26 @@ const ReceivingTicket = ({
           stepFullScreen={stepFullScreen}
           rentalJobChildFields={rentalJobChildFields}
         />
+      </TabPanel>
+      <TabPanel value={tabValue} index={2}>
+        <TechnicianDispatchReturn
+          allowedToEdit={allowedToEdit}
+          rentalManagementData={rentalManagementData}
+          stepFullScreen={stepFullScreen}
+          receive={true} />
+      </TabPanel>
+      <TabPanel value={tabValue} index={3}>
+        <Box mt={1}>
+          <FieldTicket
+            resourceData={rentalManagementData}
+            resourceFields={rentalManagementFields}
+            allowedToEdit={allowedToEdit}
+            handleChangeStatus={() => { }}
+            resource={sidebarResource.rentalManagement}
+            fetchResourceData={fetchRentalData}
+            noQuotationCheck={true}
+          />
+        </Box>
       </TabPanel>
       <Menu
         anchorEl={anchorLinkActionEl}

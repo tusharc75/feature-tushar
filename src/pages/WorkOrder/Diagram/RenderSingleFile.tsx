@@ -10,7 +10,7 @@ import { getFileIcon, getFileNameWithExtension } from './utils';
 import { KeyboardArrowDown } from '@mui/icons-material';
 import { cn } from 'src/constants/helpers';
 
-const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
+const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'heic', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 const pdfExtensions = ['pdf'];
 
 const RenderSingleFile = ({ f, setSelectedAttachment, file, selectedAttachment, setSendMail, handleMail }) => {

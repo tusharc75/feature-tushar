@@ -32,7 +32,7 @@ function CircularProgressWithLabel(props: CircularProgressProps & { value: numbe
   );
 }
 
-const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
+const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'heic', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 const pdfExtensions = ['pdf'];
 
 export type PreviewFileProps = PreviewFileInternal | PreviewFileEnternal;

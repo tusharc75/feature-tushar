@@ -4077,7 +4077,7 @@ export const getDeviceFingerprint = async () => {
 
 export const checkImageUrl = (url) => {
   let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
-  let imageExtensions = ['.tif', '.tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
+  let imageExtensions = ['.tif', '.tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.heic', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
   return imageExtensions.indexOf(extension) >= 0;
 };
 
@@ -4085,10 +4085,10 @@ export const reverseLookupDependentOn = (lookupDependentOn, options = [], value,
   const field = fields?.find((f) => f?.fieldName === lookupDependentOn);
   const option = options?.find((f) => f?.optionValue === value);
 
-  if (option[lookupDependentOn] && field?.type === 'multiSelect' && typeof option[lookupDependentOn] === 'string') {
-    return [option[lookupDependentOn]];
+  if (option?.[lookupDependentOn] && field?.type === 'multiSelect' && typeof option?.[lookupDependentOn] === 'string') {
+    return [option?.[lookupDependentOn]];
   }
-  return option[lookupDependentOn];
+  return option?.[lookupDependentOn];
 };
 
 export function calculateRatio(a: number, b: number, c: number): number {
