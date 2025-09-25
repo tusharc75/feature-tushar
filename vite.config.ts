@@ -48,6 +48,11 @@ export default defineConfig({
   build: {
     outDir: 'build'
   },
+  esbuild: {
+    minifySyntax: false,
+    minifyIdentifiers: true,
+    minifyWhitespace: true
+  },
   server: {
     open: true,
     port: 3000
