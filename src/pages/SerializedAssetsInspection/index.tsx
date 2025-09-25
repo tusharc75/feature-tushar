@@ -184,10 +184,7 @@ const SerializedAssetInspection = () => {
   };
 
   const fetchFieldSerializedAssetStatusChangeRequest = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(
-      sidebarResource.serializedAssetStatusChangeRequest,
-      false
-    );
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serializedAssetStatusChangeRequest, false);
     setSerializedAssetStatusChangeRequestFields([...fieldsDataForRead]);
   };
 
@@ -359,7 +356,9 @@ const SerializedAssetInspection = () => {
         {statusOptions ? (
           <>
             {Object.entries(statusOptions).map(([key, status]: any) => {
-              const isDisabled = selectedRecords.some((record) => record.status === status?.optionLabel);
+              const isDisabled =
+                selectedRecords.some((record) => record.status === status?.optionLabel) ||
+                (status?.optionValue === ASSET_STATUS.scrap && user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest);
               return (
                 <MenuItem
                   key={key}

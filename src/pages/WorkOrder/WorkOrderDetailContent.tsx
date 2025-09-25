@@ -448,7 +448,8 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
         workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
         allowedToEdit &&
         !workOrderData?.currentRepairJob &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !(user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest)
       ),
       children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,

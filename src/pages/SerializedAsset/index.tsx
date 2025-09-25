@@ -665,9 +665,10 @@ const SerializedAsset = () => {
                     ASSET_STATUS.needRecert,
                     ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
                   ].includes(o.status)
-                ).length === selectedRecords?.length
-                  ? false
-                  : true
+                )?.length !== selectedRecords?.length ||
+                  (user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest)
+                  ? true
+                  : false
               }
             >
               {`Status Change - ${ASSET_STATUS.scrap}`}
@@ -853,9 +854,9 @@ const SerializedAsset = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
+              ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.assetNumber : ''}`
-            : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
+              : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
             } ?`}
           onClose={() => {
             setDeleteRecord(null);

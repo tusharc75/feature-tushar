@@ -33,6 +33,7 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
   const [resourceData, setResourceData] = useState(null);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [assetStatusOptions, setAssetStatusOptions] = useState([])
+  const [fleetDispatchPolicyData, setFleetDispatchPolicyData] = useState(null);
 
   useEffect(() => {
     fetchPolicy()
@@ -50,12 +51,15 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`/dynamic-form/multiple-resource-policy?resources=${sidebarResource.rentalManagement},${sidebarResource.serializedAsset}`);
+      } = await axiosInstance().get(`/dynamic-form/multiple-resource-policy?resources=${sidebarResource.rentalManagement},${sidebarResource.serializedAsset},${sidebarResource.fleetDispatch}`);
       if (data?.find((e) => e.resource === sidebarResource.rentalManagement)) {
         setResourceData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
       }
       if (data?.find((e) => e.resource === sidebarResource.serializedAsset)) {
         setAssetPolicyData(data?.find((e) => e.resource === sidebarResource.serializedAsset));
+      }
+      if (data?.find((e) => e.resource === sidebarResource.fleetDispatch)) {
+        setFleetDispatchPolicyData(data?.find((e) => e.resource === sidebarResource.fleetDispatch));
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -72,7 +76,7 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
               setAllowUpdateStatus(o?.isUpdate);
               let options = o?.fieldData?.option?.filter(_o => [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.lost]?.includes(_o?.optionValue))
               if (user?.user?.brandPolicy?.serializedAssetScrapApproval) {
-                options = options?.filter(_o => _o?.optionValue != ASSET_STATUS.scrap)
+                options = options?.filter(_o => _o?.optionValue !== ASSET_STATUS.scrap)
               }
               setAssetStatusOptions([...options])
               return true;
@@ -121,6 +125,7 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
           assetStatusOptions={assetStatusOptions}
           setAssetStatusOptions={setAssetStatusOptions}
           assetPolicyData={assetPolicyData}
+          fleetDispatchPolicyData={fleetDispatchPolicyData}
         />
       ) : (
         <Box p={2} height={500}>
