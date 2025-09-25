@@ -154,7 +154,12 @@ const RoleDetailsPage = () => {
       resource: 'Login',
       fieldLabel: 'QR Code Login',
       fieldName: 'isQRCodeLogin'
-    }
+    },
+    {
+      resource: sidebarResource.serializedAsset,
+      fieldLabel: 'Scrap Request',
+      fieldName: 'scrapRequest'
+    },
   ];
 
   const fieldOfPolicyResources = policyResources?.map((obj) => {

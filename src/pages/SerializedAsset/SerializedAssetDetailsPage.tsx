@@ -657,7 +657,11 @@ const SerializedAssetDetailsPage = () => {
                         return (
                           <MenuItem
                             key={o?.optionValue}
-                            disabled={!manualStatus.includes(o?.optionLabel) || o?.optionLabel === assetDetails?.status}
+                            disabled={
+                              !manualStatus.includes(o?.optionLabel) ||
+                              o?.optionLabel === assetDetails?.status ||
+                              (o?.optionValue === ASSET_STATUS.scrap &&user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest)
+                            }
                             onClick={() => {
                               closeActions();
                               if (

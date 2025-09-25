@@ -30,6 +30,7 @@ const OnField = ({ rentalJob, referenceFrom }) => {
   const [assetStatusOptions, setAssetStatusOptions] = useState([])
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [isProcessor, setIsProcessor] = useState(false);
+  const [fleetDispatchPolicyData, setFleetDispatchPolicyData] = useState(null);
 
   useEffect(() => {
     fetchPolicy();
@@ -46,12 +47,15 @@ const OnField = ({ rentalJob, referenceFrom }) => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`/dynamic-form/multiple-resource-policy?resources=${sidebarResource.rentalManagement},${sidebarResource.serializedAsset}`);
+      } = await axiosInstance().get(`/dynamic-form/multiple-resource-policy?resources=${sidebarResource.rentalManagement},${sidebarResource.serializedAsset},${sidebarResource.fleetDispatch}`);
       if (data?.find((e) => e.resource === sidebarResource.rentalManagement)) {
         setResourceData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
       }
       if (data?.find((e) => e.resource === sidebarResource.serializedAsset)) {
         setAssetPolicyData(data?.find((e) => e.resource === sidebarResource.serializedAsset));
+      }
+      if (data?.find((e) => e.resource === sidebarResource.fleetDispatch)) {
+        setFleetDispatchPolicyData(data?.find((e) => e.resource === sidebarResource.fleetDispatch));
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -116,6 +120,7 @@ const OnField = ({ rentalJob, referenceFrom }) => {
           assetStatusOptions={assetStatusOptions}
           setAssetStatusOptions={setAssetStatusOptions}
           assetPolicyData={assetPolicyData}
+          fleetDispatchPolicyData={fleetDispatchPolicyData}
         />
       ) : (
         <Box p={2} height={500}>
