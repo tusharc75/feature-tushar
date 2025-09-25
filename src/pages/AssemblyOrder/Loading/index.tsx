@@ -31,7 +31,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
-  const { generateColumns } = useColumns();
+  const { generateColumns, getMaterialLabel } = useColumns();
 
   const [columns, setColumns] = useState(null);
   const [existingRentalJobDialog, setExistingRentalJobDialog] = useState(false);
@@ -80,7 +80,10 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
         Header: 'Type',
         width: 150,
         sticky: isMobile || isTablet ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
+        Cell: ({ row }) => (row.original['type'] ? <div><h5>{`${getMaterialLabel(row.original?.type, row.original?.parentId)}`}</h5></div> : <NoDataCell />),
+        accessorFn: (original) => {
+          return getMaterialLabel(original?.type, original?.parentId);
+        }
       },
       {
         accessor: 'detail',
@@ -289,11 +292,9 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       _subRow.detail =
         _subRow?.detail || (_subRow.type === MATERIAL_TYPE.product
           ? _subRow.productDetail?.productName
-          : _subRow?.type === MATERIAL_TYPE.serializedAsset
-            ? _subRow?.assetDetail?.assetNumber
-            : _subRow?.type === MATERIAL_TYPE.package
-              ? _subRow?.packageDetail?.packageName
-              : '');
+          : _subRow?.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageName
+            : '');
       _subRow.description = _subRow?.description || (_subRow.type === MATERIAL_TYPE.product
         ? _subRow?.productDetail?.productDescription
         : _subRow.type === MATERIAL_TYPE.package
@@ -331,7 +332,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
           });
         }
       } else if (action === assemblyOrderActions.deliveredToCustomer) {
-        if (!e.hasOwnProperty('loadingTicketId')) {
+        if (e?.serializedPackageId && !e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: assemblyOrderMessage.loadingNotCreated });
         } else if (e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: assemblyOrderMessage.loadingAlreadyDelivered });
@@ -379,12 +380,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
 
   const handelProcessTickets = () => {
     let data = {};
-    const loadingTicketIds = uniq(
-      map(
-        selectedRecords?.filter((e) => e?.loadingTicketId),
-        'loadingTicketId'
-      )
-    );
+    const loadingTicketIds = uniq(map(selectedRecords?.filter((e) => e?.loadingTicketId), 'loadingTicketId'));
     if (loadingTicketIds.length) {
       data['_ids'] = loadingTicketIds?.map((e) => e);
       data['status'] = DELIVERY_TICKET_STATUS.delivered;
