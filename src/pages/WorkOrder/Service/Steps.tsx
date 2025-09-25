@@ -447,7 +447,8 @@ const Steps = ({
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
           orignalValues: tempServiceData,
-          values: isDataAlreadyAdded ? getObjKeysWithValues(tempServiceData, fieldsDataForCreate, true) : { ...getObjKeys('', fieldsDataForCreate), ...getValueOfMatchedFieldName(fieldsDataForCreate, productData) }
+          values: isDataAlreadyAdded ? getObjKeysWithValues(tempServiceData, fieldsDataForCreate, true) :
+            { ...getObjKeys('', fieldsDataForCreate), ...getValueOfMatchedFieldName(fieldsDataForCreate, { ...productData, ...workOrderData }) }
         };
       }
     } else {
@@ -456,7 +457,7 @@ const Steps = ({
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
           orignalValues: {},
-          values: { ...getObjKeys('', fieldsDataForCreate), ...getValueOfMatchedFieldName(fieldsDataForCreate, productData) }
+          values: { ...getObjKeys('', fieldsDataForCreate), ...getValueOfMatchedFieldName(fieldsDataForCreate, { ...productData, ...workOrderData }) }
         };
       }
     }
