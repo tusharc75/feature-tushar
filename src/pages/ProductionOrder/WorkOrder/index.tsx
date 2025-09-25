@@ -738,18 +738,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending);
     }
     
-    const draftWorkOrders = records?.filter((record) => record?.workOrderStatus === WORK_ORDER_STATUS.draft);
-    if (draftWorkOrders?.length > 0) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'error',
-        message: 'Cannot perform services on work orders with Draft status. Please update work order status to "Ready to Build" first.'
-      });
-      setSubmitting(false);
-      setShowServiceActionConfirmBox({ open: false, action: '' });
-      return;
-    }
-    
     const data = records?.map((e) => ({
       workOrder: e?.workOrder?._id,
       service: e?.serviceDetail?._id,
