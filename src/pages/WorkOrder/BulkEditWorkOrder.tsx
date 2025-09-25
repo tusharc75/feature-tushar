@@ -53,8 +53,17 @@ const BulkEditWorkOrder = ({ onClose, onSuccess, workOrderIds = [] }) => {
         'owner',
         'collaborator'
       ]);
-
+      fieldsDataForUpdate?.forEach((e) => {
+        if (e?.required) {
+          e.required = false
+        }
+      })
       const tempInitialData = getObjKeys('', fieldsDataForUpdate);
+      fieldsDataForUpdate?.filter((e) => {
+        if (e?.type === 'date' || e?.type === 'datetime') {
+          tempInitialData[e.fieldName] = ''
+        }
+      })
       setInitialData({
         fields: fieldsDataForUpdate,
         values: tempInitialData
