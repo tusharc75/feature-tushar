@@ -201,7 +201,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
               size="small"
               aria-label="Delete"
               onClick={() => {
-                setDeleteData([row?.original?._id]);
+                setDeleteData([row.original._id]);
               }}
               disabled={row.original?.canDelete ? false : true}
             >
