@@ -201,7 +201,12 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
               size="small"
               aria-label="Delete"
               onClick={() => {
-                setDeleteData([row.original._id]);
+                if (row?.original?.isDummy) {
+                  const _ids = flattenArray(dataRows)?.filter(r => r?.parentId === row?.original?._id)?.map(r => r?._id)
+                  setDeleteData(_ids)
+                } else {
+                  setDeleteData([row?.original?._id]);
+                }
               }}
               disabled={row.original?.canDelete ? false : true}
             >
@@ -295,7 +300,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         ? _subRow?.productDetail?.productDescription : _subRow.type === MATERIAL_TYPE.package
           ? _subRow.packageDetail?.packageDescription : '');
       _subRow.qty = _subRow.qty;
-      _subRow.canDelete = _subRow?.isDummy ? false : _subRow?.workOrder ? false : true;
+      _subRow.canDelete = _subRow?.workOrder ? false : true;
       _subRow.subRows = generateNestedData(material, serializedPackages, _subRow);
     });
 
