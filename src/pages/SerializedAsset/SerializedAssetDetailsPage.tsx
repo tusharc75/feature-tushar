@@ -660,7 +660,7 @@ const SerializedAssetDetailsPage = () => {
                             disabled={
                               !manualStatus.includes(o?.optionLabel) ||
                               o?.optionLabel === assetDetails?.status ||
-                              (o?.optionValue === ASSET_STATUS.scrap &&user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest)
+                              (o?.optionValue === ASSET_STATUS.scrap && user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest)
                             }
                             onClick={() => {
                               closeActions();
