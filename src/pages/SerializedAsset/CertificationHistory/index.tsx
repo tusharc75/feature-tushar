@@ -1,18 +1,16 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Dialog, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CHILD_RESOURCE, CustomDialogTransition, displayDate, prepareDataForGrid, serializedAsset, serializedAssetsCertification, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, displayDate, prepareDataForGrid, serializedAsset, serializedAssetsCertification, sidebarResource } from '../../../constants/helpers';
 import { camelCase, isArray } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { isMobile, isTablet } from 'react-device-detect';
 import IssueCertificateDialog from '../../SerializedAssetsCertification/IssueCertificateDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -166,6 +164,9 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
         setIsDeleting(false);
         setShowConfirmBox({ open: false, _id: null });
         fetchData();
+        if (fetchAssetData) {
+          fetchAssetData();
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
