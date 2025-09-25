@@ -4,7 +4,7 @@ import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import CustomIntro from 'src/components/CustomIntro';
-import DesktopDM from 'src/components/DesktopDM';
+// import DesktopDM from 'src/components/DesktopDM';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
 import RenderAllInfoButtons from 'src/components/InfoSidebar/RenderAllInfoButtons';
 import RenderInfoInspector from 'src/components/InfoSidebar/RenderInfoInspector';
@@ -48,7 +48,7 @@ import WorkFlow from 'src/pages/WorkFlow';
 import CreateWorkFlow from 'src/pages/WorkFlow/CreateWorkFlow';
 import WorkFlowReport from 'src/pages/workFlowReport';
 import WorkFlowReportDetail from 'src/pages/workFlowReport/workFlowReportDetails';
-import WorkSpace from 'src/pages/WorkSpace';
+// import WorkSpace from 'src/pages/WorkSpace';
 import prebuildData from 'src/prebuild/prebuildData.json';
 import { registerSW } from 'virtual:pwa-register';
 import axiosInstance from './axios/axiosInstance';
@@ -1262,9 +1262,9 @@ function App() {
             <PrivateRoute exact path={`${routes.equiptAi.path}`}>
               <EquiptAi />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workSpace.path}`}>
+            {/* <PrivateRoute exact path={`${routes.workSpace.path}`}>
               <WorkSpace />
-            </PrivateRoute>
+            </PrivateRoute> */}
             <PrivateRoute exact path={`${routes.workflow.path}`}>
               <WorkFlow />
             </PrivateRoute>
@@ -1371,7 +1371,7 @@ function App() {
           <CustomIntro />
           {/* <Walkme /> */}
           {/* <CustomIntroNew />  // the new component*/}
-          {user && <DesktopDM />}
+          {/* {user && <DesktopDM />} */}
           <RenderAllInfoButtons />
           <RenderInfoInspector />
         </ErrorBoundaryComponent>
