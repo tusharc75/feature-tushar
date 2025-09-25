@@ -271,7 +271,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       parent.isValid = true;
       parent.canDelete = parent?.workOrder ? false : true;
       parent.subRows = generateNestedData(material, serializedPackages, parent);
-      if (parent.subRows?.find((r) => !r?.canDelete)) {
+      if (parent.subRows?.find((r) => !r?.canDelete) || parent.subRows?.some((r) => r?.isDummy)) {
         parent.canDelete = false;
       }
     });
