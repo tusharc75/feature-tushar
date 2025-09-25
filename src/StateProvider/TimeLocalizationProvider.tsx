@@ -29,9 +29,8 @@ dayjs.extend(isBetween);
 dayjs.extend(duration);
 
 const TimezoneLocalizationProvider = ({ children }) => {
-  const {
-    state: { user }
-  }: any = useData();
+  const data = useData();
+  const user = data?.state?.user;
 
   useEffect(() => {
     dayjs.tz.setDefault(user?.user?.timezone || DEFAULT_TIME_ZONE);

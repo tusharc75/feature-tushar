@@ -87,7 +87,17 @@ export const Provider = ({ children }) => {
     }
   }, [token]);
 
-  return <StateContext.Provider value={{ state, dispatch }}>{children}</StateContext.Provider>;
+  return (
+    <>
+      <StateContext.Provider value={{ state, dispatch }}>{children}</StateContext.Provider>
+    </>
+  );
 };
 
-export const useData = () => useContext(StateContext);
+export const useData = () => {
+  const ctx = useContext(StateContext);
+  if (!ctx) {
+    throw new Error('useData must be used within <Provider>');
+  }
+  return ctx;
+};
