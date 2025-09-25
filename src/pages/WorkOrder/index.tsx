@@ -458,12 +458,11 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.workOrderNumber || ''}`
-                : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);
@@ -489,6 +488,7 @@ const WorkOrder = () => {
             workOrderIds={bulkEditDialog?._ids}
             onClose={() => setBulkEditDialog({ open: false, _ids: [] })}
             onSuccess={() => {
+              dispatch({ type: 'selection', selectedRecords: [] });
               fetchData();
               setBulkEditDialog({ open: false, _ids: [] });
             }}
