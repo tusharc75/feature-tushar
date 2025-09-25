@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useRef } from 'react';
 import Box from '@mui/material/Box';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -12,6 +12,7 @@ import { Dialog } from '@mui/material';
 const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
   const toastConfig = useContext(CustomToastContext);
   const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleUpload = async (event) => {
     const files = event.target.files;
@@ -45,19 +46,17 @@ const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
       <CustomDialogContent>
         <Box mt={2} mb={1}>
           <input
+            ref={fileInputRef}
             id="zip-upload"
-            name="zip-upload"
             type="file"
             accept=".zip,application/zip,application/x-zip-compressed,application/pdf,.pdf,image/jpeg,image/png,image/gif,image/bmp"
             multiple
             onChange={handleUpload}
             style={{ display: 'none' }}
           />
-          <label htmlFor="zip-upload">
-            <ThemeButton disabled={isUploading} isLoading={isUploading} buttonType="theme">
-              {isUploading ? 'Uploading...' : 'Select File *'}
-            </ThemeButton>
-          </label>
+          <ThemeButton disabled={isUploading} isLoading={isUploading} buttonType="theme" onClick={() => fileInputRef.current?.click()}>
+            {isUploading ? 'Uploading...' : 'Select File *'}
+          </ThemeButton>
         </Box>
       </CustomDialogContent>
       <CustomDialogFooter>
