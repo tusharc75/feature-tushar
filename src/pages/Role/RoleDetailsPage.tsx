@@ -65,7 +65,8 @@ const RoleDetailsPage = () => {
     sublease: false,
     purchaseOrder: false,
     quoteBuilder: false,
-    productInventory: false
+    productInventory: false,
+    serializedAsset: false
   });
 
   const [policyFieldCheckBox, SetPolicyFieldCheckBox] = useState({
@@ -78,7 +79,8 @@ const RoleDetailsPage = () => {
     isApproveAccount: false,
     isConvertLeadToOpportunity: false,
     isAllowServicePerformRentalManagement: false,
-    isQRCodeLogin: false
+    isQRCodeLogin: false,
+    scrapRequest: false
   });
 
   const [resourceCheckbox, setResourceCheckBox] = useState({
@@ -89,7 +91,8 @@ const RoleDetailsPage = () => {
     productInventory: false,
     customerAccount: false,
     lead: false,
-    login: false
+    login: false,
+    serializedAsset: false
   });
 
   const [isPolicyCheckBoxChecked, setIsPolicyCheckBoxChecked] = useState(false);
@@ -206,7 +209,7 @@ const RoleDetailsPage = () => {
   }, [values, field, resource]);
 
   useEffect(() => {
-    if (resourceCheckbox.purchaseOrder && resourceCheckbox.rentalManagement && resourceCheckbox.sublease) {
+    if (resourceCheckbox.purchaseOrder && resourceCheckbox.rentalManagement && resourceCheckbox.sublease && resourceCheckbox.serializedAsset) {
       setIsPolicyCheckBoxChecked(true);
     } else {
       setIsPolicyCheckBoxChecked(false);
@@ -225,7 +228,8 @@ const RoleDetailsPage = () => {
         productInventory: e.target.checked,
         customerAccount: e.target.checked,
         lead: e.target.checked,
-        login: e.target.checked
+        login: e.target.checked,
+        serializedAsset: e.target.checked
       });
 
       SetPolicyFieldCheckBox({
@@ -238,7 +242,8 @@ const RoleDetailsPage = () => {
         isApproveAccount: e.target.checked,
         isConvertLeadToOpportunity: e.target.checked,
         isAllowServicePerformRentalManagement: e.target.checked,
-        isQRCodeLogin: e.target.checked
+        isQRCodeLogin: e.target.checked,
+        scrapRequest: e.target.checked
       });
     }
     if (checkBoxType === 'Policy-CheckBox') {
