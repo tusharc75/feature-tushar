@@ -367,7 +367,20 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 >
                   <DescriptionIcon fontSize="small" color={'primary'} />
                 </IconButton>
-              </HtmlTooltip>)}
+              </HtmlTooltip>            )}
+            {row?.original?.workOrderStatus === WORK_ORDER_STATUS.draft && (
+              <HtmlTooltip title="Ready to Build">
+                <IconButton
+                  size="small"
+                  aria-label="Ready to Build"
+                  onClick={() => {
+                    handleReadyToBuild([row.original]);
+                  }}
+                >
+                  <CheckCircle fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
             <HtmlTooltip title="Delete">
               <span>
                 <IconButton
@@ -762,6 +775,28 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       });
   };
 
+  const handleReadyToBuild = (records) => {
+    setSubmitting(true);
+    const workOrderIds = records?.map((record) => record?.workOrder?._id);
+    const data = { status: WORK_ORDER_STATUS.new, ids: workOrderIds };
+    
+    axiosInstance()
+      .put(`${workOrder.api}/update-multiple-status`, data)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message || 'Work order status updated to Ready to Build successfully'
+        });
+        fetchData();
+        setSubmitting(false);
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const handleServiceSelect = (newValue) => {
     setSelectedServiceOption(newValue);
     if (newValue) {
@@ -946,6 +981,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               setShowServiceActionConfirmBox,
               isDisabledCompleteService,
               isDisabledRevertService,
+              handleReadyToBuild,
               setDeleteData,
               setShowConfirmBox,
               setShowCloseReopenConfirmation,
@@ -1169,6 +1205,7 @@ const ActionButtonMenuItems = ({
   setShowServiceActionConfirmBox,
   isDisabledCompleteService,
   isDisabledRevertService,
+  handleReadyToBuild,
   setDeleteData,
   setShowConfirmBox,
   setShowCloseReopenConfirmation,
@@ -1276,6 +1313,15 @@ const ActionButtonMenuItems = ({
         disabled={selectedRecords.some((e) => e?.canAutoCompleteWorkOrder) ? false : true}
       >
         Auto Complete Work Order(s)
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          const draftWorkOrders = selectedRecords?.filter((e) => e?.workOrderStatus === WORK_ORDER_STATUS.draft);
+          handleReadyToBuild(draftWorkOrders);
+        }}
+        disabled={selectedRecords?.some((e) => e?.workOrderStatus === WORK_ORDER_STATUS.draft) ? false : true}
+      >
+        Ready to Build
       </MenuItem>
       <MenuItem
         disabled={
