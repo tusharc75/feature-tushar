@@ -547,7 +547,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             setConfermPackageToProduct(true)
           }}
         >
-          {`Convert in ${resources?.product?.titlePlural}`}
+          {`Convert to ${resources?.product?.titleSingular}`}
         </MenuItem>
       </>
     );
@@ -732,7 +732,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       {confermPackageToProduct && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to convert from packages to product ?`}
+          message={`Are you sure you want to convert this ${resources?.packages?.titlePlural} into a ${resources?.product?.titlePlural} ?`}
           onClose={() => setConfermPackageToProduct(false)}
           onOk={handleConvertPackageToProduct}
           okBtnLoading={isSubmitting}
