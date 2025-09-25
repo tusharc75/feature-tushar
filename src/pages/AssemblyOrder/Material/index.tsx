@@ -201,12 +201,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
               size="small"
               aria-label="Delete"
               onClick={() => {
-                if (row?.original?.isDummy) {
-                  const _ids = flattenArray(dataRows)?.filter(r => r?.parentId === row?.original?._id)?.map(r => r?._id)
-                  setDeleteData(_ids)
-                } else {
-                  setDeleteData([row?.original?._id]);
-                }
+                setDeleteData([row.original._id]);
               }}
               disabled={row.original?.canDelete ? false : true}
             >
@@ -265,13 +260,14 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent?.type === MATERIAL_TYPE.serializedPackage ? parent?.serializedPackagesDetail?.serializedPackageNumber : parent?.detail || parent.packageDetail?.packageName || ''
+      parent.detail =
+        parent?.type === MATERIAL_TYPE.serializedPackage ? parent?.serializedPackagesDetail?.serializedPackageNumber : parent?.detail || parent.packageDetail?.packageName || ''
       parent.description = parent?.description || parent?.packageDetail?.packageDescription || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.canDelete = parent?.workOrder ? false : true;
       parent.subRows = generateNestedData(material, serializedPackages, parent);
-      if (parent.subRows?.find((r) => !r?.canDelete) || parent.subRows?.some((r) => r?.isDummy)) {
+      if (parent.subRows?.find((r) => !r?.canDelete)) {
         parent.canDelete = false;
       }
     });
@@ -300,7 +296,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         ? _subRow?.productDetail?.productDescription : _subRow.type === MATERIAL_TYPE.package
           ? _subRow.packageDetail?.packageDescription : '');
       _subRow.qty = _subRow.qty;
-      _subRow.canDelete = _subRow?.workOrder ? false : true;
+      _subRow.canDelete = _subRow?.isDummy ? false : _subRow?.workOrder ? false : true;
       _subRow.subRows = generateNestedData(material, serializedPackages, _subRow);
     });
 
@@ -435,10 +431,6 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     return workOrderTypeField?.option?.some(o => o?.optionValue === WORK_ORDER_TYPE.disassemblyOrder)
   }
 
-  const getFilterSelectedRecords = (selectedRecords) => {
-    return selectedRecords?.filter((e) => !e?.isDummy)
-  }
-
   const addButtonMenuItems = () => {
     return (
       <>
@@ -501,7 +493,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   };
 
   const handleConvertPackageToProduct = () => {
-    const ids = getFilterSelectedRecords(selectedRecords)?.filter(r => r?.parentId && r?.type === MATERIAL_TYPE.package && r?.workOrder && r?.workOrder?.status !== WORK_ORDER_STATUS.completed)?.map(r => r?._id)
+    const ids = selectedRecords?.filter(r => !r?.isDummy && r?.parentId && r?.type === MATERIAL_TYPE.package && r?.workOrder && r?.workOrder?.status !== WORK_ORDER_STATUS.completed)?.map(r => r?._id)
 
     if (ids?.length > 0) {
       setSubmitting(true);
@@ -529,25 +521,25 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     return (
       <>
         {permissions?.serializedPackages?.isRead &&
-          getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.workOrderType === WORK_ORDER_TYPE.disassemblyOrder)?.length > 0 && (
+          selectedRecords?.filter((e) => e?.workOrderType === WORK_ORDER_TYPE.disassemblyOrder)?.length > 0 && (
             <MenuItem
-              disabled={checkUniqueWarehouse(getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package))}
+              disabled={checkUniqueWarehouse(selectedRecords?.filter((e) => !e?.isDummy && e?.type === MATERIAL_TYPE.package))}
               onClick={() => {
                 setOpenSerializedPackagesDialog(true);
               }}
             >{`Assign ${resources?.serializedPackages?.titleSingular}`}</MenuItem>
           )}
         <MenuItem
-          disabled={getFilterSelectedRecords(selectedRecords)?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
+          disabled={selectedRecords?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
           onClick={() => {
-            const dataToDelete = getFilterSelectedRecords(selectedRecords)?.filter((e) => !e.hideSelection && e.canDelete).map((rec: any) => rec._id);
+            const dataToDelete = selectedRecords?.filter((e) => !e.hideSelection && e.canDelete).map((rec: any) => rec._id);
             setDeleteData(dataToDelete);
           }}
         >
           Delete
         </MenuItem>
         <MenuItem
-          disabled={getFilterSelectedRecords(selectedRecords)?.every(r => r?.parentId && r?.type === MATERIAL_TYPE.package && r?.workOrder && r?.workOrder?.status !== WORK_ORDER_STATUS.completed) ? false : true}
+          disabled={selectedRecords?.filter(r => !r?.isDummy)?.every(r => r?.parentId && r?.type === MATERIAL_TYPE.package && r?.workOrder && r?.workOrder?.status !== WORK_ORDER_STATUS.completed) ? false : true}
           onClick={() => {
             setConfermPackageToProduct(true)
           }}
@@ -566,7 +558,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           addButtonMenuItems={addButtonMenuItems()}
           isActionButtonVisible={true}
           actionButtonMenuItems={actionButtonMenuItems()}
-          actionButtonProps={{ disabled: getFilterSelectedRecords(selectedRecords)?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+          actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
           hasXpadding
         />
       )}
@@ -617,21 +609,21 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           <MenuList>
             <MenuItem
               onClick={() => {
-                setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: addchildDialog.parentId });
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
-              }}
-              id={'add-existing-child-package-menu-item'}
-            >
-              {`Add Existing ${resources?.packages?.titlePlural}`}
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
                 setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: addchildDialog.parentId });
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
               }}
               id={'add-existing-child-product-menu-item'}
             >
               {`Add Existing ${resources?.product?.titlePlural}`}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: addchildDialog.parentId });
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+              }}
+              id={'add-existing-child-package-menu-item'}
+            >
+              {`Add Existing ${resources?.packages?.titlePlural}`}
             </MenuItem>
           </MenuList>
         </Popover>
@@ -707,7 +699,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGE_STATUS.available, SERIALIZED_PACKAGE_STATUS.underReview] }]}
           isSubmitting={isSubmitting}
           ids={dataRows?.filter(d => d?.serializedPackageId)?.map((d) => d?.serializedPackageId)}
-          selectedPackages={getFilterSelectedRecords(selectedRecords)
+          selectedPackages={selectedRecords
             ?.filter((r) => [WORK_ORDER_TYPE.disassemblyOrder]?.includes(r?.workOrderType))
             ?.map((r) => ({
               uniqueId: r?._id,
