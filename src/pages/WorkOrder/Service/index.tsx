@@ -403,6 +403,7 @@ const Service = ({
     }
   }, [mobScreen]);
 
+
   const stylesForEveryTab = (selectedService, data, index): React.CSSProperties => {
     const commonStyle: React.CSSProperties = { overflow: 'hidden' };
     if (data?.type === 'quotation' && selectedService?.type !== 'quotation') {
@@ -635,7 +636,7 @@ const Service = ({
                               minHeightClass={' '}
                               isMobile={mobScreen}
                               fetchWorkOrderData={fetchWorkOrderData}
-                              productData={selectedService?.parentId && products?.some(p => p?._id === selectedService?.parentId && p?.productDetail) ? products?.find(p => p?._id === selectedService?.parentId)?.productDetail : null}
+                              products={products}
                             />
                           ) : (
                             <Quotation />
