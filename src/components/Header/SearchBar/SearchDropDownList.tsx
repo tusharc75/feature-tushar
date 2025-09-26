@@ -88,7 +88,7 @@ const RenderList = React.forwardRef<HTMLDivElement, RenderListProps>(({ anchorEl
   const { historyKeywords, handleSetHistoryKeyword, fetchAllKeywordData, handleRemoveItemFromHistory, handleRemoveKeywordFromHistory } =
     useSearchHistory();
   const [activeIndex, setActiveIndex] = useState(-1);
-  const activeIndexRef = useRef(0);
+  const activeIndexRef = useRef(-1);
   const filteredKeywords = useMemo(() => {
     if (inputValue === '') return historyKeywords;
     return historyKeywords.filter((d) => d.keyword.trim().toLowerCase().includes(inputValue.trim().toLowerCase()));
