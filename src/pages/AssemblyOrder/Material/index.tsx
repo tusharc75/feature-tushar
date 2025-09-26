@@ -732,7 +732,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       {confermPackageToProduct && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to convert this ${resources?.packages?.titlePlural} into a ${resources?.product?.titlePlural} ?`}
+          message={`Are you sure you want to process this ${resources?.packages?.titlePlural} with out ${resources?.workOrder?.titlePlural} ?`}
           onClose={() => setConfermPackageToProduct(false)}
           onOk={handleConvertPackageToProduct}
           okBtnLoading={isSubmitting}
