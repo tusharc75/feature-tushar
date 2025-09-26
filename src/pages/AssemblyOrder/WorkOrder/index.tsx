@@ -43,6 +43,7 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import ProductQtyDialog from 'src/pages/AssemblyOrder/WorkOrder/ProductQtyDialog';
 import PreviewDownloadNew from 'src/components/PreviewDownloadNew';
+import BulkEditWorkOrder from 'src/pages/WorkOrder/BulkEditWorkOrder';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -82,6 +83,7 @@ const WorkOrder = ({
   const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [] });
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
   const [productQtyEdit, setProductQtyEdit] = useState({ open: false, data: null });
+  const [bulkEditWorkOrderDialog, setBulkEditWorkOrderDialog] = useState({ open: false, _ids: [] });
 
   const { generateColumns, getMaterialLabel } = useColumns();
 
@@ -901,7 +903,9 @@ const WorkOrder = ({
               setArrangeView,
               setShowDrawingDialog,
               updateWorkOrdetStatus,
-              getFilterSelectedRecords
+              getFilterSelectedRecords,
+              resources,
+              setBulkEditWorkOrderDialog
             }}
           />
         }
@@ -1088,6 +1092,17 @@ const WorkOrder = ({
         />
       )}
 
+      {bulkEditWorkOrderDialog.open && (
+        <BulkEditWorkOrder
+          workOrderIds={bulkEditWorkOrderDialog?._ids}
+          onClose={() => setBulkEditWorkOrderDialog({ open: false, _ids: [] })}
+          onSuccess={() => {
+            fetchData();
+            setBulkEditWorkOrderDialog({ open: false, _ids: [] });
+          }}
+        />
+      )}
+
       {arrangeView && (
         <ArrangeView
           data={
@@ -1143,7 +1158,9 @@ const ActionButtonMenuItems = ({
   setArrangeView,
   setShowDrawingDialog,
   updateWorkOrdetStatus,
-  getFilterSelectedRecords
+  getFilterSelectedRecords,
+  resources,
+  setBulkEditWorkOrderDialog
 }) => {
   const checkUniqWorkOrderType = () => {
     if (getFilterSelectedRecords(selectedRecords).length === 0) {
@@ -1300,6 +1317,14 @@ const ActionButtonMenuItems = ({
         }}
       >
         Upload Attachments
+      </MenuItem>
+      <MenuItem
+        disabled={getFilterSelectedRecords(selectedRecords)?.some(r => [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(r?.workOrder?.status)) || !permissions?.workOrder?.isUpdate}
+        onClick={() => {
+          setBulkEditWorkOrderDialog({ open: true, _ids: getFilterSelectedRecords(selectedRecords)?.map(r => r?.workOrder?._id) })
+        }}
+      >
+        {`Bulk Edit ${resources?.workOrder?.titlePlural}`}
       </MenuItem>
       <MenuItem
         onClick={() => {
