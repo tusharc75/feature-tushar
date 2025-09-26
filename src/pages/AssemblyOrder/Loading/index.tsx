@@ -320,16 +320,11 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
 
   const validateAction = (action) => {
     const errorMessages = [];
-    var records = selectedRecords?.filter((e) => e?.workOrder);
+    var records = selectedRecords;
     records?.forEach((e) => {
       if (action === assemblyOrderActions.createLoadingTicket) {
         if (e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: assemblyOrderMessage.loadingAlreadyCreated });
-        } else if (!e?.serializedPackageId && e?.type === MATERIAL_TYPE.package) {
-          errorMessages.push({
-            index: e.index,
-            message: `${resources.workOrder.titleSingular} not completed`
-          });
         } else if (uniq(map(records, 'serializedPackageDetail.warehouse.optionValue')).length !== 1) {
           errorMessages.push({
             index: e.index,
