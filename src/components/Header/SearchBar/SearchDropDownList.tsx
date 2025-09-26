@@ -206,7 +206,7 @@ const RenderList = React.forwardRef<HTMLDivElement, RenderListProps>(({ anchorEl
                 }}
                 onMouseLeave={() => {
                   setActiveIndex(-1);
-                  activeIndexRef.current = i;
+                  activeIndexRef.current = -1;
                 }}
               >
                 <div className="flex flex-grow items-center gap-3">
