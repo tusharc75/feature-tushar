@@ -1321,7 +1321,7 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={getFilterSelectedRecords(selectedRecords)?.some(r => [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(r?.workOrder?.status)) || !permissions?.workOrder?.isUpdate}
         onClick={() => {
-          setBulkEditWorkOrderDialog({ open: true, _ids: getFilterSelectedRecords(selectedRecords)?.map(r => r?.workOrder?._id) })
+          setBulkEditWorkOrderDialog({ open: true, _ids: uniq(getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.workOrder)?.map(r => r?.workOrder?._id)) })
         }}
       >
         {`Bulk Edit ${resources?.workOrder?.titlePlural}`}
