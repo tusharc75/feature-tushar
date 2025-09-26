@@ -23,7 +23,6 @@ import {
   getChipColor,
   getObjKeys,
   getObjKeysWithValues,
-  getValueOfMatchedFieldName,
   MATERIAL_SUB_TYPE,
   repairJob,
   setFieldsInAscendingOrder,
@@ -48,7 +47,39 @@ import CustomMessageDialog from 'src/components/MessageDialog';
 import Consumables from 'src/pages/WorkOrder/Consumables';
 import CustomCollapsible from 'src/components/CustomCollapsible';
 import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
+import { autoCalculateSpecificFields, getFormulaValue } from 'src/constants/formulaUtility';
 
+
+const getValueOfMatchedFieldName = (fields: any, productData: any, workOrderData: any, products: any) => {
+  let data: any = {}
+  const referenceData = { ...(workOrderData || {}), ...(productData || {}) }
+  if (fields?.length > 0 && referenceData) {
+    fields?.forEach(f => {
+      if (f?.fieldName && referenceData[f?.fieldName]) {
+        data[f?.fieldName] = referenceData[f?.fieldName]
+      }
+    });
+  }
+  if (products?.length) {
+    const formulaFields = fields?.filter((e) => e?.inputFields?.includes("productDescription"))
+    formulaFields?.forEach((_field) => {
+      let result = {}
+      for (const _product of products) {
+        const description = _product?.description || _product?.productDetail?.productDescription
+        const value = getFormulaValue(_field?.formula, { productDescription: description }, _field?.returnType, _field?.decimalPlaces)
+        if (value) {
+          result[_field?.fieldName] = value
+          break;
+        }
+      }
+      if (result[_field?.fieldName]) {
+        let calValues = autoCalculateSpecificFields({ [_field?.fieldName]: result[_field?.fieldName] }, {}, fields)
+        data = { ...data, ...calValues }
+      }
+    })
+  }
+  return data
+}
 export interface StepDataInterface {
   _id: string;
   uniqueId: string;
@@ -197,8 +228,9 @@ const Steps = ({
   fetchWorkOrderData = null,
   headerPadding = true,
   workOrderPolicyData = null,
-  productData = null
+  products = null
 }) => {
+
   const workOrderId = workOrderData?._id;
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -433,6 +465,9 @@ const Steps = ({
     let fieldsDataForCreate = step?.fields ? step?.fields : [];
     let tempServiceData = stepSubmitedData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.stepId === step?._id);
 
+    const productData = selectedService?.parentId && products?.some(p => p?._id === selectedService?.parentId && p?.productDetail) ?
+      products?.find(p => p?._id === selectedService?.parentId)?.productDetail : null
+
     if (tempServiceData) {
       stepData = tempServiceData;
       if (step?.fields?.length) {
@@ -448,7 +483,7 @@ const Steps = ({
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
           orignalValues: tempServiceData,
           values: isDataAlreadyAdded ? getObjKeysWithValues(tempServiceData, fieldsDataForCreate, true) :
-            { ...getObjKeys('', fieldsDataForCreate), ...getValueOfMatchedFieldName(fieldsDataForCreate, { ...productData, ...workOrderData }) }
+            { ...getObjKeys('', fieldsDataForCreate), ...getValueOfMatchedFieldName(fieldsDataForCreate, productData, workOrderData, products) }
         };
       }
     } else {
@@ -457,7 +492,7 @@ const Steps = ({
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
           orignalValues: {},
-          values: { ...getObjKeys('', fieldsDataForCreate), ...getValueOfMatchedFieldName(fieldsDataForCreate, { ...productData, ...workOrderData }) }
+          values: { ...getObjKeys('', fieldsDataForCreate), ...getValueOfMatchedFieldName(fieldsDataForCreate, productData, workOrderData, products) }
         };
       }
     }
