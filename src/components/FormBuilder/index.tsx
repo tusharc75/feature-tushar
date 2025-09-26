@@ -1,6 +1,5 @@
 import Box from '@mui/material/Box';
-import { CHILD_RESOURCE, addItemAtIndex, removeItemAtIndex } from '../../constants/helpers';
-
+import { addItemAtIndex, removeItemAtIndex } from '../../constants/helpers';
 import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
 import { useDndSensors } from 'src/hooks';
@@ -8,17 +7,6 @@ import DndOverlayWrapper from './NewDnd/DndOverlayWrapper';
 import Sections from './NewDnd/Sections';
 import Sidebar from './NewDnd/Sidebar';
 import { generateId } from './NewDnd/helper';
-
-export const subForms = [
-  CHILD_RESOURCE.rentalManagementProduct,
-  CHILD_RESOURCE.rentalManagementCost,
-  CHILD_RESOURCE.salesOrderProduct,
-  CHILD_RESOURCE.salesOrderCost,
-  CHILD_RESOURCE.purchaseOrderProduct,
-  CHILD_RESOURCE.purchaseOrderCost,
-  CHILD_RESOURCE.repairJobAsset,
-  CHILD_RESOURCE.subleaseProduct
-];
 
 export const FormBuilder = ({
   section,
@@ -64,14 +52,6 @@ export const FormBuilder = ({
   };
 
   var filterFieldType = [];
-  var isCalculativeField = true;
-  if (module === 'form-builder') {
-    isCalculativeField = true;
-  }
-  if (subForms.includes(resource)) {
-    filterFieldType = [];
-    isCalculativeField = true;
-  }
 
   const movefield = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -162,63 +142,12 @@ export const FormBuilder = ({
             addDeleteField={addDeleteField}
             module={module}
             extraFields={extraFields}
-            isCalculativeField={isCalculativeField}
             brandId={brandId}
             formData={formData}
           />
         </div>
         <DndOverlayWrapper />
       </DndContext>
-      {/* <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-        <Grid container spacing={1}>
-          <Grid item xs={12} md={3} sm={4}>
-            <Box
-              border={1}
-              p={2}
-              borderColor="var(--common-border-color)"
-              className={`h-[calc(100vh-200px)] overflow-auto max-[960px]:h-[calc(100vh-200px)] overflow-x-hidden`}
-            >
-              <Box pt={1} pb={1} pr={'8px'}>
-                <DragBox name="New Section" label="New Section" type="master"></DragBox>
-              </Box>
-              <Grid container spacing={1} className={`max-[960px]:grid grid-cols-1 max-[960px]:w-[200%] max-[960px]:pb-[15px]`}>
-                {Object.keys(FieldList).map((type, index) => {
-                  return !filterFieldType.includes(type) ? (
-                    <DragBox key={index} type="field" label={FieldList[type].label} name={FieldList[type].type} removeExtraField={removeExtraField} />
-                  ) : null;
-                })}
-              </Grid>
-              <CustomField />
-              {isCustomField && (
-                <Box>
-                  <CustomField />
-                </Box>
-              )}
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={9} sm={8}>
-            <Box
-              border={1}
-              p={2}
-              borderColor="var(--common-border-color)"
-              className={module === 'form-builder' ? classes.screenHeightAutoFormBuilder : classes.screenHeightAutoFormTemplate}
-            >
-              <DropMaster
-                addSection={addSection}
-                setSection={setSection}
-                section={section}
-                addDeleteField={addDeleteField}
-                screenHeight={classes.screenHeight}
-                module={module}
-                extraFields={extraFields}
-                onAddRemoveField={onAddRemoveField}
-                isCalculativeField={isCalculativeField}
-                brandId={brandId}
-              />
-            </Box>
-          </Grid>
-        </Grid>
-      </DndProvider> */}
     </Box>
   );
 };

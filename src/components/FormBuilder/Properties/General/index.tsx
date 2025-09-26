@@ -23,7 +23,7 @@ import LookUpDisplay from '../LookUpDisplay';
 import FieldNameDialog from './FieldNameDialog';
 import SubFieldsDialog from './SubFieldsDialog';
 
-const General = ({ values, setFieldValue, fields, fieldData, touched, errors, module, isCalculativeField, handleChangeFieldName }) => {
+const General = ({ values, setFieldValue, fields, fieldData, touched, errors, module, handleChangeFieldName }) => {
   const [isInitialUpdated, setIsInitialUpdated] = useState({
     MultipleFormula: false,
     Currency: false,
@@ -332,8 +332,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
         values['type'] === 'decimal' ||
         values['type'] === 'percent' ||
         values['type'] === 'date' ||
-        values['type'] === 'converter') &&
-        isCalculativeField && (
+        values['type'] === 'converter') && (
           <>
             <br></br>
             <FormControlLabel
@@ -363,6 +362,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
           }}
           _id={fieldData._id}
           touched={touched}
+          module={module}
           errors={errors}
         />
       )}
@@ -401,28 +401,27 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
           errors={errors}
         />
       )}
-      {(values['type'] === 'currencyAmount' || values['type'] === 'decimal' || values['type'] === 'percent' || values['type'] === 'converter') &&
-        isCalculativeField && (
-          <>
-            <br></br>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="isMulitFormula"
-                  checked={values['isMulitFormula']}
-                  onChange={(e) => {
-                    setFieldValue('isMulitFormula', e.target.checked);
-                    setFieldValue('formulaFields', []);
-                    setFieldValue('formulainputFields', []);
-                    setFieldValue('formulaoption', {});
-                  }}
-                  color="primary"
-                />
-              }
-              label="Multiple Formula"
-            />
-          </>
-        )}
+      {(values['type'] === 'currencyAmount' || values['type'] === 'decimal' || values['type'] === 'percent' || values['type'] === 'converter') && (
+        <>
+          <br></br>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="isMulitFormula"
+                checked={values['isMulitFormula']}
+                onChange={(e) => {
+                  setFieldValue('isMulitFormula', e.target.checked);
+                  setFieldValue('formulaFields', []);
+                  setFieldValue('formulainputFields', []);
+                  setFieldValue('formulaoption', {});
+                }}
+                color="primary"
+              />
+            }
+            label="Multiple Formula"
+          />
+        </>
+      )}
       {values['isMulitFormula'] && (
         <MultipleFormula
           fields={fields}
@@ -439,26 +438,25 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
         />
       )}
 
-      {(values['type'] === 'currencyAmount' || values['type'] === 'decimal' || values['type'] === 'percent' || values['type'] === 'converter') &&
-        isCalculativeField && (
-          <>
-            <br></br>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="isVlookup"
-                  checked={values['isVlookup']}
-                  onChange={(e) => {
-                    setFieldValue('isVlookup', e.target.checked);
-                    setFieldValue('isDropdown', false);
-                  }}
-                  color="primary"
-                />
-              }
-              label="Vlookup"
-            />
-          </>
-        )}
+      {(values['type'] === 'currencyAmount' || values['type'] === 'decimal' || values['type'] === 'percent' || values['type'] === 'converter') && (
+        <>
+          <br></br>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="isVlookup"
+                checked={values['isVlookup']}
+                onChange={(e) => {
+                  setFieldValue('isVlookup', e.target.checked);
+                  setFieldValue('isDropdown', false);
+                }}
+                color="primary"
+              />
+            }
+            label="Vlookup"
+          />
+        </>
+      )}
       {(values['isVlookup'] || values['type'] === 'vlookupDropdown') && (
         <Vlookup
           fields={fields}
@@ -472,7 +470,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
         />
       )}
 
-      {(values['type'] === 'converter' || values['type'] === 'formula') && isCalculativeField && (
+      {(values['type'] === 'converter' || values['type'] === 'formula') && (
         <>
           <br></br>
           <FormControlLabel

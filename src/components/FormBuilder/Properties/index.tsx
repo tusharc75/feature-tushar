@@ -22,7 +22,7 @@ const FieldSchema = object().shape({
   fieldLabel: string().required('please enter field label')
 });
 
-export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields, isCalculativeField, brandId, formData = null }) => {
+export const Properties = ({ module, handleClose, fieldData, sectionId, section, setSection, extraFields, brandId, formData = null }) => {
   const [initialValues, setInitialValues] = useState({ ...fieldData });
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -63,12 +63,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       if (!values.columnSize) {
         values.columnSize = gridSize(fieldData?.type);
       }
-      if (
-        !values.isColumnEditable &&
-        fieldData.resource === 'Rental Management Product' &&
-        module !== 'price-template' &&
-        module !== 'product-template'
-      ) {
+      if (!values.isColumnEditable && module !== 'price-template' && module !== 'product-template') {
         values.isColumnEditable = false;
       }
       if (!values.disableOnEdit && module !== 'price-template' && module !== 'product-template') {
@@ -690,7 +685,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           touched={touched}
                           errors={errors}
                           module={module}
-                          isCalculativeField={isCalculativeField}
                           handleChangeFieldName={handleChangeFieldName}
                         />
                       </TabPanel>
