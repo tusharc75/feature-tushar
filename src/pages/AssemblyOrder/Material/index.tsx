@@ -547,7 +547,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             setConfermPackageToProduct(true)
           }}
         >
-          {`Convert to ${resources?.product?.titleSingular}`}
+          {`Proceed Without ${resources?.workOrder?.titlePlural}`}
         </MenuItem>
       </>
     );
