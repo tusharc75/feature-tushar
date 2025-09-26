@@ -410,7 +410,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       values?.inputFields &&
         values?.inputFields?.forEach((_input) => {
           const tempField = fields?.find((e) => e.fieldName === _input)
-          if (['singleLine', 'multiLine']?.includes(tempField?.type)) {
+          if (['singleLine', 'multiLine']?.includes(tempField?.type) || (tempField?.type === 'formula' && tempField?.returnType === 'string') || !tempField) {
             inputValues[_input] = '';
           } else {
             inputValues[_input] = 1;
