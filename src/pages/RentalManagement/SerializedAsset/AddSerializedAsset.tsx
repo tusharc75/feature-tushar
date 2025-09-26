@@ -545,7 +545,7 @@ const AddSerializedAsset = ({
                 )}
               </div>
               <div>
-                {referenceType === 'Rental Job' && (
+                {['Rental Job', 'RentalJobReplaceAsset']?.includes(referenceType) && (
                   <Autocomplete
                     style={{ minWidth: '230px' }}
                     fullWidth
