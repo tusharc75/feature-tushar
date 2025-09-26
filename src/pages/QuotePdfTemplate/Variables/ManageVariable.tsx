@@ -122,6 +122,7 @@ export default function Manage({ data, fields, handleClose, id }) {
                   }}
                   _id={null}
                   touched={touched}
+                  module={""}
                   errors={errors}
                 />
               </Box>

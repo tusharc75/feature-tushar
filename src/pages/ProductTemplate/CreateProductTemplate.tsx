@@ -513,8 +513,8 @@ const ProductTemplate = () => {
                           setFieldValue('entity', val && val?.map((d) => d._id));
                           val && val.length !== 0
                             ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                              )
+                              ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                            )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                         }}
                         renderInput={(params) => (
@@ -547,8 +547,8 @@ const ProductTemplate = () => {
                         onOpen={() =>
                           values['entity'] && values['entity'].length !== 0
                             ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
-                              )
+                              ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                            )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                         }
                         renderInput={(params) => (
@@ -583,8 +583,8 @@ const ProductTemplate = () => {
                         onOpen={() =>
                           values['entity'] && values['entity'].length !== 0
                             ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
-                              )
+                              ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
+                            )
                             : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                         }
                         renderInput={(params) => (

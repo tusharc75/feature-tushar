@@ -12,7 +12,6 @@ type SectionPorps = {
   addDeleteField: any;
   module: any;
   extraFields: any;
-  isCalculativeField: any;
   brandId: any;
   formData?: any
 };
@@ -25,7 +24,6 @@ export default function Sections({
   addDeleteField,
   module,
   extraFields,
-  isCalculativeField,
   brandId,
   formData = null
 }: SectionPorps) {
@@ -57,7 +55,6 @@ export default function Sections({
                 addDeleteField={addDeleteField}
                 module={module}
                 extraFields={extraFields}
-                isCalculativeField={isCalculativeField}
                 brandId={brandId}
                 formData={formData}
               />

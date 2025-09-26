@@ -17,7 +17,6 @@ type SingleSectionPorps = {
   addDeleteField: any;
   module: any;
   extraFields: any;
-  isCalculativeField: any;
   brandId: any;
   formData?: any
 };
@@ -32,7 +31,6 @@ const SingleSection = ({
   addDeleteField,
   module,
   extraFields,
-  isCalculativeField,
   brandId,
   formData = null
 }: SingleSectionPorps) => {
@@ -84,7 +82,6 @@ const SingleSection = ({
         addDeleteField,
         module,
         extraFields,
-        isCalculativeField,
         brandId
       }
     }
@@ -179,7 +176,6 @@ const SingleSection = ({
                         addDeleteField={addDeleteField}
                         module={module}
                         extraFields={extraFields}
-                        isCalculativeField={isCalculativeField}
                         brandId={brandId}
                         sectionId={section.sectionId}
                         data={f}

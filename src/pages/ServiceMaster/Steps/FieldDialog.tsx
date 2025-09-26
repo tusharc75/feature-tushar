@@ -184,7 +184,7 @@ const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, re
           setDeleteField={setDeleteField}
           isCustomField={false}
           extraFields={[]}
-          module="form-builder"
+          module="service-builder"
           resource={null}
           brandId={user.user.brand}
         />
