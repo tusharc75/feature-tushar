@@ -10,8 +10,14 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { checkFormulaLoop } from 'src/constants/formulaUtility';
 import { CustomDialogTransition, fieldLabelToFieldName } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 
 const FieldDialog = ({ handleClose, handleSuccess, surveyId, notEditable = false }) => {
+
+  const {
+    state: { user }
+  }: any = useData();
+
   const toastConfig = React.useContext(CustomToastContext);
   const [isSubmitting, setSubmitting] = React.useState(false);
   const [section, setSection] = React.useState([]);
@@ -137,10 +143,10 @@ const FieldDialog = ({ handleClose, handleSuccess, surveyId, notEditable = false
           extraFields={[]}
           module="form-builder"
           resource={null}
+          brandId={user?.user?.brandId}
         />
       </CustomDialogContent>
       <CustomDialogFooter>
-
         <ThemeButton
           buttonType='transparent'
           onClick={handleClose}
