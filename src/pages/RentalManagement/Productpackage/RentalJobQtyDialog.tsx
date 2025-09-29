@@ -488,12 +488,11 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             );
 
                                             if (!isEmpty(costPrice)) {
-                                              const costPriceResult = autoCalculateSpecificFields(
-                                                { [costPriceFieldName]: costPrice?.price || 0 },
-                                                values,
+                                              const costPriceResult = autoCalculateSpecificFields({ [costPriceFieldName]: costPrice?.price || 0 },
+                                                { ...values, ...result },
                                                 initialData.fields
                                               );
-                                              result = { ...costPriceResult, ...result };
+                                              result = { ...result, ...costPriceResult };
                                             }
 
                                             if (assetPolicyData?.inUseSubStatus?.length > 0) {
@@ -504,7 +503,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                                 }
                                               });
                                             }
-
 
                                             if (Object.keys(result).length >= 1) {
                                               for (var x in result) {
