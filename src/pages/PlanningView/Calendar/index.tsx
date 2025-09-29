@@ -773,10 +773,15 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     resize(arg.event, arg.event.start, arg.event.end);
   };
 
-   const onNavigate = useCallback((data: DatesSetArg) => {
+  const onNavigate = useCallback((data: DatesSetArg) => {
+    const startStr = data.startStr;
+    const endStrExclusive = data.endStr;
+
+    const endInclusive = dayjs(endStrExclusive).subtract(1, 'day');
+
     setDateRange({
-      estimateStartDate: dayjs(data.start).format('MM/DD/YYYY'),
-      estimateEndDate: dayjs(data.end).subtract(1, 'day').format('MM/DD/YYYY')
+      estimateStartDate: dayjs(startStr).format('MM/DD/YYYY'),
+      estimateEndDate: endInclusive.format('MM/DD/YYYY')
     });
   }, []);
 
