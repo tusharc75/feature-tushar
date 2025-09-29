@@ -16,7 +16,7 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { cloneDisable, deleteDisable, scrapRequestDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -651,7 +651,7 @@ const SerializedAsset = () => {
             <HtmlTooltip
               title={
                 user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest
-                  ? 'Scrap Requests are not enabled for your role'
+                  ? scrapRequestDisable
                   : ''
               }
             >

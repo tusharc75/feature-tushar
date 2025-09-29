@@ -39,6 +39,7 @@ import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
 import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { scrapRequestDisable } from 'src/constants/messageHelpers';
 
 const SerializedAssetInspection = () => {
   const renderedFrom = camelCase(sidebarResource.serializedAssetsInspection);
@@ -361,7 +362,7 @@ const SerializedAssetInspection = () => {
                 user?.user?.brandPolicy?.serializedAssetScrapApproval &&
                 !user?.role?.selectedEntity?.policy?.scrapRequest;
               return (
-                <HtmlTooltip title={isDisabled ? 'Scrap Requests are not enabled for your role' : ''}>
+                <HtmlTooltip title={isDisabled ? scrapRequestDisable : ''}>
                   <MenuItem
                     key={key}
                     onClick={() => {

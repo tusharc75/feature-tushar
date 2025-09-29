@@ -62,6 +62,7 @@ import { getMultipleResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
 import AssetServiceTickets from 'src/pages/AssetServiceTicket';
+import { scrapRequestDisable } from 'src/constants/messageHelpers';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -659,7 +660,7 @@ const SerializedAssetDetailsPage = () => {
                           user?.user?.brandPolicy?.serializedAssetScrapApproval &&
                           !user?.role?.selectedEntity?.policy?.scrapRequest;
                         return (
-                          <HtmlTooltip title={isDisabled ? 'Scrap Requests are not enabled for your role' : ''}>
+                          <HtmlTooltip title={isDisabled ? scrapRequestDisable : ''}>
                             <MenuItem
                               key={o?.optionValue}
                               disabled={!manualStatus.includes(o?.optionLabel) || o?.optionLabel === assetDetails?.status || isDisabled}
