@@ -357,26 +357,29 @@ const SerializedAssetInspection = () => {
           <>
             {Object.entries(statusOptions).map(([key, status]: any) => {
               const isDisabled =
-                selectedRecords.some((record) => record.status === status?.optionLabel) ||
-                (status?.optionValue === ASSET_STATUS.scrap && user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest);
+                status?.optionValue === ASSET_STATUS.scrap &&
+                user?.user?.brandPolicy?.serializedAssetScrapApproval &&
+                !user?.role?.selectedEntity?.policy?.scrapRequest;
               return (
-                <MenuItem
-                  key={key}
-                  onClick={() => {
-                    if (
-                      status?.optionValue === ASSET_STATUS.scrap &&
-                      user?.user?.brandPolicy?.serializedAssetScrapApproval &&
-                      serializedAssetStatusChangeRequestFields?.length > 0
-                    ) {
-                      setStatusChangeRequestDialog(true);
-                    } else {
-                      handleStatusChange(status?.optionLabel);
-                    }
-                  }}
-                  disabled={isDisabled}
-                >
-                  {status?.optionLabel}
-                </MenuItem>
+                <HtmlTooltip title={isDisabled ? 'Scrap Requests are not enabled for your role' : ''}>
+                  <MenuItem
+                    key={key}
+                    onClick={() => {
+                      if (
+                        status?.optionValue === ASSET_STATUS.scrap &&
+                        user?.user?.brandPolicy?.serializedAssetScrapApproval &&
+                        serializedAssetStatusChangeRequestFields?.length > 0
+                      ) {
+                        setStatusChangeRequestDialog(true);
+                      } else {
+                        handleStatusChange(status?.optionLabel);
+                      }
+                    }}
+                    disabled={selectedRecords.some((record) => record.status === status?.optionLabel) || isDisabled}
+                  >
+                    {status?.optionLabel}
+                  </MenuItem>
+                </HtmlTooltip>
               );
             })}
           </>
@@ -577,16 +580,16 @@ const RightSideContents = ({
           onClick={() => setShowRepairOrderDialog(true)}
           disabled={
             checkUniqWarehouse() &&
-            selectedRecords?.every((e) =>
-              [
-                ASSET_STATUS.new,
-                ASSET_STATUS.available,
-                ASSET_STATUS.scrap,
-                ASSET_STATUS.needRecert,
-                ASSET_STATUS.needRepair,
-                ASSET_STATUS.underReview
-              ]?.includes(e.status)
-            )
+              selectedRecords?.every((e) =>
+                [
+                  ASSET_STATUS.new,
+                  ASSET_STATUS.available,
+                  ASSET_STATUS.scrap,
+                  ASSET_STATUS.needRecert,
+                  ASSET_STATUS.needRepair,
+                  ASSET_STATUS.underReview
+                ]?.includes(e.status)
+              )
               ? false
               : true
           }
@@ -600,9 +603,9 @@ const RightSideContents = ({
           onClick={() => setShowRepairJobDialog(true)}
           disabled={
             checkUniqWarehouse() &&
-            selectedRecords?.every((e) =>
-              [ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status)
-            )
+              selectedRecords?.every((e) =>
+                [ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status)
+              )
               ? false
               : true
           }

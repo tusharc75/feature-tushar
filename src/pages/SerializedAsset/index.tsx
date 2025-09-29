@@ -648,31 +648,39 @@ const SerializedAsset = () => {
             >
               {`Status Change - ${ASSET_STATUS.needRecert}`}
             </MenuItem>
-            <MenuItem
-              onClick={() => {
-                if (user?.user?.brandPolicy?.serializedAssetScrapApproval && serializedAssetStatusChangeRequestFields?.length > 0) {
-                  setStatusChangeRequestDialog(true);
-                } else {
-                  handleStatusChange(ASSET_STATUS.scrap);
-                }
-              }}
-              disabled={
-                selectedRecords?.filter((o) =>
-                  [
-                    ASSET_STATUS.new,
-                    ASSET_STATUS.available,
-                    ASSET_STATUS.needRepair,
-                    ASSET_STATUS.needRecert,
-                    ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                  ].includes(o.status)
-                )?.length !== selectedRecords?.length ||
-                  (user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest)
-                  ? true
-                  : false
+            <HtmlTooltip
+              title={
+                user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest
+                  ? 'Scrap Requests are not enabled for your role'
+                  : ''
               }
             >
-              {`Status Change - ${ASSET_STATUS.scrap}`}
-            </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  if (user?.user?.brandPolicy?.serializedAssetScrapApproval && serializedAssetStatusChangeRequestFields?.length > 0) {
+                    setStatusChangeRequestDialog(true);
+                  } else {
+                    handleStatusChange(ASSET_STATUS.scrap);
+                  }
+                }}
+                disabled={
+                  selectedRecords?.filter((o) =>
+                    [
+                      ASSET_STATUS.new,
+                      ASSET_STATUS.available,
+                      ASSET_STATUS.needRepair,
+                      ASSET_STATUS.needRecert,
+                      ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                    ].includes(o.status)
+                  )?.length !== selectedRecords?.length ||
+                    (user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest)
+                    ? true
+                    : false
+                }
+              >
+                {`Status Change - ${ASSET_STATUS.scrap}`}
+              </MenuItem>
+            </HtmlTooltip>
             <MenuItem
               onClick={() => {
                 handleStatusChange(ASSET_STATUS.lost);
