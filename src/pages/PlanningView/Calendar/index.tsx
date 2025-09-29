@@ -773,28 +773,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     resize(arg.event, arg.event.start, arg.event.end);
   };
 
-  const onNavigate = useCallback((data: DatesSetArg) => {
-    if (data?.view?.type === 'dayGridMonth') {
-      setDateRange({
-        estimateStartDate: dayjs.utc(data.start).tz().format('MM/DD/YYYY'),
-        estimateEndDate: dayjs.utc(data.end).tz().format('MM/DD/YYYY')
-      });
-    } else if (data?.view?.type === 'timeGridWeek') {
-      setDateRange({
-        estimateStartDate: dayjs.utc(data.start).tz().format('MM/DD/YYYY'),
-        estimateEndDate: dayjs.utc(data.end).tz().format('MM/DD/YYYY')
-      });
-    } else if (data?.view?.type === 'timeGridDay') {
-      setDateRange({
-        estimateStartDate: dayjs.utc(data.start).tz().format('MM/DD/YYYY'),
-        estimateEndDate: dayjs.utc(data.end).tz().format('MM/DD/YYYY')
-      });
-    } else if (data?.view?.type === 'agenda') {
-      setDateRange({
-        estimateStartDate: dayjs.utc(data.start).tz().format('MM/DD/YYYY'),
-        estimateEndDate: dayjs.utc(data.end).tz().format('MM/DD/YYYY')
-      });
-    }
+   const onNavigate = useCallback((data: DatesSetArg) => {
+    setDateRange({
+      estimateStartDate: dayjs(data.start).format('MM/DD/YYYY'),
+      estimateEndDate: dayjs(data.end).subtract(1, 'day').format('MM/DD/YYYY')
+    });
   }, []);
 
   useEffect(() => {
