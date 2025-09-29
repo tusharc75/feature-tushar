@@ -312,14 +312,15 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                                 values,
                                                 initialData.fields
                                               );
+
                                               if (!isEmpty(costPrice)) {
-                                                const costPriceResult = autoCalculateSpecificFields(
-                                                  { [costPriceFieldName]: costPrice?.price || 0 },
-                                                  values,
+                                                const costPriceResult = autoCalculateSpecificFields({ [costPriceFieldName]: costPrice?.price || 0 },
+                                                  { ...values, ...result },
                                                   initialData.fields
                                                 );
-                                                result = { ...costPriceResult, ...result };
+                                                result = { ...result, ...costPriceResult };
                                               }
+
                                               if (Object.keys(result).length >= 1) {
                                                 for (var x in result) {
                                                   setFieldValue(x, result[x]);
