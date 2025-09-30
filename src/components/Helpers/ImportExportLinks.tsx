@@ -344,7 +344,7 @@ export default function ImportExportLinks({
               <MenuItem
                 key={d.title}
                 onClick={() => {
-                  if (resource === sidebarResource.rentalManagement) {
+                  if (resource === sidebarResource.rentalManagement || resource === sidebarResource.packages) {
                     downloadTemplate(d.api);
                   } else {
                     exportToExcel(d.api);
