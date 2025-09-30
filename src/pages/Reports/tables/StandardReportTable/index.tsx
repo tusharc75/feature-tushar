@@ -601,6 +601,13 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       }
       return tempColumn;
     }
+    if (resourceCamelCase === 'jobProfitability') {
+      const materialWiseFilter = deepFilters?.find((e) => e.field === 'materialWise');
+      if (!materialWiseFilter || (materialWiseFilter && materialWiseFilter?.term === 'No')) {
+        tempColumn = tempColumn?.filter((e) => !['materialDetail', 'type']?.includes(e.accessor));
+      }
+      return tempColumn;
+    }
     if (selectedReport?.type === 'custom-report' && customReportData && customReportData?.column?.length > 0) {
       return tempColumn?.filter((t) => customReportData?.column?.includes(t?.accessor));
     }
