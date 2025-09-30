@@ -128,19 +128,24 @@ const FieldServiceTechnician = () => {
   const [selectedData, setSelectedData] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [resourceData, setResourceData] = useState(null);
-  const [resourceFlag, setResourceFlag] = useState<string>(sidebarResource.fieldServiceOrder);
+  const [resourceFlag, setResourceFlag] = useState<string>('');
   const history = useHistory();
 
   const isOfflineRef = useRef(isOffline);
 
   useEffect(() => {
     fetchPolicy();
+  }, []);
+
+  useEffect(() => {
+    if (!resourceFlag) return;
     setUpindexDB();
     fetchColumns();
     isOfflineRef.current = isOffline;
   }, [isOffline, resourceFlag]);
 
   useEffect(() => {
+    if (!resourceFlag) return;
     fetchData();
     if (resourceData?.policy?.showOnlyAssignedTickets) {
       setView('card');
@@ -227,7 +232,6 @@ const FieldServiceTechnician = () => {
       if (isOfflineRef.current) {
         fieldTicketField = await findOne(objectStore.resource, sidebarResource.fieldTicket);
       } else {
-        console.log("hey")
         const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`);
         fieldTicketField = response?.data?.data;
       }
