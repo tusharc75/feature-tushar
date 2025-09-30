@@ -297,30 +297,50 @@ const ProductDetailsPage = () => {
                             </Box>
 
                             {!productInventoryLoading ? (
-                              <Box className="formdata-v1" style={{ minHeight }}>
+                              <Box className="formdata-v1 overflow-x-auto" style={{ minHeight }}>
                                 {productInventoryData?.filter((d) => d.inventory)?.length ? (
-                                  <>
-                                    <Box display="flex" justifyContent="space-between">
-                                      <Typography className="table-head-v1">{resources?.warehouse?.titleSingular}</Typography>
-                                      {user?.user?.brandPolicy?.storageLocation && (
-                                        <Typography className="table-head-v1">{resources?.storageLocation?.titleSingular}</Typography>
-                                      )}
-                                      <Typography className="table-head-v1">Inventory</Typography>
-                                      <Typography className="table-head-v1">Available Inventory</Typography>
-                                    </Box>
-                                    {productInventoryData
-                                      ?.filter((d) => d.inventory)
-                                      .map(({ inventory, softHold, warehouse, storageLocation }) => (
-                                        <Box display="flex" justifyContent="space-between">
-                                          <Typography className="table-data-v1 bt-0 br-0">{warehouse?.name} </Typography>
-                                          {user?.user?.brandPolicy?.storageLocation && (
-                                            <Typography className="table-data-v1 bt-0 br-0">{storageLocation?.storageLocationName} </Typography>
-                                          )}
-                                          <Typography className="table-data-v1 bt-0 br-0">{inventory}</Typography>
-                                          <Typography className="table-data-v1 bt-0">{inventory - (softHold || 0)}</Typography>
-                                        </Box>
-                                      ))}
-                                  </>
+                                  <table className="border-collapse">
+                                    <thead>
+                                      <tr>
+                                        <Typography component={'th'} className="table-head-v1 min-w-[120px] text-left">
+                                          {resources?.warehouse?.titleSingular}
+                                        </Typography>
+                                        {user?.user?.brandPolicy?.storageLocation && (
+                                          <Typography component={'th'} className="table-head-v1 min-w-[120px] text-left">
+                                            {resources?.storageLocation?.titleSingular}
+                                          </Typography>
+                                        )}
+                                        <Typography component={'th'} className="table-head-v1 min-w-[120px] text-left">
+                                          Inventory
+                                        </Typography>
+                                        <Typography component={'th'} className="table-head-v1 min-w-[120px] text-left">
+                                          Available Inventory
+                                        </Typography>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {productInventoryData
+                                        ?.filter((d) => d.inventory)
+                                        .map(({ inventory, softHold, warehouse, storageLocation }, i) => (
+                                          <tr key={i}>
+                                            <Typography component={'td'} className="table-data-v1 bt-0 br-0">
+                                              {warehouse?.name}{' '}
+                                            </Typography>
+                                            {user?.user?.brandPolicy?.storageLocation && (
+                                              <Typography component={'td'} className="table-data-v1 bt-0 br-0">
+                                                {storageLocation?.storageLocationName}{' '}
+                                              </Typography>
+                                            )}
+                                            <Typography component={'td'} className="table-data-v1 bt-0 br-0">
+                                              {inventory}
+                                            </Typography>
+                                            <Typography component={'td'} className="table-data-v1 bt-0">
+                                              {inventory - (softHold || 0)}
+                                            </Typography>
+                                          </tr>
+                                        ))}
+                                    </tbody>
+                                  </table>
                                 ) : (
                                   <Box textAlign="center" padding={2} minHeight={10}>
                                     <Typography>No Record Found</Typography>
