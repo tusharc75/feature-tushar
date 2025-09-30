@@ -1,5 +1,5 @@
 import { useState, Fragment } from 'react';
-import { Box, TextField } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, TextField } from '@mui/material';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -15,6 +15,7 @@ const schema = object().shape({
 });
 
 const ReplaceAssetReason = ({ handleClose, loading, handleSucess, isIncorrectAssignment = false }) => {
+
   const [initialValues, setInitialValues] = useState({ reason: '', incorrectAssignment: false });
 
   return (
@@ -35,14 +36,11 @@ const ReplaceAssetReason = ({ handleClose, loading, handleSucess, isIncorrectAss
                 />
                 {isIncorrectAssignment && (
                   <Box mt={2}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <input
-                        type="checkbox"
-                        checked={values.incorrectAssignment || false}
-                        onChange={e => setFieldValue('incorrectAssignment', e.target.checked)}
-                      />
-                      Because of an incorrect assignment
-                    </label>
+                    <FormControlLabel control={<Checkbox
+                      checked={values.incorrectAssignment || false}
+                      onChange={e => setFieldValue('incorrectAssignment', e.target.checked)}
+                    />}
+                      label="Because of an incorrect assignment" />
                   </Box>
                 )}
               </Box>
