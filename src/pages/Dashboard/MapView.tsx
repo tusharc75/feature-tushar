@@ -5,6 +5,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { useAppTheme } from 'src/constants/AppConfig';
 import routes from 'src/components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
+import { isEmpty } from 'lodash';
 
 type locationType = {
   count: number;
@@ -111,11 +112,12 @@ const mapLightTheme: GoogleMapProps['options']['styles'] = [
 interface MapViewProps {
   data: any[];
   height: number | string;
+  filterValues?: any
 }
 
 const MapView = (props: MapViewProps) => {
   const [themeColor] = useAppTheme();
-  const { data, height } = props;
+  const { data, filterValues, height } = props;
   const [isFetching, setFetching] = React.useState(false);
   const [center, setCenter] = React.useState(null);
   const [selectedAsset, setSelectedAsset] = React.useState([]);
@@ -132,10 +134,11 @@ const MapView = (props: MapViewProps) => {
     setSelectedBase(assetData);
     setSelectedAsset([]);
     setFetching(true);
+    const urlParams = getParams()
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`/kpi/asset/location-base-status-count?location=${id}`);
+      } = await axiosInstance().get(`/kpi/asset/location-base-status-count?location=${id}${urlParams}`);
       if (data) {
         setSelectedAsset(data);
       }
@@ -144,6 +147,21 @@ const MapView = (props: MapViewProps) => {
       setFetching(false);
     }
   }, []);
+
+  const getParams = () => {
+    let url = '';
+
+    Object.keys(filterValues)?.forEach(_key => {
+      if (Array.isArray(filterValues[_key]) && filterValues[_key]?.length > 0) {
+        url = `${url}&${_key}=${JSON.stringify(filterValues[_key].map((p: any) => p?.optionValue))}`;
+      } else if (typeof filterValues[_key] === 'number' && filterValues[_key] > 0) {
+        url = `${url}&${_key}=${filterValues[_key]}`;
+      } else if (typeof filterValues[_key] === 'object' && !isEmpty(filterValues[_key])) {
+        url = `${url}&${_key}=${filterValues[_key]?.optionValue}`;
+      }
+    });
+    return url;
+  }
 
   const handleMarkerClick = (asset: locationType) => {
     setCenter({ lat: asset.location.latitude, lng: asset.location.longitude });
