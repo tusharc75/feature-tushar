@@ -14,8 +14,8 @@ const schema = object().shape({
   reason: string().required('Please enter the reason for replacement').min(3, 'Too Short')
 });
 
-const ReplaceAssetReason = ({ handleClose, loading, handleSucess }) => {
-  const [initialValues, setInitialValues] = useState({ reason: '' });
+const ReplaceAssetReason = ({ handleClose, loading, handleSucess, isIncorrectAssignment = false }) => {
+  const [initialValues, setInitialValues] = useState({ reason: '', incorrectAssignment: false });
 
   return (
     <Dialog maxWidth="sm" fullWidth TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
@@ -26,13 +26,25 @@ const ReplaceAssetReason = ({ handleClose, loading, handleSucess }) => {
             <CustomDialogContent>
               <Box className="my-2">
                 <MultiLine
-                  label={`Reason For Replacement`}
+                  label={`Reason For Replacement panda2`}
                   value={values['reason']}
                   required={true}
                   error={touched['reason'] && Boolean(errors['reason'])}
                   touched={Boolean(touched['reason']) && errors['reason']}
                   onChange={(value) => setFieldValue('reason', value)}
                 />
+                {isIncorrectAssignment && (
+                  <Box mt={2}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <input
+                        type="checkbox"
+                        checked={values.incorrectAssignment || false}
+                        onChange={e => setFieldValue('incorrectAssignment', e.target.checked)}
+                      />
+                      Because of an incorrect assignment
+                    </label>
+                  </Box>
+                )}
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>

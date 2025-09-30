@@ -167,7 +167,8 @@ const ReceivingTicket = ({
     confirmationDirectSendToSupplierDialog: false,
     data: null,
     confirmationAddNewLineItemsDialog: false,
-    confirmationAddNewLineItems: ''
+    confirmationAddNewLineItems: '',
+    incorrectAssignment: false
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -2644,11 +2645,12 @@ const ReceivingTicket = ({
         rentalJob: rentalManagementData?._id,
         reason: replaceReason,
         replaceWithNewLineItems: replaceWithNewLineItems,
-        directSendToSupplier: directSendToSupplier
+        directSendToSupplier: directSendToSupplier,
+        incorrectAssignment: showReplaceAssetWarnings?.incorrectAssignment
       })
       .then(({ data }) => {
         setAddSerializedAssetDialog({ open: false, products: [] });
-        setShowReplaceAssetWarnings({ replaceAssetReason: '', replaceAssetReasonDialog: false, data: null, confirmationAddNewLineItems: '', confirmationAddNewLineItemsDialog: false, confirmationDirectSendToSupplierDialog: false });
+        setShowReplaceAssetWarnings({ replaceAssetReason: '', replaceAssetReasonDialog: false, data: null, confirmationAddNewLineItems: '', confirmationAddNewLineItemsDialog: false, confirmationDirectSendToSupplierDialog: false, incorrectAssignment: false });
         setIsSubmitting(false);
         setOkBtnLoading(false)
         fetchRecords();
@@ -3462,8 +3464,9 @@ const ReceivingTicket = ({
           handleClose={() => setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, data: null }))}
           loading={isSubmitting}
           handleSucess={(data) => {
-            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, replaceAssetReason: data?.reason, confirmationAddNewLineItemsDialog: true }))
+            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, replaceAssetReason: data?.reason, confirmationAddNewLineItemsDialog: true, incorrectAssignment: data?.incorrectAssignment }))
           }}
+          isIncorrectAssignment={true}
         />
       )}
       {transferAnotherPackageDialog && (
