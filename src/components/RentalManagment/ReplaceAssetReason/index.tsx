@@ -26,7 +26,7 @@ const ReplaceAssetReason = ({ handleClose, loading, handleSucess, isIncorrectAss
             <CustomDialogContent>
               <Box className="my-2">
                 <MultiLine
-                  label={`Reason For Replacement panda2`}
+                  label={`Reason For Replacement`}
                   value={values['reason']}
                   required={true}
                   error={touched['reason'] && Boolean(errors['reason'])}
