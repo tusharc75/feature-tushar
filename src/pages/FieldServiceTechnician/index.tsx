@@ -134,6 +134,7 @@ const FieldServiceTechnician = () => {
   const isOfflineRef = useRef(isOffline);
 
   useEffect(() => {
+    fetchPolicy();
     setUpindexDB();
     fetchColumns();
     isOfflineRef.current = isOffline;
