@@ -9,17 +9,18 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { orderBy, uniq, map, uniqBy } from 'lodash';
+import { orderBy, uniq, map, uniqBy, camelCase, isEmpty } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FaDiceOne } from 'react-icons/fa';
 import { fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { getPricingConditions } from 'src/components/PricingCondition';
+import { getCostPriceConditions, getPricingConditions } from 'src/components/PricingCondition';
+import { useData } from 'src/StateProvider/Provider';
 
-const rateChangeFields = ['pricingMethod', 'pricingCondition'];
+const rateChangeFields = ['pricingMethod', 'pricingCondition', 'unit'];
 
-const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext, rentalPolicyData }) => {
+const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
@@ -29,6 +30,11 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
   const [priceMethodListConst, setPriceMethodListConst] = useState([]);
   const [priceConditionList, setPriceConditionList] = useState([]);
   const [priceMethodList, setPriceMethodList] = useState([]);
+  const [costPriceConditionList, setCostPriceConditionList] = useState([]);
+
+  const {
+    state: { user }
+  }: any = useData();
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -39,15 +45,6 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     let data = await fetch_rental_technician_fields(rentalManagementData?.currency, isOffline);
-    if (rentalPolicyData?.enableTechnicianDispatchReturn) {
-      data?.forEach((e: any) => {
-        if (e.fieldName === 'startDate' || e.fieldName === 'endDate') {
-          e.fieldLabel = e.fieldName === 'startDate' ? 'Dispatched Date' : 'Returned Date';
-          e.isUneditable = true;
-          e.disableOnEdit = true;
-        }
-      })
-    }
     if (bulkEdit) {
       data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
       setInitialData({
@@ -110,6 +107,11 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
       ], PRICING_SETUP_TYPE.rent);
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);
+
+      if (user?.user?.brandPolicy?.materialCostPrice) {
+        let costPriceData: any = await getCostPriceConditions([{ technician: technicianData?.technicianId }], sidebarResource.employeeMaster);
+        setCostPriceConditionList(costPriceData || []);
+      }
     }
   }
 
@@ -275,6 +277,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                                 }
                                               }
                                               let priceValue;
+                                              let costPrice;
                                               if (field.fieldName === 'pricingCondition') {
                                                 priceValue = priceConditionListConst?.find(
                                                   (d) =>
@@ -290,13 +293,34 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                                     d.materialId === values['competence']
                                                 );
                                               }
+                                              if (field.fieldName === 'pricingMethod') {
+                                                costPrice = costPriceConditionList?.find(
+                                                  (d) =>
+                                                    d?.pricingMethod === camelCase(value) && d.unit === camelCase(values?.['unit']?.toLowerCase())
+                                                );
+                                              } else if (field.fieldName === 'unit') {
+                                                costPrice = costPriceConditionList?.find(
+                                                  (d) =>
+                                                    d?.pricingMethod === camelCase(values?.['pricingMethod']) && d.unit === camelCase(value?.toLowerCase())
+                                                );
+                                              }
 
                                               let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
-                                              const result = autoCalculateSpecificFields(
+                                              let costPriceFieldName = 'costPrice_' + rentalManagementData?.currency?.toLowerCase();
+                                              let result = autoCalculateSpecificFields(
                                                 { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
                                                 values,
                                                 initialData.fields
                                               );
+
+                                              if (!isEmpty(costPrice)) {
+                                                const costPriceResult = autoCalculateSpecificFields({ [costPriceFieldName]: costPrice?.price || 0 },
+                                                  { ...values, ...result },
+                                                  initialData.fields
+                                                );
+                                                result = { ...result, ...costPriceResult };
+                                              }
+
                                               if (Object.keys(result).length >= 1) {
                                                 for (var x in result) {
                                                   setFieldValue(x, result[x]);

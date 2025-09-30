@@ -351,14 +351,6 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                 resourceData={workOrderData}
                 attachmentType={ATTACHMENT_TYPE.drawing}
               />
-              {/* <Diagram
-                resource={ACTIVITY_RESOURCE.workOrder}
-                referenceId={workOrderId}
-                currentVersion={selectedVersionNumber}
-                disableEdit={true}
-                resourceData={workOrderData}
-                attachmentType={ATTACHMENT_TYPE.drawing}
-              /> */}
             </TabPanel>
           </Box>
         </CustomDialogContent>

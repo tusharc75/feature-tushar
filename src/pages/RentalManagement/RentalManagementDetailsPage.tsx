@@ -683,6 +683,7 @@ const RentalManagementDetailsPage = () => {
                   setAssetStatusOptions={setAssetStatusOptions}
                   assetPolicyData={assetPolicyData}
                   fleetDispatchPolicyData={fleetDispatchPolicyData}
+                  rentalManagementFields={rentalManagementFields}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Final Slip' && rentalManagementData && (

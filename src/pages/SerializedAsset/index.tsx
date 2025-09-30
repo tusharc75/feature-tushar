@@ -16,7 +16,7 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { cloneDisable, deleteDisable, scrapRequestDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -648,30 +648,39 @@ const SerializedAsset = () => {
             >
               {`Status Change - ${ASSET_STATUS.needRecert}`}
             </MenuItem>
-            <MenuItem
-              onClick={() => {
-                if (user?.user?.brandPolicy?.serializedAssetScrapApproval && serializedAssetStatusChangeRequestFields?.length > 0) {
-                  setStatusChangeRequestDialog(true);
-                } else {
-                  handleStatusChange(ASSET_STATUS.scrap);
-                }
-              }}
-              disabled={
-                selectedRecords?.filter((o) =>
-                  [
-                    ASSET_STATUS.new,
-                    ASSET_STATUS.available,
-                    ASSET_STATUS.needRepair,
-                    ASSET_STATUS.needRecert,
-                    ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
-                  ].includes(o.status)
-                ).length === selectedRecords?.length
-                  ? false
-                  : true
+            <HtmlTooltip
+              title={
+                user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest
+                  ? scrapRequestDisable
+                  : ''
               }
             >
-              {`Status Change - ${ASSET_STATUS.scrap}`}
-            </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  if (user?.user?.brandPolicy?.serializedAssetScrapApproval && serializedAssetStatusChangeRequestFields?.length > 0) {
+                    setStatusChangeRequestDialog(true);
+                  } else {
+                    handleStatusChange(ASSET_STATUS.scrap);
+                  }
+                }}
+                disabled={
+                  selectedRecords?.filter((o) =>
+                    [
+                      ASSET_STATUS.new,
+                      ASSET_STATUS.available,
+                      ASSET_STATUS.needRepair,
+                      ASSET_STATUS.needRecert,
+                      ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
+                    ].includes(o.status)
+                  )?.length !== selectedRecords?.length ||
+                    (user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest)
+                    ? true
+                    : false
+                }
+              >
+                {`Status Change - ${ASSET_STATUS.scrap}`}
+              </MenuItem>
+            </HtmlTooltip>
             <MenuItem
               onClick={() => {
                 handleStatusChange(ASSET_STATUS.lost);
@@ -853,9 +862,9 @@ const SerializedAsset = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
+              ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.assetNumber : ''}`
-            : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
+              : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
             } ?`}
           onClose={() => {
             setDeleteRecord(null);

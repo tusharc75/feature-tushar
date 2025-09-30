@@ -1,4 +1,4 @@
-import { camelCase, orderBy } from "lodash";
+import { camelCase, cloneDeep, orderBy } from "lodash";
 import axiosInstance from "src/axios/axiosInstance";
 import routes from "src/components/Helpers/Routes";
 import { autoCalculateSpecificFields } from "src/constants/formulaUtility";
@@ -163,3 +163,31 @@ export const getTaxById = async (taxCode: any) => {
   return data;
 }
 
+export const getCostPriceConditions = async (material: any[], type: string) => {
+  const ids = material?.map((e) => type === sidebarResource.employeeMaster ? e?.technician : e?.materialId);
+  const {
+    data: { data }
+  } = await axiosInstance().post(`cost-price/get`, {
+    materialIds: ids,
+    type: type
+  });
+  return data;
+};
+
+export const getCostPriceValue = (row: any, costPriceData: any, currency: any, fields: any[], resource: string = null) => {
+  let rateList = [];
+  rateList = costPriceData?.filter(
+    (e) =>
+      e.materialId === `${resource === sidebarResource.employeeMaster ? row.technician : row.materialId}` &&
+      e.type === `${resource === sidebarResource.employeeMaster ? sidebarResource.employeeMaster : row.type}` &&
+      e.unit === camelCase(row?.unit?.toLowerCase()) &&
+      e.pricingMethod === camelCase(row.pricingMethod)
+  );
+  if (rateList?.length) {
+    const priceFieldName = `costPrice_${currency?.toLowerCase()}`;
+    row[priceFieldName] = rateList[0].price;
+    const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateList[0].price }, row, fields);
+    Object.assign(row, calValues);
+  }
+  return row;
+};

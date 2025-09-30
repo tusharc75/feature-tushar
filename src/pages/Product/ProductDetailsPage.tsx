@@ -41,6 +41,7 @@ import LeadTime from 'src/components/LeadTime';
 import Step from 'src/pages/DynamicForm/Step';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import CostPrice from 'src/components/CostPrice';
 
 const minHeight = '250px';
 
@@ -296,30 +297,50 @@ const ProductDetailsPage = () => {
                             </Box>
 
                             {!productInventoryLoading ? (
-                              <Box className="formdata-v1" style={{ minHeight }}>
+                              <Box className="formdata-v1 overflow-x-auto" style={{ minHeight }}>
                                 {productInventoryData?.filter((d) => d.inventory)?.length ? (
-                                  <>
-                                    <Box display="flex" justifyContent="space-between">
-                                      <Typography className="table-head-v1">{resources?.warehouse?.titleSingular}</Typography>
-                                      {user?.user?.brandPolicy?.storageLocation && (
-                                        <Typography className="table-head-v1">{resources?.storageLocation?.titleSingular}</Typography>
-                                      )}
-                                      <Typography className="table-head-v1">Inventory</Typography>
-                                      <Typography className="table-head-v1">Available Inventory</Typography>
-                                    </Box>
-                                    {productInventoryData
-                                      ?.filter((d) => d.inventory)
-                                      .map(({ inventory, softHold, warehouse, storageLocation }) => (
-                                        <Box display="flex" justifyContent="space-between">
-                                          <Typography className="table-data-v1 bt-0 br-0">{warehouse?.name} </Typography>
-                                          {user?.user?.brandPolicy?.storageLocation && (
-                                            <Typography className="table-data-v1 bt-0 br-0">{storageLocation?.storageLocationName} </Typography>
-                                          )}
-                                          <Typography className="table-data-v1 bt-0 br-0">{inventory}</Typography>
-                                          <Typography className="table-data-v1 bt-0">{inventory - (softHold || 0)}</Typography>
-                                        </Box>
-                                      ))}
-                                  </>
+                                  <table className="border-collapse">
+                                    <thead>
+                                      <tr>
+                                        <Typography component={'th'} className="table-head-v1 min-w-[120px] text-left">
+                                          {resources?.warehouse?.titleSingular}
+                                        </Typography>
+                                        {user?.user?.brandPolicy?.storageLocation && (
+                                          <Typography component={'th'} className="table-head-v1 min-w-[120px] text-left">
+                                            {resources?.storageLocation?.titleSingular}
+                                          </Typography>
+                                        )}
+                                        <Typography component={'th'} className="table-head-v1 min-w-[120px] text-left">
+                                          Inventory
+                                        </Typography>
+                                        <Typography component={'th'} className="table-head-v1 min-w-[120px] text-left">
+                                          Available Inventory
+                                        </Typography>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {productInventoryData
+                                        ?.filter((d) => d.inventory)
+                                        .map(({ inventory, softHold, warehouse, storageLocation }, i) => (
+                                          <tr key={i}>
+                                            <Typography component={'td'} className="table-data-v1 bt-0 br-0">
+                                              {warehouse?.name}{' '}
+                                            </Typography>
+                                            {user?.user?.brandPolicy?.storageLocation && (
+                                              <Typography component={'td'} className="table-data-v1 bt-0 br-0">
+                                                {storageLocation?.storageLocationName}{' '}
+                                              </Typography>
+                                            )}
+                                            <Typography component={'td'} className="table-data-v1 bt-0 br-0">
+                                              {inventory}
+                                            </Typography>
+                                            <Typography component={'td'} className="table-data-v1 bt-0">
+                                              {inventory - (softHold || 0)}
+                                            </Typography>
+                                          </tr>
+                                        ))}
+                                    </tbody>
+                                  </table>
                                 ) : (
                                   <Box textAlign="center" padding={2} minHeight={10}>
                                     <Typography>No Record Found</Typography>
@@ -520,6 +541,11 @@ const ProductDetailsPage = () => {
                       {user?.user?.brandPolicy?.leadTime && (
                         <Grid size={{ xs: 12, sm: 6, md: 6, xl: 4 }}>
                           <LeadTime referenceType={MATERIAL_TYPE.product} referenceId={id} referenceLabel={productData?.productName} />
+                        </Grid>
+                      )}
+                      {user?.user?.brandPolicy?.materialCostPrice && (
+                        <Grid size={{ xs: 12, sm: 6, md: 6, xl: 4 }}>
+                          <CostPrice referenceData={productData} type={MATERIAL_TYPE.product} />
                         </Grid>
                       )}
                     </Grid>

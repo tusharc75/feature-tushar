@@ -31,7 +31,6 @@ const DoaQuotationApproval = () => {
   const history = useHistory();
   const { id } = useParams();
   const [DOAData, setDOAData] = useState(null);
-  const [PDFName, setPDFName] = useState('');
   const [QStatus, setQStatus] = useState(true);
   const [showQuoteStatusChangeDialog, setShowQuoteStatusChangeDialog] = useState(false);
   const [quoteStatusChangeData, setQuoteStatusChangeData] = useState('');
@@ -200,7 +199,7 @@ const DoaQuotationApproval = () => {
 
   const ViewQuote = () => {
     axiosInstance()
-      .get('/user/download?fileName=' + PDFName, {
+      .get(`/pdf/${DOAData.quotation}?resource=${sidebarResource.quotation}&uniqueId=${DOAData.versionId}`, {
         responseType: 'blob'
       })
       .then(({ data }) => {

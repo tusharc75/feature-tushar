@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton, MenuItem, MenuList, Popover } from '@mui/material';
 import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -23,6 +23,7 @@ import {
   PACKAGE_TYPE,
   SERIALIZED_PACKAGE_STATUS,
   sidebarResource,
+  WORK_ORDER_STATUS,
   WORK_ORDER_TYPE
 } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -30,6 +31,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import MaterialQtyDialog from 'src/pages/AssemblyOrder/Material/MaterialQtyDialog';
 import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
 import { groupBy, orderBy } from 'lodash';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 
 const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, fetchAssembleOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -52,6 +54,8 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   const [isSubmitting, setSubmitting] = useState(false);
   const [openSerializedPackagesDialog, setOpenSerializedPackagesDialog] = useState(false);
   const [childPackageWithoutParentDialog, setChildPackageWithoutParentDialog] = useState({ open: false, data: null });
+  const [confermPackageToProduct, setConfermPackageToProduct] = useState(false)
+  const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
   const { generateColumns, getMaterialLabel } = useColumns();
 
   useEffect(() => {
@@ -116,14 +120,22 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
                 )}
                 {!row?.original?.workOrder && !row?.original?.isDummy && (
                   <Box>
-                    <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
+                    <HtmlTooltip title="Add">
                       <IconButton
-                        onClick={() => {
-                          setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: row.original?._id });
+                        id={`add-child-product-button-${row.index || 0}`}
+                        onClick={(event) => {
+                          const { top, left } = event.currentTarget.getBoundingClientRect();
+                          setAddchildDialog({
+                            open: true,
+                            parentId: row.original?._id,
+                            top: top + 25,
+                            bottom: left
+                          });
                         }}
                         size="small"
+                        color="primary"
                       >
-                        <Add fontSize="small" color="primary" />
+                        <Add fontSize="small" style={{ fontSize: 17 }} />
                       </IconButton>
                     </HtmlTooltip>
                   </Box>
@@ -136,6 +148,8 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
                 onClick={() => {
                   if (row?.original?.type === MATERIAL_TYPE.serializedPackage) {
                     window.open(`${routes.serializedPackagesDetail.path}/${row?.original?.materialId || row.original.serializedPackageId}`);
+                  } else if (row?.original?.type === MATERIAL_TYPE.product) {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                   } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                   }
@@ -246,8 +260,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail =
-        parent?.type === MATERIAL_TYPE.serializedPackage ? parent?.serializedPackagesDetail?.serializedPackageNumber : parent?.detail || parent.packageDetail?.packageName || ''
+      parent.detail = parent?.type === MATERIAL_TYPE.serializedPackage ? parent?.serializedPackagesDetail?.serializedPackageNumber : parent?.detail || parent.packageDetail?.packageName || ''
       parent.description = parent?.description || parent?.packageDetail?.packageDescription || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
@@ -417,6 +430,10 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     return workOrderTypeField?.option?.some(o => o?.optionValue === WORK_ORDER_TYPE.disassemblyOrder)
   }
 
+  const getFilterSelectedRecords = (selectedRecords) => {
+    return selectedRecords?.filter((e) => !e?.isDummy)
+  }
+
   const addButtonMenuItems = () => {
     return (
       <>
@@ -478,26 +495,59 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     return true;
   };
 
+  const handleConvertPackageToProduct = () => {
+    const ids = getFilterSelectedRecords(selectedRecords)?.filter(r => r?.parentId && r?.type === MATERIAL_TYPE.package && r?.workOrder && r?.workOrder?.status !== WORK_ORDER_STATUS.completed)?.map(r => r?._id)
+
+    if (ids?.length > 0) {
+      setSubmitting(true);
+      axiosInstance()
+        .put(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}/package-to-product`, { ids })
+        .then(({ data }) => {
+          dispatch({ type: 'selection', selectedRecords: [] });
+          setConfermPackageToProduct(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchData();
+          setSubmitting(false);
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
+
   const actionButtonMenuItems = () => {
     return (
       <>
         {permissions?.serializedPackages?.isRead &&
-          selectedRecords?.filter((e) => e?.workOrderType === WORK_ORDER_TYPE.disassemblyOrder)?.length > 0 && (
+          getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.workOrderType === WORK_ORDER_TYPE.disassemblyOrder)?.length > 0 && (
             <MenuItem
-              disabled={checkUniqueWarehouse(selectedRecords?.filter((e) => !e?.isDummy && e?.type === MATERIAL_TYPE.package))}
+              disabled={checkUniqueWarehouse(getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package))}
               onClick={() => {
                 setOpenSerializedPackagesDialog(true);
               }}
             >{`Assign ${resources?.serializedPackages?.titleSingular}`}</MenuItem>
           )}
         <MenuItem
-          disabled={selectedRecords?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
+          disabled={getFilterSelectedRecords(selectedRecords)?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
           onClick={() => {
-            const dataToDelete = selectedRecords?.filter((e) => !e.hideSelection && e.canDelete).map((rec: any) => rec._id);
+            const dataToDelete = getFilterSelectedRecords(selectedRecords)?.filter((e) => !e.hideSelection && e.canDelete).map((rec: any) => rec._id);
             setDeleteData(dataToDelete);
           }}
         >
           Delete
+        </MenuItem>
+        <MenuItem
+          disabled={getFilterSelectedRecords(selectedRecords)?.every(r => r?.parentId && r?.type === MATERIAL_TYPE.package && r?.workOrder && r?.workOrder?.status !== WORK_ORDER_STATUS.completed) ? false : true}
+          onClick={() => {
+            setConfermPackageToProduct(true)
+          }}
+        >
+          {`Proceed Without ${resources?.workOrder?.titlePlural}`}
         </MenuItem>
       </>
     );
@@ -511,7 +561,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           addButtonMenuItems={addButtonMenuItems()}
           isActionButtonVisible={true}
           actionButtonMenuItems={actionButtonMenuItems()}
-          actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+          actionButtonProps={{ disabled: getFilterSelectedRecords(selectedRecords)?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
           hasXpadding
         />
       )}
@@ -541,6 +591,47 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
+
+      {addchildDialog.open && (
+        <Popover
+          anchorReference="anchorPosition"
+          anchorPosition={{ top: addchildDialog.top, left: addchildDialog.bottom }}
+          anchorOrigin={{
+            vertical: 'center',
+            horizontal: 'left'
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left'
+          }}
+          open={addchildDialog.open}
+          onClose={() => {
+            setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+          }}
+        >
+          <MenuList>
+            <MenuItem
+              onClick={() => {
+                setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: addchildDialog.parentId });
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+              }}
+              id={'add-existing-child-package-menu-item'}
+            >
+              {`Add Existing ${resources?.packages?.titlePlural}`}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: addchildDialog.parentId });
+                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+              }}
+              id={'add-existing-child-product-menu-item'}
+            >
+              {`Add Existing ${resources?.product?.titlePlural}`}
+            </MenuItem>
+          </MenuList>
+        </Popover>
+      )}
+
       {deleteData && (
         <ConfirmationDialog
           open={true}
@@ -550,6 +641,18 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           okBtnLoading={isDeleting}
         />
       )}
+
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (
+        <AssignProductDialog
+          handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
+          onSuccess={(rows) => {
+            handleAdd(rows?.map(r => ({ ...r, type: MATERIAL_TYPE.product })))
+          }}
+          ids={dataRows?.find(r => r?._id === addDialog.parentId)?.subRows?.length > 0 && dataRows?.find(r => r?._id === addDialog.parentId)?.subRows?.filter(r => r?.type === MATERIAL_TYPE.product)?.length > 0 ? dataRows?.find(r => r?._id === addDialog.parentId)?.subRows?.filter(r => r?.type === MATERIAL_TYPE.product)?.map(r => r?.materialId) : []}
+          isSubmitting={isSubmitting}
+        />
+      )}
+
       {addDialog.open && addDialog.type === MATERIAL_TYPE.package && (
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
@@ -599,7 +702,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGE_STATUS.available, SERIALIZED_PACKAGE_STATUS.underReview] }]}
           isSubmitting={isSubmitting}
           ids={dataRows?.filter(d => d?.serializedPackageId)?.map((d) => d?.serializedPackageId)}
-          selectedPackages={selectedRecords
+          selectedPackages={getFilterSelectedRecords(selectedRecords)
             ?.filter((r) => [WORK_ORDER_TYPE.disassemblyOrder]?.includes(r?.workOrderType))
             ?.map((r) => ({
               uniqueId: r?._id,
@@ -622,6 +725,16 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           }}
           forwardText="Yes"
           cancelText="No"
+          okBtnLoading={isSubmitting}
+        />
+      )}
+
+      {confermPackageToProduct && (
+        <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to proceed without creating a ${resources?.workOrder?.titlePlural}?`}
+          onClose={() => setConfermPackageToProduct(false)}
+          onOk={handleConvertPackageToProduct}
           okBtnLoading={isSubmitting}
         />
       )}

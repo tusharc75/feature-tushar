@@ -43,6 +43,7 @@ import PreviewDownload from 'src/components/PreviewDownload';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import ProductQtyDialog from 'src/pages/AssemblyOrder/WorkOrder/ProductQtyDialog';
 import PreviewDownloadNew from 'src/components/PreviewDownloadNew';
+import BulkEditWorkOrder from 'src/pages/WorkOrder/BulkEditWorkOrder';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -82,6 +83,7 @@ const WorkOrder = ({
   const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [] });
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
   const [productQtyEdit, setProductQtyEdit] = useState({ open: false, data: null });
+  const [bulkEditWorkOrderDialog, setBulkEditWorkOrderDialog] = useState({ open: false, _ids: [] });
 
   const { generateColumns, getMaterialLabel } = useColumns();
 
@@ -690,12 +692,12 @@ const WorkOrder = ({
   };
 
   const checkUniqWorkOrder = () => {
-    if (selectedRecords.length === 0) {
+    if (getFilterSelectedRecords(selectedRecords).length === 0) {
       return false;
     } else if (
       uniq(
         map(
-          selectedRecords?.filter((r) => r?.workOrderId),
+          getFilterSelectedRecords(selectedRecords)?.filter((r) => r?.workOrderId),
           'workOrderId'
         )
       ).length === 1
@@ -708,7 +710,7 @@ const WorkOrder = ({
 
   const handleAddService = (ids) => {
     setSubmitting(true);
-    const allWorkOrders = selectedRecords?.filter((r) => r?.workOrderId)?.map((e) => e.workOrderId);
+    const allWorkOrders = getFilterSelectedRecords(selectedRecords)?.filter((r) => r?.workOrderId)?.map((e) => e.workOrderId);
     const data: any = {};
     data.serviceIds = ids;
     data.workOrderIds = [...new Set(allWorkOrders)];
@@ -823,7 +825,7 @@ const WorkOrder = ({
 
   const updateWorkOrdetStatus = () => {
     setSubmitting(true);
-    const ids = selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package && e?.status === WORK_ORDER_STATUS.draft)?.map((e) => e?.workOrderId);
+    const ids = getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.package && e?.status === WORK_ORDER_STATUS.draft)?.map((e) => e?.workOrderId);
     const data: any = { status: WORK_ORDER_STATUS.new, ids: ids };
     axiosInstance()
       .put(`${workOrder.api}/update-multiple-status`, data)
@@ -866,6 +868,10 @@ const WorkOrder = ({
       });
   }
 
+  const getFilterSelectedRecords = (selectedRecords) => {
+    return selectedRecords?.filter((e) => !e?.isDummy)
+  }
+
   return (
     <>
       {isAutoCreating && (
@@ -896,11 +902,14 @@ const WorkOrder = ({
               setConsumablesDialog,
               setArrangeView,
               setShowDrawingDialog,
-              updateWorkOrdetStatus
+              updateWorkOrdetStatus,
+              getFilterSelectedRecords,
+              resources,
+              setBulkEditWorkOrderDialog
             }}
           />
         }
-        actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+        actionButtonProps={{ disabled: getFilterSelectedRecords(selectedRecords)?.length === 0 }}
         hasXpadding
         rightSideContents={rightSideContents()}
       />
@@ -1027,7 +1036,7 @@ const WorkOrder = ({
       {userAssignDialog.open && (
         <AssignTechniciansDialog
           warehouse={assemblyOrderData?.warehouse?.optionValue}
-          workOrderData={selectedRecords
+          workOrderData={getFilterSelectedRecords(selectedRecords)
             .filter((e) => e.type === MATERIAL_TYPE.service)
             .map((d) => {
               return {
@@ -1045,7 +1054,7 @@ const WorkOrder = ({
             setUserAssignDialog({ open: false, assignedUsers: [] });
           }}
           competencies={uniq(
-            flatMap(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.serviceDetail?.competencies || []))
+            flatMap(getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.serviceDetail?.competencies || []))
           )}
         />
       )}
@@ -1053,7 +1062,7 @@ const WorkOrder = ({
       {workStationAssignDialog.open && (
         <AssignWorkStationDialog
           warehouse={assemblyOrderData?.warehouse?.optionValue}
-          workOrderData={selectedRecords
+          workOrderData={getFilterSelectedRecords(selectedRecords)
             .filter((e) => e.type === MATERIAL_TYPE.service)
             .map((d) => {
               return {
@@ -1077,9 +1086,20 @@ const WorkOrder = ({
           handleCloseDialog={() => setConsumablesDialog({ open: false, ids: [], data: null })}
           ids={consumablesDialog.ids}
           onSuccess={(rows) => {
-            handleAddConsumables(rows, consumablesDialog?.data ? consumablesDialog?.data : selectedRecords);
+            handleAddConsumables(rows, consumablesDialog?.data ? consumablesDialog?.data : getFilterSelectedRecords(selectedRecords));
           }}
           isSubmitting={isSubmitting}
+        />
+      )}
+
+      {bulkEditWorkOrderDialog.open && (
+        <BulkEditWorkOrder
+          workOrderIds={bulkEditWorkOrderDialog?._ids}
+          onClose={() => setBulkEditWorkOrderDialog({ open: false, _ids: [] })}
+          onSuccess={() => {
+            fetchData();
+            setBulkEditWorkOrderDialog({ open: false, _ids: [] });
+          }}
         />
       )}
 
@@ -1087,14 +1107,14 @@ const WorkOrder = ({
         <ArrangeView
           data={
             flattenArray(dataRows)
-              ?.filter((e) => e.type === MATERIAL_TYPE.service && e?.workOrderId === selectedRecords[0]?.workOrderId)
+              ?.filter((e) => e.type === MATERIAL_TYPE.service && e?.workOrderId === getFilterSelectedRecords(selectedRecords)[0]?.workOrderId)
               ?.map((d) => {
                 return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork };
               }) || []
           }
           title={'Arrange Services'}
           handleClose={() => setArrangeView(false)}
-          handleSubmit={(data) => handleArrangeUpdate(data, selectedRecords[0]?.workOrderId)}
+          handleSubmit={(data) => handleArrangeUpdate(data, getFilterSelectedRecords(selectedRecords)[0]?.workOrderId)}
           loading={false}
         />
       )}
@@ -1137,17 +1157,20 @@ const ActionButtonMenuItems = ({
   setConsumablesDialog,
   setArrangeView,
   setShowDrawingDialog,
-  updateWorkOrdetStatus
+  updateWorkOrdetStatus,
+  getFilterSelectedRecords,
+  resources,
+  setBulkEditWorkOrderDialog
 }) => {
   const checkUniqWorkOrderType = () => {
-    if (selectedRecords.length === 0) {
+    if (getFilterSelectedRecords(selectedRecords).length === 0) {
       return false;
-    } else if (selectedRecords?.find((e) => !e?.workOrderType)) {
+    } else if (getFilterSelectedRecords(selectedRecords)?.find((e) => !e?.workOrderType)) {
       return true;
     } else if (
       uniq(
         map(
-          selectedRecords?.filter((r) => r?.workOrderType),
+          getFilterSelectedRecords(selectedRecords)?.filter((r) => r?.workOrderType),
           'workOrderType'
         )
       ).length === 1
@@ -1161,7 +1184,7 @@ const ActionButtonMenuItems = ({
   return (
     <>
       <MenuItem
-        disabled={!checkParentProduct(selectedRecords)}
+        disabled={!checkParentProduct(getFilterSelectedRecords(selectedRecords))}
         onClick={() => {
           setAddServicesDialog({ open: true, new: false });
         }}
@@ -1169,7 +1192,7 @@ const ActionButtonMenuItems = ({
         Add Existing Services
       </MenuItem>
       <MenuItem
-        disabled={!checkParentProduct(selectedRecords)}
+        disabled={!checkParentProduct(getFilterSelectedRecords(selectedRecords))}
         onClick={() => {
           setAddServicesDialog({ open: true, new: true });
         }}
@@ -1177,10 +1200,10 @@ const ActionButtonMenuItems = ({
         Add New Service
       </MenuItem>
       <MenuItem
-        disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length ? false : true}
+        disabled={getFilterSelectedRecords(selectedRecords)?.filter((d) => d.type === MATERIAL_TYPE.service)?.length ? false : true}
         onClick={() => {
           const uniqueAssignedUsers: any = flatMap(
-            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.assignedUsers || [])
+            getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.assignedUsers || [])
           );
           const assignedUsers = [];
           uniqueAssignedUsers?.forEach((e: any) => {
@@ -1195,10 +1218,10 @@ const ActionButtonMenuItems = ({
       </MenuItem>
       {allowedToEdit && permissions?.workStations?.isRead && (
         <MenuItem
-          disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
+          disabled={getFilterSelectedRecords(selectedRecords)?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
           onClick={() => {
             const uniqueAssignedWorkStations: any = flatMap(
-              selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.assignedWorkStations || [])
+              getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.assignedWorkStations || [])
             );
             const assignedWorkStations = [];
             uniqueAssignedWorkStations?.forEach((e: any) => {
@@ -1215,19 +1238,19 @@ const ActionButtonMenuItems = ({
       {!user?.user?.brandPolicy?.workOrderConsumableHide && (
         <MenuItem
           disabled={
-            selectedRecords?.filter((d) => [MATERIAL_TYPE.package, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 && checkUniqWorkOrder()
+            getFilterSelectedRecords(selectedRecords)?.filter((d) => [MATERIAL_TYPE.package, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 && checkUniqWorkOrder()
               ? false
               : true
           }
           onClick={() => {
             var ids = [];
-            if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.package)) {
-              const packages = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.package);
+            if (getFilterSelectedRecords(selectedRecords)?.find((e) => e.type === MATERIAL_TYPE.package)) {
+              const packages = getFilterSelectedRecords(selectedRecords)?.find((e) => e.type === MATERIAL_TYPE.package);
               ids = flattenArray(dataRows)
                 ?.filter((e) => e?.workOrderId === packages?.workOrderId)
                 ?.map((e) => e.materialId);
             } else {
-              const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
+              const serviceIds = getFilterSelectedRecords(selectedRecords)?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
               ids = flattenArray(dataRows)
                 ?.filter((e) => serviceIds?.includes(e?.parentId))
                 ?.map((e) => e.materialId);
@@ -1243,16 +1266,16 @@ const ActionButtonMenuItems = ({
           setArrangeView(true);
         }}
         disabled={
-          selectedRecords?.length &&
-            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
-            selectedRecords?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
+          getFilterSelectedRecords(selectedRecords)?.length &&
+            getFilterSelectedRecords(selectedRecords)?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
+            getFilterSelectedRecords(selectedRecords)?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
             ? false
             : true
         }
       >
         Arrange Services
       </MenuItem>
-      {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package && e?.status === WORK_ORDER_STATUS.draft)?.length > 0 &&
+      {getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.package && e?.status === WORK_ORDER_STATUS.draft)?.length > 0 &&
         <MenuItem
           onClick={() => {
             updateWorkOrdetStatus()
@@ -1262,13 +1285,13 @@ const ActionButtonMenuItems = ({
         </MenuItem>}
       <MenuItem
         onClick={() => {
-          setAutoCompleteData(selectedRecords?.filter((e) => e?.canAutoCompleteWorkOrder));
+          setAutoCompleteData(getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.canAutoCompleteWorkOrder));
           setCompleteConfirmBox(true);
         }}
         disabled={
           checkUniqWorkOrderType() &&
-            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
-            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.package).every((e) => e?.canAutoCompleteWorkOrder)
+            getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
+            getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.package).every((e) => e?.canAutoCompleteWorkOrder)
             ? false
             : true
         }
@@ -1278,17 +1301,17 @@ const ActionButtonMenuItems = ({
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
-            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-              selectedRecords?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
+            (getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+              getFilterSelectedRecords(selectedRecords)?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
             ? false
             : true
         }
         onClick={() => {
-          const parentProduct = selectedRecords?.find((e) => checkParentProduct([e], e?.parentId));
+          const parentProduct = getFilterSelectedRecords(selectedRecords)?.find((e) => checkParentProduct([e], e?.parentId));
           if (parentProduct) {
             setShowDrawingDialog({ open: true, data: parentProduct });
           } else {
-            const service = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.service);
+            const service = getFilterSelectedRecords(selectedRecords)?.find((e) => e.type === MATERIAL_TYPE.service);
             setShowDrawingDialog({ open: true, data: service });
           }
         }}
@@ -1296,11 +1319,19 @@ const ActionButtonMenuItems = ({
         Upload Attachments
       </MenuItem>
       <MenuItem
+        disabled={getFilterSelectedRecords(selectedRecords)?.some(r => [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(r?.workOrder?.status)) || !permissions?.workOrder?.isUpdate}
         onClick={() => {
-          setDeleteData(selectedRecords?.filter((e) => e?.canDelete));
+          setBulkEditWorkOrderDialog({ open: true, _ids: uniq(getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.workOrder)?.map(r => r?.workOrder?._id)) })
+        }}
+      >
+        {`Bulk Edit ${resources?.workOrder?.titlePlural}`}
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          setDeleteData(getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.canDelete));
           setShowDeleteConfirmBox(true);
         }}
-        disabled={selectedRecords?.some((e) => e?.canDelete) ? false : true}
+        disabled={getFilterSelectedRecords(selectedRecords)?.some((e) => e?.canDelete) ? false : true}
       >
         Delete
       </MenuItem>

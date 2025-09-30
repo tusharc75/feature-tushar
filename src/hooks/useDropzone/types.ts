@@ -29,6 +29,7 @@ export type MimeType =
   | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
   | 'image/jpeg'
   | 'image/png'
+  | 'image/heic'
   | 'image/gif'
   | 'image/bmp'
   | 'image/webp'

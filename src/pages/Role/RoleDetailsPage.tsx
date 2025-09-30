@@ -27,6 +27,69 @@ import DefaultResources from './DefaultResources';
 import PolicyResources from './PolicyResources';
 import ImportExportRole from 'src/pages/Role/ImportExportRole';
 
+const policyResources = [
+  {
+    resource: sidebarResource.rentalManagement,
+    fieldLabel: 'Pricing Information',
+    fieldName: 'isPricingRentalManagement'
+  },
+  {
+    resource: sidebarResource.rentalManagement,
+    fieldLabel: 'Re-open',
+    fieldName: 'isRentalReopen'
+  },
+  {
+    resource: sidebarResource.rentalManagement,
+    fieldLabel: 'Allow Service Perform',
+    fieldName: 'isAllowServicePerformRentalManagement'
+  },
+  {
+    resource: sidebarResource.sublease,
+    fieldLabel: 'Pricing Information',
+    fieldName: 'isPricingSublease'
+  },
+  {
+    resource: sidebarResource.purchaseOrder,
+    fieldLabel: 'Pricing Information',
+    fieldName: 'isPricingPurchaseOrder'
+  },
+  {
+    resource: sidebarResource.quotation,
+    fieldLabel: 'Ask Supplier Quote',
+    fieldName: 'isQuoteAskSupplierPrice'
+  },
+  {
+    resource: sidebarResource.productInventory,
+    fieldLabel: 'Product Inventory Settings',
+    fieldName: 'isProductInventorySettings'
+  },
+  {
+    resource: sidebarResource.customerAccount,
+    fieldLabel: 'Approve Account',
+    fieldName: 'isApproveAccount'
+  },
+  {
+    resource: sidebarResource.contentPostPlanning,
+    fieldLabel: 'Approve Content',
+    fieldName: 'isApproveContent'
+  },
+  {
+    resource: sidebarResource.lead,
+    fieldLabel: 'Convert Lead To Opportunity',
+    fieldName: 'isConvertLeadToOpportunity'
+  },
+  {
+    resource: 'Login',
+    fieldLabel: 'QR Code Login',
+    fieldName: 'isQRCodeLogin'
+  },
+  {
+    resource: sidebarResource.serializedAsset,
+    fieldLabel: 'Scrap Request',
+    fieldName: 'scrapRequest'
+  }
+];
+
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -60,37 +123,29 @@ const RoleDetailsPage = () => {
   const [entityAccess, setEntityAccess] = useState([]);
   const [resourceOption, setResourceOption] = useState([]);
 
-  const [open, setOpen] = useState({
-    rentalManagement: false,
-    sublease: false,
-    purchaseOrder: false,
-    quoteBuilder: false,
-    productInventory: false
-  });
+  let resourcesOfPolicy: any = new Set(policyResources?.map((obj) => obj.resource));
+  resourcesOfPolicy = Array.from(resourcesOfPolicy);
 
-  const [policyFieldCheckBox, SetPolicyFieldCheckBox] = useState({
-    isPricingRentalManagement: false,
-    isPricingSublease: false,
-    isRentalReopen: false,
-    isPricingPurchaseOrder: false,
-    isQuoteAskSupplierPrice: false,
-    isProductInventorySettings: false,
-    isApproveAccount: false,
-    isConvertLeadToOpportunity: false,
-    isAllowServicePerformRentalManagement: false,
-    isQRCodeLogin: false
-  });
+  const [open, setOpen] = useState(
+    resourcesOfPolicy?.reduce((acc, r) => {
+      acc[camelCase(r)] = false;
+      return acc;
+    }, {})
+  );
 
-  const [resourceCheckbox, setResourceCheckBox] = useState({
-    rentalManagement: false,
-    sublease: false,
-    purchaseOrder: false,
-    quoteBuilder: false,
-    productInventory: false,
-    customerAccount: false,
-    lead: false,
-    login: false
-  });
+  let fieldsOfPolicy = policyResources?.map((p) => p?.fieldName);
+
+  const [policyFieldCheckBox, setPolicyFieldCheckBox] = useState(fieldsOfPolicy?.reduce((acc, f) => {
+    acc[f] = false;
+    return acc;
+  }, {}));
+
+  const [resourceCheckbox, setResourceCheckBox] = useState(
+    resourcesOfPolicy?.reduce((acc, r) => {
+      acc[camelCase(r)] = false;
+      return acc;
+    }, {})
+  );
 
   const [isPolicyCheckBoxChecked, setIsPolicyCheckBoxChecked] = useState(false);
   const [dashBoardOption, setDashBoardOption] = useState([]);
@@ -98,64 +153,6 @@ const RoleDetailsPage = () => {
   const [defaultResourceName, setDefaultResourceName] = useState([]);
   const [superAdminAccess, setSuperAdminAccess] = useState(false);
   const [canAssignByAnyuser, setCanAssignByAnyuser] = useState(false);
-
-  const policyResources = [
-    {
-      resource: sidebarResource.rentalManagement,
-      fieldLabel: 'Pricing Information',
-      fieldName: 'isPricingRentalManagement'
-    },
-    {
-      resource: sidebarResource.rentalManagement,
-      fieldLabel: 'Re-open',
-      fieldName: 'isRentalReopen'
-    },
-    {
-      resource: sidebarResource.rentalManagement,
-      fieldLabel: 'Allow Service Perform',
-      fieldName: 'isAllowServicePerformRentalManagement'
-    },
-    {
-      resource: sidebarResource.sublease,
-      fieldLabel: 'Pricing Information',
-      fieldName: 'isPricingSublease'
-    },
-    {
-      resource: sidebarResource.purchaseOrder,
-      fieldLabel: 'Pricing Information',
-      fieldName: 'isPricingPurchaseOrder'
-    },
-    {
-      resource: sidebarResource.quotation,
-      fieldLabel: 'Ask Supplier Quote',
-      fieldName: 'isQuoteAskSupplierPrice'
-    },
-    {
-      resource: sidebarResource.productInventory,
-      fieldLabel: 'Product Inventory Settings',
-      fieldName: 'isProductInventorySettings'
-    },
-    {
-      resource: sidebarResource.customerAccount,
-      fieldLabel: 'Approve Account',
-      fieldName: 'isApproveAccount'
-    },
-    {
-      resource: sidebarResource.contentPostPlanning,
-      fieldLabel: 'Approve Content',
-      fieldName: 'isApproveContent'
-    },
-    {
-      resource: sidebarResource.lead,
-      fieldLabel: 'Convert Lead To Opportunity',
-      fieldName: 'isConvertLeadToOpportunity'
-    },
-    {
-      resource: 'Login',
-      fieldLabel: 'QR Code Login',
-      fieldName: 'isQRCodeLogin'
-    }
-  ];
 
   const fieldOfPolicyResources = policyResources?.map((obj) => {
     if (obj?.fieldName) {
@@ -201,7 +198,7 @@ const RoleDetailsPage = () => {
   }, [values, field, resource]);
 
   useEffect(() => {
-    if (resourceCheckbox.purchaseOrder && resourceCheckbox.rentalManagement && resourceCheckbox.sublease) {
+    if (Object.values(policyFieldCheckBox).every((value) => value === true)) {
       setIsPolicyCheckBoxChecked(true);
     } else {
       setIsPolicyCheckBoxChecked(false);
@@ -212,41 +209,27 @@ const RoleDetailsPage = () => {
     if (checkBoxType === 'Select-All') {
       setIsPolicyCheckBoxChecked(e.target.checked);
 
-      setResourceCheckBox({
-        rentalManagement: e.target.checked,
-        purchaseOrder: e.target.checked,
-        sublease: e.target.checked,
-        quoteBuilder: e.target.checked,
-        productInventory: e.target.checked,
-        customerAccount: e.target.checked,
-        lead: e.target.checked,
-        login: e.target.checked
-      });
+      setResourceCheckBox(resourcesOfPolicy?.reduce((acc, r) => {
+        acc[camelCase(r)] = e.target.checked;
+        return acc;
+      }, {}));
 
-      SetPolicyFieldCheckBox({
-        isPricingPurchaseOrder: e.target.checked,
-        isPricingRentalManagement: e.target.checked,
-        isPricingSublease: e.target.checked,
-        isRentalReopen: e.target.checked,
-        isQuoteAskSupplierPrice: e.target.checked,
-        isProductInventorySettings: e.target.checked,
-        isApproveAccount: e.target.checked,
-        isConvertLeadToOpportunity: e.target.checked,
-        isAllowServicePerformRentalManagement: e.target.checked,
-        isQRCodeLogin: e.target.checked
-      });
+      setPolicyFieldCheckBox(fieldsOfPolicy?.reduce((acc, f) => {
+        acc[f] = e.target.checked;
+        return acc;
+      }, {}));
     }
     if (checkBoxType === 'Policy-CheckBox') {
       setResourceCheckBox((prevState) => ({ ...prevState, [camelCase(type)]: e.target.checked }));
       policyResources
         .filter((d) => d.resource === type)
         .forEach((obj) => {
-          SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [obj.fieldName]: e.target.checked }));
+          setPolicyFieldCheckBox((prevState) => ({ ...prevState, [obj.fieldName]: e.target.checked }));
         });
     }
 
     if (checkBoxType === 'Fields') {
-      SetPolicyFieldCheckBox((prevState) => ({ ...prevState, [type.field]: e.target.checked }));
+      setPolicyFieldCheckBox((prevState) => ({ ...prevState, [type.field]: e.target.checked }));
       let temppolicyFieldCheckBox = policyFieldCheckBox;
       temppolicyFieldCheckBox[type.field] = e.target.checked;
       let tempResourceCheckBox = policyResources.filter((d) => d.resource === type.resource).every((d) => temppolicyFieldCheckBox[d.fieldName]);
@@ -282,19 +265,13 @@ const RoleDetailsPage = () => {
       setResource(data.resource);
       setChildrenResource(data.childrenResource);
       setField(data.field);
-      const current = {
-        name: data.name,
-        description: data.description,
-        field: data.field,
-        resource: data.resource
-      };
       setCustomizedRoutes([{ ...routes.role, title: resources?.role?.titlePlural }, { title: data.name }]);
       if (data?.policy) {
         let copyOfResourcePolicy = {};
         for (const item in data?.policy) {
           copyOfResourcePolicy[item] = data?.policy[item];
         }
-        SetPolicyFieldCheckBox((prevState) => ({ ...prevState, ...copyOfResourcePolicy }));
+        setPolicyFieldCheckBox((prevState) => ({ ...prevState, ...copyOfResourcePolicy }));
         handlePolicyResourceCheckBox(copyOfResourcePolicy);
       }
       setResourceOption(

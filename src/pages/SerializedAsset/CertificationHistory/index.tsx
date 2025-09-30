@@ -1,23 +1,21 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, Dialog, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CHILD_RESOURCE, CustomDialogTransition, displayDate, prepareDataForGrid, serializedAsset, serializedAssetsCertification, sidebarResource } from '../../../constants/helpers';
-import { camelCase } from 'lodash';
+import { CHILD_RESOURCE, displayDate, prepareDataForGrid, serializedAsset, serializedAssetsCertification, sidebarResource } from '../../../constants/helpers';
+import { camelCase, isArray } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { Link } from 'react-router-dom';
-import { isMobile, isTablet } from 'react-device-detect';
 import IssueCertificateDialog from '../../SerializedAssetsCertification/IssueCertificateDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import ShowAttachemntsDialog from 'src/pages/FieldTicket/Submit/ShowAttachemntsDialog';
 
 const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}_certificationHistory`;
 
@@ -26,8 +24,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
   const [openDialog, setOpenDialog] = useState({ open: false });
-  const [openAttachment, setOpenAttachment] = useState({ open: false, attachmentId: null });
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [openAttachment, setOpenAttachment] = useState({ open: false, attachments: null });
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -113,13 +110,13 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {row.original?.attachmentId && (
+        {row.original?.attachments && isArray(row.original?.attachments) && row.original?.attachments?.length > 0 && (
           <HtmlTooltip title="View Attachment">
             <IconButton
               size="small"
               aria-label="Issue"
               onClick={() => {
-                setOpenAttachment({ open: true, attachmentId: row.original?.attachmentId });
+                setOpenAttachment({ open: true, attachments: row.original?.attachments });
               }}
             >
               <AttachFileIcon fontSize='small' color="primary" />
@@ -167,6 +164,9 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
         setIsDeleting(false);
         setShowConfirmBox({ open: false, _id: null });
         fetchData();
+        if (fetchAssetData) {
+          fetchAssetData();
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -213,36 +213,12 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
         />
       )}
       {openAttachment.open && (
-        <Dialog
-          open={true}
-          aria-labelledby="customized-dialog-title"
-          maxWidth="md"
-          onClose={(e, reason) => {
-            if (reason !== 'backdropClick') {
-              setFullScreen(false);
-              setOpenAttachment({ open: false, attachmentId: null });
-            }
+        <ShowAttachemntsDialog
+          onClose={() => {
+            setOpenAttachment({ open: false, attachments: null })
           }}
-          fullWidth
-          fullScreen={fullScreen || isMobile || isTablet}
-          TransitionComponent={CustomDialogTransition}
-        >
-          <ManageAttachment
-            attachmentId={openAttachment.attachmentId?._id}
-            handleClose={() => {
-              setFullScreen(false);
-              setOpenAttachment({ open: false, attachmentId: null });
-            }}
-            relatedTo={openAttachment.attachmentId?.relatedTo}
-            isMinimized={!fullScreen}
-            onMinimizeMaximize={() => {
-              setFullScreen((prevState) => !prevState);
-            }}
-            showManimizeMaximize={true}
-            parentFolder={openAttachment.attachmentId?.parentFolder}
-            type={openAttachment.attachmentId?.type}
-          />
-        </Dialog>
+          attachments={openAttachment.attachments}
+        />
       )}
       {showConfirmBox.open && (
         <ConfirmationDialogRaw

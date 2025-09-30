@@ -16,6 +16,7 @@ import {
   WORK_ORDER_STATUS,
   WORK_ORDER_TYPE,
   checkIsAllowedToDelete,
+  checkIsAllowedToEdit,
   getDefaultMyRecordType,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -31,6 +32,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useHistory } from 'react-router-dom';
 import ButtonMenu from 'src/components/ButtonMenu';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import BulkEditWorkOrder from './BulkEditWorkOrder';
 
 const WorkOrder = () => {
   let renderedFrom = camelCase(sidebarResource?.workOrder);
@@ -49,6 +51,7 @@ const WorkOrder = () => {
   const [showManageWorkOrder, setShowManageWorkOrder] = useState({ open: false, isClone: false, idToClone: null });
   const [columns, setColumns] = useState(null);
   const [createWorkOrderResouce, setCreateWorkOrderResouce] = useState([]);
+  const [bulkEditDialog, setBulkEditDialog] = useState({ open: false, _ids: [] });
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -108,7 +111,7 @@ const WorkOrder = () => {
   }, []);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.workOrder, permissions?.workOrder?.isUpdate)
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.workOrder, permissions?.workOrder?.isUpdate);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.workOrderDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
@@ -127,6 +130,8 @@ const WorkOrder = () => {
             u?.canDelete &&
             checkIsAllowedToDelete(user, sidebarResource.workOrder, finalObject?.ownerId) &&
             !data?.deleted;
+          finalObject['canEdit'] = checkIsAllowedToEdit(user, sidebarResource.workOrder, u) ? true : false;
+          finalObject['isCompleted'] = [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold].includes(u?.status) || u?.deleted ? true : false;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -322,19 +327,29 @@ const WorkOrder = () => {
 
   const ActionMenuItems = () => {
     return (
-      <MenuItem
-        disabled={selectedRecords.every((e) => e.canDelete && !e?.deleted) ? false : true}
-        onClick={() => {
-          if (selectedRecords.length === 1) {
-            setDeleteRecord(selectedRecords[0]);
-          } else {
-            setDeleteRecord(null);
-          }
-          setIsConformDialogVisible(true);
-        }}
-      >
-        {`Delete (${selectedRecords?.length})`}
-      </MenuItem>
+      <>
+        <MenuItem
+          disabled={selectedRecords.some((e) => !e.canEdit || e?.isCompleted) || !permissions?.workOrder?.isUpdate ? true : false}
+          onClick={() => {
+            setBulkEditDialog({ open: true, _ids: selectedRecords?.map((e) => e._id) });
+          }}
+        >
+          {`Bulk Edit (${selectedRecords?.length})`}
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords.every((e) => e.canDelete && !e?.deleted) ? false : true}
+          onClick={() => {
+            if (selectedRecords.length === 1) {
+              setDeleteRecord(selectedRecords[0]);
+            } else {
+              setDeleteRecord(null);
+            }
+            setIsConformDialogVisible(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
     );
   };
 
@@ -465,6 +480,17 @@ const WorkOrder = () => {
             onSuccess={() => {
               fetchData();
               setShowManageWorkOrder({ open: false, isClone: false, idToClone: null });
+            }}
+          />
+        )}
+        {bulkEditDialog.open && (
+          <BulkEditWorkOrder
+            workOrderIds={bulkEditDialog?._ids}
+            onClose={() => setBulkEditDialog({ open: false, _ids: [] })}
+            onSuccess={() => {
+              dispatch({ type: 'selection', selectedRecords: [] });
+              fetchData();
+              setBulkEditDialog({ open: false, _ids: [] });
             }}
           />
         )}

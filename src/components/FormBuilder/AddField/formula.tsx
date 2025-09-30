@@ -16,7 +16,7 @@ import { FiMaximize2 } from 'react-icons/fi';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-export const Formula = ({ fields, values, setFieldValue, _id, touched, errors }) => {
+export const Formula = ({ fields, values, module, setFieldValue, _id, touched, errors }) => {
   const [formulaError, setFormulaError] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [counterSubFieldInputFields, setCounterSubFieldInputFields] = useState(null);
@@ -43,7 +43,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
       values['inputFields'] &&
         values['inputFields'].forEach((_input) => {
           const tempField = fields?.find((e) => e.fieldName === _input)
-          if (['singleLine', 'multiLine']?.includes(tempField?.type)) {
+          if (['singleLine', 'multiLine']?.includes(tempField?.type) || (tempField?.type === 'formula' && tempField?.returnType === 'string') || !tempField) {
             inputValues[_input] = '';
           } else {
             inputValues[_input] = 1;
@@ -140,6 +140,7 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
               multiple
               disableCloseOnSelect={true}
               id="tags-filled"
+              freeSolo={module === 'service-builder' ? true : false}
               options={
                 fields &&
                 fields

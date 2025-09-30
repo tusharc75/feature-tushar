@@ -14,6 +14,7 @@ import { useData } from '../../StateProvider/Provider';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import InfoIcon from '@mui/icons-material/Info';
+import { FaStar } from 'react-icons/fa6';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -113,7 +114,15 @@ export const PreviewFields = ({
               const { key, ...optionProps } = props;
               return (
                 <Box component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
-                  <span style={{ width: 'calc(100% - 71px)' }}>{ownerState.getOptionLabel(option)}</span>
+                  <span style={{ width: 'calc(100% - 71px)' }}>
+                    {ownerState.getOptionLabel(option)}
+                    {' '}
+                    {option?.default && (
+                      <HtmlTooltip title="Default View">
+                        <FaStar size={10} className="text-[var(--new-theme-color)]" />
+                      </HtmlTooltip>
+                    )}
+                  </span>
                   <div className="flex items-center gap-2">
                     {option?.createdBy?.user?.firstName && (
                       <HtmlTooltip title={`Created By : ${option?.createdBy?.user?.firstName} ${option?.createdBy?.user?.lastName}`}>
@@ -129,10 +138,7 @@ export const PreviewFields = ({
                       </HtmlTooltip>
                     )}
                     <HtmlTooltip title={user?._id !== option?.user ? 'View owner can only edit' : 'Edit'}>
-                      <IconButton
-                        size="small"
-                        disabled={user?._id !== option?.user}
-                      >
+                      <IconButton size="small" disabled={user?._id !== option?.user}>
                         <EditIcon fontSize="small" color={user?._id === option?.user ? 'primary' : 'disabled'} />
                       </IconButton>
                     </HtmlTooltip>
@@ -155,7 +161,34 @@ export const PreviewFields = ({
             }}
             id="controllable-states-demo"
             options={views}
-            renderInput={(params) => <TextField {...params} fullWidth label={`Select ${type} View`} variant="outlined" />}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                fullWidth
+                label={`Select ${type} View`}
+                variant="outlined"
+                slotProps={{
+                  input: {
+                    ...params.InputProps,
+                    startAdornment: selectedView ? (
+                      <Box display="flex" alignItems="center" pl={1}>
+                        <span>{selectedView.name}</span>
+                        {selectedView?.default && (
+                          <HtmlTooltip title="Default View">
+                            <FaStar size={10} className="text-[var(--new-theme-color)]" style={{ marginLeft: '4px' }} />
+                          </HtmlTooltip>
+                        )}
+                      </Box>
+                    ) : params.InputProps.startAdornment
+                  }
+                }}
+                sx={{
+                  '& .MuiInputBase-input': {
+                    display: selectedView ? 'none' : 'block'
+                  }
+                }}
+              />
+            )}
           />
         </Box>
         <Box display="flex" justifyContent="space-between" alignItems="center">

@@ -355,23 +355,23 @@ const ServiceOrderDetailsPage = () => {
                 />
               ) : (
                 <FieldTicket
-                  serviceOrderData={serviceOrderData}
-                  serviceOrderFields={serviceOrderFields}
+                  resourceData={serviceOrderData}
+                  resourceFields={serviceOrderFields}
                   allowedToEdit={allowedToEdit}
                   handleChangeStatus={handleChangeStatus}
                   resource={sidebarResource.fieldServiceOrder}
-                  fetchServiceOrderData={fetchServiceOrderData}
+                  fetchResourceData={fetchServiceOrderData}
                   noQuotationCheck={true}
                 />
               ))}
             {steps[currentStep]?.name === steps[2]?.name && serviceOrderData && resourcePolicyData?.policy?.addServices && (
               <FieldTicket
-                serviceOrderData={serviceOrderData}
-                serviceOrderFields={serviceOrderFields}
+                resourceData={serviceOrderData}
+                resourceFields={serviceOrderFields}
                 allowedToEdit={allowedToEdit}
                 handleChangeStatus={handleChangeStatus}
                 resource={sidebarResource.fieldServiceOrder}
-                fetchServiceOrderData={fetchServiceOrderData}
+                fetchResourceData={fetchServiceOrderData}
                 noQuotationCheck={true}
               />
             )}
@@ -380,12 +380,12 @@ const ServiceOrderDetailsPage = () => {
         <TabPanel value={tabValue} index={2}>
           {serviceOrderData && serviceOrderFields?.length ? (
             <FieldTicket
-              serviceOrderData={serviceOrderData}
-              serviceOrderFields={serviceOrderFields}
+              resourceData={serviceOrderData}
+              resourceFields={serviceOrderFields}
               allowedToEdit={allowedToEdit}
               handleChangeStatus={handleChangeStatus}
               resource={sidebarResource.fieldServiceOrder}
-              fetchServiceOrderData={fetchServiceOrderData}
+              fetchResourceData={fetchServiceOrderData}
               noQuotationCheck={user?.user?.brandPolicy?.createFieldTicketFromQuotation ? false : true}
             />
           ) : (

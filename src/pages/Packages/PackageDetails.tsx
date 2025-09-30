@@ -20,9 +20,9 @@ import Products from './Products';
 import Services from './Services';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import LeadTime from 'src/components/LeadTime';
-import Diagram from 'src/pages/WorkOrder/Diagram';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
+import CostPrice from 'src/components/CostPrice';
 
 const PackageDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -147,6 +147,15 @@ const PackageDetails = () => {
                   </Grid>
                 </Box>
               )}
+              {user?.user?.brandPolicy?.materialCostPrice && (
+                <Box mb={2} mt={2}>
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                      <CostPrice referenceData={packageData} type={MATERIAL_TYPE.package} />
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
               <Products packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} childItem={true} />
@@ -161,7 +170,6 @@ const PackageDetails = () => {
               {tabValue === 4 && <Packages packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
             <TabPanel value={tabValue} index={5}>
-              {/* <Diagram resource={ACTIVITY_RESOURCE.packages} referenceId={id} attachmentType={ATTACHMENT_TYPE.drawing} /> */}
               <DiagramNew
                 resource={sidebarResource.packages}
                 referenceId={id}

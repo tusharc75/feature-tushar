@@ -448,7 +448,8 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
         workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
         allowedToEdit &&
         !workOrderData?.currentRepairJob &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !(user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest)
       ),
       children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
@@ -643,7 +644,13 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
                 ? ACTIVITY_RESOURCE.repairOrder
                 : workOrderData?.type === WORK_ORDER_TYPE.productionOrder
                   ? ACTIVITY_RESOURCE.productionOrder
-                  : ACTIVITY_RESOURCE.assemblyOrder
+                  : ACTIVITY_RESOURCE.assemblyOrder,
+            label:
+              workOrderData?.type === WORK_ORDER_TYPE.repairOrder
+                ? workOrderData?.repairOrder?.optionLabel
+                : workOrderData?.type === WORK_ORDER_TYPE.productionOrder
+                  ? workOrderData?.productionOrder?.optionLabel
+                  : workOrderData?.assemblyOrder?.optionLabel,
           }}
           resourceData={workOrderData}
         />
@@ -835,15 +842,6 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
           {workOrderData && (
-            // <Diagram
-            //   resource={ACTIVITY_RESOURCE.workOrder}
-            //   referenceId={id}
-            //   currentVersion={workOrderData?.versions?.length + 1 || 1}
-            //   resourceData={workOrderData}
-            //   attachmentType={ATTACHMENT_TYPE.drawing}
-            //   showMaterialFilter={true}
-            //   defaultSelectedUniqueId={defaultSelectedService}
-            // />
             <DiagramNew
               resource={sidebarResource.workOrder}
               referenceId={id}

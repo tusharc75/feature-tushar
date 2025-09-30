@@ -20,7 +20,6 @@ type ItemPorps = {
   addDeleteField: any;
   module: any;
   extraFields: any;
-  isCalculativeField: any;
   brandId: any;
   sectionId: number | string;
   data: any;
@@ -37,7 +36,6 @@ const Field = ({
   addDeleteField,
   module,
   extraFields,
-  isCalculativeField,
   brandId,
   data,
   sectionId,
@@ -133,7 +131,6 @@ const Field = ({
         addDeleteField,
         module,
         extraFields,
-        isCalculativeField,
         brandId,
         data,
         sectionId
@@ -224,7 +221,6 @@ const Field = ({
                     setSection={setSections}
                     module={module}
                     extraFields={extraFields}
-                    isCalculativeField={isCalculativeField}
                     brandId={brandId}
                     formData={formData}
                   />

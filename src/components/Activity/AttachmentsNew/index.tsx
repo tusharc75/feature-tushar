@@ -28,7 +28,7 @@ import { TbEdit } from "react-icons/tb";
 import UpdateDetailsDialog from "src/components/Activity/AttachmentsNew/UpdateDetailsDialog";
 import { VITE_APP_DMS_URL } from "src/config";
 
-const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
+const AttachmentsNew = ({ resource, referenceId, relatedTo, onSetCount }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -83,7 +83,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
   const folderIconButtons = (attachment) => {
     return (
       <div className="flex items-center gap-2">
-        <HtmlTooltip title={'Create File'}>
+        <HtmlTooltip title={'File Upload'}>
           <IconButton
             size="small"
             color="primary"
@@ -96,11 +96,11 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
             <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
           </IconButton>
         </HtmlTooltip>
-        <HtmlTooltip title={'Create Folder'}>
+        <HtmlTooltip title={'Add Folder'}>
           <IconButton
             size="small"
             color="primary"
-            aria-label="Create Folder"
+            aria-label="Add Folder"
             onClick={(e) => {
               e.stopPropagation();
               setOpen({ open: true, type: 'folder', data: attachment, isUpdate: false });
@@ -373,7 +373,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
               setOpen({ open: false, type: '', data: null, isUpdate: false });
               setFullScreen(false);
             }}
-            relatedTo={[{ resource: resource, referenceId: referenceId, label: label }]}
+            relatedTo={relatedTo}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);
@@ -393,7 +393,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
               setOpen({ open: false, type: '', data: null, isUpdate: false });
               setFullScreen(false);
             }}
-            relatedTo={[{ resource: resource, referenceId: referenceId, label: label }]}
+            relatedTo={relatedTo}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);

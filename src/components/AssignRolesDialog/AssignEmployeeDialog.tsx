@@ -86,6 +86,7 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
           finalObject['isChecked'] = false;
           finalObject['id'] = u._id;
           finalObject['pricingMethodMain'] = u?.competencyDetail?.pricingMethod;
+          finalObject['unitMain'] = u?.unit;
           return {
             ...finalObject
           };

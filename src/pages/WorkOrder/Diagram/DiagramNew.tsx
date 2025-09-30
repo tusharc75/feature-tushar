@@ -1,11 +1,11 @@
 import { Add, KeyboardArrowDown } from "@mui/icons-material";
 import { Autocomplete, Box, Collapse, Dialog, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Popover, TextField } from "@mui/material";
 import { camelCase, isEmpty } from "lodash";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { isMobile, isTablet } from "react-device-detect";
 import { CiFileOn } from "react-icons/ci";
 import axiosInstance from "src/axios/axiosInstance";
-import { allAttachmentsAreFromUser, download, getTitle, sortFileStructure, TNestedTree, unflatten } from "src/components/Activity/AttachmentsNew/helper";
+import { allAttachmentsAreFromUser, download, getTitle, IMAGE_EXTENSIONS, PDF_EXTENSION, sortFileStructure, TNestedTree, unflatten } from "src/components/Activity/AttachmentsNew/helper";
 import ManageFile from "src/components/Activity/AttachmentsNew/ManageFile";
 import ManageFolder from "src/components/Activity/AttachmentsNew/ManageFolder";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
@@ -32,9 +32,6 @@ import { FolderIcon } from "src/assets/FolderIcon"
 import AttachmentDelete from "src/components/Activity/AttachmentsNew/AttachmentDelete";
 import DeleteRequest, { DeleteRequestIcon } from "src/components/Activity/AttachmentsNew/DeleteRequest";
 
-const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
-const pdfExtensions = ['pdf'];
-
 const DiagramNew = ({
   resource,
   referenceId,
@@ -50,7 +47,8 @@ const DiagramNew = ({
   defaultSelectedUniqueId = null,
   showContainer = true,
   fullHeight = true,
-  height = ''
+  height = '',
+  hideAddNewFolder = false
 }) => {
 
   const toastConfig = useContext(CustomToastContext);
@@ -67,6 +65,13 @@ const DiagramNew = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openDelete, setOpenDelete] = useState({ open: false, request: false, attachment: null })
   const [openDeleteRequest, setOpenDeleteRequest] = useState({ ancherEl: null, attachment: null })
+
+  const fromWorkOrderServiceStep = useMemo(() => {
+    if (resource === sidebarResource.workOrder, !attachemntDialog.data && !showMaterialFilter) {
+      return true
+    }
+    return false
+  }, [resource, attachemntDialog, showMaterialFilter])
 
   useEffect(() => {
     if (resource === sidebarResource.workOrder) {
@@ -96,7 +101,11 @@ const DiagramNew = ({
     axiosInstance()
       .get(query)
       .then(({ data: { data: { data } } }) => {
-        setTreeStructure(data?.length > 0 ? unflatten(data) : [])
+        if (hideAddNewFolder) {
+          setTreeStructure(data?.length > 0 ? data?.filter(d => d?.type === 'file') : [])
+        } else {
+          setTreeStructure(data?.length > 0 ? unflatten(data) : [])
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -122,14 +131,18 @@ const DiagramNew = ({
   };
 
   const getRelatedTo = () => {
+    const extraData: any = {
+      ...(uniqueId ? { uniqueId: uniqueId } : {}),
+      ...(stepId ? { stepId: stepId } : {}),
+      ...(currentVersion ? { version: parseInt(currentVersion) } : {}),
+    }
+
     const relatedTo: any = [
       {
         resource: resource,
         referenceId: referenceId,
         label: resourceLabel,
-        ...(uniqueId ? { uniqueId: uniqueId } : {}),
-        ...(stepId ? { stepId: stepId } : {}),
-        ...(currentVersion ? { version: parseInt(currentVersion) } : {}),
+        ...extraData,
       }
     ];
 
@@ -153,6 +166,7 @@ const DiagramNew = ({
             : resourceData?.type === WORK_ORDER_TYPE.productionOrder
               ? resourceData?.productionOrder?.optionLabel || ''
               : resourceData?.assemblyOrder?.optionLabel || '',
+        ...(fromWorkOrderServiceStep ? { ...extraData } : {})
       });
     }
 
@@ -329,7 +343,13 @@ const DiagramNew = ({
                     <ThemeButton
                       buttonType="theme"
                       startIcon={<Add />}
-                      onClick={handleClickFileOrFolderUpload}
+                      onClick={(e) => {
+                        if (hideAddNewFolder) {
+                          setAttachemntDialog({ open: true, type: 'file', data: null, isUpdate: false });
+                        } else {
+                          handleClickFileOrFolderUpload(e)
+                        }
+                      }}
                     >
                       Add
                     </ThemeButton>
@@ -349,17 +369,19 @@ const DiagramNew = ({
             'aria-labelledby': 'new-button'
           }}
         >
-          <MenuItem
-            onClick={() => {
-              setAttachemntDialog({ open: true, type: 'folder', data: null, isUpdate: false });
-              handleCloseFileOrFolderUpload();
-            }}
-          >
-            <ListItemIcon>
-              <CreateNewFolderIcon color="primary" fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>New Folder</ListItemText>
-          </MenuItem>
+          {!hideAddNewFolder && (
+            <MenuItem
+              onClick={() => {
+                setAttachemntDialog({ open: true, type: 'folder', data: null, isUpdate: false });
+                handleCloseFileOrFolderUpload();
+              }}
+            >
+              <ListItemIcon>
+                <CreateNewFolderIcon color="primary" fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>New Folder</ListItemText>
+            </MenuItem>
+          )}
           <MenuItem
             onClick={() => {
               setAttachemntDialog({ open: true, type: 'file', data: null, isUpdate: false });
@@ -407,6 +429,7 @@ const DiagramNew = ({
               showManimizeMaximize={true}
               parentId={attachemntDialog?.data?._id}
               attachmentType={attachmentType}
+              fromWorkOrderServiceStep={fromWorkOrderServiceStep}
             />
           )}
           {attachemntDialog?.type === 'folder' && (
@@ -753,9 +776,9 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
       .then(({ data }) => {
         const ext = fileName?.split('.').pop().toLowerCase();
         let mimeType = 'application/octet-stream';
-        if (pdfExtensions?.includes(ext)) {
+        if (PDF_EXTENSION?.includes(ext)) {
           mimeType = 'application/pdf';
-        } else if (imageExtensions?.includes(ext)) {
+        } else if (IMAGE_EXTENSIONS?.includes(ext)) {
           mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
         }
         const blob = new Blob([data], { type: mimeType });
@@ -776,7 +799,7 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
       className='cursor-pointer px-[18px] py-[8px] mt-[15px] rounded-md  border border-solid'
       onClick={(e) => {
         e.stopPropagation()
-        if (imageExtensions.includes(extension)) {
+        if (IMAGE_EXTENSIONS.includes(extension)) {
           setOpen((prev) => !prev);
         } else {
           setSelectedFile(node)
@@ -805,7 +828,7 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
               <GetAppIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
-          {[...imageExtensions, ...pdfExtensions]?.includes(extension?.toLowerCase()) && (
+          {[...IMAGE_EXTENSIONS, ...PDF_EXTENSION]?.includes(extension?.toLowerCase()) && (
             <HtmlTooltip title={'Preview'}>
               <IconButton
                 size="small"
@@ -860,7 +883,7 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
               }}
             />
           )}
-          {imageExtensions.includes(extension) ? (
+          {IMAGE_EXTENSIONS.includes(extension) ? (
             <IconButton
               size="small"
               color="primary"
@@ -878,7 +901,7 @@ const RenderFiles = ({ node, selectedFile, setSelectedFile, disableEdit, setSend
         </div>
       </div>
       <Collapse in={open} unmountOnExit>
-        {imageExtensions.includes(extension) && (
+        {IMAGE_EXTENSIONS.includes(extension) && (
           <ImagePreview file={node} setSelectedFile={setSelectedFile} />
         )}
       </Collapse>

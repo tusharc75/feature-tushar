@@ -228,6 +228,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       }
     });
     coloum.push({
+      accessor: 'workOrderStatus',
+      Header: 'Work Order Status',
+      width: 200,
+      Cell: ({ row }) => <div>{row.original['workOrderStatus'] ? <p> {row.original.workOrderStatus}</p> : <NoDataCell />}</div>
+    });
+    coloum.push({
       accessor: 'status',
       Header: 'Status',
       width: 200,
@@ -361,7 +367,20 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 >
                   <DescriptionIcon fontSize="small" color={'primary'} />
                 </IconButton>
-              </HtmlTooltip>)}
+              </HtmlTooltip>            )}
+            {row?.original?.workOrderStatus === WORK_ORDER_STATUS.draft && (
+              <HtmlTooltip title="Ready to Build">
+                <IconButton
+                  size="small"
+                  aria-label="Ready to Build"
+                  onClick={() => {
+                    handleReadyToBuild([row.original]);
+                  }}
+                >
+                  <CheckCircle fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
             <HtmlTooltip title="Delete">
               <span>
                 <IconButton
@@ -447,8 +466,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       parent.hideSelection = false;
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         parent.hideSelection = true;
-        parent.workOrderStatus = parent?.workOrder?.status;
       }
+      parent.workOrderStatus = parent?.workOrder?.status;
       parent.status = parent?.workOrder?.serviceProcessStatus || parent?.workOrder?.status;
       parent.subRows = generateNestedData(data.material, parent);
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
@@ -496,6 +515,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       if (_subRow?.workOrder?.status === WORK_ORDER_STATUS.completed) {
         _subRow.hideSelection = true;
       }
+      _subRow.workOrderStatus = _subRow?.workOrder?.status;
       _subRow.canDelete = false;
       if (_subRow?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
         if (_subRow.type === MATERIAL_TYPE.product) {
@@ -717,6 +737,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     if (showServiceActionConfirmBox.action === 'revert') {
       records = selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending);
     }
+    
     const data = records?.map((e) => ({
       workOrder: e?.workOrder?._id,
       service: e?.serviceDetail?._id,
@@ -739,6 +760,28 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         setSubmitting(false);
         setShowServiceActionConfirmBox({ open: false, action: '' });
         toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleReadyToBuild = (records) => {
+    setSubmitting(true);
+    const workOrderIds = records?.map((record) => record?.workOrder?._id);
+    const data = { status: WORK_ORDER_STATUS.new, ids: workOrderIds };
+    
+    axiosInstance()
+      .put(`${workOrder.api}/update-multiple-status`, data)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message || 'Work order status updated to Ready to Build successfully'
+        });
+        fetchData();
+        setSubmitting(false);
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -789,6 +832,10 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
     if (records?.length !== selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.service)?.length) {
       return true;
     }
+    const hasDraftWorkOrder = records?.some((record) => record?.workOrderStatus === WORK_ORDER_STATUS.draft);
+    if (hasDraftWorkOrder) {
+      return true;
+    }
     const data = [];
     records?.forEach((record) => {
       let disabled = false;
@@ -811,6 +858,18 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       }
     });
     return !(data?.length === records?.length);
+  };
+
+  const isDisabledRevertService = () => {
+    const records = selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending);
+    if (records?.length === 0) {
+      return true;
+    }
+    const hasDraftWorkOrder = records?.some((record) => record?.workOrderStatus === WORK_ORDER_STATUS.draft);
+    if (hasDraftWorkOrder) {
+      return true;
+    }
+    return false;
   };
 
   const leftSideContents = () => {
@@ -909,6 +968,8 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               setCompleteConfirmBox,
               setShowServiceActionConfirmBox,
               isDisabledCompleteService,
+              isDisabledRevertService,
+              handleReadyToBuild,
               setDeleteData,
               setShowConfirmBox,
               setShowCloseReopenConfirmation,
@@ -1131,6 +1192,8 @@ const ActionButtonMenuItems = ({
   setCompleteConfirmBox,
   setShowServiceActionConfirmBox,
   isDisabledCompleteService,
+  isDisabledRevertService,
+  handleReadyToBuild,
   setDeleteData,
   setShowConfirmBox,
   setShowCloseReopenConfirmation,
@@ -1240,6 +1303,15 @@ const ActionButtonMenuItems = ({
         Auto Complete Work Order(s)
       </MenuItem>
       <MenuItem
+        onClick={() => {
+          const draftWorkOrders = selectedRecords?.filter((e) => e?.workOrderStatus === WORK_ORDER_STATUS.draft);
+          handleReadyToBuild(draftWorkOrders);
+        }}
+        disabled={selectedRecords?.some((e) => e?.workOrderStatus === WORK_ORDER_STATUS.draft) ? false : true}
+      >
+        Ready to Build
+      </MenuItem>
+      <MenuItem
         disabled={
           checkUniqWorkOrder() &&
             (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
@@ -1276,11 +1348,7 @@ const ActionButtonMenuItems = ({
         Skip Service
       </MenuItem>
       <MenuItem
-        disabled={
-          selectedRecords?.length && selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending)
-            ? false
-            : true
-        }
+        disabled={isDisabledRevertService()}
         onClick={() => {
           setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
         }}

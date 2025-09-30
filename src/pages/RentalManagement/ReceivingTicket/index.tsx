@@ -90,6 +90,8 @@ import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirm
 import SubStatusDatesDialog from '../LoadingTicket/SubStatusDatesDialog';
 import SubStatusLog from '../LoadingTicket/SubStatusLog';
 import FleetDispatchHistory from './FleetDispatchHistory';
+import TechnicianDispatchReturn from 'src/pages/RentalManagement/TechnicianDispatchReturn';
+import FieldTicket from 'src/pages/FieldServiceOrder/FieldTicket';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -120,7 +122,8 @@ const ReceivingTicket = ({
   assetStatusOptions,
   setAssetStatusOptions,
   assetPolicyData,
-  fleetDispatchPolicyData
+  fleetDispatchPolicyData,
+  rentalManagementFields = []
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
@@ -164,7 +167,8 @@ const ReceivingTicket = ({
     confirmationDirectSendToSupplierDialog: false,
     data: null,
     confirmationAddNewLineItemsDialog: false,
-    confirmationAddNewLineItems: ''
+    confirmationAddNewLineItems: '',
+    incorrectAssignment: false
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -193,6 +197,7 @@ const ReceivingTicket = ({
   const [rentalJobChildFields, setRentalJobChildFields] = useState(null);
   const [subStatusLog, setSubStatusLog] = useState({ open: false, data: null })
   const [fleetDispatchLog, setFleetDispatchLog] = useState({ open: false, assetData: null })
+  const [technicianDispatchReturn, setTechnicianDispatchReturn] = useState(false);
 
   const {
     state: { user, permissions, resources }
@@ -231,6 +236,9 @@ const ReceivingTicket = ({
   useEffect(() => {
     if (rentalPolicyData?.loadingReceivingDefaultView) {
       setView(rentalPolicyData?.loadingReceivingDefaultView);
+    }
+    if (rentalPolicyData?.enableTechnicianDispatchReturn) {
+      setTechnicianDispatchReturn(rentalPolicyData?.enableTechnicianDispatchReturn);
     }
   }, [rentalPolicyData]);
 
@@ -2637,11 +2645,12 @@ const ReceivingTicket = ({
         rentalJob: rentalManagementData?._id,
         reason: replaceReason,
         replaceWithNewLineItems: replaceWithNewLineItems,
-        directSendToSupplier: directSendToSupplier
+        directSendToSupplier: directSendToSupplier,
+        incorrectAssignment: showReplaceAssetWarnings?.incorrectAssignment
       })
       .then(({ data }) => {
         setAddSerializedAssetDialog({ open: false, products: [] });
-        setShowReplaceAssetWarnings({ replaceAssetReason: '', replaceAssetReasonDialog: false, data: null, confirmationAddNewLineItems: '', confirmationAddNewLineItemsDialog: false, confirmationDirectSendToSupplierDialog: false });
+        setShowReplaceAssetWarnings({ replaceAssetReason: '', replaceAssetReasonDialog: false, data: null, confirmationAddNewLineItems: '', confirmationAddNewLineItemsDialog: false, confirmationDirectSendToSupplierDialog: false, incorrectAssignment: false });
         setIsSubmitting(false);
         setOkBtnLoading(false)
         fetchRecords();
@@ -2828,10 +2837,12 @@ const ReceivingTicket = ({
 
   return (
     <>
-      {serviceData?.length > 0 && (
+      {(serviceData?.length > 0 || technicianDispatchReturn) && (
         <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
           <ContainedTab value={0} label={'Assets/Products'} />
-          <ContainedTab value={1} label={'Services'} />
+          {serviceData?.length > 0 && <ContainedTab value={1} label={'Services'} />}
+          {technicianDispatchReturn && <ContainedTab value={2} label={'Technicians'} />}
+          {(technicianDispatchReturn && permissions?.fieldTicket?.isRead) && <ContainedTab value={3} label={resources?.fieldTicket?.titlePlural} />}
         </ContainedTabs>
       )}
       <TabPanel value={tabValue} index={0}>
@@ -2909,6 +2920,26 @@ const ReceivingTicket = ({
           stepFullScreen={stepFullScreen}
           rentalJobChildFields={rentalJobChildFields}
         />
+      </TabPanel>
+      <TabPanel value={tabValue} index={2}>
+        <TechnicianDispatchReturn
+          allowedToEdit={allowedToEdit}
+          rentalManagementData={rentalManagementData}
+          stepFullScreen={stepFullScreen}
+          receive={true} />
+      </TabPanel>
+      <TabPanel value={tabValue} index={3}>
+        <Box mt={1}>
+          <FieldTicket
+            resourceData={rentalManagementData}
+            resourceFields={rentalManagementFields}
+            allowedToEdit={allowedToEdit}
+            handleChangeStatus={() => { }}
+            resource={sidebarResource.rentalManagement}
+            fetchResourceData={fetchRentalData}
+            noQuotationCheck={true}
+          />
+        </Box>
       </TabPanel>
       <Menu
         anchorEl={anchorLinkActionEl}
@@ -3433,8 +3464,9 @@ const ReceivingTicket = ({
           handleClose={() => setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, data: null }))}
           loading={isSubmitting}
           handleSucess={(data) => {
-            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, replaceAssetReason: data?.reason, confirmationAddNewLineItemsDialog: true }))
+            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, replaceAssetReason: data?.reason, confirmationAddNewLineItemsDialog: true, incorrectAssignment: data?.incorrectAssignment }))
           }}
+          isIncorrectAssignment={true}
         />
       )}
       {transferAnotherPackageDialog && (

@@ -2,7 +2,6 @@ import { Box, IconButton, MenuItem, TextField } from '@mui/material';
 import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import Autocomplete from '@mui/material/Autocomplete';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -38,11 +37,10 @@ import {
 } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
-import Technicians from './Technicians';
 import { FiExternalLink } from 'react-icons/fi';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getCostPriceConditions, getCostPriceValue, getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
@@ -81,8 +79,6 @@ const Services = ({
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState(null);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
-
-  const [serviceOption, setServiceOption] = useState(null);
   const [selectedServiceOption, setSelectedServiceOption] = useState({ optionLabel: 'All', optionValue: 'All' });
 
   const { isOffline } = useContext(CustomOfflineContext);
@@ -443,16 +439,6 @@ const Services = ({
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
       dispatch({ type: 'loading', loading: false });
 
-      setServiceOption([
-        { optionLabel: 'All', optionValue: 'All' },
-        ...rows?.map((s) => {
-          return {
-            optionLabel: s?.detail,
-            optionValue: s?.materialId,
-            _id: s?._id
-          };
-        })
-      ]);
       if (selectedServiceOption?.optionValue !== 'All' && !rows?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
         setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All' });
       }
@@ -549,15 +535,19 @@ const Services = ({
       }
       material.push(element);
     });
-    if (material.filter((d) => d.listPrice === null || d.listPrice === undefined || d.listPrice === 0).length === 0) {
-      AddMaterial(material, []);
+    let priceData: any = [];
+    if (material?.filter((d) => d?.listPrice === null || d?.listPrice === undefined || d?.listPrice === 0)?.length === 0) {
     } else {
-      let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, material, PRICING_SETUP_TYPE.rent);
-      AddMaterial(material, priceData);
+      priceData = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, material, PRICING_SETUP_TYPE.rent);
     }
+    let costPriceData: any = null;
+    if (user?.user?.brandPolicy?.materialCostPrice) {
+      costPriceData = await getCostPriceConditions(material, material[0]?.type);
+    }
+    AddMaterial(material, priceData, costPriceData);
   };
 
-  const AddMaterial = async (material, priceData) => {
+  const AddMaterial = async (material, priceData, costPriceData = null) => {
     const tempMaterial = [...material];
     if (priceData) {
       tempMaterial.forEach((element) => {
@@ -570,6 +560,12 @@ const Services = ({
           const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields, assetPolicyData?.inUseSubStatus);
           Object.assign(element, calValues);
         }
+      });
+    }
+    if (costPriceData) {
+      tempMaterial.forEach((element) => {
+        const calValues = getCostPriceValue(element, costPriceData, rentalManagementData?.currency, allFields);
+        Object.assign(element, calValues);
       });
     }
     axiosInstance()
@@ -773,7 +769,7 @@ const Services = ({
       />
       {columns ? (
         <CustomReactTable
-          height={permissions?.employeeMaster?.isRead ? '300px' : stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+          height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
@@ -790,39 +786,6 @@ const Services = ({
         <Box py={2} height={300}>
           <CommonSkeleton lenArray={[...Array(2).keys()]} xs={12} sm={12} md={12} lg={12} />
         </Box>
-      )}
-      {permissions?.employeeMaster?.isRead && (
-        <div>
-          <Box style={{ maxWidth: '400px' }} mb={2} mt={2}>
-            <Autocomplete
-              size="small"
-              style={{ minWidth: '300px' }}
-              fullWidth
-              options={serviceOption ? serviceOption : []}
-              autoHighlight
-              value={selectedServiceOption}
-              getOptionLabel={(option: any) => option?.optionLabel || ''}
-              isOptionEqualToValue={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
-              onChange={(_, val) => {
-                let value = val;
-                if (!val) {
-                  value = { optionLabel: 'All', optionValue: 'All' };
-                }
-                setSelectedServiceOption(value);
-              }}
-              renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
-            />
-          </Box>
-          <Box mt={1}>
-            <Technicians
-              allowedToEdit={allowedToEdit}
-              rentalManagementData={rentalManagementData}
-              selectedService={selectedServiceOption}
-              services={serviceOption}
-              rentalPolicyData={rentalPolicyData}
-            />
-          </Box>
-        </div>
       )}
       {deleteData && (
         <ConfirmationDialog
