@@ -28,7 +28,6 @@ import TechnicianAssign from "src/components/TechnicianAssign";
 import RentalTechnicianQtyDialog from "src/pages/RentalManagement/SerializedAsset/Technicians/RentalTechnicianQtyDialog";
 
 const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepFullScreen }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_assign_technician`;
 
@@ -37,7 +36,7 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
-  const [selectedService, setSelectedService] = useState<{ optionLabel: string; optionValue: string; _id?: string; }>({ optionLabel: 'All', optionValue: 'All' });
+  const [selectedService, setSelectedService] = useState<{ optionLabel: string; optionValue: string; _id?: string; competencyType?: string; competencies?: string[] }>({ optionLabel: 'All', optionValue: 'All' });
   const [technicianDialog, setTechnicianDialog] = useState(false);
   const [technicianAssign, setTechnicianAssign] = useState({ open: false, data: null });
   const [technicianEdit, setTechnicianEdit] = useState({ open: false, data: null, isBulkEdit: false, showSaveAndNext: false });
@@ -442,6 +441,8 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
             setTechnicianDialog(false);
           }}
           warehouse={rentalManagementData?.warehouse?.optionValue}
+          currentCompetencyType={selectedService?.competencyType}
+          currentCompetencies={selectedService?.competencies}
         />
       )}
       {technicianAssign.open && (
