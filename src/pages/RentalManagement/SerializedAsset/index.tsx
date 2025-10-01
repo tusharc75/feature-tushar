@@ -493,11 +493,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         ...material
           ?.filter(m => m?.type === MATERIAL_TYPE.service && m?.serviceDetail)
           ?.map(s => ({
-            optionLabel: s.serviceDetail.serviceName,
-            optionValue: s.serviceDetail._id,
-            _id: s._id,
-            competencyType: s.serviceDetail.competencyType,
-            competencies: s.serviceDetail.competencies
+            optionLabel: s?.serviceDetail?.serviceName || '',
+            optionValue: s?.serviceDetail?._id || '',
+            _id: s?._id || '',
+            competencyType: s?.serviceDetail?.competencyType || '',
+            competencies: s?.serviceDetail?.competencies || []
           }))
       ]);
 
