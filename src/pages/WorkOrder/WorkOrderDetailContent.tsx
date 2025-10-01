@@ -544,7 +544,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
           } else {
             updateStatus(WORK_ORDER_STATUS.completed);
           }
-        } else if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder && workOrderData?.package) {
+        } else if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder && workOrderData?.package && !workOrderData?.serializedPackage) {
           setOpenSerializedPackageDialog({ open: true, onSuccess: '' });
         } else {
           updateStatus(WORK_ORDER_STATUS.completed);
