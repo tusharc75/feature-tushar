@@ -42,7 +42,8 @@ const FieldTicket = ({
   handleChangeStatus,
   resource,
   enableGlobalSearch = true,
-  noQuotationCheck = false
+  noQuotationCheck = false,
+  fromFieldServiceTechnician = false
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const { setWalkmeData } = useSetWalkmeData();
@@ -185,12 +186,10 @@ const FieldTicket = ({
   };
 
   const getQueryString = (isExport = false) => {
-    // let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     let deepFilter = '?';
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
-    // const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     const fieldName = resource === sidebarResource.rentalManagement ? 'rentalJob' : 'fieldServiceOrder';
 
@@ -199,22 +198,7 @@ const FieldTicket = ({
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}&filterType=and`;
     }
-    // if (deepFilters?.length) {
-    //   deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
-    // }
-    // if (filterByIds?.length || deepFilters?.length) {
-    //   deepFilter = `${deepFilter}&filterType=and`;
-    // }
 
-    // if (sorting.length > 0) {
-    //   deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-    // }
-    // if (search) {
-    //   deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
-    // }
-    // if (showFilteredRecordsOnly) {
-    //   deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
-    // }
     return deepFilter;
   };
 
@@ -351,7 +335,7 @@ const FieldTicket = ({
 
   return (
     <Fragment>
-      {[sidebarResource.fieldServiceOrder, sidebarResource.rentalManagement].includes(resource) && (
+      {!fromFieldServiceTechnician && (
         <DetailsPageHeader
           isAddButtonVisible={true}
           addButtonProps={{
@@ -368,7 +352,7 @@ const FieldTicket = ({
       )}
       {columns ? (
         <CustomReactTable
-          height={[sidebarResource.fieldServiceOrder, sidebarResource.rentalManagement].includes(resource) ? 'calc(100vh - 300px)' : 'calc(100vh - 200px)'}
+          height={!fromFieldServiceTechnician ? 'calc(100vh - 300px)' : 'calc(100vh - 200px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
@@ -376,8 +360,8 @@ const FieldTicket = ({
           refreshGrid={fetchData}
           enableGlobalSearch={enableGlobalSearch}
           isClientSideGrid={true}
-          hideAction={[sidebarResource.fieldServiceOrder, sidebarResource.rentalManagement].includes(resource) ? !allowedToEdit : true}
-          hideSelection={[sidebarResource.fieldServiceOrder, sidebarResource.rentalManagement].includes(resource) ? !allowedToEdit : true}
+          hideAction={!fromFieldServiceTechnician ? !allowedToEdit : true}
+          hideSelection={!fromFieldServiceTechnician ? !allowedToEdit : true}
         />
       ) : (
         <Box p={2} height={500}>
