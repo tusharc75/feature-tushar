@@ -138,14 +138,14 @@ const FieldServiceTechnician = () => {
   }, []);
 
   useEffect(() => {
-    if (!resourceFlag) return;
+    if (!resourceData) return;
     setUpindexDB();
     fetchColumns();
     isOfflineRef.current = isOffline;
-  }, [isOffline, resourceFlag]);
+  }, [isOffline, resourceData]);
 
   useEffect(() => {
-    if (!resourceFlag) return;
+    if (!resourceData) return;
     fetchData();
     if (resourceData?.policy?.showOnlyAssignedTickets) {
       setView('card');
@@ -179,7 +179,7 @@ const FieldServiceTechnician = () => {
     if (isOffline) {
       data = await findOne(objectStore.resource, resourceFlag);
     } else {
-      policy = await fetchPolicy();
+      policy = resourceData?.policy;
       let resource = resourceFlag;
       if (policy?.showOnlyAssignedTickets) {
         resource = sidebarResource?.fieldTicket;
@@ -290,6 +290,7 @@ const FieldServiceTechnician = () => {
   );
 
   useEffect(() => {
+    if (!resourceData) return;
     const cancelToken = axios.CancelToken.source();
     fetchData(cancelToken);
     return () => cancelToken.cancel();
