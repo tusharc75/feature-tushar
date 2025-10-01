@@ -2,7 +2,6 @@ import { text, image, table, line, rectangle } from '@pdfme/schemas';
 import type { Plugin, Schema } from '@pdfme/common';
 import RobotoRegular from '../../../assets/font/Roboto-Regular.ttf';
 import RobotoBold from '../../../assets/font/Roboto-Bold.ttf';
-import myGridPlugin from './newcustomtable';
 
 type DesignerPluginSchema = Schema & {
     width: number;
@@ -187,7 +186,6 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
         Text: customTextPlugin as DesignerExpectedPlugin,
         Variable: customVariablePlugin as unknown as DesignerExpectedPlugin,
         Table: customTablePlugin as unknown as DesignerExpectedPlugin,
-        grid: myGridPlugin as unknown as DesignerExpectedPlugin,
         Image: image as DesignerExpectedPlugin,
         Line: line as DesignerExpectedPlugin,
         Rectangle: rectangle as DesignerExpectedPlugin,
