@@ -51,6 +51,10 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
           onTemplateChange(newTemplate);
         }
       });
+      } else {
+      if (template) {
+        designerInstanceRef.current.updateTemplate(template);
+      }
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
