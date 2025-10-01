@@ -128,7 +128,7 @@ const FieldServiceTechnician = () => {
   const [selectedData, setSelectedData] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [resourceData, setResourceData] = useState(null);
-  const [resourceFlag, setResourceFlag] = useState<string>('');
+  const [resourceFlag, setResourceFlag] = useState<string>(sidebarResource.fieldServiceOrder);
   const history = useHistory();
 
   const isOfflineRef = useRef(isOffline);
