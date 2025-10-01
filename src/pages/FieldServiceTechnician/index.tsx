@@ -290,6 +290,7 @@ const FieldServiceTechnician = () => {
   );
 
   useEffect(() => {
+    if (!resourceData) return;
     const cancelToken = axios.CancelToken.source();
     fetchData(cancelToken);
     return () => cancelToken.cancel();
