@@ -8,7 +8,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { useEffect, useState } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-export default function ViewFieldTicketDialog({ onClose, serviceOrderData }) {
+export default function ViewFieldTicketDialog({ onClose, resource, resourceData }) {
   const {
     state: { user, permissions }
   }: any = useData();
@@ -16,28 +16,27 @@ export default function ViewFieldTicketDialog({ onClose, serviceOrderData }) {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
 
   useEffect(() => {
-    setAllowedToEdit(
-      permissions?.fieldTicket?.isUpdate &&
-      checkIsAllowedToEdit(user, sidebarResource.fieldTicket, serviceOrderData) &&
-      ![SERVICE_ORDER_STATUS.closed]?.includes(serviceOrderData?.status)
+    setAllowedToEdit(permissions?.fieldTicket?.isUpdate &&
+      checkIsAllowedToEdit(user, sidebarResource.fieldTicket, resourceData) && ![SERVICE_ORDER_STATUS.closed]?.includes(resourceData?.status)
     );
-  }, [serviceOrderData]);
+  }, [resourceData]);
 
   return (
     <>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
         <CustomDialogHeader
-          title={`Field Ticket - ${serviceOrderData?.fieldServiceOrderNumber}`}
+          title={`Field Ticket - ${resourceData?.fieldServiceOrderNumber || resourceData?.rentalJobName}`}
           onClose={onClose}
           showRequiredLabel={false}
         ></CustomDialogHeader>
         <CustomDialogContent>
           <FieldTicket
-            resourceData={serviceOrderData}
+            resourceData={resourceData}
+            resource={resource}
             allowedToEdit={allowedToEdit}
             handleChangeStatus={() => { }}
             fetchResourceData={() => { }}
-            resource={sidebarResource.fieldServiceTechnician}
+            fromFieldServiceTechnician={true}
           />
         </CustomDialogContent>
         <CustomDialogFooter>
