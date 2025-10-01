@@ -85,7 +85,7 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = false;
           finalObject['id'] = u._id;
-          finalObject['pricingMethodMain'] = u?.competencyDetail?.pricingMethod;
+          finalObject['pricingMethodMain'] = u?.pricingMethod;
           finalObject['unitMain'] = u?.unit;
           return {
             ...finalObject

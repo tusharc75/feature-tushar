@@ -216,7 +216,9 @@ const EmployeeMasterDetail = () => {
                 <Box mb={2} mt={2}>
                   <Grid container spacing={2}>
                     <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                      <CostPrice referenceData={employeeMasterData} type={sidebarResource.employeeMaster} />
+                      <CostPrice
+                        referenceData={employeeMasterData}
+                        type={sidebarResource.employeeMaster} />
                     </Grid>
                   </Grid>
                 </Box>
