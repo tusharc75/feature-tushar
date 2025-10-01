@@ -254,9 +254,10 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
           let res: any = {
             ...prepareDataForGrid(u)
           };
-          res.orignalData = { ...u, technicianId: u?.technician['_id'] };
+          let technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];;
+          res.orignalData = { ...u, technicianId: u?.technician['_id'], technicianName };
           res.index = i + 1;
-          res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
+          res.technicianName = technicianName;
           res.technicianId = u?.technician['_id'];
           res.competencyType = u?.technician?.competencyType;
           res.competencies = u?.technician?.competencies;
