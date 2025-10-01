@@ -1049,17 +1049,24 @@ const Material = ({
           <>
             <MenuItem
               onClick={() => {
-                setAddRentalJobDataDialog({ open: true, type: MATERIAL_TYPE.serializedAsset });
+                setAddRentalJobDataDialog({ open: true, type: MATERIAL_TYPE.service });
               }}
             >
-              {`Add Rental ${resources?.serializedAsset?.titlePlural}`}
+              {`Add Job ${resources?.serviceMaster?.titlePlural}`}
             </MenuItem>
             <MenuItem
               onClick={() => {
                 setAddRentalJobDataDialog({ open: true, type: MATERIAL_TYPE.package });
               }}
             >
-              {`Add Rental ${resources?.packages?.titlePlural}`}
+              {`Add Job ${resources?.packages?.titlePlural}`}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAddRentalJobDataDialog({ open: true, type: MATERIAL_TYPE.serializedAsset });
+              }}
+            >
+              {`Add Job ${resources?.serializedAsset?.titlePlural}`}
             </MenuItem>
           </>
         )}
