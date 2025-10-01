@@ -431,6 +431,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       .post(`${routes.serializedPackages?.path}/create-with-work-order`, { referenceId: workOrderData?.assemblyOrder?.optionValue, serializedPackages: serializedPackages })
       .then(({ data: { data } }) => {
         setIsSubmitting(false)
+        fetchWorkOrderData()
         setOpenSerializedPackageDialog({ open: false, onSuccess: '' });
         setShowManageRepairJobDialog({ open: true, serializedPackage: data })
       })
@@ -441,7 +442,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
   }
 
   const isVisibleCreateRepairJob = () => {
-    if (!permissions?.repairJob?.isCreate || !allowedToEdit || workOrderData?.currentRepairJob || [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)) {
+    if (!permissions?.repairJob?.isCreate || !allowedToEdit || workOrderData?.currentRepairJob || [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.draft]?.includes(workOrderData?.status)) {
       return false
     }
     if (workOrderData?.type === WORK_ORDER_TYPE.repairOrder) {
@@ -461,10 +462,10 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       children: `Create ${resources?.repairJob?.titleSingular}`,
       tooltip: `Create ${resources?.repairJob?.titleSingular}`,
       onClick: () => {
-        if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder) {
+        if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder && !workOrderData?.serializedPackage) {
           setOpenSerializedPackageDialog({ open: true, onSuccess: SERIALIZED_PACKAGE_DIALOG_ON_SUCCESS.createRepairJob })
         } else {
-          setShowManageRepairJobDialog({ open: true, serializedPackage: null })
+          setShowManageRepairJobDialog({ open: true, serializedPackage: workOrderData?.serializedPackage ? [workOrderData?.serializedPackage?.optionValue] : null })
         }
       }
     },
@@ -543,7 +544,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
           } else {
             updateStatus(WORK_ORDER_STATUS.completed);
           }
-        } else if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder && workOrderData?.package) {
+        } else if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder && workOrderData?.package && !workOrderData?.serializedPackage) {
           setOpenSerializedPackageDialog({ open: true, onSuccess: '' });
         } else {
           updateStatus(WORK_ORDER_STATUS.completed);
