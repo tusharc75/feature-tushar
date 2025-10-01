@@ -19,7 +19,8 @@ import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, ids = [], defaultCompetencyType = [], extraStaticFilter = [], warehouse = null, currentCompetencyType = '', currentCompetencies = [] }) => {
+const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, ids = [], defaultCompetencyType = [], extraStaticFilter = [], warehouse = null,
+  currentCompetencyType = '', currentCompetencies = [] }) => {
   const renderedFrom = `${sidebarResource.employeeMaster}`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -221,7 +222,6 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
             multiple
             size={'small'}
             value={selectedCompetencyType}
-            filterSelectedOptions={true}
             renderInput={(params) => (
               <TextField {...params} margin="none" size={'small'} name="competencyType" label="Competency Type" variant="outlined" fullWidth />
             )}
@@ -239,7 +239,6 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
             multiple
             size={'small'}
             value={selectedCompetencies}
-            filterSelectedOptions={true}
             renderInput={(params) => (
               <TextField {...params} margin="none" size={'small'} name="competencies" label="Competencies" variant="outlined" fullWidth />
             )}
