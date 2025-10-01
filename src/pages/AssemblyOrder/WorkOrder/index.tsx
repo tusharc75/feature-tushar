@@ -1364,7 +1364,10 @@ const ActionButtonMenuItems = ({
               setOpenSerializedPackageDialog({ open: true, ids: getFilterSelectedRecords(selectedRecords)?.map(r => r?.workOrder?._id), createRepairJobDialog: true })
             }
           }}
-          disabled={getFilterSelectedRecords(selectedRecords)?.length > 1 ? true : getFilterSelectedRecords(selectedRecords)?.every(r => ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.draft]?.includes(r?.workOrder?.status) && r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder) ? false : true}
+          disabled={getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)?.length > 1 ?
+            true : getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)?.every(r =>
+              ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.draft]?.includes(r?.workOrder?.status)
+              && r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder) ? false : true}
         >
           {`Create ${resources?.repairJob?.titleSingular}`}
         </MenuItem>
