@@ -471,9 +471,10 @@ const FieldServiceTechnician = () => {
                           resourceData={selectedData?.orignalData}
                           allowedToEdit={allowedToEdit}
                           handleChangeStatus={() => { }}
-                          resource={sidebarResource.fieldServiceTechnician}
+                          resource={policyData?.resource}
                           enableGlobalSearch={false}
                           fetchResourceData={() => { }}
+                          fromFieldServiceTechnician={true}
                         />
                       )
                     ) : (
