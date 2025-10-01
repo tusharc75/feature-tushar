@@ -2991,6 +2991,10 @@ export const WORK_ORDER_TYPE_LABEL = {
   [WORK_ORDER_TYPE.disassemblyOrder]: 'Disassembly'
 };
 
+export const PLUGIN = {
+  CUSTOM_TABLE: 'CUSTOM_TABLE'
+}
+
 export const IRT_APPROVER_STATUS = {
   send: 'Email Sent',
   approved: 'Approved',
