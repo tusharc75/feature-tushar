@@ -67,6 +67,13 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
         errors['manualStartDate'] = 'Please enter valid start date';
       }
     }
+    if (values?.manualStartDate) {
+      let manualStartDate = dayjs(values?.manualStartDate);
+      let today = dayjs();
+      if (manualStartDate.isAfter(today, 'day')) {
+        errors['manualStartDate'] = 'Start date cannot be greater than today';
+      }
+    }
     return errors;
   }
 
