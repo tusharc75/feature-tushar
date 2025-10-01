@@ -381,7 +381,7 @@ const ChartTypes = ({
                   filters={filterValues}
                 />
               ) : chart.graphType === 'Map' ? (
-                <MapView height={fullScreen ? window.innerHeight - 200 : isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500} data={chartData} />
+                <MapView height={fullScreen ? window.innerHeight - 200 : isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500} data={chartData} filterValues={filterValues} />
               ) : chart.chartType === 'Funnel' ? (
                 <Box pr={2} pl={2} pb={2}>
                   <FunnelChart data={chartData} showValues={false} getToolTip={() => null} />
@@ -421,12 +421,12 @@ const ChartTypes = ({
                                   }
                                 } else {
                                   let parseValue = context?.parsed?.y;
-                                  if(typeof context?.parsed == "object"){
+                                  if (typeof context?.parsed == "object") {
                                     parseValue = context?.parsed?.y;
                                     if (chart?.kpi?.horizontalBar) {
                                       parseValue = context?.parsed?.x;
                                     }
-                                  }else if (typeof context?.parsed === "number"){
+                                  } else if (typeof context?.parsed === "number") {
                                     parseValue = context?.parsed
                                   }
 
@@ -462,7 +462,7 @@ const ChartTypes = ({
                       },
                       maintainAspectRatio: false,
                       indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
-                      ...(!["Pie","Doughnut"].includes(chart?.chartType) && {
+                      ...(!["Pie", "Doughnut"].includes(chart?.chartType) && {
                         scales: {
                           x: {
                             grid: {
