@@ -10,14 +10,13 @@ import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
 import { fetch_rental_technician_fields } from "src/components/RentalManagment/helper";
-import { displayDate, prepareDataForGrid, PRICING_SETUP_TYPE, rentalManagement, sidebarResource } from "src/constants/helpers";
+import { prepareDataForGrid, PRICING_SETUP_TYPE, rentalManagement, sidebarResource } from "src/constants/helpers";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import { CustomOfflineContext } from "src/StateProvider/OfflineContext/OfflineContext";
 import { useData } from "src/StateProvider/Provider";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { RiUserReceived2Fill, RiUserShared2Fill } from "react-icons/ri";
-import { Add, Visibility } from "@mui/icons-material";
+import { Add } from "@mui/icons-material";
 import { DetailsPageHeader } from "src/components/PageHeaders";
 import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialog';
 import { ThemeButton } from "src/components/Helpers/Buttons";
@@ -27,10 +26,9 @@ import { autoCalculateSpecificFields } from "src/constants/formulaUtility";
 import { getCostPriceConditions, getCostPriceValue, getPricingConditions, getPricingValue } from "src/components/PricingCondition";
 import TechnicianAssign from "src/components/TechnicianAssign";
 import RentalTechnicianQtyDialog from "src/pages/RentalManagement/SerializedAsset/Technicians/RentalTechnicianQtyDialog";
-import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDialog';
-import StartStopLogsDialog from 'src/pages/FieldTicket/material/StartStopLogsDialog';
 
 const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepFullScreen }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_assign_technician`;
 
@@ -65,7 +63,7 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
   const openTechnician = (data, rows) => {
     setTechnicianEdit({
       open: true,
-      data: data.original,
+      data: data?.original?.orignalData,
       isBulkEdit: false,
       showSaveAndNext: data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false
     });
@@ -187,19 +185,7 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
             accessorFn: (original) => AccessorFunction(original, 'competencies')
           }
         ]
-        : []),
-      {
-        accessor: 'startDate',
-        Header: 'Start Date',
-        width: 250,
-        Cell: ({ row }) => (row.original?.startDate ? <p>{displayDate(row.original?.startDate)}</p> : <NoDataCell />)
-      },
-      {
-        accessor: 'endDate',
-        Header: 'End Date',
-        width: 250,
-        Cell: ({ row }) => (row.original?.endDate ? <p>{displayDate(row.original?.endDate)}</p> : <NoDataCell />)
-      }
+        : [])
     ];
 
     column.push({
@@ -257,7 +243,6 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-
     let api = `/technician?referenceId=${rentalManagementData?._id}&referenceType=${sidebarResource.rentalManagement}`;
     if (selectedService && selectedService?.optionValue !== 'All') {
       api = `${api}&serviceId=${selectedService?.optionValue}&uniqueId=${selectedService?._id}`;
@@ -269,6 +254,7 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
           let res: any = {
             ...prepareDataForGrid(u)
           };
+          res.orignalData = { ...u, technicianId: u?.technician['_id'] };
           res.index = i + 1;
           res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
           res.technicianId = u?.technician['_id'];
@@ -298,19 +284,14 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
       element.competence = d?.competenciesId;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
+      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
       element.warehouse = rentalManagementData?.warehouse?.optionValue;
       element.estimateStartDate = rentalManagementData?.estimateStartDate || dayjs.tz().toDate();
       element.estimateEndDate = rentalManagementData?.estimateEndDate || dayjs.tz().toDate();
-      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
       const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-      element.duration = 1;
-      if (calValues && calValues['duration']) {
-        element.duration = calValues['duration'];
-      }
+      Object.assign(element, calValues)
       technician.push(element);
     });
-
     let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, technician, PRICING_SETUP_TYPE.rent);
     let costPriceData: any = null;
     if (user?.user?.brandPolicy?.materialCostPrice) {
@@ -334,7 +315,6 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
         Object.assign(element, calValues);
       });
     }
-
     setTechnicianAssign({ open: true, data: tempMaterial });
   };
 
@@ -385,14 +365,11 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
   };
 
   const leftSideContents = () => {
-    return (
-      allowedToEdit ?
-        <ThemeButton startIcon={<Add />} onClick={() => setTechnicianDialog(true)}>
-          Assign
-        </ThemeButton>
-        :
-        null
-    );
+    return (allowedToEdit ?
+      <ThemeButton startIcon={<Add />} onClick={() => setTechnicianDialog(true)}>
+        Assign
+      </ThemeButton>
+      : null);
   };
 
   const actionButtonMenuItems = () => {
@@ -455,7 +432,6 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
           </Box>
         )}
       </div>
-
       {technicianDialog && (
         <AssignEmployeeDialog
           onSuccess={(data) => {
@@ -467,7 +443,6 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
           warehouse={rentalManagementData?.warehouse?.optionValue}
         />
       )}
-
       {technicianAssign.open && (
         <TechnicianAssign
           allData={technicianAssign?.data}
@@ -482,17 +457,12 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
           }}
         />
       )}
-
       {technicianEdit.open && (
         <RentalTechnicianQtyDialog
           onClose={() => {
             setTechnicianEdit({ open: false, data: null, isBulkEdit: false, showSaveAndNext: false });
           }}
-          technicianData={{
-            ...technicianEdit.data,
-            pricingCondition: technicianEdit.data?.pricingConditionId,
-            competence: technicianEdit.data?.competenceId
-          }}
+          technicianData={technicianEdit.data}
           rentalManagementData={rentalManagementData}
           handleUpdate={handleSaveData}
           loadingEdit={isUpdating}
@@ -500,7 +470,6 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
           showSaveAndNext={technicianEdit.showSaveAndNext}
         />
       )}
-
       {deleteData && (
         <ConfirmationDialog
           open={true}
