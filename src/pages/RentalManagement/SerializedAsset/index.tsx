@@ -52,6 +52,7 @@ import ShowAssignInventory from 'src/pages/RentalManagement/SerializedAsset/Show
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 import { TabPanel } from 'src/components/CustomTabs';
 import Technicians from 'src/pages/RentalManagement/SerializedAsset/Technicians';
+import Competencies from 'src/pages/Competencies';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit, rentalPolicyData, assetPolicyData }) => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -487,7 +488,18 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       setAllLoadingTicketProducts(loadingTicketProducts);
       const material = data.material;
 
-      setServiceOption([{ optionLabel: 'All', optionValue: 'All' }, ...material?.filter(m => m?.type === MATERIAL_TYPE.service)?.map(s => ({ optionLabel: s?.serviceDetail?.serviceName, optionValue: s?.serviceDetail?._id, _id: s?._id }))])
+      setServiceOption([
+        { optionLabel: 'All', optionValue: 'All' },
+        ...material
+          ?.filter(m => m?.type === MATERIAL_TYPE.service && m?.serviceDetail)
+          ?.map(s => ({
+            optionLabel: s.serviceDetail.serviceName,
+            optionValue: s.serviceDetail._id,
+            _id: s._id,
+            competencyType: s.serviceDetail.competencyType,
+            competencies: s.serviceDetail.competencies
+          }))
+      ]);
 
       let rows = data.material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material) === true);
 
