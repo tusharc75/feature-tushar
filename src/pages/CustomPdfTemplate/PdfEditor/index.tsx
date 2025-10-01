@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Designer } from '@pdfme/ui';
 import { getFonts, getPlugins } from './plugin';
 import { Template } from '@pdfme/common';
-
 interface PdfEditorProps {
   template?: any;
   onTemplateChange?: (tpl: Template) => void;
@@ -20,7 +19,6 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
   const [savedRange, setSavedRange] = useState<Range | null>(null);
   const [fontsReady, setFontsReady] = useState(false);
   const [fontObjects, setFontObjects] = useState({});
-
   const plugins = useMemo(() => getPlugins(variables, resourceTables), [variables, resourceTables]);
 
   useEffect(() => {
@@ -53,7 +51,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
           onTemplateChange(newTemplate);
         }
       });
-    } else {
+      } else {
       if (template) {
         designerInstanceRef.current.updateTemplate(template);
       }
@@ -73,10 +71,8 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
         }
       }
     };
-
     const container = containerRef.current;
     container.addEventListener('keydown', handleKeyDown, true);
-
     return () => {
       container.removeEventListener('keydown', handleKeyDown, true);
       if (designerInstanceRef.current) {

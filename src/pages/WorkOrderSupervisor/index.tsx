@@ -308,7 +308,7 @@ const WorkOrderSupervisor = () => {
                         color="primary"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handlePdfPreview(row?.original?.workOrder, user, toastConfig);
+                          handlePdfPreview(row?.original?.workOrderId, user, toastConfig);
                         }}
                       >
                         <PictureAsPdfIcon fontSize="small" color="primary" />
