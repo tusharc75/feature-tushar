@@ -114,7 +114,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
 
   const [showConfirmVersion, setShowConfirmVersion] = useState({ open: false, withData: 0 });
   const [versionDialog, setVersionDialog] = useState(false);
-  const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false });
+  const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, serializedPackage: null });
 
   const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -126,9 +126,13 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
   const [workOrderCostFields, setWorkOrderCostFields] = useState(null);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null });
-  const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState(false);
+  const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, onSuccess: '' });
   const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
   const [showConfirmBoxDisassembled, setShowConfirmBoxDisassembled] = useState(false)
+
+  const SERIALIZED_PACKAGE_DIALOG_ON_SUCCESS = {
+    createRepairJob: 'createRepairJob'
+  }
 
   useEffect(() => {
     return history.listen((location) => {
@@ -291,7 +295,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
           type: 'success',
           message: data
         });
-        setOpenSerializedPackageDialog(false);
+        setOpenSerializedPackageDialog({ open: false, onSuccess: '' });
         setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null });
         fetchWorkOrderData();
         setIsSubmitting(false);
@@ -338,16 +342,26 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       });
   };
 
-  const handleAddAssetInRepairJob = (data) => {
+  const handleAddAssetInRepairJob = (data, serializedPackages = []) => {
+    const payload: any = {
+      repairJob: data?._id
+    }
+    if (workOrderData?.serializedAsset) {
+      payload.assets = [workOrderData?.serializedAsset?.optionValue]
+    }
+    if (serializedPackages?.length > 0) {
+      payload.serializedPackages = serializedPackages
+    }
+
     axiosInstance()
-      .put(`${repairJob.api}/add-assets-create-ticket`, { repairJob: data?._id, assets: [workOrderData?.serializedAsset?.optionValue] })
+      .put(`${repairJob.api}/add-assets-create-ticket`, payload)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
-        setShowManageRepairJobDialog({ open: false });
+        setShowManageRepairJobDialog({ open: false, serializedPackage: null });
         fetchWorkOrderData();
       })
       .catch((error) => {
@@ -411,33 +425,58 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       });
   }
 
+  const createSerializedPackageWithWorkOrder = (serializedPackages) => {
+    setIsSubmitting(true)
+    axiosInstance()
+      .post(`${routes.serializedPackages?.path}/create-with-work-order`, { referenceId: workOrderData?.assemblyOrder?.optionValue, serializedPackages: serializedPackages })
+      .then(({ data: { data } }) => {
+        setIsSubmitting(false)
+        setOpenSerializedPackageDialog({ open: false, onSuccess: '' });
+        setShowManageRepairJobDialog({ open: true, serializedPackage: data })
+      })
+      .catch((error) => {
+        setIsSubmitting(false)
+        toastConfig.setToastConfig(error);
+      });
+  }
+
+  const isVisibleCreateRepairJob = () => {
+    if (!permissions?.repairJob?.isCreate || !allowedToEdit || workOrderData?.currentRepairJob || [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)) {
+      return false
+    }
+    if (workOrderData?.type === WORK_ORDER_TYPE.repairOrder) {
+      return workOrderData?.serializedAsset && workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair
+    }
+    if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder) {
+      return workOrderData?.assemblyOrder && workOrderData?.package
+    }
+    return false
+  }
+
   const toolbarButtons: ToolbarComponents<ThemeButtonProps | MenuItemProps>[] = [
     {
       id: `Repair Job`,
       type: 'menuItem',
-      isVisible:
-        permissions?.repairJob?.isCreate &&
-          workOrderData?.serializedAsset &&
-          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
-          allowedToEdit &&
-          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob
-          ? true
-          : false,
+      isVisible: isVisibleCreateRepairJob(),
       children: `Create ${resources?.repairJob?.titleSingular}`,
       tooltip: `Create ${resources?.repairJob?.titleSingular}`,
-      onClick: () => setShowManageRepairJobDialog({ open: true })
+      onClick: () => {
+        if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder) {
+          setOpenSerializedPackageDialog({ open: true, onSuccess: SERIALIZED_PACKAGE_DIALOG_ON_SUCCESS.createRepairJob })
+        } else {
+          setShowManageRepairJobDialog({ open: true, serializedPackage: null })
+        }
+      }
     },
     {
       type: 'menuItem',
       id: `Repair Job Receive`,
       isVisible:
-        permissions?.repairJob?.isUpdate && allowedToEdit && workOrderData?.type === WORK_ORDER_TYPE.repairOrder && workOrderData?.currentRepairJob
+        permissions?.repairJob?.isUpdate && allowedToEdit && [WORK_ORDER_TYPE.repairOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) && workOrderData?.currentRepairJob
           ? true
           : false,
-      children: `Receive Asset From Supplier`,
-      tooltip: `Receive Asset From Supplier`,
+      children: `Receive ${WORK_ORDER_TYPE.repairOrder === workOrderData?.type ? 'Asset' : ''} From Supplier`,
+      tooltip: `Receive ${WORK_ORDER_TYPE.repairOrder === workOrderData?.type ? 'Asset' : ''} From Supplier`,
       onClick: () => setRepairJobReceiveConfirmation(true)
     },
     {
@@ -505,7 +544,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
             updateStatus(WORK_ORDER_STATUS.completed);
           }
         } else if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder && workOrderData?.package) {
-          setOpenSerializedPackageDialog(true);
+          setOpenSerializedPackageDialog({ open: true, onSuccess: '' });
         } else {
           updateStatus(WORK_ORDER_STATUS.completed);
         }
@@ -938,9 +977,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       )}
       {showManageRepairJobDialog.open && (
         <ManageRepairJob
-          onClose={() => setShowManageRepairJobDialog({ open: false })}
+          onClose={() => setShowManageRepairJobDialog({ open: false, serializedPackage: null })}
           onSuccess={(data) => {
-            handleAddAssetInRepairJob(data);
+            handleAddAssetInRepairJob(data, showManageRepairJobDialog.serializedPackage);
           }}
           referenceType={sidebarResource.workOrder}
           referenceData={{
@@ -964,7 +1003,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       {repairJobReceiveConfirmation && (
         <ConfirmationDialog
           open={repairJobReceiveConfirmation}
-          message={`Are you sure you want to receive asset?`}
+          message={`Are you sure you want to receive ${WORK_ORDER_TYPE.repairOrder === workOrderData?.type ? 'asset' : ''}?`}
           onClose={() => {
             setRepairJobReceiveConfirmation(false);
           }}
@@ -1003,15 +1042,19 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
           }}
         />
       )}
-      {openSerializedPackageDialog && (
+      {openSerializedPackageDialog.open && (
         <PackageNumberDialog
           onClose={() => {
-            setOpenSerializedPackageDialog(false);
+            setOpenSerializedPackageDialog({ open: false, onSuccess: '' });
           }}
           assemblyOrderId={workOrderData?.assemblyOrder?.optionValue}
           workOrderIds={[id]}
           onSuccess={(_data) => {
-            updateStatus(WORK_ORDER_STATUS.completed, null, null, null, _data);
+            if (openSerializedPackageDialog.onSuccess === SERIALIZED_PACKAGE_DIALOG_ON_SUCCESS.createRepairJob) {
+              createSerializedPackageWithWorkOrder(_data)
+            } else {
+              updateStatus(WORK_ORDER_STATUS.completed, null, null, null, _data);
+            }
           }}
           isSubmitting={isSubmitting}
         />
