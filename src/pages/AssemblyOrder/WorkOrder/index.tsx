@@ -17,6 +17,7 @@ import {
   CHILD_RESOURCE,
   MATERIAL_SUB_TYPE,
   MATERIAL_TYPE,
+  repairJob,
   sidebarResource,
   WORK_ORDER_STATUS,
   WORK_ORDER_TYPE,
@@ -44,6 +45,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import ProductQtyDialog from 'src/pages/AssemblyOrder/WorkOrder/ProductQtyDialog';
 import PreviewDownloadNew from 'src/components/PreviewDownloadNew';
 import BulkEditWorkOrder from 'src/pages/WorkOrder/BulkEditWorkOrder';
+import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -80,10 +82,11 @@ const WorkOrder = ({
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, assignedWorkStations: [] });
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
   const [arrangeView, setArrangeView] = useState(false);
-  const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [] });
+  const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [], createRepairJobDialog: false });
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
   const [productQtyEdit, setProductQtyEdit] = useState({ open: false, data: null });
   const [bulkEditWorkOrderDialog, setBulkEditWorkOrderDialog] = useState({ open: false, _ids: [] });
+  const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, serializedPackage: null });
 
   const { generateColumns, getMaterialLabel } = useColumns();
 
@@ -657,7 +660,7 @@ const WorkOrder = ({
         .then(({ data }) => {
           setCompleting(false);
           setCompleteConfirmBox(false);
-          setOpenSerializedPackageDialog({ open: false, ids: [] });
+          setOpenSerializedPackageDialog({ open: false, ids: [], createRepairJobDialog: false });
           fetchData();
           checkAllWorkOrderComplete();
           fetchAssembleOrderData();
@@ -872,6 +875,38 @@ const WorkOrder = ({
     return selectedRecords?.filter((e) => !e?.isDummy)
   }
 
+  const createSerializedPackageWithWorkOrder = (serializedPackages) => {
+    setCompleting(true)
+    axiosInstance()
+      .post(`${routes.serializedPackages?.path}/create-with-work-order`, { referenceId: assemblyOrderData._id, serializedPackages: serializedPackages })
+      .then(({ data: { data } }) => {
+        setCompleting(false)
+        setOpenSerializedPackageDialog({ open: false, ids: [], createRepairJobDialog: false });
+        setShowManageRepairJobDialog({ open: true, serializedPackage: [...data, ...getFilterSelectedRecords(selectedRecords)?.filter(r => r?.serializedPackage)?.map(r => r?.serializedPackage?.optionValue)] })
+      })
+      .catch((error) => {
+        setCompleting(false)
+        toastConfig.setToastConfig(error);
+      });
+  }
+
+  const handleAddAssetInRepairJob = (data, serializedPackages = []) => {
+    axiosInstance()
+      .put(`${repairJob.api}/add-assets-create-ticket`, { repairJob: data?._id, serializedPackages: serializedPackages })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setShowManageRepairJobDialog({ open: false, serializedPackage: null });
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <>
       {isAutoCreating && (
@@ -905,7 +940,9 @@ const WorkOrder = ({
               updateWorkOrdetStatus,
               getFilterSelectedRecords,
               resources,
-              setBulkEditWorkOrderDialog
+              setBulkEditWorkOrderDialog,
+              setOpenSerializedPackageDialog,
+              setShowManageRepairJobDialog
             }}
           />
         }
@@ -982,7 +1019,7 @@ const WorkOrder = ({
               });
             }
             if (autoCompleteData?.every((e) => e.type === MATERIAL_TYPE.package && e?.workOrderType === WORK_ORDER_TYPE.assemblyOrder)) {
-              setOpenSerializedPackageDialog({ open: true, ids: ids });
+              setOpenSerializedPackageDialog({ open: true, ids: ids, createRepairJobDialog: false });
             } else {
               handleAutoComplete(ids);
             }
@@ -993,16 +1030,34 @@ const WorkOrder = ({
       {openSerializedPackageDialog.open && (
         <PackageNumberDialog
           onClose={() => {
-            setOpenSerializedPackageDialog({ open: false, ids: [] });
+            setOpenSerializedPackageDialog({ open: false, ids: [], createRepairJobDialog: false });
             setCompleteConfirmBox(false);
           }}
           assemblyOrderId={assemblyOrderData._id}
           workOrderIds={openSerializedPackageDialog.ids}
           onSuccess={(_data) => {
-            setCompleteConfirmBox(false);
-            handleAutoComplete(openSerializedPackageDialog.ids, _data);
+            if (openSerializedPackageDialog.createRepairJobDialog) {
+              createSerializedPackageWithWorkOrder(_data)
+            } else {
+              setCompleteConfirmBox(false);
+              handleAutoComplete(openSerializedPackageDialog.ids, _data);
+            }
           }}
           isSubmitting={isCompleting}
+        />
+      )}
+
+      {showManageRepairJobDialog.open && (
+        <ManageRepairJob
+          onClose={() => setShowManageRepairJobDialog({ open: false, serializedPackage: null })}
+          onSuccess={(data) => {
+            handleAddAssetInRepairJob(data, showManageRepairJobDialog.serializedPackage);
+          }}
+          referenceType={sidebarResource.assemblyOrder}
+          referenceData={{
+            warehouse: assemblyOrderData?.warehouse?.optionValue,
+            workOrder: getFilterSelectedRecords(selectedRecords)[0]?.workOrder?._id
+          }}
         />
       )}
 
@@ -1160,7 +1215,9 @@ const ActionButtonMenuItems = ({
   updateWorkOrdetStatus,
   getFilterSelectedRecords,
   resources,
-  setBulkEditWorkOrderDialog
+  setBulkEditWorkOrderDialog,
+  setOpenSerializedPackageDialog,
+  setShowManageRepairJobDialog
 }) => {
   const checkUniqWorkOrderType = () => {
     if (getFilterSelectedRecords(selectedRecords).length === 0) {
@@ -1298,6 +1355,20 @@ const ActionButtonMenuItems = ({
       >
         Auto Complete Work Order(s)
       </MenuItem>
+      {permissions?.repairJob?.isCreate && (
+        <MenuItem
+          onClick={() => {
+            if (getFilterSelectedRecords(selectedRecords)?.every(r => r?.serializedPackage)) {
+              setShowManageRepairJobDialog({ open: true, serializedPackage: getFilterSelectedRecords(selectedRecords)?.map(r => r?.serializedPackage?.optionValue) })
+            } else {
+              setOpenSerializedPackageDialog({ open: true, ids: getFilterSelectedRecords(selectedRecords)?.map(r => r?.workOrder?._id), createRepairJobDialog: true })
+            }
+          }}
+          disabled={getFilterSelectedRecords(selectedRecords)?.length > 1 ? true : getFilterSelectedRecords(selectedRecords)?.every(r => ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.draft]?.includes(r?.workOrder?.status) && r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder) ? false : true}
+        >
+          {`Create ${resources?.repairJob?.titleSingular}`}
+        </MenuItem>
+      )}
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&
