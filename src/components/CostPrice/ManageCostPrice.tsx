@@ -70,11 +70,11 @@ const ManageCostPrice = ({ onClose, onSuccess, referenceData, costPriceData }) =
 
   const getLabel = () => {
     if (referenceData?.type === MATERIAL_TYPE.product) {
-      return `${resources?.product?.titleSingular} - ${referenceData?.productName} - Cost Price`;
+      return `${resources?.product?.titleSingular} - ${referenceData?.productName} - Cost`;
     } else if (referenceData?.type === MATERIAL_TYPE.package) {
-      return `${resources?.packages?.titleSingular} - ${referenceData?.packageName} - Cost Price`;
+      return `${resources?.packages?.titleSingular} - ${referenceData?.packageName} - Cost`;
     } else if (referenceData?.type === MATERIAL_TYPE.service) {
-      return `${resources?.serviceMaster?.titleSingular} - ${referenceData?.serviceName} - Cost Price`;
+      return `${resources?.serviceMaster?.titleSingular} - ${referenceData?.serviceName} - Cost`;
     }
   };
 
