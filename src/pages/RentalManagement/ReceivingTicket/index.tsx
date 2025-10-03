@@ -14,7 +14,6 @@ import { MdHandyman, MdHomeRepairService } from 'react-icons/md';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import ReplaceAssetReason from 'src/components/RentalManagment/ReplaceAssetReason';
 import { actionDisable, rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -3428,6 +3427,8 @@ const ReceivingTicket = ({
           selectedProducts={addSerializedAssetDialog.products}
           filterByPlant={rentalManagementData?.warehouse}
           replaceAssets={true}
+          replaceAssetReasonDialog={showReplaceAssetWarnings.replaceAssetReasonDialog}
+          setShowReplaceAssetWarnings={setShowReplaceAssetWarnings}
         />
       )}
       {openDateDialog.open && (
@@ -3458,18 +3459,6 @@ const ReceivingTicket = ({
               : `Change Date ${openDateDialog.status}`
           }
           assets={openDateDialog.assets}
-        />
-      )}
-      {showReplaceAssetWarnings.replaceAssetReasonDialog && (
-        <ReplaceAssetReason
-          handleClose={() => {
-            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, data: null }));
-          }}
-          loading={isSubmitting}
-          handleSucess={(data) => {
-            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, replaceAssetReason: data?.reason, confirmationAddNewLineItemsDialog: true, incorrectAssignment: data?.incorrectAssignment }))
-          }}
-          isIncorrectAssignment={true}
         />
       )}
       {transferAnotherPackageDialog && (
