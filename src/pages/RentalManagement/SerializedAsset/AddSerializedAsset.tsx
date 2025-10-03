@@ -39,7 +39,6 @@ import AssetDetailsChangeDialog from '../ReceivingTicket/AssetDetailsChangeDialo
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Add } from '@mui/icons-material';
 import CustomMessageDialog from 'src/components/MessageDialog';
-import { SET_IS_RESET_WAREHOUSE } from 'src/StateProvider/actionTypes';
 
 const AddSerializedAsset = ({
   isAdding,
@@ -68,7 +67,7 @@ const AddSerializedAsset = ({
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, user, resources, resetWareHouse }, dispatch: dispatchData
+    state: { permissions, user, resources }
   }: any = useData();
 
   const [serializedProducts, setSerializedProducts] = useState([]);
@@ -93,14 +92,6 @@ const AddSerializedAsset = ({
     reserveAssetsData: null,
     assetDataError: []
   });
-
-  useEffect(() => {
-    if (resetWareHouse) {
-      setSelectedWarehouse(null);
-      dispatchData({ type: SET_IS_RESET_WAREHOUSE, payload: false });
-      dispatch({ type: 'selection', selectedRecords: [] })
-    }
-  }, [resetWareHouse]);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
