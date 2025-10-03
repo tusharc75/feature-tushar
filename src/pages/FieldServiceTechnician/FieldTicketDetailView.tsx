@@ -140,6 +140,7 @@ const FieldTicketDetailView = ({ id }) => {
               allowedToEdit={allowedToEdit}
               fetchData={fetchData}
               resourcePolicy={resourceData?.policy}
+              fieldTicketFields={[]}
             />
           )}
         </ContentFullScreen>
