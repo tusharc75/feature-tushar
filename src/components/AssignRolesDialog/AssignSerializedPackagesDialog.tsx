@@ -21,7 +21,8 @@ const AssignSerializedPackagesDialog = ({
   extraFilterById = [],
   isSubmitting = false,
   selectedPackages = [],
-  referenceData = null
+  referenceData = null,
+  showWarehouseFilter = true
 }) => {
   const renderedFrom = `${camelCase(sidebarResource?.serializedPackages)}`;
   const toastConfig = useContext(CustomToastContext);
@@ -225,34 +226,36 @@ const AssignSerializedPackagesDialog = ({
   const leftSideContentsOfSearchFilter = () => {
     return (
       <Box mt={0.5}>
-        <Autocomplete
-          fullWidth
-          sx={{ width: 250 }}
-          options={warehouseOption}
-          getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
-          value={
-            warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
-              ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
-              : ''
-          }
-          onChange={(e, val) => {
-            setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              margin="dense"
-              size="small"
-              name="plant"
-              placeholder={resources?.warehouse?.titleSingular}
-              label={resources?.warehouse?.titleSingular}
-              variant="outlined"
-              fullWidth
-              className="m-0"
-            />
-          )}
-        />
+        {showWarehouseFilter && (
+          <Autocomplete
+            fullWidth
+            sx={{ width: 250 }}
+            options={warehouseOption}
+            getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+            isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+            value={
+              warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
+                ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
+                : ''
+            }
+            onChange={(e, val) => {
+              setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                margin="dense"
+                size="small"
+                name="plant"
+                placeholder={resources?.warehouse?.titleSingular}
+                label={resources?.warehouse?.titleSingular}
+                variant="outlined"
+                fullWidth
+                className="m-0"
+              />
+            )}
+          />
+        )}
       </Box>
     )
   }
