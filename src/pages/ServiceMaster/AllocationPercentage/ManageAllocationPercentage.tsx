@@ -46,7 +46,7 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
     if (referenceData?._id) {
       setIsSubmitting(true);
       axiosInstance()
-        .post(`${serviceMaster.api}/allocation-percentage`, {
+        .post(`${serviceMaster.api}/allocation`, {
           _id: referenceData._id,
           allocations: values?.allocations?.map(allocation => ({
             name: allocation?.name,
