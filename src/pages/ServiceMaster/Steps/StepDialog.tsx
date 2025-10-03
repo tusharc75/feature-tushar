@@ -400,7 +400,7 @@ export default function StepDialog({
                           size="small"
                           type="number"
                           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                          label="Cost Price"
+                          label="Cost"
                           name="costPrice"
                           variant="outlined"
                           fullWidth

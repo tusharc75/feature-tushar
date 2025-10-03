@@ -43,7 +43,7 @@ const CostPrice = ({ referenceData, type }) => {
     <>
       <Box className={`single-form-v1`} style={{ overflow: 'hidden' }}>
         <Box className={'form-head-v1'} justifyContent="space-between" alignItems="center">
-          <Typography variant="subtitle2">Cost Price</Typography>
+          <Typography variant="subtitle2">Cost</Typography>
           <IconButton
             size="small"
             onClick={() => {

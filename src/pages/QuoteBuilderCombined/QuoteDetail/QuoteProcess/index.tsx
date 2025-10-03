@@ -910,7 +910,7 @@ export default function QuoteProcess(props) {
                   {totalcost.fullFormatAmount ? totalcost.fullFormatAmount : defaultTotalValue}
                 </span>
                 <div className={'quoteBoxContent'}>
-                  <span className={'quoteDetailHeading'}>Total Cost Price </span>
+                  <span className={'quoteDetailHeading'}>Total Cost</span>
                 </div>
               </div>
               {redCard ? (
