@@ -97,7 +97,7 @@ const Steps = ({ serviceId }) => {
     },
     {
       accessor: 'costPrice',
-      Header: 'Cost Price',
+      Header: 'Cost',
       Cell: ({ row }) => (
         <>
           {row?.original?.costPrice ? (
