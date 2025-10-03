@@ -555,7 +555,7 @@ const ServiceMaster = (props: Props) => {
         <AsynImportExportMenu
           resource={sidebarResource.product}
           subResource={sidebarResource.serviceMaster}
-          permissions={permissions?.packages}
+          permissions={permissions?.product}
           module="products"
           api={`${product.api}/unknown/service-master`}
           afterImportCompleted={() => {

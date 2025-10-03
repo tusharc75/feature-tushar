@@ -6,7 +6,6 @@ import { isMobile } from 'react-device-detect';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
@@ -19,6 +18,7 @@ import routes from '../../../components/Helpers/Routes';
 import { prepareDataForGrid, product, sidebarResource } from '../../../constants/helpers';
 import { FiExternalLink } from 'react-icons/fi';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 
 function Parts({ id }) {
   const renderedFrom = `${camelCase(sidebarResource.product)}_bom`;
@@ -257,14 +257,16 @@ function Parts({ id }) {
   const rightSideContents = () => {
     return (
       <>
-        <ImportExportMenu
+        <AsynImportExportMenu
+          resource={sidebarResource.product}
+          subResource={sidebarResource.product}
           permissions={permissions?.product}
           module="products"
           api={`${product.api}/unknown/bom`}
           afterImportCompleted={() => {
             fetchBOMData();
           }}
-          isExportAllOrSomeFeature={true}
+          isExportCount={true}
           ids={[]}
           additionalParams={`productId=${id}`}
         />
