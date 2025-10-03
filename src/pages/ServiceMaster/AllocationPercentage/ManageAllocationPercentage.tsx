@@ -35,7 +35,7 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
       const val = curr.percentage === '' || curr.percentage === null || curr.percentage === undefined ? 0 : parseFloat(curr.percentage) || 0;
       return acc + val;
     }, 0) || 0;
-    
+
     if (values?.allocations?.length > 0 && Math.abs(totalPercentage - 100) > 0.01) {
       setShowError(true);
       return;
@@ -53,7 +53,12 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
             percentage: parseFloat(allocation?.percentage) || 0
           }))
         })
-        .then((res) => {
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
           setIsSubmitting(false);
           onSuccess();
         })
@@ -69,14 +74,14 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
   const validate = (values) => {
     const errors: any = {};
     let totalPercentage = 0;
-    
+
     if (values?.allocations?.length > 0) {
       values?.allocations?.forEach((d, i) => {
         if (!d.name) {
           if (!errors?.allocations) {
             errors['allocations'] = [];
           }
-          errors.allocations[i] = { name: 'Allocation Detail is required' };
+          errors.allocations[i] = { name: 'Allocation is required' };
         }
         if (d.percentage === '' || d.percentage === null || d.percentage === undefined) {
           if (!errors?.allocations) {
@@ -84,14 +89,14 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
           }
           errors.allocations[i] = { ...errors.allocations[i], percentage: 'Percentage is required' };
         }
-        
+
         if (d.percentage !== '' && d.percentage !== null && d.percentage !== undefined) {
           const percentageVal = parseFloat(d.percentage) || 0;
-          if (percentageVal < 0 || percentageVal > 100) {
+          if (percentageVal <= 0 || percentageVal > 100) {
             if (!errors?.allocations) {
               errors['allocations'] = [];
             }
-            errors.allocations[i] = { ...errors.allocations[i], percentage: 'Percentage must be between 0 and 100' };
+            errors.allocations[i] = { ...errors.allocations[i], percentage: 'Percentage must be between 1 and 100' };
           } else {
             totalPercentage += percentageVal;
           }
@@ -116,7 +121,7 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
       open={true}
     >
       <Formik initialValues={{ allocations }} enableReinitialize={true} validate={validate} onSubmit={handleSubmit}>
-        {({ values, submitForm, touched, errors }) => {          
+        {({ values, submitForm, touched, errors }) => {
           return (
             <>
               <CustomDialogHeader
@@ -138,8 +143,15 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
                 >
                   <Box p={1} bgcolor="var(--dark-secondary, grey.200)">
                     <Grid container>
-                      <Grid size={{ xs: 10 }}>
-                        <Typography variant="body2">Allocation</Typography>
+                      <Grid size={{ xs: 10, sm: 10, md: 5, lg: 5 }}>
+                        <Box sx={{ ml: 1 }}>
+                          <Typography variant="body2">Allocation</Typography>
+                        </Box>
+                      </Grid>
+                      <Grid size={{ xs: 10, sm: 10, md: 5, lg: 5 }}>
+                        <Box sx={{ ml: 1 }}>
+                          <Typography variant="body2">Percentage</Typography>
+                        </Box>
                       </Grid>
                       <Grid size={{ xs: 2 }}>
                         <Grid container justifyContent="flex-end">
@@ -169,95 +181,91 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
                         <>
                           {values?.allocations?.length
                             ? values?.allocations?.map((allocation, index) => {
-                                return (
-                                  <Box key={index} p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
-                                    <Grid container spacing={1} alignItems="center">
-                                      <Grid size={{ xs: 10, sm: 10, md: 5, lg: 5 }}>
-                                        <TextField
-                                          id="allocation-detail-field"
-                                          variant="outlined"
-                                          margin="dense"
-                                          size="small"
-                                          name="name"
-                                          label="Allocation"
-                                          fullWidth
-                                          value={allocation?.name || ''}
-                                          required
-                                          onChange={(e) => {
-                                            arrayHelpers.replace(index, {
-                                              ...values?.allocations[index],
-                                              ['name']: e.target.value
-                                            });
-                                          }}
-                                          error={
-                                            touched?.allocations &&
-                                            touched?.allocations[index]?.name &&
-                                            errors?.allocations &&
-                                            Boolean(errors?.allocations[index]?.name)
-                                          }
-                                          helperText={
-                                            touched?.allocations &&
-                                            touched?.allocations[index]?.name &&
-                                            errors?.allocations &&
-                                            errors?.allocations[index]?.name
-                                          }
-                                        />
-                                      </Grid>
-                                      <Grid size={{ xs: 10, sm: 10, md: 5, lg: 5 }}>
-                                        <TextField
-                                          id="percentage-field"
-                                          variant="outlined"
-                                          margin="dense"
-                                          size="small"
-                                          name="percentage"
-                                          label="Percentage"
-                                          type="number"
-                                          fullWidth
-                                          inputProps={{
-                                            min: 0,
-                                            max: 100,
-                                            step: 0.01
-                                          }}
-                                          InputProps={{
-                                            endAdornment: '%'
-                                          }}
-                                          style={{ margin: 0 }}
-                                          value={allocation?.percentage !== undefined && allocation?.percentage !== null ? allocation?.percentage : ''}
-                                          required
-                                          onChange={(e) => {
-                                            const value = e.target.value === '' ? '' : parseFloat(e.target.value) || 0;
-                                            arrayHelpers.replace(index, {
-                                              ...values?.allocations[index],
-                                              ['percentage']: value
-                                            });
-                                          }}
-                                          error={
-                                            touched?.allocations &&
-                                            touched?.allocations[index]?.percentage &&
-                                            errors?.allocations &&
-                                            Boolean(errors?.allocations[index]?.percentage)
-                                          }
-                                          helperText={
-                                            touched?.allocations &&
-                                            touched?.allocations[index]?.percentage &&
-                                            errors?.allocations &&
-                                            errors?.allocations[index]?.percentage
-                                          }
-                                        />
-                                      </Grid>
-                                      <Grid size={{ xs: 2, sm: 2, md: 2, lg: 2 }}>
-                                        <Grid container justifyContent="flex-end">
-                                          <HtmlTooltip title="Remove">
-                                            <IconButton size="small" aria-label="remove" onClick={() => arrayHelpers.remove(index)}>
-                                              <RemoveCircleOutline fontSize="small" color="primary" />
-                                            </IconButton>
-                                          </HtmlTooltip>
-                                        </Grid>
+                              return (
+                                <Box key={index} p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
+                                  <Grid container spacing={1} alignItems="center">
+                                    <Grid size={{ xs: 10, sm: 10, md: 5, lg: 5 }}>
+                                      <TextField
+                                        id="allocation-detail-field"
+                                        variant="outlined"
+                                        margin="dense"
+                                        size="small"
+                                        name="name"
+                                        label="Allocation"
+                                        autoComplete='off'
+                                        fullWidth
+                                        value={allocation?.name || ''}
+                                        required
+                                        onChange={(e) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values?.allocations[index],
+                                            ['name']: e.target.value
+                                          });
+                                        }}
+                                        error={
+                                          touched?.allocations &&
+                                          touched?.allocations[index]?.name &&
+                                          errors?.allocations &&
+                                          Boolean(errors?.allocations[index]?.name)
+                                        }
+                                        helperText={
+                                          touched?.allocations &&
+                                          touched?.allocations[index]?.name &&
+                                          errors?.allocations &&
+                                          errors?.allocations[index]?.name
+                                        }
+                                      />
+                                    </Grid>
+                                    <Grid size={{ xs: 10, sm: 10, md: 5, lg: 5 }}>
+                                      <TextField
+                                        id="percentage-field"
+                                        variant="outlined"
+                                        margin="dense"
+                                        size="small"
+                                        name="percentage"
+                                        label="Percentage"
+                                        type="number"
+                                        fullWidth
+                                        InputProps={{
+                                          endAdornment: '%'
+                                        }}
+                                        style={{ margin: 0 }}
+                                        value={allocation?.percentage !== undefined && allocation?.percentage !== null ? allocation?.percentage : ''}
+                                        required
+                                        onChange={(e) => {
+                                          const value = e.target.value === '' ? '' : parseFloat(e.target.value) || 0;
+                                          arrayHelpers.replace(index, {
+                                            ...values?.allocations[index],
+                                            ['percentage']: value
+                                          });
+                                        }}
+                                        error={
+                                          touched?.allocations &&
+                                          touched?.allocations[index]?.percentage &&
+                                          errors?.allocations &&
+                                          Boolean(errors?.allocations[index]?.percentage)
+                                        }
+                                        helperText={
+                                          touched?.allocations &&
+                                          touched?.allocations[index]?.percentage &&
+                                          errors?.allocations &&
+                                          errors?.allocations[index]?.percentage
+                                        }
+                                      />
+                                    </Grid>
+                                    <Grid size={{ xs: 2, sm: 2, md: 2, lg: 2 }}>
+                                      <Grid container justifyContent="flex-end">
+                                        <HtmlTooltip title="Remove">
+                                          <IconButton size="small" aria-label="remove" onClick={() => arrayHelpers.remove(index)}>
+                                            <RemoveCircleOutline fontSize="small" color="error" />
+                                          </IconButton>
+                                        </HtmlTooltip>
                                       </Grid>
                                     </Grid>
-                                  </Box>
-                                );
-                              })
+                                  </Grid>
+                                </Box>
+                              );
+                            })
                             : null}
                         </>
                       )}

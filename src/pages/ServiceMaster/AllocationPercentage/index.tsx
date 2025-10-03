@@ -3,23 +3,33 @@ import Grid from '@mui/material/Grid2';
 import { AddCircleOutline } from '@mui/icons-material';
 import { useState } from 'react';
 import ManageAllocationPercentage from './ManageAllocationPercentage';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { updateDisable } from 'src/constants/messageHelpers';
+import { useData } from 'src/StateProvider/Provider';
 
 const AllocationPercentage = ({ referenceData, onRefresh }) => {
+
   const [open, setOpen] = useState(false);
+  const {
+    state: { permissions }
+  }: any = useData();
 
   return (
     <>
       <Box className={`single-form-v1`} style={{ overflow: 'hidden' }}>
         <Box className={'form-head-v1'} justifyContent="space-between" alignItems="center">
-          <Typography variant="subtitle2">Allocation Percentage</Typography>
-          <IconButton
-            size="small"
-            onClick={() => {
-              setOpen(true);
-            }}
-          >
-            <AddCircleOutline fontSize="small" color='primary' />
-          </IconButton>
+          <Typography variant="subtitle2">Allocation</Typography>
+          <HtmlTooltip title={permissions?.serviceMaster?.isUpdate ? referenceData?.allocations?.length ? "Update" : "Add" : updateDisable}>
+            <IconButton
+              size="small"
+              onClick={() => {
+                setOpen(true);
+              }}
+              disabled={!permissions?.serviceMaster?.isUpdate}
+            >
+              <AddCircleOutline fontSize="small" color={permissions?.serviceMaster?.isUpdate ? 'primary' : 'disabled'} />
+            </IconButton>
+          </HtmlTooltip>
         </Box>
         <Box className="formdata-v1" style={{ minHeight: '250px' }}>
           {referenceData?.allocations?.length ? (
@@ -33,7 +43,7 @@ const AllocationPercentage = ({ referenceData, onRefresh }) => {
                   </Grid>
                   <Grid size={{ xs: 6 }} >
                     <Typography className="table-head-v1  br-0 text-truncate" style={{ width: '100%' }} variant="body1">
-                      Allocation Detail
+                      Allocation
                     </Typography>
                   </Grid>
                   <Grid size={{ xs: 4 }} >
