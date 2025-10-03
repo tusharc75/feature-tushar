@@ -433,7 +433,7 @@ const Consumables = ({
       setSubmitting(false);
     } else {
       const material: any = [];
-      if (addQuotationDataDialog || addFieldServiceOrderDataDialog) {
+      if (addQuotationDataDialog || addFieldServiceOrderDataDialog || addRentalJobDataDialog) {
         rows?.forEach((d: any) => {
           rows = rows?.forEach((e: any) => {
             let element: any = e;
@@ -516,6 +516,7 @@ const Consumables = ({
         setConsumablesDialog(false);
         setAddQuotationDataDialog(false);
         setAddFieldServiceOrderDataDialog(false);
+        setAddRentalJobDataDialog(false);
         fetchData();
         fetchFieldTicketData();
         setSubmitting(false);
@@ -735,7 +736,7 @@ const Consumables = ({
                 setAddRentalJobDataDialog(true);
               }}
             >
-              {`Add Consumables From ${resources?.rentalManagement?.titleSingular}`}
+              {`Add Job Consumables`}
             </MenuItem>
           </>
         )}
