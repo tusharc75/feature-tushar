@@ -195,7 +195,7 @@ const AssignSerialNumbersDialog = ({
 
   const getQueryString = () => {
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
-    let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}&activeStorageLocation=true`;
+    let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}&activeStorageLocation=true`;    
     if (!selectedProduct) {
       deepFilter = `${deepFilter}&products=${selectedProducts?.map((p) => p?.id).join(',')}`;
     } else {
