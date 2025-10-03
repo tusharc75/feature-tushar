@@ -1,5 +1,5 @@
 import { getPermissions } from '../constants/helpers';
-import { SET_USER, USER_LOADING, SET_ROLE, SET_SELECTED_ENTITY, SET_CHATTER, SET_CART, SET_START_TOUR, SET_SEARCH, SET_FILES_UPLOAD_PROGRESS } from './actionTypes';
+import { SET_USER, USER_LOADING, SET_ROLE, SET_SELECTED_ENTITY, SET_CHATTER, SET_CART, SET_START_TOUR, SET_SEARCH, SET_FILES_UPLOAD_PROGRESS, SET_IS_RESET_WAREHOUSE } from './actionTypes';
 
 export const initialState = {
   user: null,
@@ -17,7 +17,8 @@ export const initialState = {
     stepIndex: 0
   },
   gridMetaData: {},
-  filesUploadProgress: []
+  filesUploadProgress: [],
+  resetWareHouse: false,
 };
 
 const reducer = (state = initialState, action) => {
@@ -78,6 +79,8 @@ const reducer = (state = initialState, action) => {
           [...filesUploadProgress],
         isFilesUploading: filesUploadProgress?.find((e) => e?.status === 'uploading') ? true : false
       }
+    case SET_IS_RESET_WAREHOUSE:
+      return { ...state, resetWareHouse: action.payload };
     default:
       return state;
   }

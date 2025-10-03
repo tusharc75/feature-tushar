@@ -92,6 +92,7 @@ import SubStatusLog from '../LoadingTicket/SubStatusLog';
 import FleetDispatchHistory from './FleetDispatchHistory';
 import TechnicianDispatchReturn from 'src/pages/RentalManagement/TechnicianDispatchReturn';
 import FieldTicket from 'src/pages/FieldServiceOrder/FieldTicket';
+import { SET_IS_RESET_WAREHOUSE } from 'src/StateProvider/actionTypes';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -200,7 +201,7 @@ const ReceivingTicket = ({
   const [technicianDispatchReturn, setTechnicianDispatchReturn] = useState(false);
 
   const {
-    state: { user, permissions, resources }
+    state: { user, permissions, resources, warehouseSelected }, dispatch: dispatchData
   }: any = useData();
 
   const { generateColumns } = useColumns();
@@ -3461,7 +3462,10 @@ const ReceivingTicket = ({
       )}
       {showReplaceAssetWarnings.replaceAssetReasonDialog && (
         <ReplaceAssetReason
-          handleClose={() => setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, data: null }))}
+          handleClose={() => {
+            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, data: null }));
+            dispatchData({ type: SET_IS_RESET_WAREHOUSE, payload: true });
+          }}
           loading={isSubmitting}
           handleSucess={(data) => {
             setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, replaceAssetReason: data?.reason, confirmationAddNewLineItemsDialog: true, incorrectAssignment: data?.incorrectAssignment }))
