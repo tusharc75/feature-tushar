@@ -427,8 +427,11 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
 
   const createSerializedPackageWithWorkOrder = (serializedPackages) => {
     setIsSubmitting(true)
-    axiosInstance()
-      .post(`${routes.serializedPackages?.path}/create-with-work-order`, { referenceId: workOrderData?.assemblyOrder?.optionValue, serializedPackages: serializedPackages })
+    axiosInstance().post(`${routes.serializedPackages?.path}/create-with-work-order`,
+      {
+        referenceId: workOrderData?.assemblyOrder?.optionValue,
+        serializedPackages: serializedPackages
+      })
       .then(({ data: { data } }) => {
         setIsSubmitting(false)
         fetchWorkOrderData()

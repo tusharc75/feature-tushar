@@ -877,13 +877,14 @@ const WorkOrder = ({
 
   const createSerializedPackageWithWorkOrder = (serializedPackages) => {
     setCompleting(true)
-    axiosInstance()
-      .post(`${routes.serializedPackages?.path}/create-with-work-order`, { referenceId: assemblyOrderData._id, serializedPackages: serializedPackages })
-      .then(({ data: { data } }) => {
-        setCompleting(false)
-        setOpenSerializedPackageDialog({ open: false, ids: [], createRepairJobDialog: false });
-        setShowManageRepairJobDialog({ open: true, serializedPackage: [...data, ...getFilterSelectedRecords(selectedRecords)?.filter(r => r?.serializedPackage)?.map(r => r?.serializedPackage?.optionValue)] })
-      })
+    axiosInstance().post(`${routes.serializedPackages?.path}/create-with-work-order`, {
+      referenceId: assemblyOrderData._id,
+      serializedPackages: serializedPackages
+    }).then(({ data: { data } }) => {
+      setCompleting(false)
+      setOpenSerializedPackageDialog({ open: false, ids: [], createRepairJobDialog: false });
+      setShowManageRepairJobDialog({ open: true, serializedPackage: [...data, ...getFilterSelectedRecords(selectedRecords)?.filter(r => r?.serializedPackage)?.map(r => r?.serializedPackage?.optionValue)] })
+    })
       .catch((error) => {
         setCompleting(false)
         toastConfig.setToastConfig(error);
@@ -1364,10 +1365,9 @@ const ActionButtonMenuItems = ({
               setOpenSerializedPackageDialog({ open: true, ids: getFilterSelectedRecords(selectedRecords)?.map(r => r?.workOrder?._id), createRepairJobDialog: true })
             }
           }}
-          disabled={getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)?.length > 1 ?
-            true : getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)?.every(r =>
-              ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.draft]?.includes(r?.workOrder?.status)
-              && r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder) ? false : true}
+          disabled={getFilterSelectedRecords(selectedRecords)?.length > 0 && getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)?.every(r =>
+            ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.draft]?.includes(r?.workOrder?.status)
+            && r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder) ? false : true}
         >
           {`Create ${resources?.repairJob?.titleSingular}`}
         </MenuItem>
