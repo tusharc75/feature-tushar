@@ -150,7 +150,6 @@ const MapView = (props: MapViewProps) => {
 
   const getParams = () => {
     let url = '';
-
     Object.keys(filterValues)?.forEach(_key => {
       if (Array.isArray(filterValues[_key]) && filterValues[_key]?.length > 0) {
         url = `${url}&${_key}=${JSON.stringify(filterValues[_key].map((p: any) => p?.optionValue))}`;
@@ -161,6 +160,24 @@ const MapView = (props: MapViewProps) => {
       }
     });
     return url;
+  }
+
+
+  const getAssetUrl = (status) => {
+    const params: any = {}
+    if (status) {
+      params.assetStatus = status
+    }
+    params.currentLocation = JSON.stringify([{ optionLabel: selectedBase?.location.concatedName, optionValue: selectedBase?.location?._id }])
+    if (filterValues?.product?.length) {
+      params.product = JSON.stringify(filterValues?.product?.map((e) => { return { optionLabel: e?.optionLabel, optionValue: e?.optionValue } }))
+    }
+    if (filterValues?.productCategory?.length) {
+      params.productCategory = JSON.stringify(filterValues?.productCategory?.map((e) => { return { optionLabel: e?.optionLabel, optionValue: e?.optionValue } }))
+    }
+    const queryString = new URLSearchParams(params).toString();
+    let url = `${routes.serializedAsset.path}?${queryString}`
+    return url
   }
 
   const handleMarkerClick = (asset: locationType) => {
@@ -279,10 +296,7 @@ const MapView = (props: MapViewProps) => {
                               size="small"
                               color="primary"
                               onClick={() =>
-                                window.open(
-                                  `${routes.serializedAsset.path}?currentLocation=${encodeURIComponent(JSON.stringify([{ optionLabel: selectedBase?.location.concatedName, optionValue: selectedBase?.location?._id }]))}`,
-                                  '_blank'
-                                )
+                                window.open(getAssetUrl(null), '_blank')
                               }
                             >
                               <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -317,10 +331,7 @@ const MapView = (props: MapViewProps) => {
                                 size="small"
                                 color="primary"
                                 onClick={() =>
-                                  window.open(
-                                    `${routes.serializedAsset.path}?assetStatus=${d.status}&currentLocation=${encodeURIComponent(JSON.stringify([{ optionLabel: selectedBase?.location.concatedName, optionValue: selectedBase?.location?._id }]))}`,
-                                    '_blank'
-                                  )
+                                  window.open(getAssetUrl(d.status), '_blank')
                                 }
                               >
                                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
