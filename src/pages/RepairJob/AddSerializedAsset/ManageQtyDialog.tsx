@@ -18,7 +18,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-export default function ManageAssetDialog({
+export default function ManageQtyDialog({
   allFields,
   onClose,
   repairJobData,
@@ -58,7 +58,7 @@ export default function ManageAssetDialog({
       });
     } else {
       axiosInstance()
-        .get(`${repairJob.api}/${repairJobData?._id}/assets/${data?.inventory}`)
+        .get(`${repairJob.api}/${repairJobData?._id}/assets/${data?._id}`)
         .then(({ data: { data } }) => {
           setInitialData({
             fields: allFields,
@@ -88,12 +88,13 @@ export default function ManageAssetDialog({
       }
       selectedRecords.forEach((element) => {
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-        returnData.push({ _id: element.inventory, ...calValues });
+        returnData.push({ _id: element?._id, type: element?.type, ...calValues });
       });
     } else {
       returnData.push({
         ...values,
-        _id: data?.inventory
+        _id: data?._id,
+        type: data?.type
       });
     }
     isBulkedit ? handleSaveData(returnData) : handleSaveData(returnData, saveAndNext);
@@ -125,7 +126,7 @@ export default function ManageAssetDialog({
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
                 <CustomDialogHeader
-                  title={isBulkedit ? 'Bulk Edit' : `Edit - ${data?.index} (${data?.assetNumber || ''})`}
+                  title={isBulkedit ? 'Bulk Edit' : `Edit - ${data?.index} (${data?.detail || ''})`}
                   onClose={() => {
                     onClose();
                   }}
@@ -171,7 +172,7 @@ export default function ManageAssetDialog({
                                       size="small"
                                     />
                                   ) : ['expectedCompletionDate'].includes(field.fieldName) ? (
-                                    <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                    <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes
@@ -197,7 +198,7 @@ export default function ManageAssetDialog({
                                       </Box>
                                     </Grid>
                                   ) : (
-                                    <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                    <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                       <Box display="flex">
                                         <Box flexGrow={1}>
                                           <FormTypes

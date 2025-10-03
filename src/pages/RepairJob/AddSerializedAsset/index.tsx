@@ -1,7 +1,7 @@
 import { IconButton, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import { Edit } from '@mui/icons-material';
-import { Fragment, useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -16,14 +16,17 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { ASSET_STATUS, CHILD_RESOURCE, REPAIR_JOB_STATUS, repairJob, sidebarResource } from 'src/constants/helpers';
+import { ASSET_STATUS, CHILD_RESOURCE, MATERIAL_TYPE, REPAIR_JOB_STATUS, repairJob, SERIALIZED_PACKAGE_STATUS, sidebarResource } from 'src/constants/helpers';
 import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
 import AddSerializedAsset from '../../RentalManagement/SerializedAsset/AddSerializedAsset';
-import ManageAssetDialog from './ManageAssetDialog';
+import ManageQtyDialog from './ManageQtyDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddExistingSerialisedAsset, generateAddNewSerialisedAsset, generateEditSerialisedAsset } from '../walkmeSteps';
-import { repairJobMessage } from 'src/constants/messageHelpers';
+import { editDisable, repairJobMessage } from 'src/constants/messageHelpers';
+import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
+import { startCase } from 'lodash';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const SerializedAsset = ({
   repairJobData,
@@ -38,32 +41,21 @@ const SerializedAsset = ({
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
-  const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
-  const [addNewSerializedAssetDialog, setAddNewSerializedAssetDialog] = useState(false);
-
-  const [isAdding, setIsAdding] = useState(false);
-  const [okBtnLoading, setOkBtnLoading] = useState(false);
-  const [columns, setColumns] = useState(null);
-  const [isUpdating, setUpdating] = useState(false);
-  const [allFields, setAllFields] = useState([]);
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
+
   const {
     state: { user, permissions, resources }
   }: any = useData();
-  const [showEditAssetDialog, setShowEditAssetDialog] = useState({
-    open: false,
-    isBulkedit: false,
-    data: null,
-    selectedRecords: [],
-    showSaveAndNext: false
-  });
 
-  const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState<{
-    open: boolean;
-    data: { _id: string; assetNumber: string }[];
-  }>({ open: false, data: [] });
+  const [addMaterialDialog, setAddMaterialDialog] = useState({ open: false, type: '' })
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [columns, setColumns] = useState(null);
+  const [allFields, setAllFields] = useState([]);
+  const [showEditDialog, setShowEditDialog] = useState({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
+  const [showRemoveConfirmationDialog, setShowRemoveConfirmationDialog] = useState({ open: false, data: [] })
   const [isRateRequired, setIsRateRequired] = useState(false);
+
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -106,7 +98,7 @@ const SerializedAsset = ({
         },
         {
           resource: sidebarResource.serializedAsset,
-          fieldNames: ['assetNumber', 'serialNumber']
+          fieldNames: ['serialNumber']
         }
       ]
     });
@@ -124,56 +116,57 @@ const SerializedAsset = ({
         width: 100,
         disableFilters: false,
         sticky: 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.index}</p>,
         Footer: () => {
           return <>Total</>;
         }
-      }
-    ];
-    assetField?.forEach((ele) => {
-      if (ele?.fieldName === 'assetNumber') {
-        coloum.push({
-          accessor: 'assetNumber',
-          Header: ele?.fieldLabel,
-          Cell: ({ row, table }) => (
-            <div className="flex items-center gap-2">
-              {row.original.assetNumber ? (
-                <>
-                  {allowedToEdit ? (
-                    <p
-                      className="link text-truncate"
-                      onClick={() =>
-                        setShowEditAssetDialog({
-                          open: true,
-                          isBulkedit: false,
-                          data: row?.original,
-                          selectedRecords: [],
-                          showSaveAndNext:
-                            row?.index < table.getRowModel().rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-                        })
-                      }
-                    >
-                      {row.original.assetNumber}
-                    </p>
-                  ) : (
-                    <p className="text-truncate">{row.original.assetNumber}</p>
-                  )}
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </>
-              ) : (
-                <NoDataCell />
-              )}
-            </div>
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>{startCase(row.original?.type)}  </p>
+          ) : (
+            <NoDataCell />
           )
-        });
-      }
+      },
+      {
+        accessor: 'detail',
+        Header: 'Details',
+        width: 250,
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row, table }) => (
+          <div className="flex items-center gap-2">
+            <p
+              onClick={() => {
+                setShowEditDialog({ open: true, isBulkedit: false, data: row?.original, selectedRecords: [], showSaveAndNext: false });
+              }}
+              className="link text-truncate"
+              title={row.original?.detail}
+            >
+              {row.original?.detail}
+            </p>
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row?.original?.type === MATERIAL_TYPE.serializedPackage) {
+                  window.open(`${routes.serializedPackagesDetail.path}/${row?.original?._id}`);
+                } else {
+                  window.open(`${routes.serializedAssetDetail.path}/${row?.original?._id}`);
+                }
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+          </div>
+        )
+      },
+    ];
+
+    assetField?.forEach((ele) => {
       if (ele?.fieldName === 'serialNumber') {
         coloum.push({
           accessor: 'serialNumber',
@@ -192,15 +185,16 @@ const SerializedAsset = ({
         });
       }
     });
+
     productField?.forEach((ele) => {
       coloum.push({
         accessor: ele?.fieldName,
         Header: ele?.fieldLabel,
         Cell: ({ row }) => (
           <>
-            {row.original[ele?.fieldName] ? (
+            {row?.original[ele?.fieldName] ? (
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <p className="text-truncate">{row.original[ele?.fieldName]}</p>
+                <p className="text-truncate">{row?.original[ele?.fieldName]}</p>
               </div>
             ) : (
               <NoDataCell />
@@ -209,15 +203,17 @@ const SerializedAsset = ({
         )
       });
     });
+
     coloum.push({
       accessor: 'status',
       Header: 'Status',
       Cell: ({ row }) => (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <p className="text-truncate">{row.original.status}</p>
+          <p className="text-truncate">{row?.original?.status}</p>
         </div>
       )
     });
+
     coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
@@ -231,13 +227,13 @@ const SerializedAsset = ({
       Cell: ({ row }) => (
         <div className="d-flex gap-1">
           {
-            <HtmlTooltip title={permissions?.repairJob?.isUpdate ? 'Edit' : 'You are not permitted to edit'}>
+            <HtmlTooltip title={permissions?.repairJob?.isUpdate ? 'Edit' : editDisable}>
               <IconButton
                 disabled={!permissions?.repairJob?.isUpdate}
                 color="primary"
                 size="small"
                 onClick={() => {
-                  setShowEditAssetDialog({ open: true, isBulkedit: false, data: row?.original, selectedRecords: [], showSaveAndNext: false });
+                  setShowEditDialog({ open: true, isBulkedit: false, data: row?.original, selectedRecords: [], showSaveAndNext: false });
                 }}
                 id={`edit-button-${row.index || 0}`}
               >
@@ -245,13 +241,13 @@ const SerializedAsset = ({
               </IconButton>
             </HtmlTooltip>
           }
-          {row?.original?.status === ASSET_STATUS.reserved && allowedToEdit && permissions?.repairJob?.isUpdate && (
+          {((row?.original?.type === MATERIAL_TYPE.serializedPackage && row?.original?.status === SERIALIZED_PACKAGE_STATUS.reserved) || row?.original?.status === ASSET_STATUS.reserved) && allowedToEdit && permissions?.repairJob?.isUpdate && (
             <HtmlTooltip title="Delete">
               <IconButton
                 size="small"
                 aria-label="Delete"
                 onClick={() => {
-                  setShowAssetRemoveConfirmationDialog({ open: true, data: [{ _id: row?.original?._id, assetNumber: row?.original?.assetNumber }] });
+                  setShowRemoveConfirmationDialog({ open: true, data: [row?.original] });
                 }}
               >
                 <DeleteIcon color="error" fontSize="small" />
@@ -275,11 +271,12 @@ const SerializedAsset = ({
     data = response?.data?.data;
     data.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.productName = parent.product?.optionLabel;
-      parent.productDescription = parent?.productDetail?.productDescription;
-      parent.productCategory = parent?.productCategory?.optionLabel;
+      parent.detail = parent?.type === MATERIAL_TYPE.serializedPackage ? parent?.serializedPackageNumber : parent?.assetNumber || ''
+      parent.productName = parent?.product?.optionLabel || '';
+      parent.productDescription = parent?.productDetail?.productDescription || '';
+      parent.productCategory = parent?.productCategory?.optionLabel || '';
       parent.isValid = parent['finalPrice_' + repairJobData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.hideSelection = parent.status === ASSET_STATUS.lost;
+      parent.hideSelection = parent?.status === ASSET_STATUS.lost;
     });
     if (data.filter((_rows) => _rows.isValid === false).length > 0 || data.length === 0) {
       setNextStep(false);
@@ -293,15 +290,12 @@ const SerializedAsset = ({
   };
 
   const deleteRepairJobAssets = () => {
-    setOkBtnLoading(true);
-    const payload = {
-      ids: showAssetRemoveConfirmationDialog.data.map((d) => d._id)
-    };
+    setIsSubmitting(true);
     axiosInstance()
-      .put(`${repairJob.api}/${repairJobData._id}/assets/remove`, payload)
+      .put(`${repairJob.api}/${repairJobData._id}/assets/remove`, showRemoveConfirmationDialog?.data?.map(d => ({ _id: d?._id, type: d?.type })))
       .then(({ data }) => {
-        setOkBtnLoading(false);
-        setShowAssetRemoveConfirmationDialog({ open: false, data: [] });
+        setIsSubmitting(false);
+        setShowRemoveConfirmationDialog({ open: false, data: [] });
         fetchRecords();
         fetchRepairJobData();
         toastConfig.setToastConfig({
@@ -316,19 +310,11 @@ const SerializedAsset = ({
   };
 
   const handleAdd = async (rows) => {
-    setIsAdding(true);
+    setIsSubmitting(true);
     axiosInstance()
-      .post(`${repairJob.api}/${repairJobData._id}/assets`, {
-        assets: rows.map((m) => {
-          return {
-            _id: m._id ?? m.id,
-            currentStatus: m?.status
-          };
-        })
-      })
+      .post(`${repairJob.api}/${repairJobData._id}/assets`, { assets: rows })
       .then(({ data }) => {
-        setAddSerializedAssetDialog(false);
-        setAddNewSerializedAssetDialog(false);
+        setAddMaterialDialog({ open: false, type: '' })
         if (repairJobData.status === REPAIR_JOB_STATUS.new) {
           updateJobStatus(REPAIR_JOB_STATUS.inProgress);
         }
@@ -339,16 +325,16 @@ const SerializedAsset = ({
           type: 'success',
           message: data.message
         });
-        setIsAdding(false);
+        setIsSubmitting(false);
       })
       .catch((error) => {
-        setIsAdding(false);
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
-    setUpdating(true);
+    setIsSubmitting(true);
     axiosInstance()
       .put(`${repairJob.api}/${repairJobData?._id}/assets`, { assets: rows })
       .then(({ data }) => {
@@ -360,7 +346,7 @@ const SerializedAsset = ({
         });
         if (saveAndNext) {
           const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
-          setShowEditAssetDialog({
+          setShowEditDialog({
             open: true,
             isBulkedit: false,
             data: dataRows[rowIndex + 1],
@@ -368,12 +354,12 @@ const SerializedAsset = ({
             showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
           });
         } else {
-          setShowEditAssetDialog({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
+          setShowEditDialog({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
         }
-        setUpdating(false);
+        setIsSubmitting(false);
       })
       .catch((error) => {
-        setUpdating(false);
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -393,7 +379,7 @@ const SerializedAsset = ({
       <>
         <MenuItem
           onClick={() => {
-            setAddSerializedAssetDialog(true);
+            setAddMaterialDialog({ open: true, type: MATERIAL_TYPE.serializedAsset })
           }}
           id={'add-existing-serialised-asset-menu-item'}
         >
@@ -402,13 +388,21 @@ const SerializedAsset = ({
         {permissions?.serializedAsset?.isCreate && (
           <MenuItem
             onClick={() => {
-              setAddNewSerializedAssetDialog(true);
+              setAddMaterialDialog({ open: true, type: `new_${MATERIAL_TYPE.serializedAsset}` })
             }}
             id={'add-new-serialised-asset-menu-item'}
           >
             Add New {resources?.serializedAsset?.titleSingular}
           </MenuItem>
         )}
+        <MenuItem
+          onClick={() => {
+            setAddMaterialDialog({ open: true, type: MATERIAL_TYPE.serializedPackage })
+          }}
+          id={'add-existing-serialised-package-menu-item'}
+        >
+          Add Existing {resources?.serializedPackages?.titlePlural}
+        </MenuItem>
       </>
     );
   };
@@ -419,15 +413,21 @@ const SerializedAsset = ({
         <MenuItem
           disabled={selectedRecords.length === 0}
           onClick={() => {
-            setShowEditAssetDialog({ open: true, isBulkedit: true, data: null, selectedRecords: selectedRecords, showSaveAndNext: false });
+            setShowEditDialog({ open: true, isBulkedit: true, data: null, selectedRecords: selectedRecords, showSaveAndNext: false });
           }}
         >
           {'Bulk Edit'}
         </MenuItem>
         <MenuItem
-          disabled={selectedRecords.length === 0 || selectedRecords.some((s) => s.status !== ASSET_STATUS.reserved)}
+          disabled={selectedRecords.length === 0 || selectedRecords.some((s) => {
+            if (s?.type === MATERIAL_TYPE.serializedPackage) {
+              return s?.status !== SERIALIZED_PACKAGE_STATUS.reserved
+            } else {
+              return s?.status !== ASSET_STATUS.reserved
+            }
+          })}
           onClick={() => {
-            setShowAssetRemoveConfirmationDialog({ open: true, data: selectedRecords.map((m) => ({ _id: m._id, assetNumber: m.assetNumber })) });
+            setShowRemoveConfirmationDialog({ open: true, data: selectedRecords });
           }}
         >
           {'Delete'}
@@ -437,7 +437,7 @@ const SerializedAsset = ({
   };
 
   return (
-    <Fragment>
+    <>
       {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
         <>
           <DetailsPageHeader
@@ -471,61 +471,77 @@ const SerializedAsset = ({
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      {addSerializedAssetDialog && (
+      {addMaterialDialog.open && addMaterialDialog.type === MATERIAL_TYPE.serializedAsset && (
         <AddSerializedAsset
           referenceType="Repair Job"
           addSerializedAsset={(rows) => {
-            handleAdd(rows);
+            handleAdd(rows?.map(r => ({ _id: r?._id || r?.id, currentStatus: r?.status, type: MATERIAL_TYPE.serializedAsset })));
           }}
           handleSerializedAssetClose={() => {
-            setAddSerializedAssetDialog(false);
+            setAddMaterialDialog({ open: false, type: '' })
           }}
-          isAdding={isAdding}
+          isAdding={isSubmitting}
           selectedProducts={[]}
           filterByPlant={repairJobData.warehouse}
           chartOfAccount={repairJobData?.chartOfAccount}
           ids={dataRows?.map((d) => d?._id)}
         />
       )}
-      {addNewSerializedAssetDialog && (
+      {addMaterialDialog.open && addMaterialDialog.type === `new_${MATERIAL_TYPE.serializedAsset}` && (
         <ManageSerializedAsset
-          onClose={() => setAddNewSerializedAssetDialog(false)}
+          onClose={() => setAddMaterialDialog({ open: false, type: '' })}
           referenceType={'repairJob'}
           referenceData={{
             warehouse: repairJobData?.warehouse?.optionValue
           }}
           onSuccess={(data) => {
-            handleAdd([data]);
+            handleAdd([{ _id: data?._id, currentStatus: data?.status, type: MATERIAL_TYPE.serializedAsset }]);
           }}
         />
       )}
-      {showAssetRemoveConfirmationDialog.open && (
+      {addMaterialDialog.open && addMaterialDialog.type === MATERIAL_TYPE.serializedPackage && (
+        <AssignSerializedPackagesDialog
+          onSuccess={(data) => {
+            handleAdd(data?.map(d => ({ _id: d?._id, type: MATERIAL_TYPE.serializedPackage })))
+          }}
+          handleClose={() => {
+            setAddMaterialDialog({ open: false, type: '' })
+          }}
+          extraDeepFilter={[{ field: 'status', term: SERIALIZED_PACKAGE_STATUS.available }]}
+          referenceData={{ warehouse: repairJobData?.warehouse }}
+          isSubmitting={isSubmitting}
+        />
+      )}
+
+      {showRemoveConfirmationDialog.open && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to delete ${showAssetRemoveConfirmationDialog.data.length === 1 ? showAssetRemoveConfirmationDialog.data[0]['assetNumber'] : 'selected assets'} ?`}
+          message={`Are you sure you want to delete ${showRemoveConfirmationDialog?.data?.length === 1 ? showRemoveConfirmationDialog?.data[0]['detail'] : 'selected records'} ?`}
           onClose={() => {
-            setShowAssetRemoveConfirmationDialog((prevState) => ({ ...prevState, open: false }));
+            setShowRemoveConfirmationDialog({ open: false, data: [] });
           }}
           onOk={deleteRepairJobAssets}
-          okBtnLoading={okBtnLoading}
+          okBtnLoading={isSubmitting}
         />
       )}
-      {showEditAssetDialog.open && (
-        <ManageAssetDialog
+
+      {showEditDialog.open && (
+        <ManageQtyDialog
           repairJobData={repairJobData}
           allFields={allFields}
           onClose={() => {
-            setShowEditAssetDialog({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
+            setShowEditDialog({ open: false, isBulkedit: false, data: null, selectedRecords: [], showSaveAndNext: false });
           }}
           handleSaveData={handleSaveData}
-          loadingEdit={isUpdating}
-          isBulkedit={showEditAssetDialog.isBulkedit}
-          data={showEditAssetDialog.data}
-          selectedRecords={showEditAssetDialog.selectedRecords}
-          showSaveAndNext={showEditAssetDialog.showSaveAndNext}
+          loadingEdit={isSubmitting}
+          isBulkedit={showEditDialog.isBulkedit}
+          data={showEditDialog.data}
+          selectedRecords={showEditDialog.selectedRecords}
+          showSaveAndNext={showEditDialog.showSaveAndNext}
         />
       )}
-    </Fragment>
+
+    </>
   );
 };
 export default SerializedAsset;
