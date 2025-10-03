@@ -83,7 +83,6 @@ const AllocationPercentage = ({ referenceData, onRefresh }) => {
           }}
           onSuccess={() => {
             setOpen(false);
-            // Trigger a refresh of the parent component data
             if (onRefresh) {
               onRefresh();
             }

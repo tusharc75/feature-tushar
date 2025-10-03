@@ -166,15 +166,15 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
                             ? values?.allocations?.map((allocation, index) => {
                                 return (
                                   <Box key={index} p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
-                                    <Grid container spacing={1}>
-                                      <Grid size={{ xs: 12, sm: 12, md: 5, lg: 5 }}>
+                                    <Grid container spacing={1} alignItems="center">
+                                      <Grid size={{ xs: 10, sm: 10, md: 5, lg: 5 }}>
                                         <TextField
                                           id="allocation-detail-field"
                                           variant="outlined"
                                           margin="dense"
                                           size="small"
                                           name="name"
-                                          label="Allocation Detail"
+                                          label="Allocation"
                                           fullWidth
                                           value={allocation?.name || ''}
                                           required
