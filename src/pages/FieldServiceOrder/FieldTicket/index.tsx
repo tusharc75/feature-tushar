@@ -43,6 +43,7 @@ const FieldTicket = ({
   resource,
   enableGlobalSearch = true,
   noQuotationCheck = false,
+  refreshData = false,
   fromFieldServiceTechnician = false
 }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -85,7 +86,7 @@ const FieldTicket = ({
     fetchData(cancelToken);
     return () => cancelToken.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedEntity, resourceData]);
+  }, [selectedEntity, resourceData, refreshData]);
 
   const fetchGridColumns = async (cancelToken?: CancelTokenSource) => {
     try {
