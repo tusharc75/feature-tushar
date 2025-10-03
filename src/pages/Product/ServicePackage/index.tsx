@@ -201,13 +201,13 @@ const ServicePackage = ({ renderedFrom, productId }) => {
           subResource={sidebarResource.packages}
           permissions={permissions?.product}
           module="products"
-          api={`${product.api}/unknown/package`}
+          api={`${product.api}/${productId}/package`}
           afterImportCompleted={() => {
             fetchData();
           }}
           isExportCount={true}
           ids={[]}
-          additionalParams={`productId=${productId}`}
+          referenceId={productId}
         />
       </>
     );

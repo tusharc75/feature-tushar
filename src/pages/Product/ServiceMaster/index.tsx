@@ -557,13 +557,13 @@ const ServiceMaster = (props: Props) => {
           subResource={sidebarResource.serviceMaster}
           permissions={permissions?.product}
           module="products"
-          api={`${product.api}/unknown/service-master`}
+          api={`${product.api}/${id}/service-master`}
           afterImportCompleted={() => {
             fetchData();
           }}
           isExportCount={true}
           ids={[]}
-          additionalParams={`productId=${id}`}
+          referenceId={id}
         />
       </>
     );

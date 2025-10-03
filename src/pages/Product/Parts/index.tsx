@@ -262,13 +262,13 @@ function Parts({ id }) {
           subResource={sidebarResource.product}
           permissions={permissions?.product}
           module="products"
-          api={`${product.api}/unknown/bom`}
+          api={`${product.api}/${id}/bom`}
           afterImportCompleted={() => {
             fetchBOMData();
           }}
           isExportCount={true}
           ids={[]}
-          additionalParams={`productId=${id}`}
+          referenceId={id}
         />
       </>
     );

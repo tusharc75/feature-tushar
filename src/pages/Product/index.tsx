@@ -416,12 +416,14 @@ const Product = () => {
               {
                 title: 'Child Product Export',
                 api: `${product.api}/unknown/bom/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''}`,
-                type: 'export'
+                type: 'export',
+                subResource: sidebarResource.product
               },
               {
                 title: 'Child Product Import',
                 api: `${product.api}/unknown/bom/import`,
-                type: 'import'
+                type: 'import',
+                subResource: sidebarResource.product
               },
               {
                 title: 'Service/Consumable Template',
@@ -432,12 +434,14 @@ const Product = () => {
                 title: 'Service/Consumable Export',
                 api: `${product.api}/unknown/service-master/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
                   }`,
-                type: 'export'
+                type: 'export',
+                subResource: sidebarResource.serviceMaster
               },
               {
                 title: 'Service/Consumable Import',
                 api: `${product.api}/unknown/service-master/import`,
-                type: 'import'
+                type: 'import',
+                subResource: sidebarResource.serviceMaster
               },
               {
                 title: 'Service Package Template',
@@ -448,12 +452,14 @@ const Product = () => {
                 title: 'Service Package Export',
                 api: `${product.api}/unknown/package/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
                   }`,
-                type: 'export'
+                type: 'export',
+                subResource: sidebarResource.packages
               },
               {
                 title: 'Service Package Import',
                 api: `${product.api}/unknown/package/import`,
-                type: 'import'
+                type: 'import',
+                subResource: sidebarResource.packages
               }
             ]}
           />
