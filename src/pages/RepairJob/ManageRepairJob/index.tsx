@@ -140,6 +140,14 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
             }
           });
         }
+        if (referenceType === sidebarResource.assemblyOrder) {
+          initialData['workOrder'] = referenceData?.workOrder;
+          fieldsDataForCreate?.forEach((e) => {
+            if (['warehouse']?.includes(e?.fieldName)) {
+              e.isUneditable = true;
+            }
+          });
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData

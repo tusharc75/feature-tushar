@@ -13,7 +13,7 @@ import { useData } from '../../StateProvider/Provider';
 import { sidebarResource, checkIsAllowedToEdit, customPdfTemplate, PDF_RESOURCE_LIST, serviceMaster } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
-import { isEqual, template } from 'lodash';
+import { isEqual } from 'lodash';
 import PdfEditor from './PdfEditor';
 import { CUSTOM_A4_PDF, Template } from '@pdfme/common';
 import { generate } from '@pdfme/generator';

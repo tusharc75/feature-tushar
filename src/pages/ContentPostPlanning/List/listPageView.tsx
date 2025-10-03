@@ -23,6 +23,7 @@ import ButtonMenu from 'src/components/ButtonMenu';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 import { HourglassEmpty, CheckCircle, Schedule } from '@mui/icons-material';
 import PublishedWithChangesIcon from '@mui/icons-material/PublishedWithChanges';
+import ViewListIcon from '@mui/icons-material/ViewList';
 
 const ListView = ({ topRightSlot }) => {
   const renderedFrom = camelCase(sidebarResource?.contentPostPlanning);
@@ -179,7 +180,7 @@ const ListView = ({ topRightSlot }) => {
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (selectedStatus && selectedStatus !== '' && selectedStatus !== 'Others') {
+    if (selectedStatus && selectedStatus !== '' && selectedStatus !== 'Others' && selectedStatus !== 'All') {
       deepFilters.push({ field: 'status', term: selectedStatus });
     }
     if (filterByIds?.length) {
@@ -350,6 +351,12 @@ const ListView = ({ topRightSlot }) => {
 
   const statusMenuItems = useMemo(() => {
     return [
+      {
+        label: 'All',
+        selected: selectedStatus === 'All',
+        value: 'All',
+        startIcon: <ViewListIcon color="action" fontSize="small" />
+      },
       {
         label: CONTENT_POST_PLANNING_STATUS.pendingApproval,
         selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.pendingApproval,

@@ -12,6 +12,7 @@ import {
   checkIsAllowedToEdit,
   cloneResourceData,
   fieldServiceOrder,
+  rentalManagement,
   getObjKeys,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -39,6 +40,7 @@ import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
 import FieldTicketDetailView from 'src/pages/FieldServiceTechnician/FieldTicketDetailView';
 import { isMobile } from 'react-device-detect';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getMultipleResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 type Views = 'card' | 'table';
 
@@ -65,10 +67,7 @@ const getActionColumn = ({ view, permissions, user, isSubmitting, handleCreateFi
                   aria-label="Add"
                   disabled={permissions?.fieldTicket?.isCreate && row?.original?.canEdit && !isSubmitting ? false : true}
                   onClick={() => {
-                    handleCreateFieldTicket(
-                      row?.original?.orignalData,
-                      data?.filter((obj) => obj.isRead).map((d: any) => d.fieldData)
-                    );
+                    handleCreateFieldTicket(row?.original?.orignalData, data?.filter((obj) => obj.isRead).map((d: any) => d.fieldData));
                   }}
                 >
                   <NoteAddIcon
@@ -126,55 +125,60 @@ const FieldServiceTechnician = () => {
 
   const [selectedData, setSelectedData] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+
+  const [policyData, setPolicyData] = useState(null);
   const history = useHistory();
 
   const isOfflineRef = useRef(isOffline);
 
   useEffect(() => {
-    setUpindexDB();
-    fetchColumns();
-    isOfflineRef.current = isOffline;
-  }, [isOffline]);
+    if (!isOffline) {
+      fetchPolicy();
+    }
+    else {
+      setPolicyData({ resource: sidebarResource.fieldServiceOrder, showOnlyAssignedTickets: true })
+    }
+  }, []);
 
   useEffect(() => {
-    fetchData();
-    if (resourceData?.policy?.showOnlyAssignedTickets) {
-      setView('card');
+    if (policyData) {
+      setUpindexDB();
+      fetchColumns();
+      isOfflineRef.current = isOffline;
     }
-  }, [resourceData?.policy]);
+  }, [isOffline, policyData]);
+
+  useEffect(() => {
+    if (policyData) {
+      if (policyData?.showOnlyAssignedTickets) {
+        setView('card');
+      }
+    }
+  }, [policyData]);
 
   const fetchPolicy = async () => {
-    if (isOffline) return;
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceTechnician}`);
-      if (data) {
-        setResourceData(data);
-        return data?.policy;
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
+    const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.rentalManagement},${sidebarResource.fieldServiceTechnician}`)
+    const fieldServiceTechnicianPolicy = data?.find((e) => e.resource === sidebarResource.fieldServiceTechnician)
+    const rentalManagementPolicy = data?.find((e) => e.resource === sidebarResource.rentalManagement)
+    let resource: any = sidebarResource.fieldServiceOrder
+    if (rentalManagementPolicy?.policy?.enableTechnicianDispatchReturn) {
+      resource = sidebarResource.rentalManagement
     }
+    let showOnlyAssignedTickets: any = fieldServiceTechnicianPolicy?.policy?.showOnlyAssignedTickets || false
+    setPolicyData({ resource, showOnlyAssignedTickets })
   };
 
   const fetchColumns = async () => {
-    let data, policy;
+    let data;
     if (isOffline) {
-      data = await findOne(objectStore.resource, sidebarResource.fieldServiceOrder);
+      data = await findOne(objectStore.resource, policyData.resource);
     } else {
-      policy = await fetchPolicy();
-      let resource;
-      resource = sidebarResource?.fieldServiceOrder;
-      if (policy?.showOnlyAssignedTickets) {
-        resource = sidebarResource?.fieldTicket;
-      }
-      const { fieldsDataForRead } = await fetch_resource_view_fields(resource, permissions.fieldServiceTechnician?.isUpdate);
+      const { fieldsDataForRead } = await fetch_resource_view_fields(policyData.resource,
+        policyData.resource === sidebarResource.rentalManagement ? permissions?.rentalManagement?.isUpdate : permissions?.fieldServiceTechnician?.isUpdate);
       data = fieldsDataForRead;
-      if (!policy?.showOnlyAssignedTickets) {
+      if (!policyData?.showOnlyAssignedTickets) {
         try {
-          insertUpdate(objectStore.resource, sidebarResource.fieldServiceOrder, data);
+          insertUpdate(objectStore.resource, policyData.resource, data);
         } catch (e) {
           console.error(`Field Service Order : ${e.message}`);
         }
@@ -182,10 +186,12 @@ const FieldServiceTechnician = () => {
     }
     setColData(data);
     const newColumns = [
-      ...generateColumns(renderedFrom, data, policy?.showOnlyAssignedTickets ? routes.fieldTicketDetail.path : routes.fieldServiceOrderDetail.path),
+      ...generateColumns(renderedFrom, data, policyData.resource === sidebarResource.rentalManagement ?
+        routes.rentalManagementDetail.path : policyData?.showOnlyAssignedTickets ? routes.fieldTicketDetail.path : routes.fieldServiceOrderDetail.path
+      ),
       ...getStaticFields()
     ];
-    if (!policy?.showOnlyAssignedTickets) {
+    if (!policyData?.showOnlyAssignedTickets) {
       newColumns.push(getActionColumn({ view, user, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data, resources }));
     }
     setColumns(newColumns);
@@ -196,7 +202,7 @@ const FieldServiceTechnician = () => {
       if (isOfflineRef.current) return;
       axiosInstance()
         .patch(`${routes?.fieldServiceOrder?.path}/status/${fieldServiceOrderId}`, { status: status })
-        .then(() => {})
+        .then(() => { })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -205,7 +211,7 @@ const FieldServiceTechnician = () => {
   );
 
   const handleCreateFieldTicket = useCallback(
-    async (fieldServiceOrderData, fieldServiceOrderFields) => {
+    async (resourceData, resourceFields) => {
       setIsSubmitting(true);
       toastConfig.setToastConfig({
         open: true,
@@ -223,15 +229,18 @@ const FieldServiceTechnician = () => {
 
       const tempInitialData = getObjKeys('', fieldTicketField);
       tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(fieldTicketField);
-      const referenceData: any = cloneResourceData(fieldServiceOrderFields, fieldTicketField, fieldServiceOrderData, user.user?.brandCurrency);
+      const referenceData: any = cloneResourceData(resourceFields, fieldTicketField, resourceData, user.user?.brandCurrency);
       for (const key in referenceData) {
         tempInitialData[key] = referenceData[key];
       }
       if (fieldTicketField?.some((e) => e.fieldName === 'currency')) {
         tempInitialData['currency'] = user.user?.brandCurrency;
       }
-      tempInitialData['fieldServiceOrder'] = fieldServiceOrderData?._id;
-
+      if (policyData?.resource === sidebarResource.rentalManagement) {
+        tempInitialData['rentalJob'] = resourceData?._id;
+      } else {
+        tempInitialData['fieldServiceOrder'] = resourceData?._id;
+      }
       if (isOfflineRef.current) {
         const _id: any = Math.floor(Math.random() * 1000000).toString();
         const data: any = restoreObjKeysWithValues(tempInitialData, fieldTicketField);
@@ -246,11 +255,10 @@ const FieldServiceTechnician = () => {
         history.push(`${routes.fieldTicketDetail.path}/${_id}`);
         setIsSubmitting(false);
       } else {
-        axiosInstance()
-          .post(`${routes.fieldTicket?.path}`, tempInitialData)
+        axiosInstance().post(`${routes.fieldTicket?.path}`, tempInitialData)
           .then(({ data }) => {
-            if (fieldServiceOrderData?.status === SERVICE_ORDER_STATUS.new) {
-              handleChangeFieldServiceOrderStatus(fieldServiceOrderData?._id, SERVICE_ORDER_STATUS.inProgress);
+            if (policyData?.resource === sidebarResource.fieldServiceOrder && resourceData?.status === SERVICE_ORDER_STATUS.new) {
+              handleChangeFieldServiceOrderStatus(resourceData?._id, SERVICE_ORDER_STATUS.inProgress);
             }
             if (isMobile) {
               window.location.href = `${routes.fieldTicketDetail.path}/${data?.data?._id}`;
@@ -274,24 +282,30 @@ const FieldServiceTechnician = () => {
   );
 
   useEffect(() => {
-    const cancelToken = axios.CancelToken.source();
-    fetchData(cancelToken);
-    return () => cancelToken.cancel();
-  }, [page, limit, filters, sorting, showFilteredRecordsOnly, search, isOffline]);
+    if (policyData) {
+      const cancelToken = axios.CancelToken.source();
+      fetchData(cancelToken);
+      return () => cancelToken.cancel();
+    }
+  }, [page, limit, filters, sorting, showFilteredRecordsOnly, search, isOffline, policyData]);
 
   const fetchData = async (cancelToken?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     try {
       let data, count;
       if (isOffline) {
-        data = await findAll(objectStore.fieldServiceOrder);
+        data = await findAll(policyData.resource === sidebarResource.rentalManagement ? objectStore.rentalManagement : objectStore.fieldServiceOrder);
         count = data?.length || 0;
       } else {
         const queryString = getQueryString();
         let api = `${fieldServiceOrder.api}${queryString}`;
-        if (resourceData?.policy?.showOnlyAssignedTickets) {
+        if (policyData?.showOnlyAssignedTickets) {
           api = `field-service-technician/assigned-tickets${queryString}`;
         }
+        if (policyData.resource === sidebarResource.rentalManagement) {
+          api = `${rentalManagement.api}${queryString}`;
+        }
+
         const response = await axiosInstance().get(api, { cancelToken: cancelToken?.token });
         data = response?.data?.data;
         count = response?.data?.count;
@@ -362,7 +376,7 @@ const FieldServiceTechnician = () => {
     return (
       <>
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
-          {`Add ${resources?.fieldServiceOrder?.titlePlural} Offline`}
+          {`Add ${policyData.resource === sidebarResource.rentalManagement ? resources?.rentalManagement?.titlePlural : resources?.fieldServiceOrder?.titlePlural} Offline`}
         </MenuItem>
         <MenuItem
           disabled={!selectedRecords.length}
@@ -378,8 +392,8 @@ const FieldServiceTechnician = () => {
       setSelectedData(row);
       setAllowedToEdit(
         permissions?.fieldTicket?.isUpdate &&
-          checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
+        checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
       );
     }
   };
@@ -415,7 +429,7 @@ const FieldServiceTechnician = () => {
             isActionButtonVisible={true}
             isAddButtonVisible={false}
             rightSideContents={
-              isMobileView || resourceData?.policy?.showOnlyAssignedTickets ? null : (
+              isMobileView || policyData?.showOnlyAssignedTickets ? null : (
                 <ViewButtons view={view} setView={setView} resetSelectedRecords={resetSelectedRecords} />
               )
             }
@@ -436,7 +450,7 @@ const FieldServiceTechnician = () => {
                       dispatch={dispatch}
                       renderedFrom={renderedFrom}
                       refreshGrid={fetchData}
-                      resource={sidebarResource.fieldServiceOrder}
+                      resource={policyData?.resource}
                       showOnlyShowFilteredRecordSwitch={false}
                       hideSelection={true}
                       setWholeRowsCellColor={(row) =>
@@ -450,16 +464,17 @@ const FieldServiceTechnician = () => {
                   </div>
                   <div className="container-with-border p-[20px]">
                     {selectedData ? (
-                      resourceData?.policy?.showOnlyAssignedTickets ? (
+                      policyData?.showOnlyAssignedTickets ? (
                         <FieldTicketDetailView id={selectedData?._id} />
                       ) : (
                         <FieldTicket
                           resourceData={selectedData?.orignalData}
                           allowedToEdit={allowedToEdit}
-                          handleChangeStatus={() => {}}
-                          resource={sidebarResource.fieldServiceTechnician}
+                          handleChangeStatus={() => { }}
+                          resource={policyData?.resource}
                           enableGlobalSearch={false}
-                          fetchResourceData={() => {}}
+                          fetchResourceData={() => { }}
+                          fromFieldServiceTechnician={true}
                         />
                       )
                     ) : (
@@ -487,7 +502,7 @@ const FieldServiceTechnician = () => {
                 dispatch={dispatch}
                 renderedFrom={renderedFrom}
                 refreshGrid={fetchData}
-                resource={sidebarResource.fieldServiceOrder}
+                resource={policyData?.resource}
                 showOnlyShowFilteredRecordSwitch={true}
                 showFilters={!isOffline}
                 isClientSideGrid={isOffline ? true : false}
@@ -505,7 +520,8 @@ const FieldServiceTechnician = () => {
           onClose={() => {
             setViewFieldTicket({ open: false, data: null });
           }}
-          serviceOrderData={viewFieldTicket?.data}
+          resource={policyData.resource}
+          resourceData={viewFieldTicket?.data}
         />
       )}
     </section>

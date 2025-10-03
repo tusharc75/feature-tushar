@@ -1,5 +1,5 @@
 import { useState, Fragment } from 'react';
-import { Box, TextField } from '@mui/material';
+import { Box, Checkbox, FormControlLabel, TextField } from '@mui/material';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -14,8 +14,9 @@ const schema = object().shape({
   reason: string().required('Please enter the reason for replacement').min(3, 'Too Short')
 });
 
-const ReplaceAssetReason = ({ handleClose, loading, handleSucess }) => {
-  const [initialValues, setInitialValues] = useState({ reason: '' });
+const ReplaceAssetReason = ({ handleClose, loading, handleSucess, isIncorrectAssignment = false }) => {
+
+  const [initialValues, setInitialValues] = useState({ reason: '', incorrectAssignment: false });
 
   return (
     <Dialog maxWidth="sm" fullWidth TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
@@ -33,6 +34,15 @@ const ReplaceAssetReason = ({ handleClose, loading, handleSucess }) => {
                   touched={Boolean(touched['reason']) && errors['reason']}
                   onChange={(value) => setFieldValue('reason', value)}
                 />
+                {isIncorrectAssignment && (
+                  <Box mt={2}>
+                    <FormControlLabel control={<Checkbox
+                      checked={values.incorrectAssignment || false}
+                      onChange={e => setFieldValue('incorrectAssignment', e.target.checked)}
+                    />}
+                      label="Because of an incorrect assignment" />
+                  </Box>
+                )}
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>

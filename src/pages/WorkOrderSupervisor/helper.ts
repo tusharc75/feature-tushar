@@ -38,7 +38,7 @@ const fetchViewColumns = async () => {
   return [];
 }
 
-export const handlePdfPreview = async (workOrder, user, toastConfig) => {
+export const handlePdfPreview = async (workOrderId, user, toastConfig) => {
   toastConfig.setToastConfig({
     message: "Previewing PDF",
     open: true,
@@ -57,7 +57,7 @@ export const handlePdfPreview = async (workOrder, user, toastConfig) => {
     pdfCols = pdfCols?.filter((e) => e?.name !== 'serviceType');
   }
   await axiosInstance()
-    .get(`/pdf/${workOrder}?resource=${sidebarResource.workOrder}&columns=${JSON.stringify(pdfCols)}`, { responseType: 'blob' })
+    .get(`/pdf/${workOrderId}?resource=${sidebarResource.workOrder}&columns=${JSON.stringify(pdfCols)}`, { responseType: 'blob' })
     .then((response) => {
       const blobData = new Blob([response.data], { type: 'application/pdf' });
       const fileURL = URL.createObjectURL(blobData);

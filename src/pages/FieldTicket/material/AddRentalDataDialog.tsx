@@ -146,10 +146,7 @@ const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, materialType, isSub
     data = response?.data?.data;
     if (materialType === MATERIAL_TYPE.product) {
       rows = data?.material?.filter(
-        (e) =>
-          e?.status &&
-          e?.status !== RENTAL_INTERNAL_ASSET_STATUS.reserved &&
-          e.type === MATERIAL_TYPE.product &&
+        (e) => e?.status && e?.status !== RENTAL_INTERNAL_ASSET_STATUS.reserved && e.type === MATERIAL_TYPE.product &&
           !e?.productDetail?.serializedProduct &&
           !ids?.some((ele) => ele === e.materialId)
       );
@@ -162,9 +159,7 @@ const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, materialType, isSub
       });
     } else if (materialType === MATERIAL_TYPE.serializedAsset) {
       let inventoryData = data?.inventory || [];
-      inventoryData = inventoryData?.filter(
-        (e) => e?.status !== RENTAL_INTERNAL_ASSET_STATUS.reserved && !ids?.some((ele) => ele === e?.inventoryDetail?._id)
-      );
+      inventoryData = inventoryData?.filter((e) => e?.status !== RENTAL_INTERNAL_ASSET_STATUS.reserved && !ids?.some((ele) => ele === e?.inventoryDetail?._id));
       inventoryData.forEach((parent, i) => {
         const product = data?.material?.find((e) => e._id === parent._id);
         const obj: any = { ...product };
@@ -190,6 +185,17 @@ const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, materialType, isSub
         parent.qtyDisplay = parent.qty;
         parent.subRows = generateNestedData(material, parent);
       });
+    } else if (materialType === MATERIAL_TYPE.service) {
+      let material = data?.material?.filter((e) => e.type === MATERIAL_TYPE.service && !ids?.some((ele) => ele === e._id));
+      rows = material;
+      rows.forEach((parent, i) => {
+        parent.index = i + 1;
+        parent.type = MATERIAL_TYPE.service;
+        parent.detail = parent?.serviceDetail?.serviceName;
+        parent.description = parent?.serviceDetail?.serviceDescription;
+        parent.qtyDisplay = parent.qty;
+        parent.subRows = generateNestedData(material, parent);
+      });
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
@@ -212,10 +218,10 @@ const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, materialType, isSub
       <CustomDialogHeader
         title={
           materialType === MATERIAL_TYPE.product
-            ? `Add Rental Consumables`
+            ? `Add Job Consumables`
             : materialType === MATERIAL_TYPE.package
-              ? `Add Rental ${resources?.packages?.titlePlural}`
-              : `Add Rental ${resources?.serializedAsset?.titlePlural}`
+              ? `Add Job ${resources?.packages?.titlePlural}`
+              : `Add Job ${resources?.serializedAsset?.titlePlural}`
         }
         showManimizeMaximize={false}
         showRequiredLabel={false}

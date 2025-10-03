@@ -19,8 +19,8 @@ import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, ids = [], defaultCompetencyType = [], extraStaticFilter = [], warehouse = null }) => {
-
+const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, ids = [], defaultCompetencyType = [], extraStaticFilter = [], warehouse = null,
+  currentCompetencyType = '', currentCompetencies = [] }) => {
   const renderedFrom = `${sidebarResource.employeeMaster}`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -35,9 +35,11 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
   const [disableSaveButton, setDisableSaveButton] = useState(false);
   const [columns, setColumns] = useState(null);
   const [competencyOptions, setCompetencyOptions] = useState(null);
+  const [competenciesOptions, setCompetenciesOptions] = useState(null);
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse);
   const [selectedCompetencyType, setSelectedCompetencyType] = useState(defaultCompetencyType?.every((e) => e?.optionLabel) ? defaultCompetencyType : []);
+  const [selectedCompetencies, setSelectedCompetencies] = useState(defaultCompetencyType?.every((e) => e?.optionLabel) ? defaultCompetencyType : []);
 
   useEffect(() => {
     fetchGridColumns();
@@ -52,14 +54,25 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedCompetencyType, selectedWarehouse]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedCompetencyType, selectedWarehouse, selectedCompetencies]);
 
   const fetchOptionsData = () => {
     axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.competencyType},${sidebarResource.warehouse}`)
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.competencyType},${sidebarResource.warehouse},${sidebarResource.competencies}`)
       .then(({ data: { data } }) => {
         setWarehouseOptions(data[sidebarResource.warehouse] || []);
         setCompetencyOptions(data[sidebarResource.competencyType] || []);
+        setCompetenciesOptions(data[sidebarResource.competencies] || []);
+        if (currentCompetencyType) {
+          setSelectedCompetencyType(
+            data[sidebarResource.competencyType].filter(opt => opt.optionValue === currentCompetencyType)
+          );
+        }
+        if (currentCompetencies) {
+          setSelectedCompetencies(
+            data[sidebarResource.competencies].filter(opt => currentCompetencies.includes(opt.optionValue))
+          );
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -85,7 +98,7 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = false;
           finalObject['id'] = u._id;
-          finalObject['pricingMethodMain'] = u?.competencyDetail?.pricingMethod;
+          finalObject['pricingMethodMain'] = u?.pricingMethod;
           finalObject['unitMain'] = u?.unit;
           return {
             ...finalObject
@@ -124,6 +137,12 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
       updatedFilterByIds.push({
         field: 'competencyType',
         term: { $in: selectedCompetencyType?.map((e) => e?.optionValue) }
+      });
+    }
+    if (selectedCompetencies?.length > 0 && permissions?.competencies?.isRead) {
+      updatedFilterByIds.push({
+        field: 'competencies',
+        term: { $in: selectedCompetencies?.map((e) => e?.optionValue) }
       });
     }
     if (selectedWarehouse && selectedWarehouse !== '') {
@@ -203,9 +222,25 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
             multiple
             size={'small'}
             value={selectedCompetencyType}
-            filterSelectedOptions={true}
             renderInput={(params) => (
               <TextField {...params} margin="none" size={'small'} name="competencyType" label="Competency Type" variant="outlined" fullWidth />
+            )}
+          />
+        }
+        {permissions?.competencies?.isRead &&
+          <Autocomplete
+            fullWidth
+            className="max-w-[300px]"
+            options={competenciesOptions}
+            getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+            onChange={(e, val) => {
+              setSelectedCompetencies(val);
+            }}
+            multiple
+            size={'small'}
+            value={selectedCompetencies}
+            renderInput={(params) => (
+              <TextField {...params} margin="none" size={'small'} name="competencies" label="Competencies" variant="outlined" fullWidth />
             )}
           />
         }
