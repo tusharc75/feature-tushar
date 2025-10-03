@@ -510,6 +510,7 @@ const SerializedAsset = ({
           extraDeepFilter={[{ field: 'status', term: SERIALIZED_PACKAGE_STATUS.available }]}
           referenceData={{ warehouse: repairJobData?.warehouse }}
           isSubmitting={isSubmitting}
+          showWarehouseFilter={false}
         />
       )}
 
