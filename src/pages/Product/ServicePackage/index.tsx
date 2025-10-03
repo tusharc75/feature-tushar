@@ -11,12 +11,12 @@ import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from '
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { gridLoadingTimeout, PACKAGE_TYPE, packages, prepareDataForGrid, product } from 'src/constants/helpers';
+import { gridLoadingTimeout, PACKAGE_TYPE, packages, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 
 const ServicePackage = ({ renderedFrom, productId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -196,14 +196,16 @@ const ServicePackage = ({ renderedFrom, productId }) => {
   const rightSideContents = () => {
     return (
       <>
-        <ImportExportMenu
-          permissions={permissions?.packages}
-          module="packages"
+        <AsynImportExportMenu
+          resource={sidebarResource.product}
+          subResource={sidebarResource.packages}
+          permissions={permissions?.product}
+          module="products"
           api={`${product.api}/unknown/package`}
           afterImportCompleted={() => {
             fetchData();
           }}
-          isExportAllOrSomeFeature={true}
+          isExportCount={true}
           ids={[]}
           additionalParams={`productId=${productId}`}
         />
