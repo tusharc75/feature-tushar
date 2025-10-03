@@ -329,7 +329,7 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
           const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
           setTechnicianEdit({
             open: true,
-            data: dataRows[rowIndex + 1],
+            data: dataRows[rowIndex + 1]?.orignalData,
             isBulkEdit: false,
             showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
           });
