@@ -31,7 +31,10 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
   };
 
   const handleSubmit = (values) => {
-    const totalPercentage = values?.allocations?.reduce((acc, curr) => acc + (parseFloat(curr.percentage) || 0), 0) || 0;
+    const totalPercentage = values?.allocations?.reduce((acc, curr) => {
+      const val = curr.percentage === '' || curr.percentage === null || curr.percentage === undefined ? 0 : parseFloat(curr.percentage) || 0;
+      return acc + val;
+    }, 0) || 0;
     
     if (values?.allocations?.length > 0 && Math.abs(totalPercentage - 100) > 0.01) {
       setShowError(true);
@@ -75,21 +78,23 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
           }
           errors.allocations[i] = { name: 'Allocation Detail is required' };
         }
-        if (!d.percentage && d.percentage !== 0) {
+        if (d.percentage === '' || d.percentage === null || d.percentage === undefined) {
           if (!errors?.allocations) {
             errors['allocations'] = [];
           }
           errors.allocations[i] = { ...errors.allocations[i], percentage: 'Percentage is required' };
         }
         
-        const percentageVal = parseFloat(d.percentage) || 0;
-        if (d.percentage && (percentageVal < 0 || percentageVal > 100)) {
-          if (!errors?.allocations) {
-            errors['allocations'] = [];
+        if (d.percentage !== '' && d.percentage !== null && d.percentage !== undefined) {
+          const percentageVal = parseFloat(d.percentage) || 0;
+          if (percentageVal < 0 || percentageVal > 100) {
+            if (!errors?.allocations) {
+              errors['allocations'] = [];
+            }
+            errors.allocations[i] = { ...errors.allocations[i], percentage: 'Percentage must be between 0 and 100' };
+          } else {
+            totalPercentage += percentageVal;
           }
-          errors.allocations[i] = { ...errors.allocations[i], percentage: 'Percentage must be between 0 and 100' };
-        } else {
-          totalPercentage += percentageVal;
         }
       });
     }
@@ -134,7 +139,7 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
                   <Box p={1} bgcolor="var(--dark-secondary, grey.200)">
                     <Grid container>
                       <Grid size={{ xs: 10 }}>
-                        <Typography variant="body2">Allocation Detail</Typography>
+                        <Typography variant="body2">Allocation</Typography>
                       </Grid>
                       <Grid size={{ xs: 2 }}>
                         <Grid container justifyContent="flex-end">
@@ -217,12 +222,13 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
                                             endAdornment: '%'
                                           }}
                                           style={{ margin: 0 }}
-                                          value={allocation?.percentage || ''}
+                                          value={allocation?.percentage !== undefined && allocation?.percentage !== null ? allocation?.percentage : ''}
                                           required
                                           onChange={(e) => {
+                                            const value = e.target.value === '' ? '' : parseFloat(e.target.value) || 0;
                                             arrayHelpers.replace(index, {
                                               ...values?.allocations[index],
-                                              ['percentage']: parseFloat(e.target.value) || 0
+                                              ['percentage']: value
                                             });
                                           }}
                                           error={
