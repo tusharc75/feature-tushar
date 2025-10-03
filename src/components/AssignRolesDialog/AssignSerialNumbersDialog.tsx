@@ -167,12 +167,6 @@ const AssignSerialNumbersDialog = ({
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedProduct, selectedWarehouse, selectedStorageLocation]);
 
   const fetchData = () => {
-    if (!selectedProduct) {
-      dispatch({ type: 'initialize', data: [], count: 0 });
-      dispatch({ type: 'loading', loading: false });
-      return;
-    }
-
     dispatch({ type: 'loading', loading: true });
     let queryString = getQueryString();
     axiosInstance()
@@ -201,7 +195,7 @@ const AssignSerialNumbersDialog = ({
 
   const getQueryString = () => {
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
-    let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
+    let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}&activeStorageLocation=true`;    
     if (!selectedProduct) {
       deepFilter = `${deepFilter}&products=${selectedProducts?.map((p) => p?.id).join(',')}`;
     } else {
