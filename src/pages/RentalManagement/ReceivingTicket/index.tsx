@@ -3421,13 +3421,13 @@ const ReceivingTicket = ({
           referenceType={'RentalJobReplaceAsset'}
           referenceData={{
             _id: rentalManagementData?._id,
-            warehouse: rentalManagementData?.warehouse?.optionValue
+            warehouse: rentalManagementData?.warehouse?.optionValue,
+            replaceAssetReasonDialog: showReplaceAssetWarnings?.replaceAssetReasonDialog
           }}
           isAdding={isSubmitting}
           selectedProducts={addSerializedAssetDialog.products}
           filterByPlant={rentalManagementData?.warehouse}
           replaceAssets={true}
-          replaceAssetReasonDialog={showReplaceAssetWarnings.replaceAssetReasonDialog}
           setShowReplaceAssetWarnings={setShowReplaceAssetWarnings}
         />
       )}

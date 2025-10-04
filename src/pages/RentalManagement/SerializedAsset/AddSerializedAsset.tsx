@@ -59,8 +59,7 @@ const AddSerializedAsset = ({
   assetPolicyData = null,
   selectedRecordsOfMain = [],
   ids = [],
-  replaceAssetReasonDialog = false,
-  setShowReplaceAssetWarnings,
+  setShowReplaceAssetWarnings = null,
 }) => {
   const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}`;
   const toastConfig = useContext(CustomToastContext);
@@ -850,7 +849,7 @@ const AddSerializedAsset = ({
           />
         )
       }
-      {replaceAssetReasonDialog && (
+      {referenceData?.replaceAssetReasonDialog && (
         <ReplaceAssetReason
           handleClose={() => {
             setSelectedWarehouse(null);
