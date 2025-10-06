@@ -1,4 +1,4 @@
-import { IconButton, IconButtonProps, Menu, MenuItem } from '@mui/material';
+import { IconButton, IconButtonProps, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
 import React, { ReactElement, useLayoutEffect, useRef, useState } from 'react';
 import { ThemeButton, ThemeButtonProps } from 'src/components/Helpers/Buttons';
 import { MoreHoriz } from '@mui/icons-material';
@@ -103,11 +103,16 @@ const RenderMenuWithButton = ({ items }: { items: ChildList[] }) => {
     for (const item of items) {
       if (!React.isValidElement(item)) continue;
       const childType = (item.type as any).displayName || (item.type as any).name;
+      const { children, tooltip, startIcon, endIcon, ...props } = item.props;
       switch (childType) {
         case 'BulkActionButton': {
           menuItems.push(
-            <HtmlTooltip title={item.props.tooltip}>
-              <MenuItem {...item.props}></MenuItem>
+            <HtmlTooltip title={tooltip}>
+              <MenuItem {...props}>
+                {startIcon && <ListItemIcon>{startIcon}</ListItemIcon>}
+                <ListItemText>{children}</ListItemText>
+                {endIcon && <ListItemIcon>{item.props.endIcon}</ListItemIcon>}
+              </MenuItem>
             </HtmlTooltip>
           );
           break;
@@ -153,6 +158,7 @@ const RenderMenuWithButton = ({ items }: { items: ChildList[] }) => {
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
+        disablePortal
         slotProps={{
           list: {
             'aria-labelledby': 'basic-button'
