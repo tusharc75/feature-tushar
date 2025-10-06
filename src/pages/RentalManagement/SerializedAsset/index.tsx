@@ -2,7 +2,7 @@ import { IconButton, Menu, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import { Delete, ExpandMore, Info, LibraryBooks, Receipt, Repeat, Warning } from '@mui/icons-material';
 import { isArray, isEmpty, startCase, uniqBy } from 'lodash';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -54,12 +54,21 @@ import { TabPanel } from 'src/components/CustomTabs';
 import Technicians from 'src/pages/RentalManagement/SerializedAsset/Technicians';
 import Competencies from 'src/pages/Competencies';
 
-const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit, rentalPolicyData, assetPolicyData }) => {
+const SerializedAsset = ({
+  rentalManagementData,
+  setNextStep,
+  setNextStepToolTip,
+  stepFullScreen,
+  allowedToEdit,
+  rentalPolicyData,
+  assetPolicyData
+}) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = 'rental_management_serialized_asset';
 
+  const [technicianHeader, setTechnicianHeader] = useState<React.ReactNode>(null);
   const [deleting, setDeleting] = useState(false);
   const [isAdding, setAdding] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -110,12 +119,15 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     });
     const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
 
-    let serializedAssetColumn = []
+    let serializedAssetColumn = [];
     const statusChangeFields: any = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)?.fields || [];
-    const assetFieldResponce = await axiosInstance().get(`/field?resource=${serializedAsset.resource}&view=true`)
-    const filteredFields = assetFieldResponce?.data?.data?.filter((e) => (statusChangeFields.includes(e.fieldData.fieldName)
-      || [`mtrAttached`]?.includes(e.fieldData.fieldName)) && !newColumns?.map((e) => e.accessor)?.includes(e.fieldData.fieldName));
-    serializedAssetColumn = generateColumns(renderedFrom, filteredFields, null, false, rentalManagementData?.currency)
+    const assetFieldResponce = await axiosInstance().get(`/field?resource=${serializedAsset.resource}&view=true`);
+    const filteredFields = assetFieldResponce?.data?.data?.filter(
+      (e) =>
+        (statusChangeFields.includes(e.fieldData.fieldName) || [`mtrAttached`]?.includes(e.fieldData.fieldName)) &&
+        !newColumns?.map((e) => e.accessor)?.includes(e.fieldData.fieldName)
+    );
+    serializedAssetColumn = generateColumns(renderedFrom, filteredFields, null, false, rentalManagementData?.currency);
 
     let column: any = [
       {
@@ -491,8 +503,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       setServiceOption([
         { optionLabel: 'All', optionValue: 'All' },
         ...material
-          ?.filter(m => m?.type === MATERIAL_TYPE.service && m?.serviceDetail)
-          ?.map(s => ({
+          ?.filter((m) => m?.type === MATERIAL_TYPE.service && m?.serviceDetail)
+          ?.map((s) => ({
             optionLabel: s?.serviceDetail?.serviceName || '',
             optionValue: s?.serviceDetail?._id || '',
             _id: s?._id || '',
@@ -505,12 +517,13 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
       rows.forEach((parent, i) => {
         parent.index = i + 1;
-        parent.detail = `${parent.type === MATERIAL_TYPE.service
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productName
-            : parent?.packageDetail?.packageName
-          }`;
+        parent.detail = `${
+          parent.type === MATERIAL_TYPE.service
+            ? parent?.serviceDetail?.serviceName
+            : parent.type === MATERIAL_TYPE.product
+              ? parent?.productDetail?.productName
+              : parent?.packageDetail?.packageName
+        }`;
         parent.description =
           parent.type === MATERIAL_TYPE.service
             ? parent?.serviceDetail?.serviceDescription || ''
@@ -527,13 +540,13 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         parent.realAssetQty = parent.assetQty;
         parent.realAssetAssignedQty =
           parent.type === MATERIAL_TYPE.product &&
-            !parent.serializedProduct &&
-            parent.assetAssignedQty === 0 &&
-            parent?.status &&
-            loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+          !parent.serializedProduct &&
+          parent.assetAssignedQty === 0 &&
+          parent?.status &&
+          loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
             ? loadingTicketProducts
-              ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
-              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+                ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+                ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
             : parent.assetAssignedQty;
         parent.isSublease = subleaseProduct?.some((e) => e.materialId === parent.materialId);
         parent.isPurchaseOrder = purchaseOrderProduct?.some((e) => e.productId === parent.materialId);
@@ -563,12 +576,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).length === 0
             ? parent.assetQty
             : parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).reduce((sum, row) => (row.assetQty || 0) + sum, 0) +
-            (parent.type === MATERIAL_TYPE.product ? parent.assetQty : 0);
+              (parent.type === MATERIAL_TYPE.product ? parent.assetQty : 0);
         parent.assetAssignedQty =
           parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).length === 0
             ? parent.assetAssignedQty
             : parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).reduce((sum, row) => (row.assetAssignedQty || 0) + sum, 0) +
-            (parent.type === MATERIAL_TYPE.product ? parent?.subRows.filter((d) => ['asset', 'serialNumber']?.includes(d.type))?.length : 0);
+              (parent.type === MATERIAL_TYPE.product ? parent?.subRows.filter((d) => ['asset', 'serialNumber']?.includes(d.type))?.length : 0);
         parent.isValid =
           parent.serializedProduct && !parent.subRows?.find((e) => e.type === MATERIAL_TYPE.product && !e.serializedProduct)
             ? parent.assetAssignedQty === parent.assetQty
@@ -576,11 +589,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               : false
             : parent.subRows.length !== 0
               ? parent.assetAssignedQty ===
-              parent.subRows
-                .filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct)
-                .reduce((sum, row) => (row.assetQty || 0) + sum, 0) +
-              (parent.serializedProduct ? parent.realAssetQty : 0) ||
-              (parent.isValid && parent.subRows.every((d) => d.isValid))
+                  parent.subRows
+                    .filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct)
+                    .reduce((sum, row) => (row.assetQty || 0) + sum, 0) +
+                    (parent.serializedProduct ? parent.realAssetQty : 0) ||
+                (parent.isValid && parent.subRows.every((d) => d.isValid))
               : true;
 
         if (parent.subRows.length && parent.isValid) {
@@ -758,13 +771,13 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         : 0;
       _subRow.realAssetAssignedQty =
         _subRow.type === MATERIAL_TYPE.product &&
-          !_subRow.serializedProduct &&
-          _subRow.assetAssignedQty === 0 &&
-          _subRow?.status &&
-          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
+        !_subRow.serializedProduct &&
+        _subRow.assetAssignedQty === 0 &&
+        _subRow?.status &&
+        loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
           ? loadingTicketProducts
-            ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
-            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+              ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : _subRow.assetAssignedQty;
       _subRow.isSublease = subleaseProduct?.some((e) => e.materialId === _subRow.materialId);
       _subRow.isPurchaseOrder = purchaseOrderProduct?.some((e) => e.productId === _subRow.materialId);
@@ -795,7 +808,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         tempSubRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).length === 0
           ? _subRow.assetQty
           : tempSubRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).reduce((sum, row) => row.assetQty + sum, 0) +
-          (_subRow.type === 'product' ? _subRow.assetQty : 0);
+            (_subRow.type === 'product' ? _subRow.assetQty : 0);
       _subRow.isValid =
         _subRow.serializedProduct && !_subRow.subRows?.find((e) => e.type === MATERIAL_TYPE.product && !e.serializedProduct)
           ? _subRow.assetAssignedQty === _subRow.assetQty
@@ -804,12 +817,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           : tempSubRows?.filter((e) => ['asset', 'serialNumber']?.includes(e.type))?.length === tempSubRows?.length
             ? true
             : _subRow.assetAssignedQty ===
-              tempSubRows
-                .filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct)
-                .reduce((sum, row) => row.assetQty + sum, 0)
+                tempSubRows
+                  .filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct)
+                  .reduce((sum, row) => row.assetQty + sum, 0)
               ? true
               : _subRow.serializedProduct &&
-                _subRow.subRows?.every((e) => (e.type === MATERIAL_TYPE.product && !e.serializedProduct) || e.type === 'asset')
+                  _subRow.subRows?.every((e) => (e.type === MATERIAL_TYPE.product && !e.serializedProduct) || e.type === 'asset')
                 ? true
                 : false;
 
@@ -852,8 +865,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     var data = [];
     var flatArray = treeToFlatArray(selectedRecords, 'subRows').filter((f) => f.type === MATERIAL_TYPE.product);
     flatArray = uniqBy(flatArray, '_id');
-    assets?.forEach(element => {
-      element.isCounted = false
+    assets?.forEach((element) => {
+      element.isCounted = false;
     });
     flatArray?.forEach((e: any) => {
       if (e.type === MATERIAL_TYPE.product) {
@@ -1113,7 +1126,13 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         const storageLocation = _inventory?.storageLocation?.optionValue;
         const ticketQtySum =
           allLoadingTicketProducts
-            ?.filter((ticket) => ticket?.uniqueId === uniqueId && ticket?.product === materialId && ticket?.warehouse === plant && (user?.user?.brandPolicy?.storageLocation ? ticket?.storageLocation === storageLocation : true))
+            ?.filter(
+              (ticket) =>
+                ticket?.uniqueId === uniqueId &&
+                ticket?.product === materialId &&
+                ticket?.warehouse === plant &&
+                (user?.user?.brandPolicy?.storageLocation ? ticket?.storageLocation === storageLocation : true)
+            )
             ?.reduce((sum, ticket) => (sum += ticket?.qty), 0) || 0;
         if (_inventory?.qty > ticketQtySum) {
           cnt += _inventory?.qty - ticketQtySum;
@@ -1126,7 +1145,13 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const getPlantWiseValidQty = (uniqueId, materialId, warehouse, storageLocation, inventoryCnt) => {
     const ticketQtySum =
       allLoadingTicketProducts
-        ?.filter((ticket) => ticket?.uniqueId === uniqueId && ticket?.product === materialId && ticket?.warehouse === warehouse && (user?.user?.brandPolicy?.storageLocation && storageLocation ? ticket?.storageLocation === storageLocation : true))
+        ?.filter(
+          (ticket) =>
+            ticket?.uniqueId === uniqueId &&
+            ticket?.product === materialId &&
+            ticket?.warehouse === warehouse &&
+            (user?.user?.brandPolicy?.storageLocation && storageLocation ? ticket?.storageLocation === storageLocation : true)
+        )
         ?.reduce((sum, ticket) => (sum += ticket?.qty), 0) || 0;
     if (inventoryCnt > ticketQtySum) return inventoryCnt - ticketQtySum;
     return 0;
@@ -1276,21 +1301,28 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
   return (
     <Fragment>
-      {permissions?.employeeMaster?.isRead && (
-        <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
-          <ContainedTab value={0} label={'Assets'} />
-          <ContainedTab value={1} label={'Technicians'} />
-        </ContainedTabs>
-      )}
+      <div className="flex w-full flex-wrap items-center gap-2">
+        {permissions?.employeeMaster?.isRead && (
+          <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+            <ContainedTab value={0} label={'Assets'} />
+            <ContainedTab value={1} label={'Technicians'} />
+          </ContainedTabs>
+        )}
+        <TabPanel value={tabValue} index={0} className="flex-grow">
+          <DetailsPageHeader
+            isAddButtonVisible={false}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+            rightSideContents={rightSideContents()}
+            hasXpadding
+          />
+        </TabPanel>
+        <TabPanel value={tabValue} index={1} className="flex-grow">
+          {technicianHeader}
+        </TabPanel>
+      </div>
       <TabPanel value={tabValue} index={0}>
-        <DetailsPageHeader
-          isAddButtonVisible={false}
-          isActionButtonVisible={true}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          rightSideContents={rightSideContents()}
-          hasXpadding
-        />
         {columns ? (
           <Box zIndex={5}>
             <CustomReactTable
@@ -1317,14 +1349,13 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         )}
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
-        <div className='mt-4'>
-          <Technicians
-            serviceOption={serviceOption}
-            allowedToEdit={allowedToEdit}
-            rentalManagementData={rentalManagementData}
-            stepFullScreen={stepFullScreen}
-          />
-        </div>
+        <Technicians
+          serviceOption={serviceOption}
+          allowedToEdit={allowedToEdit}
+          rentalManagementData={rentalManagementData}
+          stepFullScreen={stepFullScreen}
+          setTechnicianHeader={setTechnicianHeader}
+        />
       </TabPanel>
 
       <Menu
@@ -1443,16 +1474,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             addNonSerializedInventoryDialog.type === 'add'
               ? nonSerializedProduct
               : selectedRecords
-                ?.filter(
-                  (r) => r?.type === MATERIAL_TYPE.product && !r?.productDetail?.serializedProduct && validateRemoveInventory(r?._id, r?.materialId)
-                )
-                ?.map((s) => ({
-                  ...s,
-                  _id: s._id,
-                  id: s.materialId,
-                  productName: s.productDetail?.productName,
-                  qty: validateRemoveInventory(s?._id, s?.materialId)
-                }))
+                  ?.filter(
+                    (r) => r?.type === MATERIAL_TYPE.product && !r?.productDetail?.serializedProduct && validateRemoveInventory(r?._id, r?.materialId)
+                  )
+                  ?.map((s) => ({
+                    ...s,
+                    _id: s._id,
+                    id: s.materialId,
+                    productName: s.productDetail?.productName,
+                    qty: validateRemoveInventory(s?._id, s?.materialId)
+                  }))
           }
           referenceId={rentalManagementData?._id}
           type={addNonSerializedInventoryDialog.type}
@@ -1460,11 +1491,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             addNonSerializedInventoryDialog.type === 'add'
               ? nonSerializedInventory
               : nonSerializedInventory?.map((m) => {
-                return {
-                  ...m,
-                  qty: getPlantWiseValidQty(m?._id, m?.product?.optionValue, m?.warehouse?.optionValue, m?.storageLocation?.optionValue, m?.qty)
-                };
-              })
+                  return {
+                    ...m,
+                    qty: getPlantWiseValidQty(m?._id, m?.product?.optionValue, m?.warehouse?.optionValue, m?.storageLocation?.optionValue, m?.qty)
+                  };
+                })
           }
         />
       )}
@@ -1523,13 +1554,13 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           products={
             user?.user?.brandPolicy?.purchaseOrderShowSerializedProduct
               ? showOrderDialog?.products.map((e) => {
-                return { product: e._id, unit: e.unit, qty: e.assetsCount };
-              })
-              : showOrderDialog?.products
-                ?.filter((e) => e.serialized === false)
-                ?.map((e) => {
                   return { product: e._id, unit: e.unit, qty: e.assetsCount };
                 })
+              : showOrderDialog?.products
+                  ?.filter((e) => e.serialized === false)
+                  ?.map((e) => {
+                    return { product: e._id, unit: e.unit, qty: e.assetsCount };
+                  })
           }
           currency={rentalManagementData.currency}
           refrenceData={{

@@ -1,33 +1,33 @@
-import { Autocomplete, Box, IconButton, MenuItem, TextField } from "@mui/material";
-import { camelCase } from "lodash";
-import { useContext, useEffect, useState } from "react";
-import { FiExternalLink } from "react-icons/fi";
-import axiosInstance from "src/axios/axiosInstance";
-import CustomReactTable, { AccessorFunction, useColumns, useTableReducer } from "src/components/CustomReactTable";
-import DropdownCell from "src/components/CustomReactTable/Cells/DropdownCell";
-import HtmlTooltip from "src/components/CustomTooltipTitle";
-import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
-import NoDataCell from "src/components/Helpers/NoDataCell";
-import routes from "src/components/Helpers/Routes";
-import { fetch_rental_technician_fields } from "src/components/RentalManagment/helper";
-import { prepareDataForGrid, PRICING_SETUP_TYPE, rentalManagement, sidebarResource } from "src/constants/helpers";
-import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import { CustomOfflineContext } from "src/StateProvider/OfflineContext/OfflineContext";
-import { useData } from "src/StateProvider/Provider";
+import { Autocomplete, Box, IconButton, MenuItem, TextField } from '@mui/material';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import { FiExternalLink } from 'react-icons/fi';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { AccessorFunction, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import routes from 'src/components/Helpers/Routes';
+import { fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
+import { prepareDataForGrid, PRICING_SETUP_TYPE, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { useData } from 'src/StateProvider/Provider';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Add } from "@mui/icons-material";
-import { DetailsPageHeader } from "src/components/PageHeaders";
+import { Add } from '@mui/icons-material';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialog';
-import { ThemeButton } from "src/components/Helpers/Buttons";
-import AssignEmployeeDialog from "src/components/AssignRolesDialog/AssignEmployeeDialog";
-import dayjs from "dayjs";
-import { autoCalculateSpecificFields } from "src/constants/formulaUtility";
-import { getCostPriceConditions, getCostPriceValue, getPricingConditions, getPricingValue } from "src/components/PricingCondition";
-import TechnicianAssign from "src/components/TechnicianAssign";
-import RentalTechnicianQtyDialog from "src/pages/RentalManagement/SerializedAsset/Technicians/RentalTechnicianQtyDialog";
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
+import dayjs from 'dayjs';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { getCostPriceConditions, getCostPriceValue, getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import TechnicianAssign from 'src/components/TechnicianAssign';
+import RentalTechnicianQtyDialog from 'src/pages/RentalManagement/SerializedAsset/Technicians/RentalTechnicianQtyDialog';
 
-const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepFullScreen }) => {
+const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepFullScreen, setTechnicianHeader }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_assign_technician`;
 
@@ -36,7 +36,13 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
-  const [selectedService, setSelectedService] = useState<{ optionLabel: string; optionValue: string; _id?: string; competencyType?: string; competencies?: string[] }>({ optionLabel: 'All', optionValue: 'All' });
+  const [selectedService, setSelectedService] = useState<{
+    optionLabel: string;
+    optionValue: string;
+    _id?: string;
+    competencyType?: string;
+    competencies?: string[];
+  }>({ optionLabel: 'All', optionValue: 'All' });
   const [technicianDialog, setTechnicianDialog] = useState(false);
   const [technicianAssign, setTechnicianAssign] = useState({ open: false, data: null });
   const [technicianEdit, setTechnicianEdit] = useState({ open: false, data: null, isBulkEdit: false, showSaveAndNext: false });
@@ -145,45 +151,45 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
       },
       ...(technicianFields?.find((e) => e.fieldName === 'competencyType')
         ? [
-          {
-            accessor: 'competencyType',
-            Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-            width: 250,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'competencyType',
-                  lookupResource: sidebarResource.competencyType
-                }}
-                original={row?.original}
-              />
-            ),
-            accessorFn: (original) => AccessorFunction(original, 'competencyType')
-          }
-        ]
+            {
+              accessor: 'competencyType',
+              Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencyType',
+                    lookupResource: sidebarResource.competencyType
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencyType')
+            }
+          ]
         : []),
       ...(technicianFields?.find((e) => e.fieldName === 'competencies')
         ? [
-          {
-            accessor: 'competencies',
-            Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-            width: 250,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'competencies',
-                  lookupResource: sidebarResource.competencies
-                }}
-                original={row?.original}
-              />
-            ),
-            accessorFn: (original) => AccessorFunction(original, 'competencies')
-          }
-        ]
+            {
+              accessor: 'competencies',
+              Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencies',
+                    lookupResource: sidebarResource.competencies
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencies')
+            }
+          ]
         : [])
     ];
 
@@ -234,7 +240,13 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
       }
     });
 
-    const newColumns = generateColumns(renderedFrom, data?.filter((f) => f?.isRead && !['endDate', 'startDate'].includes(f?.fieldName)), null, false, rentalManagementData?.currency);
+    const newColumns = generateColumns(
+      renderedFrom,
+      data?.filter((f) => f?.isRead && !['endDate', 'startDate'].includes(f?.fieldName)),
+      null,
+      false,
+      rentalManagementData?.currency
+    );
     setAllFields(data);
     setColumns([...column, ...newColumns]);
   };
@@ -253,7 +265,7 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
           let res: any = {
             ...prepareDataForGrid(u)
           };
-          let technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];;
+          let technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
           res.orignalData = { ...u, technicianId: u?.technician['_id'], technicianName };
           res.index = i + 1;
           res.technicianName = technicianName;
@@ -289,7 +301,7 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
       element.estimateStartDate = rentalManagementData?.estimateStartDate || dayjs.tz().toDate();
       element.estimateEndDate = rentalManagementData?.estimateEndDate || dayjs.tz().toDate();
       const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-      Object.assign(element, calValues)
+      Object.assign(element, calValues);
       technician.push(element);
     });
     let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, technician, PRICING_SETUP_TYPE.rent);
@@ -364,56 +376,65 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
       });
   };
 
-  const leftSideContents = () => {
-    return (allowedToEdit ?
-      <ThemeButton startIcon={<Add />} onClick={() => setTechnicianDialog(true)}>
-        Assign
-      </ThemeButton>
-      : null);
-  };
+  useEffect(() => {
+    const leftSideContents = () => {
+      return allowedToEdit ? (
+        <ThemeButton startIcon={<Add />} onClick={() => setTechnicianDialog(true)}>
+          Assign
+        </ThemeButton>
+      ) : null;
+    };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <MenuItem
-        disabled={selectedRecords?.some((e) => !e?.canDelete)}
-        onClick={() => {
-          setDeleteData(selectedRecords?.map((d) => d?._id));
-        }}
-      >
-        Delete
-      </MenuItem>
+    const actionButtonMenuItems = () => {
+      return (
+        <MenuItem
+          disabled={selectedRecords?.some((e) => !e?.canDelete)}
+          onClick={() => {
+            setDeleteData(selectedRecords?.map((d) => d?._id));
+          }}
+        >
+          Delete
+        </MenuItem>
+      );
+    };
+    const technicianHeader = (
+      <div className="flex flex-grow flex-wrap items-center gap-2">
+        <Autocomplete
+          size="small"
+          style={{ width: '300px' }}
+          fullWidth
+          options={serviceOption}
+          autoHighlight
+          value={selectedService}
+          getOptionLabel={(option: any) => option?.optionLabel || ''}
+          isOptionEqualToValue={(option, val) => (option ? option?.optionValue === val?.optionValue : false)}
+          onChange={(_, val) => {
+            let value = val;
+            if (!val) {
+              value = { optionLabel: 'All', optionValue: 'All' };
+            }
+            setSelectedService(value);
+          }}
+          renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" margin="none" />}
+        />
+        <div className="flex-grow">
+          <DetailsPageHeader
+            isAddButtonVisible={false}
+            isActionButtonVisible={allowedToEdit}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+            leftSideContents={leftSideContents()}
+            hasXpadding
+          />
+        </div>
+      </div>
     );
-  };
+    setTechnicianHeader(technicianHeader);
+  }, [allowedToEdit, selectedRecords, selectedRecords?.length, selectedService, serviceOption, setTechnicianHeader]);
 
   return (
     <div>
-      <Autocomplete
-        size="small"
-        style={{ width: '300px' }}
-        fullWidth
-        options={serviceOption}
-        autoHighlight
-        value={selectedService}
-        getOptionLabel={(option: any) => option?.optionLabel || ''}
-        isOptionEqualToValue={(option, val) => (option ? option?.optionValue === val?.optionValue : false)}
-        onChange={(_, val) => {
-          let value = val;
-          if (!val) {
-            value = { optionLabel: 'All', optionValue: 'All' };
-          }
-          setSelectedService(value);
-        }}
-        renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" margin="dense" />}
-      />
       <div>
-        <DetailsPageHeader
-          isAddButtonVisible={false}
-          isActionButtonVisible={allowedToEdit}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
-          leftSideContents={leftSideContents()}
-          hasXpadding
-        />
         {columns ? (
           <CustomReactTable
             height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
@@ -481,9 +502,8 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
           okBtnLoading={isDeleting}
         />
       )}
-
     </div>
-  )
-}
+  );
+};
 
 export default Technicians;

@@ -174,9 +174,12 @@ const RentalManagementDetailsPage = () => {
           }
           for (let i = 0; i < keys.length; i++) {
             if (
-              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.expired].includes(
-                data?.versions[keys[i]]?.status
-              )
+              [
+                QUOTATION_STATUS.acceptByCustomer,
+                QUOTATION_STATUS.rejectByCustomer,
+                QUOTATION_STATUS.sentToCustomer,
+                QUOTATION_STATUS.expired
+              ].includes(data?.versions[keys[i]]?.status)
             ) {
               setIsDisableCustomerAccount(true);
               break;
@@ -208,7 +211,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -262,7 +265,11 @@ const RentalManagementDetailsPage = () => {
   };
 
   const fetchPolicy = async () => {
-    const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.rentalManagement},${sidebarResource.serializedAsset},${sidebarResource.fleetDispatch}`)
+    const data = await getMultipleResourcePolicy(
+      user,
+      permissions,
+      `${sidebarResource.rentalManagement},${sidebarResource.serializedAsset},${sidebarResource.fleetDispatch}`
+    );
     if (data?.find((e) => e.resource === sidebarResource.rentalManagement)) {
       setResourcePolicyData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
     }
@@ -423,7 +430,7 @@ const RentalManagementDetailsPage = () => {
                       {`View ${resources?.iotChart?.titlePlural}`}
                     </ThemeButton>
                   )}
-                  {!isOffline &&
+                  {!isOffline && (
                     <ThemeButton
                       id={'rental-management-download-button'}
                       type="button"
@@ -437,7 +444,7 @@ const RentalManagementDetailsPage = () => {
                     >
                       {isDownloading ? 'Please wait...' : 'Download'}
                     </ThemeButton>
-                  }
+                  )}
                   {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name) &&
                     versionNotClonned &&
                     (rentalManagementData?.addQuotationStep || user?.user?.brandPolicy?.rentalQuotation) && (
@@ -550,11 +557,13 @@ const RentalManagementDetailsPage = () => {
                 setCurrentStep={setCurrentStep}
                 handlePrev={
                   rentalSteps[currentStep]?.name === 'Quotation' &&
-                    allowedToEdit &&
-                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired].includes(quotationData?.versions[currentVersion]?.status)
+                  allowedToEdit &&
+                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired].includes(
+                    quotationData?.versions[currentVersion]?.status
+                  )
                     ? () => {
-                      setShowCancelConfirmBox({ open: true, isQuote: true });
-                    }
+                        setShowCancelConfirmBox({ open: true, isQuote: true });
+                      }
                     : null
                 }
                 isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
@@ -579,13 +588,13 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.expired,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.expired,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? isQuotationStep
                         ? true
                         : false
@@ -608,13 +617,13 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.expired,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.expired,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? isQuotationStep
                         ? true
                         : false
@@ -686,6 +695,7 @@ const RentalManagementDetailsPage = () => {
                   rentalManagementFields={rentalManagementFields}
                 />
               )}
+
               {rentalSteps[currentStep]?.name === 'Final Slip' && rentalManagementData && (
                 <Invoice
                   rentalManagementData={rentalManagementData}
