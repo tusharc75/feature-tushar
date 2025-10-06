@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
-import { camelCase } from 'lodash';
+import { camelCase, isArray } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -134,7 +134,7 @@ const RepairJobDetails = () => {
       .then(({ data: { data } }) => {
         setCurrentStep(getIndex(data?.processStatus, repairJobProcessSteps));
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.repairJob, data));
-        setAllowedOperation(data?.workOrder ? false : true);
+        setAllowedOperation(isArray(data?.workOrder) && data?.workOrder?.length > 0 ? false : !isArray(data?.workOrder) && data?.workOrder ? false : true);
         setAllowedToDelete(
           permissions?.repairJob?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairJob, data?.owner?.optionValue) && data?.canDelete
         );
@@ -173,7 +173,7 @@ const RepairJobDetails = () => {
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => {})
+      .then(({ data: { data } }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
