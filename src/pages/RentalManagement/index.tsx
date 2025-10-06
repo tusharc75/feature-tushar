@@ -38,6 +38,8 @@ import { rentalJobClearOffline, rentalJobOfflineUpdate } from './rentalOfflineHe
 import queryString from 'query-string';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const RentalManagement = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -64,7 +66,7 @@ const RentalManagement = () => {
     {
       key: `Closed ${resources?.rentalManagement?.titlePlural}`,
       value: 4
-    },
+    }
   ];
 
   const history = useHistory();
@@ -190,9 +192,10 @@ const RentalManagement = () => {
                     setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.rentalJobName });
                   }}
                 >
-                  <AttachFileIcon fontSize="small" color='primary' />
+                  <AttachFileIcon fontSize="small" color="primary" />
                 </IconButton>
-              </HtmlTooltip>)}
+              </HtmlTooltip>
+            )}
             <HtmlTooltip title={row?.original.canDelete ? 'Delete' : deleteDisable} placement="top" arrow enterTouchDelay={0}>
               <span>
                 <IconButton
@@ -272,11 +275,9 @@ const RentalManagement = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    }
-    else if (selectedType === 2) {
+    } else if (selectedType === 2) {
       deepFilter = deepFilter + `&openRecords=1`;
-    }
-    else if (selectedType === 4) {
+    } else if (selectedType === 4) {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
 
@@ -323,7 +324,10 @@ const RentalManagement = () => {
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-        finalObject['canDelete'] = permissions?.rentalManagement?.isDelete && u?.canDelete && checkIsAllowedToDelete(user, sidebarResource.rentalManagement, finalObject?.ownerId);
+        finalObject['canDelete'] =
+          permissions?.rentalManagement?.isDelete &&
+          u?.canDelete &&
+          checkIsAllowedToDelete(user, sidebarResource.rentalManagement, finalObject?.ownerId);
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: count });
@@ -470,10 +474,9 @@ const RentalManagement = () => {
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
           {`Add ${resources?.rentalManagement?.titlePlural} Offline`}
         </MenuItem>
-        <MenuItem
-          disabled={!selectedRecords.length}
-          onClick={() => handleRemoveoffline(selectedRecords?.map((e) => e._id))}
-        >{`Clear Offline Data (${selectedRecords.length})`}</MenuItem>
+        <MenuItem disabled={!selectedRecords.length} onClick={() => handleRemoveoffline(selectedRecords?.map((e) => e._id))}>
+          {`Clear Offline Data (${selectedRecords.length})`}
+        </MenuItem>
         <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
       </>
     );
@@ -483,7 +486,7 @@ const RentalManagement = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ ...routes?.rentalManagement, title: resources?.rentalManagement?.titlePlural }]} />
-        {!isOffline &&
+        {!isOffline && (
           <ImportExportLinks
             permissions={permissions?.rentalManagement}
             module={resources?.rentalManagement?.titlePlural}
@@ -520,7 +523,7 @@ const RentalManagement = () => {
               }
             ]}
           />
-        }
+        )}
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -559,11 +562,12 @@ const RentalManagement = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.rentalJobName}`
-              : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
-              } ?`}
+                : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
