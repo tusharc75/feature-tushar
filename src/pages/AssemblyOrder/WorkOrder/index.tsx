@@ -1072,7 +1072,10 @@ const WorkOrder = ({
 
       {showManageRepairJobDialog.open && (
         <ManageRepairJob
-          onClose={() => setShowManageRepairJobDialog({ open: false, serializedPackage: null })}
+          onClose={() => {
+            fetchData()
+            setShowManageRepairJobDialog({ open: false, serializedPackage: null })
+          }}
           onSuccess={(data) => {
             handleAddAssetInRepairJob(data, showManageRepairJobDialog.serializedPackage);
           }}
