@@ -169,7 +169,7 @@ const ReceivingTicket = ({
     confirmationAddNewLineItemsDialog: false,
     confirmationAddNewLineItems: '',
     incorrectAssignment: false
-  })
+  });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
@@ -195,8 +195,8 @@ const ReceivingTicket = ({
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
   const [fieldLabels, setFieldLabels] = useState(null);
   const [rentalJobChildFields, setRentalJobChildFields] = useState(null);
-  const [subStatusLog, setSubStatusLog] = useState({ open: false, data: null })
-  const [fleetDispatchLog, setFleetDispatchLog] = useState({ open: false, assetData: null })
+  const [subStatusLog, setSubStatusLog] = useState({ open: false, data: null });
+  const [fleetDispatchLog, setFleetDispatchLog] = useState({ open: false, assetData: null });
   const [technicianDispatchReturn, setTechnicianDispatchReturn] = useState(false);
 
   const {
@@ -329,9 +329,17 @@ const ReceivingTicket = ({
       }
     }
     if (action === rentalManagementActions.transferToAnotherRental) {
-      const serializedPackageIds = uniq(map(getFilterSelectedRecords()?.filter((e) => e?.serializedPackageId), 'serializedPackageId'));
+      const serializedPackageIds = uniq(
+        map(
+          getFilterSelectedRecords()?.filter((e) => e?.serializedPackageId),
+          'serializedPackageId'
+        )
+      );
       const allRecord = getFilterSelectedRecords(null, flattenArray(dataRows));
-      records = [...getFilterSelectedRecords()?.filter((e) => !e?.serializedPackageId), ...allRecord?.filter((e) => serializedPackageIds?.includes(e?.serializedPackageId))];
+      records = [
+        ...getFilterSelectedRecords()?.filter((e) => !e?.serializedPackageId),
+        ...allRecord?.filter((e) => serializedPackageIds?.includes(e?.serializedPackageId))
+      ];
 
       if (records?.length != getFilterSelectedRecords()?.length) {
         errorMessages.push({ index: 1, message: rentalManagementMessage.selectAllAssetOfSerializedPackage });
@@ -387,23 +395,34 @@ const ReceivingTicket = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.returnAlreadyCreated });
         } else if ([ASSET_STATUS.lost]?.includes(e?.status)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketNotForLost });
-        } else if (![
-          ASSET_STATUS.inUse,
-          ASSET_STATUS.standBy,
-          ASSET_STATUS.standByNotChargeable,
-          ASSET_STATUS.scrap,
-          ASSET_STATUS.needRepair,
-          ASSET_STATUS.needRecert,
-          ASSET_STATUS.notApplied
-        ]?.includes(e?.status) &&
+        } else if (
+          ![
+            ASSET_STATUS.inUse,
+            ASSET_STATUS.standBy,
+            ASSET_STATUS.standByNotChargeable,
+            ASSET_STATUS.scrap,
+            ASSET_STATUS.needRepair,
+            ASSET_STATUS.needRecert,
+            ASSET_STATUS.notApplied
+          ]?.includes(e?.status) &&
           !e?.isReplaced
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingNotValidStatus });
         } else if (user?.user?.brandPolicy?.storageLocation && records?.find((e) => e.type === MATERIAL_TYPE.product && e?.storageLocationId)) {
-          if (uniq(map(records?.filter((e) => e.type === MATERIAL_TYPE.product && e?.storageLocationId), 'storageLocationId')).length !== 1) {
+          if (
+            uniq(
+              map(
+                records?.filter((e) => e.type === MATERIAL_TYPE.product && e?.storageLocationId),
+                'storageLocationId'
+              )
+            ).length !== 1
+          ) {
             errorMessages.push({
               index: e.index,
-              message: rentalManagementMessage.loadSameStorageLocation?.replace(sidebarResource?.storageLocation, resources?.storageLocation?.titleSingular)
+              message: rentalManagementMessage.loadSameStorageLocation?.replace(
+                sidebarResource?.storageLocation,
+                resources?.storageLocation?.titleSingular
+              )
             });
           }
         }
@@ -467,7 +486,9 @@ const ReceivingTicket = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingOrReturnNotDelivered });
         } else if (action === rentalManagementActions.createRepairJob && e.subleaseAsset) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.notSubleaseAsset });
-        } else if (![ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(e.status)) {
+        } else if (
+          ![ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(e.status)
+        ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.repairCanForThisAsset });
         } else if (uniq(map(records, 'warehouseId')).length !== 1) {
           errorMessages.push({
@@ -529,11 +550,10 @@ const ReceivingTicket = ({
           if (
             records?.filter((e) => {
               if (e?.type === MATERIAL_TYPE.product) {
-                return [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus)
+                return [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus);
               }
-              return [ASSET_STATUS.inUse]?.includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus)
-            })
-              ?.length !== records?.length
+              return [ASSET_STATUS.inUse]?.includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse]?.includes(e.rentalAssetStatus);
+            })?.length !== records?.length
           ) {
             records?.forEach((e) => {
               errorMessages.push({ index: e.index, message: rentalManagementMessage.transferRentalForAssetSame });
@@ -589,7 +609,19 @@ const ReceivingTicket = ({
           },
           {
             resource: sidebarResource.serializedAsset,
-            fieldNames: ['serialNumber', 'position', 'padName', 'wellNumber', 'warehouse', 'jobCount', 'currentGpsLocation', 'currentGpsWellNames', 'gpsNumber', 'subStatus', 'wellColor']
+            fieldNames: [
+              'serialNumber',
+              'position',
+              'padName',
+              'wellNumber',
+              'warehouse',
+              'jobCount',
+              'currentGpsLocation',
+              'currentGpsWellNames',
+              'gpsNumber',
+              'subStatus',
+              'wellColor'
+            ]
           }
         ]
       });
@@ -657,10 +689,10 @@ const ReceivingTicket = ({
         consumeProducts = productResponse?.data?.data?.consumeProducts;
         productSerialNumbers = productResponse?.data?.data?.productSerialNumbers;
         productSerialNumbers?.forEach((e) => {
-          e.warehouse = e?.productSerialNumberDetail?.warehouse
-          e.storageLocation = e?.productSerialNumberDetail?.storageLocation
-          e.serializedPackages = e?.productSerialNumberDetail?.serializedPackages
-        })
+          e.warehouse = e?.productSerialNumberDetail?.warehouse;
+          e.storageLocation = e?.productSerialNumberDetail?.storageLocation;
+          e.serializedPackages = e?.productSerialNumberDetail?.serializedPackages;
+        });
         nonSerializedInventory = productResponse?.data?.data?.nonSerializedInventory;
         setOnReceiveAssetDataCapture(productResponse?.data?.data?.defaultDeliveryTicketStatus === DELIVERY_TICKET_STATUS.inTransit ? true : false);
         setHideDeliveryTicketDelivered(productResponse?.data?.data?.defaultDeliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered ? true : false);
@@ -762,30 +794,43 @@ const ReceivingTicket = ({
         }
       });
 
-      productAssets = processAssets(productAssets, material, loadingTicketAssets, receiveTicketAssets, returnTicketAssets, transactionData, invoiceData);
+      productAssets = processAssets(
+        productAssets,
+        material,
+        loadingTicketAssets,
+        receiveTicketAssets,
+        returnTicketAssets,
+        transactionData,
+        invoiceData
+      );
 
       let newRows: any = [];
 
       if (view === 'flat') {
         newRows = [...productAssets];
-        material?.filter((ele) => ele.type === MATERIAL_TYPE.product &&
-          ele?.consumableType !== 'Internal' && (!ele?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === ele?._id)?.length)
-        )?.forEach((element) => {
-          const subProductRows = processProduct(
-            '',
-            newRows?.length,
-            element,
-            material,
-            nonSerializedInventory,
-            loadingTicketProducts,
-            receiveTicketProducts,
-            returnTicketProducts,
-            consumeProducts,
-            productSerialNumbers,
-            invoiceData
-          );
-          newRows = [...newRows, ...subProductRows];
-        });
+        material
+          ?.filter(
+            (ele) =>
+              ele.type === MATERIAL_TYPE.product &&
+              ele?.consumableType !== 'Internal' &&
+              (!ele?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === ele?._id)?.length)
+          )
+          ?.forEach((element) => {
+            const subProductRows = processProduct(
+              '',
+              newRows?.length,
+              element,
+              material,
+              nonSerializedInventory,
+              loadingTicketProducts,
+              receiveTicketProducts,
+              returnTicketProducts,
+              consumeProducts,
+              productSerialNumbers,
+              invoiceData
+            );
+            newRows = [...newRows, ...subProductRows];
+          });
 
         newRows = [...newRows?.filter((e) => !e.isReplaced), ...newRows?.filter((e) => e.isReplaced)];
 
@@ -812,7 +857,8 @@ const ReceivingTicket = ({
         newRows = [];
         let extraIndexCount = 0;
         rows.forEach((parent, i) => {
-          if (parent.type === MATERIAL_TYPE.product &&
+          if (
+            parent.type === MATERIAL_TYPE.product &&
             (!parent?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === parent?._id)?.length)
           ) {
             const subProductRows = processProduct(
@@ -891,7 +937,7 @@ const ReceivingTicket = ({
             );
             newRows.push(parent);
           }
-          parent.serializedPackageId = parent?.serializedPackage?.optionValue
+          parent.serializedPackageId = parent?.serializedPackage?.optionValue;
           parent.serializedPackageStatus = parent?.serializedPackage?.status;
           parent.serializedPackage = parent?.serializedPackage?.optionLabel;
         });
@@ -1037,7 +1083,7 @@ const ReceivingTicket = ({
             _subRow.status = ASSET_STATUS.notApplied;
             _subRow.rentalAssetStatus = '';
           }
-          _subRow.serializedPackageId = _subRow?.serializedPackage?.optionValue
+          _subRow.serializedPackageId = _subRow?.serializedPackage?.optionValue;
           _subRow.serializedPackageStatus = _subRow?.serializedPackage?.status;
           _subRow.serializedPackage = _subRow?.serializedPackage?.optionLabel;
           _subRow.subRows = generateNestedData(
@@ -1167,20 +1213,27 @@ const ReceivingTicket = ({
 
     if (isSerialNumberProduct) {
       if (user?.user?.brandPolicy?.storageLocation) {
-        const uniqueWarehouseLocation = uniqBy(productSerialNumbers, (obj: any) => `${obj?.warehouse?.optionValue}-${obj.storageLocation?.optionValue}`);
+        const uniqueWarehouseLocation = uniqBy(
+          productSerialNumbers,
+          (obj: any) => `${obj?.warehouse?.optionValue}-${obj.storageLocation?.optionValue}`
+        );
         uniqueWarehouseLocation?.forEach((element) => {
-          const qty = productSerialNumbers?.filter((e) => e?._id === row?._id
-            && e?.warehouse?.optionValue === element?.warehouse?.optionValue
-            && e?.storageLocation?.optionValue === element?.storageLocation?.optionValue)?.length
+          const qty = productSerialNumbers?.filter(
+            (e) =>
+              e?._id === row?._id &&
+              e?.warehouse?.optionValue === element?.warehouse?.optionValue &&
+              e?.storageLocation?.optionValue === element?.storageLocation?.optionValue
+          )?.length;
           rows.push({ ...row, qty: qty, warehouse: element?.warehouse, storageLocation: element?.storageLocation });
-        })
-      }
-      else {
+        });
+      } else {
         const uniqueWarehouse = uniqBy(productSerialNumbers, (obj: any) => `${obj?.warehouse?.optionValue}`);
         uniqueWarehouse?.forEach((element) => {
-          const qty = productSerialNumbers?.filter((e) => e?._id === row?._id && e?.warehouse?.optionValue === element?.warehouse?.optionValue)?.length
+          const qty = productSerialNumbers?.filter(
+            (e) => e?._id === row?._id && e?.warehouse?.optionValue === element?.warehouse?.optionValue
+          )?.length;
           rows.push({ ...row, qty: qty, warehouse: element?.warehouse });
-        })
+        });
       }
     } else {
       const warehouseProduct = nonSerializedInventory?.filter((e) => e._id === row._id);
@@ -1207,11 +1260,13 @@ const ReceivingTicket = ({
 
       if (element?.warehouse && element?.storageLocation) {
         ticketProduct = loadingTicketProducts?.filter(
-          (e) => e.uniqueId === element._id && e.product === element.materialId && e?.warehouse?.optionValue === element?.warehouse?.optionValue
-            && e?.storageLocation?.optionValue === element?.storageLocation?.optionValue
+          (e) =>
+            e.uniqueId === element._id &&
+            e.product === element.materialId &&
+            e?.warehouse?.optionValue === element?.warehouse?.optionValue &&
+            e?.storageLocation?.optionValue === element?.storageLocation?.optionValue
         );
-      }
-      else if (element?.warehouse) {
+      } else if (element?.warehouse) {
         ticketProduct = loadingTicketProducts?.filter(
           (e) => e.uniqueId === element._id && e.product === element.materialId && e?.warehouse?.optionValue === element?.warehouse?.optionValue
         );
@@ -1250,8 +1305,7 @@ const ReceivingTicket = ({
                 e?.warehouse?.optionValue === ele?.warehouse?.optionValue &&
                 e?.storageLocation?.optionValue === ele?.storageLocation?.optionValue
             );
-          }
-          else if (ele?.warehouse) {
+          } else if (ele?.warehouse) {
             returnTicket = returnTicketProducts?.find(
               (e) =>
                 e.qty <= ele.qty &&
@@ -1268,8 +1322,7 @@ const ReceivingTicket = ({
                 !e.isCount &&
                 e?.warehouse?.optionValue === ele?.warehouse?.optionValue
             );
-          }
-          else {
+          } else {
             returnTicket = returnTicketProducts?.find(
               (e) => e.qty <= ele.qty && e.uniqueId === element._id && e.product === element.materialId && !e.isCount
             );
@@ -1279,9 +1332,11 @@ const ReceivingTicket = ({
           }
         }
         var consumeQty = 0;
-        consumeProducts?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)?.forEach((e) => {
-          consumeQty = consumeQty + e.qty;
-        });
+        consumeProducts
+          ?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)
+          ?.forEach((e) => {
+            consumeQty = consumeQty + e.qty;
+          });
 
         const obj: any = {};
         obj._id = element.materialId + '_' + ele.loadingTicketId;
@@ -1377,10 +1432,14 @@ const ReceivingTicket = ({
         obj.wellNumber = getParentWellNumber(material, element?._id);
         obj.nonSerializedProductSerialNumbers = element?.nonSerializedProductSerialNumbers;
         if (isSerialNumberProduct) {
-          let productSerialNumbersMaterial = productSerialNumbers?.filter((e) => e?._id === element?._id &&
-            e?.warehouse?.optionValue === obj?.warehouseId && !ticketProductSerialNumbers?.includes(e?.productSerialNumberDetail?._id))
+          let productSerialNumbersMaterial = productSerialNumbers?.filter(
+            (e) =>
+              e?._id === element?._id &&
+              e?.warehouse?.optionValue === obj?.warehouseId &&
+              !ticketProductSerialNumbers?.includes(e?.productSerialNumberDetail?._id)
+          );
           if (obj?.storageLocationId) {
-            productSerialNumbersMaterial = productSerialNumbersMaterial?.filter((e) => e?.storageLocation?.optionValue === obj?.storageLocationId)
+            productSerialNumbersMaterial = productSerialNumbersMaterial?.filter((e) => e?.storageLocation?.optionValue === obj?.storageLocationId);
           }
           obj.productSerialNumbers = productSerialNumbersMaterial?.map((e) => ({ ...e, assetNumber: e?.productSerialNumberDetail?.serialNumber }));
         }
@@ -1397,7 +1456,7 @@ const ReceivingTicket = ({
       if (element?.isAllowedEndDate && invoiceMaterial) {
         element.minEndDate = new Date(invoiceMaterial?.endDate);
       }
-      element.serializedPackageId = element?.serializedPackage?.optionValue
+      element.serializedPackageId = element?.serializedPackage?.optionValue;
       element.serializedPackageStatus = element?.serializedPackage?.status;
       element.serializedPackage = element?.serializedPackage?.optionLabel;
     });
@@ -1411,7 +1470,7 @@ const ReceivingTicket = ({
     const assetFields = fieldLabels?.find((d) => d.resource === sidebarResource.serializedAsset)?.fieldNames || [];
 
     const rentalJobProductFields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
-    setRentalJobChildFields(rentalJobProductFields)
+    setRentalJobChildFields(rentalJobProductFields);
 
     const newColumns = generateColumns(
       renderedFrom,
@@ -1533,27 +1592,31 @@ const ReceivingTicket = ({
             </IconButton>
             {((row?.original?.nonSerializedProductSerialNumbers && row?.original?.nonSerializedProductSerialNumbers?.length > 0) ||
               (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
-                <Box>
-                  <HtmlTooltip title={`Serial Numbers`}>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        setShowInfo({
-                          open: true,
-                          data: {
-                            productName: row?.original?.productName,
-                            data: row?.original?.nonSerializedProductSerialNumbers?.length > 0 ?
-                              row?.original?.nonSerializedProductSerialNumbers?.map((e) => { return { assetNumber: e } }) : row?.original?.productSerialNumbers
-                          },
-                          isNonSerializedProductSerialNumbers: row?.original?.nonSerializedProductSerialNumbers?.length > 0 ? true : false
-                        });
-                      }}
-                    >
-                      <InfoIcon fontSize="small" color={'primary'} />
-                    </IconButton>
-                  </HtmlTooltip>
-                </Box>
-              )}
+              <Box>
+                <HtmlTooltip title={`Serial Numbers`}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setShowInfo({
+                        open: true,
+                        data: {
+                          productName: row?.original?.productName,
+                          data:
+                            row?.original?.nonSerializedProductSerialNumbers?.length > 0
+                              ? row?.original?.nonSerializedProductSerialNumbers?.map((e) => {
+                                  return { assetNumber: e };
+                                })
+                              : row?.original?.productSerialNumbers
+                        },
+                        isNonSerializedProductSerialNumbers: row?.original?.nonSerializedProductSerialNumbers?.length > 0 ? true : false
+                      });
+                    }}
+                  >
+                    <InfoIcon fontSize="small" color={'primary'} />
+                  </IconButton>
+                </HtmlTooltip>
+              </Box>
+            )}
             {row?.original?.isRepairJob && (
               <HtmlTooltip title={`${resources?.repairJob?.titleSingular}`}>
                 <IconButton
@@ -1583,13 +1646,13 @@ const ReceivingTicket = ({
       },
       ...(view === 'flat'
         ? [
-          {
-            accessor: 'parentName',
-            Header: 'Parent',
-            disabled: true,
-            cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
-          }
-        ]
+            {
+              accessor: 'parentName',
+              Header: 'Parent',
+              disabled: true,
+              cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
+            }
+          ]
         : []),
       ...newColumns,
       {
@@ -1600,86 +1663,93 @@ const ReceivingTicket = ({
       },
       ...(assetFields?.find((f) => f.fieldName === 'serialNumber')
         ? [
-          {
-            accessor: 'serialNumber',
-            Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
-            cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
-          }
-        ]
+            {
+              accessor: 'serialNumber',
+              Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
+              cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'position')
         ? [
-          {
-            accessor: 'position',
-            Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
-            cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
-          }
-        ]
+            {
+              accessor: 'position',
+              Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
+              cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'jobCount')
         ? [
-          {
-            accessor: 'jobCount',
-            Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'jobCount',
-            cell: ({ row }) =>
-              row?.original?.jobCount || row?.original?.jobCount === 0 ? (
-                <h5 className="text-truncate">{row?.original?.jobCount}</h5>
-              ) : (
-                <NoDataCell />
-              )
-          }
-        ]
+            {
+              accessor: 'jobCount',
+              Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'jobCount',
+              cell: ({ row }) =>
+                row?.original?.jobCount || row?.original?.jobCount === 0 ? (
+                  <h5 className="text-truncate">{row?.original?.jobCount}</h5>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'gpsNumber')
         ? [
-          {
-            accessor: 'gpsNumber',
-            Header: assetFields?.find((f) => f.fieldName === 'gpsNumber')?.fieldLabel || 'gpsNumber',
-            cell: ({ row }) => (row?.original?.gpsNumber ? <div><p className="text-truncate">{row?.original?.gpsNumber}</p></div> : <NoDataCell />)
-          }
-        ]
+            {
+              accessor: 'gpsNumber',
+              Header: assetFields?.find((f) => f.fieldName === 'gpsNumber')?.fieldLabel || 'gpsNumber',
+              cell: ({ row }) =>
+                row?.original?.gpsNumber ? (
+                  <div>
+                    <p className="text-truncate">{row?.original?.gpsNumber}</p>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'currentGpsLocation')
         ? [
-          {
-            accessor: 'currentGpsLocation',
-            Header: assetFields?.find((f) => f.fieldName === 'currentGpsLocation')?.fieldLabel || 'currentGpsLocation',
-            cell: ({ row }) => <GpsLocationCell value={row?.original?.currentGpsLocation} />
-          }
-        ]
+            {
+              accessor: 'currentGpsLocation',
+              Header: assetFields?.find((f) => f.fieldName === 'currentGpsLocation')?.fieldLabel || 'currentGpsLocation',
+              cell: ({ row }) => <GpsLocationCell value={row?.original?.currentGpsLocation} />
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')
         ? [
-          {
-            accessor: 'currentGpsWellNames',
-            Header: assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')?.fieldLabel || 'currentGpsWellNames',
-            cell: ({ row }) => <FreeStyleMultiSelect value={row?.original?.currentGpsWellNames} />
-          }
-        ]
+            {
+              accessor: 'currentGpsWellNames',
+              Header: assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')?.fieldLabel || 'currentGpsWellNames',
+              cell: ({ row }) => <FreeStyleMultiSelect value={row?.original?.currentGpsWellNames} />
+            }
+          ]
         : []),
       ...(view === 'flat'
         ? [
-          {
-            accessor: 'productName',
-            Header: productFields?.find((f) => f.fieldName === 'productName')?.fieldLabel || 'Product Name',
-            cell: ({ row }) =>
-              row?.original?.productName ? (
-                <div className="flex items-center gap-2">
-                  <h5 className="text-truncate">{row?.original?.productName}</h5>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.productDetail.path}/${row?.original?.materialId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          }
-        ]
+            {
+              accessor: 'productName',
+              Header: productFields?.find((f) => f.fieldName === 'productName')?.fieldLabel || 'Product Name',
+              cell: ({ row }) =>
+                row?.original?.productName ? (
+                  <div className="flex items-center gap-2">
+                    <h5 className="text-truncate">{row?.original?.productName}</h5>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.productDetail.path}/${row?.original?.materialId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
         : []),
       {
         accessor: 'description',
@@ -1701,66 +1771,79 @@ const ReceivingTicket = ({
                   }}
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>)}
-            </div>
-          ) : (
-            <NoDataCell />
-          )
-      },
-      ...(user?.user?.brandPolicy?.storageLocation ? [{
-        accessor: 'storageLocation',
-        Header: resources?.storageLocation?.titleSingular,
-        cell: ({ row }) =>
-          row?.original?.storageLocation ? (
-            <div className="flex items-center gap-2">
-              <h5 className="text-truncate">{row?.original?.storageLocation}</h5>
-              {permissions?.storageLocation?.isRead && (
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
               )}
             </div>
           ) : (
             <NoDataCell />
           )
-      }] : []),
+      },
+      ...(user?.user?.brandPolicy?.storageLocation
+        ? [
+            {
+              accessor: 'storageLocation',
+              Header: resources?.storageLocation?.titleSingular,
+              cell: ({ row }) =>
+                row?.original?.storageLocation ? (
+                  <div className="flex items-center gap-2">
+                    <h5 className="text-truncate">{row?.original?.storageLocation}</h5>
+                    {permissions?.storageLocation?.isRead && (
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          window.open(`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
+                        }}
+                      >
+                        <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                      </IconButton>
+                    )}
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
+        : []),
       ...(permissions?.serializedPackages?.isRead
-        ? [{
-          accessor: 'serializedPackage',
-          Header: resources?.serializedPackages?.titleSingular,
-          cell: ({ row }) =>
-            row?.original?.serializedPackage ? (
-              <div className="flex items-center gap-2">
-                <h5 className="text-truncate" title={row?.original?.serializedPackage}>{row?.original?.serializedPackage}</h5>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.serializedPackagesDetail.path}/${row?.original?.serializedPackageId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-        }, {
-          accessor: 'serializedPackageStatus',
-          Header: `${resources?.serializedPackages?.titleSingular} Status`,
-          cell: ({ row }) =>
-            row?.original?.serializedPackageStatus ? (
-              <div className="flex items-center gap-2">
-                <h5 className="text-truncate" title={row?.original?.serializedPackageStatus}>{row?.original?.serializedPackageStatus}</h5>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-        }] : []),
+        ? [
+            {
+              accessor: 'serializedPackage',
+              Header: resources?.serializedPackages?.titleSingular,
+              cell: ({ row }) =>
+                row?.original?.serializedPackage ? (
+                  <div className="flex items-center gap-2">
+                    <h5 className="text-truncate" title={row?.original?.serializedPackage}>
+                      {row?.original?.serializedPackage}
+                    </h5>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.serializedPackagesDetail.path}/${row?.original?.serializedPackageId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            },
+            {
+              accessor: 'serializedPackageStatus',
+              Header: `${resources?.serializedPackages?.titleSingular} Status`,
+              cell: ({ row }) =>
+                row?.original?.serializedPackageStatus ? (
+                  <div className="flex items-center gap-2">
+                    <h5 className="text-truncate" title={row?.original?.serializedPackageStatus}>
+                      {row?.original?.serializedPackageStatus}
+                    </h5>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
+        : []),
       {
         accessor: 'loadingTicket',
         Header: 'Loading Ticket',
@@ -1833,71 +1916,78 @@ const ReceivingTicket = ({
       },
       ...(assetFields?.find((f) => f.fieldName === 'subStatus')
         ? [
-          {
-            accessor: 'subStatus',
-            Header: `Asset ${assetFields?.find((f) => f.fieldName === 'subStatus')?.fieldLabel || 'Sub Status'}`,
-            cell: ({ row }) => (row?.original?.subStatus ? <h5 className="text-truncate">{row?.original?.subStatus}</h5> : <NoDataCell />)
-          }
-        ]
+            {
+              accessor: 'subStatus',
+              Header: `Asset ${assetFields?.find((f) => f.fieldName === 'subStatus')?.fieldLabel || 'Sub Status'}`,
+              cell: ({ row }) => (row?.original?.subStatus ? <h5 className="text-truncate">{row?.original?.subStatus}</h5> : <NoDataCell />)
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f?.fieldName === 'padName')
         ? [
-          {
-            accessor: 'padName',
-            Header: assetFields?.find((f) => f.fieldName === 'padName')?.fieldLabel || 'Pad Name',
-            cell: ({ row }) =>
-              row?.original?.padName ? (
-                <div className="flex items-center gap-2">
-                  <h5 className="text-truncate">{row?.original?.padName}</h5>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.padMasterDetail.path}/${row?.original?.padId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          }
-        ]
+            {
+              accessor: 'padName',
+              Header: assetFields?.find((f) => f.fieldName === 'padName')?.fieldLabel || 'Pad Name',
+              cell: ({ row }) =>
+                row?.original?.padName ? (
+                  <div className="flex items-center gap-2">
+                    <h5 className="text-truncate">{row?.original?.padName}</h5>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.padMasterDetail.path}/${row?.original?.padId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'wellNumber')
         ? [
-          {
-            accessor: 'wellNumber',
-            Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel,
-            accessorFn: (original) => {
-              return isArray(original?.wellNumber)
-                ? original?.wellNumber[0]?.optionLabel
-                : isObject(original?.wellNumber)
-                  ? original?.wellNumber?.optionLabel
-                  : original?.wellNumber;
-            },
-            cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'wellNumber',
-                  lookupResource: sidebarResource.wellNumber
-                }}
-                original={row?.original}
-              />
-            )
-          }
-        ]
+            {
+              accessor: 'wellNumber',
+              Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel,
+              accessorFn: (original) => {
+                return isArray(original?.wellNumber)
+                  ? original?.wellNumber[0]?.optionLabel
+                  : isObject(original?.wellNumber)
+                    ? original?.wellNumber?.optionLabel
+                    : original?.wellNumber;
+              },
+              cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'wellNumber',
+                    lookupResource: sidebarResource.wellNumber
+                  }}
+                  original={row?.original}
+                />
+              )
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'wellColor')
         ? [
-          {
-            accessor: 'wellColor',
-            Header: assetFields?.find((f) => f.fieldName === 'wellColor')?.fieldLabel || 'wellColor',
-            cell: ({ row }) => (row?.original?.wellColor ? <div><p className="text-truncate">{row?.original?.wellColor}</p></div> : <NoDataCell />)
-          }
-        ]
+            {
+              accessor: 'wellColor',
+              Header: assetFields?.find((f) => f.fieldName === 'wellColor')?.fieldLabel || 'wellColor',
+              cell: ({ row }) =>
+                row?.original?.wellColor ? (
+                  <div>
+                    <p className="text-truncate">{row?.original?.wellColor}</p>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
         : []),
       {
         accessor: 'manualStartDate',
@@ -1999,25 +2089,25 @@ const ReceivingTicket = ({
                 </span>
               </HtmlTooltip>
             ) : null}
-            {(rentalPolicyData?.subStatusDateWiseCapture && row?.original?.type === MATERIAL_TYPE.serializedAsset) && (
+            {rentalPolicyData?.subStatusDateWiseCapture && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
               <HtmlTooltip title={'View Logs'}>
                 <IconButton
                   size="small"
                   onClick={() => {
-                    setSubStatusLog({ open: true, data: row?.original })
+                    setSubStatusLog({ open: true, data: row?.original });
                   }}
                 >
                   <Visibility fontSize="small" color="primary" />
                 </IconButton>
               </HtmlTooltip>
             )}
-            {fleetDispatchPolicyData?.policy?.['prsCategory']?.includes(row?.original?.productCategory?.optionValue)
-              && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
+            {fleetDispatchPolicyData?.policy?.['prsCategory']?.includes(row?.original?.productCategory?.optionValue) &&
+              row?.original?.type === MATERIAL_TYPE.serializedAsset && (
                 <HtmlTooltip title={'Fleet Dispatch History'}>
                   <IconButton
                     size="small"
                     onClick={() => {
-                      setFleetDispatchLog({ open: true, assetData: row?.original })
+                      setFleetDispatchLog({ open: true, assetData: row?.original });
                     }}
                   >
                     <History fontSize="small" color="primary" />
@@ -2030,7 +2120,6 @@ const ReceivingTicket = ({
     });
     setColumns(column);
   };
-
 
   const getFilterSelectedRecords = (materialType = null, record = selectedRecords) => {
     if (materialType) {
@@ -2117,8 +2206,10 @@ const ReceivingTicket = ({
             data['deliveryToStorageLocation'] = records?.find((e) => e?.storageLocationId)?.storageLocationId;
             data['isDeliveryToDisable'] = true;
             data['isDeliveryToStorageLocationDisable'] = true;
-            data['deliveryToDisableMessage'] = `Changes to the ${resources.warehouse.titleSingular} are not allowed because inventory or asset assignments.`;
-            data['deliveryToStorageLocationDisableMessage'] = `Changes to the ${resources.storageLocation.titleSingular} are not allowed because inventory or asset assignments.`;
+            data['deliveryToDisableMessage'] =
+              `Changes to the ${resources.warehouse.titleSingular} are not allowed because inventory or asset assignments.`;
+            data['deliveryToStorageLocationDisableMessage'] =
+              `Changes to the ${resources.storageLocation.titleSingular} are not allowed because inventory or asset assignments.`;
           }
         }
       }
@@ -2158,7 +2249,8 @@ const ReceivingTicket = ({
           _ids: statusPolicy?.assetIds,
           referenceData: data,
           ticketType: ticketType,
-          stopAutoIncrementIds: ticketType === DELIVERY_TICKET_TYPE.return ? records?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => e._id) : []
+          stopAutoIncrementIds:
+            ticketType === DELIVERY_TICKET_TYPE.return ? records?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => e._id) : []
         });
       } else {
         setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
@@ -2176,7 +2268,7 @@ const ReceivingTicket = ({
       .then(({ data }) => {
         axiosInstance()
           .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
-          .then(({ data: { data } }) => { })
+          .then(({ data: { data } }) => {})
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
@@ -2295,19 +2387,21 @@ const ReceivingTicket = ({
         ...allRecord?.filter((e) => receivingTicketIds?.includes(e?.receivingTicketId)),
         ...allRecord?.filter((e) => returnTicketIds?.includes(e?.returnTicketId))
       ];
-      records?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.forEach((ele) => {
-        const obj: any = {
-          asset: ele?._id,
-          uniqueId: ele?.uniqueId,
-          deliveryTicketId: ele?.receivingTicketId || ele?.returnTicketId
-        };
-        const matchedAsset = assetsData?.find((e) => e._id === obj?.asset);
-        if (matchedAsset) {
-          const { _id, ...assetData } = matchedAsset;
-          obj.assetData = assetData;
-        }
-        assets.push(obj);
-      });
+      records
+        ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
+        ?.forEach((ele) => {
+          const obj: any = {
+            asset: ele?._id,
+            uniqueId: ele?.uniqueId,
+            deliveryTicketId: ele?.receivingTicketId || ele?.returnTicketId
+          };
+          const matchedAsset = assetsData?.find((e) => e._id === obj?.asset);
+          if (matchedAsset) {
+            const { _id, ...assetData } = matchedAsset;
+            obj.assetData = assetData;
+          }
+          assets.push(obj);
+        });
     }
     if (ticketIds.length) {
       data['_ids'] = ticketIds;
@@ -2650,9 +2744,17 @@ const ReceivingTicket = ({
       })
       .then(({ data }) => {
         setAddSerializedAssetDialog({ open: false, products: [] });
-        setShowReplaceAssetWarnings({ replaceAssetReason: '', replaceAssetReasonDialog: false, data: null, confirmationAddNewLineItems: '', confirmationAddNewLineItemsDialog: false, confirmationDirectSendToSupplierDialog: false, incorrectAssignment: false });
+        setShowReplaceAssetWarnings({
+          replaceAssetReason: '',
+          replaceAssetReasonDialog: false,
+          data: null,
+          confirmationAddNewLineItems: '',
+          confirmationAddNewLineItemsDialog: false,
+          confirmationDirectSendToSupplierDialog: false,
+          incorrectAssignment: false
+        });
         setIsSubmitting(false);
-        setOkBtnLoading(false)
+        setOkBtnLoading(false);
         fetchRecords();
         toastConfig.setToastConfig({
           open: true,
@@ -2662,25 +2764,27 @@ const ReceivingTicket = ({
       })
       .catch((error) => {
         setIsSubmitting(false);
-        setOkBtnLoading(false)
+        setOkBtnLoading(false);
         toastConfig.setToastConfig(error);
       });
   };
 
   useEffect(() => {
-    if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)
-      ?.every(f =>
-        ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-          (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
-        && [ASSET_STATUS.underReview].includes(f.status))
+    if (
+      getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every(
+        (f) =>
+          ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+            (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
+          [ASSET_STATUS.underReview].includes(f.status)
+      )
     ) {
-      if (!assetStatusOptions?.some(a => a?.optionValue === ASSET_STATUS.available)) {
-        setAssetStatusOptions([{ optionLabel: ASSET_STATUS.available, optionValue: ASSET_STATUS.available }, ...assetStatusOptions])
+      if (!assetStatusOptions?.some((a) => a?.optionValue === ASSET_STATUS.available)) {
+        setAssetStatusOptions([{ optionLabel: ASSET_STATUS.available, optionValue: ASSET_STATUS.available }, ...assetStatusOptions]);
       }
     } else {
-      setAssetStatusOptions([...assetStatusOptions?.filter(o => o?.optionValue != ASSET_STATUS.available)])
+      setAssetStatusOptions([...assetStatusOptions?.filter((o) => o?.optionValue != ASSET_STATUS.available)]);
     }
-  }, [selectedRecords])
+  }, [selectedRecords]);
 
   const rightSideContents = () => {
     return (
@@ -2812,17 +2916,16 @@ const ReceivingTicket = ({
   };
 
   const handleSubStatusChange = (dates) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     axiosInstance()
-      .put(`${rentalManagement.api}/${rentalManagementData?._id}/inventory/update-sub-status`,
-        {
-          assets: getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => a?._id),
-          dates: dates
-        })
+      .put(`${rentalManagement.api}/${rentalManagementData?._id}/inventory/update-sub-status`, {
+        assets: getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map((a) => a?._id),
+        dates: dates
+      })
       .then(({ data }) => {
         setSubStatusToUpdate({ open: false, status: null });
         fetchRecords();
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -2830,10 +2933,10 @@ const ReceivingTicket = ({
         });
       })
       .catch((error) => {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   return (
     <>
@@ -2842,7 +2945,7 @@ const ReceivingTicket = ({
           <ContainedTab value={0} label={'Assets/Products'} />
           {serviceData?.length > 0 && <ContainedTab value={1} label={'Services'} />}
           {technicianDispatchReturn && <ContainedTab value={2} label={'Technicians'} />}
-          {(technicianDispatchReturn && permissions?.fieldTicket?.isRead) && <ContainedTab value={3} label={resources?.fieldTicket?.titlePlural} />}
+          {technicianDispatchReturn && permissions?.fieldTicket?.isRead && <ContainedTab value={3} label={resources?.fieldTicket?.titlePlural} />}
         </ContainedTabs>
       )}
       <TabPanel value={tabValue} index={0}>
@@ -2926,7 +3029,8 @@ const ReceivingTicket = ({
           allowedToEdit={allowedToEdit}
           rentalManagementData={rentalManagementData}
           stepFullScreen={stepFullScreen}
-          receive={true} />
+          receive={true}
+        />
       </TabPanel>
       <TabPanel value={tabValue} index={3}>
         <Box mt={1}>
@@ -2934,7 +3038,7 @@ const ReceivingTicket = ({
             resourceData={rentalManagementData}
             resourceFields={rentalManagementFields}
             allowedToEdit={allowedToEdit}
-            handleChangeStatus={() => { }}
+            handleChangeStatus={() => {}}
             resource={sidebarResource.rentalManagement}
             fetchResourceData={fetchRentalData}
             noQuotationCheck={true}
@@ -2986,21 +3090,20 @@ const ReceivingTicket = ({
           horizontal: 'right'
         }}
       >
-        {assetStatusOptions?.length > 0 && assetStatusOptions?.map(o => {
-          return (
-            <MenuItem
-              disabled={
-                getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === o?.optionValue)?.length ? true : false
-              }
-              onClick={() => {
-                setAnchorEl(null);
-                setStatusToUpdate({ open: true, isUpdating: false, status: o?.optionValue, message: '' });
-              }}
-            >
-              {o.optionLabel}
-            </MenuItem>
-          )
-        })}
+        {assetStatusOptions?.length > 0 &&
+          assetStatusOptions?.map((o) => {
+            return (
+              <MenuItem
+                disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === o?.optionValue)?.length ? true : false}
+                onClick={() => {
+                  setAnchorEl(null);
+                  setStatusToUpdate({ open: true, isUpdating: false, status: o?.optionValue, message: '' });
+                }}
+              >
+                {o.optionLabel}
+              </MenuItem>
+            );
+          })}
       </Menu>
       <Menu
         id="sub-status-menu"
@@ -3021,21 +3124,21 @@ const ReceivingTicket = ({
           return (
             <MenuItem
               key={`${i}`}
-              disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every(s => s?.subStatus === o) ? true : false}
+              disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every((s) => s?.subStatus === o) ? true : false}
               onClick={() => {
                 if (validateAction(rentalManagementActions.changeSubStatus)) {
                   if (rentalPolicyData?.subStatusDateWiseCapture) {
-                    setSubStatusToUpdate({ open: true, status: o })
+                    setSubStatusToUpdate({ open: true, status: o });
                   } else {
-                    handleSubStatusChange([{ startDate: null, endDate: null, subStatus: o }])
+                    handleSubStatusChange([{ startDate: null, endDate: null, subStatus: o }]);
                   }
                 }
-                handleCloseChangeSubStatusMenu()
+                handleCloseChangeSubStatusMenu();
               }}
             >
               {o}
             </MenuItem>
-          )
+          );
         })}
       </Menu>
       {showTicketDialog.open && (
@@ -3046,16 +3149,16 @@ const ReceivingTicket = ({
           assets={
             assetsData?.length
               ? getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map((ele) => {
-                const matchedAsset = assetsData.find((asset) => asset._id === ele._id);
-                if (matchedAsset) {
-                  const { _id, ...assetData } = matchedAsset;
-                  return {
-                    ...ele,
-                    assetData: { ...assetData }
-                  };
-                }
-                return ele;
-              })
+                  const matchedAsset = assetsData.find((asset) => asset._id === ele._id);
+                  if (matchedAsset) {
+                    const { _id, ...assetData } = matchedAsset;
+                    return {
+                      ...ele,
+                      assetData: { ...assetData }
+                    };
+                  }
+                  return ele;
+                })
               : getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)
           }
           products={
@@ -3064,11 +3167,11 @@ const ReceivingTicket = ({
                 ? showQtyDialog.data.map((d) => ({ ...d, _id: d?.productId, qty: d.returnQuantity }))
                 : []
               : getFilterSelectedRecords(MATERIAL_TYPE.product).map((d) => ({
-                _id: d?.materialId,
-                qty: d?.qty,
-                uniqueId: d?.uniqueId,
-                productSerialNumbers: d?.productSerialNumbers
-              }))
+                  _id: d?.materialId,
+                  qty: d?.qty,
+                  uniqueId: d?.uniqueId,
+                  productSerialNumbers: d?.productSerialNumbers
+                }))
           }
           onClose={() => {
             setShowTicketDialog({ open: false, ticketType: '', data: {} });
@@ -3125,7 +3228,9 @@ const ReceivingTicket = ({
           products={getFilterSelectedRecords(MATERIAL_TYPE.product)}
           onSuccess={(data) => {
             setShowQtyDialog({ data: data, open: false });
-            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus
+              ? user?.user?.brandPolicy?.rentalReceivingStatus
+              : ASSET_STATUS.underReview;
             const statusPolicy = checkAssetPolicy(receivingStatus);
             if (statusPolicy && getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length && !onReceiveAssetDataCapture) {
               setOpenAssetDetailDialog((ps: any) => ({ ...ps, open: true }));
@@ -3193,14 +3298,19 @@ const ReceivingTicket = ({
           open={showReplaceAssetWarnings.confirmationAddNewLineItemsDialog}
           message={`Would you like to add the replacement assets as a new line item? Click Yes to add it as a new line item, or No to keep it under the same line item.`}
           onOk={(type) => {
-            if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some(d => d?.subleaseAsset)) {
-              setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: false, confirmationAddNewLineItems: type, confirmationDirectSendToSupplierDialog: true }))
+            if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some((d) => d?.subleaseAsset)) {
+              setShowReplaceAssetWarnings((prev) => ({
+                ...prev,
+                confirmationAddNewLineItemsDialog: false,
+                confirmationAddNewLineItems: type,
+                confirmationDirectSendToSupplierDialog: true
+              }));
             } else {
-              handleSwapAssets(showReplaceAssetWarnings.data, showReplaceAssetWarnings.replaceAssetReason, type === 'Yes' ? true : false)
+              handleSwapAssets(showReplaceAssetWarnings.data, showReplaceAssetWarnings.replaceAssetReason, type === 'Yes' ? true : false);
             }
           }}
           onClose={() => {
-            setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: false, replaceAssetReason: '', data: null }))
+            setShowReplaceAssetWarnings((prev) => ({ ...prev, confirmationAddNewLineItemsDialog: false, replaceAssetReason: '', data: null }));
           }}
           selection1={'Yes'}
           selection2={'No'}
@@ -3210,12 +3320,26 @@ const ReceivingTicket = ({
       {showReplaceAssetWarnings.confirmationDirectSendToSupplierDialog && (
         <SelectionConfirmationDialog
           open={showReplaceAssetWarnings.confirmationDirectSendToSupplierDialog}
-          message={`Would you like to send the sublease assets (${getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter(a => a?.subleaseAsset)?.map(a => a?.assetNumber).join(', ')}) directly to the supplier? Click 'Yes' to proceed, or 'No' to keep them internal.`}
+          message={`Would you like to send the sublease assets (${getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)
+            ?.filter((a) => a?.subleaseAsset)
+            ?.map((a) => a?.assetNumber)
+            .join(', ')}) directly to the supplier? Click 'Yes' to proceed, or 'No' to keep them internal.`}
           onOk={(type) => {
-            handleSwapAssets(showReplaceAssetWarnings.data, showReplaceAssetWarnings.replaceAssetReason, showReplaceAssetWarnings.confirmationAddNewLineItems === 'Yes' ? true : false, type === 'Yes' ? true : false)
+            handleSwapAssets(
+              showReplaceAssetWarnings.data,
+              showReplaceAssetWarnings.replaceAssetReason,
+              showReplaceAssetWarnings.confirmationAddNewLineItems === 'Yes' ? true : false,
+              type === 'Yes' ? true : false
+            );
           }}
           onClose={() => {
-            setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationDirectSendToSupplierDialog: false, replaceAssetReason: '', data: null, confirmationAddNewLineItems: '' }))
+            setShowReplaceAssetWarnings((prev) => ({
+              ...prev,
+              confirmationDirectSendToSupplierDialog: false,
+              replaceAssetReason: '',
+              data: null,
+              confirmationAddNewLineItems: ''
+            }));
           }}
           selection1={'Yes'}
           selection2={'No'}
@@ -3311,20 +3435,20 @@ const ReceivingTicket = ({
       {subStatusToUpdate.open && (
         <SubStatusDatesDialog
           handleClose={() => {
-            setSubStatusToUpdate({ open: false, status: null })
+            setSubStatusToUpdate({ open: false, status: null });
           }}
           options={assetPolicyData?.policy?.inUseSubStatus}
           selectedOption={subStatusToUpdate.status}
           onSuccess={handleSubStatusChange}
           submitting={isSubmitting}
           rentalId={rentalManagementData?._id}
-          assets={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => a?._id)}
+          assets={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map((a) => a?._id)}
         />
       )}
       {subStatusLog.open && (
         <SubStatusLog
           onClose={() => {
-            setSubStatusLog({ open: false, data: null })
+            setSubStatusLog({ open: false, data: null });
           }}
           assets={[{ asset: subStatusLog.data?._id, uniqueId: subStatusLog.data?.uniqueId }]}
           rentalId={rentalManagementData?._id}
@@ -3347,7 +3471,8 @@ const ReceivingTicket = ({
         <ShowNonSerializeAssets
           data={showInfo.data}
           onClose={() => setShowInfo({ open: false, data: {}, isNonSerializedProductSerialNumbers: null })}
-          isNonSerializedProductSerialNumbers={showInfo?.isNonSerializedProductSerialNumbers} />
+          isNonSerializedProductSerialNumbers={showInfo?.isNonSerializedProductSerialNumbers}
+        />
       )}
       {showConformationConsumeMultiple && (
         <ConfirmationDialog
@@ -3413,7 +3538,7 @@ const ReceivingTicket = ({
       {addSerializedAssetDialog.open && (
         <AddSerializedAsset
           addSerializedAsset={(rows) => {
-            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: true, data: rows }))
+            setShowReplaceAssetWarnings((prev) => ({ ...prev, replaceAssetReasonDialog: true, data: rows }));
           }}
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog({ open: false, products: [] });
@@ -3461,10 +3586,16 @@ const ReceivingTicket = ({
       )}
       {showReplaceAssetWarnings.replaceAssetReasonDialog && (
         <ReplaceAssetReason
-          handleClose={() => setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, data: null }))}
+          handleClose={() => setShowReplaceAssetWarnings((prev) => ({ ...prev, replaceAssetReasonDialog: false, data: null }))}
           loading={isSubmitting}
           handleSucess={(data) => {
-            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, replaceAssetReason: data?.reason, confirmationAddNewLineItemsDialog: true, incorrectAssignment: data?.incorrectAssignment }))
+            setShowReplaceAssetWarnings((prev) => ({
+              ...prev,
+              replaceAssetReasonDialog: false,
+              replaceAssetReason: data?.reason,
+              confirmationAddNewLineItemsDialog: true,
+              incorrectAssignment: data?.incorrectAssignment
+            }));
           }}
           isIncorrectAssignment={true}
         />
@@ -3543,14 +3674,12 @@ const ActionButtonMenuItems = ({
   assetPolicyData,
   validateAction,
   resources,
-  getFilterSelectedRecords,
+  getFilterSelectedRecords
 }) => {
   const checkUniqStatus = () => {
     if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset).length === 0) {
       return false;
-    } else if (
-      uniq(map(getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset), 'status')).length === 1
-    ) {
+    } else if (uniq(map(getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset), 'status')).length === 1) {
       return true;
     } else {
       return false;
@@ -3706,7 +3835,8 @@ const ActionButtonMenuItems = ({
             )}
           {getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset).length > 0 &&
             getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset).filter(
-              (e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
+              (e: any) =>
+                e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
                 [
                   RENTAL_INTERNAL_ASSET_STATUS.inUse,
                   RENTAL_INTERNAL_ASSET_STATUS.standBy,
@@ -3734,72 +3864,72 @@ const ActionButtonMenuItems = ({
       )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
-          <>
+        <>
+          <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
+            <MenuItem
+              id={'create-receiving-ticket-chargaeble-menu-item'}
+              onClick={() => {
+                if (validateAction(rentalManagementActions.createReceivingTicket)) {
+                  if (getFilterSelectedRecords()?.every((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
+                  } else {
+                    setShowQtyDialog({ open: true, data: null });
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant, false);
+                  }
+                }
+              }}
+              disabled={!permissions?.deliveryTicket?.isCreate}
+            >
+              {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
+            </MenuItem>
+          </HtmlTooltip>
+          {getFilterSelectedRecords().length > 0 &&
+          getFilterSelectedRecords()?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
+            ?.length === getFilterSelectedRecords()?.length ? (
+            <MenuItem
+              id={'remove-receiving-ticket-menu-item'}
+              onClick={() => {
+                setShowRemoveAssetFromReceivingTicketDialog(true);
+              }}
+            >
+              Remove Receiving Ticket
+            </MenuItem>
+          ) : null}
+          <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
+            <MenuItem
+              id={'create-return-ticket-non-chargeble-menu-item'}
+              onClick={() => {
+                if (validateAction(rentalManagementActions.createReturnTicket)) {
+                  if (getFilterSelectedRecords()?.every((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
+                  } else {
+                    setShowQtyDialog({ open: true, data: null });
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant, false);
+                  }
+                }
+              }}
+              disabled={!permissions?.deliveryTicket?.isCreate}
+            >
+              {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Spares)` : `Create Return Ticket (Non-Chargeable)`}
+            </MenuItem>
+          </HtmlTooltip>
+          {permissions?.sublease?.isRead && (
             <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
               <MenuItem
-                id={'create-receiving-ticket-chargaeble-menu-item'}
+                id={'create-delivery-ticket-supplier-menu-item'}
                 onClick={() => {
-                  if (validateAction(rentalManagementActions.createReceivingTicket)) {
-                    if (getFilterSelectedRecords()?.every((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
-                      handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
-                    } else {
-                      setShowQtyDialog({ open: true, data: null });
-                      handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant, false);
-                    }
+                  if (validateAction(rentalManagementActions.createSupplierDeliveryTicket)) {
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier);
                   }
                 }}
                 disabled={!permissions?.deliveryTicket?.isCreate}
               >
-                {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
+                Create Delivery Ticket for Supplier
               </MenuItem>
             </HtmlTooltip>
-            {getFilterSelectedRecords().length > 0 &&
-              getFilterSelectedRecords()?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
-              getFilterSelectedRecords()?.length ? (
-              <MenuItem
-                id={'remove-receiving-ticket-menu-item'}
-                onClick={() => {
-                  setShowRemoveAssetFromReceivingTicketDialog(true);
-                }}
-              >
-                Remove Receiving Ticket
-              </MenuItem>
-            ) : null}
-            <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
-              <MenuItem
-                id={'create-return-ticket-non-chargeble-menu-item'}
-                onClick={() => {
-                  if (validateAction(rentalManagementActions.createReturnTicket)) {
-                    if (getFilterSelectedRecords()?.every((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
-                      handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
-                    } else {
-                      setShowQtyDialog({ open: true, data: null });
-                      handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant, false);
-                    }
-                  }
-                }}
-                disabled={!permissions?.deliveryTicket?.isCreate}
-              >
-                {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Spares)` : `Create Return Ticket (Non-Chargeable)`}
-              </MenuItem>
-            </HtmlTooltip>
-            {permissions?.sublease?.isRead && (
-              <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
-                <MenuItem
-                  id={'create-delivery-ticket-supplier-menu-item'}
-                  onClick={() => {
-                    if (validateAction(rentalManagementActions.createSupplierDeliveryTicket)) {
-                      handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier);
-                    }
-                  }}
-                  disabled={!permissions?.deliveryTicket?.isCreate}
-                >
-                  Create Delivery Ticket for Supplier
-                </MenuItem>
-              </HtmlTooltip>
-            )}
-          </>
-        )}
+          )}
+        </>
+      )}
       {currentStep === RENTAL_STEPS.receiving && !hideDeliveryTicketDelivered && (
         <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
           <MenuItem
@@ -3833,7 +3963,9 @@ const ActionButtonMenuItems = ({
         getFilterSelectedRecords()?.every((e) => e?.status === ASSET_STATUS.inUse) &&
         getFilterSelectedRecords()?.every((e) => e?.loadingTicketId) &&
         !getFilterSelectedRecords()?.some((e) => e?.receivingTicketId || e?.returnTicketId) &&
-        getFilterSelectedRecords()?.map((r) => getParentPackageId(r?.uniqueId))?.every((_id) => _id === getParentPackageId(getFilterSelectedRecords()[0]?.uniqueId)) && (
+        getFilterSelectedRecords()
+          ?.map((r) => getParentPackageId(r?.uniqueId))
+          ?.every((_id) => _id === getParentPackageId(getFilterSelectedRecords()[0]?.uniqueId)) && (
           <MenuItem
             id={'transfer-to-another-package-menu-item'}
             onClick={() => {
@@ -3913,37 +4045,37 @@ const ActionButtonMenuItems = ({
         )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
-          <>
-            {!hideDeliveryTicketDelivered && (
-              <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
-                <MenuItem
-                  id={'cancel-specific-line-item-menu-item'}
-                  onClick={() => {
-                    if (validateAction(rentalManagementActions.cancelInTransitTicket)) {
-                      setShowConformationRevertTicket(true);
-                    }
-                  }}
-                  disabled={!permissions?.deliveryTicket?.isUpdate}
-                >
-                  Cancel Specific Line Items
-                </MenuItem>
-              </HtmlTooltip>
-            )}
+        <>
+          {!hideDeliveryTicketDelivered && (
             <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
               <MenuItem
-                id={'cancel-receiving-return-ticket-menu-item'}
+                id={'cancel-specific-line-item-menu-item'}
                 onClick={() => {
-                  if (validateAction(rentalManagementActions.cancelReceivingReturnTicket)) {
-                    setShowConformationCancleTicket({ open: true });
+                  if (validateAction(rentalManagementActions.cancelInTransitTicket)) {
+                    setShowConformationRevertTicket(true);
                   }
                 }}
                 disabled={!permissions?.deliveryTicket?.isUpdate}
               >
-                Cancel Receiving/Return Ticket(s)
+                Cancel Specific Line Items
               </MenuItem>
             </HtmlTooltip>
-          </>
-        )}
+          )}
+          <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
+            <MenuItem
+              id={'cancel-receiving-return-ticket-menu-item'}
+              onClick={() => {
+                if (validateAction(rentalManagementActions.cancelReceivingReturnTicket)) {
+                  setShowConformationCancleTicket({ open: true });
+                }
+              }}
+              disabled={!permissions?.deliveryTicket?.isUpdate}
+            >
+              Cancel Receiving/Return Ticket(s)
+            </MenuItem>
+          </HtmlTooltip>
+        </>
+      )}
       {getFilterSelectedRecords()?.filter(
         (f) =>
           f.type === MATERIAL_TYPE.product &&
@@ -4009,20 +4141,16 @@ const ActionButtonMenuItems = ({
       )}
       {assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved) &&
         getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length > 0 &&
-        getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every(
-          (r) => [
+        getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every((r) =>
+          [
             RENTAL_INTERNAL_ASSET_STATUS.reserved,
             RENTAL_INTERNAL_ASSET_STATUS.inUse,
             RENTAL_INTERNAL_ASSET_STATUS.standBy,
             RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
           ]?.includes(r?.rentalAssetStatus)
-        ) && getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every(
-          (r) => [
-            ASSET_STATUS.reserved,
-            ASSET_STATUS.inUse,
-            ASSET_STATUS.standBy,
-            ASSET_STATUS.standByNotChargeable
-          ]?.includes(r?.status)
+        ) &&
+        getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every((r) =>
+          [ASSET_STATUS.reserved, ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(r?.status)
         ) && (
           <MenuItem
             onClick={() => {

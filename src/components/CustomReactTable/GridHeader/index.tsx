@@ -145,7 +145,7 @@ const GridHeader = ({
   }, [resource]);
 
   return (
-    <div className={`my-[8px] flex flex-wrap items-center justify-between gap-[8px] transition-all duration-300`}>
+    <div className={`my-2 flex flex-wrap items-center justify-between gap-[8px] transition-all duration-300`}>
       {selectedRecords.length > 0 && bulkActionItems ? (
         <>
           <ModernBulkAction state={state} dispatch={dispatch} bulkActionItems={bulkActionItems} />

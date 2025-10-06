@@ -11,7 +11,7 @@ BulkActionButton.displayName = 'BulkActionButton';
 const BulkActionDivider = () => <div className="divider"></div>;
 BulkActionDivider.displayName = 'BulkActionDivider';
 
-const BulkActionIconButton = (props: IconButtonProps & { text: React.ReactNode }) => <IconButton {...props} />;
+const BulkActionIconButton = (props: IconButtonProps & { text: React.ReactNode; tooltip?: React.ReactNode }) => <IconButton {...props} />;
 BulkActionIconButton.displayName = 'BulkActionIconButton';
 
 type BulkActionChild = ReactElement<typeof BulkActionButton> | ReactElement<typeof BulkActionDivider> | ReactElement<typeof BulkActionIconButton>;
@@ -19,8 +19,21 @@ type BulkActionChild = ReactElement<typeof BulkActionButton> | ReactElement<type
 interface BulkActionContainerProps {
   children: BulkActionChild | BulkActionChild[];
 }
+function flattenChildren(children: React.ReactNode): React.ReactNode[] {
+  const result: React.ReactNode[] = [];
+  React.Children.forEach(children, (child) => {
+    if (!child) return;
+    if ((child as any).type === React.Fragment) {
+      result.push(...flattenChildren((child as React.ReactElement).props.children));
+    } else {
+      result.push(child);
+    }
+  });
+  return result;
+}
+
 const BulkActionContainer = ({ children }: BulkActionContainerProps) => {
-  const normalizedChildren = React.Children.toArray(children);
+  const normalizedChildren = React.Children.toArray(flattenChildren(children));
   const [visibleItemsLength, setVisibleItemsLength] = useState(normalizedChildren.length);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -32,7 +45,7 @@ const BulkActionContainer = ({ children }: BulkActionContainerProps) => {
     if (!parentContainer) return;
 
     const parentRect = parentContainer.getBoundingClientRect();
-    const maxWidth = parentRect.width - 170; // available space
+    const maxWidth = parentRect.width - 200; // available space
 
     const childrens = Array.from(container.children);
     let totalWidth = 0;
@@ -92,15 +105,30 @@ const RenderMenuWithButton = ({ items }: { items: ChildList[] }) => {
       const childType = (item.type as any).displayName || (item.type as any).name;
       switch (childType) {
         case 'BulkActionButton': {
-          menuItems.push(<MenuItem {...item.props}></MenuItem>);
+          menuItems.push(
+            <HtmlTooltip title={item.props.tooltip}>
+              <MenuItem {...item.props}></MenuItem>
+            </HtmlTooltip>
+          );
           break;
         }
         case 'BulkActionDivider': {
           break;
         }
         case 'BulkActionIconButton': {
-          menuItems.push(<MenuItem {...item.props}>{item.props.text}</MenuItem>);
+          menuItems.push(
+            <HtmlTooltip title={item.props.tooltip}>
+              <MenuItem {...item.props}>{item.props.text}</MenuItem>
+            </HtmlTooltip>
+          );
           break;
+        }
+        default: {
+          menuItems.push(
+            <HtmlTooltip title={item.props.tooltip}>
+              <MenuItem {...item.props} />
+            </HtmlTooltip>
+          );
         }
       }
     }

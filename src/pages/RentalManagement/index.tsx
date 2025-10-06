@@ -456,16 +456,8 @@ const RentalManagement = () => {
   const ActionMenuItems = () => {
     return (
       <>
-        <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
-      </>
-    );
-  };
-
-  const BulkActionItems = () => {
-    return (
-      <BulkActionContainer>
         {selectedRecords?.length > 0 && (
-          <BulkActionContainer.Button
+          <MenuItem
             disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
             onClick={() => {
               if (selectedRecords?.length === 1) {
@@ -477,16 +469,16 @@ const RentalManagement = () => {
             }}
           >
             {`Delete (${selectedRecords?.length})`}
-          </BulkActionContainer.Button>
+          </MenuItem>
         )}
-        <BulkActionContainer.Divider />
-        <BulkActionContainer.Button disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
+        <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
           {`Add ${resources?.rentalManagement?.titlePlural} Offline`}
-        </BulkActionContainer.Button>
-        <BulkActionContainer.Button disabled={!selectedRecords.length} onClick={() => handleRemoveoffline(selectedRecords?.map((e) => e._id))}>
+        </MenuItem>
+        <MenuItem disabled={!selectedRecords.length} onClick={() => handleRemoveoffline(selectedRecords?.map((e) => e._id))}>
           {`Clear Offline Data (${selectedRecords.length})`}
-        </BulkActionContainer.Button>
-      </BulkActionContainer>
+        </MenuItem>
+        <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
+      </>
     );
   };
 
@@ -561,7 +553,6 @@ const RentalManagement = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={!isOffline}
             resource={sidebarResource.rentalManagement}
-            bulkActionItems={<BulkActionItems />}
           />
         ) : (
           <Box p={2} height={500}>
