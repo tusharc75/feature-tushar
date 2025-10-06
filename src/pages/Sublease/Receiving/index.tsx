@@ -19,7 +19,7 @@ import { subleaseMessage } from 'src/constants/messageHelpers';
 import ReceiveProduct from 'src/pages/Sublease/Receiving/ReceiveProduct';
 import { generateReceiveStepReceive } from 'src/pages/Sublease/walkmeSteps';
 
-const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen }) => {
+const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, fetchParentData  }) => {
   const { setWalkmeData } = useSetWalkmeData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -287,6 +287,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
           subleaseData={subleaseData}
           onSuccess={() => {
             fetchData();
+            fetchParentData();
             setReceiveDialog(false);
           }}
         />
