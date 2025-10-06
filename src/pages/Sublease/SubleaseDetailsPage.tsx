@@ -275,6 +275,7 @@ const SubleaseDetailsPage = () => {
                       setNextStep={setNextStep}
                       setNextStepToolTip={setNextStepToolTip}
                       stepFullScreen={stepFullScreen}
+                      fetchParentData={fetchData}
                     />
                   )}
                   {['End Sublease'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
