@@ -65,7 +65,7 @@ export default function ImportExportLinks({
   const [anchorExtraEl, setAnchorExtraEl] = useState(null);
   const [customImportDialog, setCustomImportDialog] = useState(false);
 
-  const [openAsyncImpExpDialog, setOpenAsyncImpExpDialog] = useState({ open: false, type: null, importData: null, api: null });
+  const [openAsyncImpExpDialog, setOpenAsyncImpExpDialog] = useState({ open: false, type: null, importData: null, api: null, subResource: null });
   const [refresh, setRefresh] = useState(false);
 
   const {
@@ -231,19 +231,6 @@ export default function ImportExportLinks({
       });
   };
 
-  const downloadTemplate = () => {
-    axiosInstance()
-      .get(`${api}/template`, { responseType: 'arraybuffer' })
-      .then((response) => {
-        const fileName = response.headers['content-disposition'].split('filename=')[1];
-
-        downloadExcel(response.data, fileName);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const handleDownloadTemplate = (apiUrl = null) => {
     let exportApi = apiUrl ? apiUrl : `${api}/template`;
     if (additionalParams) {
@@ -294,7 +281,7 @@ export default function ImportExportLinks({
                     setIsUploadDialog(true);
                     handleClose();
                   } else if (module === resources?.product?.titlePlural && resource) {
-                    setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, importData: null, api: null });
+                    setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, importData: null, api: null, subResource: null });
                   }
                 }}
                 className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
@@ -307,7 +294,7 @@ export default function ImportExportLinks({
           <label
             onClick={(e) => {
               if (module === resources?.product?.titlePlural && resource) {
-                setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, importData: null, api: null });
+                setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, importData: null, api: null, subResource: null });
               } else {
                 exportToExcel();
               }
@@ -375,7 +362,7 @@ export default function ImportExportLinks({
                           htmlFor={module === resources?.product?.titlePlural && resource ? '' : `${d.title}-${idx + 2}`.replace(/\s+/g, '')}
                           onClick={(e) => {
                             if (module === resources?.product?.titlePlural && resource) {
-                              setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, importData: null, api: d.api });
+                              setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, importData: null, api: d.api, subResource: d?.subResource || null });
                               handleExtraClose();
                             }
                           }}
@@ -389,9 +376,9 @@ export default function ImportExportLinks({
                       <MenuItem
                         onClick={() => {
                           if (d?.type === 'download') {
-                            handleDownloadTemplate();
+                            handleDownloadTemplate(d?.api);
                           } else if (d?.type === 'export' && module === resources?.product?.titlePlural && resource) {
-                            setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, importData: null, api: d?.api });
+                            setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, importData: null, api: d?.api, subResource: d?.subResource || null });
                           } else {
                             exportToExcel(d.api);
                           }
@@ -527,7 +514,7 @@ export default function ImportExportLinks({
         <SelectionDialog
           uploadData={(file, _data) => {
             if (module === resources?.product?.titlePlural && resource) {
-              setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, importData: { ..._data, referenceId: referenceId }, api: null });
+              setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, importData: { ..._data, referenceId: referenceId }, api: null, subResource: null });
             } else {
               uploadData(file, _data);
             }
@@ -558,12 +545,12 @@ export default function ImportExportLinks({
       {openAsyncImpExpDialog.open && (
         <ImportExportDialog
           handleClose={() => {
-            setOpenAsyncImpExpDialog({ open: false, type: null, importData: null, api: null });
+            setOpenAsyncImpExpDialog({ open: false, type: null, importData: null, api: null, subResource: null });
             setAnchorEl(null);
           }}
           type={openAsyncImpExpDialog.type}
           resource={resource}
-          subResource={null}
+          subResource={openAsyncImpExpDialog.subResource}
           referenceId={null}
           handleExport={() => {
             exportToExcel(openAsyncImpExpDialog.api);

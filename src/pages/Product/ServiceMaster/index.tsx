@@ -17,12 +17,11 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
-import { product, serviceMaster } from 'src/constants/helpers';
+import { product, serviceMaster, sidebarResource } from 'src/constants/helpers';
 import AssignStepDialog from './AssignStepDialog/Index';
 import FrequencyDialog from './FrequencyDialog';
 import { FiExternalLink } from 'react-icons/fi';
@@ -31,6 +30,7 @@ import ServiceCondition from 'src/pages/Product/ServiceMaster/ServiceCondition';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 
 interface Props {
   renderedFrom: string;
@@ -552,16 +552,18 @@ const ServiceMaster = (props: Props) => {
             Arrange
           </ThemeButton>
         ) : null}
-        <ImportExportMenu
-          permissions={permissions?.packages}
+        <AsynImportExportMenu
+          resource={sidebarResource.product}
+          subResource={sidebarResource.serviceMaster}
+          permissions={permissions?.product}
           module="products"
-          api={`${product.api}/unknown/service-master`}
+          api={`${product.api}/${id}/service-master`}
           afterImportCompleted={() => {
             fetchData();
           }}
-          isExportAllOrSomeFeature={true}
+          isExportCount={true}
           ids={[]}
-          additionalParams={`productId=${id}`}
+          referenceId={id}
         />
       </>
     );

@@ -140,7 +140,7 @@ const DOAApproval = () => {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -253,7 +253,7 @@ const DOAApproval = () => {
                 </span>
               </div>
               <div className="quoteBox">
-                <span>Total Cost Price</span>:{' '}
+                <span>Total Cost</span>:{' '}
                 <span title={formatAmountWithCurrency(quoteData?.currency, totalCost).fullFormatAmount}>
                   {formatAmountWithCurrency(quoteData?.currency, totalCost).fullFormatAmount || 0}
                 </span>

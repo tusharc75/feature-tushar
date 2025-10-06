@@ -59,7 +59,7 @@ function Dashboard() {
                   href={routes.equiptAi.path}
                   icon={
                     <div className="max-w-[60px]">
-                      <img src={equiptGenieImage} alt={'Equipt AI Logo'} className="h-auto w-full" />
+                      <img src={equiptGenieImage} alt={'Equipt AI Logo'} className="h-auto w-[60px]" />
                     </div>
                   }
                   description="Enhances productivity by automating tasks and providing insights through advanced machine learning."

@@ -5,7 +5,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HelpIcon from '@mui/icons-material/Help';
 import LayersIcon from '@mui/icons-material/Layers';
-import { groupBy, map, uniq } from 'lodash';
+import { map, startCase, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from 'src/StateProvider/Provider';
@@ -27,6 +27,7 @@ import {
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   INVENTORY_OWNER_TYPE,
+  MATERIAL_TYPE,
   REPAIR_JOB_STATUS,
   SYSTEM_ASSET_STATUS,
   deliveryTicket,
@@ -54,20 +55,19 @@ const SerializedAsset = ({
   allowedOperation
 }) => {
   const toastConfig = useContext(CustomToastContext);
-  const [showRemoveAssetFromReceivingTicketDialog, setShowRemoveAssetFromReceivingTicketDialog] = useState(false);
+
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
   const [columns, setColumns] = useState(null);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: '', data: {} });
-  const [repairAssetDialog, setRepairAssetDialog] = useState({ open: false, assetId: null, assetName: null, assetIds: [] });
-
-  const [repairProcessDialog, setRepairProcessDialog] = useState({ open: false, assetId: null, assetNumber: null, repaired: false });
+  const [repairDialog, setRepairDialog] = useState({ open: false, data: null });
+  const [repairProcessDialog, setRepairProcessDialog] = useState({ open: false, data: null });
+  const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
   const { generateColumns } = useColumns();
-  const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
 
   const {
     state: { user, resources }
@@ -98,7 +98,7 @@ const SerializedAsset = ({
         },
         {
           resource: 'Serialized Asset',
-          fieldNames: ['assetNumber', 'serialNumber']
+          fieldNames: ['serialNumber']
         }
       ]
     });
@@ -117,34 +117,49 @@ const SerializedAsset = ({
         Footer: () => {
           return <>Total</>;
         }
-      }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>{startCase(row.original?.type)}  </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'detail',
+        Header: 'Details',
+        width: 250,
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row, table }) => (
+          <div className="flex items-center gap-2">
+            <p
+              className="text-truncate"
+              title={row.original?.detail}
+            >
+              {row.original?.detail}
+            </p>
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row?.original?.type === MATERIAL_TYPE.serializedPackage) {
+                  window.open(`${routes.serializedPackagesDetail.path}/${row?.original?._id}`);
+                } else {
+                  window.open(`${routes.serializedAssetDetail.path}/${row?.original?._id}`);
+                }
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+          </div>
+        )
+      },
     ];
     assetField?.forEach((ele) => {
-      if (ele?.fieldName === 'assetNumber') {
-        coloum.push({
-          accessor: 'assetNumber',
-          Header: ele?.fieldLabel,
-          Cell: ({ row }) => (
-            <>
-              {row.original.assetNumber ? (
-                <div className="flex items-center gap-2">
-                  <p className="text-truncate">{row.original.assetNumber}</p>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              ) : (
-                <NoDataCell />
-              )}
-            </>
-          )
-        });
-      }
       if (ele?.fieldName === 'serialNumber') {
         coloum.push({
           accessor: 'serialNumber',
@@ -199,19 +214,14 @@ const SerializedAsset = ({
       Cell: ({ row }) => {
         return (
           <div className="d-flex gap-1">
-            {row?.original?.repairTypeId && (
+            {row?.original?.repairTypeId && row?.original?.type === MATERIAL_TYPE?.serializedAsset && (
               <HtmlTooltip title="Repair Process">
                 <IconButton
                   size="small"
                   aria-label="Repair Process"
                   color="primary"
                   onClick={() => {
-                    setRepairProcessDialog({
-                      open: true,
-                      assetId: row?.original?._id,
-                      assetNumber: row?.original?.assetNumber,
-                      repaired: row?.original?.repaired
-                    });
+                    setRepairProcessDialog({ open: true, data: row?.original });
                   }}
                 >
                   <LayersIcon fontSize="small" />
@@ -225,17 +235,17 @@ const SerializedAsset = ({
             ) : allowedOperation &&
               allowedToEdit &&
               repairJobData?.status !== REPAIR_JOB_STATUS.completed &&
-              ![ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair].includes(row?.original?.status) &&
+              (row?.original?.type === MATERIAL_TYPE.serializedPackage ? true : ![ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair].includes(row?.original?.status)) &&
               row?.original?.canRepair &&
               row?.original?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
               !row?.original?.repairTypeId ? (
-              <HtmlTooltip title="Repair Asset">
+              <HtmlTooltip title={`Repair ${row?.original?.type === MATERIAL_TYPE.serializedPackage ? resources?.serializedPackages?.titleSingular : 'Asset'}`}>
                 <IconButton
                   size="small"
-                  aria-label="Repair Asset"
+                  aria-label={`Repair ${row?.original?.type === MATERIAL_TYPE.serializedPackage ? resources?.serializedPackages?.titleSingular : 'Asset'}`}
                   color="primary"
                   onClick={() => {
-                    setRepairAssetDialog({ open: true, assetId: row?.original?._id, assetName: `${row?.original?.assetNumber}`, assetIds: [] });
+                    setRepairDialog({ open: true, data: row?.original });
                   }}
                 >
                   <CheckCircleOutlineIcon fontSize="small" />
@@ -257,7 +267,7 @@ const SerializedAsset = ({
     var data: any = [];
     let assetSendedToSupplier = [];
 
-    if (user.user?.brandPolicy?.repairJobSendSupplierRequired) {
+    if (user?.user?.brandPolicy?.repairJobSendSupplierRequired) {
       const tickets = await axiosInstance().get(
         `${deliveryTicket.api}/typewise?referenceType=${sidebarResource.repairJob}&referenceId=${repairJobData._id}`
       );
@@ -282,13 +292,14 @@ const SerializedAsset = ({
     data = response?.data?.data;
     data.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.productName = parent.product?.optionLabel;
-      parent.productDescription = parent?.productDetail?.productDescription;
-      parent.productCategory = parent?.productCategory?.optionLabel;
-      parent.isValid = parent.status === ASSET_STATUS.scrap || parent.status === ASSET_STATUS.lost ? false : true;
-      parent.hideSelection = parent.status === ASSET_STATUS.lost;
-      parent.canRepair = user.user?.brandPolicy?.repairJobSendSupplierRequired
-        ? assetSendedToSupplier?.includes(parent.inventory) && !parent?.repaired
+      parent.detail = parent?.type === MATERIAL_TYPE.serializedPackage ? parent?.serializedPackageNumber : parent?.assetNumber || ''
+      parent.productName = parent?.product?.optionLabel || '';
+      parent.productDescription = parent?.productDetail?.productDescription || '';
+      parent.productCategory = parent?.productCategory?.optionLabel || '';
+      parent.isValid = parent?.status === ASSET_STATUS.scrap || parent.status === ASSET_STATUS.lost ? false : true;
+      parent.hideSelection = parent?.status === ASSET_STATUS.lost;
+      parent.canRepair = user?.user?.brandPolicy?.repairJobSendSupplierRequired
+        ? assetSendedToSupplier?.includes(parent?._id) && !parent?.repaired
         : true;
     });
 
@@ -402,12 +413,47 @@ const SerializedAsset = ({
       });
   };
 
+  const handleMarkRepair = (data) => {
+    const payload: any = {
+      repaired: true
+    }
+    if (data) {
+      if (data?.type === MATERIAL_TYPE?.serializedPackage) {
+        payload.serializedPackages = [data?._id]
+      } else {
+        payload.assets = [data?._id]
+      }
+    } else {
+      payload.assets = selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)?.map(r => r?._id)
+      payload.serializedPackages = selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedPackage)?.map(r => r?._id)
+    }
+
+    setOkBtnLoading(true);
+    axiosInstance()
+      .put(`${repairJob.api}/${repairJobData._id}/assets/repaired`, payload)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setOkBtnLoading(false);
+        setRepairDialog({ open: false, data: null });
+        fetchRepairJobData();
+        fetchRecords();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setOkBtnLoading(false);
+      });
+  }
+
   const rightSideContents = () => {
     return (
       <>
         {allowedToEdit && allowedOperation && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
           <Fragment>
-            <ThemeButton disabled={selectedRecords.length === 0 || !allowUpdateStatus} onClick={handleClick} endIcon={<ExpandMore />}>
+            <ThemeButton disabled={selectedRecords.length === 0 || selectedRecords?.some(r => r?.type === MATERIAL_TYPE.serializedPackage) || !allowUpdateStatus} onClick={handleClick} endIcon={<ExpandMore />}>
               Change Status
             </ThemeButton>
             <Menu
@@ -463,22 +509,19 @@ const SerializedAsset = ({
               buttonType="theme"
               disabled={
                 selectedRecords.length === 0 ||
-                selectedRecords.some((s) => !s?.canRepair || s.repairTypeId || [ASSET_STATUS.scrap, ASSET_STATUS.needRepair].includes(s.status)) ||
-                selectedRecords.some(
-                  (s) => s.repaired === true || s.repairTypeId || [ASSET_STATUS.scrap, ASSET_STATUS.needRepair].includes(s.status)
-                ) ||
+                selectedRecords?.some(s => s?.repaired || !s?.canRepair || s.repairTypeId || (s?.type === MATERIAL_TYPE.serializedAsset && [ASSET_STATUS.scrap, ASSET_STATUS.needRepair].includes(s.status))) ||
                 checkUniqcurrentOwnerType()
               }
               onClick={() => {
-                setRepairAssetDialog({ open: true, assetId: null, assetName: null, assetIds: [...selectedRecords.map((m) => m._id)] });
+                setRepairDialog({ open: true, data: null });
               }}
             >
               {isMobile && !isTablet ? 'Complete' : 'Complete Repair'}
             </ThemeButton>
           </Fragment>
         )}
-        {user.user?.brandPolicy?.repairJobSendSupplierRequired && (
-          <HtmlTooltip title="To complete the repair, assets must be sent to the supplier and received back at the plant">
+        {user?.user?.brandPolicy?.repairJobSendSupplierRequired && (
+          <HtmlTooltip title={`To complete the repair, assets and ${resources?.serializedPackages?.titleSingular} must be sent to the supplier and received back at the plant`}>
             <HelpIcon fontSize="small" color="primary" />
           </HtmlTooltip>
         )}
@@ -490,12 +533,12 @@ const SerializedAsset = ({
     const errorMessages = [];
     selectedRecords?.forEach((e) => {
       if (action === repairJobActions.sendToSupplier) {
-        if (e?.status === ASSET_STATUS.repair && repairJobData?.restrictReceive) {
+        if (e?.type === MATERIAL_TYPE?.serializedAsset && e?.status === ASSET_STATUS.repair && repairJobData?.restrictReceive) {
           errorMessages.push({ index: e.index, message: repairJobMessage.restrictSendOtherSupplier });
         }
       }
       if (action === repairJobActions.receivedToPlant) {
-        if (e?.status === ASSET_STATUS.repair && repairJobData?.restrictReceive) {
+        if (e?.type === MATERIAL_TYPE?.serializedAsset && e?.status === ASSET_STATUS.repair && repairJobData?.restrictReceive) {
           errorMessages.push({ index: e.index, message: repairJobMessage.restrictReceive });
         }
       }
@@ -593,36 +636,7 @@ const SerializedAsset = ({
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      {showRemoveAssetFromReceivingTicketDialog && (
-        <ConfirmationDialog
-          open={showRemoveAssetFromReceivingTicketDialog}
-          message={`Are you sure you want to remove selected records from Receiving Ticket(s) ? `}
-          onClose={() => {
-            setShowRemoveAssetFromReceivingTicketDialog(false);
-          }}
-          onOk={() => {
-            setOkBtnLoading(true);
-            const groupByCalls = groupBy(selectedRecords, 'receivingTicketId');
-            let apiCalls = [];
-            Object.keys(groupByCalls).forEach((key) => {
-              apiCalls.push(axiosInstance().put(`${deliveryTicket.api}/${key}/assets`, { ids: groupByCalls[key].map((m) => m._id) }));
-            });
-            Promise.all(apiCalls)
-              .then(() => {
-                toastConfig.setToastConfig({ open: true, type: 'success', message: `Selected records removed from assiged Receiving Ticket(s)` });
-                fetchRecords();
-              })
-              .catch((error) => {
-                toastConfig.setToastConfig(error);
-              })
-              .finally(() => {
-                setOkBtnLoading(false);
-                setShowRemoveAssetFromReceivingTicketDialog(false);
-              });
-          }}
-          okBtnLoading={okBtnLoading}
-        />
-      )}
+
       {statusToUpdate.open && (
         <AssetScrapRepairDialog
           statusToUpdate={statusToUpdate}
@@ -638,12 +652,14 @@ const SerializedAsset = ({
           }}
         />
       )}
+
       {showTicketDialog.open && (
         <ManageDeliveryTicket
           ticketType={showTicketDialog.ticketType}
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.repairJob}
           referenceData={showTicketDialog.data}
-          assets={selectedRecords}
+          assets={selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)}
+          serializedPackages={selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedPackage)?.map(r => ({ serializedPackage: r?._id, qty: r?.qty }))}
           onClose={() => setShowTicketDialog({ open: false, ticketType: '', data: {} })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, ticketType: '', data: {} });
@@ -652,55 +668,38 @@ const SerializedAsset = ({
           }}
         />
       )}
-      {repairAssetDialog.open && (
+
+      {repairDialog.open && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to mark repair complete for ${repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
+          message={`Are you sure you want to mark repair complete for ${repairDialog.data ? repairDialog.data?.detail : 'selected record(s)'
             } ? `}
           onClose={() => {
-            setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] });
+            setRepairDialog({ open: false, data: null });
           }}
           onOk={() => {
-            setOkBtnLoading(true);
-            axiosInstance()
-              .put(`${repairJob.api}/${repairJobData._id}/assets/repaired`, {
-                assets: repairAssetDialog.assetId ? [repairAssetDialog.assetId] : repairAssetDialog.assetIds,
-                repaired: true
-              })
-              .then(({ data }) => {
-                toastConfig.setToastConfig({
-                  open: true,
-                  type: 'success',
-                  message: data.message
-                });
-                setOkBtnLoading(false);
-                setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] });
-                fetchRepairJobData();
-                fetchRecords();
-              })
-              .catch((error) => {
-                toastConfig.setToastConfig(error);
-                setOkBtnLoading(false);
-              });
+            handleMarkRepair(repairDialog.data)
           }}
           okBtnLoading={okBtnLoading}
         />
       )}
+
       {repairProcessDialog.open && (
         <RepairProcess
           onClose={() => {
-            setRepairProcessDialog({ open: false, assetId: null, assetNumber: null, repaired: false });
+            setRepairProcessDialog({ open: false, data: null });
           }}
-          assetId={repairProcessDialog.assetId}
-          assetNumber={repairProcessDialog.assetNumber}
+          assetId={repairProcessDialog.data?._id}
+          assetNumber={repairProcessDialog.data?.detail}
           repairJobData={repairJobData}
-          repaired={repairProcessDialog.repaired}
+          repaired={repairProcessDialog.data?.repaired || false}
           onSuccess={() => {
-            setRepairProcessDialog({ open: false, assetId: null, assetNumber: null, repaired: false });
+            setRepairProcessDialog({ open: false, data: null });
             fetchRecords();
           }}
         />
       )}
+
       {openMessageDialog.open && (
         <CustomMessageDialog
           open={openMessageDialog.open}

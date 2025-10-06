@@ -146,7 +146,7 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
               {quotationSummary?.totalcost?.fullFormatAmount ? quotationSummary?.totalcost?.fullFormatAmount : defaultTotalValue}
             </span>
             <div className={'quoteBoxContent'}>
-              <span className={'quoteDetailHeading'}>Total Cost Price </span>
+              <span className={'quoteDetailHeading'}>Total Cost</span>
             </div>
           </div>
           {redCard ? (

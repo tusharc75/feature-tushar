@@ -418,7 +418,9 @@ const ManageDeliveryTicket = ({
             const obj: any = {};
             obj.serializedPackage = ele.serializedPackage;
             obj.qty = ele.qty;
-            obj.uniqueId = ele._id;
+            if (ele._id) {
+              obj.uniqueId = ele._id;
+            }
             tempInitialData['serializedPackages'].push(obj);
           });
           if (fieldsDataForUpdate.find((d) => d.fieldName === 'padName') && referenceData?.padName) {

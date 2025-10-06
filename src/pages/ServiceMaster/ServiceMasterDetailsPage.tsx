@@ -20,6 +20,7 @@ import ManageServiceMaster from './ManageServiceMaster';
 import Product from './Product';
 import Steps from './Steps';
 import LeadTime from 'src/components/LeadTime';
+import AllocationPercentage from './AllocationPercentage';
 import Step from '../DynamicForm/Step';
 import Grid from '@mui/material/Grid2';
 import { isTablet } from 'react-device-detect';
@@ -167,24 +168,25 @@ const ServiceMasterDetailsPage = () => {
                   resource={sidebarResource?.serviceMaster}
                   referenceId={serviceMasterDetailData?._id}
                 />
-                {user?.user?.brandPolicy?.leadTime && (
-                  <Box mb={2} mt={2}>
-                    <Grid container spacing={2}>
-                      <Grid size={{ xs: 6, sm: 12, md: 6, lg: 6 }}>
+                <Box sx={{ mt: 3 }}>
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, sm: 12, md: 6, lg: 6 }}>
+                      <AllocationPercentage
+                        referenceData={serviceMasterDetailData}
+                        onRefresh={fetchData} />
+                    </Grid>
+                    {user?.user?.brandPolicy?.leadTime && (
+                      <Grid size={{ xs: 12, sm: 12, md: 6, lg: 6 }}>
                         <LeadTime referenceType={MATERIAL_TYPE.service} referenceId={id} referenceLabel={serviceMasterDetailData?.serviceName} />
                       </Grid>
-                    </Grid>
-                  </Box>
-                )}
-                {user?.user?.brandPolicy?.materialCostPrice && (
-                  <Box mb={2} mt={2}>
-                    <Grid container spacing={2}>
-                      <Grid size={{ xs: 6, sm: 12, md: 6, lg: 6 }}>
-                        <CostPrice referenceData={serviceMasterDetailData} type={MATERIAL_TYPE.service}/>
+                    )}
+                    {user?.user?.brandPolicy?.materialCostPrice && (
+                      <Grid size={{ xs: 12, sm: 12, md: 6, lg: 6 }}>
+                        <CostPrice referenceData={serviceMasterDetailData} type={MATERIAL_TYPE.service} />
                       </Grid>
-                    </Grid>
-                  </Box>
-                )}
+                    )}
+                  </Grid>
+                </Box>
               </>
             )}
           </Box>

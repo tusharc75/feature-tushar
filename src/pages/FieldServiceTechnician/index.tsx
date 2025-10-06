@@ -44,7 +44,7 @@ import { getMultipleResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 type Views = 'card' | 'table';
 
-const getActionColumn = ({ view, permissions, user, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data, resources }) => {
+const getActionColumn = ({ view, permissions, user, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data, resources, policyData }) => {
   return {
     accessor: 'action',
     Header: 'Actions',
@@ -67,7 +67,7 @@ const getActionColumn = ({ view, permissions, user, isSubmitting, handleCreateFi
                   aria-label="Add"
                   disabled={permissions?.fieldTicket?.isCreate && row?.original?.canEdit && !isSubmitting ? false : true}
                   onClick={() => {
-                    handleCreateFieldTicket(row?.original?.orignalData, data?.filter((obj) => obj.isRead).map((d: any) => d.fieldData));
+                    handleCreateFieldTicket(row?.original?.orignalData, data?.filter((obj) => obj.isRead).map((d: any) => d.fieldData), policyData);
                   }}
                 >
                   <NoteAddIcon
@@ -125,6 +125,8 @@ const FieldServiceTechnician = () => {
 
   const [selectedData, setSelectedData] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+
+  const [refreshFieldTicketData, setRefreshFieldTicketData] = useState(false);
 
   const [policyData, setPolicyData] = useState(null);
   const history = useHistory();
@@ -192,7 +194,7 @@ const FieldServiceTechnician = () => {
       ...getStaticFields()
     ];
     if (!policyData?.showOnlyAssignedTickets) {
-      newColumns.push(getActionColumn({ view, user, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data, resources }));
+      newColumns.push(getActionColumn({ view, user, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data, resources, policyData }));
     }
     setColumns(newColumns);
   };
@@ -211,7 +213,7 @@ const FieldServiceTechnician = () => {
   );
 
   const handleCreateFieldTicket = useCallback(
-    async (resourceData, resourceFields) => {
+    async (resourceData, resourceFields, policyData) => {
       setIsSubmitting(true);
       toastConfig.setToastConfig({
         open: true,
@@ -270,6 +272,7 @@ const FieldServiceTechnician = () => {
               type: 'success',
               message: data.message
             });
+            setRefreshFieldTicketData((prev) => !prev);
             setIsSubmitting(false);
           })
           .catch((error) => {
@@ -398,17 +401,14 @@ const FieldServiceTechnician = () => {
     }
   };
 
-  const handleViewChange = useCallback(
-    (view: Views) => {
-      setView(view);
-      const updatedColumns = columns?.filter((c) => c.accessor !== 'action');
-      updatedColumns.push(
-        getActionColumn({ view, user, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData, resources })
-      );
-      setColumns(updatedColumns);
-    },
-    [colData, columns, handleCreateFieldTicket, isSubmitting, permissions]
-  );
+  const handleViewChange = useCallback((view: Views) => {
+    setView(view);
+    const updatedColumns = columns?.filter((c) => c.accessor !== 'action');
+    updatedColumns.push(
+      getActionColumn({ view, user, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData, resources, policyData })
+    );
+    setColumns(updatedColumns);
+  }, [colData, columns, handleCreateFieldTicket, isSubmitting, permissions, policyData]);
 
   useEffect(() => {
     if (isMobileView && view === 'card' && columns) {
@@ -430,8 +430,12 @@ const FieldServiceTechnician = () => {
             isAddButtonVisible={false}
             rightSideContents={
               isMobileView || policyData?.showOnlyAssignedTickets ? null : (
-                <ViewButtons view={view} setView={setView} resetSelectedRecords={resetSelectedRecords} />
-              )
+                <ViewButtons
+                  view={view}
+                  setView={(view) => {
+                    handleViewChange(view)
+                  }}
+                  resetSelectedRecords={resetSelectedRecords} />)
             }
             actionMenuItems={<ActionMenuItems />}
           />
@@ -471,9 +475,11 @@ const FieldServiceTechnician = () => {
                           resourceData={selectedData?.orignalData}
                           allowedToEdit={allowedToEdit}
                           handleChangeStatus={() => { }}
-                          resource={sidebarResource.fieldServiceTechnician}
+                          resource={policyData?.resource}
                           enableGlobalSearch={false}
                           fetchResourceData={() => { }}
+                          fromFieldServiceTechnician={true}
+                          refreshData={refreshFieldTicketData}
                         />
                       )
                     ) : (
