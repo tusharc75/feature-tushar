@@ -988,7 +988,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
           referenceType={sidebarResource.workOrder}
           referenceData={{
             warehouse: workOrderData?.warehouse?.optionValue,
-            workOrder: workOrderData?._id
+            workOrder: [workOrderData?._id]
           }}
         />
       )}

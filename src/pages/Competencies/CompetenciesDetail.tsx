@@ -2,7 +2,6 @@ import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -16,6 +15,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageCompetencies from './ManageCompetencies';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import { sidebarResource } from 'src/constants/helpers';
+import CostPrice from 'src/components/CostPrice';
 
 const CompetenciesDetail = () => {
   const { id } = useParams();
@@ -27,7 +27,7 @@ const CompetenciesDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const {
-    state: { permissions, resources }
+    state: { user, permissions, resources }
   }: any = useData();
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.competencies, title: resources?.competencies?.titlePlural }]);
   useEffect(() => {
@@ -110,7 +110,18 @@ const CompetenciesDetail = () => {
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </div>
           ) : (
-            <DetailsPage data={competenciesData} fields={fields} />
+            <>
+              <DetailsPage data={competenciesData} fields={fields} />
+              {user?.user?.brandPolicy?.materialCostPrice && (
+                <Box mb={2} mt={2}>
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, sm: 12, md: 6, lg: 6 }}>
+                      <CostPrice referenceData={competenciesData} type={sidebarResource.competencies} />
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
+            </>
           )}
         </Box>
       </Box>
