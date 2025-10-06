@@ -33,6 +33,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { FiExternalLink } from 'react-icons/fi';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddFieldTicket, generateFieldTicketActions } from '../walkmeSteps';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const FieldTicket = ({
   resourceData,
@@ -44,7 +45,8 @@ const FieldTicket = ({
   enableGlobalSearch = true,
   noQuotationCheck = false,
   refreshData = false,
-  fromFieldServiceTechnician = false
+  fromFieldServiceTechnician = false,
+  topLeftSlot = null
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const { setWalkmeData } = useSetWalkmeData();
@@ -305,23 +307,6 @@ const FieldTicket = ({
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={!selectedRecords?.every((s) => s.canDelete)}
-          onClick={() => {
-            setShowDeleteConfirmBox(true);
-            setDeleteRecord(null);
-          }}
-          id={'delete-menu-item'}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   const getRefrenceData = () => {
     const referenceData: any = cloneResourceData(
       resourceFields?.map((f) => f?.fieldData),
@@ -336,21 +321,29 @@ const FieldTicket = ({
 
   return (
     <Fragment>
-      {!fromFieldServiceTechnician && (
-        <DetailsPageHeader
-          isAddButtonVisible={true}
-          addButtonProps={{
-            disabled: allowedToEdit && (!resourceData?.quotation || noQuotationCheck) ? false : true,
-            tooltip: !allowedToEdit ? ownerAndColaborator :
-              (resourceData?.quotation && !noQuotationCheck) ? `Converted from ${resources?.quotation?.titleSingular} you can not perform this action` : ''
-          }}
-          addButtonMenuItems={addButtonMenuItems()}
-          isActionButtonVisible={!isOffline}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-          hasXpadding
-        />
-      )}
+      <div className="flex min-h-[32px] flex-wrap items-center gap-2 py-2">
+        <div>{topLeftSlot}</div>
+        <div className="flex-grow">
+          {!fromFieldServiceTechnician && (
+            <DetailsPageHeader
+              isAddButtonVisible={true}
+              addButtonProps={{
+                disabled: allowedToEdit && (!resourceData?.quotation || noQuotationCheck) ? false : true,
+                tooltip: !allowedToEdit
+                  ? ownerAndColaborator
+                  : resourceData?.quotation && !noQuotationCheck
+                    ? `Converted from ${resources?.quotation?.titleSingular} you can not perform this action`
+                    : ''
+              }}
+              addButtonMenuItems={addButtonMenuItems()}
+              isActionButtonVisible={false}
+              actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+              hasXpadding
+              hasYpadding={false}
+            />
+          )}
+        </div>
+      </div>
       {columns ? (
         <CustomReactTable
           height={!fromFieldServiceTechnician ? 'calc(100vh - 300px)' : 'calc(100vh - 200px)'}
@@ -363,6 +356,15 @@ const FieldTicket = ({
           isClientSideGrid={true}
           hideAction={!fromFieldServiceTechnician ? !allowedToEdit : true}
           hideSelection={!fromFieldServiceTechnician ? !allowedToEdit : true}
+          bulkActionItems={
+            !isOffline ? (
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+                setDeleteRecord={setDeleteRecord}
+              />
+            ) : null
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -403,3 +405,20 @@ const FieldTicket = ({
 };
 
 export default FieldTicket;
+
+const BulkActionItems = ({ selectedRecords, setShowDeleteConfirmBox, setDeleteRecord }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={!selectedRecords?.every((s) => s.canDelete)}
+        onClick={() => {
+          setShowDeleteConfirmBox(true);
+          setDeleteRecord(null);
+        }}
+        id={'delete-menu-item'}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

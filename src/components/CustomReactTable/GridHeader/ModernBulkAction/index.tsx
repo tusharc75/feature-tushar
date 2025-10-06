@@ -41,7 +41,7 @@ const ModernBulkAction = ({ state, bulkActionItems, dispatch }: ModernBulkAction
       {bulkActionItems}
       <div className="divider" />
       <p className="flex items-center gap-2 text-sm font-medium">
-        <span className="inline-block h-[20px] rounded-full bg-blue-100 px-2 text-xs leading-[20px] text-[--primary-text] dark:bg-[var(--dark-secondary)]">
+        <span className="inline-block h-[20px] rounded-full bg-blue-100 px-2 text-xs leading-[20px] text-[--primary-text] dark:bg-[var(--dark-primary)]">
           {selectedRecords.length}
         </span>{' '}
         Selected
@@ -50,10 +50,10 @@ const ModernBulkAction = ({ state, bulkActionItems, dispatch }: ModernBulkAction
         <HtmlTooltip title="Remove Selection">
           <RippleButton
             onClick={handleClose}
-            className="flex items-center rounded-md px-2 py-1 text-sm font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="flex items-center rounded-md px-2 py-1 text-sm font-medium text-red-500 hover:bg-gray-100 dark:hover:bg-gray-600"
           >
             <span>Esc</span>
-            <Close fontSize="small" />
+            <Close fontSize="small" color="error" />
           </RippleButton>
         </HtmlTooltip>
       </div>
