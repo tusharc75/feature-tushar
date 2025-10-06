@@ -1820,14 +1820,12 @@ const LoadingTicket = ({
 
   return (
     <>
-      <div className="flex flex-wrap items-center">
+      <div className="flex min-h-[32px] flex-wrap items-center py-2">
         {technicianDispatchReturn && (
-          <span className={tabValue === 1 ? 'hidden' : ''}>
-            <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
-              <ContainedTab value={0} label={'Assets/Products'} />
-              <ContainedTab value={1} label={'Technicians'} />
-            </ContainedTabs>
-          </span>
+          <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+            <ContainedTab value={0} label={'Assets/Products'} />
+            <ContainedTab value={1} label={'Technicians'} />
+          </ContainedTabs>
         )}
         <TabPanel value={tabValue} index={0} className="flex-grow">
           <DetailsPageHeader
@@ -1837,6 +1835,7 @@ const LoadingTicket = ({
             rightSideContents={rightSideContents()}
             rightSideContentsAfterAction={rightSideContentsAfterAction()}
             hasXpadding
+            hasYpadding={false}
           />
         </TabPanel>
       </div>
@@ -1889,19 +1888,7 @@ const LoadingTicket = ({
         )}
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
-        <TechnicianDispatchReturn
-          topLeftSlot={
-            technicianDispatchReturn ? (
-              <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
-                <ContainedTab value={0} label={'Assets/Products'} />
-                <ContainedTab value={1} label={'Technicians'} />
-              </ContainedTabs>
-            ) : null
-          }
-          allowedToEdit={allowedToEdit}
-          rentalManagementData={rentalManagementData}
-          stepFullScreen={stepFullScreen}
-        />
+        <TechnicianDispatchReturn allowedToEdit={allowedToEdit} rentalManagementData={rentalManagementData} stepFullScreen={stepFullScreen} />
       </TabPanel>
 
       <Menu
@@ -2305,7 +2292,6 @@ const BulkActionItems = ({
           {'Change Sub Status'}
         </BulkActionContainer.Button>
       )}
-      <BulkActionContainer.Divider />
 
       {/* Action button menu items */}
       {(allowedToEdit || isProcessor) && (

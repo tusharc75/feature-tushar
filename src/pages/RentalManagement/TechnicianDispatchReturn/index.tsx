@@ -22,7 +22,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 
-const TechnicianDispatchReturn = ({ rentalManagementData, stepFullScreen, allowedToEdit, receive = false, topLeftSlot = null }) => {
+const TechnicianDispatchReturn = ({ rentalManagementData, stepFullScreen, allowedToEdit, receive = false }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_technician`;
 
@@ -358,7 +358,6 @@ const TechnicianDispatchReturn = ({ rentalManagementData, stepFullScreen, allowe
                   />
                 ) : null
               }
-              topLeftSlot={topLeftSlot}
             />
           ) : (
             <Box p={2} height={300}>
