@@ -37,27 +37,21 @@ const BulkActionContainer = ({ children }: BulkActionContainerProps) => {
   const [visibleItemsLength, setVisibleItemsLength] = useState(normalizedChildren.length);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  useLayoutEffect(() => {
+  const recalc = () => {
     const container = containerRef.current;
     if (!container) return;
-
-    const parentContainer = container.parentElement.parentElement;
-    if (!parentContainer) return;
-
-    const parentRect = parentContainer.getBoundingClientRect();
-    const maxWidth = parentRect.width - 200; // available space
-
+    const parent = container.parentElement.parentElement;
+    if (!parent) return;
+    const maxWidth = parent.getBoundingClientRect().width - 250; // reserve space for overflow button
     const childrens = Array.from(container.children);
     let totalWidth = 0;
     let count = 0;
 
     for (let i = 0; i < childrens.length; i++) {
       const child = childrens[i] as HTMLElement;
-      const childRect = child.getBoundingClientRect();
-      const childWidth = childRect.width;
+      const childWidth = child.getBoundingClientRect().width;
 
-      // add gap (8px) except before the first element
-      if (i > 0) totalWidth += 8;
+      if (i > 0) totalWidth += 8; // gap
       totalWidth += childWidth;
 
       if (totalWidth <= maxWidth) {
@@ -68,11 +62,20 @@ const BulkActionContainer = ({ children }: BulkActionContainerProps) => {
     }
 
     setVisibleItemsLength(count);
+  };
+
+  useLayoutEffect(() => {
+    recalc();
+    const ro = new ResizeObserver(recalc);
+    if (containerRef.current?.parentElement) {
+      ro.observe(containerRef.current.parentElement);
+    }
+    return () => ro.disconnect();
   }, [normalizedChildren]);
 
   return (
     <div className="flex items-center gap-2">
-      <div className="isolate flex flex-grow flex-wrap items-center gap-2" ref={containerRef}>
+      <div className="isolate flex flex-wrap items-center gap-2" ref={containerRef}>
         {[...normalizedChildren].slice(0, visibleItemsLength)}
       </div>
       {visibleItemsLength !== normalizedChildren.length && <RenderMenuWithButton items={[...normalizedChildren].slice(visibleItemsLength)} />}
@@ -149,6 +152,17 @@ const RenderMenuWithButton = ({ items }: { items: ChildList[] }) => {
       <HtmlTooltip title="More Actions">
         <IconButton
           size="small"
+          sx={{
+            border: '1px solid var(--new_theme_secondary_border_color)',
+            backgroundColor: 'var(--new-theme-secondary-color)',
+            color: 'black',
+            borderRadius: '6px',
+            width: '31px',
+            height: '31px',
+            '&:hover': {
+              backgroundColor: 'var(--new-theme-secondary-color-hover)'
+            }
+          }}
           aria-controls={open ? 'bulk-action-menu' : undefined}
           aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}

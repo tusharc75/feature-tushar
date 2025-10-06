@@ -27,6 +27,7 @@ import {
   PACKAGE_TYPE,
   RENTAL_INTERNAL_ASSET_STATUS,
   TRANSFER_ASSET_STATUS,
+  cn,
   deliveryTicket,
   prepareDataForGrid,
   rentalManagement,
@@ -53,6 +54,7 @@ import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/Contained
 import { TabPanel } from 'src/components/CustomTabs';
 import Technicians from 'src/pages/RentalManagement/SerializedAsset/Technicians';
 import Competencies from 'src/pages/Competencies';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const SerializedAsset = ({
   rentalManagementData,
@@ -1195,105 +1197,6 @@ const SerializedAsset = ({
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        {permissions?.bulkAssetCreation?.isCreate && (
-          <MenuItem
-            disabled={showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)?.length === 0}
-            onClick={() => {
-              setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'bulkAssetCreation' }));
-            }}
-          >
-            {`Create ${resources?.bulkAssetCreation?.titleSingular}`}
-          </MenuItem>
-        )}
-        {permissions?.purchaseOrder?.isCreate && (
-          <MenuItem
-            disabled={showOrderDialog?.products?.filter((e) => e.serialized === false)?.length === 0}
-            onClick={() => {
-              setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'purchaseOrder' }));
-            }}
-          >
-            {`Create ${resources?.purchaseOrder?.titleSingular}`}
-          </MenuItem>
-        )}
-        {permissions?.sublease?.isCreate && (
-          <MenuItem
-            disabled={showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)?.length === 0}
-            onClick={() => {
-              setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'sublease' }));
-            }}
-          >
-            {`Create ${resources?.sublease?.titleSingular}`}
-          </MenuItem>
-        )}
-        {permissions?.productInventory?.isRead && selectedRecords.length && assetAssignedProduct?.length ? (
-          <MenuItem
-            onClick={() => {
-              setAssignSerialNumbersDialog(true);
-            }}
-          >
-            {`Assign Serial Numbers`}
-          </MenuItem>
-        ) : permissions?.productInventory?.isRead && selectedRecords.length && nonSerializedProduct?.length ? (
-          <>
-            <MenuItem
-              onClick={() => {
-                setAddNonSerializedInventoryDialog({ open: true, type: 'add' });
-              }}
-            >
-              {`Assign Inventory`}
-            </MenuItem>
-          </>
-        ) : null}
-        {selectedRecords?.filter((e) => validateRemoveInventory(e?._id, e?.materialId))?.length > 0 && (
-          <MenuItem
-            onClick={() => {
-              setAddNonSerializedInventoryDialog({ open: true, type: 'remove' });
-            }}
-          >
-            Remove Inventory
-          </MenuItem>
-        )}
-        <MenuItem
-          disabled={flattenArray(selectedRecords)?.filter((d) => ['asset', 'serialNumber']?.includes(d.type) && d.canRemove)?.length === 0}
-          onClick={() => {
-            const assets = flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove);
-            const serialNumbers = flattenArray(selectedRecords)?.filter((d) => d.type === 'serialNumber' && d.canRemove);
-            const dataTodelete = [];
-            assets?.forEach((element) => {
-              let isTransferAsset = false;
-              if (element?.transferData && [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(element?.transferData?.status)) {
-                isTransferAsset = true;
-              }
-              dataTodelete.push({
-                _id: element.uniqueId,
-                assetId: element._id,
-                assetNumber: element?.detail,
-                isTransferAsset: isTransferAsset,
-                isProductSerialNumbers: false,
-                type: 'asset'
-              });
-            });
-            serialNumbers?.forEach((element) => {
-              dataTodelete.push({
-                _id: element.uniqueId,
-                assetId: element.serialNumber,
-                isProductSerialNumbers: true,
-                type: 'serialNumber'
-              });
-            });
-            setDeleteData(dataTodelete);
-            setShowConfirmBox(true);
-          }}
-        >
-          {`Remove ${resources?.serializedAsset?.titlePlural}/Serial Numbers`}
-        </MenuItem>
-      </>
-    );
-  };
-
   const handleMainTabChange = (event: any, newValue: number) => {
     setTabValue(newValue);
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -1301,7 +1204,7 @@ const SerializedAsset = ({
 
   return (
     <Fragment>
-      <div className="flex w-full flex-wrap items-center gap-2">
+      <div className={cn('flex min-h-[32px] w-full flex-wrap items-center gap-2 py-2', tabValue === 1 ? 'hidden' : '')}>
         {permissions?.employeeMaster?.isRead && (
           <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
             <ContainedTab value={0} label={'Assets'} />
@@ -1311,15 +1214,11 @@ const SerializedAsset = ({
         <TabPanel value={tabValue} index={0} className="flex-grow">
           <DetailsPageHeader
             isAddButtonVisible={false}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+            isActionButtonVisible={false}
             rightSideContents={rightSideContents()}
             hasXpadding
+            hasYpadding={false}
           />
-        </TabPanel>
-        <TabPanel value={tabValue} index={1} className="flex-grow">
-          {technicianHeader}
         </TabPanel>
       </div>
       <TabPanel value={tabValue} index={0}>
@@ -1340,6 +1239,22 @@ const SerializedAsset = ({
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
               expander={true}
+              bulkActionItems={
+                <BulkActionItems
+                  permissions={permissions}
+                  setOrderDialog={setOrderDialog}
+                  resources={resources}
+                  showOrderDialog={showOrderDialog}
+                  selectedRecords={selectedRecords}
+                  assetAssignedProduct={assetAssignedProduct}
+                  nonSerializedProduct={nonSerializedProduct}
+                  validateRemoveInventory={validateRemoveInventory}
+                  setAddNonSerializedInventoryDialog={setAddNonSerializedInventoryDialog}
+                  setDeleteData={setDeleteData}
+                  setShowConfirmBox={setShowConfirmBox}
+                  setAssignSerialNumbersDialog={setAssignSerialNumbersDialog}
+                />
+              }
             />
           </Box>
         ) : (
@@ -1354,7 +1269,14 @@ const SerializedAsset = ({
           allowedToEdit={allowedToEdit}
           rentalManagementData={rentalManagementData}
           stepFullScreen={stepFullScreen}
-          setTechnicianHeader={setTechnicianHeader}
+          topLeftContent={
+            permissions?.employeeMaster?.isRead && (
+              <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+                <ContainedTab value={0} label={'Assets'} />
+                <ContainedTab value={1} label={'Technicians'} />
+              </ContainedTabs>
+            )
+          }
         />
       </TabPanel>
 
@@ -1628,3 +1550,115 @@ const SerializedAsset = ({
   );
 };
 export default SerializedAsset;
+
+const BulkActionItems = ({
+  permissions,
+  setOrderDialog,
+  resources,
+  showOrderDialog,
+  selectedRecords,
+  assetAssignedProduct,
+  nonSerializedProduct,
+  validateRemoveInventory,
+  setAddNonSerializedInventoryDialog,
+  setDeleteData,
+  setShowConfirmBox,
+  setAssignSerialNumbersDialog
+}) => {
+  return (
+    <BulkActionContainer>
+      {permissions?.bulkAssetCreation?.isCreate && (
+        <BulkActionContainer.Button
+          disabled={showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)?.length === 0}
+          onClick={() => {
+            setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'bulkAssetCreation' }));
+          }}
+        >
+          {`Create ${resources?.bulkAssetCreation?.titleSingular}`}
+        </BulkActionContainer.Button>
+      )}
+      {permissions?.purchaseOrder?.isCreate && (
+        <BulkActionContainer.Button
+          disabled={showOrderDialog?.products?.filter((e) => e.serialized === false)?.length === 0}
+          onClick={() => {
+            setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'purchaseOrder' }));
+          }}
+        >
+          {`Create ${resources?.purchaseOrder?.titleSingular}`}
+        </BulkActionContainer.Button>
+      )}
+      {permissions?.sublease?.isCreate && (
+        <BulkActionContainer.Button
+          disabled={showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)?.length === 0}
+          onClick={() => {
+            setOrderDialog((prevState) => ({ ...prevState, open: true, type: 'sublease' }));
+          }}
+        >
+          {`Create ${resources?.sublease?.titleSingular}`}
+        </BulkActionContainer.Button>
+      )}
+      {permissions?.productInventory?.isRead && selectedRecords.length && assetAssignedProduct?.length ? (
+        <BulkActionContainer.Button
+          onClick={() => {
+            setAssignSerialNumbersDialog(true);
+          }}
+        >
+          {`Assign Serial Numbers`}
+        </BulkActionContainer.Button>
+      ) : permissions?.productInventory?.isRead && selectedRecords.length && nonSerializedProduct?.length ? (
+        <>
+          <BulkActionContainer.Button
+            onClick={() => {
+              setAddNonSerializedInventoryDialog({ open: true, type: 'add' });
+            }}
+          >
+            {`Assign Inventory`}
+          </BulkActionContainer.Button>
+        </>
+      ) : null}
+      {selectedRecords?.filter((e) => validateRemoveInventory(e?._id, e?.materialId))?.length > 0 && (
+        <BulkActionContainer.Button
+          onClick={() => {
+            setAddNonSerializedInventoryDialog({ open: true, type: 'remove' });
+          }}
+        >
+          Remove Inventory
+        </BulkActionContainer.Button>
+      )}
+      <BulkActionContainer.Button
+        disabled={flattenArray(selectedRecords)?.filter((d) => ['asset', 'serialNumber']?.includes(d.type) && d.canRemove)?.length === 0}
+        onClick={() => {
+          const assets = flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove);
+          const serialNumbers = flattenArray(selectedRecords)?.filter((d) => d.type === 'serialNumber' && d.canRemove);
+          const dataTodelete = [];
+          assets?.forEach((element) => {
+            let isTransferAsset = false;
+            if (element?.transferData && [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(element?.transferData?.status)) {
+              isTransferAsset = true;
+            }
+            dataTodelete.push({
+              _id: element.uniqueId,
+              assetId: element._id,
+              assetNumber: element?.detail,
+              isTransferAsset: isTransferAsset,
+              isProductSerialNumbers: false,
+              type: 'asset'
+            });
+          });
+          serialNumbers?.forEach((element) => {
+            dataTodelete.push({
+              _id: element.uniqueId,
+              assetId: element.serialNumber,
+              isProductSerialNumbers: true,
+              type: 'serialNumber'
+            });
+          });
+          setDeleteData(dataTodelete);
+          setShowConfirmBox(true);
+        }}
+      >
+        {`Remove ${resources?.serializedAsset?.titlePlural}/Serial Numbers`}
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
