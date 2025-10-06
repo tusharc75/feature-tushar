@@ -2900,7 +2900,7 @@ const ReceivingTicket = ({
 
   return (
     <>
-      <div className={cn('flex min-h-[32px] flex-wrap items-center gap-2 py-2', tabValue === 3 ? 'hidden' : '')}>
+      <div className={cn('flex min-h-[32px] flex-wrap items-center gap-2 py-2')}>
         {(serviceData?.length > 0 || technicianDispatchReturn) && (
           <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
             <ContainedTab value={0} label={'Assets/Products'} />
@@ -3003,18 +3003,6 @@ const ReceivingTicket = ({
       </TabPanel>
       <TabPanel value={tabValue} index={3}>
         <FieldTicket
-          topLeftSlot={
-            serviceData?.length > 0 || technicianDispatchReturn ? (
-              <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
-                <ContainedTab value={0} label={'Assets/Products'} />
-                {serviceData?.length > 0 && <ContainedTab value={1} label={'Services'} />}
-                {technicianDispatchReturn && <ContainedTab value={2} label={'Technicians'} />}
-                {technicianDispatchReturn && permissions?.fieldTicket?.isRead && (
-                  <ContainedTab value={3} label={resources?.fieldTicket?.titlePlural} />
-                )}
-              </ContainedTabs>
-            ) : null
-          }
           resourceData={rentalManagementData}
           resourceFields={rentalManagementFields}
           allowedToEdit={allowedToEdit}

@@ -26,8 +26,9 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { getCostPriceConditions, getCostPriceValue, getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import TechnicianAssign from 'src/components/TechnicianAssign';
 import RentalTechnicianQtyDialog from 'src/pages/RentalManagement/SerializedAsset/Technicians/RentalTechnicianQtyDialog';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
-const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepFullScreen, setTechnicianHeader }) => {
+const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepFullScreen, topLeftContent }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_assign_technician`;
 
@@ -376,29 +377,10 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
       });
   };
 
-  useEffect(() => {
-    const leftSideContents = () => {
-      return allowedToEdit ? (
-        <ThemeButton startIcon={<Add />} onClick={() => setTechnicianDialog(true)}>
-          Assign
-        </ThemeButton>
-      ) : null;
-    };
-
-    const actionButtonMenuItems = () => {
-      return (
-        <MenuItem
-          disabled={selectedRecords?.some((e) => !e?.canDelete)}
-          onClick={() => {
-            setDeleteData(selectedRecords?.map((d) => d?._id));
-          }}
-        >
-          Delete
-        </MenuItem>
-      );
-    };
-    const technicianHeader = (
-      <div className="flex flex-grow flex-wrap items-center gap-2">
+  return (
+    <>
+      <div className={'flex min-h-[32px] w-full flex-wrap items-center gap-2 py-2'}>
+        {topLeftContent}
         <Autocomplete
           size="small"
           style={{ width: '300px' }}
@@ -417,42 +399,32 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
           }}
           renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" margin="none" />}
         />
-        <div className="flex-grow">
-          <DetailsPageHeader
-            isAddButtonVisible={false}
-            isActionButtonVisible={allowedToEdit}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
-            leftSideContents={leftSideContents()}
-            hasXpadding
-          />
-        </div>
       </div>
-    );
-    setTechnicianHeader(technicianHeader);
-  }, [allowedToEdit, selectedRecords, selectedRecords?.length, selectedService, serviceOption, setTechnicianHeader]);
-
-  return (
-    <div>
-      <div>
-        {columns ? (
-          <CustomReactTable
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            refreshGrid={fetchData}
-            renderedFrom={renderedFrom}
-            isClientSideGrid={true}
-            hideSelection={!allowedToEdit}
-            hideAction={!allowedToEdit}
-          />
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-      </div>
+      {columns ? (
+        <CustomReactTable
+          height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          refreshGrid={fetchData}
+          renderedFrom={renderedFrom}
+          isClientSideGrid={true}
+          hideSelection={!allowedToEdit}
+          hideAction={!allowedToEdit}
+          bulkActionItems={allowedToEdit ? <BulkActionItems selectedRecords={selectedRecords} setDeleteData={setDeleteData} /> : null}
+          topLeftSlot={
+            allowedToEdit ? (
+              <ThemeButton startIcon={<Add />} onClick={() => setTechnicianDialog(true)}>
+                Assign
+              </ThemeButton>
+            ) : null
+          }
+        />
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
       {technicianDialog && (
         <AssignEmployeeDialog
           onSuccess={(data) => {
@@ -502,8 +474,23 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
           okBtnLoading={isDeleting}
         />
       )}
-    </div>
+    </>
   );
 };
 
 export default Technicians;
+
+const BulkActionItems = ({ selectedRecords, setDeleteData }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={selectedRecords?.some((e) => !e?.canDelete)}
+        onClick={() => {
+          setDeleteData(selectedRecords?.map((d) => d?._id));
+        }}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
