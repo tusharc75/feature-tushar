@@ -87,7 +87,7 @@ const WorkOrder = ({
   const [productQtyEdit, setProductQtyEdit] = useState({ open: false, data: null });
   const [bulkEditWorkOrderDialog, setBulkEditWorkOrderDialog] = useState({ open: false, _ids: [] });
   const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, serializedPackage: null });
-  const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState(false);
+  const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState({open : false, sendToCustomer: false});
 
   const { generateColumns, getMaterialLabel } = useColumns();
 
@@ -909,17 +909,20 @@ const WorkOrder = ({
       });
   };
 
-  const handleReceiveAssetInRepairJob = () => {
+  const handleReceiveAssetInRepairJob = (sendToCustomer: boolean = false) => {
     setSubmitting(true);
     axiosInstance()
-      .put(`${repairJob.api}/receive-assets-complete`, { repairJob: getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.currentRepairJob })
+      .put(`${repairJob.api}/receive-assets-complete`, {
+        repairJob: getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.currentRepairJob,
+        sendToCustomer: sendToCustomer
+      })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
-        setRepairJobReceiveConfirmation(false);
+        setRepairJobReceiveConfirmation({ open: false, sendToCustomer: false });
         setSubmitting(false);
         fetchData();
       })
@@ -1087,14 +1090,16 @@ const WorkOrder = ({
         />
       )}
 
-      {repairJobReceiveConfirmation && (
+      {repairJobReceiveConfirmation?.open && (
         <ConfirmationDialog
-          open={repairJobReceiveConfirmation}
-          message={`Are you sure you want to receive ?`}
+          open={repairJobReceiveConfirmation?.open}
+          message={`Are you sure you want to ${repairJobReceiveConfirmation?.sendToCustomer ? 'send to customer' : 'receive'} ?`}
           onClose={() => {
-            setRepairJobReceiveConfirmation(false);
+            setRepairJobReceiveConfirmation({ open: false, sendToCustomer: false });
           }}
-          onOk={handleReceiveAssetInRepairJob}
+          onOk={() => {
+            handleReceiveAssetInRepairJob(repairJobReceiveConfirmation?.sendToCustomer);
+          }}
           okBtnLoading={isSubmitting}
         />
       )}
@@ -1413,11 +1418,43 @@ const ActionButtonMenuItems = ({
       {permissions?.repairJob?.isUpdate && (
         <MenuItem
           onClick={() => {
-            setRepairJobReceiveConfirmation(true)
+            setRepairJobReceiveConfirmation({open : true, sendToCustomer: false});
           }}
-          disabled={getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)?.every(r => r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder && r?.workOrder?.currentRepairJob && getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.currentRepairJob === r?.workOrder?.currentRepairJob) ? false : true}
+          disabled={
+            getFilterSelectedRecords(selectedRecords)
+              ?.filter((e) => e?.type === MATERIAL_TYPE.package)
+              ?.every(
+                (r) =>
+                  r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder &&
+                  r?.workOrder?.currentRepairJob &&
+                  getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.currentRepairJob === r?.workOrder?.currentRepairJob
+              )
+              ? false
+              : true
+          }
         >
           {`Receive From Supplier`}
+        </MenuItem>
+      )}
+      {permissions?.repairJob?.isUpdate && (
+        <MenuItem
+          onClick={() => {
+            setRepairJobReceiveConfirmation({ open: true, sendToCustomer: true });
+          }}
+          disabled={
+            getFilterSelectedRecords(selectedRecords)
+              ?.filter((e) => e?.type === MATERIAL_TYPE.package)
+              ?.every(
+                (r) =>
+                  r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder &&
+                  r?.workOrder?.currentRepairJob &&
+                  getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.currentRepairJob === r?.workOrder?.currentRepairJob
+              )
+              ? false
+              : true
+          }
+        >
+          {`Send To Customer`}
         </MenuItem>
       )}
       <MenuItem
