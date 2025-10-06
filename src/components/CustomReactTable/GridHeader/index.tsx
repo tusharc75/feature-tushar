@@ -18,6 +18,8 @@ import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/u
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import DisplayFilters from 'src/components/CustomReactTable/DisplayFilters';
 import ArrangeRow from 'src/components/CustomReactTable/ArrangeRow';
+import ModernBulkAction from 'src/components/CustomReactTable/GridHeader/ModernBulkAction';
+export { default as BulkActionContainer } from './ModernBulkAction/BulkActionContainer';
 
 type GridHeaderProps = {
   resource: any;
@@ -39,6 +41,7 @@ type GridHeaderProps = {
   handleTableExport: () => void;
   hideExportTable: boolean;
   topLeftSlot: React.ReactNode;
+  bulkActionItems: React.ReactChild;
 };
 
 const GridHeader = ({
@@ -60,7 +63,8 @@ const GridHeader = ({
   state,
   handleTableExport,
   hideExportTable = false,
-  topLeftSlot = null
+  topLeftSlot = null,
+  bulkActionItems
 }: GridHeaderProps) => {
   const toastConfig = useContext(CustomToastContext);
   const { selectedRecords, loading, filters: customFilters, dataRows }: TInitialState = state;
@@ -141,128 +145,136 @@ const GridHeader = ({
   }, [resource]);
 
   return (
-    <div className={`my-[8px] flex flex-wrap items-center justify-between gap-[8px]`}>
-      <div className="flex-grow">
-        <div className="table-filter-v1">
-          {(isClientSideGrid || selectedRecords?.length <= 200) && (
-            <ShowFilteredRecordsOnly
-              dispatchTable={dispatch}
-              showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch && !hideSelection}
-              selectedRecords={selectedRecords?.length}
-            />
-          )}
-          {topLeftSlot}
-          <DisplayFilters
-            renderedFrom={renderedFrom}
-            columns={newColumns}
-            customColumns={coloums}
-            customFilters={customFilters}
-            dispatchTable={dispatch}
-            showFilters={showFilters}
-            handleFilterOpen={handleFilterOpen}
-            selectedFilter={selectedFilter}
-            setSelectedFilter={setSelectedFilter}
-            currentFomValue={currentFomValue}
-            setCurrentFomValue={setCurrentFomValue}
-            resource={resource}
-            filterByIds={filterByIds}
-            setFilterByIds={setFilterByIds}
-            deepFilters={deepFilters}
-            setDeepFilters={setDeepFilters}
-            filterTerm={filterTerm}
-            setFilterTerm={setFilterTerm}
-          />
-        </div>
-        {isFilterOpen && (
-          <GridFilter
-            resource={resource}
-            handleClose={handleFilterClose}
-            coloums={coloums}
-            setColoums={setColoums}
-            deepFilters={deepFilters}
-            setDeepFilters={setDeepFilters}
-            filterByIds={filterByIds}
-            setFilterByIds={setFilterByIds}
-            filterTerm={filterTerm}
-            setFilterTerm={setFilterTerm}
-            handleApplyFilter={handleApplyFilter}
-            selectedFilter={selectedFilter}
-          />
-        )}
-      </div>
-      <div className="buttons ml-auto flex w-full flex-wrap justify-between gap-[8px] min-[768px]:w-[unset]">
-        <div className="buttons flex flex-wrap gap-[8px]">
-          {isMobileView && !hideSelection && (
-            <>
-              <label className="ml-[13px] flex cursor-pointer items-center gap-2">
-                <IndeterminateCheckbox
-                  {...{
-                    checked: table.getIsAllRowsSelected(),
-                    indeterminate: table.getIsSomeRowsSelected(),
-                    onChange: table.getToggleAllRowsSelectedHandler()
-                  }}
-                  className="mx-auto text-center [&_svg]:[font-size:20px] "
+    <div className={`my-[8px] flex flex-wrap items-center justify-between gap-[8px] transition-all duration-300`}>
+      {selectedRecords.length > 0 && bulkActionItems ? (
+        <>
+          <ModernBulkAction state={state} dispatch={dispatch} bulkActionItems={bulkActionItems} />
+        </>
+      ) : (
+        <>
+          <div className="flex-grow">
+            <div className="table-filter-v1">
+              {(isClientSideGrid || selectedRecords?.length <= 200) && (
+                <ShowFilteredRecordsOnly
+                  dispatchTable={dispatch}
+                  showOnlyShowFilteredRecordSwitch={showOnlyShowFilteredRecordSwitch && !hideSelection}
+                  selectedRecords={selectedRecords?.length}
                 />
-                <span>Select All</span>
-              </label>
-            </>
-          )}
-        </div>
-        <div className="buttons flex flex-wrap gap-[8px] ">
-          {showFilters && (
-            <ThemeButton onClick={handleFilterOpen} startIcon={<BiFilterAlt />} mobileTooltip="Apply Filters" iconForMobile={<BiFilterAlt />}>
-              {'Filters'}
-            </ThemeButton>
-          )}
-          {arrangeRowField && resource && (
-            <ArrangeRow state={state} arrangeRowField={arrangeRowField} resource={resource} refreshGrid={refreshGrid} />
-          )}
-          {!hideExportTable && isClientSideGrid ? (
-            <HtmlTooltip title={dataRows.length === 0 ? 'No Data to Export' : 'Export to Excel'} placement="top" arrow>
-              <span>
-                <IconButton
-                  className={`refresh-arrange-button`}
-                  color="primary"
-                  disabled={loading || dataRows.length === 0}
-                  size="small"
-                  onClick={() => {
-                    handleTableExport();
-                  }}
-                >
-                  <ExportIcon fontSize="small" />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-          ) : null}
-          {showArrangeView && (
-            <ArrangeView
-              table={table}
-              columns={newColumns}
-              hideSelection={hideSelection}
-              renderedFrom={renderedFrom}
-              dispatchTable={dispatch}
-              state={state}
-              expander={expander}
-              appliedView={null}
-            />
-          )}
-          {refreshGrid && (
-            <HtmlTooltip title="Refresh" placement="top" arrow>
-              <IconButton
-                className={`refresh-arrange-button`}
-                color="primary"
-                disabled={loading}
-                size="small"
-                onClick={() => {
-                  refreshGrid();
-                }}
-              >
-                <RefreshIcon style={{ fontSize: '20px' }} />
-              </IconButton>
-            </HtmlTooltip>
-          )}
-        </div>
-      </div>
+              )}
+              {topLeftSlot}
+              <DisplayFilters
+                renderedFrom={renderedFrom}
+                columns={newColumns}
+                customColumns={coloums}
+                customFilters={customFilters}
+                dispatchTable={dispatch}
+                showFilters={showFilters}
+                handleFilterOpen={handleFilterOpen}
+                selectedFilter={selectedFilter}
+                setSelectedFilter={setSelectedFilter}
+                currentFomValue={currentFomValue}
+                setCurrentFomValue={setCurrentFomValue}
+                resource={resource}
+                filterByIds={filterByIds}
+                setFilterByIds={setFilterByIds}
+                deepFilters={deepFilters}
+                setDeepFilters={setDeepFilters}
+                filterTerm={filterTerm}
+                setFilterTerm={setFilterTerm}
+              />
+            </div>
+            {isFilterOpen && (
+              <GridFilter
+                resource={resource}
+                handleClose={handleFilterClose}
+                coloums={coloums}
+                setColoums={setColoums}
+                deepFilters={deepFilters}
+                setDeepFilters={setDeepFilters}
+                filterByIds={filterByIds}
+                setFilterByIds={setFilterByIds}
+                filterTerm={filterTerm}
+                setFilterTerm={setFilterTerm}
+                handleApplyFilter={handleApplyFilter}
+                selectedFilter={selectedFilter}
+              />
+            )}
+          </div>
+          <div className="buttons ml-auto flex w-full flex-wrap justify-between gap-[8px] min-[768px]:w-[unset]">
+            <div className="buttons flex flex-wrap gap-[8px]">
+              {isMobileView && !hideSelection && (
+                <>
+                  <label className="ml-[13px] flex cursor-pointer items-center gap-2">
+                    <IndeterminateCheckbox
+                      {...{
+                        checked: table.getIsAllRowsSelected(),
+                        indeterminate: table.getIsSomeRowsSelected(),
+                        onChange: table.getToggleAllRowsSelectedHandler()
+                      }}
+                      className="mx-auto text-center [&_svg]:[font-size:20px] "
+                    />
+                    <span>Select All</span>
+                  </label>
+                </>
+              )}
+            </div>
+            <div className="buttons flex flex-wrap gap-[8px] ">
+              {showFilters && (
+                <ThemeButton onClick={handleFilterOpen} startIcon={<BiFilterAlt />} mobileTooltip="Apply Filters" iconForMobile={<BiFilterAlt />}>
+                  {'Filters'}
+                </ThemeButton>
+              )}
+              {arrangeRowField && resource && (
+                <ArrangeRow state={state} arrangeRowField={arrangeRowField} resource={resource} refreshGrid={refreshGrid} />
+              )}
+              {!hideExportTable && isClientSideGrid ? (
+                <HtmlTooltip title={dataRows.length === 0 ? 'No Data to Export' : 'Export to Excel'} placement="top" arrow>
+                  <span>
+                    <IconButton
+                      className={`refresh-arrange-button`}
+                      color="primary"
+                      disabled={loading || dataRows.length === 0}
+                      size="small"
+                      onClick={() => {
+                        handleTableExport();
+                      }}
+                    >
+                      <ExportIcon fontSize="small" />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
+              ) : null}
+              {showArrangeView && (
+                <ArrangeView
+                  table={table}
+                  columns={newColumns}
+                  hideSelection={hideSelection}
+                  renderedFrom={renderedFrom}
+                  dispatchTable={dispatch}
+                  state={state}
+                  expander={expander}
+                  appliedView={null}
+                />
+              )}
+              {refreshGrid && (
+                <HtmlTooltip title="Refresh" placement="top" arrow>
+                  <IconButton
+                    className={`refresh-arrange-button`}
+                    color="primary"
+                    disabled={loading}
+                    size="small"
+                    onClick={() => {
+                      refreshGrid();
+                    }}
+                  >
+                    <RefreshIcon style={{ fontSize: '20px' }} />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
