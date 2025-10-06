@@ -165,7 +165,6 @@ export const getTaxById = async (taxCode: any) => {
 
 export const getCostPriceConditions = async (material: any[], type: string) => {
   let ids = [];
-  ids = material?.map((e) => type === sidebarResource.employeeMaster ? e?.technician : e?.materialId);
   ids = material?.map((e) => type === sidebarResource.competencies ? e?.competence : e?.materialId);
   const {
     data: { data }
