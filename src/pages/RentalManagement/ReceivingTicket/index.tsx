@@ -14,7 +14,6 @@ import { MdHandyman, MdHomeRepairService } from 'react-icons/md';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import ReplaceAssetReason from 'src/components/RentalManagment/ReplaceAssetReason';
 import { actionDisable, rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -200,7 +199,8 @@ const ReceivingTicket = ({
   const [technicianDispatchReturn, setTechnicianDispatchReturn] = useState(false);
 
   const {
-    state: { user, permissions, resources }
+    state: { user, permissions, resources
+    }
   }: any = useData();
 
   const { generateColumns } = useColumns();
@@ -3546,12 +3546,14 @@ const ReceivingTicket = ({
           referenceType={'RentalJobReplaceAsset'}
           referenceData={{
             _id: rentalManagementData?._id,
-            warehouse: rentalManagementData?.warehouse?.optionValue
+            warehouse: rentalManagementData?.warehouse?.optionValue,
+            replaceAssetReasonDialog: showReplaceAssetWarnings?.replaceAssetReasonDialog
           }}
           isAdding={isSubmitting}
           selectedProducts={addSerializedAssetDialog.products}
           filterByPlant={rentalManagementData?.warehouse}
           replaceAssets={true}
+          setShowReplaceAssetWarnings={setShowReplaceAssetWarnings}
         />
       )}
       {openDateDialog.open && (

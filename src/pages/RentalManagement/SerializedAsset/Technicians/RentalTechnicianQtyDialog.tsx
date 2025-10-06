@@ -109,7 +109,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
       updateRateChangeState(values, priceData, pricingMethodOptions);
 
       if (user?.user?.brandPolicy?.materialCostPrice) {
-        let costPriceData: any = await getCostPriceConditions([{ technician: technicianData?.technicianId }], sidebarResource.employeeMaster);
+        let costPriceData: any = await getCostPriceConditions([{ competence: technicianData?.competence?.optionValue }], sidebarResource.competencies)
         setCostPriceConditionList(costPriceData || []);
       }
     }
