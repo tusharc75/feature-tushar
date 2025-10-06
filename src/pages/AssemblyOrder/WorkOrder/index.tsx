@@ -1082,7 +1082,7 @@ const WorkOrder = ({
           referenceType={sidebarResource.assemblyOrder}
           referenceData={{
             warehouse: assemblyOrderData?.warehouse?.optionValue,
-            workOrder: getFilterSelectedRecords(selectedRecords)?.map(r => r?.workOrder?._id)
+            workOrder: uniq(getFilterSelectedRecords(selectedRecords)?.map(r => r?.workOrder?._id))
           }}
         />
       )}
