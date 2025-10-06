@@ -319,6 +319,23 @@ const ServiceMaster = () => {
               title: 'Consumable Import',
               api: `${serviceMaster.api}/product/unknown/import`,
               type: 'import'
+            },
+            {
+              title: 'Allocations Template',
+              api: `${serviceMaster.api}/allocation/template`,
+              type: 'download'
+            },
+            {
+              title: 'Allocations Export',
+              api: `${serviceMaster.api}/allocation/template?export=true${
+                selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+              }`,
+              type: 'export'
+            },
+            {
+              title: 'Allocations Import',
+              api: `${serviceMaster.api}/allocation/import`,
+              type: 'import'
             }
           ]}
         />
