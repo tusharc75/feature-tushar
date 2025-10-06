@@ -75,7 +75,7 @@ const CostPrice = ({ referenceData, type }) => {
                       <th className="border border-gray-300 px-4 py-2"></th>
                       {referenceData?.pricingMethod?.map((method, index) => (
                         <th key={index} className="whitespace-nowrap border border-gray-300 px-4 py-2">
-                          {method}
+                          <span className='text-sm font-normal' > {method}</span>
                         </th>
                       ))}
                     </tr>
@@ -83,10 +83,10 @@ const CostPrice = ({ referenceData, type }) => {
                   <tbody>
                     {referenceData?.unit?.map((unit, rowIndex) => (
                       <tr key={rowIndex}>
-                        <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
+                        <td className="border border-gray-300 px-4 py-2"><span className='text-sm font-normal' >{unit}</span></td>
                         {referenceData?.pricingMethod?.map((method, colIndex) => (
                           <td key={colIndex} className="border border-gray-300 px-4 py-2">
-                            <p>
+                            <p className='text-sm'>
                               {formatAmountWithCurrency(
                                 user?.user?.brandCurrency,
                                 costPriceData?.[`${camelCase(method)}_${camelCase(unit.toLowerCase())}`]
