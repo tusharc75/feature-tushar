@@ -45,8 +45,7 @@ const FieldTicket = ({
   enableGlobalSearch = true,
   noQuotationCheck = false,
   refreshData = false,
-  fromFieldServiceTechnician = false,
-  topLeftSlot = null
+  fromFieldServiceTechnician = false
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const { setWalkmeData } = useSetWalkmeData();
@@ -321,29 +320,6 @@ const FieldTicket = ({
 
   return (
     <Fragment>
-      <div className="flex min-h-[32px] flex-wrap items-center gap-2 py-2">
-        <div>{topLeftSlot}</div>
-        <div className="flex-grow">
-          {!fromFieldServiceTechnician && (
-            <DetailsPageHeader
-              isAddButtonVisible={true}
-              addButtonProps={{
-                disabled: allowedToEdit && (!resourceData?.quotation || noQuotationCheck) ? false : true,
-                tooltip: !allowedToEdit
-                  ? ownerAndColaborator
-                  : resourceData?.quotation && !noQuotationCheck
-                    ? `Converted from ${resources?.quotation?.titleSingular} you can not perform this action`
-                    : ''
-              }}
-              addButtonMenuItems={addButtonMenuItems()}
-              isActionButtonVisible={false}
-              actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-              hasXpadding
-              hasYpadding={false}
-            />
-          )}
-        </div>
-      </div>
       {columns ? (
         <CustomReactTable
           height={!fromFieldServiceTechnician ? 'calc(100vh - 300px)' : 'calc(100vh - 200px)'}
@@ -356,6 +332,26 @@ const FieldTicket = ({
           isClientSideGrid={true}
           hideAction={!fromFieldServiceTechnician ? !allowedToEdit : true}
           hideSelection={!fromFieldServiceTechnician ? !allowedToEdit : true}
+          topLeftSlot={
+            !fromFieldServiceTechnician ? (
+              <DetailsPageHeader
+                isAddButtonVisible={true}
+                addButtonProps={{
+                  disabled: allowedToEdit && (!resourceData?.quotation || noQuotationCheck) ? false : true,
+                  tooltip: !allowedToEdit
+                    ? ownerAndColaborator
+                    : resourceData?.quotation && !noQuotationCheck
+                      ? `Converted from ${resources?.quotation?.titleSingular} you can not perform this action`
+                      : ''
+                }}
+                addButtonMenuItems={addButtonMenuItems()}
+                isActionButtonVisible={false}
+                actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+                hasXpadding
+                hasYpadding={false}
+              />
+            ) : null
+          }
           bulkActionItems={
             !isOffline ? (
               <BulkActionItems

@@ -32,12 +32,7 @@ const ModernBulkAction = ({ state, bulkActionItems, dispatch }: ModernBulkAction
   }, []);
 
   return (
-    <div
-      className={cn(
-        'flex w-full max-w-full flex-wrap items-center gap-2 rounded-md border bg-[var(--dark-secondary,#EBF0FA)] px-2 py-[6px]',
-        dividerClass
-      )}
-    >
+    <div className={cn('flex w-full max-w-full items-center gap-2 rounded-md border bg-[var(--dark-secondary,#EBF0FA)] px-2 py-[6px]', dividerClass)}>
       {bulkActionItems}
       <div className="divider" />
       <p className="flex items-center gap-2 text-sm font-medium">
