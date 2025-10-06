@@ -849,7 +849,7 @@ const AddSerializedAsset = ({
           />
         )
       }
-      {referenceData?.replaceAssetReasonDialog && (
+      {referenceType === "RentalJobReplaceAsset" && referenceData?.replaceAssetReasonDialog && (
         <ReplaceAssetReason
           handleClose={() => {
             setSelectedWarehouse(null);
