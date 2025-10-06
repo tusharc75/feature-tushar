@@ -122,16 +122,20 @@ const RenderMenuWithButton = ({ items }: { items: ChildList[] }) => {
         }
         case 'BulkActionIconButton': {
           menuItems.push(
-            <HtmlTooltip title={item.props.tooltip}>
-              <MenuItem {...item.props}>{item.props.text}</MenuItem>
+            <HtmlTooltip title={tooltip}>
+              <MenuItem {...props}>{item.props.text}</MenuItem>
             </HtmlTooltip>
           );
           break;
         }
         default: {
           menuItems.push(
-            <HtmlTooltip title={item.props.tooltip}>
-              <MenuItem {...item.props} />
+            <HtmlTooltip title={tooltip}>
+              <MenuItem {...props}>
+                {startIcon && <ListItemIcon>{startIcon}</ListItemIcon>}
+                <ListItemText>{children}</ListItemText>
+                {endIcon && <ListItemIcon>{item.props.endIcon}</ListItemIcon>}
+              </MenuItem>
             </HtmlTooltip>
           );
         }
