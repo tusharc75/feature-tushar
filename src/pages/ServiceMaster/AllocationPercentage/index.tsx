@@ -18,7 +18,7 @@ const AllocationPercentage = ({ referenceData, onRefresh }) => {
     <>
       <Box className={`single-form-v1`} style={{ overflow: 'hidden' }}>
         <Box className={'form-head-v1'} justifyContent="space-between" alignItems="center">
-          <Typography variant="subtitle2">Allocation</Typography>
+          <Typography variant="subtitle2">Allocations</Typography>
           <HtmlTooltip title={permissions?.serviceMaster?.isUpdate ? referenceData?.allocations?.length ? "Update" : "Add" : updateDisable}>
             <IconButton
               size="small"
