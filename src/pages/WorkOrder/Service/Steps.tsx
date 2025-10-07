@@ -49,37 +49,36 @@ import CustomCollapsible from 'src/components/CustomCollapsible';
 import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
 import { autoCalculateSpecificFields, getFormulaValue } from 'src/constants/formulaUtility';
 
-
 const getValueOfMatchedFieldName = (fields: any, productData: any, workOrderData: any, products: any) => {
-  let data: any = {}
-  const referenceData = { ...(workOrderData || {}), ...(productData || {}) }
+  let data: any = {};
+  const referenceData = { ...(workOrderData || {}), ...(productData || {}) };
   if (fields?.length > 0 && referenceData) {
-    fields?.forEach(f => {
+    fields?.forEach((f) => {
       if (f?.fieldName && referenceData[f?.fieldName]) {
-        data[f?.fieldName] = referenceData[f?.fieldName]
+        data[f?.fieldName] = referenceData[f?.fieldName];
       }
     });
   }
   if (products?.length) {
-    const formulaFields = fields?.filter((e) => e?.inputFields?.includes("productDescription"))
+    const formulaFields = fields?.filter((e) => e?.inputFields?.includes('productDescription'));
     formulaFields?.forEach((_field) => {
-      let result = {}
+      let result = {};
       for (const _product of products) {
-        const description = _product?.description || _product?.productDetail?.productDescription
-        const value = getFormulaValue(_field?.formula, { productDescription: description }, _field?.returnType, _field?.decimalPlaces)
+        const description = _product?.description || _product?.productDetail?.productDescription;
+        const value = getFormulaValue(_field?.formula, { productDescription: description }, _field?.returnType, _field?.decimalPlaces);
         if (value) {
-          result[_field?.fieldName] = value
+          result[_field?.fieldName] = value;
           break;
         }
       }
       if (result[_field?.fieldName]) {
-        let calValues = autoCalculateSpecificFields({ [_field?.fieldName]: result[_field?.fieldName] }, {}, fields)
-        data = { ...data, ...calValues }
+        let calValues = autoCalculateSpecificFields({ [_field?.fieldName]: result[_field?.fieldName] }, {}, fields);
+        data = { ...data, ...calValues };
       }
-    })
+    });
   }
-  return data
-}
+  return data;
+};
 export interface StepDataInterface {
   _id: string;
   uniqueId: string;
@@ -230,7 +229,6 @@ const Steps = ({
   workOrderPolicyData = null,
   products = null
 }) => {
-
   const workOrderId = workOrderData?._id;
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -341,9 +339,9 @@ const Steps = ({
             ? false
             : ele?.fields?.some((_f) => _f?.required)
               ? ele?.fields
-                ?.filter((_f) => _f?.required)
-                ?.map((f) => f?.fieldName)
-                ?.every((_fieldName) => stepSubmitedData?.find((s) => s.stepId === ele?._id)[_fieldName])
+                  ?.filter((_f) => _f?.required)
+                  ?.map((f) => f?.fieldName)
+                  ?.every((_fieldName) => stepSubmitedData?.find((s) => s.stepId === ele?._id)[_fieldName])
                 ? true
                 : false
               : true
@@ -465,8 +463,10 @@ const Steps = ({
     let fieldsDataForCreate = step?.fields ? step?.fields : [];
     let tempServiceData = stepSubmitedData?.find((d) => d.uniqueId === selectedService?.uniqueId && d.stepId === step?._id);
 
-    const productData = selectedService?.parentId && products?.some(p => p?._id === selectedService?.parentId && p?.productDetail) ?
-      products?.find(p => p?._id === selectedService?.parentId)?.productDetail : null
+    const productData =
+      selectedService?.parentId && products?.some((p) => p?._id === selectedService?.parentId && p?.productDetail)
+        ? products?.find((p) => p?._id === selectedService?.parentId)?.productDetail
+        : null;
 
     if (tempServiceData) {
       stepData = tempServiceData;
@@ -482,8 +482,9 @@ const Steps = ({
           fields: fieldsDataForCreate,
           formsData: setFieldsInAscendingOrder(fieldsDataForCreate),
           orignalValues: tempServiceData,
-          values: isDataAlreadyAdded ? getObjKeysWithValues(tempServiceData, fieldsDataForCreate, true) :
-            { ...getObjKeys('', fieldsDataForCreate), ...getValueOfMatchedFieldName(fieldsDataForCreate, productData, workOrderData, products) }
+          values: isDataAlreadyAdded
+            ? getObjKeysWithValues(tempServiceData, fieldsDataForCreate, true)
+            : { ...getObjKeys('', fieldsDataForCreate), ...getValueOfMatchedFieldName(fieldsDataForCreate, productData, workOrderData, products) }
         };
       }
     } else {
@@ -1029,9 +1030,9 @@ const Steps = ({
               <ThemeButton
                 disabled={
                   allowedToEdit &&
-                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                      selectedService?.status
-                    )
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                    selectedService?.status
+                  )
                     ? false
                     : true
                 }
@@ -1051,9 +1052,9 @@ const Steps = ({
           <ThemeButton
             disabled={
               allowedToEdit &&
-                ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                  selectedService?.status
-                )
+              ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                selectedService?.status
+              )
                 ? false
                 : true
             }
@@ -1082,7 +1083,7 @@ const Steps = ({
         <MenuItem
           disabled={
             (allowedToEdit &&
-              serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every((element) => element?.isAllowToCheck === true)
+            serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every((element) => element?.isAllowToCheck === true)
               ? false
               : true) || selectedSteps.length === 0
           }
@@ -1142,9 +1143,9 @@ const Steps = ({
                     },
                     disabled:
                       allowedToEdit &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        )
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                        selectedService?.status
+                      )
                         ? false
                         : true,
                     placement: 'right'
@@ -1160,8 +1161,9 @@ const Steps = ({
               </div>
             </div>
             <div
-              className={`w-full ${minHeightClass ? minHeightClass : 'h-[calc(100vh-278px)] '
-                } space-y-2 overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)]`}
+              className={`w-full ${
+                minHeightClass ? minHeightClass : 'h-[calc(100vh-278px)] '
+              } space-y-2 overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)]`}
             >
               {serviceDetails?.steps?.map((step, index) => {
                 const { stepData, isStepValid } = getFields(step);
@@ -1175,13 +1177,15 @@ const Steps = ({
                       element="li"
                       className="border"
                       toggleTriggerArea="onlyToggleButton"
-                      toggleIconPosition={workOrderPolicyData?.policy?.hideStepsProductsConsumables &&
-                        workOrderPolicyData?.policy?.hideStepsDrawings ? 'hidden' : 'end'}
+                      toggleIconPosition={
+                        workOrderPolicyData?.policy?.hideStepsProductsConsumables && workOrderPolicyData?.policy?.hideStepsDrawings ? 'hidden' : 'end'
+                      }
                       head={
                         <Box
                           key={step._id}
-                          className={`${classes.accordionHeading} ${!stepData?.status ? '' : 'cursor-pointer'
-                            } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
+                          className={`${classes.accordionHeading} ${
+                            !stepData?.status ? '' : 'cursor-pointer'
+                          } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
                         >
                           <div className="flex gap-2 ">
                             {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) ? (
@@ -1286,12 +1290,12 @@ const Steps = ({
                                           <DeleteOutline
                                             color={
                                               allowedToEdit &&
-                                                ![
-                                                  WORKORDER_SERVICE_STEP_STATUS.passed,
-                                                  WORKORDER_SERVICE_STEP_STATUS.failed,
-                                                  WORKORDER_SERVICE_STEP_STATUS.completed,
-                                                  WORKORDER_SERVICE_STEP_STATUS.skipped
-                                                ].includes(stepData?.passFailStatus)
+                                              ![
+                                                WORKORDER_SERVICE_STEP_STATUS.passed,
+                                                WORKORDER_SERVICE_STEP_STATUS.failed,
+                                                WORKORDER_SERVICE_STEP_STATUS.completed,
+                                                WORKORDER_SERVICE_STEP_STATUS.skipped
+                                              ].includes(stepData?.passFailStatus)
                                                 ? 'error'
                                                 : 'disabled'
                                             }
@@ -1446,10 +1450,10 @@ const Steps = ({
                                     ) : null
                                   ) : null}
                                   {stepData?.status &&
-                                    step?.isAllowToPerform &&
-                                    ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                                    // ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                                    isStepsAllowToPerform ? (
+                                  step?.isAllowToPerform &&
+                                  ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                                  // ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                                  isStepsAllowToPerform ? (
                                     [
                                       WORKORDER_SERVICE_STEP_STATUS.passed,
                                       WORKORDER_SERVICE_STEP_STATUS.failed,
@@ -1562,12 +1566,12 @@ const Steps = ({
                                     <DeleteOutline
                                       color={
                                         allowedToEdit &&
-                                          ![
-                                            WORKORDER_SERVICE_STEP_STATUS.passed,
-                                            WORKORDER_SERVICE_STEP_STATUS.failed,
-                                            WORKORDER_SERVICE_STEP_STATUS.completed,
-                                            WORKORDER_SERVICE_STEP_STATUS.skipped
-                                          ].includes(stepData?.passFailStatus)
+                                        ![
+                                          WORKORDER_SERVICE_STEP_STATUS.passed,
+                                          WORKORDER_SERVICE_STEP_STATUS.failed,
+                                          WORKORDER_SERVICE_STEP_STATUS.completed,
+                                          WORKORDER_SERVICE_STEP_STATUS.skipped
+                                        ].includes(stepData?.passFailStatus)
                                           ? 'error'
                                           : 'disabled'
                                       }
@@ -1581,7 +1585,7 @@ const Steps = ({
                         </Box>
                       }
                     >
-                      {(!user?.user?.brandPolicy?.workOrderConsumableHide && !workOrderPolicyData?.policy?.hideStepsProductsConsumables) && (
+                      {!user?.user?.brandPolicy?.workOrderConsumableHide && !workOrderPolicyData?.policy?.hideStepsProductsConsumables && (
                         <CustomCollapsible
                           head={<span className="text-sm font-normal md:text-base">Products/Consumables</span>}
                           className="border-b-0 border-t"
@@ -1597,7 +1601,7 @@ const Steps = ({
                                       : allowedToEdit
                                     : false
                                   : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-                                    !workOrderData?.deleted
+                                      !workOrderData?.deleted
                                     ? false
                                     : resource === sidebarResource?.workOrderTechnician
                                       ? true
@@ -1621,7 +1625,7 @@ const Steps = ({
                           </div>
                         </CustomCollapsible>
                       )}
-                      {!workOrderPolicyData?.policy?.hideStepsDrawings &&
+                      {!workOrderPolicyData?.policy?.hideStepsDrawings && (
                         <CustomCollapsible
                           head={<span className="text-base text-sm font-normal">Drawings</span>}
                           element="li"
@@ -1644,7 +1648,7 @@ const Steps = ({
                             />
                           </div>
                         </CustomCollapsible>
-                      }
+                      )}
                     </CustomCollapsible>
                   </>
                 );
@@ -1726,16 +1730,16 @@ const Steps = ({
                     }}
                     disabled={
                       getFields(selectedStep).canSkip &&
-                        isStepsAllowToPerform &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        ) &&
-                        ![
-                          WORKORDER_SERVICE_STEP_STATUS.skipped,
-                          WORKORDER_SERVICE_STEP_STATUS.completed,
-                          WORKORDER_SERVICE_STEP_STATUS.end,
-                          WORKORDER_SERVICE_STEP_STATUS.passed
-                        ]?.includes(getFields(selectedStep)?.stepData?.status)
+                      isStepsAllowToPerform &&
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                        selectedService?.status
+                      ) &&
+                      ![
+                        WORKORDER_SERVICE_STEP_STATUS.skipped,
+                        WORKORDER_SERVICE_STEP_STATUS.completed,
+                        WORKORDER_SERVICE_STEP_STATUS.end,
+                        WORKORDER_SERVICE_STEP_STATUS.passed
+                      ]?.includes(getFields(selectedStep)?.stepData?.status)
                         ? false
                         : true
                     }
@@ -2024,9 +2028,9 @@ const Steps = ({
                 <ThemeButton
                   disabled={
                     allowedToEdit &&
-                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                        selectedService?.status
-                      )
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                      selectedService?.status
+                    )
                       ? false
                       : true
                   }
@@ -2111,14 +2115,18 @@ export default Steps;
 
 export const RenderPassFailChip = ({ status, className = '', ...others }) => {
   return (
-    <Chip
-      className={className}
-      label={status}
-      variant="outlined"
-      {...others}
-      style={{
-        ...getChipColor(status)
-      }}
-    />
+    <>
+      <div
+        className={cn(
+          'inline-flex h-[26px] max-w-full items-center justify-center whitespace-nowrap rounded-2xl border align-middle text-[0.8125rem] font-bold leading-[1.5]',
+          getChipColor(status).background,
+          getChipColor(status).borderColor,
+          getChipColor(status).color,
+          className
+        )}
+      >
+        <span className="overflow-hidden text-ellipsis whitespace-nowrap px-[11px]">{status}</span>
+      </div>
+    </>
   );
 };
