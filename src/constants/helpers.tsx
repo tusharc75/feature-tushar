@@ -426,7 +426,8 @@ export const sidebarResource = {
   contentPostPlanning: 'Content Post Planning',
   onboardingTemplate: 'Onboarding Template',
   onboarding: 'Onboarding',
-  assetServiceTickets: 'Asset Service Tickets'
+  assetServiceTickets: 'Asset Service Tickets',
+  reportBuilder: 'Report Builder'
 } as const;
 
 export const primaryFields = {
