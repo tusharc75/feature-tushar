@@ -1277,7 +1277,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length;) {
+        for (let i = 0; i < validationFields?.length; ) {
           const field = validationFields[i];
           const condition =
             field?.type === 'section'
@@ -1684,7 +1684,7 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
         });
       }
       return { permissions, resources };
-    } catch (e) { }
+    } catch (e) {}
   }
 };
 
@@ -2900,38 +2900,47 @@ type ChipStatus =
   | 'Skipped'
   | 'Need Reperform';
 
-export const getChipColor = (status: ChipStatus): React.CSSProperties => {
-  let color = 'var(--chip-color-inProgress)';
-  let borderColor = 'var(--chip-border-inProgress)';
-  let background = 'var(--chip-background-inProgress)';
+export const getChipColor = (status: ChipStatus): { color: string; borderColor: string; background: string } => {
+  let color = 'text-[var(--chip-color-inProgress)]';
+  let borderColor = 'border-[var(--chip-border-inProgress)]';
+  let background = 'bg-[var(--chip-background-inProgress)]';
 
   switch (true) {
     case status === 'Completed' || status === 'Passed' || status === 'end':
-      color = 'var(--chip-color-completed)';
-      borderColor = 'var(--chip-border-completed)';
-      background = 'var(--chip-background-completed)';
+      color = 'text-[var(--chip-color-completed)]';
+      borderColor = 'border-[var(--chip-border-completed)]';
+      background = 'bg-[var(--chip-background-completed)]';
       break;
 
     case status === 'Failed' || status === 'Need Reperform':
-      color = 'var(--chip-color-failed)';
-      borderColor = 'var(--chip-border-failed)';
-      background = 'var(--chip-background-failed)';
+      color = 'text-[var(--chip-color-failed)]';
+      borderColor = 'border-[var(--chip-border-failed)]';
+      background = 'bg-[var(--chip-background-failed)]';
       break;
 
     case status === 'Pending' || status === 'Backlog' || status === 'Skipped':
-      color = 'var(--chip-color-pending)';
-      borderColor = 'var(--chip-border-pending)';
-      background = 'var(--chip-background-pending)';
+      color = 'text-[var(--chip-color-pending)]';
+      borderColor = 'border-[var(--chip-border-pending)]';
+      background = 'bg-[var(--chip-background-pending)]';
       break;
 
     case status === 'pause' || status === 'In-Progress':
-      color = 'var(--chip-color-inProgress)';
-      borderColor = 'var(--chip-border-inProgress)';
-      background = 'var(--chip-background-inProgress)';
+      color = 'text-[var(--chip-color-inProgress)]';
+      borderColor = 'border-[var(--chip-border-inProgress)]';
+      background = 'bg-[var(--chip-background-inProgress)]';
       break;
 
     default:
       break;
+  }
+
+  const colorData = workOrderColormap[status];
+
+  if (colorData) {
+    return {
+      ...colorData,
+      borderColor: colorData.background
+    };
   }
 
   return { color, borderColor, background };
@@ -3109,7 +3118,7 @@ export const ASSET_SERVICE_TICKET_STATUS = {
   open: 'Open',
   inProgress: 'In-Progress',
   closed: 'Closed'
-}
+};
 
 export const PRICING_TYPE = [
   { optionLabel: 'Rent', optionValue: 'Rent' },
@@ -3743,8 +3752,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
-  if (typeof callBack !== 'function') callBack = (text) => { };
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
+  if (typeof callBack !== 'function') callBack = (text) => {};
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
@@ -4099,12 +4108,13 @@ export function calculateRatio(a: number, b: number, c: number): number {
 }
 
 export const getDataFromHeader = (fields: any[], referenceData: any) => {
-  const data: any = {}
-  fields?.filter((ele) => ele?.copyFromHeaderField)?.forEach(ele => {
-    if (referenceData[ele?.copyFromHeaderField]) {
-      data[ele?.fieldName] = referenceData[ele?.copyFromHeaderField]
-    }
-  });
-  return data
-}
-
+  const data: any = {};
+  fields
+    ?.filter((ele) => ele?.copyFromHeaderField)
+    ?.forEach((ele) => {
+      if (referenceData[ele?.copyFromHeaderField]) {
+        data[ele?.fieldName] = referenceData[ele?.copyFromHeaderField];
+      }
+    });
+  return data;
+};
