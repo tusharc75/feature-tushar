@@ -4,7 +4,7 @@ export const fetch_resource_view_fields = async (resource, allowedToEdit) => {
 
     const response: any = await axiosInstance().get(`/field?resource=${resource}&view=true`);
     let fieldData = response?.data?.data;
-    console.log("fieldData", resource);
+
     if (!allowedToEdit) {
         fieldData?.forEach((e) => {
             e.fieldData.isColumnEditable = false
