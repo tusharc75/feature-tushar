@@ -151,7 +151,6 @@ const CostBooks = ({ refresh = null }) => {
       let data: any = [];
       const response: any = await axiosInstance().get(`${costBooks.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
-      console.log('data', data);
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject.original = u;
