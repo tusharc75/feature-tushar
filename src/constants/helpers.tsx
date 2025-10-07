@@ -2939,7 +2939,7 @@ export const getChipColor = (status: ChipStatus): { color: string; borderColor: 
   if (colorData) {
     return {
       ...colorData,
-      borderColor: colorData.background
+      borderColor: ''
     };
   }
 

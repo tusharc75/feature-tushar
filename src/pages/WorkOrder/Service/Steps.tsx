@@ -2114,14 +2114,13 @@ const Steps = ({
 export default Steps;
 
 export const RenderPassFailChip = ({ status, className = '', ...others }) => {
-  const { background, borderColor, color } = getChipColor(status);
+  const { background, color } = getChipColor(status);
   return (
     <>
       <div
         className={cn(
-          'inline-flex h-[26px] max-w-full items-center justify-center whitespace-nowrap rounded-2xl border align-middle text-[0.8125rem] font-bold leading-[1.5]',
+          'inline-flex h-[26px] max-w-full items-center justify-center whitespace-nowrap rounded-2xl align-middle text-[0.8125rem] font-medium leading-[1.5]',
           background,
-          borderColor,
           color,
           className
         )}
