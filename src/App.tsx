@@ -312,6 +312,8 @@ import BrandSupportTicket from './pages/BrandSupportTicket';
 import AssetServiceTickets from 'src/pages/AssetServiceTicket';
 import AssetServiceTicketDetail from 'src/pages/AssetServiceTicket/AssetServiceTicketDetail';
 import PublicOnboarding from 'src/pages/Onboarding/Public/PublicOnboarding';
+import CostBooks from 'src/pages/CostBooks';
+import CostBooksDetail from 'src/pages/CostBooks/CostBooksDetail';
 
 var notificationInterval: any = null;
 
@@ -1351,6 +1353,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.assetServiceTicketsDetail.path}/:id`}>
               <AssetServiceTicketDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.costBooks.path}`}>
+              <CostBooks />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.costBooksDetail.path}/:id`}>
+              <CostBooksDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

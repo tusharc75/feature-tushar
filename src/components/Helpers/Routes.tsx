@@ -810,6 +810,12 @@ const routes = {
   },
   contentPostPlanningDetail: {
     path: '/content-post-planning/detail'
+  },
+  costBooks: {
+    path: '/cost-books'
+  },
+  costBooksDetail: {
+    path: '/cost-books/detail'
   }
 };
 
