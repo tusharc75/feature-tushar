@@ -491,8 +491,8 @@ export default function ReportBuilderDetail() {
   );
 
   const renderLookupComponent = (item: LookupPipeline) => {
-    const localFields = resourceFieldMap[formValues?.resource] || [];
-    const lookupFields = resourceFieldMap[item?.withResource] || [];
+    const localFields = [{ fieldName: '_id', fieldLabel: '_id' }, ...(resourceFieldMap[formValues?.resource] || [])];
+    const lookupFields = [{ fieldName: '_id', fieldLabel: '_id' }, ...(resourceFieldMap[item?.withResource] || [])];
 
     return (
       <Card key={item._id} sx={{ mb: 2, border: pipelineErrors[item._id]?.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
