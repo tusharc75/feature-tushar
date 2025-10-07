@@ -186,7 +186,7 @@ const AssemblyOrderDetail = () => {
   };
 
   const showConvertInRentalJob = () => {
-    if (!assemblyOrderData?.canConvert) {
+    if (!assemblyOrderData?.canConvert || resourcePolicyData?.policy?.loadingTicket) {
       return false;
     }
     let show = false;

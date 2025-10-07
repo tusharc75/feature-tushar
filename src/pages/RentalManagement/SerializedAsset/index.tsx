@@ -1162,18 +1162,6 @@ const SerializedAsset = ({
   const rightSideContents = () => {
     return (
       <>
-        <ScanButtons
-          referenceData={rentalManagementData}
-          disabled={disableAssignSerializedAssets(selectedRecords)}
-          products={assetAssignedProduct?.map((e) => ({
-            _id: e.materialId,
-            uniqueId: e._id,
-            realAssetQty: e.realAssetQty,
-            realAssetAssignedQty: e.realAssetAssignedQty
-          }))}
-          fetchData={fetchData}
-        />
-
         {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
           <ThemeButton onClick={openLinkActions} endIcon={<ExpandMore />}>
             {`Order(s)`}
@@ -1244,6 +1232,8 @@ const SerializedAsset = ({
                   setAddNonSerializedAssetDialog={setAddNonSerializedAssetDialog}
                   setAddSerializedAssetDialog={setAddSerializedAssetDialog}
                   allowedToEdit={allowedToEdit}
+                  rentalManagementData={rentalManagementData}
+                  fetchData={fetchData}
                 />
               }
             />
@@ -1555,15 +1545,29 @@ const BulkActionItems = ({
   setDeleteData,
   setShowConfirmBox,
   setAssignSerialNumbersDialog,
-
   disableAssignSerializedAssets,
   isOffline,
   setAddNonSerializedAssetDialog,
   setAddSerializedAssetDialog,
-  allowedToEdit
+  allowedToEdit,
+  rentalManagementData,
+  fetchData
 }) => {
   return (
     <BulkActionContainer>
+      <BulkActionContainer.Group>
+        <ScanButtons
+          referenceData={rentalManagementData}
+          disabled={disableAssignSerializedAssets(selectedRecords)}
+          products={assetAssignedProduct?.map((e) => ({
+            _id: e.materialId,
+            uniqueId: e._id,
+            realAssetQty: e.realAssetQty,
+            realAssetAssignedQty: e.realAssetAssignedQty
+          }))}
+          fetchData={fetchData}
+        />
+      </BulkActionContainer.Group>
       <BulkActionContainer.Button
         id="assign-serialized-asset-button"
         disabled={disableAssignSerializedAssets(selectedRecords)}
@@ -1618,15 +1622,13 @@ const BulkActionItems = ({
           {`Assign Serial Numbers`}
         </BulkActionContainer.Button>
       ) : permissions?.productInventory?.isRead && selectedRecords.length && nonSerializedProduct?.length ? (
-        <>
-          <BulkActionContainer.Button
-            onClick={() => {
-              setAddNonSerializedInventoryDialog({ open: true, type: 'add' });
-            }}
-          >
-            {`Assign Inventory`}
-          </BulkActionContainer.Button>
-        </>
+        <BulkActionContainer.Button
+          onClick={() => {
+            setAddNonSerializedInventoryDialog({ open: true, type: 'add' });
+          }}
+        >
+          {`Assign Inventory`}
+        </BulkActionContainer.Button>
       ) : null}
       {selectedRecords?.filter((e) => validateRemoveInventory(e?._id, e?.materialId))?.length > 0 && (
         <BulkActionContainer.Button
