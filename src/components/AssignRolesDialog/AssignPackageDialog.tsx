@@ -179,9 +179,10 @@ const AssignPackageDialog = ({
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-    const updatedDeepFilters = [...deepFilters];
+    let updatedDeepFilters = [...deepFilters];
     const updatedFilterByIds = [...filterByIds];
     if (packageType) {
+      updatedDeepFilters = updatedDeepFilters?.filter((e) => e.field !== 'packageType');
       updatedDeepFilters.push({
         field: 'packageType',
         term: packageType

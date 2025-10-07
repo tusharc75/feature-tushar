@@ -1162,32 +1162,6 @@ const SerializedAsset = ({
   const rightSideContents = () => {
     return (
       <>
-        <ScanButtons
-          referenceData={rentalManagementData}
-          disabled={disableAssignSerializedAssets(selectedRecords)}
-          products={assetAssignedProduct?.map((e) => ({
-            _id: e.materialId,
-            uniqueId: e._id,
-            realAssetQty: e.realAssetQty,
-            realAssetAssignedQty: e.realAssetAssignedQty
-          }))}
-          fetchData={fetchData}
-        />
-        <ThemeButton
-          id="assign-serialized-asset-button"
-          disabled={disableAssignSerializedAssets(selectedRecords)}
-          onClick={() => {
-            if (isOffline) {
-              setAddNonSerializedAssetDialog(true);
-            } else {
-              setAddSerializedAssetDialog({ open: true });
-            }
-          }}
-          tooltip={!allowedToEdit ? ownerAndColaborator : ``}
-          buttonType="theme"
-        >
-          {`Assign ${resources?.serializedAsset?.titlePlural}`}
-        </ThemeButton>
         {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
           <ThemeButton onClick={openLinkActions} endIcon={<ExpandMore />}>
             {`Order(s)`}
@@ -1253,6 +1227,13 @@ const SerializedAsset = ({
                   setDeleteData={setDeleteData}
                   setShowConfirmBox={setShowConfirmBox}
                   setAssignSerialNumbersDialog={setAssignSerialNumbersDialog}
+                  disableAssignSerializedAssets={disableAssignSerializedAssets}
+                  isOffline={isOffline}
+                  setAddNonSerializedAssetDialog={setAddNonSerializedAssetDialog}
+                  setAddSerializedAssetDialog={setAddSerializedAssetDialog}
+                  allowedToEdit={allowedToEdit}
+                  rentalManagementData={rentalManagementData}
+                  fetchData={fetchData}
                 />
               }
             />
@@ -1563,10 +1544,45 @@ const BulkActionItems = ({
   setAddNonSerializedInventoryDialog,
   setDeleteData,
   setShowConfirmBox,
-  setAssignSerialNumbersDialog
+  setAssignSerialNumbersDialog,
+  disableAssignSerializedAssets,
+  isOffline,
+  setAddNonSerializedAssetDialog,
+  setAddSerializedAssetDialog,
+  allowedToEdit,
+  rentalManagementData,
+  fetchData
 }) => {
   return (
     <BulkActionContainer>
+      <BulkActionContainer.Group>
+        <ScanButtons
+          referenceData={rentalManagementData}
+          disabled={disableAssignSerializedAssets(selectedRecords)}
+          products={assetAssignedProduct?.map((e) => ({
+            _id: e.materialId,
+            uniqueId: e._id,
+            realAssetQty: e.realAssetQty,
+            realAssetAssignedQty: e.realAssetAssignedQty
+          }))}
+          fetchData={fetchData}
+        />
+      </BulkActionContainer.Group>
+      <BulkActionContainer.Button
+        id="assign-serialized-asset-button"
+        disabled={disableAssignSerializedAssets(selectedRecords)}
+        onClick={() => {
+          if (isOffline) {
+            setAddNonSerializedAssetDialog(true);
+          } else {
+            setAddSerializedAssetDialog({ open: true });
+          }
+        }}
+        tooltip={!allowedToEdit ? ownerAndColaborator : ``}
+        buttonType="theme"
+      >
+        {`Assign ${resources?.serializedAsset?.titlePlural}`}
+      </BulkActionContainer.Button>
       {permissions?.bulkAssetCreation?.isCreate && (
         <BulkActionContainer.Button
           disabled={showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)?.length === 0}
@@ -1606,15 +1622,13 @@ const BulkActionItems = ({
           {`Assign Serial Numbers`}
         </BulkActionContainer.Button>
       ) : permissions?.productInventory?.isRead && selectedRecords.length && nonSerializedProduct?.length ? (
-        <>
-          <BulkActionContainer.Button
-            onClick={() => {
-              setAddNonSerializedInventoryDialog({ open: true, type: 'add' });
-            }}
-          >
-            {`Assign Inventory`}
-          </BulkActionContainer.Button>
-        </>
+        <BulkActionContainer.Button
+          onClick={() => {
+            setAddNonSerializedInventoryDialog({ open: true, type: 'add' });
+          }}
+        >
+          {`Assign Inventory`}
+        </BulkActionContainer.Button>
       ) : null}
       {selectedRecords?.filter((e) => validateRemoveInventory(e?._id, e?.materialId))?.length > 0 && (
         <BulkActionContainer.Button

@@ -116,7 +116,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
   const [versionDialog, setVersionDialog] = useState(false);
   const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, serializedPackage: null });
 
-  const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState(false);
+  const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState({open : false, sendToCustomer: false});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [showReopenConfirmation, setShowReopenConfirmation] = useState(false);
@@ -369,17 +369,20 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       });
   };
 
-  const handleReceiveAssetInRepairJob = () => {
+  const handleReceiveAssetInRepairJob = (sendToCustomer: boolean = false) => {
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${repairJob.api}/receive-assets-complete`, { repairJob: workOrderData?.currentRepairJob?.optionValue || workOrderData?.currentRepairJob })
+      .put(`${repairJob.api}/receive-assets-complete`, {
+        repairJob: workOrderData?.currentRepairJob?.optionValue || workOrderData?.currentRepairJob,
+        sendToCustomer: sendToCustomer
+      })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data.message
         });
-        setRepairJobReceiveConfirmation(false);
+        setRepairJobReceiveConfirmation({ open: false, sendToCustomer: false });
         setIsSubmitting(false);
         fetchWorkOrderData();
       })
@@ -476,12 +479,29 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       id: `Repair Job Receive`,
       isVisible:
-        permissions?.repairJob?.isUpdate && allowedToEdit && [WORK_ORDER_TYPE.repairOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) && workOrderData?.currentRepairJob
+        permissions?.repairJob?.isUpdate &&
+        allowedToEdit &&
+        [WORK_ORDER_TYPE.repairOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) &&
+        workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Receive ${WORK_ORDER_TYPE.repairOrder === workOrderData?.type ? 'Asset' : ''} From Supplier`,
       tooltip: `Receive ${WORK_ORDER_TYPE.repairOrder === workOrderData?.type ? 'Asset' : ''} From Supplier`,
-      onClick: () => setRepairJobReceiveConfirmation(true)
+      onClick: () => setRepairJobReceiveConfirmation({ open: true, sendToCustomer: false })
+    },
+    {
+      type: 'menuItem',
+      id: `Send To Customer`,
+      isVisible:
+        permissions?.repairJob?.isUpdate &&
+        allowedToEdit &&
+        [WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) &&
+        workOrderData?.currentRepairJob
+          ? true
+          : false,
+      children: `Send To Customer`,
+      tooltip: `Send To Customer`,
+      onClick: () => setRepairJobReceiveConfirmation({ open: true, sendToCustomer: true })
     },
     {
       id: 'Scrap Asset',
@@ -1004,14 +1024,20 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
           isSubmitting={isSubmitting}
         />
       )}
-      {repairJobReceiveConfirmation && (
+      {repairJobReceiveConfirmation?.open && (
         <ConfirmationDialog
-          open={repairJobReceiveConfirmation}
-          message={`Are you sure you want to receive ${WORK_ORDER_TYPE.repairOrder === workOrderData?.type ? 'asset' : ''}?`}
+          open={repairJobReceiveConfirmation?.open}
+          message={
+            repairJobReceiveConfirmation?.sendToCustomer
+              ? `Are you sure you want to send to customer?`
+              : `Are you sure you want to receive ${WORK_ORDER_TYPE.repairOrder === workOrderData?.type ? 'asset' : ''}?`
+          }
           onClose={() => {
-            setRepairJobReceiveConfirmation(false);
+            setRepairJobReceiveConfirmation({ open: false, sendToCustomer: false });
           }}
-          onOk={handleReceiveAssetInRepairJob}
+          onOk={() => {
+            handleReceiveAssetInRepairJob(repairJobReceiveConfirmation?.sendToCustomer);
+          }}
           okBtnLoading={isSubmitting}
         />
       )}

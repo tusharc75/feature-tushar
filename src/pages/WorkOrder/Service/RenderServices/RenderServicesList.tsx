@@ -151,14 +151,15 @@ const RenderServicesList = ({
             <div className={`flex w-full basis-full flex-wrap items-center gap-2 pl-[20px] ${isColapsed ? 'hidden' : ''}`}>
               {data?.type === 'service' && (
                 <div className="ml-1">
-                  <Chip
-                    label={data?.status}
-                    variant="outlined"
-                    style={{
-                      ...getChipColor(data?.status),
-                      fontWeight: 700
-                    }}
-                  />
+                  <div
+                    className={cn(
+                      'relative isolate inline-flex h-[26px] max-w-full items-center justify-center whitespace-nowrap rounded-2xl align-middle text-[0.8125rem] font-medium leading-[1.5]',
+                      getChipColor(data?.status).background,
+                      getChipColor(data?.status).color
+                    )}
+                  >
+                    <span className="overflow-hidden text-ellipsis whitespace-nowrap px-[11px]">{data?.status}</span>
+                  </div>
                 </div>
               )}
               {data?.type === 'quotation' && quotationData && (

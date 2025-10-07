@@ -24,6 +24,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const PdfTemplateSchema = object().shape({
   name: string().min(3, 'Too Short!').max(50, 'Too Long').required('PDF template Name is required'),
@@ -61,8 +62,6 @@ export default function CreateCustomPdfTemplate() {
   const [resourceTables, setResourceTables] = useState(null);
 
   const [btnLoading, setBtnLoading] = useState(false);
-  const [selectedServices, setSelectedServices] = useState([]);
-  const baseResourceFields = useRef([]);
 
   useEffect(() => {
     const options = [];
@@ -75,49 +74,37 @@ export default function CreateCustomPdfTemplate() {
   }, []);
 
   useEffect(() => {
-    if (selectedServices?.length > 0 && formValues?.type === sidebarResource.workOrder) {
-      axiosInstance()
-        .get(`${serviceMaster.api}/fields?serviceIds=${selectedServices}`)
-        .then(({ data: { data } }) => {
-          const serviceFields = data?.map((field) => ({
-            label: field.fieldLabel,
-            value: field.fieldName,
-          })) || [];
-          setResourceFields(prev => [...baseResourceFields.current, ...serviceFields]);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
-    }
-  }, [selectedServices]);
-
-  useEffect(() => {
     if (formValues && formValues.type) {
-      let resource: string = formValues.type;
-      if (resource) {
-        axiosInstance().get(`/field?resource=${resource}`).then(({ data: { data } }) => {
-          const variables = [{ label: "Entity", value: "entity" }, { label: "Current Date", value: "currentDate" }]
-          data?.forEach((e) => {
-            variables.push({ label: e.fieldData.fieldLabel, value: e.fieldData.fieldName })
-          })
-          baseResourceFields.current = variables;
-          setResourceFields(variables);
-        }).catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
+      fetchFields()
+      if (formValues && formValues.type === sidebarResource.workOrder) {
+        fetchServiceOptions();
       }
     }
-    if (formValues && formValues.type === sidebarResource.workOrder) {
-      fetchServiceOptions();
-    }
-  }, [formValues?.type]);
+  }, [formValues?.type, formValues?.services]);
 
+  const fetchFields = async () => {
+    const { fieldsDataAll } = await fetch_resource_view_fields(formValues.type, false);
+    const variables = [
+      { label: "Entity", value: "entity" },
+      { label: "Current Date", value: "currentDate" }
+    ]
+    fieldsDataAll?.forEach((e) => {
+      variables.push({ label: e.fieldData.fieldLabel, value: e.fieldData.fieldName })
+    })
+    if (formValues && formValues.type === sidebarResource.workOrder && formValues?.services && formValues?.services?.length) {
+      const response = await axiosInstance().get(`${serviceMaster.api}/fields?serviceIds=${formValues?.services?.toString()}`)
+      response?.data?.data?.forEach((e) => {
+        variables.push({ label: e.fieldLabel, value: e.fieldName })
+      })
+    }
+    setResourceFields(variables)
+  }
 
   useEffect(() => {
     if (formValues && formValues.type) {
       let api = `${customPdfTemplate.api}/table/${formValues.type}`
-      if (selectedServices) {
-        api += `?serviceIds=${selectedServices}`
+      if (formValues?.services && formValues?.services?.length) {
+        api += `?serviceIds=${formValues?.services?.toString()}`
       }
       axiosInstance().get(api).then(({ data: { data } }) => {
         setResourceTables(data)
@@ -125,7 +112,7 @@ export default function CreateCustomPdfTemplate() {
         toastConfig.setToastConfig(err);
       });
     }
-  }, [formValues?.type, selectedServices]);
+  }, [formValues?.type, formValues?.services]);
 
   useEffect(() => {
     fetchData();
@@ -204,7 +191,6 @@ export default function CreateCustomPdfTemplate() {
             })
           })
         );
-        setSelectedServices(data?.services || [])
         if (isClone) {
           setAllowedToEdit(true);
           setIsEdit(true);
@@ -296,7 +282,7 @@ export default function CreateCustomPdfTemplate() {
         inputs: finalInputs,
         plugins: getPlugins(resourceFields, resourceTables)
       });
-      const pdfBytes = new Uint8Array(pdf.buffer);
+      const pdfBytes: any = new Uint8Array(pdf.buffer);
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setBtnLoading(false);
       window.open(URL.createObjectURL(blob));
@@ -610,7 +596,6 @@ export default function CreateCustomPdfTemplate() {
                           onChange={(e, val) => {
                             const selectedIds = val?.map((d) => d.optionValue) || [];
                             setFieldValue('services', selectedIds);
-                            setSelectedServices(selectedIds);
                           }}
                           renderInput={(params) => (
                             <TextField
@@ -678,8 +663,7 @@ export default function CreateCustomPdfTemplate() {
               )}
             </div >
           </Form >
-        )
-        }
+        )}
       </Formik >
     </>
   );

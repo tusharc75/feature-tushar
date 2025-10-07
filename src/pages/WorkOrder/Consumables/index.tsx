@@ -80,6 +80,7 @@ const Consumables = ({
   const [serviceOption, setServiceOption] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
+  const [deleteData, setDeleteData] = useState(null);
 
 
   const productFields = ['productName', 'productNumber', 'productDescription', 'material', 'eawt', 'exwtlbs', 'topDiameter', 'bottomDiameter', 'thickness', 'length']
@@ -361,7 +362,7 @@ const Consumables = ({
                 aria-label="Delete"
                 disabled={!row?.original?.canDelete}
                 onClick={() => {
-                  handleDelete([row.original]);
+                  setDeleteData([row?.original])
                 }}
               >
                 <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} fontSize="small" />
@@ -560,6 +561,7 @@ const Consumables = ({
       })
       .then(({ data }) => {
         fetchData();
+        setDeleteData(null);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -567,6 +569,7 @@ const Consumables = ({
         });
       })
       .catch((error) => {
+        setDeleteData(null);
         toastConfig.setToastConfig(error);
       });
   };
@@ -784,7 +787,7 @@ const Consumables = ({
           <MenuItem
             disabled={!selectedRecords?.some((s) => s?.canDelete)}
             onClick={() => {
-              handleDelete(selectedRecords?.filter((s) => s?.canDelete));
+              setDeleteData(selectedRecords?.filter((s) => s?.canDelete))
             }}
           >
             Delete
@@ -988,6 +991,16 @@ const Consumables = ({
             filterByPlant={warehouse}
             ids={serialNumbers?.map((s) => s?.materialId)}
             showWarehouseFilter={true}
+          />
+        )}
+
+        {deleteData && (
+          <ConfirmationDialog
+            open={true}
+            message={`Are you sure you want to delete the record(s)?`}
+            onClose={() => setDeleteData(null)}
+            onOk={() => handleDelete(deleteData)}
+            okBtnLoading={isSubmitting}
           />
         )}
       </Grid>
