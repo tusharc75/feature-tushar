@@ -50,7 +50,6 @@ const CostBooks = ({ refresh = null }) => {
   const fetchColumns = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.costBooks, permissions?.costBooks?.isUpdate);
     let columns = generateColumns(renderedFrom, fieldsDataForRead, routes.costBooksDetail.path, true);
-    console.log('fieldsDataForRead', fieldsDataForRead);
     columns = [...columns, ...getStaticFields(true), ActionsRenderer];
     setColumns(columns);
   };
