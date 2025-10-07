@@ -15,12 +15,17 @@ const ScanButtons = ({ referenceData, disabled, products, fetchData }) => {
   return (
     <>
       <HtmlTooltip title={`Assign ${resources?.serializedAsset?.titlePlural} through RFID`}>
-        <IconButton color="primary" onClick={() => setRfidQrDialogOpen({ open: true, type: 'rfid' })} disabled={disabled}>
+        <IconButton
+          color="primary"
+          onClick={() => setRfidQrDialogOpen({ open: true, type: 'rfid' })}
+          disabled={disabled}
+          size='small'
+        >
           <Contactless />
         </IconButton>
       </HtmlTooltip>
       <HtmlTooltip title={`Assign ${resources?.serializedAsset?.titlePlural} through QR/Barcode`}>
-        <IconButton color="primary" onClick={() => setRfidQrDialogOpen({ open: true, type: 'qr' })} disabled={disabled}>
+        <IconButton size='small' color="primary" onClick={() => setRfidQrDialogOpen({ open: true, type: 'qr' })} disabled={disabled}>
           <QrCode />
         </IconButton>
       </HtmlTooltip>
