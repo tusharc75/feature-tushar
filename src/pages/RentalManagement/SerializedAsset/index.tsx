@@ -1555,17 +1555,19 @@ const BulkActionItems = ({
 }) => {
   return (
     <BulkActionContainer>
-      <ScanButtons
-        referenceData={rentalManagementData}
-        disabled={disableAssignSerializedAssets(selectedRecords)}
-        products={assetAssignedProduct?.map((e) => ({
-          _id: e.materialId,
-          uniqueId: e._id,
-          realAssetQty: e.realAssetQty,
-          realAssetAssignedQty: e.realAssetAssignedQty
-        }))}
-        fetchData={fetchData}
-      />
+      <BulkActionContainer.Group>
+        <ScanButtons
+          referenceData={rentalManagementData}
+          disabled={disableAssignSerializedAssets(selectedRecords)}
+          products={assetAssignedProduct?.map((e) => ({
+            _id: e.materialId,
+            uniqueId: e._id,
+            realAssetQty: e.realAssetQty,
+            realAssetAssignedQty: e.realAssetAssignedQty
+          }))}
+          fetchData={fetchData}
+        />
+      </BulkActionContainer.Group>
       <BulkActionContainer.Button
         id="assign-serialized-asset-button"
         disabled={disableAssignSerializedAssets(selectedRecords)}

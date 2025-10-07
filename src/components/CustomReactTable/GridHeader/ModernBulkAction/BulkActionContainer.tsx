@@ -1,12 +1,11 @@
+import { MoreHoriz } from '@mui/icons-material';
 import { IconButton, IconButtonProps, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
 import React, { ReactElement, useLayoutEffect, useRef, useState } from 'react';
-import { ThemeButton, ThemeButtonProps } from 'src/components/Helpers/Buttons';
-import { MoreHoriz } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import BulkActionButton from './BulkActionButton';
 
-// --- Subcomponents ---
-const BulkActionButton = (props: ThemeButtonProps) => <ThemeButton {...props} />;
-BulkActionButton.displayName = 'BulkActionButton';
+const BulkActionGroup = ({ children }: { children: React.ReactChild }) => <div>{children}</div>;
+BulkActionGroup.displayName = 'BulkActionGroup';
 
 const BulkActionDivider = () => <div className="divider"></div>;
 BulkActionDivider.displayName = 'BulkActionDivider';
@@ -86,6 +85,7 @@ const BulkActionContainer = ({ children }: BulkActionContainerProps) => {
 BulkActionContainer.Divider = BulkActionDivider;
 BulkActionContainer.Button = BulkActionButton;
 BulkActionContainer.IconButton = BulkActionIconButton;
+BulkActionContainer.Group = BulkActionGroup;
 
 export default BulkActionContainer;
 
@@ -123,11 +123,20 @@ const RenderMenuWithButton = ({ items }: { items: ChildList[] }) => {
         case 'BulkActionDivider': {
           break;
         }
+
         case 'BulkActionIconButton': {
           menuItems.push(
             <HtmlTooltip title={tooltip}>
               <MenuItem {...props}>{item.props.text}</MenuItem>
             </HtmlTooltip>
+          );
+          break;
+        }
+        case 'BulkActionGroup': {
+          menuItems.push(
+            <MenuItem {...props} disableRipple className="flex items-center gap-2 [--mui-palette-action-hover:transparent]" disableTouchRipple>
+              {children}
+            </MenuItem>
           );
           break;
         }

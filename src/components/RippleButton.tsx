@@ -6,10 +6,9 @@ type Component = React.ElementType;
 type ElementTypeProps<T extends React.ElementType> = React.ComponentPropsWithoutRef<T>;
 type PolymorphicRef<T extends React.ElementType> = React.ComponentPropsWithRef<T>['ref'];
 
-type RippleButtonProps<T extends Component> = {
+export type RippleButtonProps<T extends Component> = {
   component?: T;
-  className?: string;
-  children: React.ReactNode | Element[];
+  children?: React.ReactChild;
 } & Omit<ElementTypeProps<T>, 'component' | 'children'>;
 
 const createRipple = (event: React.MouseEvent<HTMLElement>, container: HTMLDivElement) => {
