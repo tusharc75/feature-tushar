@@ -2114,16 +2114,18 @@ const Steps = ({
 export default Steps;
 
 export const RenderPassFailChip = ({ status, className = '', ...others }) => {
+  const { background, borderColor, color } = getChipColor(status);
   return (
     <>
       <div
         className={cn(
           'inline-flex h-[26px] max-w-full items-center justify-center whitespace-nowrap rounded-2xl border align-middle text-[0.8125rem] font-bold leading-[1.5]',
-          getChipColor(status).background,
-          getChipColor(status).borderColor,
-          getChipColor(status).color,
+          background,
+          borderColor,
+          color,
           className
         )}
+        {...others}
       >
         <span className="overflow-hidden text-ellipsis whitespace-nowrap px-[11px]">{status}</span>
       </div>
