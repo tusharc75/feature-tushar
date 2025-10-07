@@ -153,9 +153,8 @@ const RenderServicesList = ({
                 <div className="ml-1">
                   <div
                     className={cn(
-                      'inline-flex h-[26px] max-w-full items-center justify-center whitespace-nowrap rounded-2xl border align-middle text-[0.8125rem] font-bold leading-[1.5]',
+                      'relative isolate inline-flex h-[26px] max-w-full items-center justify-center whitespace-nowrap rounded-2xl align-middle text-[0.8125rem] font-medium leading-[1.5]',
                       getChipColor(data?.status).background,
-                      getChipColor(data?.status).borderColor,
                       getChipColor(data?.status).color
                     )}
                   >
