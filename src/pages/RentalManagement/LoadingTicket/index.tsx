@@ -323,84 +323,84 @@ const LoadingTicket = ({
             </IconButton>
             {((row?.original?.nonSerializedProductSerialNumbers && row?.original?.nonSerializedProductSerialNumbers?.length > 0) ||
               (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
-              <Box>
-                <HtmlTooltip title={`Serial Numbers`}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setShowInfo({
-                        open: true,
-                        data: {
-                          productName: row?.original?.productName,
-                          data:
-                            row?.original?.nonSerializedProductSerialNumbers?.length > 0
-                              ? row?.original?.nonSerializedProductSerialNumbers?.map((e) => {
+                <Box>
+                  <HtmlTooltip title={`Serial Numbers`}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setShowInfo({
+                          open: true,
+                          data: {
+                            productName: row?.original?.productName,
+                            data:
+                              row?.original?.nonSerializedProductSerialNumbers?.length > 0
+                                ? row?.original?.nonSerializedProductSerialNumbers?.map((e) => {
                                   return { assetNumber: e };
                                 })
-                              : row?.original?.productSerialNumbers
-                        },
-                        isNonSerializedProductSerialNumbers: row?.original?.nonSerializedProductSerialNumbers?.length > 0 ? true : false
-                      });
-                    }}
-                  >
-                    <InfoIcon fontSize="small" color={'primary'} />
-                  </IconButton>
-                </HtmlTooltip>
-              </Box>
-            )}
+                                : row?.original?.productSerialNumbers
+                          },
+                          isNonSerializedProductSerialNumbers: row?.original?.nonSerializedProductSerialNumbers?.length > 0 ? true : false
+                        });
+                      }}
+                    >
+                      <InfoIcon fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
+              )}
           </div>
         )
       },
       ...(view === 'flat'
         ? [
-            {
-              accessor: 'parentName',
-              Header: 'Parent',
-              disabled: true,
-              cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'parentName',
+            Header: 'Parent',
+            disabled: true,
+            cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
+          }
+        ]
         : []),
       ...newColumns,
       ...(permissions?.serializedPackages?.isRead
         ? [
-            {
-              accessor: 'serializedPackage',
-              Header: resources?.serializedPackages?.titleSingular,
-              cell: ({ row }) =>
-                row?.original?.serializedPackage ? (
-                  <div className="flex items-center gap-2">
-                    <h5 className="text-truncate" title={row?.original?.serializedPackage}>
-                      {row?.original?.serializedPackage}
-                    </h5>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.serializedPackagesDetail.path}/${row?.original?.serializedPackageId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            },
-            {
-              accessor: 'serializedPackageStatus',
-              Header: `${resources?.serializedPackages?.titleSingular} Status`,
-              cell: ({ row }) =>
-                row?.original?.serializedPackageStatus ? (
-                  <div className="flex items-center gap-2">
-                    <h5 className="text-truncate" title={row?.original?.serializedPackageStatus}>
-                      {row?.original?.serializedPackageStatus}
-                    </h5>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            accessor: 'serializedPackage',
+            Header: resources?.serializedPackages?.titleSingular,
+            cell: ({ row }) =>
+              row?.original?.serializedPackage ? (
+                <div className="flex items-center gap-2">
+                  <h5 className="text-truncate" title={row?.original?.serializedPackage}>
+                    {row?.original?.serializedPackage}
+                  </h5>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.serializedPackagesDetail.path}/${row?.original?.serializedPackageId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          },
+          {
+            accessor: 'serializedPackageStatus',
+            Header: `${resources?.serializedPackages?.titleSingular} Status`,
+            cell: ({ row }) =>
+              row?.original?.serializedPackageStatus ? (
+                <div className="flex items-center gap-2">
+                  <h5 className="text-truncate" title={row?.original?.serializedPackageStatus}>
+                    {row?.original?.serializedPackageStatus}
+                  </h5>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
         : []),
       {
         accessor: 'loadingTicket',
@@ -430,159 +430,159 @@ const LoadingTicket = ({
       },
       ...(assetFields?.find((f) => f.fieldName === 'serialNumber')
         ? [
-            {
-              accessor: 'serialNumber',
-              Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
-              cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'serialNumber',
+            Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
+            cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'position')
         ? [
-            {
-              accessor: 'position',
-              Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
-              cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'position',
+            Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
+            cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'jobCount')
         ? [
-            {
-              accessor: 'jobCount',
-              Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'Job Count',
-              cell: ({ row }) =>
-                row?.original?.jobCount || row?.original?.jobCount === 0 ? (
-                  <h5 className="text-truncate">{row?.original?.jobCount}</h5>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            accessor: 'jobCount',
+            Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'Job Count',
+            cell: ({ row }) =>
+              row?.original?.jobCount || row?.original?.jobCount === 0 ? (
+                <h5 className="text-truncate">{row?.original?.jobCount}</h5>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'gpsNumber')
         ? [
-            {
-              accessor: 'gpsNumber',
-              Header: assetFields?.find((f) => f.fieldName === 'gpsNumber')?.fieldLabel || 'gpsNumber',
-              cell: ({ row }) =>
-                row?.original?.gpsNumber ? (
-                  <div>
-                    <p className="text-truncate">{row?.original?.gpsNumber}</p>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            accessor: 'gpsNumber',
+            Header: assetFields?.find((f) => f.fieldName === 'gpsNumber')?.fieldLabel || 'gpsNumber',
+            cell: ({ row }) =>
+              row?.original?.gpsNumber ? (
+                <div>
+                  <p className="text-truncate">{row?.original?.gpsNumber}</p>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'currentGpsLocation')
         ? [
-            {
-              accessor: 'currentGpsLocation',
-              Header: assetFields?.find((f) => f.fieldName === 'currentGpsLocation')?.fieldLabel || 'currentGpsLocation',
-              cell: ({ row }) => <GpsLocationCell value={row?.original?.currentGpsLocation} />
-            }
-          ]
+          {
+            accessor: 'currentGpsLocation',
+            Header: assetFields?.find((f) => f.fieldName === 'currentGpsLocation')?.fieldLabel || 'currentGpsLocation',
+            cell: ({ row }) => <GpsLocationCell value={row?.original?.currentGpsLocation} />
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')
         ? [
-            {
-              accessor: 'currentGpsWellNames',
-              Header: assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')?.fieldLabel || 'currentGpsWellNames',
-              cell: ({ row }) => <FreeStyleMultiSelect value={row?.original?.currentGpsWellNames} />
-            }
-          ]
+          {
+            accessor: 'currentGpsWellNames',
+            Header: assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')?.fieldLabel || 'currentGpsWellNames',
+            cell: ({ row }) => <FreeStyleMultiSelect value={row?.original?.currentGpsWellNames} />
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f?.fieldName === 'padName')
         ? [
-            {
-              accessor: 'padName',
-              Header: assetFields?.find((f) => f.fieldName === 'padName')?.fieldLabel || 'Pad Name',
-              cell: ({ row }) =>
-                row?.original?.padName ? (
-                  <div className="flex items-center gap-2">
-                    <h5 className="text-truncate">{row?.original?.padName}</h5>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.padMasterDetail.path}/${row?.original?.padId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            accessor: 'padName',
+            Header: assetFields?.find((f) => f.fieldName === 'padName')?.fieldLabel || 'Pad Name',
+            cell: ({ row }) =>
+              row?.original?.padName ? (
+                <div className="flex items-center gap-2">
+                  <h5 className="text-truncate">{row?.original?.padName}</h5>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.padMasterDetail.path}/${row?.original?.padId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'wellNumber')
         ? [
-            {
-              accessor: 'wellNumber',
-              Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel || 'Well Number',
-              accessorFn: (original) => {
-                return isArray(original?.wellNumber)
-                  ? original?.wellNumber[0]?.optionLabel
-                  : isObject(original?.wellNumber)
-                    ? original?.wellNumber?.optionLabel
-                    : original?.wellNumber;
-              },
-              cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'wellNumber',
-                    lookupResource: sidebarResource.wellNumber
-                  }}
-                  original={row?.original}
-                />
-              )
-            }
-          ]
+          {
+            accessor: 'wellNumber',
+            Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel || 'Well Number',
+            accessorFn: (original) => {
+              return isArray(original?.wellNumber)
+                ? original?.wellNumber[0]?.optionLabel
+                : isObject(original?.wellNumber)
+                  ? original?.wellNumber?.optionLabel
+                  : original?.wellNumber;
+            },
+            cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'wellNumber',
+                  lookupResource: sidebarResource.wellNumber
+                }}
+                original={row?.original}
+              />
+            )
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'wellColor')
         ? [
-            {
-              accessor: 'wellColor',
-              Header: assetFields?.find((f) => f.fieldName === 'wellColor')?.fieldLabel || 'wellColor',
-              cell: ({ row }) =>
-                row?.original?.wellColor ? (
-                  <div>
-                    <p className="text-truncate">{row?.original?.wellColor}</p>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            accessor: 'wellColor',
+            Header: assetFields?.find((f) => f.fieldName === 'wellColor')?.fieldLabel || 'wellColor',
+            cell: ({ row }) =>
+              row?.original?.wellColor ? (
+                <div>
+                  <p className="text-truncate">{row?.original?.wellColor}</p>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
         : []),
       ...(view === 'flat'
         ? [
-            {
-              accessor: 'productName',
-              Header: productFields?.find((f) => f.fieldName === 'productName')?.fieldLabel || 'Product Name',
-              cell: ({ row }) =>
-                row?.original?.productName ? (
-                  <div className="flex items-center gap-2">
-                    <h5 className="text-truncate">{row?.original?.productName}</h5>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.productDetail.path}/${row?.original?.materialId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            accessor: 'productName',
+            Header: productFields?.find((f) => f.fieldName === 'productName')?.fieldLabel || 'Product Name',
+            cell: ({ row }) =>
+              row?.original?.productName ? (
+                <div className="flex items-center gap-2">
+                  <h5 className="text-truncate">{row?.original?.productName}</h5>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.productDetail.path}/${row?.original?.materialId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
         : []),
       {
         accessor: 'description',
@@ -613,29 +613,29 @@ const LoadingTicket = ({
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-            {
-              accessor: 'storageLocation',
-              Header: resources?.storageLocation?.titleSingular,
-              cell: ({ row }) =>
-                row?.original?.storageLocation ? (
-                  <div className="flex items-center gap-2">
-                    <h5 className="text-truncate">{row?.original?.storageLocation}</h5>
-                    {permissions?.storageLocation?.isRead && (
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          window.open(`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
-                        }}
-                      >
-                        <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                      </IconButton>
-                    )}
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            accessor: 'storageLocation',
+            Header: resources?.storageLocation?.titleSingular,
+            cell: ({ row }) =>
+              row?.original?.storageLocation ? (
+                <div className="flex items-center gap-2">
+                  <h5 className="text-truncate">{row?.original?.storageLocation}</h5>
+                  {permissions?.storageLocation?.isRead && (
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  )}
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
         : []),
       {
         accessor: 'rentalAssetStatus',
@@ -649,12 +649,12 @@ const LoadingTicket = ({
       },
       ...(assetFields?.find((f) => f.fieldName === 'subStatus')
         ? [
-            {
-              accessor: 'subStatus',
-              Header: `Asset ${assetFields?.find((f) => f.fieldName === 'subStatus')?.fieldLabel || 'Sub Status'}`,
-              cell: ({ row }) => (row?.original?.subStatus ? <h5 className="text-truncate">{row?.original?.subStatus}</h5> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'subStatus',
+            Header: `Asset ${assetFields?.find((f) => f.fieldName === 'subStatus')?.fieldLabel || 'Sub Status'}`,
+            cell: ({ row }) => (row?.original?.subStatus ? <h5 className="text-truncate">{row?.original?.subStatus}</h5> : <NoDataCell />)
+          }
+        ]
         : [])
     ];
     if (assetFields?.find((f) => f.fieldName === 'mtrAttached')) {
@@ -1705,8 +1705,8 @@ const LoadingTicket = ({
         {(allowedToEdit || isProcessor) && (
           <>
             {getFilterSelectedRecords().length &&
-            getFilterSelectedRecords()?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
-              ?.length === getFilterSelectedRecords()?.length ? (
+              getFilterSelectedRecords()?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
+                ?.length === getFilterSelectedRecords()?.length ? (
               <HtmlTooltip title="Remove Assets From Loading Ticket(s)">
                 <ThemeButton
                   onClick={() => {
@@ -2297,7 +2297,7 @@ const BulkActionItems = ({
       {(allowedToEdit || isProcessor) && (
         <>
           <BulkActionContainer.Button
-            tooltip={permissions?.deliveryTicket?.isCreate ? actionDisable : ''}
+            tooltip={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}
             onClick={() => {
               if (!validateAction(rentalManagementActions.createLoadingTicket)) {
                 if (checkMTRValidation && getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some((e) => e.mtrAttached !== true)) {
