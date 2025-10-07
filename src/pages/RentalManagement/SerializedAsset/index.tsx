@@ -1173,21 +1173,7 @@ const SerializedAsset = ({
           }))}
           fetchData={fetchData}
         />
-        <ThemeButton
-          id="assign-serialized-asset-button"
-          disabled={disableAssignSerializedAssets(selectedRecords)}
-          onClick={() => {
-            if (isOffline) {
-              setAddNonSerializedAssetDialog(true);
-            } else {
-              setAddSerializedAssetDialog({ open: true });
-            }
-          }}
-          tooltip={!allowedToEdit ? ownerAndColaborator : ``}
-          buttonType="theme"
-        >
-          {`Assign ${resources?.serializedAsset?.titlePlural}`}
-        </ThemeButton>
+
         {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
           <ThemeButton onClick={openLinkActions} endIcon={<ExpandMore />}>
             {`Order(s)`}
@@ -1253,6 +1239,11 @@ const SerializedAsset = ({
                   setDeleteData={setDeleteData}
                   setShowConfirmBox={setShowConfirmBox}
                   setAssignSerialNumbersDialog={setAssignSerialNumbersDialog}
+                  disableAssignSerializedAssets={disableAssignSerializedAssets}
+                  isOffline={isOffline}
+                  setAddNonSerializedAssetDialog={setAddNonSerializedAssetDialog}
+                  setAddSerializedAssetDialog={setAddSerializedAssetDialog}
+                  allowedToEdit={allowedToEdit}
                 />
               }
             />
@@ -1563,10 +1554,31 @@ const BulkActionItems = ({
   setAddNonSerializedInventoryDialog,
   setDeleteData,
   setShowConfirmBox,
-  setAssignSerialNumbersDialog
+  setAssignSerialNumbersDialog,
+
+  disableAssignSerializedAssets,
+  isOffline,
+  setAddNonSerializedAssetDialog,
+  setAddSerializedAssetDialog,
+  allowedToEdit
 }) => {
   return (
     <BulkActionContainer>
+      <BulkActionContainer.Button
+        id="assign-serialized-asset-button"
+        disabled={disableAssignSerializedAssets(selectedRecords)}
+        onClick={() => {
+          if (isOffline) {
+            setAddNonSerializedAssetDialog(true);
+          } else {
+            setAddSerializedAssetDialog({ open: true });
+          }
+        }}
+        tooltip={!allowedToEdit ? ownerAndColaborator : ``}
+        buttonType="theme"
+      >
+        {`Assign ${resources?.serializedAsset?.titlePlural}`}
+      </BulkActionContainer.Button>
       {permissions?.bulkAssetCreation?.isCreate && (
         <BulkActionContainer.Button
           disabled={showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)?.length === 0}
