@@ -295,7 +295,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
           onSuccess={(rows) => {
             handleAssignPackage(rows);
           }}
-          packageType={PACKAGE_TYPE.product}
+          packageType={PACKAGE_TYPE.service}
           isSubmitting={isSubmitting}
         />
       )}
