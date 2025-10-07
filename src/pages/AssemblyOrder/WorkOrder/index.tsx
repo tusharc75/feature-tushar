@@ -87,7 +87,7 @@ const WorkOrder = ({
   const [productQtyEdit, setProductQtyEdit] = useState({ open: false, data: null });
   const [bulkEditWorkOrderDialog, setBulkEditWorkOrderDialog] = useState({ open: false, _ids: [] });
   const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, serializedPackage: null });
-  const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState({open : false, sendToCustomer: false});
+  const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState({ open: false, sendToCustomer: false });
 
   const { generateColumns, getMaterialLabel } = useColumns();
 
@@ -507,43 +507,6 @@ const WorkOrder = ({
   };
 
   const generateNestedData = (material, parent) => {
-    var subPackage: any = material.filter((e) => e?.parentId === parent?._id && e?.type === MATERIAL_TYPE.package)
-    subPackage.forEach((_subPackage, index) => {
-      _subPackage.index = parent.index + '.' + `${index + 1}`;
-      _subPackage.detail = _subPackage?.detail || _subPackage.packageDetail?.packageName || '';
-      _subPackage.description = _subPackage?.description || _subPackage?.packageDetail?.packageDescription || '';
-      _subPackage.qty = _subPackage.qty;
-      if (_subPackage?.workOrder) {
-        _subPackage.workOrderId = _subPackage?.workOrder?._id;
-        _subPackage.workOrderNumber = _subPackage?.workOrder?.workOrderNumber;
-        _subPackage.status = _subPackage?.workOrder?.status || '';
-        _subPackage.workOrderStatus = _subPackage?.workOrder?.status || '';
-        if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.new) {
-          _subPackage.canAutoCompleteWorkOrder = true;
-        }
-        if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.completed) {
-          _subPackage.hideSelection = true;
-          if (_subPackage?.serializedPackage) {
-            _subPackage.serializedPackageId = _subPackage?.serializedPackage?.optionValue;
-            _subPackage.serializedPackageNumber = _subPackage?.serializedPackage?.optionLabel;
-          }
-        }
-      }
-      _subPackage.subRows = generateNestedData(material, _subPackage);
-      _subPackage.canDelete = false;
-      if (_subPackage?.isDummy) {
-        _subPackage.workOrderCompletQty = `${_subPackage?.subRows?.filter((e) => e?.workOrder?.status === WORK_ORDER_STATUS.completed)?.length} / ${_subPackage?.qty}`
-      }
-      if (_subPackage?.workOrder && !_subPackage?.isDummy) {
-        if (_subPackage?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
-          _subPackage.canDelete = _subPackage.subRows.length === 0 ? true : false;
-          if (_subPackage.subRows?.length && _subPackage.subRows?.find((e) => !e?.canDelete)) {
-            _subPackage.canDelete = false;
-          }
-        }
-      }
-    });
-
     var subRows: any = material.filter((e) => e?.parentId === parent?._id && [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(e?.type));
     subRows = orderBy(subRows, ['type'], ['desc']);
     let productIndex = 0;
@@ -585,6 +548,43 @@ const WorkOrder = ({
         }
         if (_subRow.subRows?.length && _subRow.subRows?.find((e) => !e?.canDelete)) {
           _subRow.canDelete = false;
+        }
+      }
+    });
+
+    var subPackage: any = material.filter((e) => e?.parentId === parent?._id && e?.type === MATERIAL_TYPE.package)
+    subPackage.forEach((_subPackage, index) => {
+      _subPackage.index = parent.index + '.' + `${subRows?.length + index + 1}`;
+      _subPackage.detail = _subPackage?.detail || _subPackage.packageDetail?.packageName || '';
+      _subPackage.description = _subPackage?.description || _subPackage?.packageDetail?.packageDescription || '';
+      _subPackage.qty = _subPackage.qty;
+      if (_subPackage?.workOrder) {
+        _subPackage.workOrderId = _subPackage?.workOrder?._id;
+        _subPackage.workOrderNumber = _subPackage?.workOrder?.workOrderNumber;
+        _subPackage.status = _subPackage?.workOrder?.status || '';
+        _subPackage.workOrderStatus = _subPackage?.workOrder?.status || '';
+        if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.new) {
+          _subPackage.canAutoCompleteWorkOrder = true;
+        }
+        if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.completed) {
+          _subPackage.hideSelection = true;
+        }
+        if (_subPackage?.serializedPackage) {
+          _subPackage.serializedPackageId = _subPackage?.serializedPackage?.optionValue;
+          _subPackage.serializedPackageNumber = _subPackage?.serializedPackage?.optionLabel;
+        }
+      }
+      _subPackage.subRows = generateNestedData(material, _subPackage);
+      _subPackage.canDelete = false;
+      if (_subPackage?.isDummy) {
+        _subPackage.workOrderCompletQty = `${_subPackage?.subRows?.filter((e) => e?.workOrder?.status === WORK_ORDER_STATUS.completed)?.length} / ${_subPackage?.qty}`
+      }
+      if (_subPackage?.workOrder && !_subPackage?.isDummy) {
+        if (_subPackage?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
+          _subPackage.canDelete = _subPackage.subRows.length === 0 ? true : false;
+          if (_subPackage.subRows?.length && _subPackage.subRows?.find((e) => !e?.canDelete)) {
+            _subPackage.canDelete = false;
+          }
         }
       }
     });
@@ -1418,7 +1418,7 @@ const ActionButtonMenuItems = ({
       {permissions?.repairJob?.isUpdate && (
         <MenuItem
           onClick={() => {
-            setRepairJobReceiveConfirmation({open : true, sendToCustomer: false});
+            setRepairJobReceiveConfirmation({ open: true, sendToCustomer: false });
           }}
           disabled={
             getFilterSelectedRecords(selectedRecords)

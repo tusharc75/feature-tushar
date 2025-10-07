@@ -606,6 +606,7 @@ const RentalManagementDetailsPage = () => {
                   assetPolicyData={assetPolicyData?.policy}
                 />
               )}
+
               {rentalSteps[currentStep]?.name === 'Add Services' && rentalManagementData && (
                 <Services
                   rentalManagementData={rentalManagementData}

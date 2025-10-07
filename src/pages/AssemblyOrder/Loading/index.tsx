@@ -14,11 +14,12 @@ import routes from 'src/components/Helpers/Routes';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
-import { CHILD_RESOURCE, dateFormatToSend, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, deliveryTicket, MATERIAL_TYPE, SERIALIZED_PACKAGE_OWNER_TYPE, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, dateFormatToSend, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, deliveryTicket, INVENTORY_OWNER_TYPE, MATERIAL_TYPE, SERIALIZED_PACKAGE_OWNER_TYPE, sidebarResource } from 'src/constants/helpers';
 import { actionDisable, assemblyOrderActions, assemblyOrderMessage } from 'src/constants/messageHelpers';
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import InfoIcon from '@mui/icons-material/Info';
 
 const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -109,6 +110,13 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             </Box>
+            {row?.original?.currentOwnerType === INVENTORY_OWNER_TYPE.supplierAccount && (
+              <Box>
+                <HtmlTooltip title={`${resources?.serializedPackages?.titleSingular} is at supplier location`}>
+                  <InfoIcon fontSize="small" color={'primary'} />
+                </HtmlTooltip>
+              </Box>
+            )}
           </div>
         )
       },
@@ -301,6 +309,9 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       if (_subRow.type === MATERIAL_TYPE.package) {
         _subRow.serializedPackageId = _subRow?.serializedPackageDetail?._id;
         _subRow.serializedPackageNumber = _subRow?.serializedPackageDetail?.serializedPackageNumber;
+        _subRow.status = _subRow?.serializedPackageDetail?.status;
+        _subRow.currentOwner = _subRow?.serializedPackageDetail?.currentOwner;
+        _subRow.currentOwnerType = _subRow?.serializedPackageDetail?.currentOwnerType;
       }
       _subRow.qty = _subRow.qty || 1;
       _subRow.qtyDisplay = _subRow.qty || 1;
@@ -327,6 +338,11 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
           errorMessages.push({
             index: e.index,
             message: assemblyOrderMessage.repairSameWarehouse?.replace(sidebarResource?.warehouse, resources?.warehouse?.titleSingular)
+          });
+        } else if (e?.currentOwnerType === INVENTORY_OWNER_TYPE.supplierAccount) {
+          errorMessages.push({
+            index: e.index,
+            message: `${resources?.serializedPackages?.titleSingular} ${assemblyOrderMessage.atSupplierLocation}`
           });
         }
       } else if (action === assemblyOrderActions.deliveredToCustomer) {
