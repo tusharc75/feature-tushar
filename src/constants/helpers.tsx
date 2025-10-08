@@ -427,7 +427,8 @@ export const sidebarResource = {
   onboardingTemplate: 'Onboarding Template',
   onboarding: 'Onboarding',
   assetServiceTickets: 'Asset Service Tickets',
-  reportBuilder: 'Report Builder'
+  reportBuilder: 'Report Builder',
+  costBooks: 'Cost Books'
 } as const;
 
 export const primaryFields = {
@@ -551,6 +552,11 @@ export const repairJob = {
 export const assetServiceTickets = {
   resource: 'assetServiceTickets',
   api: '/asset-service-tickets'
+};
+
+export const costBooks = {
+  resource: 'costBooks',
+  api: '/cost-books'
 };
 
 export const expenses = {
@@ -2404,7 +2410,8 @@ export const ACTIVITY_RESOURCE = {
   expenses: 'expenses',
   expenseReport: 'expenseReport',
   contentPostPlanning: 'contentPostPlanning',
-  assetServiceTicket: 'assetServiceTicket'
+  assetServiceTicket: 'assetServiceTicket',
+  costBooks: 'costBooks',
 };
 
 export const LOG_RESOURCE = {
