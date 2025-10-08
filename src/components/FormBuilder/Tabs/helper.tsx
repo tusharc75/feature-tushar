@@ -389,7 +389,7 @@ export const resourcePolicy = [
       },
       {
         fieldName: 'autoUploadPdfInWorkspace',
-        fieldLabel: 'Auto Upload Pdf In Workspace',
+        fieldLabel: 'Auto Upload PDF In Workspace',
         type: 'checkBox',
         defaultValue: false
       },
@@ -517,7 +517,7 @@ export const resourcePolicy = [
     policy: [
       {
         fieldName: 'showWorkOrderPdfPreviewInTile',
-        fieldLabel: 'Show Work Order Pdf Preview in Tile',
+        fieldLabel: 'Show Work Order PDF Preview in Tile',
         type: 'checkBox',
         defaultValue: false
       }

@@ -1021,7 +1021,7 @@ export default function NewCreateQuotePdfTemplate() {
                             />
                             <TextField
                               variant="outlined"
-                              label={'Pdf Font Size'}
+                              label={'PDF Font Size'}
                               name="pdfFontSize"
                               type="number"
                               disabled={!isEdit}
