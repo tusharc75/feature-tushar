@@ -389,7 +389,7 @@ export const resourcePolicy = [
       },
       {
         fieldName: 'autoUploadPdfInWorkspace',
-        fieldLabel: 'Auto Upload Pdf In Workspace',
+        fieldLabel: 'Auto Upload PDF In Workspace',
         type: 'checkBox',
         defaultValue: false
       },
@@ -517,7 +517,7 @@ export const resourcePolicy = [
     policy: [
       {
         fieldName: 'showWorkOrderPdfPreviewInTile',
-        fieldLabel: 'Show Work Order Pdf Preview in Tile',
+        fieldLabel: 'Show Work Order PDF Preview in Tile',
         type: 'checkBox',
         defaultValue: false
       }
@@ -653,4 +653,25 @@ export const DATE_VALUE = {
 export const RESOURCE_ACTION_TYPE = {
   actions: 'Actions',
   triggers: 'Triggers'
+}
+
+export const statusColor = {
+  fieldName: 'statusColor',
+  fieldLabel: 'Status Color',
+  type: 'multipleFields',
+  fields: [
+    {
+      fieldName: 'status',
+      fieldLabel: 'Status',
+      type: 'multiSelect',
+      required: true
+    },
+    {
+      fieldName: 'colorCode',
+      fieldLabel: 'Color Code',
+      type: 'colorPicker',
+      required: true
+    }
+  ],
+  defaultValue: []
 }

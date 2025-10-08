@@ -32,6 +32,7 @@ import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
 import { CancelTokenSource } from 'axios';
 import { RESOURCE_ACTION_TYPE } from 'src/components/FormBuilder/Tabs/helper';
 import UpdateResourceActions from 'src/components/FormBuilder/Tabs/UpdateResourceActions';
+import RoleWiseStatusChangeDialog from 'src/components/FormBuilder/Tabs/RoleWiseStatusChangeDialog';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -103,6 +104,7 @@ const CreateFormBuilder = () => {
   const [openNotifications, setOpenNotifications] = useState(false);
   const [resourceData, setResourceData] = useState(null);
   const [resourceTriggerDialog, setResourceTriggerDialog] = useState(false);
+  const [roleWiseStatusChangeDialog, setRoleWiseStatusChangeDialog] = useState(false);
   const [formData, setFormData] = useState(null)
 
   const [isNew, setIsNew] = useState(resource === '0' ? true : false);
@@ -518,6 +520,20 @@ const CreateFormBuilder = () => {
                         </IconButton>
                       </HtmlTooltip>
                     )}
+                    {resource === sidebarResource.serializedAsset && (
+                      <HtmlTooltip title={'Role Wise Status Change'}>
+                        <IconButton
+                          aria-label="Role Wise Status Change"
+                          onClick={() => {
+                            setRoleWiseStatusChangeDialog(true);
+                          }}
+                          color="primary"
+                          size="small"
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </HtmlTooltip>
+                    )}
                     <HtmlTooltip title={'Notifications'}>
                       <IconButton
                         aria-label="Notifications"
@@ -606,6 +622,18 @@ const CreateFormBuilder = () => {
                   resource={resource}
                   resourceData={resourceData}
                   type={RESOURCE_ACTION_TYPE.triggers}
+                />
+              )}
+              {roleWiseStatusChangeDialog && (
+                <RoleWiseStatusChangeDialog
+                  onClose={() => {
+                    setRoleWiseStatusChangeDialog(false);
+                  }}
+                  onSuccess={() => {
+                    fetchData();
+                    setRoleWiseStatusChangeDialog(false);
+                  }}
+                  resourceData={resourceData}
                 />
               )}
             </Fragment>
