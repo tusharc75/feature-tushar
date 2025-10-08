@@ -25,6 +25,9 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const PdfTemplateSchema = object().shape({
   name: string().min(3, 'Too Short!').max(50, 'Too Long').required('PDF template Name is required'),
@@ -62,6 +65,7 @@ export default function CreateCustomPdfTemplate() {
   const [resourceTables, setResourceTables] = useState(null);
 
   const [btnLoading, setBtnLoading] = useState(false);
+  const [stepFullScreen, setStepFullScreen] = useState(false);
 
   useEffect(() => {
     const options = [];
@@ -368,6 +372,18 @@ export default function CreateCustomPdfTemplate() {
                   >
                     Close
                   </ThemeButton>
+                  {isEdit &&
+                    <HtmlTooltip title='Full Screen'>
+                      <IconButton
+                        onClick={() => {
+                          setStepFullScreen(true)
+                        }}
+                        size='small'
+                        aria-label="delete">
+                        <OpenInFullIcon color='primary' fontSize='small' />
+                      </IconButton>
+                    </HtmlTooltip>
+                  }
                 </div>
               </div>
               <div className="main-container">
@@ -613,16 +629,19 @@ export default function CreateCustomPdfTemplate() {
                   </Grid>
                 </div>
                 {values?.template && resourceFields ?
-                  <div className='mt-4'>
-                    <PdfEditor
-                      template={values?.template as Template}
-                      onTemplateChange={(values: Template) => { setFieldValue('template', values); }}
-                      disabled={!isEdit || !allowedToEdit}
-                      noOfPages={noOfPages}
-                      variables={resourceFields}
-                      resourceTables={resourceTables}
-                    />
-                  </div> : <Box p={2} height={500}>
+                  <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+                    <div className={stepFullScreen ? '' : 'mt-4'}>
+                      <PdfEditor
+                        template={values?.template as Template}
+                        onTemplateChange={(values: Template) => { setFieldValue('template', values); }}
+                        disabled={!isEdit || !allowedToEdit}
+                        noOfPages={noOfPages}
+                        variables={resourceFields}
+                        resourceTables={resourceTables}
+                      />
+                    </div>
+                  </ContentFullScreen>
+                  : <Box p={2} height={500}>
                     <CommonSkeleton lenArray={[...Array(10).keys()]} />
                   </Box>
                 }

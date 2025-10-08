@@ -16,7 +16,6 @@ interface PdfEditorProps {
 const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables, resourceTables }: PdfEditorProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const designerInstanceRef = useRef<Designer | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [dropdownPos, setDropdownPos] = useState<{ x: number; y: number } | null>(null);
   const [savedRange, setSavedRange] = useState<Range | null>(null);
   const [fontsReady, setFontsReady] = useState(false);
