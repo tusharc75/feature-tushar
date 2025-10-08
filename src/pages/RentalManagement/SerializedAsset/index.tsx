@@ -1640,6 +1640,7 @@ const BulkActionItems = ({
         </BulkActionContainer.Button>
       )}
       <BulkActionContainer.Button
+        buttonType="red"
         disabled={flattenArray(selectedRecords)?.filter((d) => ['asset', 'serialNumber']?.includes(d.type) && d.canRemove)?.length === 0}
         onClick={() => {
           const assets = flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove);

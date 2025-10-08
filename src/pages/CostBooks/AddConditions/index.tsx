@@ -1,0 +1,777 @@
+import { useState, useEffect, useContext, Fragment } from 'react';
+import { MenuItem, Box, IconButton, Menu, Popover } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import Add from '@mui/icons-material/Add';
+import axiosInstance from '../../../axios/axiosInstance';
+import routes from '../../../components/Helpers/Routes';
+import { useData } from '../../../StateProvider/Provider';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { costBooks, gridLoadingTimeout, PRICING_TYPE, sidebarResource, MATERIAL_TYPE, formatAmountWithCurrency } from '../../../constants/helpers';
+import EditIcon from '@mui/icons-material/Edit';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from '../../../components/CustomTooltipTitle';
+import ConditionDialog from './ConditionDialog';
+import { camelCase, startCase } from 'lodash';
+import { ExpandMore, Info } from '@mui/icons-material';
+import { isMobile, isTablet } from 'react-device-detect';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { addDisable, deleteDisable, updateDisable } from 'src/constants/messageHelpers';
+import { FiExternalLink } from 'react-icons/fi';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+
+const AddConditions = ({ id, detailData }) => {
+  const renderedFrom = camelCase(`${sidebarResource?.costBooks}_condition_selected`);
+  const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { permissions, resources }
+  }: any = useData();
+
+  const { state, dispatch } = useTableReducer({ renderedFrom });
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
+  const [addMaterialDialog, setAddMaterialDialog] = useState({ open: false, materialType: '' });
+  const [condition, setCondition] = useState(null);
+  const [showDialog, setShowDialog] = useState({ open: false, isBulkedit: false });
+  const [conditionData, setConditionData] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [addAnchorEl, setAddAnchorEl] = useState(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [isSubmitting, setSubmitting] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
+  const [openConditionDetails, setOpenConditionDetails] = useState({ anchorEl: null, data: null });
+  const [assetStatusField, setAssetStatusField] = useState(null);
+  const [productList, setProductList] = useState([]);
+
+  useEffect(() => {
+    fetchCondition();
+  }, [page, limit, sorting, id, filters, showFilteredRecordsOnly, search]);
+
+  const fetchCondition = () => {
+    dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
+
+    const queryString = getQueryString();
+
+    axiosInstance()
+      .get(`${costBooks.api}/condition/${id}${queryString}`)
+      .then(({ data: { data, count } }) => {
+        setCondition(JSON.parse(JSON.stringify(data)));
+        data.forEach((element) => {
+          element.detail = `${
+            element.materialType === MATERIAL_TYPE.product
+              ? element.productDetail?.productName
+              : element.materialType === MATERIAL_TYPE.service
+                ? element.serviceDetail?.serviceName
+                : element.materialType === MATERIAL_TYPE.package
+                  ? element.packageDetail?.packageName
+                  : element.competencyDetail.competencyName
+          }`;
+          element.description = `${
+            element.materialType === MATERIAL_TYPE.product
+              ? element?.productDetail?.productDescription || ''
+              : element.materialType === MATERIAL_TYPE.service
+                ? element?.serviceDetail?.serviceDescription || ''
+                : element.materialType === MATERIAL_TYPE.package
+                  ? element?.packageDetail?.packageDescription || ''
+                  : ''
+          }`;
+          element.materialType = startCase(element.materialType);
+          element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
+            ?.map((e) => e.optionLabel)
+            ?.toString();
+          element.unit = element.unit?.toString();
+          element.pricingMethod = element.pricingMethod?.toString();
+        });
+        dispatch({ type: 'initialize', data: data, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  useEffect(() => {
+    fetchPolicy();
+  }, []);
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.costBooks}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.serializedAsset}&view=true`)
+      .then(({ data: { data } }) => {
+        const statusField = data?.find((f) => f?.fieldData?.fieldName === 'subStatus')?.fieldData;
+        if (statusField) {
+          setAssetStatusField(statusField);
+        }
+      });
+  }, []);
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource?.product}`)
+      .then(({ data: { data } }) => {
+        setProductList(data.Product || []);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }, []);
+
+  const getQueryString = () => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    if (showFilteredRecordsOnly) {
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
+    }
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    }
+    return deepFilter;
+  };
+
+  const handleAdd = (rows) => {
+    setSubmitting(true);
+    const condition: any = [];
+    rows.forEach((d) => {
+      const element: any = {};
+      element.materialId = d._id;
+      element.materialType = addMaterialDialog.materialType;
+      condition.push(element);
+    });
+
+    axiosInstance()
+      .post(`${costBooks.api}/condition/${id}`, { condition })
+      .then(({ data: { data } }) => {
+        setAddMaterialDialog({ open: false, materialType: '' });
+        fetchCondition();
+        setSubmitting(false);
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleDelete = () => {
+    let ids = [];
+    console.log('deleteRecord', deleteRecord);
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = selectedRecords.map((d) => d._id);
+    }
+    axiosInstance()
+      .post(`${costBooks.api}/condition/${id}/remove`, { ids: ids })
+      .then(() => {
+        fetchCondition();
+        setAnchorEl(null);
+        setDeleteRecord(null);
+        setShowDeleteConfirmBox(false);
+      })
+      .catch((error) => {
+        setDeleteRecord(null);
+        setShowDeleteConfirmBox(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const handleOpen = (id) => {
+    const result = condition.filter((e) => e._id === id);
+    if (result.length) {
+      setShowDialog({ open: true, isBulkedit: false });
+      setConditionData(result[0]);
+    }
+  };
+
+  const columns = [
+    {
+      accessor: 'detail',
+      Header: 'Detail',
+      disabled: true,
+      Cell: ({ row }) =>
+        row?.original?.detail ? (
+          <div>
+            <div className="flex items-center gap-2">
+              <h5
+                className="link text-truncate"
+                onClick={() => {
+                  handleOpen(row?.original._id);
+                }}
+              >
+                {row?.original?.detail}
+              </h5>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(
+                    `${
+                      row?.original?.materialType === 'Product'
+                        ? routes.productDetail.path
+                        : row?.original?.materialType === 'Service'
+                          ? routes.serviceMasterDetail.path
+                          : row?.original?.materialType === 'Package'
+                            ? routes.packagesDetail.path
+                            : routes?.competenciesDetail.path
+                    }/${row?.original?.materialId}`
+                  );
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
+            <div>
+              {row?.original?.conditionType && (
+                <HtmlTooltip title={'Pricing Information'}>
+                  <IconButton
+                    aria-label="info"
+                    size="small"
+                    color="primary"
+                    onClick={(e) => {
+                      const data = condition?.find((ele) => ele._id === row?.original?._id);
+                      if (data) {
+                        setOpenConditionDetails({ anchorEl: e.currentTarget, data: data });
+                      }
+                    }}
+                  >
+                    <Info fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
+            </div>
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+    },
+    {
+      accessor: 'materialType',
+      Header: 'Type',
+      disabled: true,
+      Cell: ({ row }) => (row?.original?.materialType ? <h5 className="text-truncate">{row?.original?.materialType}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'description',
+      Header: 'Description',
+      disabled: true,
+      Cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'conditionType',
+      Header: 'Pricing Type',
+      disabled: true,
+      Cell: ({ row }) => (row?.original?.conditionType ? <h5 className="text-truncate">{row?.original?.conditionType}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'unit',
+      Header: 'Unit',
+      disabled: true,
+      Cell: ({ row }) => (row?.original?.unit ? <h5 className="text-truncate">{row?.original?.unit}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'pricingMethod',
+      Header: 'Pricing Method',
+      disabled: true,
+      Cell: ({ row }) => (row?.original?.pricingMethod ? <h5 className="text-truncate">{row?.original?.pricingMethod}</h5> : <NoDataCell />)
+    },
+    {
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 110,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          {permissions?.costBooks?.isUpdate ? (
+            <HtmlTooltip title="Edit">
+              <IconButton
+                size="small"
+                aria-label="Edit"
+                onClick={() => {
+                  handleOpen(row?.original?._id);
+                }}
+              >
+                <EditIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          ) : (
+            <HtmlTooltip title="View">
+              <IconButton
+                size="small"
+                aria-label="View"
+                onClick={() => {
+                  handleOpen(row?.original?._id);
+                }}
+              >
+                <VisibilityIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          <HtmlTooltip title={permissions?.costBooks?.isUpdate ? 'Delete' : deleteDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                disabled={!permissions?.costBooks?.isUpdate}
+                onClick={() => {
+                  setDeleteRecord(row?.original);
+                  setShowDeleteConfirmBox(true);
+                }}
+              >
+                <DeleteIcon fontSize="small" color={permissions?.costBooks?.isUpdate ? 'error' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        </>
+      )
+    }
+  ];
+
+  const openAddActions = (event) => {
+    setAddAnchorEl(event.currentTarget);
+  };
+
+  const closeAddActions = () => {
+    setAddAnchorEl(null);
+  };
+
+  return (
+    <Fragment>
+      <Box display="flex" justifyContent="space-between" m={1} mt={2}>
+        <Box display="flex" gap={'8px'} flexWrap={'wrap'}>
+          <HtmlTooltip title={permissions?.costBooks?.isUpdate ? 'Add' : addDisable}>
+            <span>
+              <ThemeButton
+                endIcon={<ExpandMore fontSize="small" />}
+                startIcon={<Add />}
+                onClick={openAddActions}
+                disabled={!permissions?.costBooks?.isUpdate}
+              >
+                {'Add'}
+              </ThemeButton>
+            </span>
+          </HtmlTooltip>
+          <Menu
+            anchorEl={addAnchorEl}
+            keepMounted
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="add-menu"
+            open={Boolean(addAnchorEl)}
+            onClose={closeAddActions}
+          >
+            {permissions?.product?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes(MATERIAL_TYPE.product) && (
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddMaterialDialog({ open: true, materialType: MATERIAL_TYPE.product });
+                }}
+              >
+                Add Existing Products
+              </MenuItem>
+            )}
+            {permissions?.packages?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes(MATERIAL_TYPE.package) && (
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddMaterialDialog({ open: true, materialType: MATERIAL_TYPE.package });
+                }}
+              >
+                {`Add Existing ${resources?.packages?.titlePlural}`}
+              </MenuItem>
+            )}
+            {permissions?.serviceMaster?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes(MATERIAL_TYPE.service) && (
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddMaterialDialog({ open: true, materialType: MATERIAL_TYPE.service });
+                }}
+              >
+                Add Existing Services
+              </MenuItem>
+            )}
+            {permissions?.competencies?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes('competency') && (
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddMaterialDialog({ open: true, materialType: 'competency' });
+                }}
+              >
+                Add Existing Competencies
+              </MenuItem>
+            )}
+          </Menu>
+        </Box>
+        <Box display="flex">
+          {/* <Box>
+            <ImportExportLinks
+              permissions={permissions.costBooks}
+              module={resources?.pricingCondition?.titlePlural}
+              api={costBooks.api}
+              afterImportCompleted={() => {
+                fetchCondition();
+              }}
+              isExportAllOrSomeFeature={true}
+              total={rowCount}
+              recordsToExport={selectedRecords.length}
+              onExportToExcelSuccess={() => {
+                fetchCondition();
+              }}
+              hideDefaultImportExport={true}
+              extraImportExportLinks={[
+                ...(permissions?.product?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes(MATERIAL_TYPE.product)
+                  ? [
+                      {
+                        title: 'Product Template',
+                        api: `${costBooks.api}/template?materialType=product&child=true&ids=${JSON.stringify([id])}`,
+                        type: 'download'
+                      },
+                      {
+                        title: 'Product Export',
+                        api: `${costBooks.api}/template?export=true&materialType=product&child=true&ids=${JSON.stringify([id])}&uniqueIds=${JSON.stringify(selectedRecords?.map((e) => e._id))}`,
+                        type: 'export'
+                      },
+                      {
+                        title: 'Product Import',
+                        api: `${costBooks.api}/import?materialType=product&child=true&ids=${JSON.stringify([id])}`,
+                        type: 'import'
+                      }
+                    ]
+                  : []),
+                ...(permissions?.packages?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes(MATERIAL_TYPE.package)
+                  ? [
+                      {
+                        title: 'Package Template',
+                        api: `${costBooks.api}/template?materialType=package&child=true&ids=${JSON.stringify([id])}`,
+                        type: 'download'
+                      },
+                      {
+                        title: 'Package Export',
+                        api: `${costBooks.api}/template?export=true&materialType=package&child=true&ids=${JSON.stringify([id])}&uniqueIds=${JSON.stringify(selectedRecords?.map((e) => e._id))}`,
+                        type: 'export'
+                      },
+                      {
+                        title: 'Package Import',
+                        api: `${costBooks.api}/import?materialType=package&child=true&ids=${JSON.stringify([id])}`,
+                        type: 'import'
+                      }
+                    ]
+                  : []),
+                ...(permissions?.serviceMaster?.isRead && !resourceData?.policy?.hideMaterialAdd?.includes(MATERIAL_TYPE.service)
+                  ? [
+                      {
+                        title: 'Service Template',
+                        api: `${costBooks.api}/template?materialType=service&child=true&ids=${JSON.stringify([id])}`,
+                        type: 'download'
+                      },
+                      {
+                        title: 'Service Export',
+                        api: `${costBooks.api}/template?export=true&materialType=service&child=true&ids=${JSON.stringify([id])}&uniqueIds=${JSON.stringify(selectedRecords?.map((e) => e._id))}`,
+                        type: 'export'
+                      },
+                      {
+                        title: 'Service Import',
+                        api: `${costBooks.api}/import?materialType=service&child=true&ids=${JSON.stringify([id])}`,
+                        type: 'import'
+                      }
+                    ]
+                  : [])
+              ]}
+              ids={[id]}
+            />
+          </Box> */}
+          <Box ml={2}>
+            <HtmlTooltip title={permissions?.costBooks?.isUpdate ? '' : updateDisable}>
+              <span>
+                <ThemeButton
+                  mobileTooltip="Actions"
+                  buttonType="yellow"
+                  iconForMobile={<ExpandMore />}
+                  onClick={openActions}
+                  disabled={selectedRecords.length && permissions?.costBooks?.isUpdate ? false : true}
+                  endIcon={<ExpandMore />}
+                >
+                  {isMobile && !isTablet ? '' : 'Actions'}
+                </ThemeButton>
+              </span>
+            </HtmlTooltip>
+            <Menu
+              anchorEl={anchorEl}
+              keepMounted
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left'
+              }}
+              id="action-menu"
+              open={Boolean(anchorEl)}
+              onClose={closeActions}
+            >
+              <span onClick={closeActions}>
+                <MenuItem
+                  disabled={!Boolean(selectedRecords && selectedRecords?.length > 1 && dataRows?.length > 1)}
+                  onClick={() => {
+                    setShowDialog({ open: true, isBulkedit: true });
+                    setConditionData(condition.filter((data) => selectedRecords.some((rec) => rec._id === data._id)));
+                  }}
+                >
+                  Bulk Edit
+                </MenuItem>
+                <MenuItem
+                  disabled={!Boolean(selectedRecords && selectedRecords.length && dataRows?.length)}
+                  onClick={() => {
+                    setShowDeleteConfirmBox(true);
+                  }}
+                >
+                  Delete
+                </MenuItem>
+              </span>
+            </Menu>
+          </Box>
+        </Box>
+      </Box>
+      <Grid size={{ xs: 12, md: 12, sm: 12 }} className="mt-3">
+        {columns && condition ? (
+          <CustomReactTable
+            height={'calc(100vh - 393px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchCondition}
+          />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+      </Grid>
+      {addMaterialDialog.open && addMaterialDialog.materialType === MATERIAL_TYPE.product && (
+        <AssignDynamicDialog
+          resource={sidebarResource?.product}
+          onSuccess={(data) => {
+            handleAdd(data);
+          }}
+          handleClose={() => {
+            setAddMaterialDialog({ open: false, materialType: '' });
+          }}
+          isSubmitting={isSubmitting}
+          fromResource={sidebarResource.costBooks}
+          fromResourceId={id}
+        />
+      )}
+      {addMaterialDialog.open && addMaterialDialog.materialType === MATERIAL_TYPE.package && (
+        <AssignDynamicDialog
+          resource={sidebarResource?.packages}
+          onSuccess={(data) => {
+            handleAdd(data);
+          }}
+          handleClose={() => {
+            setAddMaterialDialog({ open: false, materialType: '' });
+          }}
+          isSubmitting={isSubmitting}
+          fromResource={sidebarResource.costBooks}
+          fromResourceId={id}
+        />
+      )}
+      {addMaterialDialog.open && addMaterialDialog.materialType === MATERIAL_TYPE.service && (
+        <AssignDynamicDialog
+          resource={sidebarResource?.serviceMaster}
+          onSuccess={(data) => {
+            handleAdd(data);
+          }}
+          handleClose={() => {
+            setAddMaterialDialog({ open: false, materialType: '' });
+          }}
+          fromResource={sidebarResource.costBooks}
+          fromResourceId={id}
+          isSubmitting={isSubmitting}
+        />
+      )}
+      {addMaterialDialog.open && addMaterialDialog.materialType === 'competency' && (
+        <AssignDynamicDialog
+          resource={sidebarResource?.competencies}
+          onSuccess={(data) => {
+            handleAdd(data);
+          }}
+          handleClose={() => {
+            setAddMaterialDialog({ open: false, materialType: '' });
+          }}
+          ids={condition?.filter((c) => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
+          isSubmitting={isSubmitting}
+        />
+      )}
+      {showDialog.open && conditionData && (
+        <ConditionDialog
+          conditionData={conditionData}
+          detailData={detailData}
+          isBulkedit={showDialog.isBulkedit}
+          id={id}
+          allowedToEdit={permissions?.costBooks?.isUpdate}
+          handleClose={() => {
+            setShowDialog({ open: false, isBulkedit: false });
+          }}
+          handleSuccess={() => {
+            setShowDialog({ open: false, isBulkedit: false });
+            fetchCondition();
+          }}
+          assetStatusField={assetStatusField}
+          productList={productList}
+        />
+      )}
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete cost book condition  ${
+            deleteRecord?.productDetail?.productName ||
+            deleteRecord?.packageDetail?.packageName ||
+            deleteRecord?.serviceDetail?.serviceName ||
+            deleteRecord?.competencyDetail?.competencyName ||
+            ''
+          } ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
+      )}
+      <Popover
+        PaperProps={{
+          className: 'w-[min(400px,100%)_!important]',
+          style: {
+            borderRadius: 0,
+            boxShadow: '-4px 0px 40px 0px rgba(0, 0, 0, 0.06)'
+          }
+        }}
+        id={openConditionDetails.data?.materialId}
+        open={Boolean(openConditionDetails.anchorEl)}
+        anchorEl={openConditionDetails.anchorEl}
+        onClose={() => {
+          setOpenConditionDetails({ anchorEl: null, data: null });
+        }}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left'
+        }}
+      >
+        <div className="overflow-auto border-b p-3">
+          {openConditionDetails?.data?.conditionType?.includes('Price') && (
+            <div>
+              <h4 className="mb-2 font-semibold">Sell</h4>
+              <table className="min-w-full table-auto border-collapse border border-gray-300">
+                <thead>
+                  <tr>
+                    <th className="border border-gray-300 px-4 py-2"></th>
+                    <th className="whitespace-nowrap border border-gray-300 px-4 py-2">Rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {openConditionDetails?.data?.unit?.map((unit, rowIndex) => (
+                    <tr key={rowIndex}>
+                      <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        <p>
+                          {formatAmountWithCurrency(
+                            detailData?.currency,
+                            openConditionDetails?.data[`mrp_${detailData?.currency?.toLowerCase()}_${unit.toLowerCase()}`]
+                          )?.fullFormatAmount || ''}
+                        </p>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {openConditionDetails?.data?.conditionType?.includes('Rent') && (
+            <div className="mt-3">
+              <table className="min-w-full table-auto border-collapse border border-gray-300">
+                <thead>
+                  <tr>
+                    <th className="border border-gray-300 px-4 py-2"></th>
+                    {openConditionDetails?.data?.pricingMethod?.map((method, index) => (
+                      <th key={index} className="whitespace-nowrap border border-gray-300 px-4 py-2">
+                        {method}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {openConditionDetails?.data?.unit?.map((unit, rowIndex) => (
+                    <tr key={rowIndex}>
+                      <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
+                      {openConditionDetails?.data?.pricingMethod?.map((method, colIndex) => (
+                        <td key={colIndex} className="border border-gray-300 px-4 py-2">
+                          <p>
+                            {formatAmountWithCurrency(
+                              detailData?.currency,
+                              openConditionDetails?.data[
+                                `rent_${camelCase(method)}_${detailData?.currency?.toLowerCase()}_${camelCase(unit.toLowerCase())}`
+                              ]
+                            )?.fullFormatAmount || ''}
+                          </p>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </Popover>
+    </Fragment>
+  );
+};
+
+export default AddConditions;
