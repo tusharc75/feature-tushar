@@ -61,6 +61,9 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setDropdownPos(null);
+      }
       if (e.key === '{') {
         e.preventDefault();
         const target = e.target as HTMLElement;
