@@ -10,7 +10,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ActionButtonWithMenu from 'src/components/PageHeaders/ActionButtonWithMenu';
 import RippleButton from 'src/components/RippleButton';
 import { SearchFilter } from 'src/components/SearchFilter';
-import { cn, TAB_VIEWS } from 'src/constants/helpers';
+import { cn, getDefaultMyRecordType, TAB_VIEWS } from 'src/constants/helpers';
 import HtmlTooltip from '../CustomTooltipTitle';
 import SearchBox from '../Helpers/SearchBox';
 import HideWhenOffline from '../HideWhenOffline';
@@ -164,8 +164,10 @@ const ListingPageHeader = ({
             </div>
           </>
         ) : null}
-        <div className={`flex flex-grow ${shouldNotFlexWrap
-          && !leftSideContentsOfSearchFilter ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${!isLeftSidePresent && isMobile ? '-mt-2' : ''}`}
+        <div
+          className={`flex flex-grow ${
+            shouldNotFlexWrap && !leftSideContentsOfSearchFilter ? '' : 'flex-wrap'
+          } items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${!isLeftSidePresent && isMobile ? '-mt-2' : ''}`}
         >
           {Boolean(leftSideContentsOfSearchFilter) ? leftSideContentsOfSearchFilter : null}
           {onSearch ? (
@@ -257,14 +259,10 @@ const RenderTabs = ({
     }
   ) => void;
 } & Pick<ListingPageHeaderProps, 'toggleButtonList' | 'selectedType' | 'resource'>) => {
-  const {
-    state,
-    dispatch
-  }: any = useData();
+  const { state, dispatch }: any = useData();
   const { user } = state;
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
-  const [defaultType, setDefaultType] = React.useState<number | null>(selectedType);
-
+  const [defaultType, setDefaultType] = React.useState<number | null>(getDefaultMyRecordType(user?.user, resource));
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -278,25 +276,70 @@ const RenderTabs = ({
   const open = Boolean(anchorEl);
 
   const handleSetDefault = async (value: number) => {
+    const oldData = user.user.uiPreference?.byDefaultRecord || user?.user?.brandPolicy?.brandByDefaultRecord || [];
+
+    // optimistic update
+    const newDataIndex = oldData.findIndex((d) => d.resource === resource);
+    const newData = [...oldData];
+    if (newDataIndex > -1) {
+      newData[newDataIndex] = { resource, type: TAB_VIEWS[value] };
+    } else {
+      newData.push({ resource, type: TAB_VIEWS[value] });
+    }
+    dispatch({
+      type: SET_USER,
+      payload: {
+        ...user,
+        user: {
+          ...user.user,
+          uiPreference: {
+            ...user?.user?.uiPreference,
+            byDefaultRecord: newData
+          }
+        }
+      }
+    });
+
     setDefaultType(value);
-    axiosInstance().put('/user/resource-ui-preference', {
-      resource: resource, type: TAB_VIEWS[value]
-    }).then(({ data: { data } }) => {
-      dispatch({
-        type: SET_USER, payload: {
-          ...user,
-          user: {
-            ...user.user,
-            uiPreference: {
-              ...user.uiPreference,
-              byDefaultRecord: data,
-            },
-          },
-        },
+    axiosInstance()
+      .put('/user/resource-ui-preference', {
+        resource: resource,
+        type: TAB_VIEWS[value]
+      })
+      .then(({ data: { data } }) => {
+        if (data && data.length) {
+          dispatch({
+            type: SET_USER,
+            payload: {
+              ...user,
+              user: {
+                ...user.user,
+                uiPreference: {
+                  ...user?.user?.uiPreference,
+                  byDefaultRecord: data
+                }
+              }
+            }
+          });
+        }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        // Revert the optimistic update
+        dispatch({
+          type: SET_USER,
+          payload: {
+            ...user,
+            user: {
+              ...user.user,
+              uiPreference: {
+                ...user?.user?.uiPreference,
+                byDefaultRecord: oldData
+              }
+            }
+          }
+        });
       });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });;
   };
 
   return (
@@ -305,7 +348,7 @@ const RenderTabs = ({
         className="flex items-center gap-1 rounded-[6px] bg-theme p-[4px_5px_4px_10px] text-[13px] font-medium leading-[22.4px] text-[white] outline-transparent focus-within:outline-transparent focus-visible:outline-transparent "
         onClick={handleClick}
       >
-        {toggleButtonList.find(button => button.value === selectedType)?.key || toggleButtonList[0]?.key}
+        {toggleButtonList.find((button) => button.value === selectedType)?.key || toggleButtonList[0]?.key}
         <BiChevronDown size={22} className={cn('transition-transform', open ? '[transform:rotate(180deg)]' : '')} />
       </RippleButton>
       <Popover
@@ -321,10 +364,16 @@ const RenderTabs = ({
           {toggleButtonList?.map((d) => {
             const isActive = selectedType === d.value;
             return (
-              <li key={d.value}
-                className={cn("flex items-center justify-between px-2", "hover:bg-gray-200 dark:hover:bg-gray-900", isActive ? "bg-gray-200 dark:bg-gray-900" : "")}
+              <li
+                key={d.value}
+                className={cn(
+                  'flex items-center justify-between px-2',
+                  'hover:bg-gray-200 dark:hover:bg-gray-900',
+                  isActive ? 'bg-gray-200 dark:bg-gray-900' : ''
+                )}
               >
-                <RippleButton className="flex-1 text-left px-2 py-2"
+                <RippleButton
+                  className="flex-1 px-2 py-2 text-left"
                   component="div"
                   onClick={(e) => {
                     handleClose();
@@ -333,7 +382,7 @@ const RenderTabs = ({
                 >
                   {d.key}
                 </RippleButton>
-                {resource &&
+                {resource && (
                   <HtmlTooltip title={defaultType === d.value ? '' : 'Set as default'}>
                     <IconButton
                       size="small"
@@ -342,19 +391,15 @@ const RenderTabs = ({
                         handleSetDefault(d.value);
                       }}
                     >
-                      {defaultType === d.value ? (
-                        <Star sx={{ color: 'gold' }} fontSize="small" />
-                      ) : (
-                        <StarBorder fontSize="small" />
-                      )}
+                      {defaultType === d.value ? <Star sx={{ color: 'gold' }} fontSize="small" /> : <StarBorder fontSize="small" />}
                     </IconButton>
                   </HtmlTooltip>
-                }
+                )}
               </li>
             );
           })}
         </ul>
-      </Popover >
+      </Popover>
     </>
   );
 };
