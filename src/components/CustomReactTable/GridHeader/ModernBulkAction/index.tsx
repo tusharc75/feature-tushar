@@ -37,8 +37,8 @@ const ModernBulkAction = ({ state, bulkActionItems, dispatch }: ModernBulkAction
 
       <div className="ml-auto flex items-center gap-2">
         <div className="divider" />
-        <p className="flex items-center gap-2 text-sm font-medium">
-          <span className="inline-block h-[20px] rounded-full bg-blue-100 px-2 text-xs leading-[20px] text-[--primary-text] dark:bg-[var(--dark-primary)]">
+        <p className="flex items-center gap-2 text-[13px]">
+          <span className="inline-flex h-[28px] min-w-[28px] items-center justify-center rounded-full bg-blue-200 px-2 text-[12px] text-xs font-semibold leading-[28px] text-[--primary-text] dark:bg-[var(--dark-primary)]">
             {selectedRecords.length}
           </span>{' '}
           Selected
