@@ -11,7 +11,7 @@ const buttonVariants = cva(
       buttonType: {
         outline: 'border bg-[white] dark:bg-[var(--dark-primary)] shadow-xs hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-accent-foreground',
         theme: 'bg-theme text-white hover:bg-[var(--new-theme-color-hover)]',
-        red: 'border border-red-500 bg-[white] dark:bg-[var(--dark-primary)] text-red-500 dark:text-red-500 hover:bg-red-600'
+        red: 'border border-red-500 bg-[white] dark:bg-[var(--dark-primary)]'
       },
       variant: {
         rounded: 'rounded-full',
