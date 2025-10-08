@@ -307,7 +307,7 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
     let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, technician, PRICING_SETUP_TYPE.rent);
     let costPriceData: any = null;
     if (user?.user?.brandPolicy?.materialCostPrice) {
-      costPriceData = await getCostPriceConditions(technician, sidebarResource.employeeMaster, rentalManagementData);
+      costPriceData = await getCostPriceConditions(technician, technician[0]?.type, rentalManagementData);
     }
     AddMaterial(technician, priceData, costPriceData);
   };
@@ -323,7 +323,7 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
     });
     if (costPriceData) {
       tempMaterial.forEach((element) => {
-        const calValues = getCostPriceValue(element, costPriceData, rentalManagementData?.currency, allFields, sidebarResource.employeeMaster);
+        const calValues = getCostPriceValue(element, costPriceData, rentalManagementData?.currency, allFields);
         Object.assign(element, calValues);
       });
     }
