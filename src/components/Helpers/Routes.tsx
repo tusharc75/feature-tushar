@@ -816,6 +816,12 @@ const routes = {
   },
   reportBuilderDetail: {
     path: '/report-builder/detail'
+  },
+  costBooks: {
+    path: '/cost-books'
+  },
+  costBooksDetail: {
+    path: '/cost-books/detail'
   }
 };
 
