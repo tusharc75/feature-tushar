@@ -112,7 +112,9 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   useEffect(() => {
     getResourceFieldList(resource);
     getUserList();
-    getGroupList();
+    if (permissions?.userGroup?.isRead) {
+      getGroupList();
+    }
   }, []);
 
   const getUserList = async () => {
