@@ -361,7 +361,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                         }}
                       />
                     }
-                    label="Show In Pdf"
+                    label="Show In PDF"
                   />
                 </Box>
                 {!values['linkWithResource'] && (
