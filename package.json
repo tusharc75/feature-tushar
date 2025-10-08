@@ -32,6 +32,7 @@
     "@mui/x-tree-view": "^7.23.2",
     "@pdfme/common": "^5.4.0",
     "@pdfme/generator": "^5.4.0",
+    "@pdfme/pdf-lib": "^5.4.6",
     "@pdfme/schemas": "^5.4.0",
     "@pdfme/ui": "^5.4.0",
     "@react-google-maps/api": "2.7.0",
