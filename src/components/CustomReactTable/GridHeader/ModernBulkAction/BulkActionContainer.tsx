@@ -1,8 +1,9 @@
 import { MoreHoriz } from '@mui/icons-material';
 import { IconButton, IconButtonProps, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
-import React, { ReactElement, useLayoutEffect, useRef, useState } from 'react';
+import React, { ReactElement, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import BulkActionButton from './BulkActionButton';
+import { cn } from 'src/constants/helpers';
 
 const BulkActionGroup = ({ children }: { children: React.ReactChild }) => <div>{children}</div>;
 BulkActionGroup.displayName = 'BulkActionGroup';
@@ -35,6 +36,10 @@ const BulkActionContainer = ({ children }: BulkActionContainerProps) => {
   const normalizedChildren = React.Children.toArray(flattenChildren(children));
   const [visibleItemsLength, setVisibleItemsLength] = useState(normalizedChildren.length);
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setVisibleItemsLength(React.Children.toArray(flattenChildren(children)).length);
+  }, [children]);
 
   const recalc = () => {
     const container = containerRef.current;
@@ -113,7 +118,9 @@ const RenderMenuWithButton = ({ items }: { items: ChildList[] }) => {
             <HtmlTooltip title={tooltip}>
               <MenuItem {...props}>
                 {startIcon && <ListItemIcon>{startIcon}</ListItemIcon>}
-                <ListItemText>{children}</ListItemText>
+                <ListItemText>
+                  <span className={cn(props.buttonType === 'red' ? 'text-red-500' : '')}>{children}</span>
+                </ListItemText>
                 {endIcon && <ListItemIcon>{item.props.endIcon}</ListItemIcon>}
               </MenuItem>
             </HtmlTooltip>
@@ -127,7 +134,9 @@ const RenderMenuWithButton = ({ items }: { items: ChildList[] }) => {
         case 'BulkActionIconButton': {
           menuItems.push(
             <HtmlTooltip title={tooltip}>
-              <MenuItem {...props}>{item.props.text}</MenuItem>
+              <MenuItem {...props}>
+                <span className={cn(props.buttonType === 'red' ? 'text-red-500' : '')}>{item.props.text}</span>
+              </MenuItem>
             </HtmlTooltip>
           );
           break;
