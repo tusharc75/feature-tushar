@@ -95,7 +95,8 @@ const CustomReactTable = ({
   isFullScreen = false,
   showTableHead = true,
   arrangeRowField = null,
-  rememberClientFilters = false
+  rememberClientFilters = false,
+  bulkActionItems = null
 }) => {
   const {
     dataRows: data,
@@ -549,6 +550,7 @@ const CustomReactTable = ({
               expander={expander}
               hideExportTable={hideExportTable}
               topLeftSlot={topLeftSlot}
+              bulkActionItems={bulkActionItems}
             />
           )}
           {!isMobileView && !showOnlyMobileView && (

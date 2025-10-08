@@ -216,4 +216,5 @@ export const assemblyOrderMessage = {
   loadingAlreadyDelivered: 'Loading Ticket is already delivered',
   repairSameWarehouse: `Selected records must be at same ${sidebarResource?.warehouse} to perform this action`,
   loadSameStorageLocation: `Selected records must be at same ${sidebarResource?.storageLocation} to perform this action`,
+  atSupplierLocation: `is at supplier location`
 };

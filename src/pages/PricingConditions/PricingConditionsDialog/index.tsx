@@ -14,7 +14,7 @@ import { getObjKeysWithValues, getObjKeys, sidebarResource, yupSchema, pricingCo
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { Box } from '@mui/material';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { isEqual, startCase } from 'lodash';
+import { isEqual } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../../StateProvider/Provider';
 import dayjs from 'dayjs';
@@ -28,7 +28,7 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const history = useHistory();
   const {
-    state: { user, permissions, selectedEntity, resources }
+    state: { user, resources }
   }: any = useData();
 
   useEffect(() => {

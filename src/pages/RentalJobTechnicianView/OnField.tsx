@@ -10,6 +10,7 @@ import {
   sidebarResource
 } from 'src/constants/helpers';
 import { findOne, objectStore } from 'src/constants/indexdbhelper';
+import { getMultipleResourcePolicy } from 'src/pages/DynamicForm/helper';
 import ReceivingTicket from 'src/pages/RentalManagement/ReceivingTicket';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
@@ -21,12 +22,12 @@ const OnField = ({ rentalJob, referenceFrom }) => {
   const { isOffline } = useContext(CustomOfflineContext);
   const renderedFrom = `${referenceFrom}_onField`;
   const {
-    state: { user },
+    state: { user, permissions },
   }: any = useData();
   const [loading, setLoading] = useState(true);
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [rentalPolicyData, setRentalPolicyData] = useState(null);
   const [assetStatusOptions, setAssetStatusOptions] = useState([])
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [isProcessor, setIsProcessor] = useState(false);
@@ -45,12 +46,12 @@ const OnField = ({ rentalJob, referenceFrom }) => {
 
   const fetchPolicy = async () => {
     try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/multiple-resource-policy?resources=${sidebarResource.rentalManagement},${sidebarResource.serializedAsset},${sidebarResource.fleetDispatch}`);
-      if (data?.find((e) => e.resource === sidebarResource.rentalManagement)) {
-        setResourceData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
+      const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.rentalManagement},${sidebarResource.serializedAsset},${sidebarResource.fleetDispatch}`)
+      const rentalPolicy = data?.find((e) => e.resource === sidebarResource.rentalManagement)
+      if (rentalPolicy?.policy?.enableTechnicianDispatchReturn) {
+        rentalPolicy.policy.enableTechnicianDispatchReturn = false
       }
+      setRentalPolicyData(rentalPolicy);
       if (data?.find((e) => e.resource === sidebarResource.serializedAsset)) {
         setAssetPolicyData(data?.find((e) => e.resource === sidebarResource.serializedAsset));
       }
@@ -116,7 +117,7 @@ const OnField = ({ rentalJob, referenceFrom }) => {
           isProcessor={isProcessor}
           stepFullScreen={false}
           allowUpdateStatus={allowUpdateStatus}
-          rentalPolicyData={resourceData?.policy}
+          rentalPolicyData={rentalPolicyData?.policy}
           assetStatusOptions={assetStatusOptions}
           setAssetStatusOptions={setAssetStatusOptions}
           assetPolicyData={assetPolicyData}

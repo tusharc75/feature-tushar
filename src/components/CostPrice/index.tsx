@@ -9,6 +9,7 @@ import { formatAmountWithCurrency } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 
 const CostPrice = ({ referenceData, type }) => {
+
   const [costPriceData, setCostPriceData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [manageCostPrice, setManageCostPrice] = useState(false);
@@ -42,30 +43,24 @@ const CostPrice = ({ referenceData, type }) => {
     <>
       <Box className={`single-form-v1`} style={{ overflow: 'hidden' }}>
         <Box className={'form-head-v1'} justifyContent="space-between" alignItems="center">
-          <Typography variant="subtitle2">Cost Price</Typography>
+          <Typography variant="subtitle2">Cost</Typography>
           <IconButton
             size="small"
             onClick={() => {
               setManageCostPrice(true);
             }}
-            disabled={
-              loading ||
-              !Array.isArray(referenceData?.pricingMethod) &&
-              !Array.isArray(referenceData?.unit) ||
+            disabled={loading || !Array.isArray(referenceData?.pricingMethod) && !Array.isArray(referenceData?.unit) ||
               !referenceData?.pricingMethod?.length ||
               !referenceData?.unit?.length
             }
           >
             <AddCircleOutline
               fontSize="small"
-              color={
-                !Array.isArray(referenceData?.pricingMethod) ||
-                !Array.isArray(referenceData?.unit) ||
+              color={!Array.isArray(referenceData?.pricingMethod) || !Array.isArray(referenceData?.unit) ||
                 !referenceData?.pricingMethod?.length ||
                 !referenceData?.unit?.length ||
                 loading
-                  ? 'disabled'
-                  : 'primary'
+                ? 'disabled' : 'primary'
               }
             />
           </IconButton>
@@ -80,7 +75,7 @@ const CostPrice = ({ referenceData, type }) => {
                       <th className="border border-gray-300 px-4 py-2"></th>
                       {referenceData?.pricingMethod?.map((method, index) => (
                         <th key={index} className="whitespace-nowrap border border-gray-300 px-4 py-2">
-                          {method}
+                          <span className='text-sm font-normal' > {method}</span>
                         </th>
                       ))}
                     </tr>
@@ -88,10 +83,10 @@ const CostPrice = ({ referenceData, type }) => {
                   <tbody>
                     {referenceData?.unit?.map((unit, rowIndex) => (
                       <tr key={rowIndex}>
-                        <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
+                        <td className="border border-gray-300 px-4 py-2"><span className='text-sm font-normal' >{unit}</span></td>
                         {referenceData?.pricingMethod?.map((method, colIndex) => (
                           <td key={colIndex} className="border border-gray-300 px-4 py-2">
-                            <p>
+                            <p className='text-sm'>
                               {formatAmountWithCurrency(
                                 user?.user?.brandCurrency,
                                 costPriceData?.[`${camelCase(method)}_${camelCase(unit.toLowerCase())}`]

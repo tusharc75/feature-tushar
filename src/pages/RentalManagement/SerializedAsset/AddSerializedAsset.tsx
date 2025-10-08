@@ -39,6 +39,7 @@ import AssetDetailsChangeDialog from '../ReceivingTicket/AssetDetailsChangeDialo
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Add } from '@mui/icons-material';
 import CustomMessageDialog from 'src/components/MessageDialog';
+import ReplaceAssetReason from 'src/components/RentalManagment/ReplaceAssetReason';
 
 const AddSerializedAsset = ({
   isAdding,
@@ -57,7 +58,8 @@ const AddSerializedAsset = ({
   replaceAssets = false,
   assetPolicyData = null,
   selectedRecordsOfMain = [],
-  ids = []
+  ids = [],
+  setShowReplaceAssetWarnings = null,
 }) => {
   const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}`;
   const toastConfig = useContext(CustomToastContext);
@@ -847,6 +849,20 @@ const AddSerializedAsset = ({
           />
         )
       }
+      {referenceType === "RentalJobReplaceAsset" && referenceData?.replaceAssetReasonDialog && (
+        <ReplaceAssetReason
+          handleClose={() => {
+            setSelectedWarehouse(null);
+            dispatch({ type: 'selection', selectedRecords: [] })
+            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, data: null }));
+          }}
+          loading={isSubmitting}
+          handleSucess={(data) => {
+            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, replaceAssetReason: data?.reason, confirmationAddNewLineItemsDialog: true, incorrectAssignment: data?.incorrectAssignment }))
+          }}
+          isIncorrectAssignment={true}
+        />
+      )}
     </Fragment >
   );
 };

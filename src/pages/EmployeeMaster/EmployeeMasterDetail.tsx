@@ -23,8 +23,6 @@ import Step from '../DynamicForm/Step';
 import TechnicianUnavailability from 'src/pages/TechnicianUnavailability';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
-import Grid from '@mui/material/Grid2';
-import CostPrice from 'src/components/CostPrice';
 
 const EmployeeMasterDetail = () => {
   const { id } = useParams();
@@ -212,15 +210,6 @@ const EmployeeMasterDetail = () => {
                 resource={sidebarResource?.employeeMaster}
                 referenceId={employeeMasterData?._id}
               />
-              {user?.user?.brandPolicy?.materialCostPrice && (
-                <Box mb={2} mt={2}>
-                  <Grid container spacing={2}>
-                    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                      <CostPrice referenceData={employeeMasterData} type={sidebarResource.employeeMaster} />
-                    </Grid>
-                  </Grid>
-                </Box>
-              )}
             </>
           )}
         </TabPanel>

@@ -3,6 +3,7 @@ import { Designer } from '@pdfme/ui';
 import { getFonts, getPlugins } from './plugin';
 import { Template } from '@pdfme/common';
 import { PLUGIN } from 'src/constants/helpers';
+import { Autocomplete, TextField } from '@mui/material';
 interface PdfEditorProps {
   template?: any;
   onTemplateChange?: (tpl: Template) => void;
@@ -53,7 +54,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
           onTemplateChange(newTemplate);
         }
       });
-      } else {
+    } else {
       if (template) {
         designerInstanceRef.current.updateTemplate(template);
       }
@@ -133,33 +134,25 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
           data-variable-dropdown
           style={{ top: dropdownPos.y, left: dropdownPos.x }}
         >
-          <div className="bg-white border border-gray-200 rounded-md shadow-md w-52 max-h-82 ">
-            <input
-              className="sticky top-0 w-full p-2 rounded-md outline-none text-sm bg-white border border-gray-300"
-              type="text"
-              placeholder="Search variables..."
-              value={searchTerm}
-              onFocus={(e) => e.stopPropagation()}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => e.stopPropagation()}
+          <div className="bg-white border border-gray-200 rounded-md shadow-md w-80 p-2">
+            <Autocomplete
+              disablePortal
+              options={variables}
+              fullWidth
+              getOptionLabel={(option: any) => option.label}
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  handleSelect(newValue?.value);
+                }
+              }}
+              onMouseDown={(e) => e.preventDefault()}
+              renderInput={(params) => <TextField
+                {...params}
+                size='small'
+                onMouseDown={(e) => e.preventDefault()}
+                label="Variables"
+              />}
             />
-            <div className="bg-white border border-gray-200 rounded-md shadow-md w-52 max-h-52 overflow-y-auto">
-              {variables
-                .filter((opt) => opt.label.toLowerCase().includes(searchTerm.toLowerCase()))
-                .map((opt) => (
-                  <div
-                    className="p-2 text-sm hover:bg-gray-100 cursor-pointer whitespace-nowrap"
-                    key={opt.value}
-                    title={opt.label}
-                    data-variable-option
-                    onClick={(e) => { e.preventDefault(); handleSelect(opt.value); }}
-                    onMouseDown={(e) => e.preventDefault()}
-                  >
-                    {opt.label}
-                  </div>
-                ))}
-            </div>
           </div>
         </div>
       )}

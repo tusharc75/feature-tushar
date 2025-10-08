@@ -33,6 +33,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { FiExternalLink } from 'react-icons/fi';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddFieldTicket, generateFieldTicketActions } from '../walkmeSteps';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const FieldTicket = ({
   resourceData,
@@ -42,7 +43,9 @@ const FieldTicket = ({
   handleChangeStatus,
   resource,
   enableGlobalSearch = true,
-  noQuotationCheck = false
+  noQuotationCheck = false,
+  refreshData = false,
+  fromFieldServiceTechnician = false
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const { setWalkmeData } = useSetWalkmeData();
@@ -84,7 +87,7 @@ const FieldTicket = ({
     fetchData(cancelToken);
     return () => cancelToken.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedEntity, resourceData]);
+  }, [selectedEntity, resourceData, refreshData]);
 
   const fetchGridColumns = async (cancelToken?: CancelTokenSource) => {
     try {
@@ -185,12 +188,10 @@ const FieldTicket = ({
   };
 
   const getQueryString = (isExport = false) => {
-    // let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
     let deepFilter = '?';
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
-    // const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     const fieldName = resource === sidebarResource.rentalManagement ? 'rentalJob' : 'fieldServiceOrder';
 
@@ -199,22 +200,7 @@ const FieldTicket = ({
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}&filterType=and`;
     }
-    // if (deepFilters?.length) {
-    //   deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
-    // }
-    // if (filterByIds?.length || deepFilters?.length) {
-    //   deepFilter = `${deepFilter}&filterType=and`;
-    // }
 
-    // if (sorting.length > 0) {
-    //   deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-    // }
-    // if (search) {
-    //   deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
-    // }
-    // if (showFilteredRecordsOnly) {
-    //   deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
-    // }
     return deepFilter;
   };
 
@@ -320,23 +306,6 @@ const FieldTicket = ({
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={!selectedRecords?.every((s) => s.canDelete)}
-          onClick={() => {
-            setShowDeleteConfirmBox(true);
-            setDeleteRecord(null);
-          }}
-          id={'delete-menu-item'}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   const getRefrenceData = () => {
     const referenceData: any = cloneResourceData(
       resourceFields?.map((f) => f?.fieldData),
@@ -351,24 +320,9 @@ const FieldTicket = ({
 
   return (
     <Fragment>
-      {[sidebarResource.fieldServiceOrder, sidebarResource.rentalManagement].includes(resource) && (
-        <DetailsPageHeader
-          isAddButtonVisible={true}
-          addButtonProps={{
-            disabled: allowedToEdit && (!resourceData?.quotation || noQuotationCheck) ? false : true,
-            tooltip: !allowedToEdit ? ownerAndColaborator :
-              (resourceData?.quotation && !noQuotationCheck) ? `Converted from ${resources?.quotation?.titleSingular} you can not perform this action` : ''
-          }}
-          addButtonMenuItems={addButtonMenuItems()}
-          isActionButtonVisible={!isOffline}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-          hasXpadding
-        />
-      )}
       {columns ? (
         <CustomReactTable
-          height={[sidebarResource.fieldServiceOrder, sidebarResource.rentalManagement].includes(resource) ? 'calc(100vh - 300px)' : 'calc(100vh - 200px)'}
+          height={!fromFieldServiceTechnician ? 'calc(100vh - 300px)' : 'calc(100vh - 200px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
@@ -376,8 +330,37 @@ const FieldTicket = ({
           refreshGrid={fetchData}
           enableGlobalSearch={enableGlobalSearch}
           isClientSideGrid={true}
-          hideAction={[sidebarResource.fieldServiceOrder, sidebarResource.rentalManagement].includes(resource) ? !allowedToEdit : true}
-          hideSelection={[sidebarResource.fieldServiceOrder, sidebarResource.rentalManagement].includes(resource) ? !allowedToEdit : true}
+          hideAction={!fromFieldServiceTechnician ? !allowedToEdit : true}
+          hideSelection={!fromFieldServiceTechnician ? !allowedToEdit : true}
+          topLeftSlot={
+            !fromFieldServiceTechnician ? (
+              <DetailsPageHeader
+                isAddButtonVisible={true}
+                addButtonProps={{
+                  disabled: allowedToEdit && (!resourceData?.quotation || noQuotationCheck) ? false : true,
+                  tooltip: !allowedToEdit
+                    ? ownerAndColaborator
+                    : resourceData?.quotation && !noQuotationCheck
+                      ? `Converted from ${resources?.quotation?.titleSingular} you can not perform this action`
+                      : ''
+                }}
+                addButtonMenuItems={addButtonMenuItems()}
+                isActionButtonVisible={false}
+                actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+                hasXpadding
+                hasYpadding={false}
+              />
+            ) : null
+          }
+          bulkActionItems={
+            !isOffline ? (
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+                setDeleteRecord={setDeleteRecord}
+              />
+            ) : null
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -418,3 +401,20 @@ const FieldTicket = ({
 };
 
 export default FieldTicket;
+
+const BulkActionItems = ({ selectedRecords, setShowDeleteConfirmBox, setDeleteRecord }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={!selectedRecords?.every((s) => s.canDelete)}
+        onClick={() => {
+          setShowDeleteConfirmBox(true);
+          setDeleteRecord(null);
+        }}
+        id={'delete-menu-item'}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

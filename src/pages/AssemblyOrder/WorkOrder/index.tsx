@@ -17,6 +17,7 @@ import {
   CHILD_RESOURCE,
   MATERIAL_SUB_TYPE,
   MATERIAL_TYPE,
+  repairJob,
   sidebarResource,
   WORK_ORDER_STATUS,
   WORK_ORDER_TYPE,
@@ -44,6 +45,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import ProductQtyDialog from 'src/pages/AssemblyOrder/WorkOrder/ProductQtyDialog';
 import PreviewDownloadNew from 'src/components/PreviewDownloadNew';
 import BulkEditWorkOrder from 'src/pages/WorkOrder/BulkEditWorkOrder';
+import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -80,10 +82,12 @@ const WorkOrder = ({
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, assignedWorkStations: [] });
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
   const [arrangeView, setArrangeView] = useState(false);
-  const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [] });
+  const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [], createRepairJobDialog: false });
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
   const [productQtyEdit, setProductQtyEdit] = useState({ open: false, data: null });
   const [bulkEditWorkOrderDialog, setBulkEditWorkOrderDialog] = useState({ open: false, _ids: [] });
+  const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, serializedPackage: null });
+  const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState({ open: false, sendToCustomer: false });
 
   const { generateColumns, getMaterialLabel } = useColumns();
 
@@ -503,43 +507,6 @@ const WorkOrder = ({
   };
 
   const generateNestedData = (material, parent) => {
-    var subPackage: any = material.filter((e) => e?.parentId === parent?._id && e?.type === MATERIAL_TYPE.package)
-    subPackage.forEach((_subPackage, index) => {
-      _subPackage.index = parent.index + '.' + `${index + 1}`;
-      _subPackage.detail = _subPackage?.detail || _subPackage.packageDetail?.packageName || '';
-      _subPackage.description = _subPackage?.description || _subPackage?.packageDetail?.packageDescription || '';
-      _subPackage.qty = _subPackage.qty;
-      if (_subPackage?.workOrder) {
-        _subPackage.workOrderId = _subPackage?.workOrder?._id;
-        _subPackage.workOrderNumber = _subPackage?.workOrder?.workOrderNumber;
-        _subPackage.status = _subPackage?.workOrder?.status || '';
-        _subPackage.workOrderStatus = _subPackage?.workOrder?.status || '';
-        if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.new) {
-          _subPackage.canAutoCompleteWorkOrder = true;
-        }
-        if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.completed) {
-          _subPackage.hideSelection = true;
-          if (_subPackage?.serializedPackage) {
-            _subPackage.serializedPackageId = _subPackage?.serializedPackage?.optionValue;
-            _subPackage.serializedPackageNumber = _subPackage?.serializedPackage?.optionLabel;
-          }
-        }
-      }
-      _subPackage.subRows = generateNestedData(material, _subPackage);
-      _subPackage.canDelete = false;
-      if (_subPackage?.isDummy) {
-        _subPackage.workOrderCompletQty = `${_subPackage?.subRows?.filter((e) => e?.workOrder?.status === WORK_ORDER_STATUS.completed)?.length} / ${_subPackage?.qty}`
-      }
-      if (_subPackage?.workOrder && !_subPackage?.isDummy) {
-        if (_subPackage?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
-          _subPackage.canDelete = _subPackage.subRows.length === 0 ? true : false;
-          if (_subPackage.subRows?.length && _subPackage.subRows?.find((e) => !e?.canDelete)) {
-            _subPackage.canDelete = false;
-          }
-        }
-      }
-    });
-
     var subRows: any = material.filter((e) => e?.parentId === parent?._id && [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(e?.type));
     subRows = orderBy(subRows, ['type'], ['desc']);
     let productIndex = 0;
@@ -581,6 +548,43 @@ const WorkOrder = ({
         }
         if (_subRow.subRows?.length && _subRow.subRows?.find((e) => !e?.canDelete)) {
           _subRow.canDelete = false;
+        }
+      }
+    });
+
+    var subPackage: any = material.filter((e) => e?.parentId === parent?._id && e?.type === MATERIAL_TYPE.package)
+    subPackage.forEach((_subPackage, index) => {
+      _subPackage.index = parent.index + '.' + `${subRows?.length + index + 1}`;
+      _subPackage.detail = _subPackage?.detail || _subPackage.packageDetail?.packageName || '';
+      _subPackage.description = _subPackage?.description || _subPackage?.packageDetail?.packageDescription || '';
+      _subPackage.qty = _subPackage.qty;
+      if (_subPackage?.workOrder) {
+        _subPackage.workOrderId = _subPackage?.workOrder?._id;
+        _subPackage.workOrderNumber = _subPackage?.workOrder?.workOrderNumber;
+        _subPackage.status = _subPackage?.workOrder?.status || '';
+        _subPackage.workOrderStatus = _subPackage?.workOrder?.status || '';
+        if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.new) {
+          _subPackage.canAutoCompleteWorkOrder = true;
+        }
+        if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.completed) {
+          _subPackage.hideSelection = true;
+        }
+        if (_subPackage?.serializedPackage) {
+          _subPackage.serializedPackageId = _subPackage?.serializedPackage?.optionValue;
+          _subPackage.serializedPackageNumber = _subPackage?.serializedPackage?.optionLabel;
+        }
+      }
+      _subPackage.subRows = generateNestedData(material, _subPackage);
+      _subPackage.canDelete = false;
+      if (_subPackage?.isDummy) {
+        _subPackage.workOrderCompletQty = `${_subPackage?.subRows?.filter((e) => e?.workOrder?.status === WORK_ORDER_STATUS.completed)?.length} / ${_subPackage?.qty}`
+      }
+      if (_subPackage?.workOrder && !_subPackage?.isDummy) {
+        if (_subPackage?.workOrder?.status !== WORK_ORDER_STATUS.completed) {
+          _subPackage.canDelete = _subPackage.subRows.length === 0 ? true : false;
+          if (_subPackage.subRows?.length && _subPackage.subRows?.find((e) => !e?.canDelete)) {
+            _subPackage.canDelete = false;
+          }
         }
       }
     });
@@ -657,7 +661,7 @@ const WorkOrder = ({
         .then(({ data }) => {
           setCompleting(false);
           setCompleteConfirmBox(false);
-          setOpenSerializedPackageDialog({ open: false, ids: [] });
+          setOpenSerializedPackageDialog({ open: false, ids: [], createRepairJobDialog: false });
           fetchData();
           checkAllWorkOrderComplete();
           fetchAssembleOrderData();
@@ -872,6 +876,62 @@ const WorkOrder = ({
     return selectedRecords?.filter((e) => !e?.isDummy)
   }
 
+  const createSerializedPackageWithWorkOrder = (serializedPackages) => {
+    setCompleting(true)
+    axiosInstance().post(`${routes.serializedPackages?.path}/create-with-work-order`, {
+      referenceId: assemblyOrderData._id,
+      serializedPackages: serializedPackages
+    }).then(({ data: { data } }) => {
+      setCompleting(false)
+      setOpenSerializedPackageDialog({ open: false, ids: [], createRepairJobDialog: false });
+      setShowManageRepairJobDialog({ open: true, serializedPackage: [...data, ...getFilterSelectedRecords(selectedRecords)?.filter(r => r?.serializedPackage)?.map(r => r?.serializedPackage?.optionValue)] })
+    })
+      .catch((error) => {
+        setCompleting(false)
+        toastConfig.setToastConfig(error);
+      });
+  }
+
+  const handleAddAssetInRepairJob = (data, serializedPackages = []) => {
+    axiosInstance()
+      .put(`${repairJob.api}/add-assets-create-ticket`, { repairJob: data?._id, serializedPackages: serializedPackages })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setShowManageRepairJobDialog({ open: false, serializedPackage: null });
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleReceiveAssetInRepairJob = (sendToCustomer: boolean = false) => {
+    setSubmitting(true);
+    axiosInstance()
+      .put(`${repairJob.api}/receive-assets-complete`, {
+        repairJob: getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.currentRepairJob,
+        sendToCustomer: sendToCustomer
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setRepairJobReceiveConfirmation({ open: false, sendToCustomer: false });
+        setSubmitting(false);
+        fetchData();
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <>
       {isAutoCreating && (
@@ -905,7 +965,10 @@ const WorkOrder = ({
               updateWorkOrdetStatus,
               getFilterSelectedRecords,
               resources,
-              setBulkEditWorkOrderDialog
+              setBulkEditWorkOrderDialog,
+              setOpenSerializedPackageDialog,
+              setShowManageRepairJobDialog,
+              setRepairJobReceiveConfirmation
             }}
           />
         }
@@ -982,7 +1045,7 @@ const WorkOrder = ({
               });
             }
             if (autoCompleteData?.every((e) => e.type === MATERIAL_TYPE.package && e?.workOrderType === WORK_ORDER_TYPE.assemblyOrder)) {
-              setOpenSerializedPackageDialog({ open: true, ids: ids });
+              setOpenSerializedPackageDialog({ open: true, ids: ids, createRepairJobDialog: false });
             } else {
               handleAutoComplete(ids);
             }
@@ -993,16 +1056,51 @@ const WorkOrder = ({
       {openSerializedPackageDialog.open && (
         <PackageNumberDialog
           onClose={() => {
-            setOpenSerializedPackageDialog({ open: false, ids: [] });
+            setOpenSerializedPackageDialog({ open: false, ids: [], createRepairJobDialog: false });
             setCompleteConfirmBox(false);
           }}
           assemblyOrderId={assemblyOrderData._id}
           workOrderIds={openSerializedPackageDialog.ids}
           onSuccess={(_data) => {
-            setCompleteConfirmBox(false);
-            handleAutoComplete(openSerializedPackageDialog.ids, _data);
+            if (openSerializedPackageDialog.createRepairJobDialog) {
+              createSerializedPackageWithWorkOrder(_data)
+            } else {
+              setCompleteConfirmBox(false);
+              handleAutoComplete(openSerializedPackageDialog.ids, _data);
+            }
           }}
           isSubmitting={isCompleting}
+        />
+      )}
+
+      {showManageRepairJobDialog.open && (
+        <ManageRepairJob
+          onClose={() => {
+            fetchData()
+            setShowManageRepairJobDialog({ open: false, serializedPackage: null })
+          }}
+          onSuccess={(data) => {
+            handleAddAssetInRepairJob(data, showManageRepairJobDialog.serializedPackage);
+          }}
+          referenceType={sidebarResource.assemblyOrder}
+          referenceData={{
+            warehouse: assemblyOrderData?.warehouse?.optionValue,
+            workOrder: uniq(getFilterSelectedRecords(selectedRecords)?.map(r => r?.workOrder?._id))
+          }}
+        />
+      )}
+
+      {repairJobReceiveConfirmation?.open && (
+        <ConfirmationDialog
+          open={repairJobReceiveConfirmation?.open}
+          message={`Are you sure you want to ${repairJobReceiveConfirmation?.sendToCustomer ? 'send to customer' : 'receive'} ?`}
+          onClose={() => {
+            setRepairJobReceiveConfirmation({ open: false, sendToCustomer: false });
+          }}
+          onOk={() => {
+            handleReceiveAssetInRepairJob(repairJobReceiveConfirmation?.sendToCustomer);
+          }}
+          okBtnLoading={isSubmitting}
         />
       )}
 
@@ -1160,7 +1258,10 @@ const ActionButtonMenuItems = ({
   updateWorkOrdetStatus,
   getFilterSelectedRecords,
   resources,
-  setBulkEditWorkOrderDialog
+  setBulkEditWorkOrderDialog,
+  setOpenSerializedPackageDialog,
+  setShowManageRepairJobDialog,
+  setRepairJobReceiveConfirmation
 }) => {
   const checkUniqWorkOrderType = () => {
     if (getFilterSelectedRecords(selectedRecords).length === 0) {
@@ -1298,6 +1399,64 @@ const ActionButtonMenuItems = ({
       >
         Auto Complete Work Order(s)
       </MenuItem>
+      {permissions?.repairJob?.isCreate && (
+        <MenuItem
+          onClick={() => {
+            if (getFilterSelectedRecords(selectedRecords)?.every(r => r?.serializedPackage)) {
+              setShowManageRepairJobDialog({ open: true, serializedPackage: getFilterSelectedRecords(selectedRecords)?.map(r => r?.serializedPackage?.optionValue) })
+            } else {
+              setOpenSerializedPackageDialog({ open: true, ids: getFilterSelectedRecords(selectedRecords)?.map(r => r?.workOrder?._id), createRepairJobDialog: true })
+            }
+          }}
+          disabled={getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)?.every(r =>
+            ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.draft]?.includes(r?.workOrder?.status)
+            && r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder && !r?.workOrder?.currentRepairJob) ? false : true}
+        >
+          {`Create ${resources?.repairJob?.titleSingular}`}
+        </MenuItem>
+      )}
+      {permissions?.repairJob?.isUpdate && (
+        <MenuItem
+          onClick={() => {
+            setRepairJobReceiveConfirmation({ open: true, sendToCustomer: false });
+          }}
+          disabled={
+            getFilterSelectedRecords(selectedRecords)
+              ?.filter((e) => e?.type === MATERIAL_TYPE.package)
+              ?.every(
+                (r) =>
+                  r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder &&
+                  r?.workOrder?.currentRepairJob &&
+                  getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.currentRepairJob === r?.workOrder?.currentRepairJob
+              )
+              ? false
+              : true
+          }
+        >
+          {`Receive From Supplier`}
+        </MenuItem>
+      )}
+      {permissions?.repairJob?.isUpdate && (
+        <MenuItem
+          onClick={() => {
+            setRepairJobReceiveConfirmation({ open: true, sendToCustomer: true });
+          }}
+          disabled={
+            getFilterSelectedRecords(selectedRecords)
+              ?.filter((e) => e?.type === MATERIAL_TYPE.package)
+              ?.every(
+                (r) =>
+                  r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder &&
+                  r?.workOrder?.currentRepairJob &&
+                  getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.currentRepairJob === r?.workOrder?.currentRepairJob
+              )
+              ? false
+              : true
+          }
+        >
+          {`Send To Customer`}
+        </MenuItem>
+      )}
       <MenuItem
         disabled={
           checkUniqWorkOrder() &&

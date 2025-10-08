@@ -1,4 +1,4 @@
-import { Box, Button, Chip, MenuItem, TextField } from '@mui/material';
+import { Box, Button, MenuItem, TextField } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import IconButton from '@mui/material/IconButton';
@@ -7,7 +7,7 @@ import FileCopyIcon from '@mui/icons-material/FileCopy';
 import WarningIcon from '@mui/icons-material/Warning';
 import queryString from 'query-string';
 import Autocomplete from '@mui/material/Autocomplete';
-import { camelCase, isArray, isObject, uniqBy } from 'lodash';
+import { camelCase, isArray, isObject } from 'lodash';
 import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
@@ -99,7 +99,7 @@ const SerializedAsset = () => {
 
   useEffect(() => {
     if (columns) {
-      if (assetStatus || product || warehouse || currentLocation || jobCount) {
+      if (assetStatus || product || warehouse || currentLocation || jobCount || productCategoryFromQuery) {
         const filterVal = {};
         if (assetStatus) {
           filterVal['status'] = { filter: [assetStatus] };
@@ -862,9 +862,9 @@ const SerializedAsset = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
+            ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.assetNumber : ''}`
-              : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
+            : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
             } ?`}
           onClose={() => {
             setDeleteRecord(null);

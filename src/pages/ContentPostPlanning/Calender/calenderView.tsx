@@ -16,6 +16,7 @@ import { HourglassEmpty, CheckCircle, Schedule, Category } from '@mui/icons-mate
 import { gridFilterParser } from 'src/components/CustomReactTable';
 import { DatesSetArg } from '@fullcalendar/core';
 import dayjs from 'dayjs';
+import ViewListIcon from '@mui/icons-material/ViewList';
 
 const useStyles = makeStyles((theme: Theme) => ({
   whiteBg: {
@@ -50,7 +51,7 @@ const CalendarView = ({ topRightSlot }) => {
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (selectedStatus && selectedStatus !== '' && selectedStatus !== 'Others') {
+    if (selectedStatus && selectedStatus !== '' && selectedStatus !== 'Others' && selectedStatus !== 'All') {
       deepFilters.push({ field: 'status', term: selectedStatus });
     }
     if (filterByIds?.length) {
@@ -151,6 +152,12 @@ const CalendarView = ({ topRightSlot }) => {
   const resolvedTopRight = typeof topRightSlot === 'function' ? (topRightSlot as Function)() : topRightSlot;
   const statusMenuItems = useMemo(() => {
     return [
+      {
+        label: 'All',
+        selected: selectedStatus === 'All',
+        value: 'All',
+        startIcon: <ViewListIcon color="action" fontSize="small" />
+      },
       {
         label: CONTENT_POST_PLANNING_STATUS.pendingApproval,
         selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.pendingApproval,
