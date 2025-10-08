@@ -1,8 +1,8 @@
-import { camelCase, cloneDeep, orderBy } from "lodash";
+import { camelCase, orderBy } from "lodash";
 import axiosInstance from "src/axios/axiosInstance";
 import routes from "src/components/Helpers/Routes";
 import { autoCalculateSpecificFields } from "src/constants/formulaUtility";
-import { pricingCondition, sidebarResource } from "src/constants/helpers";
+import { costBooks, pricingCondition, sidebarResource } from "src/constants/helpers";
 
 export const getPricingConditions = (resource: any, referenceData: any, material: any[], conditionType: any) => {
   if (referenceData) {
@@ -165,10 +165,10 @@ export const getTaxById = async (taxCode: any) => {
 
 export const getCostPriceConditions = async (material: any[], type: string, referenceData: any) => {
   let ids = [];
-  ids = material?.map((e) => type === sidebarResource.competencies ? e?.competence : e?.materialId);
+  ids = material?.map((e) => e?.materialId);
   const {
     data: { data }
-  } = await axiosInstance().post(`cost-books/material-pricing-data`, {
+  } = await axiosInstance().post(`${costBooks.api}/material-cost-data`, {
     materialIds: ids,
     type: type,
     warehouse: referenceData?.warehouse?.optionValue ? [referenceData?.warehouse?.optionValue] : []
@@ -176,12 +176,12 @@ export const getCostPriceConditions = async (material: any[], type: string, refe
   return data;
 };
 
-export const getCostPriceValue = (row: any, costPriceData: any, currency: any, fields: any[], resource: string = null) => {
+export const getCostPriceValue = (row: any, costPriceData: any, currency: any, fields: any[]) => {
   let rateList = [];
   rateList = costPriceData?.filter(
     (e) =>
-      e.materialId === `${resource === sidebarResource.employeeMaster ? row.technician : row.materialId}` &&
-      e.materialType === `${resource === sidebarResource.employeeMaster ? sidebarResource.employeeMaster : row.type}` &&
+      e.materialId === `${row?.type === 'competency' ? row.competence : row?.materialId}` &&
+      e.materialType === row.type &&
       e.unit === row?.unit &&
       e.pricingMethod === row.pricingMethod
   );
