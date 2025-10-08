@@ -43,7 +43,7 @@ const ListView = ({ topRightSlot }) => {
   const [deleteRecord, setDeleteRecord] = useState<any>(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isEdit: false, idToEdit: null });
-  const [selectedStatus, setSelectedStatus] = useState(localStorage.getItem('contentPostPlanningStatus') || CONTENT_POST_PLANNING_STATUS.pendingApproval);
+  const [selectedStatus, setSelectedStatus] = useState(localStorage.getItem('contentPostPlanningStatus') || "All");
   const [statusOptions, setStatusOptions] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null, data: null });
   const [allowedToEdit, setAllowedToEdit] = useState(false);

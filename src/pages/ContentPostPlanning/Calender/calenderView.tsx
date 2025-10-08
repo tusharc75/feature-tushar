@@ -40,7 +40,9 @@ const CalendarView = ({ topRightSlot }) => {
   const [events, setEvents] = useState([]);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const [selectedStatus, setSelectedStatus] = useState(CONTENT_POST_PLANNING_STATUS.pendingApproval);
+
+  const [selectedStatus, setSelectedStatus] = useState(localStorage.getItem('contentPostPlanningStatus') || "All");
+
   const [dateRange, setDateRange] = useState({
     estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
     estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
@@ -70,24 +72,20 @@ const CalendarView = ({ topRightSlot }) => {
   const fetchData = async () => {
     try {
       dispatch({ type: 'loading', loading: true });
-
       const queryString = getQueryString();
       const {
         data: {
           data: { data, count }
         }
       } = await axiosInstance().get(`/content-post-planning${queryString}`);
-
       const eventsData = data.map((item: any) => ({
         id: item._id,
         title: `${item.title || ''}`,
-        start: item.dateTime,
+        start: dayjs.utc(item.dateTime).tz().format(),
         allDay: true,
         status: item.status
       }));
-
       setEvents(eventsData);
-
       dispatch({ type: 'initialize', data, count });
       dispatch({ type: 'loading', loading: false });
     } catch (error: any) {
@@ -189,6 +187,7 @@ const CalendarView = ({ topRightSlot }) => {
             items={statusMenuItems}
             onItemClick={(e, item) => {
               setSelectedStatus(item.value);
+              localStorage.setItem('contentPostPlanningStatus', item.value);
             }}
           >
             <span className="flex items-center gap-2 [&_svg]:text-[18px]">Status: {selectedStatus}</span>
