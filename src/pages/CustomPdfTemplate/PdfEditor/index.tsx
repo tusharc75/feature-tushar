@@ -70,10 +70,10 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
         const autoCompleteWidth = 320;
 
         const left = rect.x + window.scrollX;
-        const top = rect.y + window.scrollY - autoCompleteHeight - padding;
+        const centerY = rect.y + window.scrollY - autoCompleteHeight - padding;
         const centerX = left - autoCompleteWidth * 0.5 + rect.width * 0.5;
         if (rect) {
-          setDropdownPos({ x: centerX, y: top });
+          setDropdownPos({ x: centerX, y: centerY });
           const sel = window.getSelection();
           const activeGrid = sel?.anchorNode?.parentElement?.closest(`[plugin-type=${PLUGIN.CUSTOM_TABLE}]`);
           if (activeGrid) {
