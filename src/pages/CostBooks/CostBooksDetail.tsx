@@ -1,4 +1,4 @@
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { Edit } from '@mui/icons-material';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
@@ -18,6 +18,8 @@ import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ManageCostBooks from 'src/pages/CostBooks/ManageCostBooks';
+import AddConditions from 'src/pages/CostBooks/AddConditions';
+import Step from '../DynamicForm/Step';
 
 const CostBooksDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -145,19 +147,15 @@ const CostBooksDetail = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Details</CustomTab>
           {resourcePolicyData &&
             resourcePolicyData?.tabs?.length > 0 &&
-            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {costBookData && fields ? (
-              <DetailsPage
-                data={costBookData}
-                fields={fields}
-                resource={sidebarResource?.costBooks}
-                referenceId={costBookData?._id}
-              />
+              <DetailsPage data={costBookData} fields={fields} resource={sidebarResource?.costBooks} referenceId={costBookData?._id} />
             ) : (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -165,6 +163,26 @@ const CostBooksDetail = () => {
             )}
           </Box>
         </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <AddConditions id={id} detailData={costBookData} />
+        </TabPanel>
+        {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => {
+              return (
+                <TabPanel value={tabValue} index={i + 2}>
+                  <Step
+                    tab={tab}
+                    resourcePolicyId={resourcePolicyData?._id}
+                    resourceId={id}
+                    resource={sidebarResource.costBooks}
+                    data={costBookData}
+                    allowedToEdit={allowedToEdit}
+                    referenceData={null}
+                  />
+                </TabPanel>
+              );
+            })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

@@ -14,7 +14,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, costBooks, sidebarResource, repairOrder, MATERIAL_TYPE } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, costBooks, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import routes from '../../components/Helpers/Routes';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -24,7 +24,7 @@ import ManageCostBooks from 'src/pages/CostBooks/ManageCostBooks';
 
 let costBooksTimeout;
 
-const CostBooks = ({ refresh = null }) => {
+const CostBooks = () => {
   const renderedFrom = camelCase(sidebarResource?.costBooks);
  
   const toastConfig = useContext(CustomToastContext);
