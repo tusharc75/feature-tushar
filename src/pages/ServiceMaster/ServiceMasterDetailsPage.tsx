@@ -28,7 +28,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { mobileNotSupported } from 'src/constants/messageHelpers';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
-import CostPrice from 'src/components/CostPrice';
 
 const ServiceMasterDetailsPage = () => {
   const isMobile = useMediaQuery('(max-width:768px)');
@@ -178,11 +177,6 @@ const ServiceMasterDetailsPage = () => {
                     {user?.user?.brandPolicy?.leadTime && (
                       <Grid size={{ xs: 12, sm: 12, md: 6, lg: 6 }}>
                         <LeadTime referenceType={MATERIAL_TYPE.service} referenceId={id} referenceLabel={serviceMasterDetailData?.serviceName} />
-                      </Grid>
-                    )}
-                    {user?.user?.brandPolicy?.materialCostPrice && (
-                      <Grid size={{ xs: 12, sm: 12, md: 6, lg: 6 }}>
-                        <CostPrice referenceData={serviceMasterDetailData} type={MATERIAL_TYPE.service} />
                       </Grid>
                     )}
                   </Grid>

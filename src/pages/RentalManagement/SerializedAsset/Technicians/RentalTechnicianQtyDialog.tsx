@@ -109,7 +109,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
       updateRateChangeState(values, priceData, pricingMethodOptions);
 
       if (user?.user?.brandPolicy?.materialCostPrice) {
-        let costPriceData: any = await getCostPriceConditions([{ competence: technicianData?.competence?.optionValue }], sidebarResource.competencies)
+        let costPriceData: any = await getCostPriceConditions([{ competence: technicianData?.competence?.optionValue }], sidebarResource.competencies, rentalManagementData);
         setCostPriceConditionList(costPriceData || []);
       }
     }
@@ -299,12 +299,12 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                               if (field.fieldName === 'pricingMethod') {
                                                 costPrice = costPriceConditionList?.find(
                                                   (d) =>
-                                                    d?.pricingMethod === camelCase(value) && d.unit === camelCase(values?.['unit']?.toLowerCase())
+                                                    d?.pricingMethod === value && d.unit === values?.['unit']
                                                 );
                                               } else if (field.fieldName === 'unit') {
                                                 costPrice = costPriceConditionList?.find(
                                                   (d) =>
-                                                    d?.pricingMethod === camelCase(values?.['pricingMethod']) && d.unit === camelCase(value?.toLowerCase())
+                                                    d?.pricingMethod === values?.['pricingMethod'] && d.unit === value
                                                 );
                                               }
                                               let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();

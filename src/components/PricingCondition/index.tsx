@@ -163,14 +163,15 @@ export const getTaxById = async (taxCode: any) => {
   return data;
 }
 
-export const getCostPriceConditions = async (material: any[], type: string) => {
+export const getCostPriceConditions = async (material: any[], type: string, referenceData: any) => {
   let ids = [];
   ids = material?.map((e) => type === sidebarResource.competencies ? e?.competence : e?.materialId);
   const {
     data: { data }
-  } = await axiosInstance().post(`cost-price/get`, {
+  } = await axiosInstance().post(`cost-books/material-pricing-data`, {
     materialIds: ids,
-    type: type
+    type: type,
+    warehouse: referenceData?.warehouse?.optionValue ? [referenceData?.warehouse?.optionValue] : []
   });
   return data;
 };
@@ -180,9 +181,9 @@ export const getCostPriceValue = (row: any, costPriceData: any, currency: any, f
   rateList = costPriceData?.filter(
     (e) =>
       e.materialId === `${resource === sidebarResource.employeeMaster ? row.technician : row.materialId}` &&
-      e.type === `${resource === sidebarResource.employeeMaster ? sidebarResource.employeeMaster : row.type}` &&
-      e.unit === camelCase(row?.unit?.toLowerCase()) &&
-      e.pricingMethod === camelCase(row.pricingMethod)
+      e.materialType === `${resource === sidebarResource.employeeMaster ? sidebarResource.employeeMaster : row.type}` &&
+      e.unit === row?.unit &&
+      e.pricingMethod === row.pricingMethod
   );
   if (rateList?.length) {
     const priceFieldName = `costPrice_${currency?.toLowerCase()}`;
