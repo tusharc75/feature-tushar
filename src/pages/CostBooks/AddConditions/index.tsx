@@ -326,7 +326,7 @@ const AddConditions = ({ id, detailData }) => {
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          {permissions?.pricingCondition?.isUpdate ? (
+          {permissions?.costBooks?.isUpdate ? (
             <HtmlTooltip title="Edit">
               <IconButton
                 size="small"
@@ -351,18 +351,18 @@ const AddConditions = ({ id, detailData }) => {
               </IconButton>
             </HtmlTooltip>
           )}
-          <HtmlTooltip title={permissions?.pricingCondition?.isUpdate ? 'Delete' : deleteDisable}>
+          <HtmlTooltip title={permissions?.costBooks?.isUpdate ? 'Delete' : deleteDisable}>
             <span>
               <IconButton
                 size="small"
                 aria-label="Delete"
-                disabled={!permissions?.pricingCondition?.isUpdate}
+                disabled={!permissions?.costBooks?.isUpdate}
                 onClick={() => {
                   setDeleteRecord(row?.original);
                   setShowDeleteConfirmBox(true);
                 }}
               >
-                <DeleteIcon fontSize="small" color={permissions?.pricingCondition?.isUpdate ? 'error' : 'disabled'} />
+                <DeleteIcon fontSize="small" color={permissions?.costBooks?.isUpdate ? 'error' : 'disabled'} />
               </IconButton>
             </span>
           </HtmlTooltip>
@@ -383,13 +383,13 @@ const AddConditions = ({ id, detailData }) => {
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1} mt={2}>
         <Box display="flex" gap={'8px'} flexWrap={'wrap'}>
-          <HtmlTooltip title={permissions?.pricingCondition?.isUpdate ? 'Add' : addDisable}>
+          <HtmlTooltip title={permissions?.costBooks?.isUpdate ? 'Add' : addDisable}>
             <span>
               <ThemeButton
                 endIcon={<ExpandMore fontSize="small" />}
                 startIcon={<Add />}
                 onClick={openAddActions}
-                disabled={!permissions?.pricingCondition?.isUpdate}
+                disabled={!permissions?.costBooks?.isUpdate}
               >
                 {'Add'}
               </ThemeButton>
@@ -451,7 +451,7 @@ const AddConditions = ({ id, detailData }) => {
         <Box display="flex">
           {/* <Box>
             <ImportExportLinks
-              permissions={permissions.pricingCondition}
+              permissions={permissions.costBooks}
               module={resources?.pricingCondition?.titlePlural}
               api={costBooks.api}
               afterImportCompleted={() => {
@@ -527,14 +527,14 @@ const AddConditions = ({ id, detailData }) => {
             />
           </Box> */}
           <Box ml={2}>
-            <HtmlTooltip title={permissions?.pricingCondition?.isUpdate ? '' : updateDisable}>
+            <HtmlTooltip title={permissions?.costBooks?.isUpdate ? '' : updateDisable}>
               <span>
                 <ThemeButton
                   mobileTooltip="Actions"
                   buttonType="yellow"
                   iconForMobile={<ExpandMore />}
                   onClick={openActions}
-                  disabled={selectedRecords.length && permissions?.pricingCondition?.isUpdate ? false : true}
+                  disabled={selectedRecords.length && permissions?.costBooks?.isUpdate ? false : true}
                   endIcon={<ExpandMore />}
                 >
                   {isMobile && !isTablet ? '' : 'Actions'}
@@ -601,7 +601,7 @@ const AddConditions = ({ id, detailData }) => {
             setAddMaterialDialog({ open: false, materialType: '' });
           }}
           isSubmitting={isSubmitting}
-          fromResource={sidebarResource.pricingCondition}
+          fromResource={sidebarResource.costBooks}
           fromResourceId={id}
         />
       )}
@@ -615,7 +615,7 @@ const AddConditions = ({ id, detailData }) => {
             setAddMaterialDialog({ open: false, materialType: '' });
           }}
           isSubmitting={isSubmitting}
-          fromResource={sidebarResource.pricingCondition}
+          fromResource={sidebarResource.costBooks}
           fromResourceId={id}
         />
       )}
@@ -628,7 +628,7 @@ const AddConditions = ({ id, detailData }) => {
           handleClose={() => {
             setAddMaterialDialog({ open: false, materialType: '' });
           }}
-          fromResource={sidebarResource.pricingCondition}
+          fromResource={sidebarResource.costBooks}
           fromResourceId={id}
           isSubmitting={isSubmitting}
         />
@@ -652,7 +652,7 @@ const AddConditions = ({ id, detailData }) => {
           detailData={detailData}
           isBulkedit={showDialog.isBulkedit}
           id={id}
-          allowedToEdit={permissions?.pricingCondition?.isUpdate}
+          allowedToEdit={permissions?.costBooks?.isUpdate}
           handleClose={() => {
             setShowDialog({ open: false, isBulkedit: false });
           }}
@@ -735,7 +735,6 @@ const AddConditions = ({ id, detailData }) => {
           )}
           {openConditionDetails?.data?.conditionType?.includes('Rent') && (
             <div className="mt-3">
-              <h4 className="mb-2 font-semibold">Rent</h4>
               <table className="min-w-full table-auto border-collapse border border-gray-300">
                 <thead>
                   <tr>
