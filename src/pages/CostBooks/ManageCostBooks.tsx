@@ -21,7 +21,6 @@ import {
   yupSchema,
   sidebarResource,
   getObjKeys,
-  GenerateResourceLineNumber
 } from '../../constants/helpers';
 import routes from '../../components/Helpers/Routes';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -78,6 +77,9 @@ const ManageCostBooks = ({
       } else {
         setTitle(`Create ${resources?.costBooks?.titleSingular}`);
         let initialData = getObjKeys('', fieldsDataForCreate);
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+          initialData['currency'] = user.user?.brandCurrency;
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData

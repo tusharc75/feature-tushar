@@ -63,24 +63,22 @@ const AddConditions = ({ id, detailData }) => {
       .then(({ data: { data, count } }) => {
         setCondition(JSON.parse(JSON.stringify(data)));
         data.forEach((element) => {
-          element.detail = `${
-            element.materialType === MATERIAL_TYPE.product
-              ? element.productDetail?.productName
-              : element.materialType === MATERIAL_TYPE.service
-                ? element.serviceDetail?.serviceName
-                : element.materialType === MATERIAL_TYPE.package
-                  ? element.packageDetail?.packageName
-                  : element.competencyDetail.competencyName
-          }`;
-          element.description = `${
-            element.materialType === MATERIAL_TYPE.product
-              ? element?.productDetail?.productDescription || ''
-              : element.materialType === MATERIAL_TYPE.service
-                ? element?.serviceDetail?.serviceDescription || ''
-                : element.materialType === MATERIAL_TYPE.package
-                  ? element?.packageDetail?.packageDescription || ''
-                  : ''
-          }`;
+          element.detail = `${element.materialType === MATERIAL_TYPE.product
+            ? element.productDetail?.productName
+            : element.materialType === MATERIAL_TYPE.service
+              ? element.serviceDetail?.serviceName
+              : element.materialType === MATERIAL_TYPE.package
+                ? element.packageDetail?.packageName
+                : element.competencyDetail.competencyName
+            }`;
+          element.description = `${element.materialType === MATERIAL_TYPE.product
+            ? element?.productDetail?.productDescription || ''
+            : element.materialType === MATERIAL_TYPE.service
+              ? element?.serviceDetail?.serviceDescription || ''
+              : element.materialType === MATERIAL_TYPE.package
+                ? element?.packageDetail?.packageDescription || ''
+                : ''
+            }`;
           element.materialType = startCase(element.materialType);
           element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
             ?.map((e) => e.optionLabel)
@@ -190,7 +188,6 @@ const AddConditions = ({ id, detailData }) => {
 
   const handleDelete = () => {
     let ids = [];
-    console.log('deleteRecord', deleteRecord);
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
@@ -210,6 +207,7 @@ const AddConditions = ({ id, detailData }) => {
         toastConfig.setToastConfig(error);
       });
   };
+
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -246,14 +244,13 @@ const AddConditions = ({ id, detailData }) => {
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${
-                      row?.original?.materialType === 'Product'
-                        ? routes.productDetail.path
-                        : row?.original?.materialType === 'Service'
-                          ? routes.serviceMasterDetail.path
-                          : row?.original?.materialType === 'Package'
-                            ? routes.packagesDetail.path
-                            : routes?.competenciesDetail.path
+                    `${row?.original?.materialType === 'Product'
+                      ? routes.productDetail.path
+                      : row?.original?.materialType === 'Service'
+                        ? routes.serviceMasterDetail.path
+                        : row?.original?.materialType === 'Package'
+                          ? routes.packagesDetail.path
+                          : routes?.competenciesDetail.path
                     }/${row?.original?.materialId}`
                   );
                 }}
@@ -661,13 +658,12 @@ const AddConditions = ({ id, detailData }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete cost book condition  ${
-            deleteRecord?.productDetail?.productName ||
+          message={`Are you sure you want to delete cost book condition  ${deleteRecord?.productDetail?.productName ||
             deleteRecord?.packageDetail?.packageName ||
             deleteRecord?.serviceDetail?.serviceName ||
             deleteRecord?.competencyDetail?.competencyName ||
             ''
-          } ?`}
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -750,7 +746,7 @@ const AddConditions = ({ id, detailData }) => {
                             {formatAmountWithCurrency(
                               detailData?.currency,
                               openConditionDetails?.data[
-                                `rent_${camelCase(method)}_${detailData?.currency?.toLowerCase()}_${camelCase(unit.toLowerCase())}`
+                              `rent_${camelCase(method)}_${detailData?.currency?.toLowerCase()}_${camelCase(unit.toLowerCase())}`
                               ]
                             )?.fullFormatAmount || ''}
                           </p>
