@@ -4,6 +4,7 @@ import { getFonts, getPlugins } from './plugin';
 import { Template } from '@pdfme/common';
 import { PLUGIN } from 'src/constants/helpers';
 import { Autocomplete, TextField } from '@mui/material';
+import { createPortal } from 'react-dom';
 interface PdfEditorProps {
   template?: any;
   onTemplateChange?: (tpl: Template) => void;
@@ -64,14 +65,20 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
         e.preventDefault();
         const target = e.target as HTMLElement;
         const rect = target.getBoundingClientRect?.();
+        const padding = 10;
+        const autoCompleteHeight = 56;
+        const autoCompleteWidth = 320;
+
+        const left = rect.x + window.scrollX;
+        const top = rect.y + window.scrollY - autoCompleteHeight - padding;
+        const centerX = left - autoCompleteWidth * 0.5 + rect.width * 0.5;
         if (rect) {
-          setDropdownPos({ x: rect.left - 75, y: rect.bottom - 250 });
+          setDropdownPos({ x: centerX, y: top });
           const sel = window.getSelection();
           const activeGrid = sel?.anchorNode?.parentElement?.closest(`[plugin-type=${PLUGIN.CUSTOM_TABLE}]`);
           if (activeGrid) {
             activeInputRef.current = e.target;
-          }
-          else {
+          } else {
             const selection = window.getSelection();
             if (selection && selection.rangeCount > 0) {
               setSavedRange(selection.getRangeAt(0).cloneRange());
@@ -98,12 +105,11 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
       const event = new CustomEvent('insert-variable', {
         detail: { value: `{${value}}` },
         bubbles: true,
-        cancelable: true,
+        cancelable: true
       });
       activeInputRef.current.dispatchEvent(event);
       activeInputRef.current = null;
-    }
-    else if (savedRange) {
+    } else if (savedRange) {
       const selection = window.getSelection();
       selection?.removeAllRanges();
       selection?.addRange(savedRange);
@@ -126,38 +132,35 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
 
   return (
     <div className="relative h-screen w-full">
-      <div ref={containerRef} className="h-full w-full relative overflow-hidden" />
-      {dropdownPos && (
-        <div
-          className="absolute z-[10000] bg-white border border-gray-300 shadow-lg rounded-md"
-          data-variable-dropdown
-          style={{ top: dropdownPos.y, left: dropdownPos.x }}
-        >
-          <div className="bg-white border border-gray-200 rounded-md shadow-md w-80 p-2">
-            <Autocomplete
-              disablePortal
-              options={variables}
-              fullWidth
-              getOptionLabel={(option: any) => option.label}
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  handleSelect(newValue?.value);
-                }
-              }}
-              onMouseDown={(e) => e.preventDefault()}
-              renderInput={(params) => <TextField
-                {...params}
-                size='small'
+      <div ref={containerRef} className="relative h-full w-full overflow-hidden" />
+      {dropdownPos &&
+        createPortal(
+          <div
+            className="absolute z-[10000] rounded-md border border-gray-300 bg-white shadow-lg"
+            data-variable-dropdown
+            style={{ top: dropdownPos.y, left: dropdownPos.x }}
+          >
+            <div className="w-80 rounded-md border border-gray-200 bg-white p-2 shadow-md">
+              <Autocomplete
+                disablePortal
+                options={variables}
+                fullWidth
+                getOptionLabel={(option: any) => option.label}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    handleSelect(newValue?.value);
+                  }
+                }}
                 onMouseDown={(e) => e.preventDefault()}
-                label="Variables"
-              />}
-            />
-          </div>
-        </div>
-      )}
+                renderInput={(params) => <TextField {...params} size="small" onMouseDown={(e) => e.preventDefault()} label="Variables" />}
+              />
+            </div>
+          </div>,
+          document.body
+        )}
 
       {disabled && (
-        <div className="absolute inset-0 bg-gray-500 bg-opacity-30 z-[9999] flex justify-center items-center text-white text-lg font-bold pointer-events-auto cursor-not-allowed" />
+        <div className="pointer-events-auto absolute inset-0 z-[9999] flex cursor-not-allowed items-center justify-center bg-gray-500 bg-opacity-30 text-lg font-bold text-white" />
       )}
     </div>
   );
