@@ -3,9 +3,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isEmpty, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -21,6 +21,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ManageDynamicForm from './ManageDynamicForm';
 import PreviewDownload from 'src/components/PreviewDownload';
 import EditIcon from '@mui/icons-material/Edit';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const DynamicForm = () => {
   const { route } = useParams();
@@ -81,6 +82,19 @@ const DynamicForm = () => {
   }, [route, search, page, limit, filters, sorting, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, resource);
+    const statusColors = {};
+    if (resourcePolicy?.policy?.statusColor) {
+      resourcePolicy?.policy?.statusColor?.forEach((item) => {
+        if (Array.isArray(item?.status)) {
+          item.status.forEach((status) => {
+            statusColors[status] = item.colorCode;
+          });
+        } else {
+          statusColors[item?.status] = item.colorCode;
+        }
+      })
+    }
     let data;
     const response = await axiosInstance().get(`/field?resource=${resource}`);
     data = response?.data?.data?.filter((d) => !HIDDEN_FIELD_TYPE.includes(d?.fieldData?.type));
@@ -91,6 +105,24 @@ const DynamicForm = () => {
     const primaryField = data?.find((e) => e?.fieldData?.primaryField);
     if (primaryField) {
       setPrimaryFieldName(primaryField?.fieldData?.fieldName);
+      if (!isEmpty(statusColors)) {
+        newColumns?.forEach((o) => {
+          if (o?.accessor === primaryField?.fieldData?.fieldName) {
+            o.cell = ({ row }) => (
+              <div style={{
+                backgroundColor: (() => { return statusColors[row?.original?.status] || '' })()
+              }}
+              >
+                <Link className="link text-truncate"
+                  title={row?.original?.[primaryField?.fieldData?.fieldName]}
+                  to={`${detailPagePath}/${row?.original?._id}`}>
+                  {row?.original?.[primaryField?.fieldData?.fieldName]}
+                </Link>
+              </div>
+            );
+          }
+        });
+      }
     }
     if (data?.find((ele) => ele?.fieldData?.fieldName === 'pdfTemplate')) {
       setIsPdfTemplateFieldExist(true);

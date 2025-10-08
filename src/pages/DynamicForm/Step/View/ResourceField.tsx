@@ -9,12 +9,14 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
-import { camelCase, isArray, kebabCase } from 'lodash';
+import { camelCase, isArray, isEmpty, kebabCase } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialog';
 import ManageDynamicForm from '../../ManageDynamicForm';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { Link } from 'react-router-dom';
 
 const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, referenceData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -44,16 +46,47 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
   const fetchColumn = async () => {
     setColumns(null);
     try {
+      const resourcePolicy = await getResourcePolicy(user, permissions, step?.linkResourceName);
+      const statusColors = {};
+      if (resourcePolicy?.policy?.statusColor) {
+        resourcePolicy?.policy?.statusColor?.forEach((item) => {
+          if (Array.isArray(item?.status)) {
+            item.status.forEach((status) => {
+              statusColors[status] = item.colorCode;
+            });
+          } else {
+            statusColors[item?.status] = item.colorCode;
+          }
+        })
+      }
       const {
         data: { data }
       } = await axiosInstance().get(`/field?resource=${step?.linkResourceName}`);
       setLinkResourceFieldType(data?.find((d) => d?.fieldData?.fieldName === step?.linkResourceField)?.fieldData?.type);
-      const newColumns = generateColumns(
-        camelCase(step?.linkResourceName),
-        data?.filter((d) => d?.fieldData?.fieldName !== step?.linkResourceField),
-        `/${kebabCase(step?.linkResourceName)}/detail`,
+      const detailPagePath = `/${kebabCase(step?.linkResourceName)}/detail`
+      const newColumns = generateColumns(camelCase(step?.linkResourceName), data?.filter((d) => d?.fieldData?.fieldName !== step?.linkResourceField), detailPagePath,
         false
       );
+      const primaryField = data?.find((e) => e?.fieldData?.primaryField);
+      if (primaryField) {
+        if (!isEmpty(statusColors)) {
+          newColumns?.forEach((o) => {
+            if (o?.accessor === primaryField?.fieldData?.fieldName) {
+              o.cell = ({ row }) => (
+                <div style={{
+                  backgroundColor: (() => { return statusColors[row?.original?.status] || '' })()
+                }}
+                >
+                  <Link className="link text-truncate" title={row?.original?.[primaryField?.fieldData?.fieldName]}
+                    to={`${detailPagePath}/${row?.original?._id}`}>
+                    {row?.original?.[primaryField?.fieldData?.fieldName]}
+                  </Link>
+                </div>
+              );
+            }
+          });
+        }
+      }
       setColumns([
         ...newColumns,
         ...(step?.readOnly

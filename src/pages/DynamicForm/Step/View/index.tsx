@@ -27,6 +27,8 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { useData } from 'src/StateProvider/Provider';
+import { Add } from '@mui/icons-material';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const View = ({
   step,
@@ -43,7 +45,7 @@ const View = ({
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user }
+    state: { user, permissions }
   }: any = useData();
 
   const renderedFrom = `${camelCase(resource)}_${camelCase(step?.stepName)}`;
@@ -87,13 +89,33 @@ const View = ({
 
   const fetchColumns = async () => {
     setColumns(null);
+    const statusColorField = step?.fields?.find((e) => e?.fieldName === 'status' && e?.type === 'lookUpDisplay')
+    const statusColors = {};
+    if (statusColorField) {
+      const lookUpField = step?.fields?.find((e) => e?.fieldName === statusColorField?.lookUpField)
+      if (lookUpField && lookUpField?.lookupResource) {
+        const resourcePolicy = await getResourcePolicy(user, permissions, lookUpField?.lookupResource);
+        if (resourcePolicy?.policy?.statusColor) {
+          resourcePolicy?.policy?.statusColor?.forEach((item) => {
+            if (Array.isArray(item?.status)) {
+              item.status.forEach((status) => {
+                statusColors[status] = item.colorCode;
+              });
+            } else {
+              statusColors[item?.status] = item.colorCode;
+            }
+          })
+        }
+      }
+    }
     const column: any = [
       {
         accessor: 'index',
         Header: 'Index',
         width: 70,
         sticky: 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Cell: ({ row }) => <div style={{ backgroundColor: (() => { return statusColors[row?.original?.status] || '' })() }}><p className="text-truncate">
+          {row.original.index}</p></div>,
         Footer: () => {
           return <>Total</>;
         }
@@ -419,6 +441,7 @@ const View = ({
                               setOpen({ open: true, id: null });
                             }}
                             buttonType="theme"
+                            startIcon={<Add />}
                           >
                             Add
                           </ThemeButton>
