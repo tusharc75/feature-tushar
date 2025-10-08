@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { resourcePolicy } from 'src/components/FormBuilder/Tabs/helper';
+import { resourcePolicy, statusColor } from 'src/components/FormBuilder/Tabs/helper';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import EntityResource from 'src/pages/FormBuilder/Setting/EntityResource';
@@ -29,6 +29,7 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
   const [resourceData, setResourceData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fields, setFields] = useState([]);
+  const [allFields, setAllFields] = useState(null);
 
   const isDynamicResource = !Object.values(sidebarResource)?.includes(resource);
 
@@ -50,19 +51,21 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
 
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field?resource=${resource}`);
-    setFields(
-      response?.data?.data
-        ? response?.data?.data
-          ?.filter((d) => d?.fieldData?.primaryField)
-          ?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName }))
-        : []
+    setAllFields(response?.data?.data)
+    setFields(response?.data?.data
+      ? response?.data?.data?.filter((d) => d?.fieldData?.primaryField)
+        ?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName }))
+      : []
     );
   };
 
   useEffect(() => {
-    if (resourceData) {
+    if (resourceData && allFields) {
       let currentPolicy = resourceData?.policy || {};
       let defaultPolicy: any = resourcePolicy.find((e) => e.resource === resource)?.policy || [];
+      if (isDynamicResource && allFields?.find((e) => e?.fieldData?.fieldName === 'status')) {
+        defaultPolicy = [statusColor]
+      }
       setInitialValues({
         ...initialValues,
         entityWiseResourceName: resourceData?.entityResources?.length > 0 ? true : false,
@@ -86,7 +89,7 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
         enableReport: resourceData?.enableReport
       });
     }
-  }, [resourceData]);
+  }, [resourceData, allFields]);
 
   const handleSave = (values) => {
     setIsSubmitting(true);
