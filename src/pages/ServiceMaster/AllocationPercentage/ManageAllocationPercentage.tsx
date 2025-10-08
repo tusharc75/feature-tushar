@@ -92,11 +92,11 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
 
         if (d.percentage !== '' && d.percentage !== null && d.percentage !== undefined) {
           const percentageVal = parseFloat(d.percentage) || 0;
-          if (percentageVal <= 0 || percentageVal > 100) {
+          if (percentageVal < 0 || percentageVal > 100) {
             if (!errors?.allocations) {
               errors['allocations'] = [];
             }
-            errors.allocations[i] = { ...errors.allocations[i], percentage: 'Percentage must be between 1 and 100' };
+            errors.allocations[i] = { ...errors.allocations[i], percentage: 'Percentage must be between 0 and 100' };
           } else {
             totalPercentage += percentageVal;
           }
