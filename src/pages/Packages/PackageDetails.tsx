@@ -22,7 +22,6 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import LeadTime from 'src/components/LeadTime';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
-import CostPrice from 'src/components/CostPrice';
 
 const PackageDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -143,15 +142,6 @@ const PackageDetails = () => {
                   <Grid container spacing={2}>
                     <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                       <LeadTime referenceType={MATERIAL_TYPE.package} referenceId={id} referenceLabel={packageData?.packageName} />
-                    </Grid>
-                  </Grid>
-                </Box>
-              )}
-              {user?.user?.brandPolicy?.materialCostPrice && (
-                <Box mb={2} mt={2}>
-                  <Grid container spacing={2}>
-                    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                      <CostPrice referenceData={packageData} type={MATERIAL_TYPE.package} />
                     </Grid>
                   </Grid>
                 </Box>

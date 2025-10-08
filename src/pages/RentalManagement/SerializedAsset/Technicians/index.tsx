@@ -17,7 +17,6 @@ import { useData } from 'src/StateProvider/Provider';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Add } from '@mui/icons-material';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
 import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
@@ -308,7 +307,7 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
     let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, technician, PRICING_SETUP_TYPE.rent);
     let costPriceData: any = null;
     if (user?.user?.brandPolicy?.materialCostPrice) {
-      costPriceData = await getCostPriceConditions(technician, sidebarResource.employeeMaster);
+      costPriceData = await getCostPriceConditions(technician, sidebarResource.employeeMaster, rentalManagementData);
     }
     AddMaterial(technician, priceData, costPriceData);
   };

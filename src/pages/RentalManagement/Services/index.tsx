@@ -542,7 +542,7 @@ const Services = ({
     }
     let costPriceData: any = null;
     if (user?.user?.brandPolicy?.materialCostPrice) {
-      costPriceData = await getCostPriceConditions(material, material[0]?.type);
+      costPriceData = await getCostPriceConditions(material, material[0]?.type, rentalManagementData);
     }
     AddMaterial(material, priceData, costPriceData);
   };
