@@ -263,7 +263,7 @@ const AddConditions = ({ id, detailData }) => {
             </div>
             <div>
               {row?.original?.conditionType && (
-                <HtmlTooltip title={'Pricing Information'}>
+                <HtmlTooltip title={'Cost Information'}>
                   <IconButton
                     aria-label="info"
                     size="small"
@@ -296,12 +296,6 @@ const AddConditions = ({ id, detailData }) => {
       Header: 'Description',
       disabled: true,
       Cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
-    },
-    {
-      accessor: 'conditionType',
-      Header: 'Pricing Type',
-      disabled: true,
-      Cell: ({ row }) => (row?.original?.conditionType ? <h5 className="text-truncate">{row?.original?.conditionType}</h5> : <NoDataCell />)
     },
     {
       accessor: 'unit',
