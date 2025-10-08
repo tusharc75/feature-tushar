@@ -523,7 +523,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   color="primary"
                 />
               }
-              label="Show In Pdf"
+              label="Show In PDF"
             />
           </Grid>
           <Grid item xs={12} md={6}></Grid>
