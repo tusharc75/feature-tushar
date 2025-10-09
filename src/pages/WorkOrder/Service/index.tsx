@@ -227,9 +227,10 @@ const Service = ({
           }
         }
 
-        if (services?.some(s => s?.parentId) && !services?.filter(s => s?.parentId)?.every(s => s?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed)) {
+        const productServices = services?.filter(s => s?.parentId)
+        if (productServices?.length && !productServices?.every(s => s?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed)) {
           services?.forEach(s => {
-            if (!s?.parentId && !s?.prework) {
+            if (!s?.parentId && !s?.preWork) {
               s.clickable = false
             }
           });
