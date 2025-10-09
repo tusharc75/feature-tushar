@@ -43,6 +43,7 @@ import { scrapRequestDisable, statusChangePermissionMsg } from 'src/constants/me
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import { statusChangePermissionsAllowed } from 'src/pages/SerializedAsset/helper';
 import { getMultipleResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const SerializedAssetInspection = () => {
   const renderedFrom = camelCase(sidebarResource.serializedAssetsInspection);
@@ -63,7 +64,7 @@ const SerializedAssetInspection = () => {
   const [subleaseAsset, setSubleaseAsset] = useState(false);
   const [statusOptions, setStatusOptions] = useState(null);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
+
   const [status, setStatus] = useState('');
   const [resourcePolicy, setResourcePolicy] = useState(null);
   const [serializedAssetPolicy, setSerializedAssetPolicy] = useState(null);
@@ -196,8 +197,12 @@ const SerializedAssetInspection = () => {
 
   const fetchPolicy = async () => {
     try {
-      const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.serializedAssetsInspection},${sidebarResource.serializedAsset}`)
-      const serializedAssetsInspectionPolicy = data?.find((e) => e.resource === sidebarResource.serializedAssetsInspection)
+      const data = await getMultipleResourcePolicy(
+        user,
+        permissions,
+        `${sidebarResource.serializedAssetsInspection},${sidebarResource.serializedAsset}`
+      );
+      const serializedAssetsInspectionPolicy = data?.find((e) => e.resource === sidebarResource.serializedAssetsInspection);
       if (serializedAssetsInspectionPolicy?.policy?.canCreateRepairOrder) {
         setStatusOptions((prev) => {
           let newOptions = prev?.filter((e) => e.optionValue !== ASSET_STATUS.inRepair);
@@ -347,56 +352,28 @@ const SerializedAssetInspection = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const ActionMenuItems = () => {
-    return (
-      <>
-        {statusOptions ? (
-          <>
-            {Object.entries(statusOptions).map(([key, status]: any) => {
-              const isDisabled =
-                status?.optionValue === ASSET_STATUS.scrap &&
-                user?.user?.brandPolicy?.serializedAssetScrapApproval &&
-                !user?.role?.selectedEntity?.policy?.scrapRequest;
-              return (
-                <HtmlTooltip title={isDisabled ? scrapRequestDisable : ''}>
-                  <MenuItem
-                    key={key}
-                    onClick={() => {
-                      if (serializedAssetPolicy?.statusChangePermissions?.length) {
-                        let statusChangeAllowed = statusChangePermissionsAllowed(user, serializedAssetPolicy?.statusChangePermissions, selectedRecords?.map((e) => e?.status), status);
-                        if (!statusChangeAllowed) {
-                          setStatusChangePermissionError(true)
-                          return;
-                        }
-                      }
-                      if (
-                        status?.optionValue === ASSET_STATUS.scrap &&
-                        user?.user?.brandPolicy?.serializedAssetScrapApproval &&
-                        serializedAssetStatusChangeRequestFields?.length > 0
-                      ) {
-                        setStatusChangeRequestDialog(true);
-                      } else {
-                        handleStatusChange(status?.optionLabel);
-                      }
-                    }}
-                    disabled={selectedRecords.some((record) => record.status === status?.optionLabel) || isDisabled}
-                  >
-                    {status?.optionLabel}
-                  </MenuItem>
-                </HtmlTooltip>
-              );
-            })}
-          </>
-        ) : null}
-      </>
-    );
+  const handleActionMenuItemOnClick = (status) => {
+    if (serializedAssetPolicy?.statusChangePermissions?.length) {
+      let statusChangeAllowed = statusChangePermissionsAllowed(
+        user,
+        serializedAssetPolicy?.statusChangePermissions,
+        selectedRecords?.map((e) => e?.status),
+        status
+      );
+      if (!statusChangeAllowed) {
+        setStatusChangePermissionError(true);
+        return;
+      }
+    }
+    if (
+      status?.optionValue === ASSET_STATUS.scrap &&
+      user?.user?.brandPolicy?.serializedAssetScrapApproval &&
+      serializedAssetStatusChangeRequestFields?.length > 0
+    ) {
+      setStatusChangeRequestDialog(true);
+    } else {
+      handleStatusChange(status?.optionLabel);
+    }
   };
 
   return (
@@ -415,25 +392,6 @@ const SerializedAssetInspection = () => {
                 setSelectedWarehouse,
                 subleaseAsset,
                 setSubleaseAsset,
-                resources,
-                ActionMenuItems,
-                setAnchorEl,
-                anchorEl
-              }}
-            />
-          }
-          rightSideContents={
-            <RightSideContents
-              {...{
-                openActions,
-                anchorEl,
-                closeActions,
-                ActionMenuItems,
-                selectedRecords,
-                resourcePolicy,
-                permissions,
-                setShowRepairOrderDialog,
-                setShowRepairJobDialog,
                 resources
               }}
             />
@@ -454,6 +412,19 @@ const SerializedAssetInspection = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.serializedAsset}
+            bulkActionItems={
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                resourcePolicy={resourcePolicy}
+                permissions={permissions}
+                setShowRepairOrderDialog={setShowRepairOrderDialog}
+                setShowRepairJobDialog={setShowRepairJobDialog}
+                resources={resources}
+                statusOptions={statusOptions}
+                user={user}
+                handleActionMenuItemOnClick={handleActionMenuItemOnClick}
+              />
+            }
           />
         ) : (
           <Box p={2} height={500}>
@@ -511,18 +482,122 @@ const SerializedAssetInspection = () => {
         />
       )}
       {statusChangePermissionError && (
-        <MessageDialog
-          open={true}
-          header="Alert"
-          message={statusChangePermissionMsg}
-          onClose={() => setStatusChangePermissionError(false)}
-        />
+        <MessageDialog open={true} header="Alert" message={statusChangePermissionMsg} onClose={() => setStatusChangePermissionError(false)} />
       )}
     </section>
   );
 };
 
 export default SerializedAssetInspection;
+
+const BulkActionItems = ({
+  selectedRecords,
+  resourcePolicy,
+  permissions,
+  setShowRepairOrderDialog,
+  setShowRepairJobDialog,
+  resources,
+  statusOptions,
+  user,
+  handleActionMenuItemOnClick
+}) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const checkUniqWarehouse = () => {
+    let warehouses = new Set(selectedRecords?.map((d) => d?.warehouseId));
+    return warehouses?.size === 1;
+  };
+
+  return (
+    <>
+      <BulkActionContainer>
+        {resourcePolicy?.policy?.canCreateRepairOrder && permissions?.repairOrder?.isCreate && (
+          <BulkActionContainer.Button
+            onClick={() => setShowRepairOrderDialog(true)}
+            disabled={
+              checkUniqWarehouse() &&
+              selectedRecords?.every((e) =>
+                [
+                  ASSET_STATUS.new,
+                  ASSET_STATUS.available,
+                  ASSET_STATUS.scrap,
+                  ASSET_STATUS.needRecert,
+                  ASSET_STATUS.needRepair,
+                  ASSET_STATUS.underReview
+                ]?.includes(e.status)
+              )
+                ? false
+                : true
+            }
+          >
+            {`Create ${resources?.repairOrder?.titleSingular}`}
+          </BulkActionContainer.Button>
+        )}
+        {resourcePolicy?.policy?.canCreateRepairOrder && permissions?.repairJob?.isCreate && (
+          <BulkActionContainer.Button
+            onClick={() => setShowRepairJobDialog(true)}
+            disabled={
+              checkUniqWarehouse() &&
+              selectedRecords?.every((e) =>
+                [ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status)
+              )
+                ? false
+                : true
+            }
+          >
+            {`Create ${resources?.repairJob?.titleSingular}`}
+          </BulkActionContainer.Button>
+        )}
+        <BulkActionContainer.Button
+          onClick={(e) => setAnchorEl(e.currentTarget)}
+          endIcon={<ExpandMore />}
+          disabled={selectedRecords?.length ? false : true}
+        >
+          Change Status
+        </BulkActionContainer.Button>
+      </BulkActionContainer>
+
+      {/* status menu */}
+      <Menu
+        anchorEl={anchorEl}
+        id="action-menu"
+        keepMounted
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left'
+        }}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+      >
+        <span onClick={() => setAnchorEl(null)}>
+          {statusOptions ? (
+            <>
+              {Object.entries(statusOptions).map(([key, status]: any) => {
+                const isDisabled =
+                  status?.optionValue === ASSET_STATUS.scrap &&
+                  user?.user?.brandPolicy?.serializedAssetScrapApproval &&
+                  !user?.role?.selectedEntity?.policy?.scrapRequest;
+                return (
+                  <HtmlTooltip title={isDisabled ? scrapRequestDisable : ''}>
+                    <MenuItem
+                      key={key}
+                      onClick={() => {
+                        handleActionMenuItemOnClick(status);
+                      }}
+                      disabled={selectedRecords.some((record) => record.status === status?.optionLabel) || isDisabled}
+                    >
+                      {status?.optionLabel}
+                    </MenuItem>
+                  </HtmlTooltip>
+                );
+              })}
+            </>
+          ) : null}
+        </span>
+      </Menu>
+    </>
+  );
+};
 
 const LeftSideContent = ({ permissions, warehouseOptions, selectedWarehouse, setSelectedWarehouse, subleaseAsset, setSubleaseAsset, resources }) => {
   return (
@@ -570,91 +645,6 @@ const LeftSideContent = ({ permissions, warehouseOptions, selectedWarehouse, set
           />
         )}
       </Fragment>
-    </>
-  );
-};
-
-const RightSideContents = ({
-  openActions,
-  anchorEl,
-  closeActions,
-  ActionMenuItems,
-  selectedRecords,
-  resourcePolicy,
-  permissions,
-  setShowRepairOrderDialog,
-  setShowRepairJobDialog,
-  resources
-}) => {
-  const checkUniqWarehouse = () => {
-    let warehouses = new Set(selectedRecords?.map((d) => d?.warehouseId));
-    return warehouses?.size === 1;
-  };
-
-  return (
-    <>
-      {resourcePolicy?.policy?.canCreateRepairOrder && permissions?.repairOrder?.isCreate && (
-        <ThemeButton
-          buttonType="themeBorder"
-          onClick={() => setShowRepairOrderDialog(true)}
-          disabled={
-            checkUniqWarehouse() &&
-              selectedRecords?.every((e) =>
-                [
-                  ASSET_STATUS.new,
-                  ASSET_STATUS.available,
-                  ASSET_STATUS.scrap,
-                  ASSET_STATUS.needRecert,
-                  ASSET_STATUS.needRepair,
-                  ASSET_STATUS.underReview
-                ]?.includes(e.status)
-              )
-              ? false
-              : true
-          }
-        >
-          {`Create ${resources?.repairOrder?.titleSingular}`}
-        </ThemeButton>
-      )}
-      {resourcePolicy?.policy?.canCreateRepairOrder && permissions?.repairJob?.isCreate && (
-        <ThemeButton
-          buttonType="themeBorder"
-          onClick={() => setShowRepairJobDialog(true)}
-          disabled={
-            checkUniqWarehouse() &&
-              selectedRecords?.every((e) =>
-                [ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status)
-              )
-              ? false
-              : true
-          }
-        >
-          {`Create ${resources?.repairJob?.titleSingular}`}
-        </ThemeButton>
-      )}
-      <ThemeButton
-        onClick={openActions}
-        endIcon={<ExpandMore />}
-        buttonType="yellow"
-        disabled={selectedRecords?.length ? false : true}
-        mobileTooltip="Change Status"
-        iconForMobile={<RiExchange2Line size={24} />}
-      >
-        Change Status
-      </ThemeButton>
-      <Menu
-        anchorEl={anchorEl}
-        id="action-menu"
-        keepMounted
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left'
-        }}
-        open={Boolean(anchorEl)}
-        onClose={closeActions}
-      >
-        <span onClick={() => closeActions()}>{ActionMenuItems && <ActionMenuItems />}</span>
-      </Menu>
     </>
   );
 };
