@@ -116,7 +116,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
   const [versionDialog, setVersionDialog] = useState(false);
   const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, serializedPackage: null });
 
-  const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState({open : false, sendToCustomer: false});
+  const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState({ open: false, sendToCustomer: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [showReopenConfirmation, setShowReopenConfirmation] = useState(false);
@@ -451,6 +451,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
     if (!permissions?.repairJob?.isCreate || !allowedToEdit || workOrderData?.currentRepairJob || [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.draft]?.includes(workOrderData?.status)) {
       return false
     }
+    if (workOrderData?.hasOwnProperty('canSendToSupplier') && !workOrderData?.canSendToSupplier) {
+      return false
+    }
     if (workOrderData?.type === WORK_ORDER_TYPE.repairOrder) {
       return workOrderData?.serializedAsset && workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair
     }
@@ -480,9 +483,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       id: `Repair Job Receive`,
       isVisible:
         permissions?.repairJob?.isUpdate &&
-        allowedToEdit &&
-        [WORK_ORDER_TYPE.repairOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) &&
-        workOrderData?.currentRepairJob
+          allowedToEdit &&
+          [WORK_ORDER_TYPE.repairOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) &&
+          workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Receive ${WORK_ORDER_TYPE.repairOrder === workOrderData?.type ? 'Asset' : ''} From Supplier`,
@@ -494,9 +497,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       id: `Send To Customer`,
       isVisible:
         permissions?.repairJob?.isUpdate &&
-        allowedToEdit &&
-        [WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) &&
-        workOrderData?.currentRepairJob
+          allowedToEdit &&
+          [WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) &&
+          workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Send To Customer`,

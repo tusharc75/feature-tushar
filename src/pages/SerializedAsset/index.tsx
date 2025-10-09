@@ -42,6 +42,7 @@ import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeReq
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import StatusChangeFieldDialog from 'src/pages/SerializedAsset/StatusChangeFieldDialog';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { statusChangePermissionsAllowed } from './helper';
 
 const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
@@ -503,7 +504,21 @@ const SerializedAsset = () => {
   };
 
   const handleStatusChange = (status) => {
-    const { policy } = resourceData;
+    const { policy, statusChangePermissions } = resourceData;
+    let statusChangeAllowed = statusChangePermissionsAllowed({
+      status: status,
+      user,
+      statusChangePermissions,
+      selectedRecords,
+    });
+    if (!statusChangeAllowed) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: 'You don’t have permission to change the status. Please contact your supervisor.'
+      });
+      return;
+    }
     let statusPolicy = null;
     const statusPolicyData = policy?.statusChangeFields?.find((ele) => ele.status === status);
     if (statusPolicyData) {
@@ -522,7 +537,6 @@ const SerializedAsset = () => {
         statusPolicy = statusPolicyData;
       }
     }
-
     setStatus(status);
     if (status === ASSET_STATUS.scrap || status === ASSET_STATUS.lost) {
       if (statusPolicy) {

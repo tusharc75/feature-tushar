@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
-import { map, uniq } from 'lodash';
+import { map, orderBy, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
@@ -34,7 +34,6 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
   const { generateColumns, getMaterialLabel } = useColumns();
 
   const [columns, setColumns] = useState(null);
-  const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [hideDeliveryTicketDelivered, setHideDeliveryTicketDelivered] = useState(false);
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
@@ -42,7 +41,6 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
 
   useEffect(() => {
     fetchFields();
-    fetchPolicy();
   }, [assemblyOrderData]);
 
   const fetchFields = async () => {
@@ -200,19 +198,6 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     setColumns(coloum);
   };
 
-  const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
-      if (data) {
-        setAssetPolicyData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  };
-
   useEffect(() => {
     fetchData();
   }, []);
@@ -292,7 +277,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
   };
 
   const generateNestedData = (material, parent, loadingTicketsPackages, loadingTicketsProducts) => {
-    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    const subRows: any = orderBy(material.filter((e) => e.parentId === parent._id), [item => item.type === MATERIAL_TYPE.product ? 0 : 1], ['asc']);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail =

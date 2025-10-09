@@ -35,19 +35,16 @@ const ModernBulkAction = ({ state, bulkActionItems, dispatch }: ModernBulkAction
     <div className={cn('flex w-full max-w-full items-center gap-2 rounded-md border bg-[var(--dark-secondary,#EBF0FA)] px-2 py-[6px]', dividerClass)}>
       {bulkActionItems}
 
-      <div className="ml-auto flex items-center gap-2">
-        <div className="divider" />
-        <p className="flex items-center gap-2 text-[13px]">
-          <span className="inline-flex h-[28px] min-w-[28px] items-center justify-center rounded-full bg-blue-200 px-2 text-[12px] text-xs font-semibold leading-[28px] text-[--primary-text] dark:bg-[var(--dark-primary)]">
-            {selectedRecords.length}
-          </span>{' '}
-          Selected
-        </p>
+      <div className="ml-auto  ">
         <HtmlTooltip title="Remove Selection">
           <RippleButton
             onClick={handleClose}
-            className="flex items-center rounded-md px-2 py-1 text-sm font-medium text-red-500 hover:bg-gray-100 dark:hover:bg-gray-600"
+            className="flex items-center rounded-full border bg-[var(--dark-primary,white)] px-2 py-1 text-sm font-medium text-red-500 hover:bg-gray-50 dark:hover:bg-gray-600"
           >
+            <p className="flex items-center gap-1 pl-1 pr-2 text-[13px] text-gray-500 dark:text-gray-300">
+              <span>{selectedRecords.length}</span>
+              Selected
+            </p>
             <span className="max-md:sr-only">Esc</span>
             <Close fontSize="small" color="error" />
           </RippleButton>

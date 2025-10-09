@@ -39,16 +39,14 @@ export default function RoleWiseStatusChangeDialog({ onClose, onSuccess, resourc
 
   const fetchRoles = async () => {
     setLoadingRoles(true);
-    axiosInstance()
-      .get(`/role`)
-      .then(({ data: { data } }) => {
-        const roleOptions = data.map((role) => ({
-          optionLabel: role.name,
-          optionValue: role._id
-        }));
-        setRoles(roleOptions);
-        setLoadingRoles(false);
-      });
+    axiosInstance().get(`/role`).then(({ data: { data } }) => {
+      const roleOptions = data.map((role) => ({
+        optionLabel: role.name,
+        optionValue: role._id
+      }));
+      setRoles(roleOptions);
+      setLoadingRoles(false);
+    });
   };
 
   const handleSave = (values) => {
@@ -61,7 +59,7 @@ export default function RoleWiseStatusChangeDialog({ onClose, onSuccess, resourc
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: data.message || 'Role Wise Status Change configuration saved successfully'
+          message: data.message
         });
       })
       .catch((error) => {
@@ -107,7 +105,7 @@ export default function RoleWiseStatusChangeDialog({ onClose, onSuccess, resourc
             <Fragment>
               <CustomDialogHeader
                 onClose={onClose}
-                title="Role Wise Status Change"
+                title="Status Change Permissions by Roles"
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -121,9 +119,9 @@ export default function RoleWiseStatusChangeDialog({ onClose, onSuccess, resourc
                     {({ push, remove }) => (
                       <>
                         <div className="sticky top-0 z-10 flex items-center justify-between gap-2 bg-[var(--dark-primary,white)] py-3 pb-3">
-                            <ThemeButton buttonType="theme" onClick={() => push({ from_status: [], to_status: [], roles: [] })}>
-                              Add
-                            </ThemeButton>
+                          <ThemeButton buttonType="theme" onClick={() => push({ from_status: [], to_status: [], roles: [] })}>
+                            Add
+                          </ThemeButton>
                         </div>
                         <ul className="list-none space-y-4">
                           {values?.roleWiseStatusChange?.map((item, index) => (
@@ -178,54 +176,52 @@ const RoleWiseStatusChangeCard = ({ values, index, parentRemove, setFieldValue, 
         </legend>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <Autocomplete
-              options={statusOptions}
-              getOptionLabel={(option) => option?.optionLabel || ''}
-              value={statusOptions?.filter((status) => values?.roleWiseStatusChange?.[index]?.from_status?.includes(status?.optionValue)) || []}
-              fullWidth
-              multiple
-              onChange={(e, newValue) => {
-                setFieldValue(`roleWiseStatusChange.${index}.from_status`, newValue?.map((v) => v?.optionValue) || []);
-              }}
-              size="small"
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="From Status"
-                  margin="none"
-                  size="small"
-                  required
-                  error={touched?.roleWiseStatusChange?.[index]?.from_status && Boolean(errors[`roleWiseStatusChange.${index}.from_status`])}
-                  helperText={touched?.roleWiseStatusChange?.[index]?.from_status && errors[`roleWiseStatusChange.${index}.from_status`]}
-                  variant="outlined"
-                />
-              )}
-            />
-
-            <Autocomplete
-              options={statusOptions}
-              getOptionLabel={(option) => option?.optionLabel || ''}
-              value={statusOptions?.filter((status) => values?.roleWiseStatusChange?.[index]?.to_status?.includes(status?.optionValue)) || []}
-              fullWidth
-              multiple
-              onChange={(e, newValue) => {
-                setFieldValue(`roleWiseStatusChange.${index}.to_status`, newValue?.map((v) => v?.optionValue) || []);
-              }}
-              size="small"
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="To Status"
-                  margin="none"
-                  size="small"
-                  required
-                  error={touched?.roleWiseStatusChange?.[index]?.to_status && Boolean(errors[`roleWiseStatusChange.${index}.to_status`])}
-                  helperText={touched?.roleWiseStatusChange?.[index]?.to_status && errors[`roleWiseStatusChange.${index}.to_status`]}
-                  variant="outlined"
-                />
-              )}
-            />
-
+          <Autocomplete
+            options={statusOptions}
+            getOptionLabel={(option) => option?.optionLabel || ''}
+            value={statusOptions?.filter((status) => values?.roleWiseStatusChange?.[index]?.from_status?.includes(status?.optionValue)) || []}
+            fullWidth
+            multiple
+            onChange={(e, newValue) => {
+              setFieldValue(`roleWiseStatusChange.${index}.from_status`, newValue?.map((v) => v?.optionValue) || []);
+            }}
+            size="small"
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="From Status"
+                margin="none"
+                size="small"
+                required
+                error={touched?.roleWiseStatusChange?.[index]?.from_status && Boolean(errors[`roleWiseStatusChange.${index}.from_status`])}
+                helperText={touched?.roleWiseStatusChange?.[index]?.from_status && errors[`roleWiseStatusChange.${index}.from_status`]}
+                variant="outlined"
+              />
+            )}
+          />
+          <Autocomplete
+            options={statusOptions}
+            getOptionLabel={(option) => option?.optionLabel || ''}
+            value={statusOptions?.filter((status) => values?.roleWiseStatusChange?.[index]?.to_status?.includes(status?.optionValue)) || []}
+            fullWidth
+            multiple
+            onChange={(e, newValue) => {
+              setFieldValue(`roleWiseStatusChange.${index}.to_status`, newValue?.map((v) => v?.optionValue) || []);
+            }}
+            size="small"
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="To Status"
+                margin="none"
+                size="small"
+                required
+                error={touched?.roleWiseStatusChange?.[index]?.to_status && Boolean(errors[`roleWiseStatusChange.${index}.to_status`])}
+                helperText={touched?.roleWiseStatusChange?.[index]?.to_status && errors[`roleWiseStatusChange.${index}.to_status`]}
+                variant="outlined"
+              />
+            )}
+          />
           <Autocomplete
             options={roles}
             getOptionLabel={(option) => option?.optionLabel || ''}

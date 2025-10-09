@@ -208,103 +208,111 @@ function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
               }}
               className="custom-react-table editable-table-v1 border"
             >
-              <MaUTable size="small" className="tableWrap sticky table">
-                <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
-                  <TableRow key={'thead'} className="tr">
-                    {entries[0]?.map((field, index) => (
-                      <TableCell key={`${index}-${field?.fieldName}-head`} className="th text-truncate table-header overflow-initial">
-                        <div className="d-flex align-items-center justify-content-space-between pos-rel">
-                          <div className="d-flex align-items-center gap-2">
-                            <span>{field?.fieldLabel}</span>
+              {!loading ? (
+                <MaUTable size="small" className="tableWrap sticky table">
+                  <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
+                    <TableRow key={'thead'} className="tr">
+                      {entries[0]?.map((field, index) => (
+                        <TableCell key={`${index}-${field?.fieldName}-head`} className="th text-truncate table-header overflow-initial">
+                          <div className="d-flex align-items-center justify-content-space-between pos-rel">
+                            <div className="d-flex align-items-center gap-2">
+                              <span>{field?.fieldLabel}</span>
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                    ))}
-                    <TableCell
-                      key={`Index add`}
-                      className="th text-truncate table-header overflow-initial"
-                      style={{ width: '10px', position: 'sticky', right: 0, backgroundColor: '#ffffff' }}
-                    >
-                      <div
-                        style={{ cursor: 'pointer' }}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          addEntry();
-                        }}
+                        </TableCell>
+                      ))}
+                      <TableCell
+                        key={`Index add`}
+                        className="th text-truncate table-header overflow-initial"
+                        style={{ width: '10px', position: 'sticky', right: 0, backgroundColor: '#ffffff' }}
                       >
-                        <Add fontSize="small" color={'primary'} />
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody
-                  style={{
-                    overflowY: 'scroll',
-                    overflowX: 'hidden'
-                  }}
-                  className="body"
-                >
-                  {entries?.map((iData, idx) => {
-                    return (
-                      <TableRow key={'tbody'} className="tr" style={{ overflow: 'auto' }}>
-                        {iData?.map((field, i) => {
-                          return (
-                            <TableCell key={`${idx}-${i}-${field?.fieldName}-body`} className={`td`} style={{ minWidth: '300px', maxWidth: '300px' }}>
-                              <FormTypes
-                                {...field}
-                                disabled={field.disableOnEdit}
-                                values={entryValues[idx] || {}}
-                                errors={error}
-                                fields={iData}
-                                fieldData={field}
-                                touched={touched || {}}
-                                label={field.fieldLabel}
-                                name={field.fieldName}
-                                type={field.type}
-                                options={field.option}
-                                setFieldValue={(name, value) => {
-                                  setEntryValues((prevState) => {
-                                    const prevData = [...prevState];
-                                    prevData[idx][name] = value;
-                                    return prevData;
-                                  });
-                                }}
-                                required={field.required}
-                                fullWidth
-                                isTooltip={field?.isTooltip || false}
-                                tooltipMessage={field?.tooltipMessage}
-                                size="small"
-                              />
-                            </TableCell>
-                          );
-                        })}
-                        <TableCell
-                          key={`Index ${idx}-action`}
-                          className="td table-header action-column"
-                          style={{
-                            width: '10px',
-                            position: 'sticky',
-                            right: 0,
-                            backgroundColor: '#ffffff'
+                        <div
+                          style={{ cursor: 'pointer' }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            addEntry();
                           }}
                         >
-                          {entries?.length !== 1 && (
-                            <div
-                              style={{ cursor: 'pointer' }}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                removeEntry(idx);
-                              }}
-                            >
-                              <Delete fontSize="small" color={'error'} />
-                            </div>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </MaUTable>
+                          <Add fontSize="small" color={'primary'} />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody
+                    style={{
+                      overflowY: 'scroll',
+                      overflowX: 'hidden'
+                    }}
+                    className="body"
+                  >
+                    {entries?.map((iData, idx) => {
+                      return (
+                        <TableRow key={'tbody'} className="tr" style={{ overflow: 'auto' }}>
+                          {iData?.map((field, i) => {
+                            return (
+                              <TableCell
+                                key={`${idx}-${i}-${field?.fieldName}-body`}
+                                className={`td`}
+                                style={{ minWidth: '300px', maxWidth: '300px' }}
+                              >
+                                <FormTypes
+                                  {...field}
+                                  disabled={field.disableOnEdit}
+                                  values={entryValues[idx] || {}}
+                                  errors={error}
+                                  fields={iData}
+                                  fieldData={field}
+                                  touched={touched || {}}
+                                  label={field.fieldLabel}
+                                  name={field.fieldName}
+                                  type={field.type}
+                                  options={field.option}
+                                  setFieldValue={(name, value) => {
+                                    setEntryValues((prevState) => {
+                                      const prevData = [...prevState];
+                                      prevData[idx][name] = value;
+                                      return prevData;
+                                    });
+                                  }}
+                                  required={field.required}
+                                  fullWidth
+                                  isTooltip={field?.isTooltip || false}
+                                  tooltipMessage={field?.tooltipMessage}
+                                  size="small"
+                                />
+                              </TableCell>
+                            );
+                          })}
+                          <TableCell
+                            key={`Index ${idx}-action`}
+                            className="td table-header action-column"
+                            style={{
+                              width: '10px',
+                              position: 'sticky',
+                              right: 0,
+                              backgroundColor: '#ffffff'
+                            }}
+                          >
+                            {entries?.length !== 1 && (
+                              <div
+                                style={{ cursor: 'pointer' }}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  removeEntry(idx);
+                                }}
+                              >
+                                <Delete fontSize="small" color={'error'} />
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </MaUTable>
+              ) : (
+                <CommonSkeleton />
+              )}
             </div>
           </CustomDialogContent>
           <CustomDialogFooter>
@@ -316,7 +324,7 @@ function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
                   onClose();
                 }
               }}
-              buttonType='transparent'
+              buttonType="transparent"
             >
               Cancel
             </ThemeButton>
@@ -327,7 +335,7 @@ function AddMultiple({ resource, referenceData = null, onClose, onSuccess }) {
               }}
               disabled={submitting || isEmpty(entryValues)}
               isLoading={submitting}
-              buttonType='theme'
+              buttonType="theme"
             >
               Save
             </ThemeButton>

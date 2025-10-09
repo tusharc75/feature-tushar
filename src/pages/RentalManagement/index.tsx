@@ -1,8 +1,10 @@
-import { Box, Button, IconButton, MenuItem } from '@mui/material';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
+import { Box, Button, IconButton, MenuItem } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase, isArray, isObject } from 'lodash';
+import queryString from 'query-string';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -32,14 +34,10 @@ import {
 import { findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { createRentalJobsFlow } from 'src/pages/RentalManagement/walkmeSteps';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRentalManagementDialog from './ManageRental';
 import { rentalJobClearOffline, rentalJobOfflineUpdate } from './rentalOfflineHelper';
-import queryString from 'query-string';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const RentalManagement = () => {
   const { setWalkmeData } = useSetWalkmeData();
