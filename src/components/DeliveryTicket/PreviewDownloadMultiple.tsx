@@ -8,14 +8,18 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { PreviewDialog } from 'src/components/PreviewDownload/PreviewDialog';
 
-function PreviewDownloadMultiple({ referenceIds }) {
+function PreviewDownloadMultiple({ referenceIds, allColumns = null, defaultColumns = null }) {
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
-    fetchGridColumns();
-  }, []);
+    if (allColumns && allColumns?.length > 0) {
+      setColumns(allColumns)
+    } else {
+      fetchGridColumns();
+    }
+  }, [allColumns]);
 
   const fetchGridColumns = async () => {
     try {
@@ -143,7 +147,7 @@ function PreviewDownloadMultiple({ referenceIds }) {
           allColumn={columns}
           resource={sidebarResource.deliveryTicket}
           referenceId={null}
-          defaultColumns={['assetNumber', 'product', 'productDescription']}
+          defaultColumns={defaultColumns && defaultColumns?.length > 0 ? defaultColumns : ['assetNumber', 'product', 'productDescription']}
           columns={columns}
           button1Title={'Regular'}
           button2Title={'Detail'}

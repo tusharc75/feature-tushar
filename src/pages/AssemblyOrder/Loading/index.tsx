@@ -34,6 +34,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
   const { generateColumns, getMaterialLabel } = useColumns();
 
   const [columns, setColumns] = useState(null);
+  const [allFields, setAllFields] = useState(null)
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [hideDeliveryTicketDelivered, setHideDeliveryTicketDelivered] = useState(false);
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
@@ -46,7 +47,10 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
   const fetchFields = async () => {
     const response = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', allowedToEdit);
     const data = response;
-    let newColumns = generateColumns(renderedFrom, data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName)), null, false, assemblyOrderData?.currency || 'USD');
+    const allFields = data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName))
+    setAllFields(JSON.parse(JSON.stringify(allFields)))
+
+    let newColumns = generateColumns(renderedFrom, allFields, null, false, assemblyOrderData?.currency || 'USD');
 
     const {
       data: { data: serializedPackageFieldData }
@@ -439,7 +443,36 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
 
   const rightSideContents = () => {
     return (
-      <PreviewDownloadMultiple referenceIds={uniqueLoadingTicket} />
+      <PreviewDownloadMultiple
+        referenceIds={uniqueLoadingTicket}
+        allColumns={[
+          {
+            fieldName: 'index',
+            fieldLabel: 'Index'
+          },
+          {
+            fieldName: 'type',
+            fieldLabel: 'Type'
+          },
+          {
+            fieldName: 'detail',
+            fieldLabel: 'Detail'
+          },
+          {
+            fieldName: 'description',
+            fieldLabel: 'Description'
+          },
+          {
+            fieldName: 'serializedPackageNumber',
+            fieldLabel: 'Serialized Package Number'
+          },
+          ...(allFields && allFields?.length > 0 ? allFields?.map(f => ({
+            fieldName: f?.fieldName,
+            fieldLabel: f?.fieldLabel
+          })) : [])
+        ]}
+        defaultColumns={['index', 'type', 'detail', 'description', 'serializedPackageNumber', 'qty']}
+      />
     );
   };
 
