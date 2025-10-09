@@ -1410,7 +1410,7 @@ const ActionButtonMenuItems = ({
           }}
           disabled={getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)?.every(r =>
             ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.draft]?.includes(r?.workOrder?.status)
-            && r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder && !r?.workOrder?.currentRepairJob) ? false : true}
+              && r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder && !r?.workOrder?.currentRepairJob && r?.workOrder?.hasOwnProperty('canSendToSupplier') ? r?.workOrder?.canSendToSupplier : true) ? false : true}
         >
           {`Create ${resources?.repairJob?.titleSingular}`}
         </MenuItem>

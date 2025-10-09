@@ -63,6 +63,7 @@ import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
 import AssetServiceTickets from 'src/pages/AssetServiceTicket';
 import { scrapRequestDisable } from 'src/constants/messageHelpers';
+import { statusChangePermissionsAllowed } from './helper';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -327,7 +328,21 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleStatusChange = (o) => {
-    const { policy } = resourcePolicyData;
+    const { policy, statusChangePermissions } = resourcePolicyData;
+    let statusChangeAllowed = statusChangePermissionsAllowed({
+      status: o.optionValue,
+      user,
+      statusChangePermissions,
+      assetDetails
+    });
+    if (!statusChangeAllowed) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: 'You don’t have permission to change the status. Please contact your supervisor.'
+      });
+      return;
+    }
     const statusPolicy = policy?.statusChangeFields?.find(
       (ele) =>
         ele.status === o.optionValue && (!ele?.products || ele?.products?.length === 0 || ele?.products?.includes(assetDetails?.product?.optionValue))

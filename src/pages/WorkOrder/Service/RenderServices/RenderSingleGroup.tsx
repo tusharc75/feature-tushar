@@ -5,6 +5,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import RippleButton from 'src/components/RippleButton';
 import { cn } from 'src/constants/helpers';
+import { RenderStatusIcon } from 'src/pages/WorkOrder/Service';
 import RenderServiceCountBadge from 'src/pages/WorkOrder/Service/RenderServices/RenderServiceCountBadge';
 import RenderServicesList from 'src/pages/WorkOrder/Service/RenderServices/RenderServicesList';
 
@@ -31,6 +32,8 @@ const RenderSingleGroup = ({
   const isSelected = useMemo(() => {
     return !!selectedService && !!group?.serviceSteps.find((d) => d._id === selectedService?._id && selectedService.parentId === group._id);
   }, [selectedService, group?.serviceSteps, group._id]);
+
+  const data = group.serviceSteps?.[0];
 
   return (
     <div className="relative isolate min-w-0 max-w-full rounded-[8px] border">
@@ -64,6 +67,23 @@ const RenderSingleGroup = ({
                 <h6 className={'text-base font-medium leading-[24px]'}>{group.product}</h6>
                 <RenderServiceCountBadge serviceSteps={group.serviceSteps} />
               </div>
+              {/* pass fail */}
+              {group?.serviceSteps?.length === 1 && (
+                <>
+                  {data?.type === 'service' && data?.serviceStatus && (
+                    <RenderStatusIcon
+                      className={`${isMobile ? 'h-[20px] max-w-[20px]' : 'h-[24px] max-w-[24px]'} mt-[3px] flex-shrink-0`}
+                      stepStatus={data?.serviceStatus}
+                    />
+                  )}
+                  {data?.type === 'quotation' && quotationData && (
+                    <RenderStatusIcon
+                      className={`${isMobile ? 'h-[20px] max-w-[20px]' : 'h-[24px] max-w-[24px]'} mt-[3px] flex-shrink-0`}
+                      stepStatus={quotationData?.status}
+                    />
+                  )}
+                </>
+              )}
               <HtmlTooltip title={expanded ? 'Collapse' : 'Expand'} className="block max-h-[24px] rounded-[inherit]">
                 <RippleButton
                   onClickCapture={(e) => {

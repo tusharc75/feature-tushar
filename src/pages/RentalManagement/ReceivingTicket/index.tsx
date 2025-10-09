@@ -202,8 +202,7 @@ const ReceivingTicket = ({
   const [technicianDispatchReturn, setTechnicianDispatchReturn] = useState(false);
 
   const {
-    state: { user, permissions, resources
-    }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const { generateColumns } = useColumns();
@@ -1595,31 +1594,31 @@ const ReceivingTicket = ({
             </IconButton>
             {((row?.original?.nonSerializedProductSerialNumbers && row?.original?.nonSerializedProductSerialNumbers?.length > 0) ||
               (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
-                <Box>
-                  <HtmlTooltip title={`Serial Numbers`}>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        setShowInfo({
-                          open: true,
-                          data: {
-                            productName: row?.original?.productName,
-                            data:
-                              row?.original?.nonSerializedProductSerialNumbers?.length > 0
-                                ? row?.original?.nonSerializedProductSerialNumbers?.map((e) => {
+              <Box>
+                <HtmlTooltip title={`Serial Numbers`}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setShowInfo({
+                        open: true,
+                        data: {
+                          productName: row?.original?.productName,
+                          data:
+                            row?.original?.nonSerializedProductSerialNumbers?.length > 0
+                              ? row?.original?.nonSerializedProductSerialNumbers?.map((e) => {
                                   return { assetNumber: e };
                                 })
-                                : row?.original?.productSerialNumbers
-                          },
-                          isNonSerializedProductSerialNumbers: row?.original?.nonSerializedProductSerialNumbers?.length > 0 ? true : false
-                        });
-                      }}
-                    >
-                      <InfoIcon fontSize="small" color={'primary'} />
-                    </IconButton>
-                  </HtmlTooltip>
-                </Box>
-              )}
+                              : row?.original?.productSerialNumbers
+                        },
+                        isNonSerializedProductSerialNumbers: row?.original?.nonSerializedProductSerialNumbers?.length > 0 ? true : false
+                      });
+                    }}
+                  >
+                    <InfoIcon fontSize="small" color={'primary'} />
+                  </IconButton>
+                </HtmlTooltip>
+              </Box>
+            )}
             {row?.original?.isRepairJob && (
               <HtmlTooltip title={`${resources?.repairJob?.titleSingular}`}>
                 <IconButton
@@ -1649,13 +1648,13 @@ const ReceivingTicket = ({
       },
       ...(view === 'flat'
         ? [
-          {
-            accessor: 'parentName',
-            Header: 'Parent',
-            disabled: true,
-            cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
-          }
-        ]
+            {
+              accessor: 'parentName',
+              Header: 'Parent',
+              disabled: true,
+              cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
+            }
+          ]
         : []),
       ...newColumns,
       {
@@ -1666,93 +1665,93 @@ const ReceivingTicket = ({
       },
       ...(assetFields?.find((f) => f.fieldName === 'serialNumber')
         ? [
-          {
-            accessor: 'serialNumber',
-            Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
-            cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
-          }
-        ]
+            {
+              accessor: 'serialNumber',
+              Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
+              cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'position')
         ? [
-          {
-            accessor: 'position',
-            Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
-            cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
-          }
-        ]
+            {
+              accessor: 'position',
+              Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
+              cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'jobCount')
         ? [
-          {
-            accessor: 'jobCount',
-            Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'jobCount',
-            cell: ({ row }) =>
-              row?.original?.jobCount || row?.original?.jobCount === 0 ? (
-                <h5 className="text-truncate">{row?.original?.jobCount}</h5>
-              ) : (
-                <NoDataCell />
-              )
-          }
-        ]
+            {
+              accessor: 'jobCount',
+              Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'jobCount',
+              cell: ({ row }) =>
+                row?.original?.jobCount || row?.original?.jobCount === 0 ? (
+                  <h5 className="text-truncate">{row?.original?.jobCount}</h5>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'gpsNumber')
         ? [
-          {
-            accessor: 'gpsNumber',
-            Header: assetFields?.find((f) => f.fieldName === 'gpsNumber')?.fieldLabel || 'gpsNumber',
-            cell: ({ row }) =>
-              row?.original?.gpsNumber ? (
-                <div>
-                  <p className="text-truncate">{row?.original?.gpsNumber}</p>
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          }
-        ]
+            {
+              accessor: 'gpsNumber',
+              Header: assetFields?.find((f) => f.fieldName === 'gpsNumber')?.fieldLabel || 'gpsNumber',
+              cell: ({ row }) =>
+                row?.original?.gpsNumber ? (
+                  <div>
+                    <p className="text-truncate">{row?.original?.gpsNumber}</p>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'currentGpsLocation')
         ? [
-          {
-            accessor: 'currentGpsLocation',
-            Header: assetFields?.find((f) => f.fieldName === 'currentGpsLocation')?.fieldLabel || 'currentGpsLocation',
-            cell: ({ row }) => <GpsLocationCell value={row?.original?.currentGpsLocation} />
-          }
-        ]
+            {
+              accessor: 'currentGpsLocation',
+              Header: assetFields?.find((f) => f.fieldName === 'currentGpsLocation')?.fieldLabel || 'currentGpsLocation',
+              cell: ({ row }) => <GpsLocationCell value={row?.original?.currentGpsLocation} />
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')
         ? [
-          {
-            accessor: 'currentGpsWellNames',
-            Header: assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')?.fieldLabel || 'currentGpsWellNames',
-            cell: ({ row }) => <FreeStyleMultiSelect value={row?.original?.currentGpsWellNames} />
-          }
-        ]
+            {
+              accessor: 'currentGpsWellNames',
+              Header: assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')?.fieldLabel || 'currentGpsWellNames',
+              cell: ({ row }) => <FreeStyleMultiSelect value={row?.original?.currentGpsWellNames} />
+            }
+          ]
         : []),
       ...(view === 'flat'
         ? [
-          {
-            accessor: 'productName',
-            Header: productFields?.find((f) => f.fieldName === 'productName')?.fieldLabel || 'Product Name',
-            cell: ({ row }) =>
-              row?.original?.productName ? (
-                <div className="flex items-center gap-2">
-                  <h5 className="text-truncate">{row?.original?.productName}</h5>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.productDetail.path}/${row?.original?.materialId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          }
-        ]
+            {
+              accessor: 'productName',
+              Header: productFields?.find((f) => f.fieldName === 'productName')?.fieldLabel || 'Product Name',
+              cell: ({ row }) =>
+                row?.original?.productName ? (
+                  <div className="flex items-center gap-2">
+                    <h5 className="text-truncate">{row?.original?.productName}</h5>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.productDetail.path}/${row?.original?.materialId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
         : []),
       {
         accessor: 'description',
@@ -1783,69 +1782,69 @@ const ReceivingTicket = ({
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-          {
-            accessor: 'storageLocation',
-            Header: resources?.storageLocation?.titleSingular,
-            cell: ({ row }) =>
-              row?.original?.storageLocation ? (
-                <div className="flex items-center gap-2">
-                  <h5 className="text-truncate">{row?.original?.storageLocation}</h5>
-                  {permissions?.storageLocation?.isRead && (
+            {
+              accessor: 'storageLocation',
+              Header: resources?.storageLocation?.titleSingular,
+              cell: ({ row }) =>
+                row?.original?.storageLocation ? (
+                  <div className="flex items-center gap-2">
+                    <h5 className="text-truncate">{row?.original?.storageLocation}</h5>
+                    {permissions?.storageLocation?.isRead && (
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          window.open(`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
+                        }}
+                      >
+                        <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                      </IconButton>
+                    )}
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
+        : []),
+      ...(permissions?.serializedPackages?.isRead
+        ? [
+            {
+              accessor: 'serializedPackage',
+              Header: resources?.serializedPackages?.titleSingular,
+              cell: ({ row }) =>
+                row?.original?.serializedPackage ? (
+                  <div className="flex items-center gap-2">
+                    <h5 className="text-truncate" title={row?.original?.serializedPackage}>
+                      {row?.original?.serializedPackage}
+                    </h5>
                     <IconButton
                       size="small"
                       onClick={() => {
-                        window.open(`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
+                        window.open(`${routes.serializedPackagesDetail.path}/${row?.original?.serializedPackageId}`);
                       }}
                     >
                       <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
-                  )}
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          }
-        ]
-        : []),
-      ...(permissions?.serializedPackages?.isRead
-        ? [
-          {
-            accessor: 'serializedPackage',
-            Header: resources?.serializedPackages?.titleSingular,
-            cell: ({ row }) =>
-              row?.original?.serializedPackage ? (
-                <div className="flex items-center gap-2">
-                  <h5 className="text-truncate" title={row?.original?.serializedPackage}>
-                    {row?.original?.serializedPackage}
-                  </h5>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.serializedPackagesDetail.path}/${row?.original?.serializedPackageId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          },
-          {
-            accessor: 'serializedPackageStatus',
-            Header: `${resources?.serializedPackages?.titleSingular} Status`,
-            cell: ({ row }) =>
-              row?.original?.serializedPackageStatus ? (
-                <div className="flex items-center gap-2">
-                  <h5 className="text-truncate" title={row?.original?.serializedPackageStatus}>
-                    {row?.original?.serializedPackageStatus}
-                  </h5>
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          }
-        ]
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            },
+            {
+              accessor: 'serializedPackageStatus',
+              Header: `${resources?.serializedPackages?.titleSingular} Status`,
+              cell: ({ row }) =>
+                row?.original?.serializedPackageStatus ? (
+                  <div className="flex items-center gap-2">
+                    <h5 className="text-truncate" title={row?.original?.serializedPackageStatus}>
+                      {row?.original?.serializedPackageStatus}
+                    </h5>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
         : []),
       {
         accessor: 'loadingTicket',
@@ -1919,78 +1918,78 @@ const ReceivingTicket = ({
       },
       ...(assetFields?.find((f) => f.fieldName === 'subStatus')
         ? [
-          {
-            accessor: 'subStatus',
-            Header: `Asset ${assetFields?.find((f) => f.fieldName === 'subStatus')?.fieldLabel || 'Sub Status'}`,
-            cell: ({ row }) => (row?.original?.subStatus ? <h5 className="text-truncate">{row?.original?.subStatus}</h5> : <NoDataCell />)
-          }
-        ]
+            {
+              accessor: 'subStatus',
+              Header: `Asset ${assetFields?.find((f) => f.fieldName === 'subStatus')?.fieldLabel || 'Sub Status'}`,
+              cell: ({ row }) => (row?.original?.subStatus ? <h5 className="text-truncate">{row?.original?.subStatus}</h5> : <NoDataCell />)
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f?.fieldName === 'padName')
         ? [
-          {
-            accessor: 'padName',
-            Header: assetFields?.find((f) => f.fieldName === 'padName')?.fieldLabel || 'Pad Name',
-            cell: ({ row }) =>
-              row?.original?.padName ? (
-                <div className="flex items-center gap-2">
-                  <h5 className="text-truncate">{row?.original?.padName}</h5>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.padMasterDetail.path}/${row?.original?.padId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          }
-        ]
+            {
+              accessor: 'padName',
+              Header: assetFields?.find((f) => f.fieldName === 'padName')?.fieldLabel || 'Pad Name',
+              cell: ({ row }) =>
+                row?.original?.padName ? (
+                  <div className="flex items-center gap-2">
+                    <h5 className="text-truncate">{row?.original?.padName}</h5>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.padMasterDetail.path}/${row?.original?.padId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'wellNumber')
         ? [
-          {
-            accessor: 'wellNumber',
-            Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel,
-            accessorFn: (original) => {
-              return isArray(original?.wellNumber)
-                ? original?.wellNumber[0]?.optionLabel
-                : isObject(original?.wellNumber)
-                  ? original?.wellNumber?.optionLabel
-                  : original?.wellNumber;
-            },
-            cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'wellNumber',
-                  lookupResource: sidebarResource.wellNumber
-                }}
-                original={row?.original}
-              />
-            )
-          }
-        ]
+            {
+              accessor: 'wellNumber',
+              Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel,
+              accessorFn: (original) => {
+                return isArray(original?.wellNumber)
+                  ? original?.wellNumber[0]?.optionLabel
+                  : isObject(original?.wellNumber)
+                    ? original?.wellNumber?.optionLabel
+                    : original?.wellNumber;
+              },
+              cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'wellNumber',
+                    lookupResource: sidebarResource.wellNumber
+                  }}
+                  original={row?.original}
+                />
+              )
+            }
+          ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'wellColor')
         ? [
-          {
-            accessor: 'wellColor',
-            Header: assetFields?.find((f) => f.fieldName === 'wellColor')?.fieldLabel || 'wellColor',
-            cell: ({ row }) =>
-              row?.original?.wellColor ? (
-                <div>
-                  <p className="text-truncate">{row?.original?.wellColor}</p>
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          }
-        ]
+            {
+              accessor: 'wellColor',
+              Header: assetFields?.find((f) => f.fieldName === 'wellColor')?.fieldLabel || 'wellColor',
+              cell: ({ row }) =>
+                row?.original?.wellColor ? (
+                  <div>
+                    <p className="text-truncate">{row?.original?.wellColor}</p>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
         : []),
       {
         accessor: 'manualStartDate',
@@ -2271,7 +2270,7 @@ const ReceivingTicket = ({
       .then(({ data }) => {
         axiosInstance()
           .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
-          .then(({ data: { data } }) => { })
+          .then(({ data: { data } }) => {})
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
@@ -3007,7 +3006,7 @@ const ReceivingTicket = ({
           resourceData={rentalManagementData}
           resourceFields={rentalManagementFields}
           allowedToEdit={allowedToEdit}
-          handleChangeStatus={() => { }}
+          handleChangeStatus={() => {}}
           resource={sidebarResource.rentalManagement}
           fetchResourceData={fetchRentalData}
           noQuotationCheck={true}
@@ -3117,16 +3116,16 @@ const ReceivingTicket = ({
           assets={
             assetsData?.length
               ? getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map((ele) => {
-                const matchedAsset = assetsData.find((asset) => asset._id === ele._id);
-                if (matchedAsset) {
-                  const { _id, ...assetData } = matchedAsset;
-                  return {
-                    ...ele,
-                    assetData: { ...assetData }
-                  };
-                }
-                return ele;
-              })
+                  const matchedAsset = assetsData.find((asset) => asset._id === ele._id);
+                  if (matchedAsset) {
+                    const { _id, ...assetData } = matchedAsset;
+                    return {
+                      ...ele,
+                      assetData: { ...assetData }
+                    };
+                  }
+                  return ele;
+                })
               : getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)
           }
           products={
@@ -3135,11 +3134,11 @@ const ReceivingTicket = ({
                 ? showQtyDialog.data.map((d) => ({ ...d, _id: d?.productId, qty: d.returnQuantity }))
                 : []
               : getFilterSelectedRecords(MATERIAL_TYPE.product).map((d) => ({
-                _id: d?.materialId,
-                qty: d?.qty,
-                uniqueId: d?.uniqueId,
-                productSerialNumbers: d?.productSerialNumbers
-              }))
+                  _id: d?.materialId,
+                  qty: d?.qty,
+                  uniqueId: d?.uniqueId,
+                  productSerialNumbers: d?.productSerialNumbers
+                }))
           }
           onClose={() => {
             setShowTicketDialog({ open: false, ticketType: '', data: {} });
@@ -3886,70 +3885,70 @@ const BulkActionItems = ({
           )}
           {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
             (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
-              <>
+            <>
+              <BulkActionContainer.Button
+                tooltip={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}
+                id={'create-receiving-ticket-chargaeble-menu-item'}
+                onClick={() => {
+                  if (validateAction(rentalManagementActions.createReceivingTicket)) {
+                    if (getFilterSelectedRecords()?.every((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
+                      handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
+                    } else {
+                      setShowQtyDialog({ open: true, data: null });
+                      handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant, false);
+                    }
+                  }
+                }}
+                disabled={!permissions?.deliveryTicket?.isCreate}
+              >
+                {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
+              </BulkActionContainer.Button>
+              {getFilterSelectedRecords().length > 0 &&
+              getFilterSelectedRecords()?.filter(
+                (f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new
+              )?.length === getFilterSelectedRecords()?.length ? (
+                <BulkActionContainer.Button
+                  id={'remove-receiving-ticket-menu-item'}
+                  onClick={() => {
+                    setShowRemoveAssetFromReceivingTicketDialog(true);
+                  }}
+                >
+                  Remove Receiving Ticket
+                </BulkActionContainer.Button>
+              ) : null}
+              <BulkActionContainer.Button
+                tooltip={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}
+                id={'create-return-ticket-non-chargeble-menu-item'}
+                onClick={() => {
+                  if (validateAction(rentalManagementActions.createReturnTicket)) {
+                    if (getFilterSelectedRecords()?.every((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
+                      handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
+                    } else {
+                      setShowQtyDialog({ open: true, data: null });
+                      handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant, false);
+                    }
+                  }
+                }}
+                disabled={!permissions?.deliveryTicket?.isCreate}
+              >
+                {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Spares)` : `Create Return Ticket (Non-Chargeable)`}
+              </BulkActionContainer.Button>
+              {permissions?.sublease?.isRead && (
                 <BulkActionContainer.Button
                   tooltip={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}
-                  id={'create-receiving-ticket-chargaeble-menu-item'}
+                  id={'create-delivery-ticket-supplier-menu-item'}
                   onClick={() => {
-                    if (validateAction(rentalManagementActions.createReceivingTicket)) {
-                      if (getFilterSelectedRecords()?.every((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
-                        handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
-                      } else {
-                        setShowQtyDialog({ open: true, data: null });
-                        handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant, false);
-                      }
+                    if (validateAction(rentalManagementActions.createSupplierDeliveryTicket)) {
+                      handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier);
                     }
                   }}
                   disabled={!permissions?.deliveryTicket?.isCreate}
                 >
-                  {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
+                  Create Delivery Ticket for Supplier
                 </BulkActionContainer.Button>
-                {getFilterSelectedRecords().length > 0 &&
-                  getFilterSelectedRecords()?.filter(
-                    (f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new
-                  )?.length === getFilterSelectedRecords()?.length ? (
-                  <BulkActionContainer.Button
-                    id={'remove-receiving-ticket-menu-item'}
-                    onClick={() => {
-                      setShowRemoveAssetFromReceivingTicketDialog(true);
-                    }}
-                  >
-                    Remove Receiving Ticket
-                  </BulkActionContainer.Button>
-                ) : null}
-                <BulkActionContainer.Button
-                  tooltip={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}
-                  id={'create-return-ticket-non-chargeble-menu-item'}
-                  onClick={() => {
-                    if (validateAction(rentalManagementActions.createReturnTicket)) {
-                      if (getFilterSelectedRecords()?.every((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
-                        handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
-                      } else {
-                        setShowQtyDialog({ open: true, data: null });
-                        handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant, false);
-                      }
-                    }
-                  }}
-                  disabled={!permissions?.deliveryTicket?.isCreate}
-                >
-                  {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Spares)` : `Create Return Ticket (Non-Chargeable)`}
-                </BulkActionContainer.Button>
-                {permissions?.sublease?.isRead && (
-                  <BulkActionContainer.Button
-                    tooltip={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}
-                    id={'create-delivery-ticket-supplier-menu-item'}
-                    onClick={() => {
-                      if (validateAction(rentalManagementActions.createSupplierDeliveryTicket)) {
-                        handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier);
-                      }
-                    }}
-                    disabled={!permissions?.deliveryTicket?.isCreate}
-                  >
-                    Create Delivery Ticket for Supplier
-                  </BulkActionContainer.Button>
-                )}
-              </>
-            )}
+              )}
+            </>
+          )}
           {currentStep === RENTAL_STEPS.receiving && !hideDeliveryTicketDelivered && (
             <BulkActionContainer.Button
               tooltip={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}
@@ -4066,36 +4065,36 @@ const BulkActionItems = ({
             )}
           {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
             (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
-              <>
-                {!hideDeliveryTicketDelivered && (
-                  <BulkActionContainer.Button
-                    tooltip={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}
-                    id={'cancel-specific-line-item-menu-item'}
-                    onClick={() => {
-                      if (validateAction(rentalManagementActions.cancelInTransitTicket)) {
-                        setShowConformationRevertTicket(true);
-                      }
-                    }}
-                    disabled={!permissions?.deliveryTicket?.isUpdate}
-                  >
-                    Cancel Specific Line Items
-                  </BulkActionContainer.Button>
-                )}
-
+            <>
+              {!hideDeliveryTicketDelivered && (
                 <BulkActionContainer.Button
                   tooltip={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}
-                  id={'cancel-receiving-return-ticket-menu-item'}
+                  id={'cancel-specific-line-item-menu-item'}
                   onClick={() => {
-                    if (validateAction(rentalManagementActions.cancelReceivingReturnTicket)) {
-                      setShowConformationCancleTicket({ open: true });
+                    if (validateAction(rentalManagementActions.cancelInTransitTicket)) {
+                      setShowConformationRevertTicket(true);
                     }
                   }}
                   disabled={!permissions?.deliveryTicket?.isUpdate}
                 >
-                  Cancel Receiving/Return Ticket(s)
+                  Cancel Specific Line Items
                 </BulkActionContainer.Button>
-              </>
-            )}
+              )}
+
+              <BulkActionContainer.Button
+                tooltip={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}
+                id={'cancel-receiving-return-ticket-menu-item'}
+                onClick={() => {
+                  if (validateAction(rentalManagementActions.cancelReceivingReturnTicket)) {
+                    setShowConformationCancleTicket({ open: true });
+                  }
+                }}
+                disabled={!permissions?.deliveryTicket?.isUpdate}
+              >
+                Cancel Receiving/Return Ticket(s)
+              </BulkActionContainer.Button>
+            </>
+          )}
           {getFilterSelectedRecords()?.filter(
             (f) =>
               f.type === MATERIAL_TYPE.product &&
@@ -4407,72 +4406,72 @@ const ActionButtonMenuItems = ({
       )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
-          <>
+        <>
+          <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
+            <MenuItem
+              id={'create-receiving-ticket-chargaeble-menu-item'}
+              onClick={() => {
+                if (validateAction(rentalManagementActions.createReceivingTicket)) {
+                  if (getFilterSelectedRecords()?.every((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
+                  } else {
+                    setShowQtyDialog({ open: true, data: null });
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant, false);
+                  }
+                }
+              }}
+              disabled={!permissions?.deliveryTicket?.isCreate}
+            >
+              {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
+            </MenuItem>
+          </HtmlTooltip>
+          {getFilterSelectedRecords().length > 0 &&
+          getFilterSelectedRecords()?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
+            ?.length === getFilterSelectedRecords()?.length ? (
+            <MenuItem
+              id={'remove-receiving-ticket-menu-item'}
+              onClick={() => {
+                setShowRemoveAssetFromReceivingTicketDialog(true);
+              }}
+            >
+              Remove Receiving Ticket
+            </MenuItem>
+          ) : null}
+          <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
+            <MenuItem
+              id={'create-return-ticket-non-chargeble-menu-item'}
+              onClick={() => {
+                if (validateAction(rentalManagementActions.createReturnTicket)) {
+                  if (getFilterSelectedRecords()?.every((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
+                  } else {
+                    setShowQtyDialog({ open: true, data: null });
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant, false);
+                  }
+                }
+              }}
+              disabled={!permissions?.deliveryTicket?.isCreate}
+            >
+              {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Spares)` : `Create Return Ticket (Non-Chargeable)`}
+            </MenuItem>
+          </HtmlTooltip>
+          {permissions?.sublease?.isRead && (
             <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
               <MenuItem
-                id={'create-receiving-ticket-chargaeble-menu-item'}
+                id={'create-delivery-ticket-supplier-menu-item'}
                 onClick={() => {
-                  if (validateAction(rentalManagementActions.createReceivingTicket)) {
-                    if (getFilterSelectedRecords()?.every((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
-                      handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
-                    } else {
-                      setShowQtyDialog({ open: true, data: null });
-                      handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant, false);
-                    }
+                  if (validateAction(rentalManagementActions.createSupplierDeliveryTicket)) {
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier);
                   }
                 }}
                 disabled={!permissions?.deliveryTicket?.isCreate}
               >
-                {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
+                Create Delivery Ticket for Supplier
               </MenuItem>
             </HtmlTooltip>
-            {getFilterSelectedRecords().length > 0 &&
-              getFilterSelectedRecords()?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)
-                ?.length === getFilterSelectedRecords()?.length ? (
-              <MenuItem
-                id={'remove-receiving-ticket-menu-item'}
-                onClick={() => {
-                  setShowRemoveAssetFromReceivingTicketDialog(true);
-                }}
-              >
-                Remove Receiving Ticket
-              </MenuItem>
-            ) : null}
-            <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
-              <MenuItem
-                id={'create-return-ticket-non-chargeble-menu-item'}
-                onClick={() => {
-                  if (validateAction(rentalManagementActions.createReturnTicket)) {
-                    if (getFilterSelectedRecords()?.every((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
-                      handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
-                    } else {
-                      setShowQtyDialog({ open: true, data: null });
-                      handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant, false);
-                    }
-                  }
-                }}
-                disabled={!permissions?.deliveryTicket?.isCreate}
-              >
-                {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Spares)` : `Create Return Ticket (Non-Chargeable)`}
-              </MenuItem>
-            </HtmlTooltip>
-            {permissions?.sublease?.isRead && (
-              <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
-                <MenuItem
-                  id={'create-delivery-ticket-supplier-menu-item'}
-                  onClick={() => {
-                    if (validateAction(rentalManagementActions.createSupplierDeliveryTicket)) {
-                      handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier);
-                    }
-                  }}
-                  disabled={!permissions?.deliveryTicket?.isCreate}
-                >
-                  Create Delivery Ticket for Supplier
-                </MenuItem>
-              </HtmlTooltip>
-            )}
-          </>
-        )}
+          )}
+        </>
+      )}
       {currentStep === RENTAL_STEPS.receiving && !hideDeliveryTicketDelivered && (
         <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
           <MenuItem
@@ -4588,37 +4587,37 @@ const ActionButtonMenuItems = ({
         )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
-          <>
-            {!hideDeliveryTicketDelivered && (
-              <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
-                <MenuItem
-                  id={'cancel-specific-line-item-menu-item'}
-                  onClick={() => {
-                    if (validateAction(rentalManagementActions.cancelInTransitTicket)) {
-                      setShowConformationRevertTicket(true);
-                    }
-                  }}
-                  disabled={!permissions?.deliveryTicket?.isUpdate}
-                >
-                  Cancel Specific Line Items
-                </MenuItem>
-              </HtmlTooltip>
-            )}
+        <>
+          {!hideDeliveryTicketDelivered && (
             <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
               <MenuItem
-                id={'cancel-receiving-return-ticket-menu-item'}
+                id={'cancel-specific-line-item-menu-item'}
                 onClick={() => {
-                  if (validateAction(rentalManagementActions.cancelReceivingReturnTicket)) {
-                    setShowConformationCancleTicket({ open: true });
+                  if (validateAction(rentalManagementActions.cancelInTransitTicket)) {
+                    setShowConformationRevertTicket(true);
                   }
                 }}
                 disabled={!permissions?.deliveryTicket?.isUpdate}
               >
-                Cancel Receiving/Return Ticket(s)
+                Cancel Specific Line Items
               </MenuItem>
             </HtmlTooltip>
-          </>
-        )}
+          )}
+          <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
+            <MenuItem
+              id={'cancel-receiving-return-ticket-menu-item'}
+              onClick={() => {
+                if (validateAction(rentalManagementActions.cancelReceivingReturnTicket)) {
+                  setShowConformationCancleTicket({ open: true });
+                }
+              }}
+              disabled={!permissions?.deliveryTicket?.isUpdate}
+            >
+              Cancel Receiving/Return Ticket(s)
+            </MenuItem>
+          </HtmlTooltip>
+        </>
+      )}
       {getFilterSelectedRecords()?.filter(
         (f) =>
           f.type === MATERIAL_TYPE.product &&
