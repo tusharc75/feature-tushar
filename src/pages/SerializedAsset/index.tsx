@@ -42,6 +42,7 @@ import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeReq
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import StatusChangeFieldDialog from 'src/pages/SerializedAsset/StatusChangeFieldDialog';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { statusChangePermissionsAllowed } from './helper';
 
 const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
@@ -504,51 +505,52 @@ const SerializedAsset = () => {
 
   const handleStatusChange = (status) => {
     const { policy, statusChangePermissions } = resourceData;
-    const selectedUserRole = user?.role?.selectedEntity?.rolesIds;
-    const allRoles = selectedUserRole?.flat() || [];
-
-    const statusChangeAllowed = statusChangePermissions.some(p =>
-      p.roles?.some(r => allRoles.includes(r)) &&
-      selectedRecords.every(rec => p.from_status?.includes(rec.status)) &&
-      p.to_status?.includes(status)
-    );
-
-    if (!statusChangeAllowed) {
+    let statusChangeAllowed = statusChangePermissionsAllowed({
+      status: status,
+      user,
+      statusChangePermissions,
+      selectedRecords,
+    });
+    if (statusChangeAllowed) {
+      let statusPolicy = null;
+      const statusPolicyData = policy?.statusChangeFields?.find((ele) => ele.status === status);
+      if (statusPolicyData) {
+        if (statusPolicyData?.products?.length > 0) {
+          if (selectedRecords?.every((r) => statusPolicyData?.products?.includes(r?.productId))) {
+            statusPolicy = statusPolicyData;
+          } else {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'error',
+              message: `All selected ${resources?.serializedAsset?.titlePlural} must belong to the same product.`
+            });
+            return;
+          }
+        } else {
+          statusPolicy = statusPolicyData;
+        }
+      }
+      setStatus(status);
+      if (status === ASSET_STATUS.scrap || status === ASSET_STATUS.lost) {
+        if (statusPolicy) {
+          setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
+        } else {
+          setShowReasonDialog(true);
+        }
+      } else {
+        if (statusPolicy) {
+          setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
+        } else {
+          handleStatusUpdate({ status });
+        }
+      }
+    } else {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
-        message: 'You don’t have permission to change the status. Please contact your supervisor.',
+        message: 'You don’t have permission to change the status. Please contact your supervisor.'
       });
       return;
-    }
-
-    const statusPolicyData = policy?.statusChangeFields?.find(ele => ele.status === status);
-    let statusPolicy = null;
-
-    if (statusPolicyData) {
-      const { products = [] } = statusPolicyData;
-      const allProductsMatch = !products.length || selectedRecords.every(r => products.includes(r?.productId));
-
-      if (!allProductsMatch) {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'error',
-          message: `All selected ${resources?.serializedAsset?.titlePlural} must belong to the same product.`,
-        });
-        return;
-      }
-
-      statusPolicy = statusPolicyData;
-    }
-    setStatus(status);
-    const needsReasonDialog = [ASSET_STATUS.scrap, ASSET_STATUS.lost].includes(status);
-
-    if (statusPolicy) {
-      setOpenStatusChangeFieldDialog({ open: true, statusPolicy });
-    } else if (needsReasonDialog) {
-      setShowReasonDialog(true);
-    } else {
-      handleStatusUpdate({ status });
     }
   };
 

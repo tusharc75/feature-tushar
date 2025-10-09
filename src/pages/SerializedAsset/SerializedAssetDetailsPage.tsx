@@ -63,6 +63,7 @@ import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
 import AssetServiceTickets from 'src/pages/AssetServiceTicket';
 import { scrapRequestDisable } from 'src/constants/messageHelpers';
+import { statusChangePermissionsAllowed } from './helper';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -328,44 +329,42 @@ const SerializedAssetDetailsPage = () => {
 
   const handleStatusChange = (o) => {
     const { policy, statusChangePermissions } = resourcePolicyData;
-    const selectedUserRole = user?.role?.selectedEntity?.rolesIds;
-    const newStatus = o?.optionValue;
-    const currentStatus = assetDetails?.status;
-
-    const statusChangeAllowed = statusChangePermissions.some(p =>
-      p.roles?.some(r => selectedUserRole.flat().includes(r)) &&
-      p.from_status?.includes(currentStatus) &&
-      p.to_status?.includes(newStatus)
-    );
-
+    let statusChangeAllowed = statusChangePermissionsAllowed({
+      status,
+      user,
+      statusChangePermissions,
+      assetDetails
+    });
     if (!statusChangeAllowed) {
+      const statusPolicy = policy?.statusChangeFields?.find(
+        (ele) =>
+          ele.status === o.optionValue && (!ele?.products || ele?.products?.length === 0 || ele?.products?.includes(assetDetails?.product?.optionValue))
+      );
+      setStatus(o.optionValue);
+      if (
+        (o.optionValue === ASSET_STATUS.available && assetDetails?.status === ASSET_STATUS.scrap) ||
+        o.optionValue === ASSET_STATUS.scrap ||
+        o.optionValue === ASSET_STATUS.lost
+      ) {
+        if (statusPolicy) {
+          setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
+        } else {
+          setShowReasonDialog(true);
+        }
+      } else {
+        if (statusPolicy) {
+          setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
+        } else {
+          handleStatusUpdate({ status: o.optionValue });
+        }
+      }
+    } else {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
-        message: 'You don’t have permission to change the status. Please contact your supervisor.',
+        message: 'You don’t have permission to change the status. Please contact your supervisor.'
       });
       return;
-    }
-
-    const statusPolicy = policy?.statusChangeFields?.find(
-      (ele) =>
-        ele.status === newStatus &&
-        (!ele?.products?.length || ele.products.includes(assetDetails?.product?.optionValue))
-    );
-
-    setStatus(newStatus);
-
-    const requiresReasonDialog =
-      (newStatus === ASSET_STATUS.available && currentStatus === ASSET_STATUS.scrap) ||
-      newStatus === ASSET_STATUS.scrap ||
-      newStatus === ASSET_STATUS.lost;
-
-    if (statusPolicy) {
-      setOpenStatusChangeFieldDialog({ open: true, statusPolicy });
-    } else if (requiresReasonDialog) {
-      setShowReasonDialog(true);
-    } else {
-      handleStatusUpdate({ status: newStatus });
     }
   };
 
