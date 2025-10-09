@@ -27,6 +27,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
   ASSET_STATUS,
+  CHILD_RESOURCE,
   dateFormatToSend,
   DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_MAPPED_STATUS,
@@ -57,6 +58,7 @@ import Step from 'src/pages/DynamicForm/Step';
 import DeliveryTcketSerializedPackages from 'src/pages/DeliveryTicket/DeliveryTcketSerializedPackages';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 export default function DeliveryTicketDetail(props) {
   const renderedFrom = `${camelCase(sidebarResource.deliveryTicket)}_grid-1`;
@@ -97,6 +99,7 @@ export default function DeliveryTicketDetail(props) {
   const { isOffline } = useContext(CustomOfflineContext);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
   const [resourcePolicyData, setResourcePolicyData] = useState(null);
+  const [assemblyOrderMaterialPdsFields, setAssemblyOrderMaterialPdfFields] = useState(null)
 
   useEffect(() => {
     return history.listen((location) => {
@@ -231,6 +234,43 @@ export default function DeliveryTicketDetail(props) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (deliveryTicketData && deliveryTicketData?.type === DELIVERY_TICKET_REFERENCE_TYPE.assemblyOrder) {
+      fetchAssemblyOrderMaterialFields()
+    }
+  }, [deliveryTicketData])
+
+  const fetchAssemblyOrderMaterialFields = async () => {
+    let fields = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, deliveryTicketData?.currency || 'USD', false);
+    fields = fields?.filter((e) => !['detail', 'description']?.includes(e?.fieldName))
+    setAssemblyOrderMaterialPdfFields([
+      {
+        accessor: 'index',
+        Header: 'Index'
+      },
+      {
+        accessor: 'type',
+        Header: 'Type'
+      },
+      {
+        accessor: 'detail',
+        Header: 'Detail'
+      },
+      {
+        accessor: 'description',
+        Header: 'Description'
+      },
+      {
+        accessor: 'serializedPackageNumber',
+        Header: 'Serialized Package Number'
+      },
+      ...(fields?.length > 0 ? fields?.map(f => ({
+        accessor: f?.fieldName,
+        Header: f?.fieldLabel
+      })) : [])
+    ])
+  }
 
   const fetchPolicy = async () => {
     const data = await getResourcePolicy(user, permissions, sidebarResource.deliveryTicket)
@@ -522,9 +562,13 @@ export default function DeliveryTicketDetail(props) {
                 referenceId={deliveryTicketData?._id}
                 hideDetailButton={true}
                 fileName={`${resources?.deliveryTicket?.titleSingular}-${deliveryTicketData?.ticketName}`}
-                columns={serializedAssetColumns?.length ? serializedAssetColumns : productColumns}
+                columns={assemblyOrderMaterialPdsFields?.length ? assemblyOrderMaterialPdsFields : serializedAssetColumns?.length ? serializedAssetColumns : productColumns}
                 defaultColumns={
-                  serializedAssetColumns?.length ? ['assetNumber', 'product', 'productDescription'] : ['productName', 'productDescription']
+                  assemblyOrderMaterialPdsFields?.length ?
+                    ['index', 'type', 'detail', 'description', 'serializedPackageNumber', 'qty']
+                    : serializedAssetColumns?.length ?
+                      ['assetNumber', 'product', 'productDescription']
+                      : ['productName', 'productDescription']
                 }
                 subject={`${resources?.deliveryTicket?.titleSingular}-${deliveryTicketData?.ticketName}`}
                 isSendEmail={true}
