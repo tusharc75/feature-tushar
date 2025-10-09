@@ -52,6 +52,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import PreviewDownloadNew from 'src/components/PreviewDownloadNew';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
 
 type ToolbarMenuItem = {
   type: 'menuItem';
@@ -129,6 +130,8 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
   const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, onSuccess: '' });
   const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
   const [showConfirmBoxDisassembled, setShowConfirmBoxDisassembled] = useState(false)
+
+  const [repairJobAlert, setRepairJobAlert] = useState({ open: false, serviceName: '' });
 
   const SERIALIZED_PACKAGE_DIALOG_ON_SUCCESS = {
     createRepairJob: 'createRepairJob'
@@ -451,9 +454,6 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
     if (!permissions?.repairJob?.isCreate || !allowedToEdit || workOrderData?.currentRepairJob || [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.draft]?.includes(workOrderData?.status)) {
       return false
     }
-    if (!workOrderData?.canSendToSupplier) {
-      return false
-    }
     if (workOrderData?.type === WORK_ORDER_TYPE.repairOrder) {
       return workOrderData?.serializedAsset && workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair
     }
@@ -463,6 +463,21 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
     return false
   }
 
+  const handleClickCreateRepairOrder = async () => {
+    if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder && workOrderData?.sendToSupplierValidationCheck) {
+      const responce = await axiosInstance().put(`${workOrder.api}/check-valid-for-send-to-supplier`, { ids: [workOrderData?._id] })
+      if (!responce?.data?.data?.canSendToSupplier) {
+        setRepairJobAlert({ open: true, serviceName: responce?.data?.data?.serviceName })
+        return
+      }
+    }
+    if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder && !workOrderData?.serializedPackage) {
+      setOpenSerializedPackageDialog({ open: true, onSuccess: SERIALIZED_PACKAGE_DIALOG_ON_SUCCESS.createRepairJob })
+    } else {
+      setShowManageRepairJobDialog({ open: true, serializedPackage: workOrderData?.serializedPackage ? [workOrderData?.serializedPackage?.optionValue] : null })
+    }
+  }
+
   const toolbarButtons: ToolbarComponents<ThemeButtonProps | MenuItemProps>[] = [
     {
       id: `Repair Job`,
@@ -470,13 +485,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       isVisible: isVisibleCreateRepairJob(),
       children: `Create ${resources?.repairJob?.titleSingular}`,
       tooltip: `Create ${resources?.repairJob?.titleSingular}`,
-      onClick: () => {
-        if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder && !workOrderData?.serializedPackage) {
-          setOpenSerializedPackageDialog({ open: true, onSuccess: SERIALIZED_PACKAGE_DIALOG_ON_SUCCESS.createRepairJob })
-        } else {
-          setShowManageRepairJobDialog({ open: true, serializedPackage: workOrderData?.serializedPackage ? [workOrderData?.serializedPackage?.optionValue] : null })
-        }
-      }
+      onClick: handleClickCreateRepairOrder
     },
     {
       type: 'menuItem',
@@ -1110,6 +1119,14 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
             setStatusChangeRequestDialog(false);
             fetchWorkOrderData();
           }}
+        />
+      )}
+      {repairJobAlert.open && (
+        <MessageDialog
+          open={true}
+          header="Alert"
+          message={`You can send it to the supplier/vendor once it reaches the ${repairJobAlert.serviceName} service.`}
+          onClose={() => setRepairJobAlert({ open: false, serviceName: '' })}
         />
       )}
     </Box>
