@@ -227,6 +227,14 @@ const Service = ({
           }
         }
 
+        if (services?.some(s => s?.parentId) && !services?.filter(s => s?.parentId)?.every(s => s?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed)) {
+          services?.forEach(s => {
+            if (!s?.parentId) {
+              s.clickable = false
+            }
+          });
+        }
+
         if (selectedService) {
           setSelectedService(services?.find((e) => e?.uniqueId === selectedService?.uniqueId) || null);
         } else {
