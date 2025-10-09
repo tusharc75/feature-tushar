@@ -1632,6 +1632,7 @@ const BulkActionItems = ({
       ) : null}
       {selectedRecords?.filter((e) => validateRemoveInventory(e?._id, e?.materialId))?.length > 0 && (
         <BulkActionContainer.Button
+          buttonType="red"
           onClick={() => {
             setAddNonSerializedInventoryDialog({ open: true, type: 'remove' });
           }}

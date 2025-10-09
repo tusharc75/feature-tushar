@@ -636,6 +636,7 @@ const RentalManagementDetailsPage = () => {
                   assetPolicyData={assetPolicyData?.policy}
                 />
               )}
+              {console.log(rentalSteps[currentStep]?.name)}
               {rentalSteps[currentStep]?.name === 'Quotation' && rentalManagementData && (
                 <Quotation
                   rentalManagementData={rentalManagementData}

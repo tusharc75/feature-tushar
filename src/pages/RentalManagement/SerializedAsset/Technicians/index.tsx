@@ -483,6 +483,7 @@ const BulkActionItems = ({ selectedRecords, setDeleteData }) => {
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
+        buttonType="red"
         disabled={selectedRecords?.some((e) => !e?.canDelete)}
         onClick={() => {
           setDeleteData(selectedRecords?.map((d) => d?._id));
