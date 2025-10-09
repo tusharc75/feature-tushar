@@ -511,46 +511,45 @@ const SerializedAsset = () => {
       statusChangePermissions,
       selectedRecords,
     });
-    if (statusChangeAllowed) {
-      let statusPolicy = null;
-      const statusPolicyData = policy?.statusChangeFields?.find((ele) => ele.status === status);
-      if (statusPolicyData) {
-        if (statusPolicyData?.products?.length > 0) {
-          if (selectedRecords?.every((r) => statusPolicyData?.products?.includes(r?.productId))) {
-            statusPolicy = statusPolicyData;
-          } else {
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'error',
-              message: `All selected ${resources?.serializedAsset?.titlePlural} must belong to the same product.`
-            });
-            return;
-          }
-        } else {
-          statusPolicy = statusPolicyData;
-        }
-      }
-      setStatus(status);
-      if (status === ASSET_STATUS.scrap || status === ASSET_STATUS.lost) {
-        if (statusPolicy) {
-          setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
-        } else {
-          setShowReasonDialog(true);
-        }
-      } else {
-        if (statusPolicy) {
-          setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
-        } else {
-          handleStatusUpdate({ status });
-        }
-      }
-    } else {
+    if (!statusChangeAllowed) {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
         message: 'You don’t have permission to change the status. Please contact your supervisor.'
       });
       return;
+    }
+    let statusPolicy = null;
+    const statusPolicyData = policy?.statusChangeFields?.find((ele) => ele.status === status);
+    if (statusPolicyData) {
+      if (statusPolicyData?.products?.length > 0) {
+        if (selectedRecords?.every((r) => statusPolicyData?.products?.includes(r?.productId))) {
+          statusPolicy = statusPolicyData;
+        } else {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'error',
+            message: `All selected ${resources?.serializedAsset?.titlePlural} must belong to the same product.`
+          });
+          return;
+        }
+      } else {
+        statusPolicy = statusPolicyData;
+      }
+    }
+    setStatus(status);
+    if (status === ASSET_STATUS.scrap || status === ASSET_STATUS.lost) {
+      if (statusPolicy) {
+        setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
+      } else {
+        setShowReasonDialog(true);
+      }
+    } else {
+      if (statusPolicy) {
+        setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
+      } else {
+        handleStatusUpdate({ status });
+      }
     }
   };
 

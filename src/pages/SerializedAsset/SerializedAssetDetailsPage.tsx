@@ -336,29 +336,6 @@ const SerializedAssetDetailsPage = () => {
       assetDetails
     });
     if (!statusChangeAllowed) {
-      const statusPolicy = policy?.statusChangeFields?.find(
-        (ele) =>
-          ele.status === o.optionValue && (!ele?.products || ele?.products?.length === 0 || ele?.products?.includes(assetDetails?.product?.optionValue))
-      );
-      setStatus(o.optionValue);
-      if (
-        (o.optionValue === ASSET_STATUS.available && assetDetails?.status === ASSET_STATUS.scrap) ||
-        o.optionValue === ASSET_STATUS.scrap ||
-        o.optionValue === ASSET_STATUS.lost
-      ) {
-        if (statusPolicy) {
-          setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
-        } else {
-          setShowReasonDialog(true);
-        }
-      } else {
-        if (statusPolicy) {
-          setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
-        } else {
-          handleStatusUpdate({ status: o.optionValue });
-        }
-      }
-    } else {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
@@ -366,6 +343,29 @@ const SerializedAssetDetailsPage = () => {
       });
       return;
     }
+    const statusPolicy = policy?.statusChangeFields?.find(
+      (ele) =>
+        ele.status === o.optionValue && (!ele?.products || ele?.products?.length === 0 || ele?.products?.includes(assetDetails?.product?.optionValue))
+    );
+    setStatus(o.optionValue);
+    if (
+      (o.optionValue === ASSET_STATUS.available && assetDetails?.status === ASSET_STATUS.scrap) ||
+      o.optionValue === ASSET_STATUS.scrap ||
+      o.optionValue === ASSET_STATUS.lost
+    ) {
+      if (statusPolicy) {
+        setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
+      } else {
+        setShowReasonDialog(true);
+      }
+    } else {
+      if (statusPolicy) {
+        setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
+      } else {
+        handleStatusUpdate({ status: o.optionValue });
+      }
+    }
+
   };
 
   const handleAddAssetToRepairJob = (repairJobId) => {
