@@ -39,7 +39,9 @@ const BulkActionContainer = ({ children }: BulkActionContainerProps) => {
 
   useEffect(() => {
     setVisibleItemsLength(React.Children.toArray(flattenChildren(children)).length);
-  }, [children]);
+    console.log('hi');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [normalizedChildren.length]);
 
   const recalc = () => {
     const container = containerRef.current;
