@@ -33,6 +33,7 @@ import { CancelTokenSource } from 'axios';
 import { RESOURCE_ACTION_TYPE } from 'src/components/FormBuilder/Tabs/helper';
 import UpdateResourceActions from 'src/components/FormBuilder/Tabs/UpdateResourceActions';
 import RoleWiseStatusChangeDialog from 'src/components/FormBuilder/Tabs/RoleWiseStatusChangeDialog';
+import PolicyIcon from '@mui/icons-material/Policy';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -515,22 +516,22 @@ const CreateFormBuilder = () => {
                           onClick={() => {
                             setResourceTriggerDialog(true);
                           }}
+                          size="small"
                         >
                           <ElectricBolt fontSize="small" color={'primary'} />
                         </IconButton>
                       </HtmlTooltip>
                     )}
                     {resource === sidebarResource.serializedAsset && (
-                      <HtmlTooltip title={'Role Wise Status Change'}>
+                      <HtmlTooltip title={'Status Change Permissions by Roles'}>
                         <IconButton
-                          aria-label="Role Wise Status Change"
                           onClick={() => {
                             setRoleWiseStatusChangeDialog(true);
                           }}
                           color="primary"
                           size="small"
                         >
-                          <EditIcon fontSize="small" />
+                          <PolicyIcon fontSize="small" />
                         </IconButton>
                       </HtmlTooltip>
                     )}
