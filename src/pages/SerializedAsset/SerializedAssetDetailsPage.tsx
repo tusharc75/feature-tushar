@@ -330,7 +330,7 @@ const SerializedAssetDetailsPage = () => {
   const handleStatusChange = (o) => {
     const { policy, statusChangePermissions } = resourcePolicyData;
     let statusChangeAllowed = statusChangePermissionsAllowed({
-      status,
+      status: o.optionValue,
       user,
       statusChangePermissions,
       assetDetails
@@ -365,7 +365,6 @@ const SerializedAssetDetailsPage = () => {
         handleStatusUpdate({ status: o.optionValue });
       }
     }
-
   };
 
   const handleAddAssetToRepairJob = (repairJobId) => {
