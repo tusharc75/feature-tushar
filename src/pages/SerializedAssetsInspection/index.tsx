@@ -549,7 +549,6 @@ const BulkActionItems = ({
           </BulkActionContainer.Button>
         )}
         <BulkActionContainer.Button
-          buttonType="theme"
           onClick={(e) => setAnchorEl(e.currentTarget)}
           endIcon={<ExpandMore />}
           disabled={selectedRecords?.length ? false : true}
