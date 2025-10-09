@@ -57,8 +57,8 @@ const SubStatusDatesDialog = ({ handleClose, options, onSuccess, submitting, ren
       } = await axiosInstance().get(api);
 
       if (data?.minDate) {
-        const newDate = dayjs.utc(data?.minDate).add(1, 'day');
-        setMinDate(newDate);
+        const newDate = dayjs.utc(data.minDate);
+        setMinDate(data?.notAddDay ? newDate : newDate.add(1, 'day'));
       }
     } catch (error) {
       toastConfig.setToastConfig(error);

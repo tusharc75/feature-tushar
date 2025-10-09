@@ -385,7 +385,7 @@ const TechnicianDispatchReturn = ({ rentalManagementData, stepFullScreen, allowe
                     receive={receive}
                     selectedRecords={selectedRecords}
                     setStartEndDateConfirmationDialog={setStartEndDateConfirmationDialog}
-                    handleClickChangeSubStatus={handleClickChangeSubStatus}
+                    handleClickChangeSubStatus={subStatusOptions?.length > 0 ? handleClickChangeSubStatus : null}
                   />
                 ) : null
               }
@@ -528,13 +528,15 @@ const BulkActionItems = ({ receive, selectedRecords, setStartEndDateConfirmation
             Return
           </BulkActionContainer.Button>
         )}
-        <BulkActionContainer.Button
-          disabled={selectedRecords?.every((s: any) => s?.status === TECHNICIAN_STATUS.dispatched) ? false : true}
-          onClick={handleClickChangeSubStatus}
-          endIcon={<ExpandMore />}
-        >
-          {'Change Sub Status'}
-        </BulkActionContainer.Button>
+        {handleClickChangeSubStatus && (
+          <BulkActionContainer.Button
+            disabled={selectedRecords?.every((s: any) => s?.status === TECHNICIAN_STATUS.dispatched) ? false : true}
+            onClick={handleClickChangeSubStatus}
+            endIcon={<ExpandMore />}
+          >
+            {'Change Sub Status'}
+          </BulkActionContainer.Button>
+        )}
       </>
     </BulkActionContainer>
   );
