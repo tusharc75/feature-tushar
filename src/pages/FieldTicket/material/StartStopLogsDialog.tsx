@@ -117,6 +117,23 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
       }
     },
     {
+      accessor: 'subStatus',
+      Header: 'Sub Status',
+      Cell: ({ row }) => {
+        return (
+          <>
+            {row?.original?.subStatus ? (
+              <div>
+                <p className="text-truncate">{row.original?.subStatus}</p>
+              </div>
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        );
+      }
+    },
+    {
       accessor: 'startedBy',
       Header: `${resource === sidebarResource.fieldServiceOrder ? 'Dispatched' : 'Started'} By`,
       disabled: true,
