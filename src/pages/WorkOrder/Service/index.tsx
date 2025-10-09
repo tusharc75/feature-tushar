@@ -229,7 +229,7 @@ const Service = ({
 
         if (services?.some(s => s?.parentId) && !services?.filter(s => s?.parentId)?.every(s => s?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed)) {
           services?.forEach(s => {
-            if (!s?.parentId) {
+            if (!s?.parentId && !s?.prework) {
               s.clickable = false
             }
           });
