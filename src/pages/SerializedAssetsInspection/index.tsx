@@ -39,7 +39,10 @@ import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
 import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
-import { scrapRequestDisable } from 'src/constants/messageHelpers';
+import { scrapRequestDisable, statusChangePermissionMsg } from 'src/constants/messageHelpers';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
+import { statusChangePermissionsAllowed } from 'src/pages/SerializedAsset/helper';
+import { getMultipleResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const SerializedAssetInspection = () => {
   const renderedFrom = camelCase(sidebarResource.serializedAssetsInspection);
@@ -62,11 +65,14 @@ const SerializedAssetInspection = () => {
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [status, setStatus] = useState('');
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicy, setResourcePolicy] = useState(null);
+  const [serializedAssetPolicy, setSerializedAssetPolicy] = useState(null);
+
   const [showRepairOrderDialog, setShowRepairOrderDialog] = useState(false);
   const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
   const [serializedAssetStatusChangeRequestFields, setSerializedAssetStatusChangeRequestFields] = useState(null);
   const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
+  const [statusChangePermissionError, setStatusChangePermissionError] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
@@ -77,7 +83,6 @@ const SerializedAssetInspection = () => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search, limit, filters, sorting, selectedWarehouse, selectedEntity, subleaseAsset, showFilteredRecordsOnly]);
 
   useEffect(() => {
@@ -90,10 +95,10 @@ const SerializedAssetInspection = () => {
 
   const fetchGridColumns = async () => {
     const resourceDataResponce = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
-    const resourceData = resourceDataResponce?.data?.data;
+    const resourcePolicy = resourceDataResponce?.data?.data;
     const statusColors = {};
-    if (resourceData?.policy?.statusColor) {
-      for (const item of resourceData?.policy?.statusColor) {
+    if (resourcePolicy?.policy?.statusColor) {
+      for (const item of resourcePolicy?.policy?.statusColor) {
         if (Array.isArray(item.status)) {
           item.status.forEach((status) => {
             statusColors[status] = item.colorCode;
@@ -191,18 +196,16 @@ const SerializedAssetInspection = () => {
 
   const fetchPolicy = async () => {
     try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAssetsInspection}`);
-      if (data) {
-        if (data?.policy?.canCreateRepairOrder) {
-          setStatusOptions((prev) => {
-            let newOptions = prev?.filter((e) => e.optionValue !== ASSET_STATUS.inRepair);
-            return newOptions;
-          });
-        }
-        setResourceData(data);
+      const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.serializedAssetsInspection},${sidebarResource.serializedAsset}`)
+      const serializedAssetsInspectionPolicy = data?.find((e) => e.resource === sidebarResource.serializedAssetsInspection)
+      if (serializedAssetsInspectionPolicy?.policy?.canCreateRepairOrder) {
+        setStatusOptions((prev) => {
+          let newOptions = prev?.filter((e) => e.optionValue !== ASSET_STATUS.inRepair);
+          return newOptions;
+        });
       }
+      setResourcePolicy(serializedAssetsInspectionPolicy);
+      setSerializedAssetPolicy(data?.find((e) => e.resource === sidebarResource.serializedAsset));
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -366,6 +369,13 @@ const SerializedAssetInspection = () => {
                   <MenuItem
                     key={key}
                     onClick={() => {
+                      if (serializedAssetPolicy?.statusChangePermissions?.length) {
+                        let statusChangeAllowed = statusChangePermissionsAllowed(user, serializedAssetPolicy?.statusChangePermissions, selectedRecords?.map((e) => e?.status), status);
+                        if (!statusChangeAllowed) {
+                          setStatusChangePermissionError(true)
+                          return;
+                        }
+                      }
                       if (
                         status?.optionValue === ASSET_STATUS.scrap &&
                         user?.user?.brandPolicy?.serializedAssetScrapApproval &&
@@ -420,7 +430,7 @@ const SerializedAssetInspection = () => {
                 closeActions,
                 ActionMenuItems,
                 selectedRecords,
-                resourceData,
+                resourcePolicy,
                 permissions,
                 setShowRepairOrderDialog,
                 setShowRepairJobDialog,
@@ -500,6 +510,14 @@ const SerializedAssetInspection = () => {
           }}
         />
       )}
+      {statusChangePermissionError && (
+        <MessageDialog
+          open={true}
+          header="Alert"
+          message={statusChangePermissionMsg}
+          onClose={() => setStatusChangePermissionError(false)}
+        />
+      )}
     </section>
   );
 };
@@ -562,7 +580,7 @@ const RightSideContents = ({
   closeActions,
   ActionMenuItems,
   selectedRecords,
-  resourceData,
+  resourcePolicy,
   permissions,
   setShowRepairOrderDialog,
   setShowRepairJobDialog,
@@ -575,7 +593,7 @@ const RightSideContents = ({
 
   return (
     <>
-      {resourceData?.policy?.canCreateRepairOrder && permissions?.repairOrder?.isCreate && (
+      {resourcePolicy?.policy?.canCreateRepairOrder && permissions?.repairOrder?.isCreate && (
         <ThemeButton
           buttonType="themeBorder"
           onClick={() => setShowRepairOrderDialog(true)}
@@ -598,7 +616,7 @@ const RightSideContents = ({
           {`Create ${resources?.repairOrder?.titleSingular}`}
         </ThemeButton>
       )}
-      {resourceData?.policy?.canCreateRepairOrder && permissions?.repairJob?.isCreate && (
+      {resourcePolicy?.policy?.canCreateRepairOrder && permissions?.repairJob?.isCreate && (
         <ThemeButton
           buttonType="themeBorder"
           onClick={() => setShowRepairJobDialog(true)}
