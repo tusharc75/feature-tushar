@@ -73,7 +73,10 @@ const ManageRentalManagementDialog = ({
 
   const fetchFields = async () => {
     try {
-      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.rentalManagement, ['quotation', 'assemblyOrder'])
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.rentalManagement, [
+        'quotation',
+        'assemblyOrder'
+      ]);
       if (rentalManagementId) {
         try {
           let data;
@@ -83,9 +86,11 @@ const ManageRentalManagementDialog = ({
             const { rentalJobName, ...rest } = data;
             rest['status'] = RENTAL_STATUS.new;
             rest['rentalJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
-            fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(obj.fieldName));
+            fieldsDataForCreate = fieldsDataForCreate?.filter(
+              (obj) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(obj.fieldName)
+            );
             setCloneHeading(rentalJobName);
-            setIsMaterialAvailable(!data?.canDelete)
+            setIsMaterialAvailable(!data?.canDelete);
             setRentalData({
               fields: fieldsDataForCreate,
               initialValues: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user), estimateEndDate: null }
@@ -160,23 +165,26 @@ const ManageRentalManagementDialog = ({
           toastConfig.setToastConfig(error);
         });
     } else {
-      axiosInstance().post(`${rentalManagement.api}`, values).then(({ data: { data, message } }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: message
-        });
-        setShowConfirmCloneDetailsDialog(false)
-        if (referenceData || isAutomated) {
-          onSuccess(data);
-        } else {
-          history.push(`${routes.rentalManagementDetail.path}/${data?._id}`);
+      axiosInstance()
+        .post(`${rentalManagement.api}`, values)
+        .then(({ data: { data, message } }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: message
+          });
+          setShowConfirmCloneDetailsDialog(false);
+          if (referenceData || isAutomated) {
+            onSuccess(data);
+          } else {
+            history.push(`${routes.rentalManagementDetail.path}/${data?._id}`);
+            setLoading(false);
+          }
+        })
+        .catch((error) => {
           setLoading(false);
-        }
-      }).catch((error) => {
-        setLoading(false);
-        toastConfig.setToastConfig(error);
-      });
+          toastConfig.setToastConfig(error);
+        });
     }
   };
 
@@ -225,9 +233,8 @@ const ManageRentalManagementDialog = ({
           onSubmit={(values) => {
             if (rentalManagementId && isClone && isMaterialAvailable && !showConfirmCloneDetailsDialog) {
               setShowConfirmCloneDetailsDialog(true);
-            }
-            else {
-              handleSubmit(values)
+            } else {
+              handleSubmit(values);
             }
           }}
         >
@@ -442,7 +449,9 @@ const ManageRentalManagementDialog = ({
               {showConfirmCloneDetailsDialog && (
                 <SelectionConfirmationDialog
                   open={showConfirmCloneDetailsDialog}
-                  message={"Would you like to clone this with all line items? Click 'Yes' to clone both the header and its line items, or 'No' to clone only the header."}
+                  message={
+                    "Would you like to clone this with all line items? Click 'Yes' to clone both the header and its line items, or 'No' to clone only the header."
+                  }
                   onOk={(type) => {
                     if (type === 'Yes') {
                       setFieldValue('rentalJobId', rentalManagementId);
@@ -450,7 +459,7 @@ const ManageRentalManagementDialog = ({
                     submitForm();
                   }}
                   onClose={() => {
-                    setShowConfirmCloneDetailsDialog(false)
+                    setShowConfirmCloneDetailsDialog(false);
                   }}
                   selection1={'Yes'}
                   selection2={'No'}

@@ -157,7 +157,7 @@ const ListboxComponent = React.forwardRef<HTMLDivElement>(function ListboxCompon
 const bindPricingConditionOptions = (field, values) => {
   let options = field?.option || [];
   if (values?.currency) {
-    options = options?.filter((e) => e?.currency?.toLowerCase() === values?.currency?.toLowerCase())
+    options = options?.filter((e) => e?.currency?.toLowerCase() === values?.currency?.toLowerCase());
   }
   const customerAccount = values?.customerAccount;
   const warehouse = values?.warehouse;
@@ -182,7 +182,10 @@ const bindPricingConditionOptions = (field, values) => {
 };
 
 function dropdownOptions(options, values, fields, fieldData, newAddressOptionList = []) {
-  if (fieldData?.fieldName === 'pricingCondition' && ['customerAccount', 'warehouse', 'currency'].every((name) => fields?.some((f) => f?.fieldName === name))) {
+  if (
+    fieldData?.fieldName === 'pricingCondition' &&
+    ['customerAccount', 'warehouse', 'currency'].every((name) => fields?.some((f) => f?.fieldName === name))
+  ) {
     return bindPricingConditionOptions(fieldData, values);
   }
   const lookupDependentOn = fieldData?.lookupDependentOn;
@@ -217,15 +220,14 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
       if (dependentOnFieldValue) {
         const dependentFieldOption = dependentOnField?.option?.filter((e) => dependentOnFieldValue?.includes(e.optionValue));
         if (dependentFieldOption) {
-          let dependentIds = []
+          let dependentIds = [];
           dependentFieldOption?.forEach((e) => {
             if (isArray(e[lookupDependentOnField]) && e[lookupDependentOnField]?.length) {
-              dependentIds = [...dependentIds, ...e[lookupDependentOnField]]
+              dependentIds = [...dependentIds, ...e[lookupDependentOnField]];
+            } else {
+              dependentIds = [...dependentIds, e[lookupDependentOnField]];
             }
-            else {
-              dependentIds = [...dependentIds, e[lookupDependentOnField]]
-            }
-          })
+          });
           let option = options;
           if (fieldData?.lookupResource === 'Address' && newAddressOptionList?.length) {
             newAddressOptionList?.forEach((ele: any) => {
@@ -461,36 +463,36 @@ function Dropdown({
                 onChange={
                   onChange
                     ? (e, value: any, reason) => {
-                      const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
-                      if (isSelectedAll) {
-                        onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
-                      } else {
-                        onChange(e, value, reason);
-                      }
-                    }
-                    : (e, value: any, reason) => {
-                      if (setFieldValue) {
                         const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
-
                         if (isSelectedAll) {
-                          // If "Select All" is selected, set all other options as values
-                          setFieldValue(
-                            name,
-                            dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
-                          );
+                          onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
                         } else {
-                          // Remove "Select All" if it was selected and set the values accordingly
-                          setFieldValue(
-                            name,
-                            value.map((val) => val.optionValue)
-                          );
+                          onChange(e, value, reason);
                         }
-                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                        fieldChange?.forEach((val: any) => {
-                          setFieldValue(val.fieldName, val.value);
-                        });
                       }
-                    }
+                    : (e, value: any, reason) => {
+                        if (setFieldValue) {
+                          const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+
+                          if (isSelectedAll) {
+                            // If "Select All" is selected, set all other options as values
+                            setFieldValue(
+                              name,
+                              dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
+                            );
+                          } else {
+                            // Remove "Select All" if it was selected and set the values accordingly
+                            setFieldValue(
+                              name,
+                              value.map((val) => val.optionValue)
+                            );
+                          }
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
+                          });
+                        }
+                      }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -525,38 +527,38 @@ function Dropdown({
                     onChange
                       ? onChange
                       : (e, val) => {
-                        if (setFieldValue) {
-                          const overRideValues = {};
-                          handleChange(name, val && val.optionValue ? val.optionValue : '');
-                          overRideValues[name] = val && val.optionValue ? val.optionValue : '';
-                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                          fieldChange?.forEach((val: any) => {
-                            setFieldValue(val.fieldName, val.value);
-                            overRideValues[val.fieldName] = val && val.optionValue ? val.optionValue : '';
-                          });
+                          if (setFieldValue) {
+                            const overRideValues = {};
+                            handleChange(name, val && val.optionValue ? val.optionValue : '');
+                            overRideValues[name] = val && val.optionValue ? val.optionValue : '';
+                            const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                            fieldChange?.forEach((val: any) => {
+                              setFieldValue(val.fieldName, val.value);
+                              overRideValues[val.fieldName] = val && val.optionValue ? val.optionValue : '';
+                            });
 
-                          //Fixed Code For Handle Some Case Start
-                          if (name === 'customerAccount') {
-                            if (fields?.find((f) => f?.fieldName === 'toOpenInvoice')) {
-                              if (val?.defaultOpenInvoice) {
-                                setFieldValue('toOpenInvoice', true);
-                                overRideValues['toOpenInvoice'] = true;
-                              } else {
-                                setFieldValue('toOpenInvoice', false);
-                                overRideValues['toOpenInvoice'] = false;
+                            //Fixed Code For Handle Some Case Start
+                            if (name === 'customerAccount') {
+                              if (fields?.find((f) => f?.fieldName === 'toOpenInvoice')) {
+                                if (val?.defaultOpenInvoice) {
+                                  setFieldValue('toOpenInvoice', true);
+                                  overRideValues['toOpenInvoice'] = true;
+                                } else {
+                                  setFieldValue('toOpenInvoice', false);
+                                  overRideValues['toOpenInvoice'] = false;
+                                }
                               }
                             }
-                          }
-                          if (['customerAccount', 'warehouse']?.includes(name) && values?.pricingCondition) {
-                            if (['customerAccount', 'warehouse', 'currency'].every((name) => fields?.some((f) => f?.fieldName === name))) {
-                              setFieldValue('pricingCondition', '');
+                            if (['customerAccount', 'warehouse']?.includes(name) && values?.pricingCondition) {
+                              if (['customerAccount', 'warehouse', 'currency'].every((name) => fields?.some((f) => f?.fieldName === name))) {
+                                setFieldValue('pricingCondition', '');
+                              }
                             }
-                          }
-                          //Fixed Code For Handle Some Case End
+                            //Fixed Code For Handle Some Case End
 
-                          handleLookUpDependent(name, val, fields, setFieldValue, overRideValues);
+                            handleLookUpDependent(name, val, fields, setFieldValue, overRideValues);
+                          }
                         }
-                      }
                   }
                   selectOnFocus
                   clearOnBlur
