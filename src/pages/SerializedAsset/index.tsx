@@ -16,7 +16,7 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { cloneDisable, deleteDisable, scrapRequestDisable } from 'src/constants/messageHelpers';
+import { cloneDisable, deleteDisable, scrapRequestDisable, statusChangePermissionMsg } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -43,6 +43,7 @@ import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import StatusChangeFieldDialog from 'src/pages/SerializedAsset/StatusChangeFieldDialog';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import { statusChangePermissionsAllowed } from './helper';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
 
 const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
@@ -89,6 +90,7 @@ const SerializedAsset = () => {
   const [allStatusOptions, setAllStatusOptions] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [openStatusChangeFieldDialog, setOpenStatusChangeFieldDialog] = useState({ open: false, statusPolicy: null });
+  const [statusChangePermissionError, setStatusChangePermissionError] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -505,20 +507,15 @@ const SerializedAsset = () => {
 
   const handleStatusChange = (status) => {
     const { policy, statusChangePermissions } = resourceData;
-    let statusChangeAllowed = statusChangePermissionsAllowed({
-      status: status,
-      user,
-      statusChangePermissions,
-      selectedRecords,
-    });
-    if (!statusChangeAllowed) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'error',
-        message: 'You don’t have permission to change the status. Please contact your supervisor.'
-      });
-      return;
+
+    if (statusChangePermissions?.length) {
+      let statusChangeAllowed = statusChangePermissionsAllowed(user, statusChangePermissions, selectedRecords?.map((e) => e?.status), status);
+      if (!statusChangeAllowed) {
+        setStatusChangePermissionError(true)
+        return;
+      }
     }
+
     let statusPolicy = null;
     const statusPolicyData = policy?.statusChangeFields?.find((ele) => ele.status === status);
     if (statusPolicyData) {
@@ -937,6 +934,14 @@ const SerializedAsset = () => {
             handleStatusUpdate({ status: status, assetData: values });
             setOpenStatusChangeFieldDialog({ open: false, statusPolicy: null });
           }}
+        />
+      )}
+      {statusChangePermissionError && (
+        <MessageDialog
+          open={true}
+          header="Alert"
+          message={statusChangePermissionMsg}
+          onClose={() => setStatusChangePermissionError(false)}
         />
       )}
     </section>
