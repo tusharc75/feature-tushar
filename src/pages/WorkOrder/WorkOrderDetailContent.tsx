@@ -451,7 +451,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
     if (!permissions?.repairJob?.isCreate || !allowedToEdit || workOrderData?.currentRepairJob || [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.draft]?.includes(workOrderData?.status)) {
       return false
     }
-    if (workOrderData?.hasOwnProperty('canSendToSupplier') && !workOrderData?.canSendToSupplier) {
+    if (!workOrderData?.canSendToSupplier) {
       return false
     }
     if (workOrderData?.type === WORK_ORDER_TYPE.repairOrder) {
