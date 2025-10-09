@@ -22,6 +22,7 @@ import { useData } from '../../../StateProvider/Provider';
 import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Delete } from '@mui/icons-material';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords, stepFullScreen, rentalJobChildFields }) => {
   const renderedFrom = `${camelCase(sidebarResource.rentalManagement)}_services`;
@@ -111,11 +112,16 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         Header: 'Description',
         Cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
       },
-      ...(rentalJobChildFields?.find((r) => r?.fieldName === 'longDescription') ? [{
-        accessor: 'longDescription',
-        Header: 'Long Description',
-        Cell: ({ row }) => (row?.original?.longDescription ? <h5 className="text-truncate">{row?.original?.longDescription}</h5> : <NoDataCell />)
-      }] : []),
+      ...(rentalJobChildFields?.find((r) => r?.fieldName === 'longDescription')
+        ? [
+            {
+              accessor: 'longDescription',
+              Header: 'Long Description',
+              Cell: ({ row }) =>
+                row?.original?.longDescription ? <h5 className="text-truncate">{row?.original?.longDescription}</h5> : <NoDataCell />
+            }
+          ]
+        : []),
       {
         accessor: 'actualStartDate',
         Header: 'Actual Start Date',
@@ -256,7 +262,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
 
   return (
     <Box>
-      <DetailsPageHeader
+      {/* <DetailsPageHeader
         isAddButtonVisible={false}
         isActionButtonVisible={allowedToEdit && user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
         actionButtonMenuItems={
@@ -271,7 +277,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         }
         actionButtonProps={{ disabled: selectedRecords.length === 0 }}
         hasXpadding
-      />
+      /> */}
       <Grid container>
         <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
@@ -284,6 +290,16 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
               isClientSideGrid={true}
               hideSelection={!allowedToEdit || !user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
               refreshGrid={fetchRecords}
+              bulkActionItems={
+                allowedToEdit && user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement ? (
+                  <BulkActionItems
+                    selectedRecords={selectedRecords}
+                    setOpenMessageDialog={setOpenMessageDialog}
+                    setServiceConfirmationDialog={setServiceConfirmationDialog}
+                    setDeleteServiceLogConfirmDialog={setDeleteServiceLogConfirmDialog}
+                  />
+                ) : null
+              }
             />
           ) : (
             <Box p={2} height={300}>
@@ -351,7 +367,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
 
 export default ReceivingServices;
 
-const ActionButtonMenuItems = ({ selectedRecords, setOpenMessageDialog, setServiceConfirmationDialog, setDeleteServiceLogConfirmDialog }) => {
+const BulkActionItems = ({ selectedRecords, setOpenMessageDialog, setServiceConfirmationDialog, setDeleteServiceLogConfirmDialog }) => {
   const validateAction = (action) => {
     const errorMessages = [];
     selectedRecords.forEach((e) => {
@@ -390,8 +406,8 @@ const ActionButtonMenuItems = ({ selectedRecords, setOpenMessageDialog, setServi
   };
 
   return (
-    <>
-      <MenuItem
+    <BulkActionContainer>
+      <BulkActionContainer.Button
         onClick={() => {
           if (!validateAction(rentalManagementActions.startService)) {
             const dates = [];
@@ -410,8 +426,8 @@ const ActionButtonMenuItems = ({ selectedRecords, setOpenMessageDialog, setServi
         }}
       >
         Start Service(s)
-      </MenuItem>
-      <MenuItem
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
         onClick={() => {
           if (!validateAction(rentalManagementActions.stopService)) {
             const dates = [];
@@ -435,8 +451,8 @@ const ActionButtonMenuItems = ({ selectedRecords, setOpenMessageDialog, setServi
         }}
       >
         Stop Service(s)
-      </MenuItem>
-      <MenuItem
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
         onClick={() => {
           if (!validateAction(rentalManagementActions.startService)) {
             const dates = [];
@@ -455,8 +471,9 @@ const ActionButtonMenuItems = ({ selectedRecords, setOpenMessageDialog, setServi
         }}
       >
         Start/Stop Service(s)
-      </MenuItem>
-      <MenuItem
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        buttonType="red"
         onClick={() => {
           if (!validateAction(rentalManagementActions.deleteServiceLog)) {
             const data = [];
@@ -471,7 +488,7 @@ const ActionButtonMenuItems = ({ selectedRecords, setOpenMessageDialog, setServi
         }}
       >
         Delete Service Log(s)
-      </MenuItem>
-    </>
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
   );
 };

@@ -44,6 +44,7 @@ import { getCostPriceConditions, getCostPriceValue, getPricingConditions, getPri
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const Services = ({
   rentalManagementData,
@@ -142,7 +143,10 @@ const Services = ({
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
                   ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
-                    ? '(Product)' : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service ? '(Service)' : ''
+                    ? '(Product)'
+                    : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service
+                      ? '(Service)'
+                      : ''
                   : row.original.type === MATERIAL_TYPE.service
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                     : ''}
@@ -251,9 +255,10 @@ const Services = ({
                     setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
                   }}
                 >
-                  <AttachFileIcon fontSize="small" color='primary' />
+                  <AttachFileIcon fontSize="small" color="primary" />
                 </IconButton>
-              </HtmlTooltip>)}
+              </HtmlTooltip>
+            )}
             {allowedToEdit || !quotationApproved ? (
               !row.original.canDelete ? (
                 <HtmlTooltip
@@ -314,7 +319,7 @@ const Services = ({
       var inventory: any = [];
       var productSerialNumbers: any = [];
       const loadingTicketProducts: any = [];
-      let nonSerializedInventory: any = []
+      let nonSerializedInventory: any = [];
       var nextStepMessage = null;
 
       if (isOffline) {
@@ -329,7 +334,7 @@ const Services = ({
 
         setMaterial(JSON.parse(JSON.stringify(data.material)));
         inventory = data.inventory?.filter((e) => !e.isReplaced);
-        nonSerializedInventory = data?.nonSerializedInventory || []
+        nonSerializedInventory = data?.nonSerializedInventory || [];
         productSerialNumbers = data.productSerialNumbers;
         loadingTicketResult?.data?.data?.forEach((element) => {
           if (element.ticketType === DELIVERY_TICKET_TYPE.loading && element?.products?.length) {
@@ -342,7 +347,9 @@ const Services = ({
         });
       }
       let rows = data.material.filter((e) => e.parentId === null);
-      rows = rows.filter((e) => e.type === MATERIAL_TYPE.service || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType === PACKAGE_TYPE.service));
+      rows = rows.filter(
+        (e) => e.type === MATERIAL_TYPE.service || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType === PACKAGE_TYPE.service)
+      );
 
       const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
 
@@ -387,13 +394,13 @@ const Services = ({
                   : true;
         parent.nonSerializedQty =
           parent.type === MATERIAL_TYPE.service &&
-            !parent.serializedProduct &&
-            parent.assetQty === 0 &&
-            parent?.status &&
-            loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+          !parent.serializedProduct &&
+          parent.assetQty === 0 &&
+          parent?.status &&
+          loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
             ? loadingTicketProducts
-              ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
-              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+                ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+                ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
             : 0;
         parent.subRows = generateNestedData(
           data.material,
@@ -426,8 +433,9 @@ const Services = ({
         if (
           data?.material
             ?.filter((e) => e.parentId === null)
-            .filter((e) => e.type === MATERIAL_TYPE.product || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== PACKAGE_TYPE.service))
-            ?.length
+            .filter(
+              (e) => e.type === MATERIAL_TYPE.product || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== PACKAGE_TYPE.service)
+            )?.length
         ) {
           setNextStep(true);
           setNextStepToolTip(null);
@@ -476,16 +484,22 @@ const Services = ({
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
         : nonSerializedInventory?.filter((d) => d?._id === _subRow?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
       _subRow.canDelete =
-        _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog?.length ? false : _subRow?.assetQty > 0 ? false : _subRow?.status ? false : true;
+        _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog?.length
+          ? false
+          : _subRow?.assetQty > 0
+            ? false
+            : _subRow?.status
+              ? false
+              : true;
       _subRow.nonSerializedQty =
         _subRow.type === MATERIAL_TYPE.service &&
-          !_subRow.serializedProduct &&
-          _subRow.assetQty === 0 &&
-          _subRow?.status &&
-          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
+        !_subRow.serializedProduct &&
+        _subRow.assetQty === 0 &&
+        _subRow?.status &&
+        loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
           ? loadingTicketProducts
-            ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
-            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+              ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : 0;
       _subRow.subRows = generateNestedData(
         material,
@@ -685,76 +699,16 @@ const Services = ({
         return;
       }
     }
-    setSubmitState({ open: true, values: inputField, rowData: rowData })
-  };
-
-  const addButtonMenuItems = () => {
-    return (
-      <>
-        {permissions?.serviceMaster?.isRead && (
-          <MenuItem
-            onClick={() => {
-              setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
-            }}
-          >
-            Add Existing Services
-          </MenuItem>
-        )}
-        {permissions?.packages?.isRead && (
-          <MenuItem
-            onClick={() => {
-              setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
-            }}
-          >
-            {`Add Existing Service ${resources?.packages?.titlePlural}`}
-          </MenuItem>
-        )}
-        <MenuItem
-          onClick={() => {
-            setAddExistingProductDialog({ open: true, type: 'newService', parentId: null });
-          }}
-        >
-          Add New Service
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
-          }}
-        >
-          {`Add New Service Package`}
-        </MenuItem>
-      </>
-    );
-  };
-
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
-            setIsBulkEdit(true);
-          }}
-        >
-          Bulk Edit
-        </MenuItem>
-        <MenuItem
-          disabled={isDeleting || !selectedRecords?.some((r) => r?.canDelete)}
-          onClick={() => {
-            handleDeleteMultiple();
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
+    setSubmitState({ open: true, values: inputField, rowData: rowData });
   };
 
   return (
     <Fragment>
       <DetailsPageHeader
         isAddButtonVisible={true}
-        addButtonMenuItems={addButtonMenuItems()}
+        addButtonMenuItems={
+          <AddButtonMenuItems permissions={permissions} setAddExistingProductDialog={setAddExistingProductDialog} resources={resources} />
+        }
         addButtonProps={{
           tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? `Quotation ${quotationStatus} you can not perform this action` : ``,
           disabled: !allowedToEdit || quotationApproved,
@@ -762,8 +716,7 @@ const Services = ({
           introWrapperTitle: 'Click add button',
           introWrapperContent: 'Click add button and select the dropdown option'
         }}
-        isActionButtonVisible={true}
-        actionButtonMenuItems={actionButtonMenuItems()}
+        isActionButtonVisible={false}
         actionButtonProps={{ disabled: selectedRecords.length === 0 }}
         hasXpadding
       />
@@ -781,6 +734,15 @@ const Services = ({
           onSaveEdit={onSaveInlineEdit}
           isClientSideGrid={true}
           expander={true}
+          bulkActionItems={
+            <BulkActionItems
+              setIsProductEdit={setIsProductEdit}
+              setIsBulkEdit={setIsBulkEdit}
+              isDeleting={isDeleting}
+              selectedRecords={selectedRecords}
+              handleDeleteMultiple={handleDeleteMultiple}
+            />
+          }
         />
       ) : (
         <Box py={2} height={300}>
@@ -876,7 +838,7 @@ const Services = ({
           isRedirectToDetailPage={false}
         />
       )}
-      {submitState.open &&
+      {submitState.open && (
         <MaterialUpdateActions
           resource={sidebarResource.rentalManagement}
           referenceData={rentalManagementData}
@@ -885,15 +847,15 @@ const Services = ({
           rowData={submitState.rowData}
           handleUpdateData={(rows) => {
             handleSaveData(rows);
-            setSubmitState({ open: false, values: null, rowData: null })
+            setSubmitState({ open: false, values: null, rowData: null });
           }}
           values={submitState.values}
           handleClose={() => {
-            setSubmitState({ open: false, values: null, rowData: null })
+            setSubmitState({ open: false, values: null, rowData: null });
           }}
           needCalculate={true}
         />
-      }
+      )}
       {showAttachmentDialog.open && (
         <DiagramDialog
           referenceId={rentalManagementData?._id}
@@ -910,3 +872,66 @@ const Services = ({
 };
 
 export default Services;
+
+const AddButtonMenuItems = ({ permissions, setAddExistingProductDialog, resources }) => {
+  return (
+    <>
+      {permissions?.serviceMaster?.isRead && (
+        <MenuItem
+          onClick={() => {
+            setAddExistingProductDialog({ open: true, type: 'service', parentId: null });
+          }}
+        >
+          Add Existing Services
+        </MenuItem>
+      )}
+      {permissions?.packages?.isRead && (
+        <MenuItem
+          onClick={() => {
+            setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+          }}
+        >
+          {`Add Existing Service ${resources?.packages?.titlePlural}`}
+        </MenuItem>
+      )}
+      <MenuItem
+        onClick={() => {
+          setAddExistingProductDialog({ open: true, type: 'newService', parentId: null });
+        }}
+      >
+        Add New Service
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
+        }}
+      >
+        {`Add New Service Package`}
+      </MenuItem>
+    </>
+  );
+};
+
+const BulkActionItems = ({ setIsProductEdit, setIsBulkEdit, isDeleting, selectedRecords, handleDeleteMultiple }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
+          setIsBulkEdit(true);
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        buttonType="red"
+        disabled={isDeleting || !selectedRecords?.some((r) => r?.canDelete)}
+        onClick={() => {
+          handleDeleteMultiple();
+        }}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

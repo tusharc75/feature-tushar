@@ -406,6 +406,7 @@ const BulkActionItems = ({ selectedRecords, setShowDeleteConfirmBox, setDeleteRe
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
+        buttonType="red"
         disabled={!selectedRecords?.every((s) => s.canDelete)}
         onClick={() => {
           setShowDeleteConfirmBox(true);

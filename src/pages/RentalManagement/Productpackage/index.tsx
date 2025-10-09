@@ -62,6 +62,7 @@ import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdate
 import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const Productpackage = ({
   rentalManagementData,
@@ -216,7 +217,10 @@ const Productpackage = ({
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
                   ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
-                    ? '(Product)' : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service ? '(Service)' : ''
+                    ? '(Product)'
+                    : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service
+                      ? '(Service)'
+                      : ''
                   : row.original.type === MATERIAL_TYPE.service
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                     : ''}
@@ -340,9 +344,10 @@ const Productpackage = ({
                     setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
                   }}
                 >
-                  <AttachFileIcon fontSize="small" color='primary' />
+                  <AttachFileIcon fontSize="small" color="primary" />
                 </IconButton>
-              </HtmlTooltip>)}
+              </HtmlTooltip>
+            )}
             {allowedToEdit || !quotationApproved ? (
               !row.original.canDelete ? (
                 <HtmlTooltip
@@ -450,16 +455,17 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.service
-        ? parent.serviceDetail
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.manualEntry
-            ? parent.detail
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail
+            ? parent.serviceDetail?.serviceName
             : parent.packageDetail?.packageName
-        }`;
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.manualEntry
+              ? parent.detail
+              : parent.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -499,17 +505,17 @@ const Productpackage = ({
                 : true;
       parent.nonSerializedQty =
         parent.type === MATERIAL_TYPE.product &&
-          !parent.serializedProduct &&
-          parent.assetQty === 0 &&
-          parent?.status &&
-          loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+        !parent.serializedProduct &&
+        parent.assetQty === 0 &&
+        parent?.status &&
+        loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
           ? loadingTicketProducts
-            ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
-            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+              ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : nonSerializedInventory?.filter((e) => e?._id === parent?._id && e?.product?.optionValue === parent?.materialId)?.length > 0
             ? nonSerializedInventory
-              ?.filter((e) => e?._id === parent?._id && e?.product?.optionValue === parent?.materialId)
-              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+                ?.filter((e) => e?._id === parent?._id && e?.product?.optionValue === parent?.materialId)
+                ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
             : 0;
       parent.subRows = generateNestedData(
         data.material,
@@ -553,28 +559,21 @@ const Productpackage = ({
     dispatch({ type: 'loading', loading: false });
   };
 
-  const generateNestedData = (
-    material,
-    inventory,
-    productSerialNumbers,
-    parent,
-    isPriceRequired,
-    loadingTicketProducts,
-    nonSerializedInventory
-  ) => {
+  const generateNestedData = (material, inventory, productSerialNumbers, parent, isPriceRequired, loadingTicketProducts, nonSerializedInventory) => {
     const currency = rentalManagementData?.currency?.toLowerCase();
 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.service
-        ? _subRow.serviceDetail?.serviceName
-        : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : ''
-        } `;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.service
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === MATERIAL_TYPE.product
+              ? _subRow.productDetail?.productName
+              : ''
+      } `;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -601,13 +600,13 @@ const Productpackage = ({
               : true;
       _subRow.nonSerializedQty =
         _subRow.type === MATERIAL_TYPE.product &&
-          !_subRow.serializedProduct &&
-          _subRow.assetQty === 0 &&
-          _subRow?.status &&
-          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
+        !_subRow.serializedProduct &&
+        _subRow.assetQty === 0 &&
+        _subRow?.status &&
+        loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
           ? loadingTicketProducts
-            ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
-            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+              ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : 0;
       _subRow.subRows = generateNestedData(
         material,
@@ -663,7 +662,7 @@ const Productpackage = ({
       material.push(element);
     });
     let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, material, PRICING_SETUP_TYPE.rent);
-    let costPriceData: any= null;
+    let costPriceData: any = null;
     if (user?.user?.brandPolicy?.materialCostPrice) {
       costPriceData = await getCostPriceConditions(material, material[0]?.type, rentalManagementData);
     }
@@ -688,7 +687,7 @@ const Productpackage = ({
       });
   };
 
-  const AddMaterial = async (material, priceData, costPriceData= null) => {
+  const AddMaterial = async (material, priceData, costPriceData = null) => {
     const tempMaterial = [...material];
     if (priceData) {
       tempMaterial.forEach((element) => {
@@ -927,65 +926,6 @@ const Productpackage = ({
     }
   };
 
-  const addButtonMenuItems = useMemo(() => {
-    return (
-      <>
-        <MenuItem
-          id={'add-existing-products-menu-item'}
-          onClick={() => {
-            setAddExistingProductDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
-          }}
-        >
-          Add Existing Products
-        </MenuItem>
-        <MenuItem
-          id={'add-existing-package-menu-item'}
-          onClick={() => {
-            setAddExistingProductDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
-          }}
-        >
-          {`Add Existing ${resources?.packages?.titlePlural}`}
-        </MenuItem>
-        {permissions?.serializedPackages?.isRead && (
-          <MenuItem
-            id={'add-existing-serialized-package-menu-item'}
-            onClick={() => {
-              setAddExistingSerializedPackages(true);
-            }}
-          >
-            Add Existing {resources?.serializedPackages?.titlePlural}
-          </MenuItem>
-        )}
-        <MenuItem
-          id={'add-new-products-package-menu-item'}
-          onClick={() => {
-            setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
-          }}
-        >
-          Add New Product Package
-        </MenuItem>
-        <MenuItem
-          id={'add-existing-serialized-asset-menu-item'}
-          onClick={() => {
-            setAddExistingAssets(true);
-          }}
-        >
-          {`Add Existing ${resources?.serializedAsset?.titlePlural}`}
-        </MenuItem>
-        {costFields?.filter((f) => f?.isRead)?.length > 0 && (
-          <MenuItem
-            id={'add-manual-entry-menu-item'}
-            onClick={() => {
-              setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
-            }}
-          >
-            Add Manual Entry
-          </MenuItem>
-        )}
-      </>
-    );
-  }, [costFields, permissions?.serializedPackages?.isRead, resources?.serializedPackages?.titlePlural, resources?.serializedAsset?.titlePlural]);
-
   const rightSideContents = () => {
     return (
       <>
@@ -1006,37 +946,21 @@ const Productpackage = ({
     );
   };
 
-  const actionButtonmenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          id={'bulk-edit-menu-item'}
-          disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
-          onClick={() => {
-            setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
-            setIsBulkEdit(true);
-          }}
-        >
-          Bulk Edit
-        </MenuItem>
-        <MenuItem
-          id={'delete-menu-item'}
-          disabled={isDeleting || !selectedRecords?.some((r) => r?.canDelete)}
-          onClick={() => {
-            handleDeleteMultiple();
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <Fragment>
       <DetailsPageHeader
         isAddButtonVisible={true}
-        addButtonMenuItems={addButtonMenuItems}
+        addButtonMenuItems={
+          <AddButtonMenuItems
+            setAddExistingProductDialog={setAddExistingProductDialog}
+            setAddExistingSerializedPackages={setAddExistingSerializedPackages}
+            setAddExistingAssets={setAddExistingAssets}
+            costFields={costFields}
+            setShowCostDialog={setShowCostDialog}
+            resources={resources}
+            permissions={permissions}
+          />
+        }
         addButtonProps={{
           disabled: !allowedToEdit || quotationApproved,
           tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? `Quotation ${quotationStatus} you can not perform this action` : ``,
@@ -1044,8 +968,7 @@ const Productpackage = ({
           introWrapperTitle: 'Click add button',
           introWrapperContent: 'Click add button and select the dropdown option'
         }}
-        isActionButtonVisible={true}
-        actionButtonMenuItems={actionButtonmenuItems()}
+        isActionButtonVisible={false}
         actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
         rightSideContents={rightSideContents()}
         hasXpadding
@@ -1065,6 +988,15 @@ const Productpackage = ({
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
             expander={true}
+            bulkActionItems={
+              <BulkActionItems
+                setIsProductEdit={setIsProductEdit}
+                setIsBulkEdit={setIsBulkEdit}
+                isDeleting={isDeleting}
+                selectedRecords={selectedRecords}
+                handleDeleteMultiple={handleDeleteMultiple}
+              />
+            }
           />
         </Box>
       ) : (
@@ -1285,3 +1217,97 @@ const Productpackage = ({
 };
 
 export default Productpackage;
+
+const BulkActionItems = ({ setIsProductEdit, setIsBulkEdit, isDeleting, selectedRecords, handleDeleteMultiple }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        id={'bulk-edit-menu-item'}
+        disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
+        onClick={() => {
+          setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
+          setIsBulkEdit(true);
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        buttonType="red"
+        id={'delete-menu-item'}
+        disabled={isDeleting || !selectedRecords?.some((r) => r?.canDelete)}
+        onClick={() => {
+          handleDeleteMultiple();
+        }}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
+
+const AddButtonMenuItems = ({
+  setAddExistingProductDialog,
+  setAddExistingSerializedPackages,
+  setAddExistingAssets,
+  costFields,
+  setShowCostDialog,
+  resources,
+  permissions
+}) => {
+  return (
+    <>
+      <MenuItem
+        id={'add-existing-products-menu-item'}
+        onClick={() => {
+          setAddExistingProductDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
+        }}
+      >
+        Add Existing Products
+      </MenuItem>
+      <MenuItem
+        id={'add-existing-package-menu-item'}
+        onClick={() => {
+          setAddExistingProductDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
+        }}
+      >
+        {`Add Existing ${resources?.packages?.titlePlural}`}
+      </MenuItem>
+      {permissions?.serializedPackages?.isRead && (
+        <MenuItem
+          id={'add-existing-serialized-package-menu-item'}
+          onClick={() => {
+            setAddExistingSerializedPackages(true);
+          }}
+        >
+          Add Existing {resources?.serializedPackages?.titlePlural}
+        </MenuItem>
+      )}
+      <MenuItem
+        id={'add-new-products-package-menu-item'}
+        onClick={() => {
+          setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
+        }}
+      >
+        Add New Product Package
+      </MenuItem>
+      <MenuItem
+        id={'add-existing-serialized-asset-menu-item'}
+        onClick={() => {
+          setAddExistingAssets(true);
+        }}
+      >
+        {`Add Existing ${resources?.serializedAsset?.titlePlural}`}
+      </MenuItem>
+      {costFields?.filter((f) => f?.isRead)?.length > 0 && (
+        <MenuItem
+          id={'add-manual-entry-menu-item'}
+          onClick={() => {
+            setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
+          }}
+        >
+          Add Manual Entry
+        </MenuItem>
+      )}
+    </>
+  );
+};
