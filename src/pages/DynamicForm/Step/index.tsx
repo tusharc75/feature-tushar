@@ -14,14 +14,24 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
 import { camelCase } from 'lodash';
 
-const Step = ({ tab, resourcePolicyId = null, workflowId = null, onboardingTemplateId = null, resourceId, resource, data, allowedToEdit, referenceData = null }) => {
+const Step = ({
+  tab,
+  resourcePolicyId = null,
+  workflowId = null,
+  onboardingTemplateId = null,
+  resourceId,
+  resource,
+  data,
+  allowedToEdit,
+  referenceData = null
+}) => {
   const {
     state: { user, permissions }
   }: any = useData();
 
   const [steps, setSteps] = useState(null);
   const [stepLoading, setStepLoading] = useState(false);
-  const [isStepsExist, setIsStepsExist] = useState(false)
+  const [isStepsExist, setIsStepsExist] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [expended, setExpended] = useState({});
@@ -41,14 +51,14 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, onboardingTempl
         steps?.forEach((step) => {
           step.fields = CURReplaceByCurrencySingle(step?.fields, data?.currency ? data?.currency : 'USD');
         });
-        const _steps = steps?.filter(s => {
+        const _steps = steps?.filter((s) => {
           if (s?.linkResourceName) {
-            return permissions[camelCase(s?.linkResourceName)]?.isRead
+            return permissions[camelCase(s?.linkResourceName)]?.isRead;
           }
-          return true
-        })
-        setIsStepsExist(steps?.length ? true : false)
-        setSteps(_steps)
+          return true;
+        });
+        setIsStepsExist(steps?.length ? true : false);
+        setSteps(_steps);
         setStepLoading(false);
       })
       .catch((error) => {
@@ -72,10 +82,10 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, onboardingTempl
 
   const isSidebarVisible = () => {
     if (steps?.length === 1 && tab?.tabName === steps[0]?.stepName) {
-      return false
+      return false;
     }
-    return true
-  }
+    return true;
+  };
 
   return (
     <>
@@ -117,8 +127,7 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, onboardingTempl
                     isExpanded ? 'w-[--sidebar-w]' : 'w-[--collapsed-width]'
                   )}
                 >
-
-                  <div className={`container-with-border max-h-[calc(100vh-300px)] overflow-y-auto overflow-x-hidden p-[20px]`}>
+                  <div className={`container-with-border flex max-h-[calc(100vh-300px)] flex-col overflow-y-auto overflow-x-hidden p-[20px]`}>
                     <div className={`${isExpanded ? 'ml-auto' : 'mx-auto'} mb-2 max-w-fit`}>
                       <IconButton size="small" onClick={() => setIsExpanded((prev) => !prev)}>
                         <KeyboardArrowLeft
@@ -127,27 +136,30 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, onboardingTempl
                         />
                       </IconButton>
                     </div>
-                    {steps?.map((step, i) => {
-                      return (
-                        <div
-                          key={i}
-                          title={step?.stepName}
-                          onClick={() => handleClick(step)}
-                          data-active={index === step}
-                          className={`p-[18px] [border:1px_solid_var(--common-border-color)] ${i === 0 ? 'rounded-t-md' : ''
+                    <div className="flex-grow overflow-y-auto">
+                      {steps?.map((step, i) => {
+                        return (
+                          <div
+                            key={i}
+                            title={step?.stepName}
+                            onClick={() => handleClick(step)}
+                            data-active={index === step}
+                            className={`p-[18px] [border:1px_solid_var(--common-border-color)] ${
+                              i === 0 ? 'rounded-t-md' : ''
                             } cursor-pointer last:rounded-b-md data-[active=true]:[border:1px_solid_var(--dark-active-border-color,#298B88)]`}
-                        >
-                          <div className="flex gap-2">
-                            <span className="h-[20px] w-[20px] flex-shrink-0 rounded-full bg-[var(--dark-secondary,var(--primary))] text-center text-[10px] leading-[20px] text-white">
-                              {i + 1}
-                            </span>
-                            <Typography variant="subtitle2" className={`${isExpanded ? '' : 'sr-only'} line-clamp-1 transition-all duration-300`}>
-                              {step?.stepName}
-                            </Typography>
+                          >
+                            <div className="flex gap-2">
+                              <span className="h-[20px] w-[20px] flex-shrink-0 rounded-full bg-[var(--dark-secondary,var(--primary))] text-center text-[10px] leading-[20px] text-white">
+                                {i + 1}
+                              </span>
+                              <Typography variant="subtitle2" className={`${isExpanded ? '' : 'sr-only'} line-clamp-1 transition-all duration-300`}>
+                                {step?.stepName}
+                              </Typography>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               )}
