@@ -9,7 +9,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const renderedFrom = `${sidebarResource?.workOrder}_Service_StepData`;
 
-const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selectedService }) => {
+const ViewServiceStepDataDialog = ({ servicesData, products, stepsData, handleClose, selectedService }) => {
   const { generateColumns } = useColumns();
   const [serviceOptions, setServiceOptions] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
@@ -33,7 +33,7 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selec
       });
       const columns = fetchGridColumns(sd?.steps);
       services.push({
-        optionLabel: sd.serviceName,
+        optionLabel: `${sd.serviceName}${sd?.parentId && products?.some(e => e?._id === sd?.parentId) ? ` - ${products?.find(e => e?._id === sd?.parentId)?.productDetail?.productName}` : ''}`,
         optionValue: sd?._id,
         uniqueId: sd?.uniqueId,
         steps: sd?.steps,
