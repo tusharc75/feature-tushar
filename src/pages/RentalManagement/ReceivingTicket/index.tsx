@@ -3720,24 +3720,24 @@ const BulkActionItems = ({
     <BulkActionContainer>
       {allowedToEdit && !isOffline && !rentalPolicyData?.hideAssetChangeStatus && (
         <BulkActionContainer.Button
-          disabled={false
-            // !allowUpdateStatus ||
-            // assetStatusOptions?.length === 0 ||
-            // getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0 ||
-            // getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some((f) =>
-            //   [
-            //     ASSET_STATUS.lost,
-            //     ASSET_STATUS.delivered,
-            //     ASSET_STATUS.inUse,
-            //     ASSET_STATUS.standBy,
-            //     ASSET_STATUS.standByNotChargeable,
-            //     ASSET_STATUS.inTransit,
-            //     ASSET_STATUS.inRepair,
-            //     ASSET_STATUS.repair,
-            //     ASSET_STATUS.reserved,
-            //     ASSET_STATUS.scrapRequested
-            //   ].includes(f.status)
-            // )
+          disabled={
+            !allowUpdateStatus ||
+            assetStatusOptions?.length === 0 ||
+            getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0 ||
+            getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some((f) =>
+              [
+                ASSET_STATUS.lost,
+                ASSET_STATUS.delivered,
+                ASSET_STATUS.inUse,
+                ASSET_STATUS.standBy,
+                ASSET_STATUS.standByNotChargeable,
+                ASSET_STATUS.inTransit,
+                ASSET_STATUS.inRepair,
+                ASSET_STATUS.repair,
+                ASSET_STATUS.reserved,
+                ASSET_STATUS.scrapRequested
+              ].includes(f.status)
+            )
           }
           onClick={handleClick}
           endIcon={<ExpandMore />}
