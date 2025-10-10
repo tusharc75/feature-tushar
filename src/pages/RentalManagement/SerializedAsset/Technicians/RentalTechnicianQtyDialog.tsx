@@ -17,6 +17,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getCostPriceConditions, getPricingConditions } from 'src/components/PricingCondition';
 import { useData } from 'src/StateProvider/Provider';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const rateChangeFields = ['pricingMethod', 'pricingCondition', 'unit'];
 
@@ -33,6 +34,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
   const [priceConditionList, setPriceConditionList] = useState([]);
   const [priceMethodList, setPriceMethodList] = useState([]);
   const [costPriceConditionList, setCostPriceConditionList] = useState([]);
+  const [subStatusOptions, setSubStatusOptions] = useState([]);
 
   const {
     state: { user }
@@ -47,6 +49,8 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     let data = await fetch_rental_technician_fields(rentalManagementData?.currency, isOffline);
+    const { fieldsDataAll } = await fetch_resource_view_fields(sidebarResource.employeeMaster, true);
+    setSubStatusOptions(fieldsDataAll?.find((e) => e?.fieldData?.fieldName === 'subStatus')?.fieldData?.option?.map((e) => e?.optionValue));
     if (bulkEdit) {
       data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
       setInitialData({
@@ -315,7 +319,14 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                                 initialData.fields
                                               );
                                               if (!isEmpty(costPrice)) {
-                                                const costPriceResult = autoCalculateSpecificFields({ [costPriceFieldName]: costPrice?.price || 0 },
+                                                const obj: any = {
+                                                  [costPriceFieldName]: costPrice?.price || 0
+                                                };
+                                                subStatusOptions?.forEach((subStatus) => {
+                                                  obj[`${camelCase(subStatus)}Price_${rentalManagementData?.currency?.toLowerCase()}`] =
+                                                    costPrice?.subStatusCost?.[`${camelCase(subStatus)}`] || 0;
+                                                });
+                                                const costPriceResult = autoCalculateSpecificFields(obj,
                                                   { ...values, ...result },
                                                   initialData.fields
                                                 );
