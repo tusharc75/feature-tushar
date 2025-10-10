@@ -45,8 +45,7 @@ const AddConditions = ({ id, detailData }) => {
   const [isSubmitting, setSubmitting] = useState(false);
   const [resourceData, setResourceData] = useState(null);
   const [openConditionDetails, setOpenConditionDetails] = useState({ anchorEl: null, data: null });
-  const [assetStatusField, setAssetStatusField] = useState(null);
-  const [productList, setProductList] = useState([]);
+  const [subStatusOptions, setSubStatusOptions] = useState(null);
 
   useEffect(() => {
     fetchCondition();
@@ -115,23 +114,12 @@ const AddConditions = ({ id, detailData }) => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource.serializedAsset}&view=true`)
+      .get(`/field?resource=${sidebarResource.employeeMaster}&view=true`)
       .then(({ data: { data } }) => {
         const statusField = data?.find((f) => f?.fieldData?.fieldName === 'subStatus')?.fieldData;
-        if (statusField) {
-          setAssetStatusField(statusField);
+        if (statusField?.option?.length > 0) {
+          setSubStatusOptions(statusField?.option);
         }
-      });
-  }, []);
-
-  useEffect(() => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource?.product}`)
-      .then(({ data: { data } }) => {
-        setProductList(data.Product || []);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
       });
   }, []);
 
@@ -651,8 +639,7 @@ const AddConditions = ({ id, detailData }) => {
             setShowDialog({ open: false, isBulkedit: false });
             fetchCondition();
           }}
-          assetStatusField={assetStatusField}
-          productList={productList}
+          subStatusOptions={subStatusOptions}
         />
       )}
       {showDeleteConfirmBox && (

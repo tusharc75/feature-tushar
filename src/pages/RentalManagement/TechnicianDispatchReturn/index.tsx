@@ -1,5 +1,5 @@
-import { Visibility } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
+import { Visibility, ExpandMore } from '@mui/icons-material';
+import { IconButton, Menu, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid2';
 import { camelCase } from 'lodash';
@@ -13,7 +13,7 @@ import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader'
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
-import { displayDate, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { displayDate, prepareDataForGrid, sidebarResource, TECHNICIAN_STATUS } from 'src/constants/helpers';
 import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDialog';
 import StartStopLogsDialog from 'src/pages/FieldTicket/material/StartStopLogsDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -21,6 +21,8 @@ import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
+import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const TechnicianDispatchReturn = ({ rentalManagementData, stepFullScreen, allowedToEdit, receive = false }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -40,6 +42,9 @@ const TechnicianDispatchReturn = ({ rentalManagementData, stepFullScreen, allowe
     _id: null
   });
   const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, technicianId: null });
+  const [subStatusToUpdate, setSubStatusToUpdate] = useState({ open: false, status: null });
+  const [subStatusAnchorEl, setSubStatusAnchorEl] = useState(null);
+  const [subStatusOptions, setSubStatusOptions] = useState([]);
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -61,15 +66,9 @@ const TechnicianDispatchReturn = ({ rentalManagementData, stepFullScreen, allowe
     let data = isOffline ? [] : await fetch_rental_technician_fields(rentalManagementData?.currency, false);
     let technicianFields = [];
     if (!isOffline) {
-      const fieldLabelResponce = await axiosInstance().put(`/field/find-field-labels`, {
-        fields: [
-          {
-            resource: sidebarResource.employeeMaster,
-            fieldNames: ['competencyType', 'competencies']
-          }
-        ]
-      });
-      technicianFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.employeeMaster)?.fieldNames || [];
+      const { fieldsDataAll } = await fetch_resource_view_fields(sidebarResource.employeeMaster, true);
+      technicianFields = fieldsDataAll?.map((e) => e?.fieldData);
+      setSubStatusOptions(technicianFields?.find((e) => e?.fieldName === 'subStatus')?.option);
     }
     const column: any = [
       {
@@ -118,11 +117,11 @@ const TechnicianDispatchReturn = ({ rentalManagementData, stepFullScreen, allowe
       },
       {
         accessor: 'status',
-        Header: 'Status',
+        Header: 'Rental Status',
         width: 200,
         Cell: ({ row }) => (row.original['status'] ? <p>{row.original?.status}</p> : <NoDataCell />)
       },
-      ...(technicianFields?.find((e) => e.fieldName === 'competencyType')
+      ...(technicianFields?.find((e) => e?.fieldName === 'competencyType')
         ? [
             {
               accessor: 'competencyType',
@@ -335,6 +334,37 @@ const TechnicianDispatchReturn = ({ rentalManagementData, stepFullScreen, allowe
       });
   };
 
+  const handleSubStatusChange = (dates) => {
+    setUpdating(true);
+    axiosInstance()
+      .put(`/technician/update-sub-status`, {
+        _ids: selectedRecords?.map((r) => r?._id),
+        dates: dates
+      })
+      .then(({ data }) => {
+        setSubStatusToUpdate({ open: false, status: null });
+        fetchData();
+        setUpdating(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setUpdating(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleClickChangeSubStatus = (event) => {
+    setSubStatusAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseChangeSubStatusMenu = () => {
+    setSubStatusAnchorEl(null);
+  };
+
   return (
     <>
       <Grid container spacing={2}>
@@ -355,6 +385,7 @@ const TechnicianDispatchReturn = ({ rentalManagementData, stepFullScreen, allowe
                     receive={receive}
                     selectedRecords={selectedRecords}
                     setStartEndDateConfirmationDialog={setStartEndDateConfirmationDialog}
+                    handleClickChangeSubStatus={subStatusOptions?.length > 0 ? handleClickChangeSubStatus : null}
                   />
                 ) : null
               }
@@ -366,6 +397,35 @@ const TechnicianDispatchReturn = ({ rentalManagementData, stepFullScreen, allowe
           )}
         </Grid>
       </Grid>
+      <Menu
+        id="sub-status-menu"
+        anchorEl={subStatusAnchorEl}
+        keepMounted
+        open={Boolean(subStatusAnchorEl)}
+        onClose={handleCloseChangeSubStatusMenu}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+      >
+        {subStatusOptions?.map((o, i) => {
+          return (
+            <MenuItem
+              key={`${i}`}
+              onClick={() => {
+                setSubStatusToUpdate({ open: true, status: o?.optionValue });
+                handleCloseChangeSubStatusMenu();
+              }}
+            >
+              {o?.optionLabel}
+            </MenuItem>
+          );
+        })}
+      </Menu>
       {startEndDateConfirmationDialog.open && (
         <StartStopDateDialog
           type={startEndDateConfirmationDialog.type}
@@ -393,13 +453,28 @@ const TechnicianDispatchReturn = ({ rentalManagementData, stepFullScreen, allowe
           resource={sidebarResource.rentalManagement}
         />
       )}
+
+      {subStatusToUpdate.open && (
+        <SubStatusDatesDialog
+          handleClose={() => {
+            setSubStatusToUpdate({ open: false, status: null });
+          }}
+          options={subStatusOptions?.map((o) => o?.optionLabel)}
+          selectedOption={subStatusToUpdate.status}
+          onSuccess={handleSubStatusChange}
+          submitting={isUpdating}
+          rentalId={rentalManagementData?._id}
+          assets={[]}
+          technicians={selectedRecords?.map((a) => a?.technicianId)}
+        />
+      )}
     </>
   );
 };
 
 export default TechnicianDispatchReturn;
 
-const BulkActionItems = ({ receive, selectedRecords, setStartEndDateConfirmationDialog }) => {
+const BulkActionItems = ({ receive, selectedRecords, setStartEndDateConfirmationDialog, handleClickChangeSubStatus }) => {
   return (
     <BulkActionContainer>
       <>
@@ -451,6 +526,15 @@ const BulkActionItems = ({ receive, selectedRecords, setStartEndDateConfirmation
             }}
           >
             Return
+          </BulkActionContainer.Button>
+        )}
+        {handleClickChangeSubStatus && (
+          <BulkActionContainer.Button
+            disabled={selectedRecords?.every((s: any) => s?.status === TECHNICIAN_STATUS.dispatched) ? false : true}
+            onClick={handleClickChangeSubStatus}
+            endIcon={<ExpandMore />}
+          >
+            {'Change Sub Status'}
           </BulkActionContainer.Button>
         )}
       </>

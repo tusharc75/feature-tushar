@@ -15,7 +15,7 @@ import { cn, CustomDialogTransition, dateFormat, rentalManagement } from 'src/co
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const SubStatusDatesDialog = ({ handleClose, options, onSuccess, submitting, rentalId, assets, selectedOption = null }) => {
+const SubStatusDatesDialog = ({ handleClose, options, onSuccess, submitting, rentalId, assets, selectedOption = null, technicians = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -44,18 +44,25 @@ const SubStatusDatesDialog = ({ handleClose, options, onSuccess, submitting, ren
     fetchLogs();
   }, []);
 
-  const fetchLogs = () => {
-    axiosInstance()
-      .get(`${rentalManagement.api}/${rentalId}/inventory/asset-min-log-date?assets=${JSON.stringify(assets)}`)
-      .then(({ data: { data } }) => {
-        if (data?.minDate) {
-          const newDate = dayjs.utc(data?.minDate).add(1, 'day');
-          setMinDate(newDate);
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+  const fetchLogs = async () => {
+    try {
+      let api = `${rentalManagement.api}/${rentalId}/inventory/asset-min-log-date?assets=${JSON.stringify(assets)}`;
+
+      if (technicians?.length > 0) {
+        api = `/technician/min-sub-status-date?referenceId=${rentalId}&technicians=${technicians?.join(',')}`;
+      }
+
+      const {
+        data: { data }
+      } = await axiosInstance().get(api);
+
+      if (data?.minDate) {
+        const newDate = dayjs.utc(data.minDate);
+        setMinDate(data?.notAddDay ? newDate : newDate.add(1, 'day'));
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleSubmit = (values) => {
