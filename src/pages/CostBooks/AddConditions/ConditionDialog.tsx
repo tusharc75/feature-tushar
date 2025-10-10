@@ -331,7 +331,7 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
                     <Fragment>
                       <Box marginTop={1} marginBottom={1}>
                         <div className="mt-2 border p-2">
-                          <RentPriceBox
+                          <RentCostBox
                             conditionData={conditionData}
                             values={values}
                             setFieldValue={setFieldValue}
@@ -341,7 +341,7 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
                             errors={errors}
                           />
                         </div>
-                        {(values['materialType'] === 'competency' && subStatusOptions?.length > 0) && (
+                        {values['materialType'] === 'competency' && subStatusOptions?.length > 0 && (
                           <div className="mt-2 border p-2">
                             <FormControlLabel
                               control={
@@ -402,7 +402,7 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
                                   values['subStatusWiseCosting'] &&
                                   values['subStatusWiseCosting']?.length > 0 &&
                                   values['subStatusWiseCosting']?.map((value) => (
-                                    <RentPriceBox
+                                    <RentCostBox
                                       conditionData={conditionData}
                                       values={values}
                                       setFieldValue={setFieldValue}
@@ -413,6 +413,64 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
                                   ))}
                               </div>
                             )}
+                          </div>
+                        )}
+                        {values['materialType'] === 'competency' && (
+                          <>
+                            <Box mt={2} />
+                            <Autocomplete
+                              limitTags={2}
+                              multiple
+                              disableCloseOnSelect={true}
+                              freeSolo
+                              options={[]}
+                              renderTags={(value, getTagProps) =>
+                                value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  variant="outlined"
+                                  margin="dense"
+                                  size="small"
+                                  helperText="Type and press Enter to add"
+                                  label={'Extra Cost'}
+                                  name={'extraCostFields'}
+                                  required={false}
+                                />
+                              )}
+                              value={values['extraCostFields']}
+                              onBlur={(e: any) => {
+                                if (e.target.value && e.target.value.trim() !== '') {
+                                  setFieldValue('extraCostFields', [...values['extraCostFields'], e.target.value]);
+                                }
+                              }}
+                              onChange={(e, value: any) => {
+                                let valuesToInsert = [];
+                                for (var val of value) {
+                                  if (val && val.trim() !== '') {
+                                    valuesToInsert.push(val);
+                                  }
+                                }
+                                setFieldValue('extraCostFields', valuesToInsert);
+                                setFieldValue(
+                                  'extraCost',
+                                  [...(values?.['extraCost'] || [])]?.filter((a) => valuesToInsert?.includes(a?.name))
+                                );
+                              }}
+                            />
+                          </>
+                        )}
+                        {values['extraCostFields'] && values['extraCostFields']?.length > 0 && (
+                          <div className="mt-2">
+                            <ExtraCostBox
+                              values={values}
+                              setFieldValue={setFieldValue}
+                              currency={currency}
+                              allowedToEdit={allowedToEdit}
+                              touched={touched}
+                              errors={errors}
+                            />
                           </div>
                         )}
                       </Box>
@@ -459,7 +517,7 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
 
 export default ConditionDialog;
 
-const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedToEdit, touched = null, errors = null, status = '' }) => {
+const RentCostBox = ({ conditionData, values, setFieldValue, currency, allowedToEdit, touched = null, errors = null, status = '' }) => {
   const value = status ? values['subStatusWiseCosting']?.find((a) => a?.status === status) || {} : values;
   return (
     <div className={`mt-2 p-2 ${status ? 'border' : ''}`}>
@@ -469,16 +527,26 @@ const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedT
           <tr>
             <th></th>
             {currency &&
-              currency.map((_currency, i) => values['unit'] && values['unit'].map((_unit, j) => <th key={j} className='font-normal'>{_unit}</th>))}
+              currency.map(
+                (_currency, i) =>
+                  values['unit'] &&
+                  values['unit'].map((_unit, j) => (
+                    <th key={j} className="font-normal">
+                      {_unit}
+                    </th>
+                  ))
+              )}
           </tr>
         </thead>
         <tbody>
           {values['pricingMethod'] &&
             values['pricingMethod'].map((_pricingMethod, i) => (
               <tr key={i}>
-                <th style={{ paddingRight: 10, minWidth: 50 }} className='font-normal'>{startCase(_pricingMethod)}</th>
+                <th style={{ paddingRight: 10, minWidth: 50 }} className="font-normal">
+                  {startCase(_pricingMethod)}
+                </th>
                 {currency &&
-                  currency.map((_currency, j) => {
+                  currency?.map((_currency, j) => {
                     const _fieldName = `rent_${camelCase(_pricingMethod.toLowerCase())}_${_currency.toLowerCase()}`;
                     return values['unit']
                       ? values['unit'].map((_unit, k) => {
@@ -531,6 +599,74 @@ const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedT
                         );
                       })
                       : null;
+                  })}
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+const ExtraCostBox = ({ values, setFieldValue, currency, allowedToEdit, touched = null, errors = null }) => {
+  const value: any = values?.['extraCost'] || [];
+  return (
+    <div className={`mt-2 p-2`}>
+      <table>
+        <tbody>
+          {values['extraCostFields'] &&
+            values['extraCostFields'].map((_extraCostField, i) => (
+              <tr key={i}>
+                <th style={{ paddingRight: 10, minWidth: 50 }} className="font-normal">
+                  {startCase(_extraCostField)}
+                </th>
+                {currency &&
+                  currency?.map((_currency, j) => {
+                    return (
+                      <td key={j}>
+                        <TextField
+                          name={_extraCostField}
+                          disabled={!allowedToEdit}
+                          variant="outlined"
+                          margin="dense"
+                          size="small"
+                          fullWidth
+                          type="number"
+                          onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                          style={{ margin: 0 }}
+                          value={value?.find((a) => a?.name === _extraCostField)?.cost || 0}
+                          onChange={(e) => {
+                            const extraCost = [...(values?.['extraCost'] || [])]?.filter((a) =>
+                              [...(values?.['extraCostFields'] || [])]?.includes(a?.name)
+                            );
+                            const extraCostField = extraCost?.find((a) => a?.name === _extraCostField);
+                            if (extraCostField) {
+                              extraCostField['cost'] = parseFloat(e.target.value);
+                            } else {
+                              extraCost.push({ name: _extraCostField, cost: parseFloat(e.target.value) });
+                            }
+                            setFieldValue('extraCost', extraCost);
+                          }}
+                          slotProps={{
+                            input: {
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  {result(
+                                    find(getUniqueCurrencies(), function (obj) {
+                                      return obj.currencyCode === _currency;
+                                    }),
+                                    'symbolNative'
+                                  )}
+                                </InputAdornment>
+                              ),
+                              inputProps: { min: 0, max: 9999999999 }
+                            }
+                          }}
+                          error={touched && errors && touched[_extraCostField] && Boolean(errors[_extraCostField])}
+                          helperText={touched && errors && touched[_extraCostField] && errors[_extraCostField]}
+                        />
+                      </td>
+                    );
                   })}
               </tr>
             ))}
