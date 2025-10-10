@@ -64,7 +64,6 @@ const DynamicForm = () => {
   const [primaryFieldName, setPrimaryFieldName] = useState(null);
   const [isPdfTemplateFieldExist, setIsPdfTemplateFieldExist] = useState(false);
 
-
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
@@ -93,7 +92,7 @@ const DynamicForm = () => {
         } else {
           statusColors[item?.status] = item.colorCode;
         }
-      })
+      });
     }
     let data;
     const response = await axiosInstance().get(`/field?resource=${resource}`);
@@ -109,13 +108,18 @@ const DynamicForm = () => {
         newColumns?.forEach((o) => {
           if (o?.accessor === primaryField?.fieldData?.fieldName) {
             o.cell = ({ row }) => (
-              <div style={{
-                backgroundColor: (() => { return statusColors[row?.original?.status] || '' })()
-              }}
+              <div
+                style={{
+                  backgroundColor: (() => {
+                    return statusColors[row?.original?.status] || '';
+                  })()
+                }}
               >
-                <Link className="link text-truncate"
+                <Link
+                  className="link text-truncate"
                   title={row?.original?.[primaryField?.fieldData?.fieldName]}
-                  to={`${detailPagePath}/${row?.original?._id}`}>
+                  to={`${detailPagePath}/${row?.original?._id}`}
+                >
                   {row?.original?.[primaryField?.fieldData?.fieldName]}
                 </Link>
               </div>
@@ -267,8 +271,8 @@ const DynamicForm = () => {
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const values: any = { _id: updatedData?._id };
-    Object.keys(inputField)?.map((_key) => {
-      values[_key] = updatedData[_key] ? updatedData[_key] : '';
+    Object.keys(inputField)?.forEach((_key) => {
+      values[_key] = updatedData[_key] ?? '';
     });
     axiosInstance()
       .put(`/dynamic-form/update-selected-field`, values, {
@@ -424,10 +428,11 @@ const DynamicForm = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resourceLabel?.titleSingular?.toLowerCase()} ${primaryFieldName ? `: ${deleteRecord?.[primaryFieldName]}` : ''}`
-            : `selected ${resourceLabel?.titlePlural?.toLowerCase()}`
-            } ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resourceLabel?.titleSingular?.toLowerCase()} ${primaryFieldName ? `: ${deleteRecord?.[primaryFieldName]}` : ''}`
+              : `selected ${resourceLabel?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
