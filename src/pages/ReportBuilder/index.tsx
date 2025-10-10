@@ -1,6 +1,6 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { camelCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
@@ -64,6 +64,13 @@ const ReportBuilder = () => {
         width: 120,
         disabled: true,
         Cell: ({ row }) => <p className="text-truncate">{row.original.resource}</p>
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        width: 120,
+        disabled: true,
+        Cell: ({ row }) => <p className="text-truncate">{startCase(row.original.type)}</p>
       },
       ...getStaticFields(),
       {
