@@ -133,10 +133,10 @@ const ManageOnboarding = ({ onClose, onSuccess, isClone = false, id = null }) =>
       }}
     >
       {initialData.fields.length ? (
-        <Formik 
-          initialValues={initialData.values} 
-          validationSchema={yupSchema(initialData.fields)} 
-          onSubmit={handleSubmit} 
+        <Formik
+          initialValues={initialData.values}
+          validationSchema={yupSchema(initialData.fields)}
+          onSubmit={handleSubmit}
           validate={validate}
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
@@ -150,7 +150,7 @@ const ManageOnboarding = ({ onClose, onSuccess, isClone = false, id = null }) =>
                   ? isClone
                     ? `Clone ${cloneHeading}`
                     : `Edit`
-                  : `Create Onboarding`
+                  : `Create ${resources?.onboarding?.titleSingular}`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

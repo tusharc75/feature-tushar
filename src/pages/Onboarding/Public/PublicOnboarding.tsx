@@ -40,7 +40,7 @@ const PublicOnboarding = () => {
 
       if (onboardingResponse.onboardingTemplateData) {
         setOnboardingTemplateData(onboardingResponse.onboardingTemplateData);
-        
+
         const editableStepsArray = onboardingResponse.onboardingTemplateData.tabs?.[0]?.steps.map(
           step => step.properties?.filledByCandidate === true
         ) || [];
@@ -56,9 +56,9 @@ const PublicOnboarding = () => {
             }, {})
           };
         }) || [];
-        
+
         setStepsData(initialStepsData);
-        
+
         const currentStepId = onboardingResponse.onboardingTemplateData.tabs[0].steps[activeStepIndex]._id;
         const currentStepData = initialStepsData.find(step => step.stepId === currentStepId) || {};
         setInitialValues(currentStepData);
@@ -69,7 +69,7 @@ const PublicOnboarding = () => {
       setLoading(false);
     }
   };
-  
+
   const handleStepChange = (index: number) => {
     setActiveStepIndex(index);
     const currentStepId = onboardingTemplateData.tabs[0].steps[index]._id;
@@ -81,12 +81,12 @@ const PublicOnboarding = () => {
     setSaving(true);
     try {
       const currentStepId = onboardingTemplateData.tabs[0].steps[activeStepIndex]._id;
-      
+
       let updatedStepsData = [...stepsData];
       const stepIndex = updatedStepsData.findIndex(step => step.stepId === currentStepId);
-      
+
       const existingId = stepIndex !== -1 ? updatedStepsData[stepIndex]._id : undefined;
-      
+
       const newStepData = {
         ...(stepIndex !== -1 ? updatedStepsData[stepIndex] : {}),
         ...values,
@@ -99,7 +99,7 @@ const PublicOnboarding = () => {
       } else {
         updatedStepsData[stepIndex] = newStepData;
       }
-      
+
       setStepsData(updatedStepsData);
 
       const submitData = {
@@ -107,7 +107,7 @@ const PublicOnboarding = () => {
         stepsData: updatedStepsData
       };
       await axiosInstance().put(`${routes.onboarding.path}/public/${id}`, submitData);
-      
+
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
@@ -132,7 +132,7 @@ const PublicOnboarding = () => {
     toastConfig.setToastConfig({
       open: true,
       type: 'success',
-      message: 'Onboarding submitted successfully!'
+      message: 'Submitted successfully!'
     });
   };
 
@@ -177,8 +177,8 @@ const PublicOnboarding = () => {
       <AppBar
         position="fixed"
         elevation={0}
-        sx={{ 
-          backgroundColor: 'white', 
+        sx={{
+          backgroundColor: 'white',
           color: 'text.primary',
           borderBottom: '1px solid',
           borderColor: 'divider'
@@ -199,18 +199,18 @@ const PublicOnboarding = () => {
         <Box className="headerbox-v1">
           <Box className="nav-v1">
             <Typography sx={{ fontSize: '1.7rem' }} fontWeight="bold">
-              {onboardingData.name}
+              {onboardingData?.name}
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              {onboardingData.jobRole}
+              {onboardingData?.jobRole}
             </Typography>
           </Box>
-          <Box className="controls-v1">
-            <Chip 
-              label={onboardingData.status} 
-              color={onboardingData.status === 'Pending' ? 'warning' : 'success'} 
+          {/* <Box className="controls-v1">
+            <Chip
+              label={onboardingData.status}
+              color={onboardingData.status === 'Pending' ? 'warning' : 'success'}
             />
-          </Box>
+          </Box> */}
         </Box>
 
         <Box className="detail-container-v1">
@@ -218,7 +218,7 @@ const PublicOnboarding = () => {
             <Stepper activeStep={activeStepIndex} alternativeLabel>
               {steps.map((step, index) => (
                 <Step key={step._id}>
-                  <StepLabel 
+                  <StepLabel
                     onClick={() => handleStepChange(index)}
                     sx={{ cursor: 'pointer', '& .MuiStepLabel-label': { mt: 1 } }}
                     StepIconProps={{
@@ -238,7 +238,6 @@ const PublicOnboarding = () => {
               ))}
             </Stepper>
           </Box>
-
           <Formik
             initialValues={initialValues}
             validationSchema={yupSchema(fieldsData)}
@@ -262,7 +261,7 @@ const PublicOnboarding = () => {
                     />
                   </CardContent>
                 </Card>
-                
+
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
                   <ThemeButton
                     onClick={() => handleStepChange(activeStepIndex - 1)}
@@ -271,7 +270,7 @@ const PublicOnboarding = () => {
                   >
                     Back
                   </ThemeButton>
-                  
+
                   <Stack direction="row" spacing={2}>
                     {isCurrentStepEditable && (
                       <ThemeButton
@@ -283,7 +282,7 @@ const PublicOnboarding = () => {
                         Save
                       </ThemeButton>
                     )}
-                    
+
                     {!isLastStep && (
                       <ThemeButton
                         onClick={handleNextWithoutSave}
@@ -292,7 +291,7 @@ const PublicOnboarding = () => {
                         Next
                       </ThemeButton>
                     )}
-                    
+
                     {isCurrentStepEditable && (
                       <ThemeButton
                         onClick={submitForm}
@@ -303,7 +302,7 @@ const PublicOnboarding = () => {
                         {isLastStep ? 'Submit' : 'Save & Next'}
                       </ThemeButton>
                     )}
-                    
+
                     {!isCurrentStepEditable && isLastStep && (
                       <ThemeButton
                         onClick={submitForm}
