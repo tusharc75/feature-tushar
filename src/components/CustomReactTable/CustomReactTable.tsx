@@ -316,11 +316,12 @@ const CustomReactTable = ({
       return count;
     };
 
+    // ✅ slice from the *core* row model to respect pagination
     const topLevelRows = table.getCoreRowModel().rows.slice(0, limit);
 
     const length = getRowCount(topLevelRows);
     return Math.max(length, limit);
-  }, [table, limit, isAllRowsExpanded, expander, isMobileView]);
+  }, [table, limit, isAllRowsExpanded, expanded, expander, isMobileView]);
 
   useEffect(() => {
     table.setPageSize(paginationLimit);
