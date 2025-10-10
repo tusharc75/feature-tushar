@@ -66,7 +66,7 @@ export const OPERATION_ON_LINE_ITEMS = {
 export const PRE_FILTER_CHECKBOX_OPTION = {
   yes: 'YES',
   no: 'NO'
-}
+};
 
 export const checkBoxOptions = [
   { optionLabel: 'YES', optionValue: 'yes' },
@@ -78,7 +78,6 @@ export const NOT_ALLOW_INLINE_EDIT_FIELD_TYPE = [
   FieldList.VLOOKUPDROPDOWN.type,
   FieldList.CONVERTER.type,
   FieldList.SWITCH.type,
-  FieldList.CHECKBOX.type,
   FieldList.IMAGEUPLOAD.type,
   FieldList.MULTIIMAGEUPLOAD.type,
   FieldList.FILEUPLOAD.type,
@@ -93,4 +92,4 @@ export const NOT_ALLOW_INLINE_EDIT_FIELD_TYPE = [
   FieldList.LOOKUPDISPLAY.type,
   FieldList.COUNTER.type,
   FieldList.DESCRIPTION.type
-]
+];

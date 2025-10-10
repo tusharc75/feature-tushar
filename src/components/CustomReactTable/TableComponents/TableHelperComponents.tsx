@@ -480,7 +480,9 @@ export const RenderInputs = ({ columnDef, row, cell, submitInput, handleStopEdit
   const [cellValue, setCellValue] = React.useState(getCellValue(cell) || null);
 
   const handleSubmit = () => {
-    if (!cellValue) return;
+    if (cellValue === undefined || cellValue === null || cellValue?.trim?.() === '') {
+      return;
+    }
     const inputField = {
       [cell.column.id]: cellValue
     };
