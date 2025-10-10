@@ -8,7 +8,6 @@ import { NOT_ALLOW_INLINE_EDIT_FIELD_TYPE, OPERATION_ON_LINE_ITEMS } from 'src/c
 import CopyFromHeaderFieldDropdown from 'src/components/FormBuilder/Properties/Setting/CopyFromHeaderFieldDropdown';
 
 const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, section, touched, errors, module, brandId, formData = null }) => {
-
   return (
     <Box pb={1}>
       <Box>
@@ -209,7 +208,12 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                 <Checkbox
                   name="isColumnEditable"
                   checked={values['isColumnEditable']}
-                  disabled={NOT_ALLOW_INLINE_EDIT_FIELD_TYPE.includes(values?.type) || values?.isUneditable || values?.disableOnEdit || values?.isSystemGenerate}
+                  disabled={
+                    NOT_ALLOW_INLINE_EDIT_FIELD_TYPE.includes(values?.type) ||
+                    values?.isUneditable ||
+                    values?.disableOnEdit ||
+                    values?.isSystemGenerate
+                  }
                   onChange={(e) => {
                     setFieldValue('isColumnEditable', e.target.checked);
                   }}
@@ -529,7 +533,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
           <Grid item xs={12} md={6}></Grid>
         </Grid>
       </Box>
-      {fieldData.type === 'currencyAmount' &&
+      {fieldData.type === 'currencyAmount' && (
         <Box>
           <Grid container>
             <Grid item xs={12} md={6}>
@@ -550,7 +554,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
             <Grid item xs={12} md={6}></Grid>
           </Grid>
         </Box>
-      }
+      )}
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
@@ -599,7 +603,10 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
-            {(fieldData.type === 'number' || fieldData.type === 'decimal' || fieldData.type === 'currencyAmount' || fieldData.type === 'currencyNumber') && (
+            {(fieldData.type === 'number' ||
+              fieldData.type === 'decimal' ||
+              fieldData.type === 'currencyAmount' ||
+              fieldData.type === 'currencyNumber') && (
               <FormControlLabel
                 control={
                   <Checkbox
@@ -759,11 +766,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
         </Box>
       )}
       {fieldData?.type === FieldList.PERCENT.type && formData?.childResource && formData?.parentResource && (
-        <CopyFromHeaderFieldDropdown
-          values={values}
-          setFieldValue={setFieldValue}
-          resource={formData?.parentResource}
-        />
+        <CopyFromHeaderFieldDropdown values={values} setFieldValue={setFieldValue} resource={formData?.parentResource} />
       )}
       <Box mt={1}>
         <FormControl component="fieldset">

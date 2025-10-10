@@ -186,9 +186,13 @@ export const getCostPriceValue = (row: any, costPriceData: any, currency: any, f
       e.pricingMethod === row.pricingMethod
   );
   if (rateList?.length) {
-    const priceFieldName = `costPrice_${currency?.toLowerCase()}`;
-    row[priceFieldName] = rateList[0].price;
-    const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateList[0].price }, row, fields);
+    const obj: any = {};
+    obj[`costPrice_${currency?.toLowerCase()}`] = rateList[0].price;
+    Object?.keys(rateList[0]?.subStatusCost)?.forEach(key => {
+      obj[`${key}Price_${currency?.toLowerCase()}`] = rateList[0]?.subStatusCost?.[key];
+    });
+    Object.assign(row, obj);
+    const calValues = autoCalculateSpecificFields(obj, row, fields);
     Object.assign(row, calValues);
   }
   return row;

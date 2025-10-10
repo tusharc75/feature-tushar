@@ -10,6 +10,7 @@ import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import DataList from 'src/components/CustomReactTable/TableComponents/DataList';
 import { getCellValue } from 'src/components/CustomReactTable/utils';
+import FieldList from 'src/components/FormBuilder/FieldList';
 import CurrencyAutocomplete from 'src/components/Helpers/CurrencyAutocomplete';
 import { cn, dateFormat, dateTimeFormat, getUniqueCurrencies } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
@@ -19,25 +20,26 @@ import { ValidateOptions } from 'yup/lib/types';
 type YupSchema = Partial<yup.AnySchema> & { isValid: (value: any, options?: ValidateOptions<any>) => Promise<boolean> };
 
 const validInputs = new Set([
-  'singleLine',
-  'multiLine',
-  'email',
-  'mobileNumber',
-  'dropDown',
-  'multiSelect',
-  'date',
-  'year',
-  'dateTime',
-  'number',
-  'decimal',
-  'currencyNumber',
-  'percent',
-  'radio',
-  'name',
-  'colorPicker',
-  'url',
-  'currency',
-  'currencyAmount'
+  FieldList.SINGLELINE.type,
+  FieldList.MULTILINE.type,
+  FieldList.EMAIL.type,
+  FieldList.MOBILENUMBER.type,
+  FieldList.DROPDOWN.type,
+  FieldList.MULTISELECT.type,
+  FieldList.DATE.type,
+  FieldList.YEAR.type,
+  FieldList.DATETIME.type,
+  FieldList.NUMBER.type,
+  FieldList.DECIMAL.type,
+  FieldList.CURRENCYNUMBER.type,
+  FieldList.CURRENCYAMOUNT.type,
+  FieldList.PERCENT.type,
+  FieldList.RADIO.type,
+  FieldList.NAME.type,
+  FieldList.COLORPICKER.type,
+  FieldList.URL.type,
+  FieldList.CURRENCY.type,
+  FieldList.CHECKBOX.type
 ] as const);
 
 const inputArray = Array.from(validInputs);
@@ -311,6 +313,78 @@ const DropdownMultiSelectAndRadio = ({
   );
 };
 
+const RenderCheckBox = ({
+  cell,
+  cellValue,
+  columnDef,
+  handleStopEditing,
+  handleSubmit,
+  row,
+  setCellValue,
+  validationSchema
+}: InputProps & Partial<AutocompleteProps<any, any, any, any>>) => {
+  const [isValid, setIsValid] = useState(true);
+  const options = [
+    { optionLabel: 'Yes', optionValue: true },
+    { optionLabel: 'No', optionValue: false }
+  ];
+
+  const handleBlur = async () => {
+    handleStopEditing();
+    if (!isValid) return;
+    if (getCellValue(cell) !== cellValue) {
+      handleSubmit();
+    }
+  };
+
+  const value = useMemo(() => {
+    const emptyValue = { optionLabel: '', optionValue: '' };
+    return options?.find((d) => d.optionValue === cellValue) || emptyValue;
+  }, [cellValue, columnDef]);
+
+  const handleInput = async (value: string | string[]) => {
+    const isValidValue = await validationSchema?.isValid?.(value);
+    setIsValid(isValidValue);
+    setCellValue(value);
+  };
+
+  return (
+    <Autocomplete
+      fullWidth
+      loading={!options}
+      multiple={false}
+      disableCloseOnSelect
+      limitTags={2}
+      onKeyDown={(e) => {
+        const target = e.target as HTMLInputElement;
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          target.blur();
+        }
+      }}
+      size={'small'}
+      selectOnFocus
+      options={options ? options : []}
+      getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+      value={value}
+      onChange={(e, val) => {
+        handleInput(val?.optionValue);
+      }}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          variant="outlined"
+          id={`${cell.column.id}-input-${row.index || 0}`}
+          autoFocus
+          onBlur={() => {
+            handleBlur();
+          }}
+        />
+      )}
+    />
+  );
+};
+
 const DataListWrapper = ({ cell, cellValue, columnDef, handleStopEditing, handleSubmit, row, setCellValue, validationSchema }: InputProps) => {
   const handleBlur = async () => {
     handleStopEditing();
@@ -511,20 +585,23 @@ const decimalPlaceValidator = (decimalPlaces: number = 0, allowedMinus: boolean 
     });
 };
 
-const schemas: Partial<Record<ValidInputType, YupSchema | ((attributes: any, allowedMinus?: boolean) => YupSchema)>> = {
-  name: yup.string(),
-  colorPicker: yup.string().min(7),
-  email: yup.string().email(),
-  mobileNumber: yup.string().min(5),
-  singleLine: yup.string().min(1),
-  multiLine: yup.string().min(1),
-  url: yup.string().url(),
-  number: (allowedMinus: boolean = false) => (allowedMinus ? yup.number() : yup.number().min(1)),
-  currencyNumber: (decimalPlaces: number, allowMinus: boolean) => decimalPlaceValidator(decimalPlaces, allowMinus)
+const schemas: Partial<Record<ValidInputType, (attributes: any, allowedMinus?: boolean) => YupSchema>> = {
+  name: () => yup.string(),
+  colorPicker: () => yup.string().min(7),
+  email: () => yup.string().email(),
+  mobileNumber: () => yup.string().min(5),
+  singleLine: () => yup.string().min(1),
+  multiLine: () => yup.string().min(1),
+  url: () => yup.string().url(),
+  number: (_decimalPlaces: number, allowedMinus: boolean = false) => (allowedMinus ? yup.number() : yup.number().min(0.000001)),
+  currencyNumber: (decimalPlaces: number, allowMinus: boolean) => decimalPlaceValidator(decimalPlaces, allowMinus),
+  checkBox: () => yup.boolean().required()
 } as const;
 
 export const RenderInputField = memo((props: InputProps) => {
-  const validationSchema = schemas[props.columnDef.type] || { isValid: () => new Promise((resove) => resove(true)) };
+  const validationSchema = schemas[props.columnDef.type]?.(props.columnDef.decimalPlaces ?? 2, props.columnDef.isAllowedMinus) || {
+    isValid: () => new Promise((resove) => resove(true))
+  };
 
   // isAllowedMinus
 
@@ -544,10 +621,10 @@ export const RenderInputField = memo((props: InputProps) => {
       return <RenderTextInput {...props} validationSchema={validationSchema} type="color" />;
     }
     case 'currencyNumber': {
-      return <CurrencyNumber {...props} validationSchema={validationSchema(props.columnDef.decimalPlaces ?? 2, props.columnDef.isAllowedMinus)} />;
+      return <CurrencyNumber {...props} validationSchema={validationSchema} />;
     }
     case 'number': {
-      return <RenderTextInput {...props} validationSchema={validationSchema(props.columnDef.isAllowedMinus)} type={'number'} />;
+      return <RenderTextInput {...props} validationSchema={validationSchema} type={'number'} />;
     }
     case 'percent': {
       return <RenderTextInput {...props} validationSchema={validationSchema} suffixIcon={'%'} />;
@@ -572,6 +649,9 @@ export const RenderInputField = memo((props: InputProps) => {
     }
     case 'mobileNumber': {
       return <PhoneNumberInput {...props} validationSchema={validationSchema} />;
+    }
+    case 'checkBox': {
+      return <RenderCheckBox {...props} validationSchema={validationSchema} />;
     }
     case 'radio':
     case 'dropDown':
