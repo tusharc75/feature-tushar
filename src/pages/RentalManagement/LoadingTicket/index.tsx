@@ -1799,15 +1799,6 @@ const LoadingTicket = ({
   };
 
   const handleSubStatusChange = (dates) => {
-    const { statusChangePermissions } = assetPolicyData;
-    if (statusChangePermissions?.length) {
-      let statusChangeAllowed = statusChangePermissionsAllowed(user, statusChangePermissions, getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map((e) => e?.status), subStatusToUpdate.status);
-      if (!statusChangeAllowed) {
-        setStatusChangePermissionError(true)
-        setSubStatusToUpdate({ open: false, status: null });
-        return;
-      }
-    }
     setSubmitting(true);
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData?._id}/inventory/update-sub-status`, {
