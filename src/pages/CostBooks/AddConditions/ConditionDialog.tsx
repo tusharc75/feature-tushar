@@ -18,7 +18,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import _ from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 
-const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detailData, isBulkedit, allowedToEdit, assetStatusField, productList }) => {
+const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detailData, isBulkedit, allowedToEdit, subStatusOptions }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -85,14 +85,14 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
       }
       setHeaderLabel(
         startCase(conditionData?.materialType) +
-          ' - ' +
-          (conditionData?.materialType === MATERIAL_TYPE.product
-            ? details?.productName
-            : conditionData?.materialType === MATERIAL_TYPE.service
-              ? details?.serviceName
-              : conditionData?.materialType === MATERIAL_TYPE.package
-                ? details?.packageName
-                : details?.competencyName)
+        ' - ' +
+        (conditionData?.materialType === MATERIAL_TYPE.product
+          ? details?.productName
+          : conditionData?.materialType === MATERIAL_TYPE.service
+            ? details?.serviceName
+            : conditionData?.materialType === MATERIAL_TYPE.package
+              ? details?.packageName
+              : details?.competencyName)
       );
 
       currency.forEach((_currency) => {
@@ -158,7 +158,7 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
     delete values.tax;
     delete values.productDetail;
     delete values.packageDetail;
-    
+
     if (isBulkedit) {
       conditionData.forEach((element) => {
         data.push({ ...element, ...values });
@@ -341,34 +341,34 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
                             errors={errors}
                           />
                         </div>
-                        {permissions?.serializedAsset?.isRead && (
+                        {(values['materialType'] === 'competency' && subStatusOptions?.length > 0) && (
                           <div className="mt-2 border p-2">
                             <FormControlLabel
                               control={
                                 <Checkbox
-                                  checked={values['enableAssetStatusWisePricing']}
+                                  checked={values['enableSubStatusWiseCosting']}
                                   onChange={(e) => {
-                                    setFieldValue('enableAssetStatusWisePricing', e?.target?.checked);
+                                    setFieldValue('enableSubStatusWiseCosting', e?.target?.checked);
                                     if (!e?.target?.checked) {
-                                      setFieldValue('assetStatusWisePricing', []);
+                                      setFieldValue('subStatusWiseCosting', []);
                                     }
                                   }}
-                                  name="enableAssetStatusWisePricing"
+                                  name="enableSubStatusWiseCosting"
                                   color="primary"
                                 />
                               }
-                              label="Enable Asset Sub Status Wise Pricing"
+                              label="Enable Sub Status Wise Costing"
                             />
-                            {values['enableAssetStatusWisePricing'] && (
+                            {values['enableSubStatusWiseCosting'] && (
                               <div className="mt-2">
                                 <Autocomplete
                                   multiple
                                   id="status"
-                                  options={assetStatusField?.option || []}
+                                  options={subStatusOptions || []}
                                   getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                                   isOptionEqualToValue={(option: any, val) => option?.optionValue === val}
-                                  value={[...(assetStatusField?.option || [])]?.filter((o) =>
-                                    [...(values['assetStatusWisePricing'] || [])]?.map((a) => a?.status)?.includes(o?.optionValue)
+                                  value={[...(subStatusOptions || [])]?.filter((o) =>
+                                    [...(values['subStatusWiseCosting'] || [])]?.map((a) => a?.status)?.includes(o?.optionValue)
                                   )}
                                   onChange={(e, val) => {
                                     const newObj: any = {};
@@ -382,9 +382,9 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
                                       });
                                     });
                                     setFieldValue(
-                                      'assetStatusWisePricing',
+                                      'subStatusWiseCosting',
                                       val?.map((v) => {
-                                        const _v = values['assetStatusWisePricing']?.find((a) => a?.status === v?.optionValue);
+                                        const _v = values['subStatusWiseCosting']?.find((a) => a?.status === v?.optionValue);
                                         return {
                                           ...newObj,
                                           ..._v,
@@ -399,9 +399,9 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
                                 />
                                 {values['pricingMethod']?.length > 0 &&
                                   values['unit']?.length > 0 &&
-                                  values['assetStatusWisePricing'] &&
-                                  values['assetStatusWisePricing']?.length > 0 &&
-                                  values['assetStatusWisePricing']?.map((value) => (
+                                  values['subStatusWiseCosting'] &&
+                                  values['subStatusWiseCosting']?.length > 0 &&
+                                  values['subStatusWiseCosting']?.map((value) => (
                                     <RentPriceBox
                                       conditionData={conditionData}
                                       values={values}
@@ -460,7 +460,7 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
 export default ConditionDialog;
 
 const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedToEdit, touched = null, errors = null, status = '' }) => {
-  const value = status ? values['assetStatusWisePricing']?.find((a) => a?.status === status) || {} : values;
+  const value = status ? values['subStatusWiseCosting']?.find((a) => a?.status === status) || {} : values;
   return (
     <div className={`mt-2 p-2 ${status ? 'border' : ''}`}>
       {status && <div>{status}</div>}
@@ -469,67 +469,67 @@ const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedT
           <tr>
             <th></th>
             {currency &&
-              currency.map((_currency, i) => values['unit'] && values['unit'].map((_unit, j) => <th key={j}>{_unit + ' ' + _currency}</th>))}
+              currency.map((_currency, i) => values['unit'] && values['unit'].map((_unit, j) => <th key={j} className='font-normal'>{_unit}</th>))}
           </tr>
         </thead>
         <tbody>
           {values['pricingMethod'] &&
             values['pricingMethod'].map((_pricingMethod, i) => (
               <tr key={i}>
-                <th style={{ paddingRight: 10, minWidth: 50 }}>{startCase(_pricingMethod)}</th>
+                <th style={{ paddingRight: 10, minWidth: 50 }} className='font-normal'>{startCase(_pricingMethod)}</th>
                 {currency &&
                   currency.map((_currency, j) => {
                     const _fieldName = `rent_${camelCase(_pricingMethod.toLowerCase())}_${_currency.toLowerCase()}`;
                     return values['unit']
                       ? values['unit'].map((_unit, k) => {
-                          const __fieldName = `${_fieldName}_${camelCase(_unit.toLowerCase())}`;
-                          return (
-                            <td key={j + k}>
-                              <TextField
-                                name={__fieldName}
-                                disabled={!allowedToEdit}
-                                variant="outlined"
-                                margin="dense"
-                                size="small"
-                                fullWidth
-                                type="number"
-                                onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                                style={{ margin: 0 }}
-                                value={value[__fieldName]}
-                                onChange={(e) => {
-                                  if (status) {
-                                    const assetStatusWisePricing = [...values['assetStatusWisePricing']];
-                                    assetStatusWisePricing?.forEach((a) => {
-                                      if (a?.status === status) {
-                                        a[__fieldName] = parseFloat(e.target.value);
-                                      }
-                                    });
-                                    setFieldValue('assetStatusWisePricing', assetStatusWisePricing);
-                                  } else {
-                                    setFieldValue(__fieldName, parseFloat(e.target.value));
-                                  }
-                                }}
-                                slotProps={{
-                                  input: {
-                                    startAdornment: (
-                                      <InputAdornment position="start">
-                                        {result(
-                                          find(getUniqueCurrencies(), function (obj) {
-                                            return obj.currencyCode === _currency;
-                                          }),
-                                          'symbolNative'
-                                        )}
-                                      </InputAdornment>
-                                    ),
-                                    inputProps: { min: 0, max: 9999999999 }
-                                  }
-                                }}
-                                error={touched && errors && touched[__fieldName] && Boolean(errors[__fieldName])}
-                                helperText={touched && errors && touched[__fieldName] && errors[__fieldName]}
-                              />
-                            </td>
-                          );
-                        })
+                        const __fieldName = `${_fieldName}_${camelCase(_unit.toLowerCase())}`;
+                        return (
+                          <td key={j + k}>
+                            <TextField
+                              name={__fieldName}
+                              disabled={!allowedToEdit}
+                              variant="outlined"
+                              margin="dense"
+                              size="small"
+                              fullWidth
+                              type="number"
+                              onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                              style={{ margin: 0 }}
+                              value={value[__fieldName]}
+                              onChange={(e) => {
+                                if (status) {
+                                  const subStatusWiseCosting = [...values['subStatusWiseCosting']];
+                                  subStatusWiseCosting?.forEach((a) => {
+                                    if (a?.status === status) {
+                                      a[__fieldName] = parseFloat(e.target.value);
+                                    }
+                                  });
+                                  setFieldValue('subStatusWiseCosting', subStatusWiseCosting);
+                                } else {
+                                  setFieldValue(__fieldName, parseFloat(e.target.value));
+                                }
+                              }}
+                              slotProps={{
+                                input: {
+                                  startAdornment: (
+                                    <InputAdornment position="start">
+                                      {result(
+                                        find(getUniqueCurrencies(), function (obj) {
+                                          return obj.currencyCode === _currency;
+                                        }),
+                                        'symbolNative'
+                                      )}
+                                    </InputAdornment>
+                                  ),
+                                  inputProps: { min: 0, max: 9999999999 }
+                                }
+                              }}
+                              error={touched && errors && touched[__fieldName] && Boolean(errors[__fieldName])}
+                              helperText={touched && errors && touched[__fieldName] && errors[__fieldName]}
+                            />
+                          </td>
+                        );
+                      })
                       : null;
                   })}
               </tr>

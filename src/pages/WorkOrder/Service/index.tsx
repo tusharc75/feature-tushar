@@ -1187,6 +1187,7 @@ const Service = ({
       {viewServiceStepDataDialog.open && (
         <ViewServiceStepDataDialog
           servicesData={allServices}
+          products={products}
           stepsData={stepSubmitedData}
           selectedService={selectedService}
           handleClose={() => {
