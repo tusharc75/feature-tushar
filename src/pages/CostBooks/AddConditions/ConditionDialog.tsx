@@ -85,14 +85,14 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
       }
       setHeaderLabel(
         startCase(conditionData?.materialType) +
-          ' - ' +
-          (conditionData?.materialType === MATERIAL_TYPE.product
-            ? details?.productName
-            : conditionData?.materialType === MATERIAL_TYPE.service
-              ? details?.serviceName
-              : conditionData?.materialType === MATERIAL_TYPE.package
-                ? details?.packageName
-                : details?.competencyName)
+        ' - ' +
+        (conditionData?.materialType === MATERIAL_TYPE.product
+          ? details?.productName
+          : conditionData?.materialType === MATERIAL_TYPE.service
+            ? details?.serviceName
+            : conditionData?.materialType === MATERIAL_TYPE.package
+              ? details?.packageName
+              : details?.competencyName)
       );
 
       currency.forEach((_currency) => {
@@ -158,7 +158,7 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
     delete values.tax;
     delete values.productDetail;
     delete values.packageDetail;
-    
+
     if (isBulkedit) {
       conditionData.forEach((element) => {
         data.push({ ...element, ...values });
@@ -341,7 +341,7 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
                             errors={errors}
                           />
                         </div>
-                        {values['materialType'] === 'competency' && (
+                        {(values['materialType'] === 'competency' && subStatusOptions?.length > 0) && (
                           <div className="mt-2 border p-2">
                             <FormControlLabel
                               control={
@@ -469,67 +469,67 @@ const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedT
           <tr>
             <th></th>
             {currency &&
-              currency.map((_currency, i) => values['unit'] && values['unit'].map((_unit, j) => <th key={j}>{_unit + ' ' + _currency}</th>))}
+              currency.map((_currency, i) => values['unit'] && values['unit'].map((_unit, j) => <th key={j} className='font-normal'>{_unit}</th>))}
           </tr>
         </thead>
         <tbody>
           {values['pricingMethod'] &&
             values['pricingMethod'].map((_pricingMethod, i) => (
               <tr key={i}>
-                <th style={{ paddingRight: 10, minWidth: 50 }}>{startCase(_pricingMethod)}</th>
+                <th style={{ paddingRight: 10, minWidth: 50 }} className='font-normal'>{startCase(_pricingMethod)}</th>
                 {currency &&
                   currency.map((_currency, j) => {
                     const _fieldName = `rent_${camelCase(_pricingMethod.toLowerCase())}_${_currency.toLowerCase()}`;
                     return values['unit']
                       ? values['unit'].map((_unit, k) => {
-                          const __fieldName = `${_fieldName}_${camelCase(_unit.toLowerCase())}`;
-                          return (
-                            <td key={j + k}>
-                              <TextField
-                                name={__fieldName}
-                                disabled={!allowedToEdit}
-                                variant="outlined"
-                                margin="dense"
-                                size="small"
-                                fullWidth
-                                type="number"
-                                onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                                style={{ margin: 0 }}
-                                value={value[__fieldName]}
-                                onChange={(e) => {
-                                  if (status) {
-                                    const subStatusWiseCosting = [...values['subStatusWiseCosting']];
-                                    subStatusWiseCosting?.forEach((a) => {
-                                      if (a?.status === status) {
-                                        a[__fieldName] = parseFloat(e.target.value);
-                                      }
-                                    });
-                                    setFieldValue('subStatusWiseCosting', subStatusWiseCosting);
-                                  } else {
-                                    setFieldValue(__fieldName, parseFloat(e.target.value));
-                                  }
-                                }}
-                                slotProps={{
-                                  input: {
-                                    startAdornment: (
-                                      <InputAdornment position="start">
-                                        {result(
-                                          find(getUniqueCurrencies(), function (obj) {
-                                            return obj.currencyCode === _currency;
-                                          }),
-                                          'symbolNative'
-                                        )}
-                                      </InputAdornment>
-                                    ),
-                                    inputProps: { min: 0, max: 9999999999 }
-                                  }
-                                }}
-                                error={touched && errors && touched[__fieldName] && Boolean(errors[__fieldName])}
-                                helperText={touched && errors && touched[__fieldName] && errors[__fieldName]}
-                              />
-                            </td>
-                          );
-                        })
+                        const __fieldName = `${_fieldName}_${camelCase(_unit.toLowerCase())}`;
+                        return (
+                          <td key={j + k}>
+                            <TextField
+                              name={__fieldName}
+                              disabled={!allowedToEdit}
+                              variant="outlined"
+                              margin="dense"
+                              size="small"
+                              fullWidth
+                              type="number"
+                              onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                              style={{ margin: 0 }}
+                              value={value[__fieldName]}
+                              onChange={(e) => {
+                                if (status) {
+                                  const subStatusWiseCosting = [...values['subStatusWiseCosting']];
+                                  subStatusWiseCosting?.forEach((a) => {
+                                    if (a?.status === status) {
+                                      a[__fieldName] = parseFloat(e.target.value);
+                                    }
+                                  });
+                                  setFieldValue('subStatusWiseCosting', subStatusWiseCosting);
+                                } else {
+                                  setFieldValue(__fieldName, parseFloat(e.target.value));
+                                }
+                              }}
+                              slotProps={{
+                                input: {
+                                  startAdornment: (
+                                    <InputAdornment position="start">
+                                      {result(
+                                        find(getUniqueCurrencies(), function (obj) {
+                                          return obj.currencyCode === _currency;
+                                        }),
+                                        'symbolNative'
+                                      )}
+                                    </InputAdornment>
+                                  ),
+                                  inputProps: { min: 0, max: 9999999999 }
+                                }
+                              }}
+                              error={touched && errors && touched[__fieldName] && Boolean(errors[__fieldName])}
+                              helperText={touched && errors && touched[__fieldName] && errors[__fieldName]}
+                            />
+                          </td>
+                        );
+                      })
                       : null;
                   })}
               </tr>
