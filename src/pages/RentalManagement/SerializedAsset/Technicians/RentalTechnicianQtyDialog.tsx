@@ -323,7 +323,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                                   [costPriceFieldName]: costPrice?.price || 0
                                                 };
                                                 subStatusOptions?.forEach((subStatus) => {
-                                                  obj[`${camelCase(subStatus)}Price_${rentalManagementData?.currency?.toLowerCase()}`] =
+                                                  obj[`${camelCase(subStatus)}CostPrice_${rentalManagementData?.currency?.toLowerCase()}`] =
                                                     costPrice?.subStatusCost?.[`${camelCase(subStatus)}`] || 0;
                                                 });
                                                 const costPriceResult = autoCalculateSpecificFields(obj,
