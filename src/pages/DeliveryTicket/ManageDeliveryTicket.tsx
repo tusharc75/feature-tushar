@@ -398,6 +398,12 @@ const ManageDeliveryTicket = ({
             if (ele?.assetData) {
               obj.assetData = ele.assetData;
             }
+            if (ele?.status) {
+              obj.assetStatusOnTicketCreation = ele?.status
+            }
+            if (ele?.subStatus) {
+              obj.assetSubStatusOnTicketCreation = ele?.subStatus
+            }
             tempInitialData['assets'].push(obj);
           });
           tempInitialData['products'] = [];
