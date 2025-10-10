@@ -302,23 +302,27 @@ const CustomReactTable = ({
 
   const paginationLimit = useMemo(() => {
     if (!expander || isMobileView) return limit;
-    if (isAllRowsExpanded) {
-      if (isClientSideGrid) return table.getRowModel().flatRows.length;
-      else return table.getExpandedRowModel().flatRows.length;
-    }
-    const getRowCount = (list: Row<any>[], limit) => {
-      let rowLength = limit;
-      for (let i = 0; i < limit; i++) {
-        const item = list[i];
-        if (!item) return rowLength;
-        if (!item.subRows.length || !item.getIsExpanded()) continue;
-        rowLength += getRowCount(item.subRows, item.subRows.length);
+
+    const getRowCount = (rows: Row<any>[]): number => {
+      let count = 0;
+      for (const row of rows) {
+        count += 1; // count the row itself
+        if (row.getIsExpanded() && row.subRows.length) {
+          count += getRowCount(row.subRows);
+        }
       }
-      return rowLength;
+      return count;
     };
-    let length = getRowCount(table.getExpandedRowModel().rows, limit);
+
+    const start = page * limit;
+    const end = start + limit;
+
+    // slice from the *core* row model to respect pagination
+    const topLevelRows = table.getCoreRowModel().rows.slice(start, end);
+
+    const length = getRowCount(topLevelRows);
     return Math.max(length, limit);
-  }, [table, limit, isAllRowsExpanded, expanded, isClientSideGrid, expander, isMobileView]);
+  }, [table, limit, isAllRowsExpanded, expanded, expander, isMobileView, page]);
 
   useEffect(() => {
     table.setPageSize(paginationLimit);
