@@ -18,7 +18,6 @@ import { camelCase, startCase } from 'lodash';
 import { ExpandMore, Info } from '@mui/icons-material';
 import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { addDisable, deleteDisable, updateDisable } from 'src/constants/messageHelpers';
@@ -33,7 +32,7 @@ const AddConditions = ({ id, detailData }) => {
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
   const [addMaterialDialog, setAddMaterialDialog] = useState({ open: false, materialType: '' });
   const [condition, setCondition] = useState(null);
   const [showDialog, setShowDialog] = useState({ open: false, isBulkedit: false });
@@ -117,7 +116,7 @@ const AddConditions = ({ id, detailData }) => {
       .get(`/field?resource=${sidebarResource.employeeMaster}&view=true`)
       .then(({ data: { data } }) => {
         const statusField = data?.find((f) => f?.fieldData?.fieldName === 'subStatus')?.fieldData;
-        if (statusField?.option?.length > 0) {
+        if (statusField && statusField?.option?.length > 0) {
           setSubStatusOptions(statusField?.option);
         }
       });
@@ -717,7 +716,7 @@ const AddConditions = ({ id, detailData }) => {
                   <tr>
                     <th className="border border-gray-300 px-4 py-2"></th>
                     {openConditionDetails?.data?.pricingMethod?.map((method, index) => (
-                      <th key={index} className="whitespace-nowrap border border-gray-300 px-4 py-2">
+                      <th key={index} className="whitespace-nowrap border border-gray-300 px-4 py-2 font-normal">
                         {method}
                       </th>
                     ))}
@@ -726,9 +725,9 @@ const AddConditions = ({ id, detailData }) => {
                 <tbody>
                   {openConditionDetails?.data?.unit?.map((unit, rowIndex) => (
                     <tr key={rowIndex}>
-                      <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
+                      <td className="border border-gray-300 px-4 py-2 font-normal">{unit}</td>
                       {openConditionDetails?.data?.pricingMethod?.map((method, colIndex) => (
-                        <td key={colIndex} className="border border-gray-300 px-4 py-2">
+                        <td key={colIndex} className="border border-gray-300 px-4 py-2 ">
                           <p>
                             {formatAmountWithCurrency(
                               detailData?.currency,
