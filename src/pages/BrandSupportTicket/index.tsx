@@ -34,12 +34,12 @@ const BrandSupportTicket = () => {
     const [selectedStatus, setSelectedStatus] = useState(null);
 
     useEffect(() => {
-        fetchGridColumns();
-    }, [selectedBrand]);
-
-    useEffect(() => {
         fetchBrand();
     }, []);
+
+    useEffect(() => {
+        fetchGridColumns();
+    }, [selectedBrand]);
 
     useEffect(() => {
         if (renderCount > 0) {
@@ -84,7 +84,7 @@ const BrandSupportTicket = () => {
         if (isExport) {
             deepFilter = `?`;
         }
-        if (selectedBrand || user?.user?.brand) {
+        if (selectedBrand) {
             deepFilter = `${deepFilter}&brand=${selectedBrand?.optionValue || user?.user?.brand}`;
         }
         if (selectedStatus) {
