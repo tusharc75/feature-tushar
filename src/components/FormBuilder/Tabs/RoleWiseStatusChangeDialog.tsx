@@ -1,7 +1,7 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { Autocomplete, Box, Dialog, IconButton, TextField } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, ASSET_STATUS } from 'src/constants/helpers';
+import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { FieldArray, Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -21,14 +21,12 @@ export default function RoleWiseStatusChangeDialog({ onClose, onSuccess, resourc
   const [submitting, setSubmitting] = useState(false);
   const [roles, setRoles] = useState([]);
   const [loadingRoles, setLoadingRoles] = useState(false);
-
-  const statusOptions = Object.values(ASSET_STATUS).map((status) => ({
-    optionLabel: status,
-    optionValue: status
-  }));
+  const [statusOptions, setStatusOptions] = useState([]);
+  const [loadingStatusOptions, setLoadingStatusOptions] = useState(false);
 
   useEffect(() => {
     fetchRoles();
+    fetchStatusOptions();
   }, []);
 
   useEffect(() => {
@@ -47,6 +45,23 @@ export default function RoleWiseStatusChangeDialog({ onClose, onSuccess, resourc
       setRoles(roleOptions);
       setLoadingRoles(false);
     });
+  };
+
+  const fetchStatusOptions = async () => {
+    setLoadingStatusOptions(true);
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.serializedAsset}&view=true`)
+      .then(({ data: { data } }) => {
+        const statusField = data?.find((f) => f?.fieldData?.fieldName === 'status')?.fieldData;
+        if (statusField?.option) {
+          setStatusOptions(statusField.option);
+        }
+        setLoadingStatusOptions(false);
+      })
+      .catch((error) => {
+        setLoadingStatusOptions(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleSave = (values) => {
@@ -99,7 +114,7 @@ export default function RoleWiseStatusChangeDialog({ onClose, onSuccess, resourc
         }
       }}
     >
-      {!loadingRoles ? (
+      {!loadingRoles && !loadingStatusOptions ? (
         <Formik initialValues={initialValues} validateOnMount validate={validate} onSubmit={handleSave}>
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
