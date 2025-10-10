@@ -13,7 +13,7 @@ import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { actionDisable, rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
+import { actionDisable, rentalManagementActions, rentalManagementMessage, statusChangePermissionMsg } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -73,6 +73,9 @@ import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/Contained
 import { TabPanel } from 'src/components/CustomTabs';
 import TechnicianDispatchReturn from 'src/pages/RentalManagement/TechnicianDispatchReturn';
 import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
+import { statusChangePermissionsAllowed } from 'src/pages/SerializedAsset/helper';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
+
 
 const stepGlobalDataAdded = {
   createTicket: false,
@@ -115,7 +118,7 @@ const LoadingTicket = ({
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords, dataRows } = state;
-
+  const [statusChangePermissionError, setStatusChangePermissionError] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -2047,6 +2050,15 @@ const LoadingTicket = ({
               disabled={statusToUpdate.isUpdating}
               onClick={() => {
                 setStatusToUpdate((prevState) => ({ ...prevState, isUpdating: true }));
+                const { statusChangePermissions } = assetPolicyData;
+                if (statusChangePermissions?.length) {
+                  let statusChangeAllowed = statusChangePermissionsAllowed(user, statusChangePermissions, getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map((e) => e?.status), statusToUpdate.status);
+                  if (!statusChangeAllowed) {
+                    setStatusChangePermissionError(true)
+                    setStatusToUpdate({ open: false, isUpdating: false, status: '', message: '' });
+                    return;
+                  }
+                }
                 axiosInstance()
                   .put(`${serializedAsset.api}/update-status`, {
                     comment: statusToUpdate.message,
@@ -2213,6 +2225,14 @@ const LoadingTicket = ({
           ids={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map((r) => r?._id)}
           onSuccess={handleAssetData}
           loading={replaceLoading}
+        />
+      )}
+      {statusChangePermissionError && (
+        <MessageDialog
+          open={true}
+          header="Alert"
+          message={statusChangePermissionMsg}
+          onClose={() => setStatusChangePermissionError(false)}
         />
       )}
     </>

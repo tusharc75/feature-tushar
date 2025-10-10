@@ -283,7 +283,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                  permissions?.serializedAssetStatusChangeRequest?.isUpdate
+                    permissions?.serializedAssetStatusChangeRequest?.isUpdate
                     ? false
                     : true
                 }
@@ -296,7 +296,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                  permissions?.serializedAssetStatusChangeRequest?.isUpdate
+                    permissions?.serializedAssetStatusChangeRequest?.isUpdate
                     ? false
                     : true
                 }
