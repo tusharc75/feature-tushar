@@ -30,6 +30,8 @@ const BrandSupportTicket = () => {
     const [brandList, setBrandList] = useState([]);
     const [renderCount, setRenderCount] = useState(0);
     const [columns, setColumns] = useState(null);
+    const [statusOptions, setStatusOptions] = useState(null);
+    const [selectedStatus, setSelectedStatus] = useState(null);
 
     useEffect(() => {
         fetchBrand();
@@ -45,7 +47,7 @@ const BrandSupportTicket = () => {
             fetchData(cancelTokenSource);
             return () => cancelTokenSource.cancel();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, selectedBrand]);
+    }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, selectedBrand, selectedStatus]);
 
     const fetchBrand = () => {
         axiosInstance()
@@ -60,6 +62,7 @@ const BrandSupportTicket = () => {
         axiosInstance()
             .get(`${routes.supportTicket.path}/fields?brand=${brand}`)
             .then(({ data: { data } }) => {
+                setStatusOptions(data?.find((d) => d?.fieldData?.fieldName === 'status')?.fieldData?.option || []);
                 const newColumns = generateColumns(
                     renderedFrom,
                     data,
@@ -83,6 +86,9 @@ const BrandSupportTicket = () => {
         }
         if (selectedBrand) {
             deepFilter = `${deepFilter}&brand=${selectedBrand?.optionValue || user?.user?.brand}`;
+        }
+        if (selectedStatus) {
+            deepFilter = `${deepFilter}&selectedStatus=${selectedStatus?.optionValue}`;
         }
         const { filterByIds, deepFilters } = gridFilterParser(filters);
         if (filterByIds?.length) {
@@ -178,6 +184,24 @@ const BrandSupportTicket = () => {
                                         margin='none'
                                         size='small'
                                         label='Brand'
+                                        variant='outlined'
+                                    />
+                                )}
+                            />
+                            <Autocomplete
+                                style={{ width: 250 }}
+                                value={selectedStatus}
+                                onChange={(_, value) => {
+                                    setSelectedStatus(value);
+                                }}
+                                options={statusOptions}
+                                getOptionLabel={(option) => option.optionLabel}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        margin='none'
+                                        size='small'
+                                        label='Status'
                                         variant='outlined'
                                     />
                                 )}
