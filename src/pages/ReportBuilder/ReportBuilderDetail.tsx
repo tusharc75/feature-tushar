@@ -20,13 +20,106 @@ import SortIcon from '@mui/icons-material/Sort';
 import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import JoinInnerIcon from '@mui/icons-material/JoinInner';
 import FunctionsIcon from '@mui/icons-material/Functions';
-import { PipelineItem, LookupPipeline, GroupPipeline, SortPipeline, LimitPipeline, OPERATIONS, getUniqueResources, validatePipeline } from './utils';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import {
+  PipelineItem,
+  LookupPipeline,
+  GroupPipeline,
+  SortPipeline,
+  LimitPipeline,
+  ChartPipeline,
+  OPERATIONS,
+  getUniqueResources,
+  validatePipeline,
+  reportBuilderTypeOptions,
+  chartTypeOptions
+} from './utils';
 
 const schema = object().shape({
   name: string().min(3, 'Too Short!').max(50, 'Too Long').required('Report name  is required'),
   resource: string().required('Resource is required'),
   pageNumberInFooter: boolean()
 });
+
+const AccumulatorRow = ({
+  accumulator,
+  accIndex,
+  resourceFields,
+  onUpdate,
+  onRemove,
+  showRemove = false,
+  isEdit
+}: {
+  accumulator: any;
+  accIndex: number;
+  resourceFields: any[];
+  onUpdate: (updates: any) => void;
+  onRemove?: () => void;
+  showRemove?: boolean;
+  isEdit: boolean;
+}) => (
+  <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
+    <Grid size={{ xs: 12, sm: 3 }}>
+      <Autocomplete
+        disabled={!isEdit}
+        value={OPERATIONS.find((op) => op.value === accumulator.operation) || null}
+        options={OPERATIONS}
+        getOptionLabel={(option) => option.label}
+        onChange={(e, val) => {
+          onUpdate({ operation: val?.value || 'count' });
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            size="small"
+            label="Operation"
+            variant="outlined"
+            fullWidth
+            required
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+        )}
+      />
+    </Grid>
+    {accumulator?.operation !== 'count' && (
+      <Grid size={{ xs: 12, sm: 3 }}>
+        <Autocomplete
+          disabled={!isEdit}
+          value={resourceFields.find((f) => f.fieldName === accumulator.field) || null}
+          options={resourceFields}
+          getOptionLabel={(option) => option.fieldLabel}
+          onChange={(e, val) => {
+            onUpdate({ field: val?.fieldName || '' });
+          }}
+          renderInput={(params) => (
+            <TextField {...params} size="small" label="Field" variant="outlined" fullWidth required slotProps={{ inputLabel: { shrink: true } }} />
+          )}
+        />
+      </Grid>
+    )}
+    <Grid size={{ xs: 12, sm: 3 }}>
+      <TextField
+        disabled={!isEdit}
+        size="small"
+        label="Output Field Name"
+        variant="outlined"
+        fullWidth
+        value={accumulator?.outputField}
+        slotProps={{ inputLabel: { shrink: true } }}
+        onChange={(e) => {
+          onUpdate({ outputField: e.target.value });
+        }}
+      />
+    </Grid>
+    {showRemove && (
+      <Grid size={{ xs: 12, sm: 1 }}>
+        <IconButton size="small" onClick={onRemove} disabled={!isEdit}>
+          <DeleteIcon fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
+        </IconButton>
+      </Grid>
+    )}
+  </Grid>
+);
 
 export default function ReportBuilderDetail() {
   const { id } = useParams();
@@ -77,7 +170,8 @@ export default function ReportBuilderDetail() {
     const initialValues = {
       name: '',
       resource: '',
-      pipeline: []
+      pipeline: [],
+      type: 'report'
     };
     if (id && id !== '0') {
       try {
@@ -88,6 +182,7 @@ export default function ReportBuilderDetail() {
         initialValues.resource = data?.resource;
         initialValues.pipeline = data?.pipeline || [];
         initialValues.name = data?.name;
+        initialValues.type = data?.type;
 
         setPipeline(data?.pipeline || []);
 
@@ -129,6 +224,24 @@ export default function ReportBuilderDetail() {
   useEffect(() => {
     fetchData();
   }, [id]);
+
+  useEffect(() => {
+    if (formValues?.type === 'report') {
+      setPipeline(prev => prev.filter(item => item.type !== 'chart'));
+    } else if (formValues?.type === 'kpi') {
+      const hasChart = pipeline?.some(item => item.type === 'chart');
+      if (!hasChart) {
+        const chartItem: ChartPipeline = {
+          _id: `chart-${Date.now()}`,
+          type: 'chart',
+          chartType: 'bar',
+          xAxis: { field: '', label: '' },
+          yAxis: { field: '', label: '' }
+        };
+        setPipeline(prev => [...prev, chartItem]);
+      }
+    }
+  }, [formValues?.type]);
 
   const generateId = (type: string) => `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -173,7 +286,17 @@ export default function ReportBuilderDetail() {
         return;
     }
 
-    setPipeline((prev) => [...prev, newItem]);
+    setPipeline((prev) => {
+      const chartIndex = prev.findIndex(item => item.type === 'chart');
+
+      if (chartIndex !== -1) {
+        const newPipeline = [...prev];
+        newPipeline.splice(chartIndex, 0, newItem);
+        return newPipeline;
+      } else {
+        return [...prev, newItem];
+      }
+    });
   };
 
   const updatePipelineItem = (id: string, updates: Partial<PipelineItem>) => {
@@ -210,13 +333,16 @@ export default function ReportBuilderDetail() {
 
     setIsUpdating(true);
 
+    const submitData: any = {
+      name: values.name.trim(),
+      pipeline: pipeline,
+      resource: values?.resource,
+      type: values?.type
+    };
+
     if (id === '0') {
       axiosInstance()
-        .post('/report-builder', {
-          name: values.name.trim(),
-          pipeline: pipeline,
-          resource: values?.resource
-        })
+        .post('/report-builder', submitData)
         .then(({ data: { data, message } }) => {
           if (isBreakCrumbPath) {
             history.push({ pathname: isBreakCrumbPath });
@@ -236,13 +362,10 @@ export default function ReportBuilderDetail() {
           toastConfig.setToastConfig(error);
         });
     } else {
-      let api = '/report-builder';
       axiosInstance()
-        .put(api, {
+        .put('/report-builder', {
           _id: id,
-          name: values.name.trim(),
-          pipeline: pipeline,
-          resource: values?.resource
+          ...submitData
         })
         .then(({ data: { data, message } }) => {
           if (isBreakCrumbPath) {
@@ -265,8 +388,8 @@ export default function ReportBuilderDetail() {
     }
   };
 
-  const handleClose = () => {
-    history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.reportBuilder.path });
+  const handleClose = (path?: string) => {
+    history.push({ pathname: isBreakCrumbPath || path ? isBreakCrumbPath || path : routes.reportBuilder.path });
   };
 
   const FieldMatchRow = ({
@@ -412,84 +535,6 @@ export default function ReportBuilderDetail() {
     </Grid>
   );
 
-  const AccumulatorRow = ({
-    accumulator,
-    accIndex,
-    resourceFields,
-    onUpdate,
-    onRemove,
-    showRemove = false
-  }: {
-    accumulator: any;
-    accIndex: number;
-    resourceFields: any[];
-    onUpdate: (updates: any) => void;
-    onRemove?: () => void;
-    showRemove?: boolean;
-  }) => (
-    <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
-      <Grid size={{ xs: 12, sm: 3 }}>
-        <Autocomplete
-          disabled={!isEdit}
-          value={OPERATIONS.find((op) => op.value === accumulator.operation) || null}
-          options={OPERATIONS}
-          getOptionLabel={(option) => option.label}
-          onChange={(e, val) => {
-            onUpdate({ operation: val?.value || 'count' });
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              size="small"
-              label="Operation"
-              variant="outlined"
-              fullWidth
-              required
-              slotProps={{ inputLabel: { shrink: true } }}
-            />
-          )}
-        />
-      </Grid>
-      {accumulator?.operation !== 'count' && (
-        <Grid size={{ xs: 12, sm: 3 }}>
-          <Autocomplete
-            disabled={!isEdit}
-            value={resourceFields.find((f) => f.fieldName === accumulator.field) || null}
-            options={resourceFields}
-            getOptionLabel={(option) => option.fieldLabel}
-            onChange={(e, val) => {
-              onUpdate({ field: val?.fieldName || '' });
-            }}
-            renderInput={(params) => (
-              <TextField {...params} size="small" label="Field" variant="outlined" fullWidth required slotProps={{ inputLabel: { shrink: true } }} />
-            )}
-          />
-        </Grid>
-      )}
-      <Grid size={{ xs: 12, sm: 3 }}>
-        <TextField
-          disabled={!isEdit}
-          size="small"
-          label="Output Field Name"
-          variant="outlined"
-          fullWidth
-          value={accumulator?.outputField}
-          slotProps={{ inputLabel: { shrink: true } }}
-          onChange={(e) => {
-            onUpdate({ outputField: e.target.value });
-          }}
-        />
-      </Grid>
-      {showRemove && (
-        <Grid size={{ xs: 12, sm: 1 }}>
-          <IconButton size="small" onClick={onRemove} disabled={!isEdit}>
-            <DeleteIcon fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
-          </IconButton>
-        </Grid>
-      )}
-    </Grid>
-  );
-
   const renderLookupComponent = (item: LookupPipeline) => {
     const localFields = [{ fieldName: '_id', fieldLabel: '_id' }, ...(resourceFieldMap[formValues?.resource] || [])];
     const lookupFields = [{ fieldName: '_id', fieldLabel: '_id' }, ...(resourceFieldMap[item?.withResource] || [])];
@@ -573,6 +618,7 @@ export default function ReportBuilderDetail() {
               accumulator={acc}
               accIndex={index}
               resourceFields={resourceFields}
+              isEdit={isEdit}
               onUpdate={(updates) => {
                 const updatedAccumulator = [...item.accumulator];
                 updatedAccumulator[index] = { ...updatedAccumulator[index], ...updates };
@@ -581,9 +627,9 @@ export default function ReportBuilderDetail() {
               onRemove={
                 item?.accumulator?.length > 1
                   ? () => {
-                      const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
-                      updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                    }
+                    const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
+                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                  }
                   : undefined
               }
               showRemove={item?.accumulator?.length > 1}
@@ -606,7 +652,8 @@ export default function ReportBuilderDetail() {
           <Divider sx={{ my: 2 }} />
 
           <Box>
-            <span style={{ fontWeight: 500, marginRight: 8, marginBottom: 2 }}>Group by:</span>
+            <span>Group By</span>
+            <Box mt={2} />
             <Autocomplete
               disabled={!isEdit}
               multiple
@@ -768,6 +815,184 @@ export default function ReportBuilderDetail() {
     );
   };
 
+  const renderChartComponent = (item: ChartPipeline) => {
+    const itemErrors = pipelineErrors[item._id] || [];
+
+    return (
+      <Card key={item._id} sx={{ mb: 2, border: itemErrors.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
+        <CardContent>
+          <Box display="flex" alignItems="center" gap={1} mb={2}>
+            <BarChartIcon color="primary" />
+            <span style={{ fontWeight: 500 }}>Chart</span>
+          </Box>
+
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <Autocomplete
+                disabled={!isEdit}
+                value={chartTypeOptions.find((option) => option.optionValue === item.chartType) || null}
+                options={chartTypeOptions}
+                getOptionLabel={(option) => option.optionLabel}
+                onChange={(e, val) => {
+                  if (val?.optionValue === 'bar') {
+                    updatePipelineItem(item._id, {
+                      chartType: 'bar',
+                      xAxis: { field: '', label: '' },
+                      yAxis: { field: '', label: '' },
+                      value: undefined,
+                      label: undefined
+                    });
+                  } else if (val?.optionValue === 'pie') {
+                    updatePipelineItem(item._id, {
+                      chartType: 'pie',
+                      value: '',
+                      label: '',
+                      xAxis: undefined,
+                      yAxis: undefined
+                    });
+                  }
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    label="Chart Type"
+                    variant="outlined"
+                    fullWidth
+                    required
+                    error={itemErrors.includes('chartType_required')}
+                    helperText={itemErrors.includes('chartType_required') ? 'Chart Type is required' : ''}
+                    slotProps={{ inputLabel: { shrink: true } }}
+                  />
+                )}
+              />
+            </Grid>
+
+            {item.chartType === 'bar' && (
+              <>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <TextField
+                    disabled={!isEdit}
+                    size="small"
+                    label="X-Axis Field"
+                    variant="outlined"
+                    fullWidth
+                    required
+                    value={item.xAxis?.field || ''}
+                    error={itemErrors.includes('xAxis_field_required')}
+                    helperText={itemErrors.includes('xAxis_field_required') ? 'X-Axis Field is required' : ''}
+                    slotProps={{ inputLabel: { shrink: true } }}
+                    onChange={(e) => {
+                      updatePipelineItem(item._id, {
+                        xAxis: { ...item.xAxis, field: e.target.value }
+                      });
+                    }}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <TextField
+                    disabled={!isEdit}
+                    size="small"
+                    label="X-Axis Label"
+                    variant="outlined"
+                    fullWidth
+                    required
+                    value={item.xAxis?.label || ''}
+                    error={itemErrors.includes('xAxis_label_required')}
+                    helperText={itemErrors.includes('xAxis_label_required') ? 'X-Axis Label is required' : ''}
+                    slotProps={{ inputLabel: { shrink: true } }}
+                    onChange={(e) => {
+                      updatePipelineItem(item._id, {
+                        xAxis: { ...item.xAxis, label: e.target.value }
+                      });
+                    }}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <TextField
+                    disabled={!isEdit}
+                    size="small"
+                    label="Y-Axis Field"
+                    variant="outlined"
+                    fullWidth
+                    required
+                    value={item.yAxis?.field || ''}
+                    error={itemErrors.includes('yAxis_field_required')}
+                    helperText={itemErrors.includes('yAxis_field_required') ? 'Y-Axis Field is required' : ''}
+                    slotProps={{ inputLabel: { shrink: true } }}
+                    onChange={(e) => {
+                      updatePipelineItem(item._id, {
+                        yAxis: { ...item.yAxis, field: e.target.value }
+                      });
+                    }}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                  <TextField
+                    disabled={!isEdit}
+                    size="small"
+                    label="Y-Axis Label"
+                    variant="outlined"
+                    fullWidth
+                    required
+                    value={item.yAxis?.label || ''}
+                    error={itemErrors.includes('yAxis_label_required')}
+                    helperText={itemErrors.includes('yAxis_label_required') ? 'Y-Axis Label is required' : ''}
+                    slotProps={{ inputLabel: { shrink: true } }}
+                    onChange={(e) => {
+                      updatePipelineItem(item._id, {
+                        yAxis: { ...item.yAxis, label: e.target.value }
+                      });
+                    }}
+                  />
+                </Grid>
+              </>
+            )}
+
+            {item.chartType === 'pie' && (
+              <>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                  <TextField
+                    disabled={!isEdit}
+                    size="small"
+                    label="Value"
+                    variant="outlined"
+                    fullWidth
+                    required
+                    value={item.value || ''}
+                    error={itemErrors.includes('value_required')}
+                    helperText={itemErrors.includes('value_required') ? 'Value Field is required' : ''}
+                    slotProps={{ inputLabel: { shrink: true } }}
+                    onChange={(e) => {
+                      updatePipelineItem(item._id, { value: e.target.value });
+                    }}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                  <TextField
+                    disabled={!isEdit}
+                    size="small"
+                    label="Label"
+                    variant="outlined"
+                    fullWidth
+                    required
+                    value={item.label || ''}
+                    error={itemErrors.includes('label_required')}
+                    helperText={itemErrors.includes('label_required') ? 'Label Field is required' : ''}
+                    slotProps={{ inputLabel: { shrink: true } }}
+                    onChange={(e) => {
+                      updatePipelineItem(item._id, { label: e.target.value });
+                    }}
+                  />
+                </Grid>
+              </>
+            )}
+          </Grid>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return initialValues ? (
     <>
       <Formik initialValues={initialValues} validationSchema={schema} onSubmit={handleSubmit} enableReinitialize={true}>
@@ -794,11 +1019,10 @@ export default function ReportBuilderDetail() {
                       isConfirmBeforeClick={true}
                       onBreadCrumbClick={(path) => {
                         setIsBreakCrumbPath(path);
-
                         if (!isEqual({ ...values }, initialValues)) {
                           setShowConfirmDialog(true);
                         } else {
-                          handleClose();
+                          handleClose(path);
                         }
                       }}
                     />
@@ -886,6 +1110,38 @@ export default function ReportBuilderDetail() {
                               )}
                             />
                           </Grid>
+                          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                            <Autocomplete
+                              disableClearable={true}
+                              disabled={!isEdit}
+                              getOptionLabel={(option) => option.optionLabel}
+                              isOptionEqualToValue={(option, value) => option.optionValue === value.optionValue}
+                              value={
+                                reportBuilderTypeOptions?.find((data) => data.optionValue === values['type'])
+                                  ? reportBuilderTypeOptions?.find((data) => data.optionValue === values['type'])
+                                  : null
+                              }
+                              options={reportBuilderTypeOptions}
+                              onChange={(e, val: any) => {
+                                setFieldValue('type', val ? val.optionValue : '');
+                              }}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  required={true}
+                                  margin="none"
+                                  size="small"
+                                  name="type"
+                                  label="Type"
+                                  variant="outlined"
+                                  error={touched['type'] && Boolean(errors['type'])}
+                                  helperText={touched['type'] && errors['type']}
+                                  fullWidth
+                                  slotProps={{ inputLabel: { shrink: true } }}
+                                />
+                              )}
+                            />
+                          </Grid>
                         </Grid>
                       </Grid>
 
@@ -940,6 +1196,8 @@ export default function ReportBuilderDetail() {
                                   return renderSortComponent(item as SortPipeline);
                                 case 'limit':
                                   return renderLimitComponent(item as LimitPipeline);
+                                case 'chart':
+                                  return renderChartComponent(item as ChartPipeline);
                                 default:
                                   return null;
                               }
