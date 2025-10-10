@@ -28,9 +28,6 @@ import { FiExternalLink } from 'react-icons/fi';
 import { useHistory } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
-import { statusChangePermissionsAllowed } from '../helper';
-import MessageDialog from 'src/components/Helpers/MessageDialog';
-import { statusChangePermissionMsg } from 'src/constants/messageHelpers';
 
 const renderedFrom = camelCase(sidebarResource.serializedAssetStatusChangeRequest);
 
@@ -50,12 +47,9 @@ const SerializedAssetStatusChangeRequest = () => {
   const [renderCount, setRenderCount] = useState(0);
   const [approveRejectRecord, setApproveRejectRecord] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState(ASSET_APPROVAL_STATUS.pending);
-  const [policy, setPolicy] = useState(null);
-  const [statusChangePermissionError, setStatusChangePermissionError] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
-    fetchPolicy();
   }, []);
 
   useEffect(() => {
@@ -63,16 +57,6 @@ const SerializedAssetStatusChangeRequest = () => {
       fetchData();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, selectedStatus]);
-
-  const fetchPolicy = async () => {
-    try {
-      const { data } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
-      const policy = data?.data;
-      setPolicy(policy);
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  }
 
   const fetchGridColumns = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(
@@ -252,15 +236,6 @@ const SerializedAssetStatusChangeRequest = () => {
   };
 
   const handleStatusChange = (status) => {
-    const { statusChangePermissions } = policy;
-    if (statusChangePermissions?.length) {
-      let statusChangeAllowed = statusChangePermissionsAllowed(user, statusChangePermissions, selectedRecords?.map((e) => e?.status), status);
-      if (!statusChangeAllowed) {
-        setStatusChangePermissionError(true)
-        return;
-      }
-    }
-
     let _ids = [];
     if (approveRejectRecord) {
       _ids.push(approveRejectRecord._id);
@@ -376,14 +351,6 @@ const SerializedAssetStatusChangeRequest = () => {
           onOk={() => {
             handleStatusChange(showConfirmDialog.status);
           }}
-        />
-      )}
-      {statusChangePermissionError && (
-        <MessageDialog
-          open={true}
-          header="Alert"
-          message={statusChangePermissionMsg}
-          onClose={() => setStatusChangePermissionError(false)}
         />
       )}
     </section>
