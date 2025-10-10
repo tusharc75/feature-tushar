@@ -145,7 +145,7 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
       },
       {
         accessor: 'status',
-        Header: 'Status',
+        Header: 'Rental Status',
         width: 200,
         Cell: ({ row }) => (row.original['status'] ? <p>{row.original?.status}</p> : <NoDataCell />)
       },
