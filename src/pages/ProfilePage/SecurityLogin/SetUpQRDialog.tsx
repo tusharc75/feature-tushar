@@ -1,4 +1,3 @@
-
 import React, { useContext, useState } from 'react';
 import { Box, Dialog, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
@@ -15,15 +14,17 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 
 const SetUpQRDialog = ({ onClose, onSubmit, mode = 'setup', qrLoginId = null }) => {
   const [loading, setLoading] = useState(false);
+  const [oldPin, setOldPin] = useState('');
   const [pin, setPin] = useState('');
   const toastConfig = useContext(CustomToastContext);
 
   const handleSubmit = async () => {
     setLoading(true);
     const pinNumber = Number(pin);
+    const oldPinNumber = Number(oldPin);
     let apiCall;
     if (mode === 'change' && qrLoginId) {
-      apiCall = axiosInstance().put('/user/qr-setup', { pin: pinNumber, _id: qrLoginId });
+      apiCall = axiosInstance().put('/user/qr-setup', { pin: pinNumber, _id: qrLoginId, oldPin: oldPinNumber });
     } else {
       apiCall = axiosInstance().post('/user/qr-setup', { pin: pinNumber });
     }
@@ -37,7 +38,8 @@ const SetUpQRDialog = ({ onClose, onSubmit, mode = 'setup', qrLoginId = null }) 
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-      }).finally(() => {
+      })
+      .finally(() => {
         setLoading(false);
         onSubmit();
         onClose();
@@ -69,15 +71,29 @@ const SetUpQRDialog = ({ onClose, onSubmit, mode = 'setup', qrLoginId = null }) 
             <Box m={2}>
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12 }}>
+                  {mode === 'change' && (
+                    <div className="mx-auto mb-7 max-w-[200px] text-center">
+                      <Typography variant="body2" className="mb-2">
+                        Enter Old PIN
+                      </Typography>
+                      <OtpInput
+                        validateChar={(character, index) => /^[0-9]$/.test(character)}
+                        value={oldPin}
+                        onChange={(value) => setOldPin(value)}
+                        TextFieldsProps={{ size: 'small', type: 'password' }}
+                        length={4}
+                      />
+                    </div>
+                  )}
                   <div className="mx-auto max-w-[200px] text-center">
                     <Typography variant="body2" className="mb-2">
-                      Enter PIN
+                      Enter {mode === 'change' ? 'New' : ''} PIN
                     </Typography>
                     <OtpInput
                       validateChar={(character, index) => /^[0-9]$/.test(character)}
                       value={pin}
                       onChange={(value) => setPin(value)}
-                      TextFieldsProps={{ size: 'small' }}
+                      TextFieldsProps={{ size: 'small', type: 'password' }}
                       length={4}
                     />
                   </div>
@@ -88,14 +104,10 @@ const SetUpQRDialog = ({ onClose, onSubmit, mode = 'setup', qrLoginId = null }) 
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        <ThemeButton onClick={onClose} buttonType='transparent'>
+        <ThemeButton onClick={onClose} buttonType="transparent">
           Cancel
         </ThemeButton>
-        <ThemeButton
-          buttonType='theme'
-          disabled={pin.length < 4}
-          onClick={handleSubmit}
-        >
+        <ThemeButton buttonType="theme" disabled={pin.length < 4} onClick={handleSubmit}>
           Submit
         </ThemeButton>
       </CustomDialogFooter>
