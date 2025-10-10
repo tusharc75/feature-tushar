@@ -16,15 +16,18 @@ import {
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import axios, { CancelTokenSource } from 'axios';
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const BrandSupportTicket = () => {
+
     const renderedFrom = camelCase("Brand Support Tickets");
     const toastConfig = useContext(CustomToastContext);
     const { state, dispatch } = useTableReducer({ renderedFrom });
     const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
     const { generateColumns } = useColumns();
     const {
-        state: { user, selectedEntity, permissions }
+        state: { user }
     }: any = useData();
     const [selectedBrand, setSelectedBrand] = useState(null);
     const [brandList, setBrandList] = useState([]);
@@ -32,6 +35,29 @@ const BrandSupportTicket = () => {
     const [columns, setColumns] = useState(null);
     const [statusOptions, setStatusOptions] = useState(null);
     const [selectedStatus, setSelectedStatus] = useState(null);
+
+    if (user?.user?.brand !== '66c81f4780d6ec9b112302ef') {
+        return (<div className="pt-3 flex flex-col items-center justify-center">
+            <div className="bg-white shadow-md rounded-2xl p-8 text-center max-w-md border border-gray-200">
+                <div className="flex justify-center mb-4">
+                    <LockOutlinedIcon className="!text-red-500 !w-12 !h-12" fontSize="large" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                    Access Denied
+                </h2>
+                <p className="text-gray-600 mb-4">
+                    You don’t have permission to access this page.
+                </p>
+                <ThemeButton
+                    buttonType="theme"
+                    onClick={() => window.history.back()}
+                >
+                    Go Back
+                </ThemeButton>
+            </div>
+        </div>
+        )
+    }
 
     useEffect(() => {
         fetchBrand();
@@ -47,7 +73,7 @@ const BrandSupportTicket = () => {
             fetchData(cancelTokenSource);
             return () => cancelTokenSource.cancel();
         } else setRenderCount((preCount) => preCount + 1);
-    }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, selectedBrand, selectedStatus]);
+    }, [search, page, limit, filters, sorting, showFilteredRecordsOnly, selectedBrand, selectedStatus]);
 
     const fetchBrand = () => {
         axiosInstance()
@@ -63,10 +89,7 @@ const BrandSupportTicket = () => {
             .get(`${routes.supportTicket.path}/fields?brand=${brand}`)
             .then(({ data: { data } }) => {
                 setStatusOptions(data?.find((d) => d?.fieldData?.fieldName === 'status')?.fieldData?.option || []);
-                const newColumns = generateColumns(
-                    renderedFrom,
-                    data,
-                ).map((col) => ({
+                const newColumns = generateColumns(renderedFrom, data).map((col) => ({
                     ...col,
                     isColumnEditable: false,
                     editAble: false,
