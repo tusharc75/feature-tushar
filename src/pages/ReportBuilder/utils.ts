@@ -9,7 +9,7 @@ export const OPERATIONS = [
 
 export interface PipelineItem {
   _id: string;
-  type: 'lookup' | 'group' | 'sort' | 'limit';
+  type: 'lookup' | 'group' | 'sort' | 'limit' | 'chart';
   [key: string]: any;
 }
 
@@ -41,6 +41,31 @@ export interface LimitPipeline extends PipelineItem {
   type: 'limit';
   limit: number;
 }
+
+export interface ChartPipeline extends PipelineItem {
+  type: 'chart';
+  chartType: 'bar' | 'pie';
+  xAxis?: {
+    field: string;
+    label: string;
+  };
+  yAxis?: {
+    field: string;
+    label: string;
+  };
+  value?: string;
+  label?: string;
+}
+
+export const reportBuilderTypeOptions = [
+  { optionLabel: 'Report', optionValue: 'report' },
+  { optionLabel: 'KPI', optionValue: 'kpi' }
+];
+
+export const chartTypeOptions = [
+  { optionLabel: 'Bar', optionValue: 'bar' },
+  { optionLabel: 'Pie', optionValue: 'pie' }
+];
 
 export const getUniqueResources = (pipeline: PipelineItem[], mainResource?: string): string[] => {
   const resources = new Set<string>();
@@ -109,6 +134,35 @@ export const validatePipeline = (pipeline: PipelineItem[]): { [itemId: string]: 
         const limitItem = item as LimitPipeline;
         if (!limitItem?.limit || limitItem?.limit < 1) {
           itemErrors.push('limit_required');
+        }
+        break;
+
+      case 'chart':
+        const chartItem = item as ChartPipeline;
+        if (!chartItem?.chartType) {
+          itemErrors.push('chartType_required');
+        }
+        if (chartItem?.chartType === 'bar') {
+          if (!chartItem?.xAxis?.field) {
+            itemErrors.push('xAxis_field_required');
+          }
+          if (!chartItem?.xAxis?.label) {
+            itemErrors.push('xAxis_label_required');
+          }
+          if (!chartItem?.yAxis?.field) {
+            itemErrors.push('yAxis_field_required');
+          }
+          if (!chartItem?.yAxis?.label) {
+            itemErrors.push('yAxis_label_required');
+          }
+        }
+        if (chartItem?.chartType === 'pie') {
+          if (!chartItem?.value) {
+            itemErrors.push('value_required');
+          }
+          if (!chartItem?.label) {
+            itemErrors.push('label_required');
+          }
         }
         break;
     }
