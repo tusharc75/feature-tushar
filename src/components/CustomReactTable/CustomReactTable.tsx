@@ -302,9 +302,7 @@ const CustomReactTable = ({
 
   const paginationLimit = useMemo(() => {
     if (!expander || isMobileView) return limit;
-    if (isAllRowsExpanded) {
-      return table.getExpandedRowModel().flatRows.length;
-    }
+
     const getRowCount = (rows: Row<any>[]): number => {
       let count = 0;
       for (const row of rows) {
@@ -316,12 +314,15 @@ const CustomReactTable = ({
       return count;
     };
 
-    // ✅ slice from the *core* row model to respect pagination
-    const topLevelRows = table.getCoreRowModel().rows.slice(0, limit);
+    const start = page * limit;
+    const end = start + limit;
+
+    // slice from the *core* row model to respect pagination
+    const topLevelRows = table.getCoreRowModel().rows.slice(start, end);
 
     const length = getRowCount(topLevelRows);
     return Math.max(length, limit);
-  }, [table, limit, isAllRowsExpanded, expanded, expander, isMobileView]);
+  }, [table, limit, isAllRowsExpanded, expanded, expander, isMobileView, page]);
 
   useEffect(() => {
     table.setPageSize(paginationLimit);
