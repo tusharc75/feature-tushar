@@ -189,7 +189,7 @@ export const getCostPriceValue = (row: any, costPriceData: any, currency: any, f
     const obj: any = {};
     obj[`costPrice_${currency?.toLowerCase()}`] = rateList[0].price;
     Object?.keys(rateList[0]?.subStatusCost)?.forEach(key => {
-      obj[`${key}Price_${currency?.toLowerCase()}`] = rateList[0]?.subStatusCost?.[key];
+      obj[`${key}CostPrice_${currency?.toLowerCase()}`] = rateList[0]?.subStatusCost?.[key];
     });
     Object.assign(row, obj);
     const calValues = autoCalculateSpecificFields(obj, row, fields);
