@@ -317,7 +317,7 @@ const CustomReactTable = ({
     const start = page * limit;
     const end = start + limit;
 
-    // ✅ slice from the *core* row model to respect pagination
+    // slice from the *core* row model to respect pagination
     const topLevelRows = table.getCoreRowModel().rows.slice(start, end);
 
     const length = getRowCount(topLevelRows);
