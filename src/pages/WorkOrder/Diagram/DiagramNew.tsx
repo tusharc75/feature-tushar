@@ -119,7 +119,7 @@ const DiagramNew = ({
     }: any = await axiosInstance().get(`${workOrder.api}/service/service/${referenceId}`);
     if (data?.length) {
       const serviceData = data?.map((s) => ({
-        optionLabel: s?.serviceDetail?.optionLabel,
+        optionLabel: `${s?.serviceDetail?.optionLabel}${s?.addInOptionLabel ? ` - ${s?.addInOptionLabel}` : ''}`,
         optionValue: s?.serviceDetail?.optionValue,
         uniqueId: s?._id
       }));
