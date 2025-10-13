@@ -948,19 +948,19 @@ export const checkFieldDependency = (fieldId, sectionId, section, sectionFields 
       row?.field.forEach((_field) => {
         fieldNames?.forEach((_fieldName) => {
           if (_field?.inputFields && _field?.inputFields.includes(_fieldName)) {
-            used_Fields.push({ fieldLabel: _field.fieldLabel, fieldName: _field?.fieldName, sectionName: _field?.sectionName });
+            used_Fields.push({ fieldLabel: _field.fieldLabel, fieldName: _field?.fieldName, sectionName: _field?.sectionName || row?.sectionName });
           }
           if (_field?.formulaFields && _field?.formulaFields.includes(_fieldName)) {
-            used_Fields.push({ fieldLabel: _field.fieldLabel, fieldName: _field?.fieldName, sectionName: _field?.sectionName });
+            used_Fields.push({ fieldLabel: _field.fieldLabel, fieldName: _field?.fieldName, sectionName: _field?.sectionName || row?.sectionName });
           }
           if (_field?.formulainputFields && _field?.formulainputFields.includes(_fieldName)) {
-            used_Fields.push({ fieldLabel: _field.fieldLabel, fieldName: _field?.fieldName, sectionName: _field?.sectionName });
+            used_Fields.push({ fieldLabel: _field.fieldLabel, fieldName: _field?.fieldName, sectionName: _field?.sectionName || row?.sectionName });
           }
           if (_field?.dropdowDependentOn && _field?.dropdowDependentOn.includes(_fieldName)) {
-            used_Fields.push({ fieldLabel: _field.fieldLabel, fieldName: _field?.fieldName, sectionName: _field?.sectionName });
+            used_Fields.push({ fieldLabel: _field.fieldLabel, fieldName: _field?.fieldName, sectionName: _field?.sectionName || row?.sectionName });
           }
           if (_field?.lookupDependentOn && _field?.lookupDependentOn === _fieldName) {
-            used_Fields.push({ fieldLabel: _field.fieldLabel, fieldName: _field?.fieldName, sectionName: _field?.sectionName });
+            used_Fields.push({ fieldLabel: _field.fieldLabel, fieldName: _field?.fieldName, sectionName: _field?.sectionName || row?.sectionName });
           }
         });
       });
@@ -984,6 +984,7 @@ export const checkFieldDependency = (fieldId, sectionId, section, sectionFields 
 };
 
 export const checkSectionDependency = (sectionId, sections) => {
+  console.log('sections', sections)
   try {
     const sectionToDelete = sections.find(s => s.sectionId.toString() === sectionId.toString());
 
