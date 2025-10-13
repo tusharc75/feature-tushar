@@ -221,7 +221,9 @@ const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, materialType, isSub
             ? `Add Job Consumables`
             : materialType === MATERIAL_TYPE.package
               ? `Add Job ${resources?.packages?.titlePlural}`
-              : `Add Job ${resources?.serializedAsset?.titlePlural}`
+              : materialType === MATERIAL_TYPE.service
+                ? `Add Job ${resources?.serviceMaster?.titlePlural}`
+                : `Add Job ${resources?.serializedAsset?.titlePlural}`
         }
         showManimizeMaximize={false}
         showRequiredLabel={false}
