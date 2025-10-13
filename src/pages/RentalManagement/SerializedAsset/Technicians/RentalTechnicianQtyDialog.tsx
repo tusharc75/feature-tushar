@@ -62,7 +62,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
       let pricingMethodOptions: any = arrayToDropwdownOption(technicianData?.competence?.pricingMethod || []);
       let unitOptions: any = arrayToDropwdownOption(technicianData?.competence?.unit || []);
       setPriceMethodListConst(pricingMethodOptions);
-      if (data.some((ele) => ele.fieldName === 'pricingCondition')) {
+      if (data.some((ele) => ele.fieldName === 'pricingCondition') || user?.user?.brandPolicy?.materialCostPrice) {
         await getAllPricingCondition({ ...technicianData, competence: technicianData?.competence?.optionValue }, pricingMethodOptions);
       } else {
         setPriceMethodList(pricingMethodOptions);
@@ -319,13 +319,20 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                                 initialData.fields
                                               );
                                               if (!isEmpty(costPrice)) {
+                                                console.log(costPrice)
                                                 const obj: any = {
                                                   [costPriceFieldName]: costPrice?.price || 0
                                                 };
+
                                                 subStatusOptions?.forEach((subStatus) => {
                                                   if (allFields?.find((f) => f?.fieldName === `${camelCase(subStatus)}CostPrice`)) {
                                                     obj[`${camelCase(subStatus)}CostPrice_${rentalManagementData?.currency?.toLowerCase()}`] =
                                                       costPrice?.subStatusCost?.[`${camelCase(subStatus)}`] || 0;
+                                                  }
+                                                });
+                                                costPrice?.extraCost?.forEach(e => {
+                                                  if (allFields?.find(f => f?.fieldName === `${camelCase(e?.name)}CostPrice`)) {
+                                                    obj[`${camelCase(e?.name)}CostPrice_${rentalManagementData?.currency?.toLowerCase()}`] = e?.cost || 0;
                                                   }
                                                 });
                                                 const costPriceResult = autoCalculateSpecificFields(obj,
@@ -371,7 +378,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                               const competenceData = technicianData?.technician?.competencies?.find((ele) => ele.optionValue === value);
                                               const newMethodOptions = arrayToDropwdownOption(competenceData?.pricingMethod);
                                               setPriceMethodListConst(newMethodOptions);
-                                              if (isPricingConditionField) {
+                                              if (isPricingConditionField || user?.user?.brandPolicy?.materialCostPrice) {
                                                 setFieldValue('pricingCondition', '');
                                                 if (value !== '') {
                                                   await getAllPricingCondition(
@@ -382,11 +389,8 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                               } else {
                                                 setPriceMethodList(newMethodOptions);
                                               }
-
                                               let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
-
                                               const result = autoCalculateSpecificFields({ [priceFieldName]: 0 }, values, initialData.fields);
-
                                               if (Object.keys(result).length >= 1) {
                                                 for (var x in result) {
                                                   setFieldValue(x, result[x]);
