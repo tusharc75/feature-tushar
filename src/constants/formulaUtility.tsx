@@ -908,37 +908,6 @@ export const checkUniqueValidation = (checkinFields, checkfromFields) => {
   }
 };
 
-export const checkSectionDependency = (sectionId, sections) => {
-  try {
-    const sectionToDelete = sections.find(s => s.sectionId.toString() === sectionId.toString());
-    
-    if (!sectionToDelete) {
-      return { error: true, message: 'Section not found' };
-    }
-
-    const dependentFields = [];
-    
-    sectionToDelete.field.forEach(field => {
-      const result = checkFieldDependency(field._id, sectionId, sections);
-      if (result.error) {
-        const usedInFields = result.message.replace('This field used in ', '').replace(' fields.', '');
-        dependentFields.push(`${field.fieldLabel} → ${usedInFields}`);
-      }
-    });
-
-    if (dependentFields.length > 0) {
-      return { 
-        error: true, 
-        message: `Cannot delete section. Dependencies found: ${dependentFields.join('; ')}` 
-      };
-    }
-
-    return { error: false, message: '' };
-  } catch (e) {
-    return { error: true, message: 'Error checking section dependencies' };
-  }
-};
-
 export const checkFieldDependency = (fieldId, sectionId, section) => {
   try {
     var fieldData: any = {};
@@ -1001,6 +970,37 @@ export const checkFieldDependency = (fieldId, sectionId, section) => {
     }
   } catch (e) {
     return { error: true, message: 'Error in Delete' };
+  }
+};
+
+export const checkSectionDependency = (sectionId, sections) => {
+  try {
+    const sectionToDelete = sections.find(s => s.sectionId.toString() === sectionId.toString());
+    
+    if (!sectionToDelete) {
+      return { error: true, message: 'Section not found' };
+    }
+
+    const dependentFields = [];
+    
+    sectionToDelete.field.forEach(field => {
+      const result = checkFieldDependency(field._id, sectionId, sections);
+      if (result.error) {
+        const usedInFields = result.message.replace('This field used in ', '').replace(' fields.', '');
+        dependentFields.push(`${field.fieldLabel} → ${usedInFields}`);
+      }
+    });
+
+    if (dependentFields.length > 0) {
+      return { 
+        error: true, 
+        message: `Cannot delete section. Dependencies found: ${dependentFields.join('; ')}` 
+      };
+    }
+
+    return { error: false, message: '' };
+  } catch (e) {
+    return { error: true, message: 'Error checking section dependencies' };
   }
 };
 
