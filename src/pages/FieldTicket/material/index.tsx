@@ -113,7 +113,7 @@ const Material = ({
   }>({
     open: false,
     type: null,
-    minStartDate: null,
+    minStartDate: null
   });
   const [isStartStopServiceEnabled, setIsStartStopServiceEnabled] = useState(false);
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
@@ -122,13 +122,8 @@ const Material = ({
 
   useEffect(() => {
     fetchFields();
-  }, [fieldTicketData]);
-
-  useEffect(() => {
-    if (columns) {
-      fetchMaterial();
-    }
-  }, [columns]);
+    fetchMaterial();
+  }, [fieldTicketData?._id]);
 
   useEffect(() => {
     let stepData = [
@@ -173,7 +168,7 @@ const Material = ({
   };
 
   const fetchFields = async () => {
-    setColumns(null)
+    setColumns(null);
     let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit, isOffline);
     setAllFields(JSON.parse(JSON.stringify(data)));
     data = data?.filter((f) => f?.isRead);
@@ -199,10 +194,11 @@ const Material = ({
         Header: 'Index',
         width: 70,
         sticky: 'left',
-        Cell: ({ row }) =>
-        (<div className="d-flex align-items-center gap-2">
-          <h5 className="text-truncate">{row?.original?.index}</h5>
-        </div>),
+        Cell: ({ row }) => (
+          <div className="d-flex align-items-center gap-2">
+            <h5 className="text-truncate">{row?.original?.index}</h5>
+          </div>
+        ),
         Footer: () => {
           return <>Total</>;
         }
@@ -308,45 +304,45 @@ const Material = ({
       },
       ...(serviceFields?.find((e) => e.fieldName === 'competencyType')
         ? [
-          {
-            accessor: 'competencyType',
-            Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-            width: 250,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'competencyType',
-                  lookupResource: sidebarResource.competencyType
-                }}
-                original={row?.original}
-              />
-            ),
-            accessorFn: (original) => AccessorFunction(original, 'competencyType')
-          }
-        ]
+            {
+              accessor: 'competencyType',
+              Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencyType',
+                    lookupResource: sidebarResource.competencyType
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencyType')
+            }
+          ]
         : []),
       ...(serviceFields?.find((e) => e.fieldName === 'competencies')
         ? [
-          {
-            accessor: 'competencies',
-            Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-            width: 250,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'competencies',
-                  lookupResource: sidebarResource.competencies
-                }}
-                original={row?.original}
-              />
-            ),
-            accessorFn: (original) => AccessorFunction(original, 'competencies')
-          }
-        ]
+            {
+              accessor: 'competencies',
+              Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencies',
+                    lookupResource: sidebarResource.competencies
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencies')
+            }
+          ]
         : [])
     ];
     column = [...column, ...newColumns];
@@ -479,7 +475,7 @@ const Material = ({
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
-    setRefreshChild(!refreshChild);
+    setRefreshChild((prev) => !prev);
   };
 
   const generateNestedData = (material, parent, isPriceRequired) => {
@@ -1004,280 +1000,43 @@ const Material = ({
       });
   };
 
-  const AddButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null, parentType: '', serializedAssetService: false });
-          }}
-          id={'add-existing-service-menu-item'}
-        >
-          Add Existing Service
-        </MenuItem>
-        {permissions?.serviceMaster?.isCreate && !isOffline && (
-          <MenuItem
-            onClick={() => {
-              setMaterialDialog({ open: true, type: 'newService', parentId: null, parentType: '', serializedAssetService: false });
-            }}
-            id={'add-new-service-menu-item'}
-          >
-            Add New Service
-          </MenuItem>
-        )}
-        {permissions?.packages?.isRead && resourcePolicy?.showAddPackages && !isOffline && (
-          <MenuItem
-            onClick={() => {
-              setMaterialDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null, parentType: '', serializedAssetService: false });
-            }}
-            id={'add-existing-package-menu-item'}
-          >
-            Add Existing Package
-          </MenuItem>
-        )}
-        {costFields?.length > 0 && (
-          <MenuItem
-            onClick={() => {
-              setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
-            }}
-            id={'add-manual-entry-menu-item'}
-          >
-            Add Manual Entry
-          </MenuItem>
-        )}
-        {!isOffline && resourcePolicy?.showRentalAddMaterial && fieldTicketData?.rentalJob?.optionValue && (
-          <>
-            <MenuItem
-              onClick={() => {
-                setAddRentalJobDataDialog({ open: true, type: MATERIAL_TYPE.service });
-              }}
-            >
-              {`Add Job ${resources?.serviceMaster?.titlePlural}`}
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                setAddRentalJobDataDialog({ open: true, type: MATERIAL_TYPE.package });
-              }}
-            >
-              {`Add Job ${resources?.packages?.titlePlural}`}
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                setAddRentalJobDataDialog({ open: true, type: MATERIAL_TYPE.serializedAsset });
-              }}
-            >
-              {`Add Job ${resources?.serializedAsset?.titlePlural}`}
-            </MenuItem>
-          </>
-        )}
-        {!isOffline &&
-          resourcePolicy?.showQuotationAddMaterial &&
-          fieldTicketData?.quotation?.optionValue &&
-          fieldTicketData?.quotationVersion?.optionValue && (
-            <>
-              <MenuItem
-                onClick={() => {
-                  setAddQuotationDataDialog({ open: true, type: MATERIAL_TYPE.package });
-                }}
-              >
-                {`Add ${resources?.packages?.titlePlural} From ${resources?.quotation?.titleSingular}`}
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setAddQuotationDataDialog({ open: true, type: MATERIAL_TYPE.service });
-                }}
-              >
-                {`Add Services From ${resources?.quotation?.titleSingular}`}
-              </MenuItem>
-            </>
-          )}
-        {!isOffline &&
-          resourcePolicy?.showFieldServiceOrderAddMaterial &&
-          fieldTicketData?.isServiceInFieldServiceOrder &&
-          fieldTicketData?.fieldServiceOrder?.optionValue && (
-            <>
-              <MenuItem
-                onClick={() => {
-                  setAddFieldServiceOrderDataDialog(true);
-                }}
-              >
-                {`Add Services From ${resources?.fieldServiceOrder?.titleSingular}`}
-              </MenuItem>
-            </>
-          )}
-      </>
-    );
-  };
-
-  const ActionButtonMenuItms = () => {
-
-    const validateAction = (action) => {
-      const errorMessages = [];
-      selectedRecords.forEach((e) => {
-        if (action === fieldTicketActions.startService) {
-          const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
-          if (!isEmpty(serviceLogEntry)) {
-            errorMessages.push({ index: e.index, message: fieldTicketMessages.serviceAlreadyStarted });
-          }
-        } else if (action === fieldTicketActions.stopService) {
-          const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
-          if (!serviceLogEntry) {
-            errorMessages.push({ index: e.index, message: fieldTicketMessages.serviceNotStarted });
-          }
-        }
-        else if (action === fieldTicketActions.deleteServiceLog) {
-          const serviceLogCount = e?.serviceLog?.length;
-          if (!serviceLogCount) {
-            errorMessages.push({ index: e.index, message: fieldTicketMessages.serviceNotStarted });
-          }
-        }
-      });
-      if (errorMessages?.length) {
-        setOpenMessageDialog({ open: true, errorMessages: errorMessages });
-        return true;
-      }
-      return false;
-    };
-    return (
-      <>
-        {isStartStopServiceEnabled && (
-          <>
-            <MenuItem
-              onClick={() => {
-                if (!validateAction(fieldTicketActions.startService)) {
-                  const dates = [];
-                  selectedRecords?.forEach((d: any) => {
-                    d?.serviceLog?.forEach((l: any) => {
-                      if (l?.endDate) dates.push(new Date(l.endDate));
-                    });
-                  });
-                  let date = null;
-                  if (dates?.length) {
-                    date = new Date(Math.max(...dates));
-                    date.setDate(date.getDate() + 1);
-                  }
-                  setServiceConfirmationDialog({ open: true, type: 'start', minStartDate: date });
-                }
-              }}
-            >
-              Start Service(s)
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                if (!validateAction(fieldTicketActions.stopService)) {
-                  const dates = [];
-                  selectedRecords?.forEach((d: any) => {
-                    const serviceLogEntry = d?.serviceLog?.find((log: any) => !log.endDate);
-                    dates.push(new Date(serviceLogEntry?.startDate));
-                  });
-                  let date = null;
-                  if (dates?.length) {
-                    date = new Date(Math.max(...dates));
-                  }
-                  date = selectedRecords?.reduce((maxDate, record) => {
-                    if (record?.maxInvoiceDate) {
-                      const recordDate = new Date(record.maxInvoiceDate);
-                      return recordDate > maxDate ? recordDate : maxDate;
-                    }
-                    return maxDate;
-                  }, date);
-                  setServiceConfirmationDialog({ open: true, type: 'stop', minStartDate: date });
-                }
-              }}
-            >
-              Stop Service(s)
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                if (!validateAction(fieldTicketActions.startService)) {
-                  const dates = [];
-                  selectedRecords?.forEach((d: any) => {
-                    d?.serviceLog?.forEach((l: any) => {
-                      dates.push(new Date(l.endDate));
-                    });
-                  });
-                  let date = null;
-                  if (dates?.length) {
-                    date = new Date(Math.max(...dates));
-                    date.setDate(date.getDate() + 1);
-                  }
-                  setServiceConfirmationDialog({ open: true, type: 'startStop', minStartDate: date });
-                }
-              }}
-            >
-              Start/Stop Service(s)
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                if (!validateAction(fieldTicketActions.deleteServiceLog)) {
-                  const data = [];
-                  selectedRecords?.forEach((d: any) => {
-                    data.push({
-                      _id: d?._id,
-                      serviceLogId: d?.serviceLog[d?.serviceLog?.length - 1]?._id
-                    });
-                  });
-                  setDeleteServiceLogConfirmDialog({ open: true, data });
-                }
-              }}
-            >
-              Delete Service Log(s)
-            </MenuItem>
-          </>
-        )}
-        <MenuItem
-          disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
-          onClick={() => {
-            setIsServiceEdit({ open: true, data: null, showSaveAndNext: false });
-            setIsBulkEdit(true);
-          }}
-        >
-          Bulk Edit
-        </MenuItem>
-        {selectedRecords.some((e) => e.type === MATERIAL_TYPE.serializedAsset) && (
-          <MenuItem
-            onClick={() => {
-              setMaterialDialog({
-                open: true,
-                type: MATERIAL_TYPE.service,
-                parentId: null,
-                parentType: MATERIAL_TYPE.serializedAsset,
-                serializedAssetService: true
-              });
-            }}
-          >
-            {`Perform ${resources?.serviceMaster?.titlePlural}`}
-          </MenuItem>
-        )}
-        <MenuItem
-          disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
-          onClick={() => {
-            const obj: any = [];
-            const dataToDelete = selectedRecords && selectedRecords.filter((e) => !e.hideSelection);
-            dataToDelete?.forEach((ele) => {
-              obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
-            });
-            dataToDelete?.forEach((ele) => {
-              getNestedSubRows(obj, ele);
-            });
-            setDeleteData(obj);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <>
       {allowedToEdit && (
         <>
           <DetailsPageHeader
             isAddButtonVisible={true}
-            addButtonMenuItems={<AddButtonMenuItems />}
+            addButtonMenuItems={
+              <AddButtonMenuItems
+                setMaterialDialog={setMaterialDialog}
+                permissions={permissions}
+                isOffline={isOffline}
+                resourcePolicy={resourcePolicy}
+                costFields={costFields}
+                setShowCostDialog={setShowCostDialog}
+                fieldTicketData={fieldTicketData}
+                setAddRentalJobDataDialog={setAddRentalJobDataDialog}
+                resources={resources}
+                setAddQuotationDataDialog={setAddQuotationDataDialog}
+                setAddFieldServiceOrderDataDialog={setAddFieldServiceOrderDataDialog}
+              />
+            }
             isActionButtonVisible={!isOffline}
-            actionButtonMenuItems={<ActionButtonMenuItms />}
+            actionButtonMenuItems={
+              <ActionButtonMenuItms
+                selectedRecords={selectedRecords}
+                setOpenMessageDialog={setOpenMessageDialog}
+                isStartStopServiceEnabled={isStartStopServiceEnabled}
+                setServiceConfirmationDialog={setServiceConfirmationDialog}
+                setDeleteServiceLogConfirmDialog={setDeleteServiceLogConfirmDialog}
+                setIsServiceEdit={setIsServiceEdit}
+                setIsBulkEdit={setIsBulkEdit}
+                setMaterialDialog={setMaterialDialog}
+                resources={resources}
+                isDeleting={isDeleting}
+                setDeleteData={setDeleteData}
+              />
+            }
             actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
             hasXpadding
           />
@@ -1522,3 +1281,290 @@ const Material = ({
 };
 
 export default Material;
+
+const AddButtonMenuItems = ({
+  setMaterialDialog,
+  permissions,
+  isOffline,
+  resourcePolicy,
+  costFields,
+  setShowCostDialog,
+  fieldTicketData,
+  setAddRentalJobDataDialog,
+  resources,
+  setAddQuotationDataDialog,
+  setAddFieldServiceOrderDataDialog
+}) => {
+  return (
+    <>
+      <MenuItem
+        onClick={() => {
+          setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null, parentType: '', serializedAssetService: false });
+        }}
+        id={'add-existing-service-menu-item'}
+      >
+        Add Existing Service
+      </MenuItem>
+      {permissions?.serviceMaster?.isCreate && !isOffline && (
+        <MenuItem
+          onClick={() => {
+            setMaterialDialog({ open: true, type: 'newService', parentId: null, parentType: '', serializedAssetService: false });
+          }}
+          id={'add-new-service-menu-item'}
+        >
+          Add New Service
+        </MenuItem>
+      )}
+      {permissions?.packages?.isRead && resourcePolicy?.showAddPackages && !isOffline && (
+        <MenuItem
+          onClick={() => {
+            setMaterialDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null, parentType: '', serializedAssetService: false });
+          }}
+          id={'add-existing-package-menu-item'}
+        >
+          Add Existing Package
+        </MenuItem>
+      )}
+      {costFields?.length > 0 && (
+        <MenuItem
+          onClick={() => {
+            setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
+          }}
+          id={'add-manual-entry-menu-item'}
+        >
+          Add Manual Entry
+        </MenuItem>
+      )}
+      {!isOffline && resourcePolicy?.showRentalAddMaterial && fieldTicketData?.rentalJob?.optionValue && (
+        <>
+          <MenuItem
+            onClick={() => {
+              setAddRentalJobDataDialog({ open: true, type: MATERIAL_TYPE.service });
+            }}
+          >
+            {`Add Job ${resources?.serviceMaster?.titlePlural}`}
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setAddRentalJobDataDialog({ open: true, type: MATERIAL_TYPE.package });
+            }}
+          >
+            {`Add Job ${resources?.packages?.titlePlural}`}
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setAddRentalJobDataDialog({ open: true, type: MATERIAL_TYPE.serializedAsset });
+            }}
+          >
+            {`Add Job ${resources?.serializedAsset?.titlePlural}`}
+          </MenuItem>
+        </>
+      )}
+      {!isOffline &&
+        resourcePolicy?.showQuotationAddMaterial &&
+        fieldTicketData?.quotation?.optionValue &&
+        fieldTicketData?.quotationVersion?.optionValue && (
+          <>
+            <MenuItem
+              onClick={() => {
+                setAddQuotationDataDialog({ open: true, type: MATERIAL_TYPE.package });
+              }}
+            >
+              {`Add ${resources?.packages?.titlePlural} From ${resources?.quotation?.titleSingular}`}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAddQuotationDataDialog({ open: true, type: MATERIAL_TYPE.service });
+              }}
+            >
+              {`Add Services From ${resources?.quotation?.titleSingular}`}
+            </MenuItem>
+          </>
+        )}
+      {!isOffline &&
+        resourcePolicy?.showFieldServiceOrderAddMaterial &&
+        fieldTicketData?.isServiceInFieldServiceOrder &&
+        fieldTicketData?.fieldServiceOrder?.optionValue && (
+          <>
+            <MenuItem
+              onClick={() => {
+                setAddFieldServiceOrderDataDialog(true);
+              }}
+            >
+              {`Add Services From ${resources?.fieldServiceOrder?.titleSingular}`}
+            </MenuItem>
+          </>
+        )}
+    </>
+  );
+};
+
+const ActionButtonMenuItms = ({
+  selectedRecords,
+  setOpenMessageDialog,
+  isStartStopServiceEnabled,
+  setServiceConfirmationDialog,
+  setDeleteServiceLogConfirmDialog,
+  setIsServiceEdit,
+  setIsBulkEdit,
+  setMaterialDialog,
+  resources,
+  isDeleting,
+  setDeleteData
+}) => {
+  const validateAction = (action) => {
+    const errorMessages = [];
+    selectedRecords.forEach((e) => {
+      if (action === fieldTicketActions.startService) {
+        const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
+        if (!isEmpty(serviceLogEntry)) {
+          errorMessages.push({ index: e.index, message: fieldTicketMessages.serviceAlreadyStarted });
+        }
+      } else if (action === fieldTicketActions.stopService) {
+        const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
+        if (!serviceLogEntry) {
+          errorMessages.push({ index: e.index, message: fieldTicketMessages.serviceNotStarted });
+        }
+      } else if (action === fieldTicketActions.deleteServiceLog) {
+        const serviceLogCount = e?.serviceLog?.length;
+        if (!serviceLogCount) {
+          errorMessages.push({ index: e.index, message: fieldTicketMessages.serviceNotStarted });
+        }
+      }
+    });
+    if (errorMessages?.length) {
+      setOpenMessageDialog({ open: true, errorMessages: errorMessages });
+      return true;
+    }
+    return false;
+  };
+  return (
+    <>
+      {isStartStopServiceEnabled && (
+        <>
+          <MenuItem
+            onClick={() => {
+              if (!validateAction(fieldTicketActions.startService)) {
+                const dates = [];
+                selectedRecords?.forEach((d: any) => {
+                  d?.serviceLog?.forEach((l: any) => {
+                    if (l?.endDate) dates.push(new Date(l.endDate));
+                  });
+                });
+                let date = null;
+                if (dates?.length) {
+                  date = new Date(Math.max(...dates));
+                  date.setDate(date.getDate() + 1);
+                }
+                setServiceConfirmationDialog({ open: true, type: 'start', minStartDate: date });
+              }
+            }}
+          >
+            Start Service(s)
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              if (!validateAction(fieldTicketActions.stopService)) {
+                const dates = [];
+                selectedRecords?.forEach((d: any) => {
+                  const serviceLogEntry = d?.serviceLog?.find((log: any) => !log.endDate);
+                  dates.push(new Date(serviceLogEntry?.startDate));
+                });
+                let date = null;
+                if (dates?.length) {
+                  date = new Date(Math.max(...dates));
+                }
+                date = selectedRecords?.reduce((maxDate, record) => {
+                  if (record?.maxInvoiceDate) {
+                    const recordDate = new Date(record.maxInvoiceDate);
+                    return recordDate > maxDate ? recordDate : maxDate;
+                  }
+                  return maxDate;
+                }, date);
+                setServiceConfirmationDialog({ open: true, type: 'stop', minStartDate: date });
+              }
+            }}
+          >
+            Stop Service(s)
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              if (!validateAction(fieldTicketActions.startService)) {
+                const dates = [];
+                selectedRecords?.forEach((d: any) => {
+                  d?.serviceLog?.forEach((l: any) => {
+                    dates.push(new Date(l.endDate));
+                  });
+                });
+                let date = null;
+                if (dates?.length) {
+                  date = new Date(Math.max(...dates));
+                  date.setDate(date.getDate() + 1);
+                }
+                setServiceConfirmationDialog({ open: true, type: 'startStop', minStartDate: date });
+              }
+            }}
+          >
+            Start/Stop Service(s)
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              if (!validateAction(fieldTicketActions.deleteServiceLog)) {
+                const data = [];
+                selectedRecords?.forEach((d: any) => {
+                  data.push({
+                    _id: d?._id,
+                    serviceLogId: d?.serviceLog[d?.serviceLog?.length - 1]?._id
+                  });
+                });
+                setDeleteServiceLogConfirmDialog({ open: true, data });
+              }
+            }}
+          >
+            Delete Service Log(s)
+          </MenuItem>
+        </>
+      )}
+      <MenuItem
+        disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
+        onClick={() => {
+          setIsServiceEdit({ open: true, data: null, showSaveAndNext: false });
+          setIsBulkEdit(true);
+        }}
+      >
+        Bulk Edit
+      </MenuItem>
+      {selectedRecords.some((e) => e.type === MATERIAL_TYPE.serializedAsset) && (
+        <MenuItem
+          onClick={() => {
+            setMaterialDialog({
+              open: true,
+              type: MATERIAL_TYPE.service,
+              parentId: null,
+              parentType: MATERIAL_TYPE.serializedAsset,
+              serializedAssetService: true
+            });
+          }}
+        >
+          {`Perform ${resources?.serviceMaster?.titlePlural}`}
+        </MenuItem>
+      )}
+      <MenuItem
+        disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
+        onClick={() => {
+          const obj: any = [];
+          const dataToDelete = selectedRecords && selectedRecords.filter((e) => !e.hideSelection);
+          dataToDelete?.forEach((ele) => {
+            obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
+          });
+          dataToDelete?.forEach((ele) => {
+            getNestedSubRows(obj, ele);
+          });
+          setDeleteData(obj);
+        }}
+      >
+        Delete
+      </MenuItem>
+    </>
+  );
+};
