@@ -462,7 +462,7 @@ const Material = ({
       parent.competencyType = parent?.serviceDetail?.competencyType;
       parent.competencies = parent?.serviceDetail?.competencies;
       parent.isValid = parent['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : !isPriceRequired;
-      parent.canDelete = parent.canDelete ?? true;
+      parent.canDelete = parent?.serviceLog?.length > 0 ? false : (parent.canDelete ?? true);
       parent.subRows = generateNestedData(data, parent, isPriceRequired);
     });
     if (rows?.length) {

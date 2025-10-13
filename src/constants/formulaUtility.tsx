@@ -1,4 +1,4 @@
-import { isArray, isEmpty, round, uniq } from 'lodash';
+import { isArray, isEmpty, round, uniq, uniqBy } from 'lodash';
 import { checkValue, fieldLabelToFieldName, getObjKeys, sidebarResource } from './helpers';
 import { LOGIC } from 'src/components/FormBuilder/helper';
 import dayjs from 'dayjs';
@@ -908,7 +908,7 @@ export const checkUniqueValidation = (checkinFields, checkfromFields) => {
   }
 };
 
-export const checkFieldDependency = (fieldId, sectionId, section) => {
+export const checkFieldDependency = (fieldId, sectionId, section, sectionFields = []) => {
   try {
     var fieldData: any = {};
     section.forEach((row) => {
@@ -942,28 +942,39 @@ export const checkFieldDependency = (fieldId, sectionId, section) => {
     } else {
       fieldNames.push(fieldData.fieldName ? fieldData.fieldName : fieldLabelToFieldName(fieldData.fieldLabel));
     }
+
     var used_Fields = [];
-    section.forEach((row) => {
-      row.field.forEach((_field) => {
-        fieldNames.forEach((_fieldName) => {
-          if (_field.inputFields && _field.inputFields.includes(_fieldName)) {
-            used_Fields.push(_field.fieldLabel);
+    section?.forEach((row) => {
+      row?.field.forEach((_field) => {
+        fieldNames?.forEach((_fieldName) => {
+          if (_field?.inputFields && _field?.inputFields.includes(_fieldName)) {
+            used_Fields.push({ fieldLabel: _field.fieldLabel, fieldName: _field?.fieldName, sectionName: _field?.sectionName });
           }
-          if (_field.formulaFields && _field.formulaFields.includes(_fieldName)) {
-            used_Fields.push(_field.fieldLabel);
+          if (_field?.formulaFields && _field?.formulaFields.includes(_fieldName)) {
+            used_Fields.push({ fieldLabel: _field.fieldLabel, fieldName: _field?.fieldName, sectionName: _field?.sectionName });
           }
-          if (_field.formulainputFields && _field.formulainputFields.includes(_fieldName)) {
-            used_Fields.push(_field.fieldLabel);
+          if (_field?.formulainputFields && _field?.formulainputFields.includes(_fieldName)) {
+            used_Fields.push({ fieldLabel: _field.fieldLabel, fieldName: _field?.fieldName, sectionName: _field?.sectionName });
           }
-          if (_field.dropdowDependentOn && _field.dropdowDependentOn.includes(_fieldName)) {
-            used_Fields.push(_field.fieldLabel);
+          if (_field?.dropdowDependentOn && _field?.dropdowDependentOn.includes(_fieldName)) {
+            used_Fields.push({ fieldLabel: _field.fieldLabel, fieldName: _field?.fieldName, sectionName: _field?.sectionName });
+          }
+          if (_field?.lookupDependentOn && _field?.lookupDependentOn === _fieldName) {
+            used_Fields.push({ fieldLabel: _field.fieldLabel, fieldName: _field?.fieldName, sectionName: _field?.sectionName });
           }
         });
       });
     });
+    if (sectionFields?.length > 0) {
+      used_Fields = used_Fields?.filter(f => !sectionFields?.includes(f?.fieldName))
+    }
     if (used_Fields.length) {
-      used_Fields = uniq(used_Fields);
-      return { error: true, message: 'This field used in ' + used_Fields.join() + ' fields.' };
+      used_Fields = uniqBy(used_Fields, 'fieldName');
+      if (sectionFields?.length > 0) {
+        return { error: true, fields: used_Fields }
+      } else {
+        return { error: true, message: 'This field used in ' + used_Fields?.map(f => f?.fieldLabel).join() + ' fields.' };
+      }
     } else {
       return { error: false, message: '' };
     }
@@ -975,25 +986,29 @@ export const checkFieldDependency = (fieldId, sectionId, section) => {
 export const checkSectionDependency = (sectionId, sections) => {
   try {
     const sectionToDelete = sections.find(s => s.sectionId.toString() === sectionId.toString());
-    
+
     if (!sectionToDelete) {
       return { error: true, message: 'Section not found' };
     }
 
     const dependentFields = [];
-    
+    let sectionNames: any = []
+
     sectionToDelete.field.forEach(field => {
-      const result = checkFieldDependency(field._id, sectionId, sections);
+      const result = checkFieldDependency(field._id, sectionId, sections, sectionToDelete.field?.map(e => e?.fieldName));
       if (result.error) {
-        const usedInFields = result.message.replace('This field used in ', '').replace(' fields.', '');
-        dependentFields.push(`${field.fieldLabel} → ${usedInFields}`);
+        result?.fields?.map(f => {
+          sectionNames.push(f?.sectionName)
+        })
+        dependentFields.push(field?.fieldLabel);
       }
     });
 
     if (dependentFields.length > 0) {
-      return { 
-        error: true, 
-        message: `Cannot delete section. Dependencies found: ${dependentFields.join('; ')}` 
+      sectionNames = uniq(sectionNames);
+      return {
+        error: true,
+        message: `${dependentFields.join(', ')} used in section ${sectionNames?.join()}`
       };
     }
 
@@ -1181,8 +1196,21 @@ export const CURReplaceByCurrencySingle = (fields: any, currency: any) => {
 // }
 
 export const validateFields = (fields: any[], resource) => {
-  if ([sidebarResource.product, sidebarResource.packages, sidebarResource.serviceMaster, sidebarResource.serializedAsset, sidebarResource.serializedPackages]?.includes(resource) && fields?.some(f => f?.fieldName === 'type')) {
-    return `The field name "type" cannot be used because it is reserved by the system.`
+  let errorMessage = ''
+  for (let field of fields) {
+    if ([sidebarResource.product, sidebarResource.packages, sidebarResource.serviceMaster, sidebarResource.serializedAsset, sidebarResource.serializedPackages]?.includes(resource) && field?.fieldName === 'type') {
+      errorMessage = `The field name "type" cannot be used because it is reserved by the system.`
+      break;
+    }
+    if (!field?.sectionName) {
+      errorMessage = `Section name is required`
+      break
+    }
+
+    if (!field?.fieldLabel) {
+      errorMessage = `Field Label is required`
+      break
+    }
   }
-  return ''
+  return errorMessage
 };
