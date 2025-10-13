@@ -507,7 +507,7 @@ const SerializedAsset = ({
           handleClose={() => {
             setAddMaterialDialog({ open: false, type: '' })
           }}
-          extraDeepFilter={[{ field: 'status', term: SERIALIZED_PACKAGE_STATUS.available }]}
+          extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGE_STATUS.available, SERIALIZED_PACKAGE_STATUS.underReview] }]}
           referenceData={{ warehouse: repairJobData?.warehouse }}
           isSubmitting={isSubmitting}
           showWarehouseFilter={false}
