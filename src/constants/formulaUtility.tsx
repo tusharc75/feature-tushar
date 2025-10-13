@@ -984,7 +984,6 @@ export const checkFieldDependency = (fieldId, sectionId, section, sectionFields 
 };
 
 export const checkSectionDependency = (sectionId, sections) => {
-  console.log('sections', sections)
   try {
     const sectionToDelete = sections.find(s => s.sectionId.toString() === sectionId.toString());
 
