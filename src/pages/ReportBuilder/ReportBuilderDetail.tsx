@@ -625,8 +625,6 @@ export default function ReportBuilderDetail() {
 
           {item?.withResource && (
             <Box mt={3}>
-              <span>Select Fields from {item?.withResource}</span>
-              <Box mt={2} />
               <Autocomplete
                 disabled={!isEdit}
                 multiple
