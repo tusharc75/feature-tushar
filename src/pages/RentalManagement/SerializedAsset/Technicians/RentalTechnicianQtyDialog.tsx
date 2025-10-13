@@ -319,7 +319,6 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                                 initialData.fields
                                               );
                                               if (!isEmpty(costPrice)) {
-                                                console.log(costPrice)
                                                 const obj: any = {
                                                   [costPriceFieldName]: costPrice?.price || 0
                                                 };
