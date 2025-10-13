@@ -25,6 +25,7 @@ const PublicOnboarding = () => {
   const [initialValues, setInitialValues] = useState({});
   const [editableSteps, setEditableSteps] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [canComplete, setCanComplete] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -37,6 +38,7 @@ const PublicOnboarding = () => {
     try {
       const { data: { data: onboardingResponse } } = await axiosInstance().get(`${routes.onboarding.path}/public/${id}`);
       setOnboardingData(onboardingResponse);
+      setCanComplete(onboardingResponse.canComplete || false);
 
       if (onboardingResponse.onboardingTemplateData) {
         setOnboardingTemplateData(onboardingResponse.onboardingTemplateData);
@@ -106,12 +108,12 @@ const PublicOnboarding = () => {
         ...onboardingData,
         stepsData: updatedStepsData
       };
-      await axiosInstance().put(`${routes.onboarding.path}/public/${id}`, submitData);
-
+      const { data } = await axiosInstance().put(`${routes.onboarding.path}/public/${id}`, submitData);
+      setCanComplete(data.data.canComplete || false);
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
-        message: 'Progress saved successfully!'
+        message: data.message
       });
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -127,13 +129,26 @@ const PublicOnboarding = () => {
     }
   };
 
-  const handleFinalSubmit = async (values) => {
-    await saveCurrentStep(values);
-    toastConfig.setToastConfig({
-      open: true,
-      type: 'success',
-      message: 'Submitted successfully!'
-    });
+  const handleFinalSubmit = async () => {
+    try {
+      const submitData = {
+        ...onboardingData,
+        stepsData: stepsData,
+        status: 'Completed'
+      };
+      
+      await axiosInstance().put(`${routes.onboarding.path}/public/${id}`, submitData);
+      
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: 'Submitted successfully!'
+      });
+      
+      fetchData();
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleNextWithoutSave = () => {
@@ -163,14 +178,44 @@ const PublicOnboarding = () => {
   const fieldsData = activeStepData?.fields || [];
   const isCurrentStepEditable = editableSteps[activeStepIndex];
   const isLastStep = activeStepIndex === steps.length - 1;
+  const isCompleted = onboardingData?.status === 'Completed';
 
-  const modifiedFieldsData = isCurrentStepEditable
+  const modifiedFieldsData = isCurrentStepEditable && onboardingData.status !== 'Completed'
     ? fieldsData
     : fieldsData.map(field => ({
       ...field,
       isUneditable: true,
       disableOnEdit: true
     }));
+
+  const hasStepData = (stepData) => {
+    if (!stepData) return false;
+
+    const dataFields = { ...stepData };
+    delete dataFields.stepId;
+    delete dataFields._id;
+    
+    return Object.values(dataFields).some(value => 
+      value !== '' && value !== null && value !== undefined
+    );
+  };
+
+  const isStepCompleted = (stepIndex: number) => {
+    const step = steps[stepIndex];
+    if (!step) return false;
+    
+    const stepData = stepsData.find(sd => sd.stepId === step._id);
+    if (!stepData) return false;
+    
+    if (editableSteps[stepIndex]) {
+      const stepFields = step.fields || [];
+      return stepFields.every(field => {
+        const value = stepData[field.fieldName];
+        return value !== '' && value !== null && value !== undefined;
+      });
+    }
+    return true;
+  };
 
   return (
     <Box className="main-container-v1" sx={{ p: { xs: 2, md: 4 }, minHeight: '100vh' }}>
@@ -205,43 +250,64 @@ const PublicOnboarding = () => {
               {onboardingData?.jobRole}
             </Typography>
           </Box>
-          {/* <Box className="controls-v1">
-            <Chip
-              label={onboardingData.status}
-              color={onboardingData.status === 'Pending' ? 'warning' : 'success'}
-            />
-          </Box> */}
+          {canComplete && !isCompleted && (
+            <ThemeButton
+              onClick={() => {
+                if (window.confirm('Are you sure you want to submit? Once submitted, you cannot make changes.')) {
+                  handleFinalSubmit();
+                }
+              }}
+              buttonType="themeBorder"
+            >
+              Submit
+            </ThemeButton>
+          )}
         </Box>
 
         <Box className="detail-container-v1">
-          <Box sx={{ bgcolor: 'background.paper', p: 2, borderRadius: 2, mb: 4 }}>
+          <Box sx={{ bgcolor: 'background.paper', p: 1, borderRadius: 2 }}>
             <Stepper activeStep={activeStepIndex} alternativeLabel>
-              {steps.map((step, index) => (
-                <Step key={step._id}>
-                  <StepLabel
-                    onClick={() => handleStepChange(index)}
-                    sx={{ cursor: 'pointer', '& .MuiStepLabel-label': { mt: 1 } }}
-                    StepIconProps={{
-                      sx: {
-                        color: editableSteps[index] ? 'primary.main' : 'grey.500',
-                      }
-                    }}
-                  >
-                    {step.stepName}
-                    {!editableSteps[index] && (
-                      <Typography variant="caption" display="block" color="text.secondary">
-                        (Read-only)
-                      </Typography>
-                    )}
-                  </StepLabel>
-                </Step>
-              ))}
+              {steps.map((step, index) => {
+                const completed = isStepCompleted(index);
+                return (
+                  <Step key={step._id} completed={completed}>
+                    <StepLabel
+                      onClick={() => handleStepChange(index)}
+                      sx={{ cursor: 'pointer', '& .MuiStepLabel-label': { mt: 1 } }}
+                      StepIconProps={{
+                        sx: {
+                          color: completed ? 'success.main' : 
+                                editableSteps[index] ? 'primary.main' : 'grey.500',
+                          '&.Mui-completed': {
+                            color: 'success.main',
+                          },
+                          '&.Mui-active': {
+                            color: editableSteps[index] ? 'primary.main' : 'grey.500',
+                          }
+                        }
+                      }}
+                    >
+                      {step.stepName}
+                      {!editableSteps[index] && (
+                        <Typography variant="caption" display="block" color="text.secondary">
+                          (Read-only)
+                        </Typography>
+                      )}
+                      {isCompleted && (
+                        <Typography variant="caption" display="block" color="text.secondary">
+                          (Completed)
+                        </Typography>
+                      )}
+                    </StepLabel>
+                  </Step>
+                );
+              })}
             </Stepper>
           </Box>
           <Formik
             initialValues={initialValues}
             validationSchema={yupSchema(fieldsData)}
-            onSubmit={isLastStep ? handleFinalSubmit : handleSaveAndNext}
+            onSubmit={handleSaveAndNext}
             enableReinitialize
           >
             {({ values, errors, touched, setFieldValue, submitForm, isValid, dirty }) => (
@@ -263,23 +329,26 @@ const PublicOnboarding = () => {
                 </Card>
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-                  <ThemeButton
-                    onClick={() => handleStepChange(activeStepIndex - 1)}
-                    disabled={activeStepIndex === 0}
-                    buttonType="theme"
-                  >
-                    Back
-                  </ThemeButton>
+                  {activeStepIndex > 0 && (
+                    <ThemeButton
+                      onClick={() => handleStepChange(activeStepIndex - 1)}
+                      disabled={activeStepIndex === 0}
+                      buttonType="theme"
+                    >
+                      Back
+                    </ThemeButton>
+                  )}
+                  {activeStepIndex === 0 && <Box />}
 
                   <Stack direction="row" spacing={2}>
-                    {isCurrentStepEditable && (
+                    {isCurrentStepEditable && !isCompleted && (
                       <ThemeButton
                         onClick={() => saveCurrentStep(values)}
                         disabled={saving || !isValid}
-                        buttonType="theme"
+                        buttonType="themeBorder"
                         isLoading={saving}
                       >
-                        Save
+                        {hasStepData(stepsData.find(step => step.stepId === activeStepData._id)) ? 'Update' : 'Save'}
                       </ThemeButton>
                     )}
 
@@ -292,23 +361,14 @@ const PublicOnboarding = () => {
                       </ThemeButton>
                     )}
 
-                    {isCurrentStepEditable && (
+                    {isCurrentStepEditable && !isLastStep && !isCompleted && (
                       <ThemeButton
                         onClick={submitForm}
                         disabled={saving || !isValid}
-                        buttonType="theme"
+                        buttonType="themeBorder"
                         isLoading={saving}
                       >
-                        {isLastStep ? 'Submit' : 'Save & Next'}
-                      </ThemeButton>
-                    )}
-
-                    {!isCurrentStepEditable && isLastStep && (
-                      <ThemeButton
-                        onClick={submitForm}
-                        buttonType="theme"
-                      >
-                        Submit
+                        Save & Next
                       </ThemeButton>
                     )}
                   </Stack>
