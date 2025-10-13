@@ -66,10 +66,10 @@ const SingleSection = ({
   const deleteSection = (sectionId) => {
     const result = checkSectionDependency(sectionId, sections);
     if (result.error) {
-      toastConfig.setToastConfig({ 
-        open: true, 
-        type: 'error', 
-        message: result.message 
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: result.message
       });
       handleClose();
       return;
@@ -143,7 +143,7 @@ const SingleSection = ({
               />
             </div>
             <IconButton aria-label="setting" onClick={handleClick}>
-              <Settings fontSize="small" />
+              <Settings color='primary' fontSize="small" />
             </IconButton>
             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
               <MenuItem
