@@ -92,7 +92,7 @@ const DynamicForm = () => {
         } else {
           statusColors[item?.status] = item.colorCode;
         }
-      });
+      })
     }
     let data;
     const response = await axiosInstance().get(`/field?resource=${resource}`);
@@ -108,18 +108,13 @@ const DynamicForm = () => {
         newColumns?.forEach((o) => {
           if (o?.accessor === primaryField?.fieldData?.fieldName) {
             o.cell = ({ row }) => (
-              <div
-                style={{
-                  backgroundColor: (() => {
-                    return statusColors[row?.original?.status] || '';
-                  })()
-                }}
+              <div style={{
+                backgroundColor: (() => { return statusColors[row?.original?.status] || '' })()
+              }}
               >
-                <Link
-                  className="link text-truncate"
+                <Link className="link text-truncate"
                   title={row?.original?.[primaryField?.fieldData?.fieldName]}
-                  to={`${detailPagePath}/${row?.original?._id}`}
-                >
+                  to={`${detailPagePath}/${row?.original?._id}`}>
                   {row?.original?.[primaryField?.fieldData?.fieldName]}
                 </Link>
               </div>
