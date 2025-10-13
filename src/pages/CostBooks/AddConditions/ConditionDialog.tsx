@@ -74,6 +74,8 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
         details = conditionData?.serviceDetail;
       } else if (conditionData?.materialType === MATERIAL_TYPE.package) {
         details = conditionData?.packageDetail;
+      } else if (conditionData?.materialType === 'technician') {
+        details = conditionData?.technicianDetail;
       } else {
         details = conditionData?.competencyDetail;
       }
@@ -92,6 +94,8 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
             ? details?.serviceName
             : conditionData?.materialType === MATERIAL_TYPE.package
               ? details?.packageName
+              : conditionData?.materialType === 'technician'
+                ? details?.firstName + ' ' + details?.lastName
               : details?.competencyName)
       );
 
@@ -341,7 +345,7 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
                             errors={errors}
                           />
                         </div>
-                        {values['materialType'] === 'competency' && subStatusOptions?.length > 0 && (
+                        {['competency', 'technician'].includes(values?.['materialType']) && subStatusOptions?.length > 0 && (
                           <div className="mt-2 border p-2">
                             <FormControlLabel
                               control={
@@ -415,7 +419,7 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
                             )}
                           </div>
                         )}
-                        {values['materialType'] === 'competency' && (
+                        {['competency', 'technician'].includes(values?.['materialType']) && (
                           <>
                             <Box mt={2} />
                             <Autocomplete
