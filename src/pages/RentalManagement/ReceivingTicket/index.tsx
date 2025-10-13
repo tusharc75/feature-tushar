@@ -2736,10 +2736,13 @@ const ReceivingTicket = ({
 
   const handleSwapAssets = (rows, replaceReason = '', replaceWithNewLineItems = false, directSendToSupplier = false) => {
     const data = [];
+    rows?.forEach((e) => {
+      delete e?.isCounted
+    })
     getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.forEach((element: any) => {
       const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
       if (result.length) {
-        data.push({ _id: element._id, newId: result[0]._id, parentId: element?.parentId });
+        data.push({ _id: element._id, newId: result[0]._id, parentId: element?.parentId, oldAssetUniqueId: element?.uniqueId });
         result[0].isCounted = true;
       }
     });
@@ -2747,7 +2750,7 @@ const ReceivingTicket = ({
     axiosInstance()
       .post(`${rentalManagement.api}/replace-inuse-assets`, {
         assets: data?.map((e) => {
-          return { asset: e.newId, oldAssetParentId: e?.parentId, oldAsset: e?._id };
+          return { asset: e.newId, oldAssetParentId: e?.parentId, oldAsset: e?._id, oldAssetUniqueId: e?.oldAssetUniqueId };
         }),
         rentalJob: rentalManagementData?._id,
         reason: replaceReason,
