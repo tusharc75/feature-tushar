@@ -163,9 +163,12 @@ export const getTaxById = async (taxCode: any) => {
   return data;
 }
 
-export const getCostPriceConditions = async (material: any[], type: string, referenceData: any) => {
+export const getCostPriceConditions = async (material: any[], type: string[], referenceData: any) => {
   let ids = [];
-  ids = material?.map((e) => e?.materialId);
+  ids = material?.map((e) => e?.materialId)?.filter(Boolean) || [];
+  if (type?.includes('technician')) {
+    ids = [...ids, ...(material?.map((e) => e?.technician)?.filter(Boolean) || [])];
+  }
   const {
     data: { data }
   } = await axiosInstance().post(`${costBooks.api}/material-cost-data`, {
@@ -178,13 +181,18 @@ export const getCostPriceConditions = async (material: any[], type: string, refe
 
 export const getCostPriceValue = (row: any, costPriceData: any, currency: any, fields: any[]) => {
   let rateList = [];
-  rateList = costPriceData?.filter(
-    (e) =>
-      e.materialId === `${row?.type === 'competency' ? row.competence : row?.materialId}` &&
-      e.materialType === row.type &&
+  rateList = costPriceData?.filter((e) => {
+    const matchesMaterialId = row?.type === 'competency'
+      ? e.materialId === `${row?.competence}` || e.materialId === `${row?.technician}`
+      : e.materialId === `${row?.materialId}`;
+  
+    return (
+      matchesMaterialId &&
+      e.materialType === row?.type &&
       e.unit === row?.unit &&
-      e.pricingMethod === row.pricingMethod
-  );
+      e.pricingMethod === row?.pricingMethod
+    );
+  });
   if (rateList?.length) {
     const obj: any = {};
     if (fields?.find(f => f?.fieldName === `costPrice`)) {

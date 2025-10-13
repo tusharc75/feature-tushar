@@ -236,7 +236,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       updateRateChangeState(values, priceData, pricingMethodOptions);
 
       if (user?.user?.brandPolicy?.materialCostPrice) {
-        let costPriceData: any = await getCostPriceConditions([{ materialId: rowData.materialId }], rowData.type, rentalManagementData);
+        let costPriceData: any = await getCostPriceConditions([{ materialId: rowData.materialId }], [rowData.type], rentalManagementData);
         setCostPriceConditionList(costPriceData || []);
       }
     }
