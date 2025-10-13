@@ -2312,8 +2312,6 @@ const BulkActionItems = ({
           {'Change Sub Status'}
         </BulkActionContainer.Button>
       )}
-
-      {/* Action button menu items */}
       {(allowedToEdit || isProcessor) && (
         <>
           <BulkActionContainer.Button
