@@ -42,7 +42,9 @@ import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceFi
 import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomMessageDialog from 'src/components/MessageDialog';
-import { repairJobActions, repairJobMessage } from 'src/constants/messageHelpers';
+import { repairJobActions, repairJobMessage, statusChangePermissionMsg } from 'src/constants/messageHelpers';
+import { statusChangePermissionsAllowed } from 'src/pages/SerializedAsset/helper';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
 
 const SerializedAsset = ({
   repairJobData,
@@ -55,7 +57,6 @@ const SerializedAsset = ({
   allowedOperation
 }) => {
   const toastConfig = useContext(CustomToastContext);
-
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -64,7 +65,8 @@ const SerializedAsset = ({
   const [repairDialog, setRepairDialog] = useState({ open: false, data: null });
   const [repairProcessDialog, setRepairProcessDialog] = useState({ open: false, data: null });
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
-
+  const [policyData, setPolicyData] = useState(null);
+  const [statusChangePermissionError, setStatusChangePermissionError] = useState(false);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -82,8 +84,15 @@ const SerializedAsset = ({
   };
 
   useEffect(() => {
+    fetchPolicy();
     fetchFields();
   }, []);
+
+  const fetchPolicy = async () => {
+    const policy = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+    setPolicyData(policy?.data?.data || []);
+  }
+
 
   const fetchFields = async () => {
     let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.repairJobAsset, repairJobData?.currency, false);
@@ -389,7 +398,21 @@ const SerializedAsset = ({
     }
   };
 
+  const checkPermissionForStatusChange = (status) => {
+    const { statusChangePermissions } = policyData;
+    if (statusChangePermissions?.length) {
+      let statusChangeAllowed = statusChangePermissionsAllowed(user, statusChangePermissions, selectedRecords?.map((e) => e?.status), status);
+      if (!statusChangeAllowed) {
+        setStatusChangePermissionError(true)
+        return false;
+      }
+    }
+    return true;
+  }
+
   const handleUpdateStatus = () => {
+    if (!checkPermissionForStatusChange(ASSET_STATUS.needRepair)) return;
+
     axiosInstance()
       .put(`${serializedAsset.api}/update-status`, {
         comment: '',
@@ -489,7 +512,9 @@ const SerializedAsset = ({
                   }
                   onClick={() => {
                     setAnchorEl(null);
-                    setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
+                    if (checkPermissionForStatusChange(ASSET_STATUS.scrap)) {
+                      setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
+                    }
                   }}
                 >
                   {ASSET_STATUS.scrap}
@@ -499,7 +524,9 @@ const SerializedAsset = ({
                 disabled={selectedRecords?.some((r) => SYSTEM_ASSET_STATUS?.includes(r?.status))}
                 onClick={() => {
                   setAnchorEl(null);
-                  setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
+                  if (checkPermissionForStatusChange(ASSET_STATUS.lost)) {
+                    setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
+                  }
                 }}
               >
                 {ASSET_STATUS.lost}
@@ -707,6 +734,14 @@ const SerializedAsset = ({
           onClose={() => {
             setOpenMessageDialog({ open: false, errorMessages: [] });
           }}
+        />
+      )}
+      {statusChangePermissionError && (
+        <MessageDialog
+          open={true}
+          header="Alert"
+          message={statusChangePermissionMsg}
+          onClose={() => setStatusChangePermissionError(false)}
         />
       )}
     </>
