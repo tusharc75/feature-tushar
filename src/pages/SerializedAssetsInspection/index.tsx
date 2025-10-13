@@ -358,7 +358,7 @@ const SerializedAssetInspection = () => {
         user,
         serializedAssetPolicy?.statusChangePermissions,
         selectedRecords?.map((e) => e?.status),
-        status
+        status?.optionValue
       );
       if (!statusChangeAllowed) {
         setStatusChangePermissionError(true);
@@ -516,16 +516,16 @@ const BulkActionItems = ({
             onClick={() => setShowRepairOrderDialog(true)}
             disabled={
               checkUniqWarehouse() &&
-              selectedRecords?.every((e) =>
-                [
-                  ASSET_STATUS.new,
-                  ASSET_STATUS.available,
-                  ASSET_STATUS.scrap,
-                  ASSET_STATUS.needRecert,
-                  ASSET_STATUS.needRepair,
-                  ASSET_STATUS.underReview
-                ]?.includes(e.status)
-              )
+                selectedRecords?.every((e) =>
+                  [
+                    ASSET_STATUS.new,
+                    ASSET_STATUS.available,
+                    ASSET_STATUS.scrap,
+                    ASSET_STATUS.needRecert,
+                    ASSET_STATUS.needRepair,
+                    ASSET_STATUS.underReview
+                  ]?.includes(e.status)
+                )
                 ? false
                 : true
             }
@@ -538,9 +538,9 @@ const BulkActionItems = ({
             onClick={() => setShowRepairJobDialog(true)}
             disabled={
               checkUniqWarehouse() &&
-              selectedRecords?.every((e) =>
-                [ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status)
-              )
+                selectedRecords?.every((e) =>
+                  [ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status)
+                )
                 ? false
                 : true
             }

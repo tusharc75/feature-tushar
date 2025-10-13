@@ -333,7 +333,7 @@ const SerializedAssetDetailsPage = () => {
     const { policy, statusChangePermissions } = resourcePolicyData;
 
     if (statusChangePermissions?.length) {
-      let statusChangeAllowed = statusChangePermissionsAllowed(user, statusChangePermissions, [assetDetails?.status], status);
+      let statusChangeAllowed = statusChangePermissionsAllowed(user, statusChangePermissions, [assetDetails?.status], o.optionValue);
       if (!statusChangeAllowed) {
         setStatusChangePermissionError(true)
         return;
