@@ -1440,7 +1440,7 @@ const ActionButtonMenuItms = ({
   };
   return (
     <>
-      {isStartStopServiceEnabled && (
+      {isStartStopServiceEnabled && selectedRecords?.every((e) => e.type === MATERIAL_TYPE.service) && (
         <>
           <MenuItem
             onClick={() => {
