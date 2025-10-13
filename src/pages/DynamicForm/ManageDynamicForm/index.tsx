@@ -91,15 +91,20 @@ const ManageDynamicForm = ({
         }
 
         if (!isEmpty(referenceData)) {
-          const disabledFields: any = []
+          const disabledFields: any = [];
           Object.keys(referenceData)?.forEach((_r) => {
             fieldsDataForCreate?.forEach((_f) => {
               if (_f?.fieldName === _r) {
-                disabledFields.push(_f?.fieldName)
+                disabledFields.push(_f?.fieldName);
                 tempInitialData[_f?.fieldName] = referenceData[_f?.fieldName];
                 if (_f?.lookupDependentOn) {
-                  tempInitialData[_f?.lookupDependentOn] = reverseLookupDependentOn(_f?.lookupDependentOn, _f?.option, referenceData[_f?.fieldName], fieldsDataForCreate)
-                  disabledFields.push(_f?.lookupDependentOn)
+                  tempInitialData[_f?.lookupDependentOn] = reverseLookupDependentOn(
+                    _f?.lookupDependentOn,
+                    _f?.option,
+                    referenceData[_f?.fieldName],
+                    fieldsDataForCreate
+                  );
+                  disabledFields.push(_f?.lookupDependentOn);
                 }
                 return;
               }

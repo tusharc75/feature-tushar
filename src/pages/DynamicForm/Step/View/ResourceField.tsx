@@ -17,8 +17,9 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { Link } from 'react-router-dom';
+import EditableExcelTable from 'src/components/EditableExcelTable';
 
-const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, referenceData }) => {
+const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, referenceData, showTableInput = false }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -57,14 +58,17 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
           } else {
             statusColors[item?.status] = item.colorCode;
           }
-        })
+        });
       }
       const {
         data: { data }
       } = await axiosInstance().get(`/field?resource=${step?.linkResourceName}`);
       setLinkResourceFieldType(data?.find((d) => d?.fieldData?.fieldName === step?.linkResourceField)?.fieldData?.type);
-      const detailPagePath = `/${kebabCase(step?.linkResourceName)}/detail`
-      const newColumns = generateColumns(camelCase(step?.linkResourceName), data?.filter((d) => d?.fieldData?.fieldName !== step?.linkResourceField), detailPagePath,
+      const detailPagePath = `/${kebabCase(step?.linkResourceName)}/detail`;
+      const newColumns = generateColumns(
+        camelCase(step?.linkResourceName),
+        data?.filter((d) => d?.fieldData?.fieldName !== step?.linkResourceField),
+        detailPagePath,
         false
       );
       const primaryField = data?.find((e) => e?.fieldData?.primaryField);
@@ -73,12 +77,18 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
           newColumns?.forEach((o) => {
             if (o?.accessor === primaryField?.fieldData?.fieldName) {
               o.cell = ({ row }) => (
-                <div style={{
-                  backgroundColor: (() => { return statusColors[row?.original?.status] || '' })()
-                }}
+                <div
+                  style={{
+                    backgroundColor: (() => {
+                      return statusColors[row?.original?.status] || '';
+                    })()
+                  }}
                 >
-                  <Link className="link text-truncate" title={row?.original?.[primaryField?.fieldData?.fieldName]}
-                    to={`${detailPagePath}/${row?.original?._id}`}>
+                  <Link
+                    className="link text-truncate"
+                    title={row?.original?.[primaryField?.fieldData?.fieldName]}
+                    to={`${detailPagePath}/${row?.original?._id}`}
+                  >
                     {row?.original?.[primaryField?.fieldData?.fieldName]}
                   </Link>
                 </div>
@@ -92,51 +102,51 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
         ...(step?.readOnly
           ? []
           : [
-            {
-              accessor: 'action',
-              Header: 'Actions',
-              minWidth: 100,
-              width: 110,
-              sticky: 'right',
-              disableFilters: true,
-              disableSortBy: true,
-              canDrag: false,
-              Cell: ({ row }) => (
-                <>
-                  <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
-                    <span>
-                      <IconButton
-                        size="small"
-                        aria-label="Edit"
-                        disabled={allowedToEdit ? false : true}
-                        onClick={() => {
-                          setOpen({ open: true, id: row?.original?._id });
-                        }}
-                      >
-                        <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
+              {
+                accessor: 'action',
+                Header: 'Actions',
+                minWidth: 100,
+                width: 110,
+                sticky: 'right',
+                disableFilters: true,
+                disableSortBy: true,
+                canDrag: false,
+                Cell: ({ row }) => (
+                  <>
+                    <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="Edit"
+                          disabled={allowedToEdit ? false : true}
+                          onClick={() => {
+                            setOpen({ open: true, id: row?.original?._id });
+                          }}
+                        >
+                          <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
 
-                  <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
-                    <span>
-                      <IconButton
-                        size="small"
-                        aria-label="Delete"
-                        disabled={allowedToDelete ? false : true}
-                        onClick={() => {
-                          setDeleteRecord(row?.original);
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                </>
-              )
-            }
-          ])
+                    <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="Delete"
+                          disabled={allowedToDelete ? false : true}
+                          onClick={() => {
+                            setDeleteRecord(row?.original);
+                            setShowDeleteConfirmBox(true);
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
+                  </>
+                )
+              }
+            ])
       ]);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -256,7 +266,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
               onClick={() => {
                 setOpen({ open: true, id: null });
               }}
-              buttonType='theme'
+              buttonType="theme"
             >
               Add
             </ThemeButton>
@@ -265,17 +275,20 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
       )}
       <Box mt={1}>
         {columns ? (
-          <CustomReactTable
-            height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            resource={step?.linkResourceName}
-            hideSelection={step?.readOnly}
-            hideAction={step?.readOnly}
-          />
+          <>
+            {showTableInput && <EditableExcelTable columns={columns} data={state.dataRows} onChange={console.log} />}
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchData}
+              resource={step?.linkResourceName}
+              hideSelection={step?.readOnly}
+              hideAction={step?.readOnly}
+            />
+          </>
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
