@@ -138,7 +138,7 @@ const Consumables = ({
   }, [selectedServiceOption, tabValue, refreshChild]);
 
   const fetchColumns = async () => {
-    setColumns(null)
+    setColumns(null);
     let fields = await fetch_child_resource_fields_perm(
       CHILD_RESOURCE.fieldTicketMateial,
       fieldTicketData?.currency,
@@ -243,20 +243,20 @@ const Consumables = ({
       ...newColumns,
       ...(!resourcePolicy?.hideInventoryConsume
         ? [
-          {
-            accessor: 'requestedQty',
-            Header: 'Requested Qty',
-            width: 150,
-            cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-          },
-          {
-            accessor: 'consumedQty',
-            Header: 'Consumed Qty',
-            primaryField: true,
-            width: 150,
-            cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-          }
-        ]
+            {
+              accessor: 'requestedQty',
+              Header: 'Requested Qty',
+              width: 150,
+              cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+            },
+            {
+              accessor: 'consumedQty',
+              Header: 'Consumed Qty',
+              primaryField: true,
+              width: 150,
+              cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+            }
+          ]
         : []),
       {
         accessor: 'action',
@@ -676,102 +676,6 @@ const Consumables = ({
     setTabValue(newValue);
   };
 
-  const rightSideContents = () => {
-    return !resourcePolicy?.hideInventoryConsume ? (
-      <>
-        <HideWhenOffline>
-          <ThemeButton disabled={!Boolean(selectedRecords?.length)} onClick={() => setOpenConsumablesQtyDialog(true)} buttonType="theme">
-            {consumeRequest ? 'Request ' : 'Consume '} {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
-          </ThemeButton>
-        </HideWhenOffline>
-      </>
-    ) : null;
-  };
-
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            setIsConsumableEdit({ open: true, data: null, showSaveAndNext: false });
-            setIsBulkEdit(true);
-          }}
-        >
-          Bulk Edit
-        </MenuItem>
-
-        <MenuItem
-          disabled={isDeleting || selectedRecords?.some((e) => e?.requestedQty || e?.consumedQty)}
-          onClick={() => {
-            setDeleteData(
-              selectedRecords?.map((d) => {
-                return {
-                  id: d?._id
-                };
-              })
-            );
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
-  const AddButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            setConsumablesDialog(true);
-          }}
-          id={'add-product-consumable'}
-        >
-          {`Add Products/Consumables`}
-        </MenuItem>
-        {!isOffline && resourcePolicy?.showRentalAddMaterial && fieldTicketData?.rentalJob?.optionValue && fieldTicketData?.isConsumablesInRentalJob && (
-          <>
-            <MenuItem
-              onClick={() => {
-                setAddRentalJobDataDialog(true);
-              }}
-            >
-              {`Add Job Consumables`}
-            </MenuItem>
-          </>
-        )}
-        {!isOffline &&
-          resourcePolicy?.showQuotationAddMaterial &&
-          fieldTicketData?.quotation?.optionValue &&
-          fieldTicketData?.quotationVersion?.optionValue && (
-            <>
-              <MenuItem
-                onClick={() => {
-                  setAddQuotationDataDialog(true);
-                }}
-              >
-                {`Add Consumables From ${resources?.quotation?.titleSingular}`}
-              </MenuItem>
-            </>
-          )}
-        {!isOffline &&
-          resourcePolicy?.showFieldServiceOrderAddMaterial &&
-          fieldTicketData?.isProductInFieldServiceOrder &&
-          fieldTicketData?.fieldServiceOrder?.optionValue && (
-            <>
-              <MenuItem
-                onClick={() => {
-                  setAddFieldServiceOrderDataDialog(true);
-                }}
-              >
-                {`Add Consumables From ${resources?.fieldServiceOrder?.titleSingular}`}
-              </MenuItem>
-            </>
-          )}
-      </>
-    );
-  };
-
   return (
     <>
       {allowedToEdit && serviceOption?.length > 0 && (
@@ -808,11 +712,37 @@ const Consumables = ({
             <>
               <DetailsPageHeader
                 isAddButtonVisible={true}
-                addButtonMenuItems={<AddButtonMenuItems />}
+                addButtonMenuItems={
+                  <AddButtonMenuItems
+                    setConsumablesDialog={setConsumablesDialog}
+                    isOffline={isOffline}
+                    resourcePolicy={resourcePolicy}
+                    fieldTicketData={fieldTicketData}
+                    setAddRentalJobDataDialog={setAddRentalJobDataDialog}
+                    setAddQuotationDataDialog={setAddQuotationDataDialog}
+                    setAddFieldServiceOrderDataDialog={setAddFieldServiceOrderDataDialog}
+                    resources={resources}
+                  />
+                }
                 isActionButtonVisible={!isOffline}
-                actionButtonMenuItems={actionButtonMenuItems()}
+                actionButtonMenuItems={
+                  <ActionButtonMenuItems
+                    setIsConsumableEdit={setIsConsumableEdit}
+                    setIsBulkEdit={setIsBulkEdit}
+                    isDeleting={isDeleting}
+                    setDeleteData={setDeleteData}
+                    selectedRecords={selectedRecords}
+                  />
+                }
                 actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
-                rightSideContents={rightSideContents()}
+                rightSideContents={
+                  <RightSideContent
+                    resourcePolicy={resourcePolicy}
+                    selectedRecords={selectedRecords}
+                    setOpenConsumablesQtyDialog={setOpenConsumablesQtyDialog}
+                    consumeRequest={consumeRequest}
+                  />
+                }
                 hasXpadding
               />
             </>
@@ -1000,3 +930,115 @@ const Consumables = ({
 };
 
 export default Consumables;
+
+const RightSideContent = ({ resourcePolicy, selectedRecords, setOpenConsumablesQtyDialog, consumeRequest }) => {
+  return (
+    <>
+      {!resourcePolicy?.hideInventoryConsume ? (
+        <>
+          <HideWhenOffline>
+            <ThemeButton disabled={!Boolean(selectedRecords?.length)} onClick={() => setOpenConsumablesQtyDialog(true)} buttonType="theme">
+              {consumeRequest ? 'Request ' : 'Consume '} {selectedRecords?.length > 0 ? '(' + selectedRecords?.length + ')' : ''}
+            </ThemeButton>
+          </HideWhenOffline>
+        </>
+      ) : null}
+    </>
+  );
+};
+
+const ActionButtonMenuItems = ({ setIsConsumableEdit, setIsBulkEdit, isDeleting, setDeleteData, selectedRecords }) => {
+  return (
+    <>
+      <MenuItem
+        onClick={() => {
+          setIsConsumableEdit({ open: true, data: null, showSaveAndNext: false });
+          setIsBulkEdit(true);
+        }}
+      >
+        Bulk Edit
+      </MenuItem>
+
+      <MenuItem
+        disabled={isDeleting || selectedRecords?.some((e) => e?.requestedQty || e?.consumedQty)}
+        onClick={() => {
+          setDeleteData(
+            selectedRecords?.map((d) => {
+              return {
+                id: d?._id
+              };
+            })
+          );
+        }}
+      >
+        Delete
+      </MenuItem>
+    </>
+  );
+};
+
+const AddButtonMenuItems = ({
+  setConsumablesDialog,
+  isOffline,
+  resourcePolicy,
+  fieldTicketData,
+  setAddRentalJobDataDialog,
+  setAddQuotationDataDialog,
+  setAddFieldServiceOrderDataDialog,
+  resources
+}) => {
+  return (
+    <>
+      <MenuItem
+        onClick={() => {
+          setConsumablesDialog(true);
+        }}
+        id={'add-product-consumable'}
+      >
+        {`Add Products/Consumables`}
+      </MenuItem>
+      {!isOffline &&
+        resourcePolicy?.showRentalAddMaterial &&
+        fieldTicketData?.rentalJob?.optionValue &&
+        fieldTicketData?.isConsumablesInRentalJob && (
+          <>
+            <MenuItem
+              onClick={() => {
+                setAddRentalJobDataDialog(true);
+              }}
+            >
+              {`Add Job Consumables`}
+            </MenuItem>
+          </>
+        )}
+      {!isOffline &&
+        resourcePolicy?.showQuotationAddMaterial &&
+        fieldTicketData?.quotation?.optionValue &&
+        fieldTicketData?.quotationVersion?.optionValue && (
+          <>
+            <MenuItem
+              onClick={() => {
+                setAddQuotationDataDialog(true);
+              }}
+            >
+              {`Add Consumables From ${resources?.quotation?.titleSingular}`}
+            </MenuItem>
+          </>
+        )}
+      {!isOffline &&
+        resourcePolicy?.showFieldServiceOrderAddMaterial &&
+        fieldTicketData?.isProductInFieldServiceOrder &&
+        fieldTicketData?.fieldServiceOrder?.optionValue && (
+          <>
+            <MenuItem
+              onClick={() => {
+                setAddFieldServiceOrderDataDialog(true);
+              }}
+            >
+              {`Add Consumables From ${resources?.fieldServiceOrder?.titleSingular}`}
+            </MenuItem>
+          </>
+        )}
+    </>
+  );
+};

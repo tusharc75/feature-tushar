@@ -2312,8 +2312,6 @@ const BulkActionItems = ({
           {'Change Sub Status'}
         </BulkActionContainer.Button>
       )}
-
-      {/* Action button menu items */}
       {(allowedToEdit || isProcessor) && (
         <>
           <BulkActionContainer.Button
@@ -2489,14 +2487,14 @@ const BulkActionItems = ({
             </BulkActionContainer.Button>
           )}
           <BulkActionContainer.Button
-            tooltip={!permissions?.deliveryTicket?.isDelete ? actionDisable : ''}
+            tooltip={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}
             onClick={() => {
               if (!validateAction(rentalManagementActions.cancelLoadingTicket)) {
                 setShowConformationCancleTicket({ open: true });
               }
             }}
             id={'cancel-loading-ticket-menu-item'}
-            disabled={!permissions?.deliveryTicket?.isDelete || getFilterSelectedRecords()?.length === 0}
+            disabled={!permissions?.deliveryTicket?.isUpdate || getFilterSelectedRecords()?.length === 0}
           >
             Cancel Loading Ticket(s)
           </BulkActionContainer.Button>

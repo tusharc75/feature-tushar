@@ -307,7 +307,7 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
     let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, technician, PRICING_SETUP_TYPE.rent);
     let costPriceData: any = null;
     if (user?.user?.brandPolicy?.materialCostPrice) {
-      costPriceData = await getCostPriceConditions(technician, technician[0]?.type, rentalManagementData);
+      costPriceData = await getCostPriceConditions(technician, [technician[0]?.type, 'technician'], rentalManagementData);
     }
     AddMaterial(technician, priceData, costPriceData);
   };

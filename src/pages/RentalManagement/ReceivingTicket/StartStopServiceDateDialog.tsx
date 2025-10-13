@@ -28,6 +28,12 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
 
   const validate = (values) => {
     const errors = {};
+    if (type !== 'stop' && !values?.startDate) {
+      errors['startDate'] = `${resource === sidebarResource.fieldTicket ? '' : 'Actual'} Start Date is required`;
+    }
+    if ((type === 'startStop' || type === 'stop') && !values?.endDate) {
+      errors['endDate'] = `${resource === sidebarResource.fieldTicket ? '' : 'Actual'} End Date is required`;
+    }
     if (values?.endDate && normalizeDate(values?.startDate) > normalizeDate(values.endDate)) {
       errors['endDate'] = `Please enter valid end date`;
     }

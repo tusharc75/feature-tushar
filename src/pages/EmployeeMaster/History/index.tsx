@@ -12,6 +12,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = `${camelCase(sidebarResource.employeeMaster)}_History`;
 
@@ -24,10 +25,9 @@ const History = ({ id }) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, showFilteredRecordsOnly } = state;
 
-
   const [selectedResource, setSelectedResource] = useState(null);
   const [tabValue, setTabValue] = useState(null);
-
+  const [columns, setColumns] = useState(null);
 
   const [resourceList, setResourceList] = useState([]);
 
@@ -55,134 +55,169 @@ const History = ({ id }) => {
       resource: sidebarResource.workOrder,
       path: routes.workOrderDetail.path,
       title: resources?.workOrder?.titleSingular
-    },
-  ];
-
-  const columns = [
-    {
-      accessor: 'reference',
-      Header: selectedResource?.title || 'Reference',
-      minWidth: 150,
-      width: 150,
-      primaryField: true,
-      disableFilters: true,
-      disableSortBy: true,
-      disabled: true,
-      cell: ({ row }) => (
-        <>
-          {row?.original?.reference?.optionValue ? (
-            <div className="flex items-center gap-2">
-              <div>{row?.original?.reference?.optionLabel}</div>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${selectedResource.path}/${row?.original?.reference?.optionValue}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )}
-        </>
-      )
-    },
-    {
-      accessor: 'warehouse',
-      Header: resources?.warehouse?.titleSingular,
-      minWidth: 200,
-      width: 200,
-      disabled: true,
-      cell: ({ row }) => (
-        <div>
-          {row?.original?.warehouse ? (
-            <div className="flex items-center gap-2">
-              <div>{row?.original?.warehouse?.optionLabel}</div>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouse?.optionValue}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )}
-        </div>
-      )
-    },
-    {
-      accessor: 'service',
-      Header: 'Service',
-      minWidth: 150,
-      width: 150,
-      disabled: true,
-      disableFilters: true,
-      disableSortBy: true,
-      cell: ({ row }) => (
-        <>
-          {row?.original?.service ? (
-            <div className="flex items-center gap-2">
-              <div>{row?.original?.service?.optionLabel}</div>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.serviceMasterDetail.path}/${row?.original?.service?.optionValue}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )}
-        </>
-      )
-    },
-    {
-      accessor: 'startDate',
-      Header: 'Start Date',
-      minWidth: 150,
-      width: 150,
-      disableFilters: true,
-      disableSortBy: true,
-      disabled: true,
-      cell: ({ row }) => (
-        <>
-          {row?.original?.startDate ? (
-            <h5 className="text-truncate" title={displayDateTime(row?.original?.startDate)}>
-              {displayDateTime(row?.original?.startDate)}
-            </h5>
-          ) : (
-            <NoDataCell />
-          )}
-        </>
-      )
-    },
-    {
-      accessor: 'endDate',
-      Header: 'End Date',
-      minWidth: 150,
-      width: 150,
-      disableFilters: true,
-      disableSortBy: true,
-      disabled: true,
-      cell: ({ row }) => (
-        <>
-          {row?.original?.endDate ? (
-            <h5 className="text-truncate" title={displayDateTime(row?.original?.endDate)}>
-              {displayDateTime(row?.original?.endDate)}
-            </h5>
-          ) : (
-            <NoDataCell />
-          )}
-        </>
-      )
     }
   ];
+
+  const fetchFields = async () => {
+    try {
+      let subStatusOptions: any = [];
+      if (selectedResource?.resource === sidebarResource.rentalManagement) {
+        const { fieldsDataAll } = await fetch_resource_view_fields(sidebarResource.employeeMaster, true);
+        subStatusOptions = fieldsDataAll?.find((e) => e?.fieldData?.fieldName === 'subStatus')?.fieldData?.option;
+      }
+
+      const cols: any = [
+        {
+          accessor: 'reference',
+          Header: selectedResource?.title || 'Reference',
+          minWidth: 150,
+          width: 150,
+          primaryField: true,
+          disableFilters: true,
+          disableSortBy: true,
+          disabled: true,
+          cell: ({ row }) => (
+            <>
+              {row?.original?.reference?.optionValue ? (
+                <div className="flex items-center gap-2">
+                  <div>{row?.original?.reference?.optionLabel}</div>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${selectedResource.path}/${row?.original?.reference?.optionValue}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          )
+        },
+        {
+          accessor: 'warehouse',
+          Header: resources?.warehouse?.titleSingular,
+          minWidth: 200,
+          width: 200,
+          disabled: true,
+          cell: ({ row }) => (
+            <div>
+              {row?.original?.warehouse ? (
+                <div className="flex items-center gap-2">
+                  <div>{row?.original?.warehouse?.optionLabel}</div>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouse?.optionValue}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )}
+            </div>
+          )
+        },
+        ...(subStatusOptions?.length > 0
+          ? [
+              {
+                accessor: 'subStatus',
+                Header: 'Sub Status',
+                Cell: ({ row }) => {
+                  return (
+                    <>
+                      {row?.original?.subStatus ? (
+                        <div>
+                          <p className="text-truncate">{row.original?.subStatus}</p>
+                        </div>
+                      ) : (
+                        <NoDataCell />
+                      )}
+                    </>
+                  );
+                }
+              }
+            ]
+          : []),
+        {
+          accessor: 'service',
+          Header: 'Service',
+          minWidth: 150,
+          width: 150,
+          disabled: true,
+          disableFilters: true,
+          disableSortBy: true,
+          cell: ({ row }) => (
+            <>
+              {row?.original?.service ? (
+                <div className="flex items-center gap-2">
+                  <div>{row?.original?.service?.optionLabel}</div>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.serviceMasterDetail.path}/${row?.original?.service?.optionValue}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          )
+        },
+        {
+          accessor: 'startDate',
+          Header: 'Start Date',
+          minWidth: 150,
+          width: 150,
+          disableFilters: true,
+          disableSortBy: true,
+          disabled: true,
+          cell: ({ row }) => (
+            <>
+              {row?.original?.startDate ? (
+                <h5 className="text-truncate" title={displayDateTime(row?.original?.startDate)}>
+                  {displayDateTime(row?.original?.startDate)}
+                </h5>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          )
+        },
+        {
+          accessor: 'endDate',
+          Header: 'End Date',
+          minWidth: 150,
+          width: 150,
+          disableFilters: true,
+          disableSortBy: true,
+          disabled: true,
+          cell: ({ row }) => (
+            <>
+              {row?.original?.endDate ? (
+                <h5 className="text-truncate" title={displayDateTime(row?.original?.endDate)}>
+                  {displayDateTime(row?.original?.endDate)}
+                </h5>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          )
+        }
+      ];
+
+      setColumns(cols);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   useEffect(() => {
     const options: any = [];
@@ -193,10 +228,14 @@ const History = ({ id }) => {
     });
     setResourceList(options);
     if (options.length > 0) {
-      setTabValue(options[0]?.key)
-      setSelectedResource(options[0])
+      setTabValue(options[0]?.key);
+      setSelectedResource(options[0]);
     }
   }, []);
+
+  useEffect(() => {
+    fetchFields();
+  }, [selectedResource]);
 
   useEffect(() => {
     if (id || selectedResource) {
@@ -238,8 +277,8 @@ const History = ({ id }) => {
   };
 
   const handleMainTabChange = (event: any, newValue: any) => {
-    setTabValue(newValue)
-    setSelectedResource(TECHNICIAN_RESOURCE?.find((e) => e.key === newValue))
+    setTabValue(newValue);
+    setSelectedResource(TECHNICIAN_RESOURCE?.find((e) => e.key === newValue));
     dispatch({ type: 'pageChange', page: 0 });
   };
 
@@ -276,9 +315,7 @@ const LeftSideContents = ({ tabValue, resourceList, handleMainTabChange }) => {
   return (
     <>
       <ContainedTabs value={tabValue} onChange={(e, value) => handleMainTabChange(e, value)}>
-        {resourceList?.map((res, idx) => (
-          <ContainedTab value={res.key} id={res.key} label={`${res.title}`} />
-        ))}
+        {resourceList?.map((res, idx) => <ContainedTab value={res.key} id={res.key} label={`${res.title}`} />)}
       </ContainedTabs>
     </>
   );
