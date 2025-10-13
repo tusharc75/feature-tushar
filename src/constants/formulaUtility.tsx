@@ -915,7 +915,6 @@ export const checkFieldDependency = (fieldId, sectionId, section) => {
       if (row.sectionId.toString() === sectionId.toString()) {
         if (row.field.filter((i) => i._id.toString() === fieldId.toString()).length) {
           fieldData = row.field.filter((i) => i._id.toString() === fieldId.toString())[0];
-          console.log("fieldData : ", fieldData)
         }
       }
     });
