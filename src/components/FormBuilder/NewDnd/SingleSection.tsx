@@ -3,9 +3,11 @@ import { CSS } from '@dnd-kit/utilities';
 import { IconButton, Menu, MenuItem, TextField } from '@mui/material';
 import { DragIndicator, Settings } from '@mui/icons-material';
 import update from 'immutability-helper';
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import Field from './Field';
 import { SectionProperties } from '../Properties/SectionProperties';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { checkSectionDependency } from 'src/constants/formulaUtility';
 
 type SingleSectionPorps = {
   section: any;
@@ -40,6 +42,7 @@ const SingleSection = ({
     setAnchorEl(event.currentTarget);
   };
   const [openProperties, setOpenProperties] = React.useState(false);
+  const toastConfig = useContext(CustomToastContext);
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -61,6 +64,16 @@ const SingleSection = ({
   };
 
   const deleteSection = (sectionId) => {
+    const result = checkSectionDependency(sectionId, sections);
+    if (result.error) {
+      toastConfig.setToastConfig({ 
+        open: true, 
+        type: 'error', 
+        message: result.message 
+      });
+      handleClose();
+      return;
+    }
     if (onAddRemoveField) onAddRemoveField();
     setSections(sections.filter((i) => i.sectionId.toString() !== sectionId.toString()));
     handleClose();
@@ -141,12 +154,12 @@ const SingleSection = ({
               >
                 Edit Properties
               </MenuItem>
-              {/* <MenuItem
+              <MenuItem
                 onClick={() => deleteSection(section.sectionId)}
-                disabled={section.field.filter((_field) => _field.editAble === false).length > 0 ? true : true}
+                disabled={section.field.filter((_field) => _field.editAble === false).length > 0 ? true : false}
               >
                 Delete
-              </MenuItem> */}
+              </MenuItem>
             </Menu>
           </div>
           {section.field.length === 0 ? (
