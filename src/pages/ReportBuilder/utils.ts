@@ -20,6 +20,7 @@ export interface LookupPipeline extends PipelineItem {
     localField: string;
     lookupResourceField: string;
   }>;
+  fields: string[];
 }
 
 export interface GroupPipeline extends PipelineItem {

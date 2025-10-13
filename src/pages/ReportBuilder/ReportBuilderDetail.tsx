@@ -10,7 +10,7 @@ import routes from '../../components/Helpers/Routes';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete, Box, Card, CardContent, IconButton, Divider } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
-import { UnCamelCase } from '../../constants/helpers';
+import { sidebarResource, UnCamelCase } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -148,17 +148,27 @@ export default function ReportBuilderDetail() {
   }, []);
 
   const fetchResourceFields = useCallback(
-    async (resource) => {
+    async (resource, onFieldsLoaded) => {
       try {
-        if (resourceFieldMap?.hasOwnProperty(resource)) return;
+        if (resourceFieldMap?.hasOwnProperty(resource)) {
+          if (onFieldsLoaded) {
+            onFieldsLoaded(resourceFieldMap[resource]);
+          }
+          return;
+        }
         const {
           data: { data }
         } = await axiosInstance().get(`/field?resource=${resource}`);
 
+        const fields = data?.filter((e) => e.isRead)?.map((e) => e.fieldData);
         setResourceFieldMap((prev) => ({
           ...prev,
-          [resource]: data?.filter((e) => e.isRead)?.map((e) => e.fieldData)
+          [resource]: fields
         }));
+
+        if (onFieldsLoaded) {
+          onFieldsLoaded(fields);
+        }
       } catch (error) {
         toastConfig.setToastConfig(error);
       }
@@ -166,10 +176,21 @@ export default function ReportBuilderDetail() {
     [resourceFieldMap, toastConfig]
   );
 
+  const validateAndCleanFields = useCallback((selectedFields: string[], availableFields) => {
+    if (!availableFields || !availableFields?.length) {
+      return [];
+    }
+
+    const availableFieldNames = availableFields.map(field => field?.fieldName);
+
+    return selectedFields?.filter(fieldName => availableFieldNames.includes(fieldName));
+  }, []);
+
   const fetchData = async () => {
     const initialValues = {
       name: '',
       resource: '',
+      fields: [],
       pipeline: [],
       type: 'report'
     };
@@ -180,6 +201,7 @@ export default function ReportBuilderDetail() {
           data: { data }
         } = res;
         initialValues.resource = data?.resource;
+        initialValues.fields = data?.fields || [];
         initialValues.pipeline = data?.pipeline || [];
         initialValues.name = data?.name;
         initialValues.type = data?.type;
@@ -190,7 +212,7 @@ export default function ReportBuilderDetail() {
         setHasLimitItem((data?.pipeline || []).some((item) => item.type === 'limit'));
 
         const uniqueResources = getUniqueResources(data?.pipeline || [], data?.resource);
-        uniqueResources?.forEach((resource) => fetchResourceFields(resource));
+        uniqueResources?.forEach((resource) => fetchResourceFields(resource, null));
       } catch (e) {
         toastConfig.setToastConfig(e);
       }
@@ -210,19 +232,20 @@ export default function ReportBuilderDetail() {
     const options = [];
     for (const [key] of Object.entries(permissions)) {
       const title = resources?.[key] ? resources?.[key]?.titleSingular : UnCamelCase(key);
-      options.push({ title: title, value: title });
+      options.push({ title: title, value: sidebarResource[key] || title });
     }
     setresourceOptions(options);
   }, [permissions, resources]);
 
   useEffect(() => {
     if (formValues && formValues?.resource) {
-      fetchResourceFields(formValues?.resource);
+      fetchResourceFields(formValues?.resource, null);
     }
   }, [formValues, fetchResourceFields]);
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -241,6 +264,7 @@ export default function ReportBuilderDetail() {
         setPipeline(prev => [...prev, chartItem]);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formValues?.type]);
 
   const generateId = (type: string) => `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -255,7 +279,8 @@ export default function ReportBuilderDetail() {
           _id,
           type: 'lookup',
           withResource: '',
-          fieldToMatch: [{ localField: '', lookupResourceField: '' }]
+          fieldToMatch: [{ localField: '', lookupResourceField: '' }],
+          fields: []
         } as LookupPipeline;
         break;
       case 'group':
@@ -335,6 +360,7 @@ export default function ReportBuilderDetail() {
 
     const submitData: any = {
       name: values.name.trim(),
+      fields: values?.fields,
       pipeline: pipeline,
       resource: values?.resource,
       type: values?.type
@@ -448,12 +474,19 @@ export default function ReportBuilderDetail() {
               options={resourceOptions?.filter((option) => option.value !== formValues?.resource) || []}
               getOptionLabel={(option) => option.title}
               onChange={(e, val) => {
-                onUpdate({
+                const updates: any = {
                   withResource: val?.value || '',
-                  fieldToMatch: [{ localField: '', lookupResourceField: '' }]
-                });
+                  fieldToMatch: [{ localField: '', lookupResourceField: '' }],
+                  fields: []
+                };
+
+                onUpdate(updates);
+
                 if (val?.value) {
-                  fetchResourceFields(val.value);
+                  fetchResourceFields(val.value, (fields) => {
+                    const allFieldNames = fields?.map(field => field?.fieldName);
+                    updatePipelineItem(item._id, { fields: allFieldNames });
+                  });
                 }
               }}
               renderInput={(params) => (
@@ -589,6 +622,44 @@ export default function ReportBuilderDetail() {
               Add Field Match
             </ThemeButton>
           </Box>
+
+          {item?.withResource && (
+            <Box mt={3}>
+              <span>Select Fields from {item?.withResource}</span>
+              <Box mt={2} />
+              <Autocomplete
+                disabled={!isEdit}
+                multiple
+                limitTags={4}
+                disableCloseOnSelect
+                value={
+                  (() => {
+                    const validFields = validateAndCleanFields(item?.fields, lookupFields);
+                    return lookupFields
+                      ?.filter(field => validFields.includes(field.fieldName))
+                      ?.map(field => ({ fieldName: field.fieldName, fieldLabel: field.fieldLabel })) || [];
+                  })()
+                }
+                options={lookupFields?.map(field => ({ fieldName: field.fieldName, fieldLabel: field.fieldLabel })) || []}
+                getOptionLabel={(option) => option.fieldLabel}
+                isOptionEqualToValue={(option, val) => option.fieldName === val.fieldName}
+                onChange={(e, val: any) => {
+                  const selectedFieldNames = val.map((v: any) => v.fieldName);
+                  updatePipelineItem(item._id, { fields: selectedFieldNames });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    label="Select Fields"
+                    variant="outlined"
+                    fullWidth
+                    slotProps={{ inputLabel: { shrink: true } }}
+                  />
+                )}
+              />
+            </Box>
+          )}
         </CardContent>
       </Card>
     );
@@ -1087,10 +1158,16 @@ export default function ReportBuilderDetail() {
                               onChange={(e, val: any) => {
                                 setFieldValue('resource', val ? val.value : '');
                                 if (!val?.value) {
+                                  setFieldValue('fields', []);
                                   setPipeline([]);
                                   setHasSortItem(false);
                                   setHasLimitItem(false);
                                   setPipelineErrors({});
+                                } else {
+                                  fetchResourceFields(val.value, (fields) => {
+                                    const allFieldNames = fields?.map(field => field?.fieldName);
+                                    setFieldValue('fields', allFieldNames);
+                                  });
                                 }
                               }}
                               renderInput={(params) => (
@@ -1104,6 +1181,45 @@ export default function ReportBuilderDetail() {
                                   variant="outlined"
                                   error={touched['resource'] && Boolean(errors['resource'])}
                                   helperText={touched['resource'] && errors['resource']}
+                                  fullWidth
+                                  slotProps={{ inputLabel: { shrink: true } }}
+                                />
+                              )}
+                            />
+                          </Grid>
+                          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                            <Autocomplete
+                              disabled={!isEdit || !values?.resource}
+                              multiple
+                              limitTags={3}
+                              disableCloseOnSelect
+                              value={
+                                (() => {
+                                  const availableFields = resourceFieldMap[values?.resource] || [];
+                                  const validFields = validateAndCleanFields(values?.fields, availableFields);
+                                  return availableFields
+                                    ?.filter(field => validFields.includes(field.fieldName))
+                                    ?.map(field => ({ fieldName: field.fieldName, fieldLabel: field.fieldLabel })) || [];
+                                })()
+                              }
+                              options={resourceFieldMap[values?.resource]?.map(field => ({ fieldName: field.fieldName, fieldLabel: field.fieldLabel })) || []}
+                              getOptionLabel={(option) => option.fieldLabel}
+                              isOptionEqualToValue={(option, val) => option.fieldName === val.fieldName}
+                              onChange={(e, val: any) => {
+                                const selectedFieldNames = val.map((v: any) => v.fieldName);
+                                setFieldValue('fields', selectedFieldNames);
+                              }}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  required={true}
+                                  margin="none"
+                                  size="small"
+                                  name="fields"
+                                  label="Fields"
+                                  variant="outlined"
+                                  error={touched['fields'] && Boolean(errors['fields'])}
+                                  helperText={touched['fields'] && errors['fields']}
                                   fullWidth
                                   slotProps={{ inputLabel: { shrink: true } }}
                                 />
