@@ -154,7 +154,7 @@ const Details = (props: DetailProps) => {
         text = value ? value : '-';
       }
     } else if (input.type === 'multiSelect') {
-      const filterOptions = input.option?.filter((opt) => values[input.fieldName].includes(opt.optionValue));
+      const filterOptions = input.option?.filter((opt) => values[input.fieldName]?.includes(opt?.optionValue));
       const value =
         typeof values[input.fieldName] === 'string'
           ? values[input.fieldName]
