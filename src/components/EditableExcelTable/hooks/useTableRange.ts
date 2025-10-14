@@ -3,7 +3,7 @@ import { TColType } from 'src/components/CustomReactTable/TableComponents/TableH
 import { CellPosition } from 'src/components/EditableExcelTable/types';
 import { copyRangeToClipboard, getCellValueText, getRange } from 'src/components/EditableExcelTable/utils';
 
-const DASHED_BORDER = ['outline-1', 'outline-blue-500', 'outline-dashed'];
+const DASHED_BORDER = ['outline-1', 'outline-blue-500', 'outline-dashed', 'outline-offset-[-2px]'];
 
 export const useTableRange = ({
   columns,
@@ -29,6 +29,28 @@ export const useTableRange = ({
   const startCellRef = useRef<CellPosition | null>(null);
   const endCellRef = useRef<CellPosition | null>(null);
 
+  const updateRangeBox = useCallback(() => {
+    if (!startCellRect.current || !endCellRect.current) return;
+
+    const borderElement = rangeRef.current;
+    borderElement.classList.remove('hidden');
+
+    const rect1 = startCellRect.current!;
+    const rect2 = endCellRect.current!;
+    const container = containerRef.current!;
+    const containerRect = container.getBoundingClientRect();
+
+    const top = Math.min(rect1.top, rect2.top) - containerRect.top + container.scrollTop - window.scrollY;
+    const left = Math.min(rect1.left, rect2.left) - containerRect.left + container.scrollLeft - window.scrollX;
+    const bottom = Math.max(rect1.bottom, rect2.bottom) - containerRect.top + container.scrollTop;
+    const right = Math.max(rect1.right, rect2.right) - containerRect.left + container.scrollLeft;
+
+    borderElement.style.top = `${top - container.scrollTop + 1}px`;
+    borderElement.style.left = `${left - container.scrollLeft + 1}px`;
+    borderElement.style.height = `${bottom - top + container.scrollTop - 4}px`;
+    borderElement.style.width = `${right - left + container.scrollLeft - 4}px`;
+  }, [containerRef, rangeRef]);
+
   const onMouseOver = useCallback(
     (e: MouseEvent) => {
       const cell = (e.target as HTMLElement).closest('td');
@@ -38,29 +60,9 @@ export const useTableRange = ({
         row: Number(cell.getAttribute('data-row')),
         col: Number(cell.getAttribute('data-col'))
       };
-
-      if (startCellRef.current && endCellRef.current) {
-        // --- Position the border container ---
-        const borderElement = rangeRef.current;
-        borderElement.classList.remove('hidden');
-
-        const rect1 = startCellRect.current!;
-        const rect2 = endCellRect.current!;
-        const containerRect = containerRef.current!.getBoundingClientRect();
-
-        // Relative to container, no scrollTop/scrollLeft
-        const top = Math.min(rect1.top, rect2.top) - containerRect.top + containerRef.current!.scrollTop;
-        const left = Math.min(rect1.left, rect2.left) - containerRect.left + containerRef.current!.scrollLeft;
-        const bottom = Math.max(rect1.bottom, rect2.bottom) - containerRect.top + containerRef.current!.scrollTop;
-        const right = Math.max(rect1.right, rect2.right) - containerRect.left + containerRef.current!.scrollLeft;
-
-        borderElement.style.top = `${top}px`;
-        borderElement.style.left = `${left}px`;
-        borderElement.style.width = `${right - left}px`;
-        borderElement.style.height = `${bottom - top}px`;
-      }
+      updateRangeBox();
     },
-    [containerRef, rangeRef]
+    [updateRangeBox]
   );
 
   const onMouseUp = useCallback(() => {
