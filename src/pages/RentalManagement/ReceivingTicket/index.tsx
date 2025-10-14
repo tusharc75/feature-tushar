@@ -4051,6 +4051,7 @@ const BulkActionItems = ({
                   setShowRepairJobDialog(true);
                 }
               }}
+              disabled={getFilterSelectedRecords()?.length === 0}
             >
               {`Create ${resources?.repairJob?.titleSingular}`}
             </BulkActionContainer.Button>
