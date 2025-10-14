@@ -19,7 +19,9 @@ const TableHead = ({ columns }: TableHeadProps) => {
   return (
     <tr>
       {columns.map((col) => (
-        <th key={col.id || col.accessor || (col as any)._id}>{renderHeadText(col)}</th>
+        <th className="border" key={col.id || col.accessor || (col as any)._id}>
+          {renderHeadText(col)}
+        </th>
       ))}
     </tr>
   );

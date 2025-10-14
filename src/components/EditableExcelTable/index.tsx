@@ -7,7 +7,7 @@ import TableBody from './TableBody';
 const EditableExcelTable = ({ columns, data, onChange }: EditableExcelTableProps) => {
   const { tableBodyRef, tableData } = useEditableExcelTable(data, columns);
   return (
-    <table>
+    <table className="table-auto border-collapse border">
       <thead>
         <TableHead columns={columns} />
       </thead>
