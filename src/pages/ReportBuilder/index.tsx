@@ -1,13 +1,14 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { deleteDisable } from 'src/constants/messageHelpers';
+import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -17,11 +18,11 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../c
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import axios, { CancelTokenSource } from 'axios';
+import ManageReportBuilder from './ManageReportBuilder';
 
 const ReportBuilder = () => {
   const renderedFrom = camelCase(sidebarResource?.reportBuilder);
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const {
@@ -32,6 +33,7 @@ const ReportBuilder = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [columns, setColumns] = useState(null);
+  const [reportBuilderDialog, setReportBuilderDialog] = useState({ open: false, reportData: null });
 
   useEffect(() => {
     fetchGridColumns();
@@ -83,6 +85,18 @@ const ReportBuilder = () => {
         canDrag: false,
         Cell: ({ row }) => (
           <>
+            <HtmlTooltip title={row?.original?.allowedToEdit ? 'Edit' : editDisable}>
+              <IconButton
+                size="small"
+                aria-label="Edit"
+                disabled={!row?.original?.allowedToEdit}
+                onClick={() => {
+                  setReportBuilderDialog({ open: true, reportData: row.original });
+                }}
+              >
+                <EditIcon fontSize="small" color={row?.original?.allowedToEdit ? 'primary' : 'disabled'} />
+              </IconButton>
+            </HtmlTooltip>
             <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
               <span>
                 <IconButton
@@ -216,7 +230,7 @@ const ReportBuilder = () => {
           isActionButtonVisible={permissions?.reportBuilder?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          addButtonOnclick={() => history.push(routes.reportBuilderDetail.path + '/0')}
+          addButtonOnclick={() => setReportBuilderDialog({ open: true, reportData: null })}
           isAddButtonVisible={permissions?.reportBuilder?.isCreate}
         />
         {columns ? (
@@ -246,6 +260,16 @@ const ReportBuilder = () => {
           }}
           okBtnLoading={isSubmitting}
           onOk={handleDelete}
+        />
+      )}
+      {reportBuilderDialog.open && (
+        <ManageReportBuilder
+          reportData={reportBuilderDialog.reportData}
+          onClose={() => setReportBuilderDialog({ open: false, reportData: null })}
+          onSuccess={() => {
+            setReportBuilderDialog({ open: false, reportData: null });
+            fetchData();
+          }}
         />
       )}
     </section>
