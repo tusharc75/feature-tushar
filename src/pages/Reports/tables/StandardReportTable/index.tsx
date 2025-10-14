@@ -583,7 +583,6 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
 
   const getFilteredColumn = (column) => {
     let tempColumn = column;
-    console.log(resourceCamelCase)
     if (resourceCamelCase === 'dailyVolumeReport') {
       const dayWiseFilter = deepFilters?.find((e) => e.field === 'dayWise');
       if (!dayWiseFilter || (dayWiseFilter && dayWiseFilter?.term === 'No')) {
