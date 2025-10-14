@@ -680,6 +680,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           forceSplitQuantity={true}
           showWarehouseSelectDialog={allFields?.some((f) => f?.fieldName === 'warehouse')}
           warehouse={assemblyOrderData?.warehouse?.optionValue}
+          resource={sidebarResource.assemblyOrder}
         />
       )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.serializedPackage && (
