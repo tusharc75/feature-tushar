@@ -961,6 +961,34 @@ const WorkOrder = ({
               hideAction={!allowedToEdit}
               expander={true}
               isClientSideGrid={true}
+              bulkActionItems={
+                <BulkActionItems
+                  selectedRecords={selectedRecords}
+                  allowedToEdit={allowedToEdit}
+                  permissions={permissions}
+                  user={user}
+                  checkUniqWorkOrder={checkUniqWorkOrder}
+                  setDeleteData={setDeleteData}
+                  setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+                  setAutoCompleteData={setAutoCompleteData}
+                  setCompleteConfirmBox={setCompleteConfirmBox}
+                  checkParentProduct={checkParentProduct}
+                  setAddServicesDialog={setAddServicesDialog}
+                  setUserAssignDialog={setUserAssignDialog}
+                  setWorkStationAssignDialog={setWorkStationAssignDialog}
+                  dataRows={dataRows}
+                  setConsumablesDialog={setConsumablesDialog}
+                  setArrangeView={setArrangeView}
+                  setShowDrawingDialog={setShowDrawingDialog}
+                  updateWorkOrdetStatus={updateWorkOrdetStatus}
+                  getFilterSelectedRecords={getFilterSelectedRecords}
+                  resources={resources}
+                  setBulkEditWorkOrderDialog={setBulkEditWorkOrderDialog}
+                  setOpenSerializedPackageDialog={setOpenSerializedPackageDialog}
+                  setShowManageRepairJobDialog={setShowManageRepairJobDialog}
+                  setRepairJobReceiveConfirmation={setRepairJobReceiveConfirmation}
+                />
+              }
             />
           </Box>
         </>
