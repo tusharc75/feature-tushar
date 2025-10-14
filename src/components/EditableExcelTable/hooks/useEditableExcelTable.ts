@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
+import { cleanPastedValue } from 'src/components/EditableExcelTable/utils';
 
 function parsePlainTextTable(text: string) {
   const rows = text.split(/\r?\n/).filter((r) => r.trim() !== '');
@@ -35,49 +36,49 @@ const pasteListener = (event: ClipboardEvent, callBack: (e: ClipboardEvent, data
 };
 
 function handlePaste({
-  columns,
+  columnsMap,
   event,
   setTableData,
-  pastedData
+  pastedData,
+  setDirtyRows
 }: {
   event: ClipboardEvent;
   pastedData: string[][];
-  columns: TColType[];
+  columnsMap: Map<string, TColType>;
   setTableData: React.Dispatch<React.SetStateAction<any[]>>;
+  setDirtyRows: React.Dispatch<React.SetStateAction<any[]>>;
 }) {
-  const targetCell = (event.target as HTMLElement)?.closest('[data-row-index][data-cell-index]') as HTMLElement | null;
+  const targetCell = (event.target as HTMLElement)?.closest('[data-row][data-col]') as HTMLElement | null;
   if (pastedData.length === 0) return;
   if (!targetCell) return;
   event.preventDefault();
   event.stopPropagation();
 
-  const sortedCells = [...targetCell.parentElement.querySelectorAll('td')]?.map((c) => c.getAttribute('data-key'));
-  const rowIndex = Number(targetCell.getAttribute('data-row-index'));
-  const colIndex = Number(targetCell.getAttribute('data-cell-index'));
-  const columnKey = targetCell.getAttribute('data-key');
+  const sortedCells = [...targetCell.parentElement.querySelectorAll('td')]?.map((c) => c.getAttribute('data-key')).filter((d, i) => !!d && i !== 0);
+  const rowIndex = Number(targetCell.getAttribute('data-row'));
+  const colIndex = Number(targetCell.getAttribute('data-col'));
 
   setTableData((prev) => {
     const newData = [...prev];
+    const dirtyRows = [];
 
     for (let r = 0; r < pastedData.length; r++) {
-      const data = pastedData[r];
+      const dataRow = pastedData[r];
       const currentRowIndex = rowIndex + r;
-      const tempData: any = {};
-      for (let c = colIndex; c < data.length + colIndex; c++) {
+      if (!newData[currentRowIndex]) {
+        newData[currentRowIndex] = {} as any;
+      }
+      for (let c = colIndex; c < colIndex + dataRow.length && c < sortedCells.length; c++) {
         const colKey = sortedCells[c];
-        if (newData[currentRowIndex]) {
-          console.log(newData[currentRowIndex]);
-          newData[currentRowIndex][colKey] = data[c];
-        } else {
-          console.log('hi');
-          tempData[colKey] = data[c];
+        if (colKey) {
+          const cleanedValue = cleanPastedValue({ value: dataRow[c - colIndex], columnsMap, key: colKey });
+          newData[currentRowIndex][colKey] = cleanedValue;
         }
       }
-      if (Object.keys(tempData).length) {
-        newData.push(tempData);
-      }
+      dirtyRows.push(newData[currentRowIndex]);
     }
-    console.log({ newData, rowIndex, sortedCells, columnKey, colIndex, pastedData });
+    console.log({ newData, columnsMap, dirtyRows });
+    setDirtyRows(dirtyRows);
     return newData;
   });
 }
@@ -85,6 +86,15 @@ function handlePaste({
 const useEditableExcelTable = (data: any[], columns: TColType[]) => {
   const tableBodyRef = useRef<HTMLTableSectionElement>(null);
   const [tableData, setTableData] = useState(data);
+  const [dirtyRows, setDirtyRows] = useState<any[]>(null);
+
+  const columnsMap = useMemo(() => {
+    const map = new Map<string, TColType>();
+    for (const c of columns) {
+      map.set(c.id || c.accessor, c);
+    }
+    return map;
+  }, [columns]);
 
   useEffect(() => {
     setTableData(data);
@@ -96,18 +106,20 @@ const useEditableExcelTable = (data: any[], columns: TColType[]) => {
 
     const pasteWrapper = (e: ClipboardEvent) => {
       // The cell where paste happened
-      pasteListener(e, (event, pastedData) => handlePaste({ event, columns, setTableData: setTableData, pastedData }));
+      pasteListener(e, (event, pastedData) => handlePaste({ event, columnsMap, setTableData: setTableData, pastedData, setDirtyRows }));
     };
 
     tbody.addEventListener('paste', pasteWrapper);
     return () => {
       tbody.removeEventListener('paste', pasteWrapper);
     };
-  }, [columns]);
+  }, [columnsMap]);
 
   return {
     tableBodyRef,
-    tableData
+    tableData,
+    dirtyRows,
+    setTableData
   };
 };
 

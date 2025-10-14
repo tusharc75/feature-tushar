@@ -192,7 +192,7 @@ export const FieldList = {
     type: 'description',
     icon: 'far fa-calendar-check'
   }
-};
+} as const;
 
 export default FieldList;
 
