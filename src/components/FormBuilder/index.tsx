@@ -45,9 +45,10 @@ export const FormBuilder = ({
 
   const addDeleteField = (_id) => {
     if (isNaN(_id)) {
-      let data = [...deleteField];
-      data.push({ _id: _id });
-      setDeleteField(data);
+      setDeleteField(prev => {
+        if (prev.some(p => p._id === _id)) return prev;
+        return [...prev, { _id }];
+      });
     }
   };
 
