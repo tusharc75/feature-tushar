@@ -32,7 +32,6 @@ type DetailsPageHeaderProps = {
   newActionButtonProps?: NewActionButtonProps<any, any>;
   hasYpadding?: boolean;
   className?: string;
-  rightSideContentsAfterAction?: ReactNode;
   actionButtonType?: 'button' | 'iconButton';
   addButtonText?: string;
 };
@@ -53,7 +52,6 @@ const DetailsPageHeader = ({
   hasYpadding = true,
   className = '',
   actionButtonType = 'button',
-  rightSideContentsAfterAction,
   addButtonText = 'Add'
 }: DetailsPageHeaderProps) => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -205,7 +203,6 @@ const DetailsPageHeader = ({
             </Menu>
           </>
         ) : null}
-        {rightSideContentsAfterAction}
       </div>
     </div>
   );
