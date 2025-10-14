@@ -7,7 +7,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -201,7 +201,9 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
               size="small"
               aria-label="Delete"
               onClick={() => {
-                setDeleteData([row.original._id]);
+                const obj: any = [{ id: row?.original?._id, type: row?.original?.type, materialId: row?.original?.materialId }];
+                getNestedSubRows(obj, row.original);
+                setDeleteData(obj);
               }}
               disabled={row.original?.canDelete ? false : true}
             >
@@ -362,10 +364,21 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       });
   };
 
+  const handleDeleteMultiple = () => {
+    const obj: any = [];
+    const dataToDelete = getFilterSelectedRecords(selectedRecords)?.filter((e) => !e.hideSelection && e.canDelete)
+    dataToDelete?.forEach((ele) => {
+      const _ele = { id: ele._id, type: ele.type, materialId: ele.materialId }
+      obj.push(_ele)
+      getNestedSubRows(obj, _ele);
+    });
+    setDeleteData(obj);
+  };
+
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${routes.assemblyOrder.path}/material/${assemblyOrderData?._id}/delete`, { ids: rows })
+      .put(`${routes.assemblyOrder.path}/material/${assemblyOrderData?._id}/delete`, { ids: rows?.map(e => e?.id) })
       .then(({ data }) => {
         dispatch({ type: 'selection', selectedRecords: [] });
         setDeleting(false);
@@ -535,8 +548,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         <MenuItem
           disabled={getFilterSelectedRecords(selectedRecords)?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
           onClick={() => {
-            const dataToDelete = getFilterSelectedRecords(selectedRecords)?.filter((e) => !e.hideSelection && e.canDelete).map((rec: any) => rec._id);
-            setDeleteData(dataToDelete);
+            handleDeleteMultiple()
           }}
         >
           Delete
