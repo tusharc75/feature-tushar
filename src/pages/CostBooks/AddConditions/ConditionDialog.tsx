@@ -320,7 +320,7 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
                                 size="small"
                                 variant="outlined"
                                 name="pricingMethod"
-                                label="Pricing Method"
+                                label="Cost Method"
                                 error={touched['pricingMethod'] && Boolean(errors['pricingMethod'])}
                                 helperText={touched['pricingMethod'] && errors['pricingMethod']}
                               />
