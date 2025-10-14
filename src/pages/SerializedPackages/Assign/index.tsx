@@ -18,7 +18,6 @@ import { Delete } from '@mui/icons-material';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
 import ReplaceAssetReason from 'src/components/RentalManagment/ReplaceAssetReason';
-import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspection }) => {
 
@@ -44,8 +43,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
   const [showReplaceAssetWarnings, setShowReplaceAssetWarnings] = useState({
     replaceAssetReasonDialog: false,
     replaceAssetReason: '',
-    data: null,
-    confirmationAddNewLineItemsDialog: false
+    data: null
   })
 
   useEffect(() => {
@@ -392,7 +390,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
       });
   }
 
-  const handleReplaceAssetsInUse = (data, replaceReason = '', replaceWithNewLineItems = false) => {
+  const handleReplaceAssetsInUse = (data, replaceReason) => {
     const selectedAssets = selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)
     const assets: any = []
     data?.forEach(d => {
@@ -400,7 +398,8 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
       if (asset) {
         assets.push({
           oldAsset: asset?.asset,
-          asset: d?.asset
+          asset: d?.asset,
+          oldAssetUniqueId: asset?.oldAssetUniqueId
         })
         asset.isCounted = true
       }
@@ -412,11 +411,11 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
         assets,
         rentalJob: serializedPackagesData?.rentalJob,
         reason: replaceReason,
-        replaceWithNewLineItems: replaceWithNewLineItems
+        replaceWithNewLineItems: true
       })
       .then(() => {
         fetchSerializedPackagesData()
-        setShowReplaceAssetWarnings({ replaceAssetReasonDialog: false, replaceAssetReason: '', data: null, confirmationAddNewLineItemsDialog: false })
+        setShowReplaceAssetWarnings({ replaceAssetReasonDialog: false, replaceAssetReason: '', data: null })
         setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
         setIsSubmitting(false);
         fetchData();
@@ -616,23 +615,8 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
           handleClose={() => setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, data: null }))}
           loading={isSubmitting}
           handleSucess={(data) => {
-            setShowReplaceAssetWarnings(prev => ({ ...prev, replaceAssetReasonDialog: false, replaceAssetReason: data?.reason, confirmationAddNewLineItemsDialog: true }))
+            handleReplaceAssetsInUse(showReplaceAssetWarnings.data, data?.reason)
           }}
-        />
-      )}
-      {showReplaceAssetWarnings.confirmationAddNewLineItemsDialog && (
-        <SelectionConfirmationDialog
-          open={showReplaceAssetWarnings.confirmationAddNewLineItemsDialog}
-          message={`Would you like to add the replacement assets as a new line item in ${resources?.rentalManagement?.titleSingular}? Click Yes to add it as a new line item, or No to keep it under the same line item.`}
-          onOk={(type) => {
-            handleReplaceAssetsInUse(showReplaceAssetWarnings.data, showReplaceAssetWarnings.replaceAssetReason, type === 'Yes' ? true : false)
-          }}
-          onClose={() => {
-            setShowReplaceAssetWarnings(prev => ({ ...prev, confirmationAddNewLineItemsDialog: false, replaceAssetReason: '', data: null }))
-          }}
-          selection1={'Yes'}
-          selection2={'No'}
-          okBtnLoading={isSubmitting}
         />
       )}
     </>
