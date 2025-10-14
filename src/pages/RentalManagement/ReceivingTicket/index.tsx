@@ -2808,7 +2808,13 @@ const ReceivingTicket = ({
         <span>
           <PreviewDownloadMultiple referenceIds={uniqueReceivingTicket} />
         </span>
-
+        {(repairJobCount > 0 || repairOrderCount > 0) && (
+          <ThemeButton
+            onClick={openLinkActions}
+            endIcon={<ExpandMore fontSize="inherit" />}>
+            Order(s)
+          </ThemeButton>
+        )}
         {showProcessDeliveryTicket && !isOffline && (
           <>
             <HtmlTooltip title="Process Multiple Receiving/Return Ticket(s)">
@@ -2825,30 +2831,25 @@ const ReceivingTicket = ({
             </HtmlTooltip>
           </>
         )}
+        <IconButtonTabs
+          items={
+            [
+              {
+                value: 'flat',
+                icon: <FormatAlignJustifyIcon />,
+                tooltip: 'Flat View'
+              },
+              {
+                value: 'parentChild',
+                icon: <FormatAlignLeftIcon />,
+                tooltip: 'Parent Child View'
+              }
+            ] as const
+          }
+          setValue={setView}
+          value={view}
+        />
       </>
-    );
-  };
-
-  const rightSideContentsAfterAction = () => {
-    return (
-      <IconButtonTabs
-        items={
-          [
-            {
-              value: 'flat',
-              icon: <FormatAlignJustifyIcon />,
-              tooltip: 'Flat View'
-            },
-            {
-              value: 'parentChild',
-              icon: <FormatAlignLeftIcon />,
-              tooltip: 'Parent Child View'
-            }
-          ] as const
-        }
-        setValue={setView}
-        value={view}
-      />
     );
   };
 
@@ -2929,7 +2930,6 @@ const ReceivingTicket = ({
             isActionButtonVisible={false}
             actionButtonProps={{ disabled: getFilterSelectedRecords()?.length === 0 }}
             rightSideContents={rightSideContents()}
-            rightSideContentsAfterAction={rightSideContentsAfterAction()}
             hasXpadding
             hasYpadding={false}
           />
@@ -2984,9 +2984,6 @@ const ReceivingTicket = ({
                   assetStatusOptions={assetStatusOptions}
                   handleClick={handleClick}
                   handleClickChangeSubStatus={handleClickChangeSubStatus}
-                  repairJobCount={repairJobCount}
-                  openLinkActions={openLinkActions}
-                  repairOrderCount={repairOrderCount}
                 />
               }
             />
@@ -3043,7 +3040,7 @@ const ReceivingTicket = ({
               OpenInNewWindow(routes.repairJob.path);
             }}
           >
-            {`Created ${resources?.repairJob?.titleSingular}`}
+            {`show ${resources?.repairJob?.titlePlural}`}
           </MenuItem>
         )}
         {repairOrderCount > 0 && (
@@ -3052,7 +3049,7 @@ const ReceivingTicket = ({
               OpenInNewWindow(routes?.repairOrder?.path);
             }}
           >
-            {`Created ${resources?.repairOrder?.titleSingular}`}
+            {`show ${resources?.repairOrder?.titlePlural}`}
           </MenuItem>
         )}
       </Menu>
@@ -3668,10 +3665,7 @@ const BulkActionItems = ({
   allowUpdateStatus,
   assetStatusOptions,
   handleClick,
-  handleClickChangeSubStatus,
-  repairJobCount,
-  openLinkActions,
-  repairOrderCount
+  handleClickChangeSubStatus
 }) => {
   const checkUniqStatus = () => {
     if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset).length === 0) {
@@ -3758,11 +3752,6 @@ const BulkActionItems = ({
             {'Change Sub Status'}
           </BulkActionContainer.Button>
         )}
-      {(repairJobCount > 0 || repairOrderCount > 0) && (
-        <BulkActionContainer.Button onClick={openLinkActions} endIcon={<ExpandMore fontSize="inherit" />}>
-          Order(s)
-        </BulkActionContainer.Button>
-      )}
       {allowedToEdit && (
         <>
           {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && !hideDeliveryTicketDelivered && (
