@@ -586,7 +586,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     if (resourceCamelCase === 'dailyVolumeReport') {
       const dayWiseFilter = deepFilters?.find((e) => e.field === 'dayWise');
       if (!dayWiseFilter || (dayWiseFilter && dayWiseFilter?.term === 'No')) {
-        tempColumn = tempColumn?.filter((e) => e.accessor !== 'date');
+        tempColumn = tempColumn?.filter((e) => !['date', 'status']?.includes(e.accessor));
       }
       const padWiseFilter = deepFilters?.find((e) => e.field === 'padWise');
       if (padWiseFilter && padWiseFilter?.term === 'Yes') {
@@ -595,9 +595,14 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       return tempColumn;
     }
     if (resourceCamelCase === 'volumeReport') {
+
       const unitWiseFilter = deepFilters?.find((e) => e.field === 'unitWise');
       if (!unitWiseFilter || (unitWiseFilter && unitWiseFilter?.term === 'No')) {
         tempColumn = tempColumn?.filter((e) => !['asset', 'padName', 'customerAccount']?.includes(e.accessor));
+      }
+      const frequencyFilter = deepFilters?.find((e) => e.field === 'frequency');
+      if (!frequencyFilter || (frequencyFilter && frequencyFilter?.term !== 'daily') || !unitWiseFilter || (unitWiseFilter && unitWiseFilter?.term === 'No')) {
+        tempColumn = tempColumn?.filter((e) => !['status']?.includes(e.accessor));
       }
       return tempColumn;
     }
@@ -803,7 +808,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           handleClose={() => {
             setShowPadData({ open: false, data: [] });
           }}
-          column={columns}
+          column={getFilteredColumn(columns)}
           data={showPadData.data}
         />
       )}
