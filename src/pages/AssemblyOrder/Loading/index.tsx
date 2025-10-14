@@ -20,6 +20,7 @@ import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket'
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import InfoIcon from '@mui/icons-material/Info';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -406,41 +407,6 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     }
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
-          <MenuItem
-            disabled={!permissions?.deliveryTicket?.isCreate
-              || selectedRecords?.filter((r) => r?.serializedPackageId || r?.type === MATERIAL_TYPE.product)?.length === 0}
-            onClick={() => {
-              if (!validateAction(assemblyOrderActions.createLoadingTicket)) {
-                handleDeliveryTicketDialog()
-              }
-            }}
-          >
-            Send to Customer
-          </MenuItem>
-        </HtmlTooltip>
-        {!hideDeliveryTicketDelivered && (
-          <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
-            <MenuItem
-              disabled={!permissions?.deliveryTicket?.isUpdate || selectedRecords?.filter((r) => r?.serializedPackageId)?.length === 0}
-              onClick={() => {
-                if (!validateAction(assemblyOrderActions.deliveredToCustomer)) {
-                  handelProcessTickets()
-                }
-              }}
-              id={'delivered-to-customer-menu-item'}
-            >
-              Delivered to Customer
-            </MenuItem>
-          </HtmlTooltip>
-        )}
-      </>
-    );
-  };
-
   const rightSideContents = () => {
     return (
       <PreviewDownloadMultiple
@@ -482,9 +448,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
         <>
           <DetailsPageHeader
             isAddButtonVisible={false}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+            isActionButtonVisible={false}
             rightSideContents={rightSideContents()}
             hasXpadding
           />
@@ -504,6 +468,18 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
               hideAction={!allowedToEdit}
               isClientSideGrid={true}
               expander={true}
+              bulkActionItems={
+                <BulkActionItems
+                  selectedRecords={selectedRecords}
+                  permissions={permissions}
+                  resources={resources}
+                  hideDeliveryTicketDelivered={hideDeliveryTicketDelivered}
+                  validateAction={validateAction}
+                  assemblyOrderActions={assemblyOrderActions}
+                  handleDeliveryTicketDialog={handleDeliveryTicketDialog}
+                  handelProcessTickets={handelProcessTickets}
+                />
+              }
             />
           </Box>
         </>
@@ -543,3 +519,45 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
 };
 
 export default Loading;
+
+const BulkActionItems = ({
+  selectedRecords,
+  permissions,
+  resources,
+  hideDeliveryTicketDelivered,
+  validateAction,
+  assemblyOrderActions,
+  handleDeliveryTicketDialog,
+  handelProcessTickets
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={
+          !permissions?.deliveryTicket?.isCreate ||
+          selectedRecords?.filter((r) => r?.serializedPackageId || r?.type === MATERIAL_TYPE.product)?.length === 0
+        }
+        onClick={() => {
+          if (!validateAction(assemblyOrderActions.createLoadingTicket)) {
+            handleDeliveryTicketDialog();
+          }
+        }}
+      >
+        Send to Customer
+      </BulkActionContainer.Button>
+
+      {!hideDeliveryTicketDelivered && (
+        <BulkActionContainer.Button
+          disabled={!permissions?.deliveryTicket?.isUpdate || selectedRecords?.filter((r) => r?.serializedPackageId)?.length === 0}
+          onClick={() => {
+            if (!validateAction(assemblyOrderActions.deliveredToCustomer)) {
+              handelProcessTickets();
+            }
+          }}
+        >
+          Delivered to Customer
+        </BulkActionContainer.Button>
+      )}
+    </BulkActionContainer>
+  );
+};
