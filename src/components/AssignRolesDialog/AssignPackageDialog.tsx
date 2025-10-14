@@ -156,6 +156,7 @@ const AssignPackageDialog = ({
           if (qtyAdded.length) {
             finalObject['qty'] = qtyAdded[0].qty;
           }
+          finalObject['packages'] = u?.packages || [];
           return {
             ...finalObject
           };
