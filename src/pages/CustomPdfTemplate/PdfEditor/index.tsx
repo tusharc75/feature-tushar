@@ -3,6 +3,8 @@ import { Designer } from '@pdfme/ui';
 import { getFonts, getPlugins } from './plugin';
 import { Template } from '@pdfme/common';
 import { PLUGIN } from 'src/constants/helpers';
+import { Autocomplete, TextField } from '@mui/material';
+import { createPortal } from 'react-dom';
 interface PdfEditorProps {
   template?: any;
   onTemplateChange?: (tpl: Template) => void;
@@ -15,7 +17,6 @@ interface PdfEditorProps {
 const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables, resourceTables }: PdfEditorProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const designerInstanceRef = useRef<Designer | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [dropdownPos, setDropdownPos] = useState<{ x: number; y: number } | null>(null);
   const [savedRange, setSavedRange] = useState<Range | null>(null);
   const [fontsReady, setFontsReady] = useState(false);
@@ -35,6 +36,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
 
   useEffect(() => {
     if (!containerRef.current || !fontsReady) return;
+
     if (!designerInstanceRef.current) {
       designerInstanceRef.current = new Designer({
         domContainer: containerRef.current,
@@ -47,7 +49,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
         plugins: plugins
       });
 
-      designerInstanceRef.current.onChangeTemplate((newTemplate: Template) => {
+      designerInstanceRef.current.onChangeTemplate((newTemplate) => {
         if (onTemplateChange) {
           onTemplateChange(newTemplate);
         }
@@ -66,8 +68,16 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
         e.preventDefault();
         const target = e.target as HTMLElement;
         const rect = target.getBoundingClientRect?.();
+        const padding = 10;
+        const autoCompleteHeight = 56;
+        const autoCompleteWidth = 320;
+
         if (rect) {
-          setDropdownPos({ x: rect.left - 75, y: rect.bottom - 250 });
+          const left = rect.x + window.scrollX;
+          const centerY = rect.y + window.scrollY - autoCompleteHeight - padding;
+          const centerX = left - autoCompleteWidth * 0.5 + rect.width * 0.5;
+
+          setDropdownPos({ x: centerX, y: centerY });
           const sel = window.getSelection();
           const activeGrid = sel?.anchorNode?.parentElement?.closest(`[plugin-type=${PLUGIN.CUSTOM_TABLE}]`);
           if (activeGrid) {
@@ -99,12 +109,11 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
       const event = new CustomEvent('insert-variable', {
         detail: { value: `{${value}}` },
         bubbles: true,
-        cancelable: true,
+        cancelable: true
       });
       activeInputRef.current.dispatchEvent(event);
       activeInputRef.current = null;
-    }
-    else if (savedRange) {
+    } else if (savedRange) {
       const selection = window.getSelection();
       selection?.removeAllRanges();
       selection?.addRange(savedRange);
@@ -127,46 +136,35 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
 
   return (
     <div className="relative h-screen w-full">
-      <div ref={containerRef} className="h-full w-full relative overflow-hidden" />
-      {dropdownPos && (
-        <div
-          className="absolute z-[10000] bg-white border border-gray-300 shadow-lg rounded-md"
-          data-variable-dropdown
-          style={{ top: dropdownPos.y, left: dropdownPos.x }}
-        >
-          <div className="bg-white border border-gray-200 rounded-md shadow-md w-52 max-h-82 ">
-            <input
-              className="sticky top-0 w-full p-2 rounded-md outline-none text-sm bg-white border border-gray-300"
-              type="text"
-              placeholder="Search variables..."
-              value={searchTerm}
-              onFocus={(e) => e.stopPropagation()}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => e.stopPropagation()}
-            />
-            <div className="bg-white border border-gray-200 rounded-md shadow-md w-52 max-h-52 overflow-y-auto">
-              {variables
-                .filter((opt) => opt.label.toLowerCase().includes(searchTerm.toLowerCase()))
-                .map((opt) => (
-                  <div
-                    className="p-2 text-sm hover:bg-gray-100 cursor-pointer whitespace-nowrap"
-                    key={opt.value}
-                    title={opt.label}
-                    data-variable-option
-                    onClick={(e) => { e.preventDefault(); handleSelect(opt.value); }}
-                    onMouseDown={(e) => e.preventDefault()}
-                  >
-                    {opt.label}
-                  </div>
-                ))}
+      <div ref={containerRef} className="relative h-full w-full overflow-hidden" />
+      {dropdownPos &&
+        createPortal(
+          <div
+            className="absolute z-[10000] rounded-md border border-gray-300 bg-white shadow-lg"
+            data-variable-dropdown
+            style={{ top: dropdownPos.y, left: dropdownPos.x }}
+          >
+            <div className="w-80 rounded-md border border-gray-200 bg-white p-2 shadow-md">
+              <Autocomplete
+                disablePortal
+                options={variables}
+                fullWidth
+                getOptionLabel={(option: any) => option.label}
+                onChange={(event, newValue) => {
+                  if (newValue) {
+                    handleSelect(newValue?.value);
+                  }
+                }}
+                onMouseDown={(e) => e.preventDefault()}
+                renderInput={(params) => <TextField {...params} size="small" onMouseDown={(e) => e.preventDefault()} label="Variables" />}
+              />
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
 
       {disabled && (
-        <div className="absolute inset-0 bg-gray-500 bg-opacity-30 z-[9999] flex justify-center items-center text-white text-lg font-bold pointer-events-auto cursor-not-allowed" />
+        <div className="pointer-events-auto absolute inset-0 z-[9999] flex cursor-not-allowed items-center justify-center bg-gray-500 bg-opacity-30 text-lg font-bold text-white" />
       )}
     </div>
   );
