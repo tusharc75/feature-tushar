@@ -942,7 +942,7 @@ const WorkOrder = ({
       )}
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={true}
+        isActionButtonVisible={false}
         hasXpadding
         rightSideContents={rightSideContents()}
       />
