@@ -1739,30 +1739,25 @@ const LoadingTicket = ({
             )}
           </>
         )}
+        <IconButtonTabs
+          items={
+            [
+              {
+                value: 'flat',
+                icon: <FormatAlignJustifyIcon />,
+                tooltip: 'Flat View'
+              },
+              {
+                value: 'parentChild',
+                icon: <FormatAlignLeftIcon />,
+                tooltip: 'Parent Child View'
+              }
+            ] as const
+          }
+          setValue={setView}
+          value={view}
+        />
       </>
-    );
-  };
-
-  const rightSideContentsAfterAction = () => {
-    return (
-      <IconButtonTabs
-        items={
-          [
-            {
-              value: 'flat',
-              icon: <FormatAlignJustifyIcon />,
-              tooltip: 'Flat View'
-            },
-            {
-              value: 'parentChild',
-              icon: <FormatAlignLeftIcon />,
-              tooltip: 'Parent Child View'
-            }
-          ] as const
-        }
-        setValue={setView}
-        value={view}
-      />
     );
   };
 
@@ -1836,7 +1831,6 @@ const LoadingTicket = ({
             isActionButtonVisible={false}
             actionButtonProps={{ disabled: selectedRecords.length === 0 }}
             rightSideContents={rightSideContents()}
-            rightSideContentsAfterAction={rightSideContentsAfterAction()}
             hasXpadding
             hasYpadding={false}
           />

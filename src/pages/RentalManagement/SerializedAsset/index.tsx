@@ -519,13 +519,12 @@ const SerializedAsset = ({
 
       rows.forEach((parent, i) => {
         parent.index = i + 1;
-        parent.detail = `${
-          parent.type === MATERIAL_TYPE.service
-            ? parent?.serviceDetail?.serviceName
-            : parent.type === MATERIAL_TYPE.product
-              ? parent?.productDetail?.productName
-              : parent?.packageDetail?.packageName
-        }`;
+        parent.detail = `${parent.type === MATERIAL_TYPE.service
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent?.productDetail?.productName
+            : parent?.packageDetail?.packageName
+          }`;
         parent.description =
           parent.type === MATERIAL_TYPE.service
             ? parent?.serviceDetail?.serviceDescription || ''
@@ -542,13 +541,13 @@ const SerializedAsset = ({
         parent.realAssetQty = parent.assetQty;
         parent.realAssetAssignedQty =
           parent.type === MATERIAL_TYPE.product &&
-          !parent.serializedProduct &&
-          parent.assetAssignedQty === 0 &&
-          parent?.status &&
-          loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+            !parent.serializedProduct &&
+            parent.assetAssignedQty === 0 &&
+            parent?.status &&
+            loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
             ? loadingTicketProducts
-                ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
-                ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+              ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
             : parent.assetAssignedQty;
         parent.isSublease = subleaseProduct?.some((e) => e.materialId === parent.materialId);
         parent.isPurchaseOrder = purchaseOrderProduct?.some((e) => e.productId === parent.materialId);
@@ -578,12 +577,12 @@ const SerializedAsset = ({
           parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).length === 0
             ? parent.assetQty
             : parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).reduce((sum, row) => (row.assetQty || 0) + sum, 0) +
-              (parent.type === MATERIAL_TYPE.product ? parent.assetQty : 0);
+            (parent.type === MATERIAL_TYPE.product ? parent.assetQty : 0);
         parent.assetAssignedQty =
           parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).length === 0
             ? parent.assetAssignedQty
             : parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).reduce((sum, row) => (row.assetAssignedQty || 0) + sum, 0) +
-              (parent.type === MATERIAL_TYPE.product ? parent?.subRows.filter((d) => ['asset', 'serialNumber']?.includes(d.type))?.length : 0);
+            (parent.type === MATERIAL_TYPE.product ? parent?.subRows.filter((d) => ['asset', 'serialNumber']?.includes(d.type))?.length : 0);
         parent.isValid =
           parent.serializedProduct && !parent.subRows?.find((e) => e.type === MATERIAL_TYPE.product && !e.serializedProduct)
             ? parent.assetAssignedQty === parent.assetQty
@@ -591,11 +590,11 @@ const SerializedAsset = ({
               : false
             : parent.subRows.length !== 0
               ? parent.assetAssignedQty ===
-                  parent.subRows
-                    .filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct)
-                    .reduce((sum, row) => (row.assetQty || 0) + sum, 0) +
-                    (parent.serializedProduct ? parent.realAssetQty : 0) ||
-                (parent.isValid && parent.subRows.every((d) => d.isValid))
+              parent.subRows
+                .filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct)
+                .reduce((sum, row) => (row.assetQty || 0) + sum, 0) +
+              (parent.serializedProduct ? parent.realAssetQty : 0) ||
+              (parent.isValid && parent.subRows.every((d) => d.isValid))
               : true;
 
         if (parent.subRows.length && parent.isValid) {
@@ -773,13 +772,13 @@ const SerializedAsset = ({
         : 0;
       _subRow.realAssetAssignedQty =
         _subRow.type === MATERIAL_TYPE.product &&
-        !_subRow.serializedProduct &&
-        _subRow.assetAssignedQty === 0 &&
-        _subRow?.status &&
-        loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
+          !_subRow.serializedProduct &&
+          _subRow.assetAssignedQty === 0 &&
+          _subRow?.status &&
+          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
           ? loadingTicketProducts
-              ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
-              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+            ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
+            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : _subRow.assetAssignedQty;
       _subRow.isSublease = subleaseProduct?.some((e) => e.materialId === _subRow.materialId);
       _subRow.isPurchaseOrder = purchaseOrderProduct?.some((e) => e.productId === _subRow.materialId);
@@ -810,7 +809,7 @@ const SerializedAsset = ({
         tempSubRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).length === 0
           ? _subRow.assetQty
           : tempSubRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).reduce((sum, row) => row.assetQty + sum, 0) +
-            (_subRow.type === 'product' ? _subRow.assetQty : 0);
+          (_subRow.type === 'product' ? _subRow.assetQty : 0);
       _subRow.isValid =
         _subRow.serializedProduct && !_subRow.subRows?.find((e) => e.type === MATERIAL_TYPE.product && !e.serializedProduct)
           ? _subRow.assetAssignedQty === _subRow.assetQty
@@ -819,12 +818,12 @@ const SerializedAsset = ({
           : tempSubRows?.filter((e) => ['asset', 'serialNumber']?.includes(e.type))?.length === tempSubRows?.length
             ? true
             : _subRow.assetAssignedQty ===
-                tempSubRows
-                  .filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct)
-                  .reduce((sum, row) => row.assetQty + sum, 0)
+              tempSubRows
+                .filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct)
+                .reduce((sum, row) => row.assetQty + sum, 0)
               ? true
               : _subRow.serializedProduct &&
-                  _subRow.subRows?.every((e) => (e.type === MATERIAL_TYPE.product && !e.serializedProduct) || e.type === 'asset')
+                _subRow.subRows?.every((e) => (e.type === MATERIAL_TYPE.product && !e.serializedProduct) || e.type === 'asset')
                 ? true
                 : false;
 
@@ -1179,7 +1178,7 @@ const SerializedAsset = ({
   return (
     <Fragment>
       <div className={cn('flex min-h-[32px] w-full flex-wrap items-center gap-2 py-2', tabValue === 1 ? 'hidden' : '')}>
-        {permissions?.employeeMaster?.isRead && (
+        {(permissions?.employeeMaster && user?.user?.brandPolicy?.rentalService) && (
           <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
             <ContainedTab value={0} label={'Assets'} />
             <ContainedTab value={1} label={'Technicians'} />
@@ -1283,7 +1282,7 @@ const SerializedAsset = ({
               OpenInNewWindow(routes.purchaseOrder.path);
             }}
           >
-            {`Show ${resources?.purchaseOrder?.titleSingular}`}
+            {`Show ${resources?.purchaseOrder?.titlePlural}`}
           </MenuItem>
         )}
         {permissions?.bulkAssetCreation?.isRead && (
@@ -1293,7 +1292,7 @@ const SerializedAsset = ({
               OpenInNewWindow(routes.bulkAssetCreation.path);
             }}
           >
-            {`Show ${resources?.bulkAssetCreation?.titleSingular}`}
+            {`Show ${resources?.bulkAssetCreation?.titlePlural}`}
           </MenuItem>
         )}
 
@@ -1304,7 +1303,7 @@ const SerializedAsset = ({
               OpenInNewWindow(routes.sublease.path);
             }}
           >
-            {`Show ${resources?.sublease?.titleSingular}`}
+            {`Show ${resources?.sublease?.titlePlural}`}
           </MenuItem>
         )}
         {permissions?.transferAsset?.isRead && (
@@ -1314,7 +1313,7 @@ const SerializedAsset = ({
               OpenInNewWindow(routes.transferAsset.path);
             }}
           >
-            {`Show ${resources?.transferAsset?.titleSingular}`}
+            {`Show ${resources?.transferAsset?.titlePlural}`}
           </MenuItem>
         )}
       </Menu>
@@ -1377,16 +1376,16 @@ const SerializedAsset = ({
             addNonSerializedInventoryDialog.type === 'add'
               ? nonSerializedProduct
               : selectedRecords
-                  ?.filter(
-                    (r) => r?.type === MATERIAL_TYPE.product && !r?.productDetail?.serializedProduct && validateRemoveInventory(r?._id, r?.materialId)
-                  )
-                  ?.map((s) => ({
-                    ...s,
-                    _id: s._id,
-                    id: s.materialId,
-                    productName: s.productDetail?.productName,
-                    qty: validateRemoveInventory(s?._id, s?.materialId)
-                  }))
+                ?.filter(
+                  (r) => r?.type === MATERIAL_TYPE.product && !r?.productDetail?.serializedProduct && validateRemoveInventory(r?._id, r?.materialId)
+                )
+                ?.map((s) => ({
+                  ...s,
+                  _id: s._id,
+                  id: s.materialId,
+                  productName: s.productDetail?.productName,
+                  qty: validateRemoveInventory(s?._id, s?.materialId)
+                }))
           }
           referenceId={rentalManagementData?._id}
           type={addNonSerializedInventoryDialog.type}
@@ -1394,11 +1393,11 @@ const SerializedAsset = ({
             addNonSerializedInventoryDialog.type === 'add'
               ? nonSerializedInventory
               : nonSerializedInventory?.map((m) => {
-                  return {
-                    ...m,
-                    qty: getPlantWiseValidQty(m?._id, m?.product?.optionValue, m?.warehouse?.optionValue, m?.storageLocation?.optionValue, m?.qty)
-                  };
-                })
+                return {
+                  ...m,
+                  qty: getPlantWiseValidQty(m?._id, m?.product?.optionValue, m?.warehouse?.optionValue, m?.storageLocation?.optionValue, m?.qty)
+                };
+              })
           }
         />
       )}
@@ -1457,13 +1456,13 @@ const SerializedAsset = ({
           products={
             user?.user?.brandPolicy?.purchaseOrderShowSerializedProduct
               ? showOrderDialog?.products.map((e) => {
+                return { product: e._id, unit: e.unit, qty: e.assetsCount };
+              })
+              : showOrderDialog?.products
+                ?.filter((e) => e.serialized === false)
+                ?.map((e) => {
                   return { product: e._id, unit: e.unit, qty: e.assetsCount };
                 })
-              : showOrderDialog?.products
-                  ?.filter((e) => e.serialized === false)
-                  ?.map((e) => {
-                    return { product: e._id, unit: e.unit, qty: e.assetsCount };
-                  })
           }
           currency={rentalManagementData.currency}
           refrenceData={{
