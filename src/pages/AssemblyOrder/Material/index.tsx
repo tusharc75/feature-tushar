@@ -669,7 +669,6 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {
-            console.log(rows)
             if (rows?.find((e) => e?.packages?.filter((e) => e.packageType === PACKAGE_TYPE.product)?.length)) {
               setChildPackageWithoutParentDialog({ open: true, data: rows });
             } else {
