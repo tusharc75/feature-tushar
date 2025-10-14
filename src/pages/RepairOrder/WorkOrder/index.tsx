@@ -7,9 +7,7 @@ import Grid from '@mui/material/Grid2';
 import { capitalize, orderBy, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { AiOutlineDelete, AiOutlineUserAdd } from 'react-icons/ai';
 import { FiExternalLink } from 'react-icons/fi';
-import { PiBuildingOfficeThin, PiChecksLight, PiFileArchiveLight, PiPlusLight, PiSkipForwardLight, PiUploadSimpleLight } from 'react-icons/pi';
 import { useParams } from 'react-router-dom';
 import { AutoCompleteWorkOrder, PostWorkIcon, PreWorkIcon } from 'src/assets/svg/svgIcons';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
@@ -53,9 +51,6 @@ import {
 } from '../../../constants/helpers';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { GrRevert } from "react-icons/gr";
-import { GoListUnordered } from "react-icons/go";
-import { MdEdit } from "react-icons/md";
 import { repairOrderMessage } from 'src/constants/messageHelpers';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
