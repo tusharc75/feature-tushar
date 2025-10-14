@@ -21,6 +21,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { packages, sidebarResource, prepareDataForGrid, WORK_ORDER_TYPE_LABEL, WORK_ORDER_TYPE, PACKAGE_TYPE, MATERIAL_SUB_TYPE } from 'src/constants/helpers';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { cH } from '@fullcalendar/core/internal-common';
 
 const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, childItem = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_product`;
@@ -325,7 +326,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
       )}
       {showProductAssignDialog && (
         <AssignProductDialog
-          serialized={packageData?.packageType === PACKAGE_TYPE.service || !childItem ? false : null}
+          serialized={(packageData?.packageType === PACKAGE_TYPE.service || !childItem) ? false : null}
           handleCloseDialog={() => setShowProductAssignDialog(false)}
           ids={[...dataRows?.map((e) => e._id)]}
           onSuccess={(rows) => {
