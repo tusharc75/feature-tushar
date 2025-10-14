@@ -74,6 +74,15 @@ const SingleSection = ({
       handleClose();
       return;
     }
+    const sectionToDelete = sections.find(s => s.sectionId.toString() === sectionId.toString());
+
+    if (sectionToDelete) {
+      sectionToDelete.field.forEach(field => {
+        if (field._id) {
+          addDeleteField(field._id);
+        }
+      });
+    }
     if (onAddRemoveField) onAddRemoveField();
     setSections(sections.filter((i) => i.sectionId.toString() !== sectionId.toString()));
     handleClose();
