@@ -96,7 +96,7 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
               ? details?.packageName
               : conditionData?.materialType === 'technician'
                 ? details?.firstName + ' ' + details?.lastName
-              : details?.competencyName)
+                : details?.competencyName)
       );
 
       currency.forEach((_currency) => {
@@ -264,7 +264,7 @@ const ConditionDialog = ({ id, conditionData, handleClose, handleSuccess, detail
                   <Fragment>
                     <div className={'detail-box-content'}>
                       <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                      <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Pricing</h2>
+                      <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Cost Information</h2>
                     </div>
                     <Box marginTop={1} marginBottom={1}>
                       <Grid spacing={3} container>
