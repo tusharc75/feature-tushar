@@ -1408,10 +1408,11 @@ const ActionButtonMenuItems = ({
               setOpenSerializedPackageDialog({ open: true, ids: getFilterSelectedRecords(selectedRecords)?.map(r => r?.workOrder?._id), createRepairJobDialog: true })
             }
           }}
-          disabled={getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package
-            && e?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder)?.every(r =>
-              ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.draft]?.includes(r?.workOrder?.status)
-              && !r?.workOrder?.currentRepairJob && r?.workOrder?.canSendToSupplier) ? false : true}
+          disabled={getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)?.length
+            && getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package
+              && e?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder)?.every(r =>
+                ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.draft]?.includes(r?.workOrder?.status)
+                && !r?.workOrder?.currentRepairJob && r?.workOrder?.canSendToSupplier) ? false : true}
         >
           {`Create ${resources?.repairJob?.titleSingular}`}
         </MenuItem>
@@ -1421,17 +1422,16 @@ const ActionButtonMenuItems = ({
           onClick={() => {
             setRepairJobReceiveConfirmation({ open: true, sendToCustomer: false });
           }}
-          disabled={
-            getFilterSelectedRecords(selectedRecords)
-              ?.filter((e) => e?.type === MATERIAL_TYPE.package)
+          disabled={getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)?.length &&
+            getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)
               ?.every(
                 (r) =>
                   r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder &&
                   r?.workOrder?.currentRepairJob &&
                   getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.currentRepairJob === r?.workOrder?.currentRepairJob
               )
-              ? false
-              : true
+            ? false
+            : true
           }
         >
           {`Receive From Supplier`}
@@ -1442,7 +1442,7 @@ const ActionButtonMenuItems = ({
           onClick={() => {
             setRepairJobReceiveConfirmation({ open: true, sendToCustomer: true });
           }}
-          disabled={
+          disabled={getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)?.length &&
             getFilterSelectedRecords(selectedRecords)
               ?.filter((e) => e?.type === MATERIAL_TYPE.package)
               ?.every(
@@ -1451,8 +1451,8 @@ const ActionButtonMenuItems = ({
                   r?.workOrder?.currentRepairJob &&
                   getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.currentRepairJob === r?.workOrder?.currentRepairJob
               )
-              ? false
-              : true
+            ? false
+            : true
           }
         >
           {`Send To Customer`}

@@ -34,7 +34,8 @@ const AssignPackageDialog = ({
   hideQty = false,
   forceSplitQuantity = false,
   showWarehouseSelectDialog = false,
-  warehouse = null
+  warehouse = null,
+  resource = null
 }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}`;
   const toastConfig = useContext(CustomToastContext);
@@ -177,6 +178,9 @@ const AssignPackageDialog = ({
     }
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
+    }
+    if (resource === sidebarResource.assemblyOrder) {
+      deepFilter = `${deepFilter}&packageTypeInSubPackages=true`
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     let updatedDeepFilters = [...deepFilters];
