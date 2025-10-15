@@ -27,6 +27,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const Material = ({
   allowedToEdit,
@@ -506,37 +507,6 @@ const Material = ({
     subject: `${resources?.purchaseRequisition?.titleSingular}-${purchaseRequisitionData?.purchaseRequisitionNumber}`
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
-          onClick={() => {
-            setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
-          }}
-        >
-          Bulk Edit
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            const dataToDelete = selectedRecords
-              ?.filter((e) => !e.hideSelection)
-              .map((rec: any) => {
-                const obj: any = {};
-                obj.id = rec._id;
-                obj.type = rec?.type;
-                obj.materialId = rec?.materialId;
-                return obj;
-              });
-            setDeleteData(dataToDelete);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   const rightSideContents = () => {
     return (
       <>
@@ -558,9 +528,7 @@ const Material = ({
         <DetailsPageHeader
           isAddButtonVisible={allowedToAddMaterial}
           addButtonMenuItems={addButtonMenuItems()}
-          isActionButtonVisible={allowedToAddMaterial}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+          isActionButtonVisible={false}
           previewDownloadProps={previewDownloadProps}
           hasXpadding={true}
           rightSideContents={rightSideContents()}
@@ -581,6 +549,13 @@ const Material = ({
             onSaveEdit={onSaveInlineEdit}
             expander={true}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
+            bulkActionItems={
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                setMaterialEdit={setMaterialEdit}
+                setDeleteData={setDeleteData}
+              />
+            }
           />
         </Box>
       ) : (
@@ -659,3 +634,36 @@ const Material = ({
 };
 
 export default Material;
+
+const BulkActionItems = ({ selectedRecords, setMaterialEdit, setDeleteData }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
+        onClick={() => {
+          setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+
+      <BulkActionContainer.Button
+        buttonType="red"
+        onClick={() => {
+          const dataToDelete = selectedRecords
+            ?.filter((e) => !e.hideSelection)
+            .map((rec: any) => {
+              const obj: any = {};
+              obj.id = rec._id;
+              obj.type = rec?.type;
+              obj.materialId = rec?.materialId;
+              return obj;
+            });
+          setDeleteData(dataToDelete);
+        }}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
