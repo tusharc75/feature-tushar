@@ -66,7 +66,6 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
       if (allFields?.filter(e => ['dropDown', 'multiSelect'].includes(e?.fieldData?.type) && !e?.fieldData?.lookup)?.length > 0) {
         defaultPolicy = [...defaultPolicy, fieldColor]
       }
-
       setInitialValues({
         ...initialValues,
         entityWiseResourceName: resourceData?.entityResources?.length > 0 ? true : false,

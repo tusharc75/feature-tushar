@@ -407,7 +407,8 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
       });
     setFieldOptions(fieldsData);
     if (Data?.fieldName === 'fieldColor') {
-      setFieldColorFieldNameOptions(fields?.filter(f => ['dropDown', 'multiSelect'].includes(f?.fieldData?.type) && !f?.fieldData?.lookup)?.map(e => ({ optionLabel: e?.fieldData?.fieldLabel, optionValue: e?.fieldData?.fieldName })))
+      setFieldColorFieldNameOptions(fields?.filter(f =>
+        ['dropDown', 'multiSelect'].includes(f?.fieldData?.type) && !f?.fieldData?.lookup)?.map(e => ({ optionLabel: e?.fieldData?.fieldLabel, optionValue: e?.fieldData?.fieldName })))
     }
   }, [fields]);
 
@@ -428,8 +429,8 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
   return (
     <>
       {(statusOptions?.length > 0 || fieldColorFieldNameOptions?.length > 0) && fieldOptions?.length && initialData && !optionLoading ? (
-        <div className="flex flex-col gap-2">
-          <div className="mx-2 flex items-center justify-between">
+        <div className="flex flex-col gap-2 border border-[var(--common-border-color)] mt-2 mb-2">
+          <div className="p-2 bg-gray-100 flex items-center justify-between">
             <Typography variant="subtitle2">{Data.fieldLabel}</Typography>
             <HtmlTooltip title={'Add'}>
               <IconButton
@@ -452,7 +453,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
             </HtmlTooltip>
           </div>
           {initialData?.fieldsData?.map((value, index) => (
-            <div className="my-2 flex items-center justify-between gap-1 rounded-md border border-[var(--common-border-color)] p-2" key={index}>
+            <div className="my-2 flex items-center justify-between gap-1 border-b last:border-b-0 rounded-md p-2" key={index}>
               <div className="grid w-[94%] gap-2 sm:grid-cols-1 md:grid-cols-3">
                 {initialData?.fields?.map((field) =>
                   field?.type === 'checkBox' ? (
