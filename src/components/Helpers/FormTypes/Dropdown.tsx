@@ -914,6 +914,28 @@ function Dropdown({
             }}
           />
         )}
+        {showLookupDialog.open && showLookupDialog.resource === sidebarResource.storageLocation && (
+          <ManageStorageLocation
+            referenceData={{ warehouse: values[fieldData.lookupDependentOn] }}
+            storageLocationId={showLookupDialog.data ? showLookupDialog.data?.optionValue : null}
+            onClose={() => setShowLookupDialog({ open: false, isClone: false, resource: '', data: null })}
+            isClone={showLookupDialog.isClone}
+            onSuccess={({ data }) => {
+              setShowLookupDialog({ open: false, isClone: false, resource: '', data: null })
+              if (data.storageLocationName && data._id) {
+                let tempNewOption = {
+                  default: false,
+                  optionLabel: data.storageLocationName,
+                  optionValue: data._id,
+                  order: option.length,
+                  warehouse: data.warehouse
+                };
+                setOptionsList([tempNewOption, ...option]);
+                handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+              }
+            }}
+          />
+        )}
         {showLookupDialog.open && showLookupDialog.resource === sidebarResource.competencyType && (
           <ManageCompetencyType
             id={showLookupDialog.data ? showLookupDialog.data?.optionValue : null}
