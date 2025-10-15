@@ -371,6 +371,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
               setShowProductDialog={setShowProductDialog}
               setShowDeleteConfirmBox={setShowDeleteConfirmBox}
               setDeleteBulkAssetCreationProduct={setDeleteBulkAssetCreationProduct}
+              setSelectedProductData={setSelectedProductData}
             />
           }
         />
@@ -406,7 +407,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${selectedRecords?.length ? `${resources?.product?.titleSingular?.toLowerCase()} : ${selectedProductData?.productName}` : `selected ${resources?.product?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${selectedProductData ? `${resources?.product?.titleSingular?.toLowerCase()} : ${selectedProductData?.productName}` : `selected ${resources?.product?.titlePlural?.toLowerCase()}`} ?`}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDelete}
         />
@@ -433,12 +434,13 @@ const BulkActionItems = ({
   setIsBulkEdit,
   setShowProductDialog,
   setShowDeleteConfirmBox,
-  setDeleteBulkAssetCreationProduct
+  setDeleteBulkAssetCreationProduct,
+  setSelectedProductData
 }) => {
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
-        disabled={selectedRecords.length === 0 || bulkAssetCreationData?.assetCreationInProgess}
+        disabled={bulkAssetCreationData?.assetCreationInProgess}
         onClick={() => {
           setIsBulkEdit(true);
           setShowProductDialog(true);
@@ -447,8 +449,13 @@ const BulkActionItems = ({
         Bulk Edit
       </BulkActionContainer.Button>
       <BulkActionContainer.Button
-        disabled={selectedRecords.length === 0 || loadingButton || bulkAssetCreationData?.assetCreationInProgess}
+        disabled={loadingButton || bulkAssetCreationData?.assetCreationInProgess}
         onClick={() => {
+          if (selectedRecords.length === 1) {
+            setSelectedProductData(selectedRecords[0]);
+          } else {
+            setSelectedProductData(null);
+          }
           setShowDeleteConfirmBox(true);
           setDeleteBulkAssetCreationProduct(selectedRecords.map((d) => d._id));
         }}

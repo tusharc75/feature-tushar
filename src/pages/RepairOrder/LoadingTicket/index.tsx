@@ -363,7 +363,7 @@ const BulkActionItems = ({
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
-        disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.hasOwnProperty('loadingTicketId'))}
+        disabled={selectedRecords.some((f) => f.hasOwnProperty('loadingTicketId'))}
         onClick={() => {
           handleDeliveryTicketDialog();
         }}
@@ -372,7 +372,6 @@ const BulkActionItems = ({
       </BulkActionContainer.Button>
       <BulkActionContainer.Button
         disabled={
-          selectedRecords.length === 0 ||
           selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
         }
         onClick={() => {
