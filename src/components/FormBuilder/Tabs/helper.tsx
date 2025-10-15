@@ -635,27 +635,6 @@ export const RESOURCE_ACTION_TYPE = {
   triggers: 'Triggers'
 }
 
-export const statusColor = {
-  fieldName: 'statusColor',
-  fieldLabel: 'Status Color',
-  type: 'multipleFields',
-  fields: [
-    {
-      fieldName: 'status',
-      fieldLabel: 'Status',
-      type: 'multiSelect',
-      required: true
-    },
-    {
-      fieldName: 'colorCode',
-      fieldLabel: 'Color Code',
-      type: 'colorPicker',
-      required: true
-    }
-  ],
-  defaultValue: []
-}
-
 export const fieldColor = {
   fieldName: 'fieldColor',
   fieldLabel: 'Field Color',
