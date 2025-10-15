@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import { LocalShipping } from '@mui/icons-material';
 import { map, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -14,6 +14,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import {
   CHILD_RESOURCE,
   DELIVERY_FROM_TO_TYPE,
@@ -336,51 +337,12 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
     }
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            if (!validateAction(subcontractAssemblyActions.createLoadingTicket)) {
-              handleDeliveryTicketDialog();
-            }
-          }}
-          disabled={selectedRecords.length === 0}
-        >
-          Create Loading Ticket
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (!validateAction(subcontractAssemblyActions.deliveredLoadingTicket)) {
-              setShowConformationDeliverTicket(true);
-            }
-          }}
-          disabled={selectedRecords.length === 0}
-        >
-          Delivered Loading Ticket
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (!validateAction(subcontractAssemblyActions.cancelLoadingTicket)) {
-              setShowConformationCancleTicket(true);
-            }
-          }}
-          disabled={selectedRecords.length === 0}
-        >
-          Cancel Loading Ticket(s)
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <>
       <>
         <DetailsPageHeader
           isAddButtonVisible={false}
-          isActionButtonVisible={allowedToEdit}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+          isActionButtonVisible={false}
           hasXpadding
         />
         {columns ? (
@@ -395,6 +357,15 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
               refreshGrid={fetchData}
               hideSelection={!allowedToEdit}
               hideAction={!allowedToEdit}
+              bulkActionItems={
+                <BulkActionItems
+                  validateAction={validateAction}
+                  subcontractAssemblyActions={subcontractAssemblyActions}
+                  handleDeliveryTicketDialog={handleDeliveryTicketDialog}
+                  setShowConformationDeliverTicket={setShowConformationDeliverTicket}
+                  setShowConformationCancleTicket={setShowConformationCancleTicket}
+                />
+              }
             />
           </Box>
         ) : (
@@ -458,3 +429,43 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 };
 
 export default LoadingTicket;
+
+const BulkActionItems = ({ 
+  validateAction,
+  subcontractAssemblyActions,
+  handleDeliveryTicketDialog,
+  setShowConformationDeliverTicket,
+  setShowConformationCancleTicket
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          if (!validateAction(subcontractAssemblyActions.createLoadingTicket)) {
+            handleDeliveryTicketDialog();
+          }
+        }}
+      >
+        Create Loading Ticket
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        onClick={() => {
+          if (!validateAction(subcontractAssemblyActions.deliveredLoadingTicket)) {
+            setShowConformationDeliverTicket(true);
+          }
+        }}
+      >
+        Delivered Loading Ticket
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        onClick={() => {
+          if (!validateAction(subcontractAssemblyActions.cancelLoadingTicket)) {
+            setShowConformationCancleTicket(true);
+          }
+        }}
+      >
+        Cancel Loading Ticket(s)
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
