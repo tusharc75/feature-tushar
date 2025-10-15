@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import { map, uniq } from 'lodash';
 import { FC, Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -9,6 +9,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import {
   ASSET_STATUS,
   COLOUR_MASTER,
@@ -366,36 +367,6 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     hideDetailButton: true
   };
 
-  const ActionMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={
-            selectedRecords.length === 0 ||
-            assetWithNoTicket.length === 0 ||
-            loadingTicketsNotDelivered.length > 0 ||
-            selectedRecords.filter((asset: any) => asset?.status === ASSET_STATUS.lost).length > 0 ||
-            selectedRecords.filter((asset: any) => asset.hasOwnProperty('receivingTicket')).length > 0
-          }
-          onClick={createReceivingTicket}
-        >
-          Create Receiving Ticket
-        </MenuItem>
-        <MenuItem
-          disabled={
-            selectedRecords.length === 0 ||
-            selectedRecords.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
-          }
-          onClick={() => {
-            setShowConfirmBoxReceive(true);
-          }}
-        >
-          {`Receive ${resources?.serializedAsset?.titlePlural}`}
-        </MenuItem>
-      </>
-    );
-  };
-
   const handelReceiveAssets = () => {
     let data = {};
     setIsSubmitting(true);
@@ -431,9 +402,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             isAddButtonVisible={false}
             previewDownloadProps={previewDownloadProps}
             hasXpadding
-            isActionButtonVisible={allowedToEdit && !isTransferEnded}
-            actionButtonMenuItems={<ActionMenuItems />}
-            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+            isActionButtonVisible={false}
           />
         </>
       )}
@@ -450,6 +419,18 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
               refreshGrid={fetchAssetsData}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
+              bulkActionItems={
+                <BulkActionItems
+                  selectedRecords={selectedRecords}
+                  assetWithNoTicket={assetWithNoTicket}
+                  loadingTicketsNotDelivered={loadingTicketsNotDelivered}
+                  ASSET_STATUS={ASSET_STATUS}
+                  createReceivingTicket={createReceivingTicket}
+                  DELIVERY_TICKET_STATUS={DELIVERY_TICKET_STATUS}
+                  setShowConfirmBoxReceive={setShowConfirmBoxReceive}
+                  resources={resources}
+                />
+              }
             />
           </Box>
         ) : (
@@ -487,3 +468,43 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
 };
 
 export default ReceivingTicketGrid;
+
+const BulkActionItems = ({ 
+  selectedRecords,
+  assetWithNoTicket,
+  loadingTicketsNotDelivered,
+  ASSET_STATUS,
+  createReceivingTicket,
+  DELIVERY_TICKET_STATUS,
+  setShowConfirmBoxReceive,
+  resources
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={
+          selectedRecords.length === 0 ||
+          assetWithNoTicket.length === 0 ||
+          loadingTicketsNotDelivered.length > 0 ||
+          selectedRecords.filter((asset: any) => asset?.status === ASSET_STATUS.lost).length > 0 ||
+          selectedRecords.filter((asset: any) => asset.hasOwnProperty('receivingTicket')).length > 0
+        }
+        onClick={createReceivingTicket}
+      >
+        Create Receiving Ticket
+      </BulkActionContainer.Button>
+      
+      <BulkActionContainer.Button
+        disabled={
+          selectedRecords.length === 0 ||
+          selectedRecords.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
+        }
+        onClick={() => {
+          setShowConfirmBoxReceive(true);
+        }}
+      >
+        {`Receive ${resources?.serializedAsset?.titlePlural}`}
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
