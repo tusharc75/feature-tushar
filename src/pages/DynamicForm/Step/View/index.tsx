@@ -58,7 +58,7 @@ const View = ({
   const [allowedToEditState, setAllowedToEditState] = useState(null);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { dataRows, selectedRecords } = state;
+  const { dataRows, selectedRecords, loading } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
 
@@ -474,21 +474,26 @@ const View = ({
             ) : (
               <>
                 {sidebarButton}
-                <Box textAlign={'right'}>
-                  <HtmlTooltip title={allowedToEditState ? 'Edit' : editDisable}>
-                    <ThemeButton
-                      onClick={() => {
-                        setOpen({ open: true, id: dataRows[0] ? dataRows[0]?._id : null });
-                      }}
-                      disabled={!allowedToEditState}
-                      buttonType="theme"
-                    >
-                      Edit
-                    </ThemeButton>
-                  </HtmlTooltip>
-                </Box>
                 <Box mt={2}>
-                  <DetailsPage data={dataRows[0] || {}} fields={step?.fields?.map((f) => ({ fieldData: f }))} />
+                  {!loading ? <>
+                    <Box textAlign={'right'}>
+                      <HtmlTooltip title={allowedToEditState ? 'Edit' : editDisable}>
+                        <ThemeButton
+                          onClick={() => {
+                            setOpen({ open: true, id: dataRows[0] ? dataRows[0]?._id : null });
+                          }}
+                          disabled={!allowedToEditState}
+                          buttonType="theme"
+                        >
+                          Edit
+                        </ThemeButton>
+                      </HtmlTooltip>
+                    </Box>
+                    <DetailsPage data={dataRows[0] || {}} fields={step?.fields?.map((f) => ({ fieldData: f }))} />
+                  </> :
+                    <Box p={2} height={500}>
+                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                    </Box>}
                 </Box>
               </>
             )

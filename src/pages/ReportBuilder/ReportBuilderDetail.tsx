@@ -7,7 +7,7 @@ import { Formik, Form } from 'formik';
 import { useParams, useHistory } from 'react-router-dom';
 import routes from '../../components/Helpers/Routes';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import { Autocomplete, Box, Card, CardContent, IconButton, Divider } from '@mui/material';
+import { Autocomplete, Box, Card, CardContent, IconButton, Checkbox, FormControlLabel, Typography, ClickAwayListener } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
@@ -19,6 +19,8 @@ import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import JoinInnerIcon from '@mui/icons-material/JoinInner';
 import FunctionsIcon from '@mui/icons-material/Functions';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import {
   PipelineItem,
   LookupPipeline,
@@ -32,6 +34,313 @@ import {
   chartTypeOptions
 } from './utils';
 import { sidebarResource, UnCamelCase } from 'src/constants/helpers';
+import Popper from '@mui/material/Popper';
+import Paper from '@mui/material/Paper';
+
+const WithResourceFieldsPopper = ({ isEdit, item, lookupFields, updatePipelineItem }) => {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const open = Boolean(anchorEl);
+  const handleToggle = (e) => {
+    setAnchorEl(open ? null : e.currentTarget);
+  };
+
+  const handleClickAway = (event) => {
+    if (anchorEl && !anchorEl.contains(event.target)) {
+      setAnchorEl(null);
+    }
+  };
+
+  return (
+    <>
+      <IconButton onClick={handleToggle} disabled={!isEdit} size="small" className="border" style={{ borderColor: 'var(--common-border-color)' }}>
+        {open ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+      </IconButton>
+
+      <Popper
+        open={open}
+        anchorEl={anchorEl}
+        placement="bottom-end"
+        modifiers={[{ name: 'offset', options: { offset: [0, 8] } }]}
+        sx={{ zIndex: (theme) => theme.zIndex.modal }}
+      >
+        <ClickAwayListener onClickAway={handleClickAway}>
+          <Paper elevation={4} sx={{ width: 320, maxHeight: 384, overflow: 'auto', p: 2 }}>
+            <div className="mb-3">
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    size="small"
+                    checked={(() => {
+                      return item?.fields?.length === lookupFields.length && lookupFields.length > 0;
+                    })()}
+                    indeterminate={(() => {
+                      return item?.fields?.length > 0 && item?.fields?.length < lookupFields.length;
+                    })()}
+                    onChange={(e) => {
+                      updatePipelineItem(item._id, { fields: e.target.checked ? lookupFields.map((f) => f.fieldName) : [] });
+                    }}
+                    disabled={!isEdit}
+                  />
+                }
+                label="Select all"
+                className="text-sm font-medium"
+              />
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--common-border-color)' }} className="pt-2">
+              {lookupFields.map((field) => {
+                const checked = item?.fields?.includes(field.fieldName);
+                return (
+                  <div key={field.fieldName} className="mb-1">
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          size="small"
+                          checked={checked}
+                          onChange={(e) => {
+                            const next = e.target.checked ? [...item?.fields, field.fieldName] : item?.fields?.filter((f) => f !== field.fieldName);
+                            updatePipelineItem(item._id, { fields: next });
+                          }}
+                          disabled={!isEdit}
+                        />
+                      }
+                      label={<span className="text-sm">{field.fieldLabel}</span>}
+                    />
+                  </div>
+                );
+              })}
+              {lookupFields?.length === 0 && (
+                <div className="py-4 text-center">
+                  <span className="text-sm" style={{ color: 'var(--dark-secondary-text, #6c757d)' }}>
+                    No fields available
+                  </span>
+                </div>
+              )}
+            </div>
+          </Paper>
+        </ClickAwayListener>
+      </Popper>
+    </>
+  );
+};
+
+const FieldMatchRow = ({
+  item,
+  matchIndex,
+  localFields,
+  lookupFields,
+  onUpdate,
+  onRemove,
+  totalMatches,
+  resourceOptions,
+  formValues,
+  isEdit,
+  fetchResourceFields,
+  updatePipelineItem,
+  pipelineErrors
+}: {
+  item: LookupPipeline;
+  matchIndex: number;
+  localFields: any[];
+  lookupFields: any[];
+  onUpdate: (updates: any) => void;
+  onRemove?: () => void;
+  totalMatches?: number;
+  resourceOptions: any[];
+  formValues: any;
+  isEdit: boolean;
+  fetchResourceFields: (resource: string, onFieldsLoaded: (fields: any[]) => void) => void;
+  updatePipelineItem: (id: string, updates: Partial<PipelineItem>) => void;
+  pipelineErrors: { [itemId: string]: string[] };
+}) => {
+  const fromResourceName = resourceOptions?.find((r) => r.value === formValues?.resource)?.title || formValues?.resource;
+  const withResourceName = resourceOptions?.find((r) => r.value === item.withResource)?.title || item.withResource;
+
+  return (
+    <>
+      <Grid container spacing={1} alignItems="center" sx={{ mt: matchIndex > 0 ? 1 : 0 }}>
+        {matchIndex > 0 && (
+          <Grid size={{ xs: 12, sm: 5.5 }}>
+            <Box />
+          </Grid>
+        )}
+        {matchIndex === 0 && (
+          <>
+            <Grid size={{ xs: 12, sm: 2.5 }}>
+              <Autocomplete
+                disabled={true}
+                value={{ title: fromResourceName, value: formValues?.resource }}
+                options={[{ title: fromResourceName, value: formValues?.resource }]}
+                getOptionLabel={(option) => option.title}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    label="From Resource"
+                    variant="outlined"
+                    fullWidth
+                    required
+                    slotProps={{ inputLabel: { shrink: true } }}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 0.5 }} className="flex items-center justify-center">
+              <JoinInnerIcon color="primary" fontSize="small" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 2.5 }}>
+              <div className="fields-panel-container relative flex items-center gap-2">
+                <div className="flex-1">
+                  <Autocomplete
+                    disabled={!isEdit}
+                    value={
+                      resourceOptions?.filter((option) => option.value !== formValues?.resource)?.find((r) => r.value === item.withResource) || null
+                    }
+                    options={resourceOptions?.filter((option) => option.value !== formValues?.resource) || []}
+                    getOptionLabel={(option) => option.title}
+                    onChange={(e, val) => {
+                      const updates: any = {
+                        withResource: val?.value || '',
+                        fieldToMatch: [{ localField: '', lookupResourceField: '' }],
+                        fields: []
+                      };
+
+                      onUpdate(updates);
+
+                      if (val?.value) {
+                        fetchResourceFields(val.value, (fields) => {
+                          const allFieldNames = fields?.map((field) => field?.fieldName);
+                          updatePipelineItem(item._id, { fields: allFieldNames });
+                        });
+                      }
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        size="small"
+                        label="With Resource"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        error={pipelineErrors[item._id]?.includes('withResource_required')}
+                        helperText={pipelineErrors[item._id]?.includes('withResource_required') ? 'With Resource is required' : ''}
+                        slotProps={{ inputLabel: { shrink: true } }}
+                      />
+                    )}
+                  />
+                </div>
+                {item?.withResource && (
+                  <WithResourceFieldsPopper isEdit={isEdit} item={item} lookupFields={lookupFields} updatePipelineItem={updatePipelineItem} />
+                )}
+              </div>
+            </Grid>
+          </>
+        )}
+        <Grid size={{ xs: 12, sm: 0.5 }} className="flex items-center justify-center">
+          <span className="text-sm font-medium" style={{ color: 'var(--primary-text)' }}>
+            {matchIndex === Math.floor(totalMatches / 2) ? 'on' : ' '}
+          </span>
+        </Grid>
+        <Grid size={{ xs: 12, sm: matchIndex > 0 ? 2.5 : 2.5 }}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Box flex={1}>
+              <Autocomplete
+                disabled={!isEdit || !item.withResource}
+                value={localFields.find((f) => f.fieldName === item?.fieldToMatch?.[matchIndex]?.localField) || null}
+                options={localFields}
+                getOptionLabel={(option) => option.fieldLabel}
+                onChange={(e, val) => {
+                  const updatedFieldToMatch = [...item.fieldToMatch];
+                  updatedFieldToMatch[matchIndex] = { ...updatedFieldToMatch[matchIndex], localField: val?.fieldName || '' };
+                  onUpdate({ fieldToMatch: updatedFieldToMatch });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    label={fromResourceName}
+                    variant="outlined"
+                    fullWidth
+                    required
+                    error={pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`)}
+                    helperText={
+                      pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`) ? `${fromResourceName} field is required` : ''
+                    }
+                    slotProps={{ inputLabel: { shrink: true } }}
+                  />
+                )}
+              />
+            </Box>
+            <span className="text-lg font-medium" style={{ color: 'var(--primary-text)' }}>
+              =
+            </span>
+          </Box>
+        </Grid>
+        <Grid size={{ xs: 12, sm: matchIndex > 0 ? 3.5 : 3.5 }}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Box flex={1}>
+              <Autocomplete
+                disabled={!isEdit || !item.withResource}
+                value={lookupFields.find((f) => f.fieldName === item?.fieldToMatch?.[matchIndex]?.lookupResourceField) || null}
+                options={lookupFields}
+                getOptionLabel={(option) => option.fieldLabel}
+                onChange={(e, val) => {
+                  const updatedFieldToMatch = [...item?.fieldToMatch];
+                  updatedFieldToMatch[matchIndex] = { ...updatedFieldToMatch[matchIndex], lookupResourceField: val?.fieldName || '' };
+                  onUpdate({ fieldToMatch: updatedFieldToMatch });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    label={withResourceName}
+                    variant="outlined"
+                    fullWidth
+                    required
+                    error={pipelineErrors[item._id]?.includes(`lookupResourceField_${matchIndex}_required`)}
+                    helperText={
+                      pipelineErrors[item._id]?.includes(`lookupResourceField_${matchIndex}_required`)
+                        ? `${withResourceName} field is required`
+                        : ''
+                    }
+                    slotProps={{ inputLabel: { shrink: true } }}
+                  />
+                )}
+              />
+            </Box>
+
+            {(totalMatches === 1 || matchIndex === totalMatches - 1) && (
+              <IconButton
+                onClick={() => {
+                  const updatedFieldToMatch = [...item.fieldToMatch, { localField: '', lookupResourceField: '' }];
+                  updatePipelineItem(item._id, { fieldToMatch: updatedFieldToMatch });
+                }}
+                disabled={!isEdit}
+                size="small"
+                className="border"
+                style={{ borderColor: 'var(--common-border-color)' }}
+              >
+                <AddIcon fontSize="small" />
+              </IconButton>
+            )}
+            {matchIndex !== 0 && (
+              <IconButton size="small" onClick={onRemove} disabled={!isEdit}>
+                <DeleteIcon fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
+              </IconButton>
+            )}
+          </Box>
+        </Grid>
+      </Grid>
+      {matchIndex < totalMatches - 1 && (
+        <Grid container justifyContent="end" sx={{ mt: 1 }}>
+          <Typography variant="body2" sx={{ color: 'var(--primary-text)' }}>
+            and
+          </Typography>
+        </Grid>
+      )}
+    </>
+  );
+};
 
 const AccumulatorRow = ({
   accumulator,
@@ -39,16 +348,16 @@ const AccumulatorRow = ({
   resourceFields,
   onUpdate,
   onRemove,
-  showRemove = false,
-  isEdit
+  isEdit,
+  onAddOperation
 }: {
   accumulator: any;
   accIndex: number;
   resourceFields: any[];
   onUpdate: (updates: any) => void;
-  onRemove?: () => void;
-  showRemove?: boolean;
+  onRemove?: () => void | undefined;
   isEdit: boolean;
+  onAddOperation: () => void | undefined;
 }) => (
   <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
     <Grid size={{ xs: 12, sm: 3 }}>
@@ -95,13 +404,18 @@ const AccumulatorRow = ({
         }}
       />
     </Grid>
-    {showRemove && (
-      <Grid size={{ xs: 12, sm: 1 }}>
+    <Grid size={{ xs: 12, sm: 1 }}>
+      {onAddOperation && (
+        <IconButton size="small" onClick={onAddOperation} disabled={!isEdit}>
+          <AddIcon fontSize="small" />
+        </IconButton>
+      )}
+      {onRemove && (
         <IconButton size="small" onClick={onRemove} disabled={!isEdit}>
           <DeleteIcon fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
         </IconButton>
-      </Grid>
-    )}
+      )}
+    </Grid>
   </Grid>
 );
 
@@ -124,6 +438,18 @@ export default function ReportBuilderDetail() {
   const [hasSortItem, setHasSortItem] = useState(false);
   const [hasLimitItem, setHasLimitItem] = useState(false);
   const [pipelineErrors, setPipelineErrors] = useState<{ [itemId: string]: string[] }>({});
+  const [showFieldsPanel, setShowFieldsPanel] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showFieldsPanel && !(event.target as Element).closest('.fields-panel-container')) {
+        setShowFieldsPanel(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showFieldsPanel]);
 
   const onBackButtonEvent = useCallback((e) => {
     e.preventDefault();
@@ -224,7 +550,9 @@ export default function ReportBuilderDetail() {
     if (formValues && formValues?.resource) {
       fetchResourceFields(formValues?.resource, (fields) => {
         const allFieldNames = fields?.map((field) => field?.fieldName);
-        setInitialValues({ ...initialValues, fields: allFieldNames });
+        if (!formValues?.fields?.length) {
+          setInitialValues({ ...initialValues, fields: allFieldNames });
+        }
       });
     }
   }, [formValues]);
@@ -404,156 +732,6 @@ export default function ReportBuilderDetail() {
     history.push({ pathname: isBreakCrumbPath || path ? isBreakCrumbPath || path : routes.reportBuilder.path });
   };
 
-  const FieldMatchRow = ({
-    item,
-    matchIndex,
-    localFields,
-    lookupFields,
-    onUpdate,
-    onRemove,
-    showRemove = false
-  }: {
-    item: LookupPipeline;
-    matchIndex: number;
-    localFields: any[];
-    lookupFields: any[];
-    onUpdate: (updates: any) => void;
-    onRemove?: () => void;
-    showRemove?: boolean;
-  }) => (
-    <Grid container spacing={2} alignItems="center" sx={{ mt: matchIndex > 0 ? 1 : 0 }}>
-      {matchIndex > 0 && (
-        <>
-          <Grid size={{ xs: 12, sm: 3 }}>
-            <Box />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 3 }}>
-            <Box />
-          </Grid>
-        </>
-      )}
-      {matchIndex === 0 && (
-        <>
-          <Grid size={{ xs: 12, sm: 3 }}>
-            <Autocomplete
-              disabled={true}
-              value={{ title: formValues?.resource, value: formValues?.resource }}
-              options={[{ title: formValues?.resource, value: formValues?.resource }]}
-              getOptionLabel={(option) => option.title}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  size="small"
-                  label="From Resource"
-                  variant="outlined"
-                  fullWidth
-                  required
-                  slotProps={{ inputLabel: { shrink: true } }}
-                />
-              )}
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 3 }}>
-            <Autocomplete
-              disabled={!isEdit}
-              value={resourceOptions?.filter((option) => option.value !== formValues?.resource)?.find((r) => r.value === item.withResource) || null}
-              options={resourceOptions?.filter((option) => option.value !== formValues?.resource) || []}
-              getOptionLabel={(option) => option.title}
-              onChange={(e, val) => {
-                const updates: any = {
-                  withResource: val?.value || '',
-                  fieldToMatch: [{ localField: '', lookupResourceField: '' }],
-                  fields: []
-                };
-
-                onUpdate(updates);
-
-                if (val?.value) {
-                  fetchResourceFields(val.value, (fields) => {
-                    const allFieldNames = fields?.map((field) => field?.fieldName);
-                    updatePipelineItem(item._id, { fields: allFieldNames });
-                  });
-                }
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  size="small"
-                  label="With Resource"
-                  variant="outlined"
-                  fullWidth
-                  required
-                  error={pipelineErrors[item._id]?.includes('withResource_required')}
-                  helperText={pipelineErrors[item._id]?.includes('withResource_required') ? 'With Resource is required' : ''}
-                  slotProps={{ inputLabel: { shrink: true } }}
-                />
-              )}
-            />
-          </Grid>
-        </>
-      )}
-      <Grid size={{ xs: 12, sm: matchIndex > 0 ? 3 : 3 }}>
-        <Autocomplete
-          disabled={!isEdit || !item.withResource}
-          value={localFields.find((f) => f.fieldName === item?.fieldToMatch?.[matchIndex]?.localField) || null}
-          options={localFields}
-          getOptionLabel={(option) => option.fieldLabel}
-          onChange={(e, val) => {
-            const updatedFieldToMatch = [...item.fieldToMatch];
-            updatedFieldToMatch[matchIndex] = { ...updatedFieldToMatch[matchIndex], localField: val?.fieldName || '' };
-            onUpdate({ fieldToMatch: updatedFieldToMatch });
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              size="small"
-              label="Local Field"
-              variant="outlined"
-              fullWidth
-              required
-              error={pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`)}
-              helperText={pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`) ? 'Local Field is required' : ''}
-              slotProps={{ inputLabel: { shrink: true } }}
-            />
-          )}
-        />
-      </Grid>
-      <Grid size={{ xs: 12, sm: matchIndex > 0 ? 2 : 3 }}>
-        <Autocomplete
-          disabled={!isEdit || !item.withResource}
-          value={lookupFields.find((f) => f.fieldName === item?.fieldToMatch?.[matchIndex]?.lookupResourceField) || null}
-          options={lookupFields}
-          getOptionLabel={(option) => option.fieldLabel}
-          onChange={(e, val) => {
-            const updatedFieldToMatch = [...item?.fieldToMatch];
-            updatedFieldToMatch[matchIndex] = { ...updatedFieldToMatch[matchIndex], lookupResourceField: val?.fieldName || '' };
-            onUpdate({ fieldToMatch: updatedFieldToMatch });
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              size="small"
-              label="With Resource Field"
-              variant="outlined"
-              fullWidth
-              required
-              error={pipelineErrors[item._id]?.includes(`lookupResourceField_${matchIndex}_required`)}
-              helperText={pipelineErrors[item._id]?.includes(`lookupResourceField_${matchIndex}_required`) ? 'With Resource Field is required' : ''}
-              slotProps={{ inputLabel: { shrink: true } }}
-            />
-          )}
-        />
-      </Grid>
-      {showRemove && (
-        <Grid size={{ xs: 12, sm: 1 }}>
-          <IconButton size="small" onClick={onRemove} disabled={!isEdit}>
-            <DeleteIcon fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
-          </IconButton>
-        </Grid>
-      )}
-    </Grid>
-  );
-
   const renderLookupComponent = (item: LookupPipeline) => {
     const localFields = [{ fieldName: '_id', fieldLabel: '_id' }, ...(resourceFieldMap[formValues?.resource] || [])];
     const lookupFields = [{ fieldName: '_id', fieldLabel: '_id' }, ...(resourceFieldMap[item?.withResource] || [])];
@@ -577,6 +755,13 @@ export default function ReportBuilderDetail() {
             localFields={localFields}
             lookupFields={lookupFields}
             onUpdate={(updates) => updatePipelineItem(item._id, updates)}
+            totalMatches={item?.fieldToMatch?.length || 0}
+            resourceOptions={resourceOptions}
+            formValues={formValues}
+            isEdit={isEdit}
+            fetchResourceFields={fetchResourceFields}
+            updatePipelineItem={updatePipelineItem}
+            pipelineErrors={pipelineErrors}
           />
 
           {item?.fieldToMatch?.length > 1 &&
@@ -592,58 +777,15 @@ export default function ReportBuilderDetail() {
                   const updatedFieldToMatch = item?.fieldToMatch?.filter((_, i) => i !== index + 1);
                   updatePipelineItem(item._id, { fieldToMatch: updatedFieldToMatch });
                 }}
-                showRemove={true}
+                totalMatches={item?.fieldToMatch?.length || 0}
+                resourceOptions={resourceOptions}
+                formValues={formValues}
+                isEdit={isEdit}
+                fetchResourceFields={fetchResourceFields}
+                updatePipelineItem={updatePipelineItem}
+                pipelineErrors={pipelineErrors}
               />
             ))}
-
-          <Box mt={2}>
-            <ThemeButton
-              startIcon={<AddIcon />}
-              onClick={() => {
-                const updatedFieldToMatch = [...item.fieldToMatch, { localField: '', lookupResourceField: '' }];
-                updatePipelineItem(item._id, { fieldToMatch: updatedFieldToMatch });
-              }}
-              disabled={!isEdit}
-            >
-              Add Field Match
-            </ThemeButton>
-          </Box>
-
-          {item?.withResource && (
-            <Box mt={3}>
-              <Autocomplete
-                disabled={!isEdit}
-                multiple
-                limitTags={4}
-                disableCloseOnSelect
-                value={(() => {
-                  const validFields = validateAndCleanFields(item?.fields, lookupFields);
-                  return (
-                    lookupFields
-                      ?.filter((field) => validFields.includes(field.fieldName))
-                      ?.map((field) => ({ fieldName: field.fieldName, fieldLabel: field.fieldLabel })) || []
-                  );
-                })()}
-                options={lookupFields?.map((field) => ({ fieldName: field.fieldName, fieldLabel: field.fieldLabel })) || []}
-                getOptionLabel={(option) => option.fieldLabel}
-                isOptionEqualToValue={(option, val) => option.fieldName === val.fieldName}
-                onChange={(e, val: any) => {
-                  const selectedFieldNames = val.map((v: any) => v.fieldName);
-                  updatePipelineItem(item._id, { fields: selectedFieldNames });
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    size="small"
-                    label="Select Fields"
-                    variant="outlined"
-                    fullWidth
-                    slotProps={{ inputLabel: { shrink: true } }}
-                  />
-                )}
-              />
-            </Box>
-          )}
         </CardContent>
       </Card>
     );
@@ -687,24 +829,16 @@ export default function ReportBuilderDetail() {
                     }
                   : undefined
               }
-              showRemove={item?.accumulator?.length > 1}
+              onAddOperation={
+                index === item?.accumulator?.length - 1
+                  ? () => {
+                      const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
+                      updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                    }
+                  : undefined
+              }
             />
           ))}
-
-          <Box mb={2}>
-            <ThemeButton
-              startIcon={<AddIcon />}
-              onClick={() => {
-                const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
-                updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-              }}
-              disabled={!isEdit}
-            >
-              Add Operation
-            </ThemeButton>
-          </Box>
-
-          <Divider sx={{ my: 2 }} />
 
           <Box>
             <span>Group By</span>
@@ -1111,138 +1245,196 @@ export default function ReportBuilderDetail() {
                     <Grid container spacing={2} direction={'column'}>
                       <Grid>
                         <Grid container spacing={2}>
-                          <Grid size={{ xs: 12, sm: 6, md: 6, lg: 6 }}>
-                            <Autocomplete
-                              disabled={true}
-                              getOptionLabel={(option) => option.title}
-                              isOptionEqualToValue={(option, value) => option.value === value.value}
-                              value={
-                                resourceOptions?.find((data) => data.value === values['resource'])
-                                  ? resourceOptions?.find((data) => data.value === values['resource'])
-                                  : null
-                              }
-                              options={resourceOptions}
-                              onChange={(e, val: any) => {}}
-                              renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  required={true}
-                                  margin="none"
-                                  size="small"
-                                  name="resource"
-                                  label="Resource"
-                                  variant="outlined"
-                                  error={touched['resource'] && Boolean(errors['resource'])}
-                                  helperText={touched['resource'] && errors['resource']}
-                                  fullWidth
-                                  slotProps={{ inputLabel: { shrink: true } }}
+                          <Grid size={{ xs: 12, sm: 4, md: 4, lg: 4 }}>
+                            <div className="fields-panel-container relative flex items-center gap-2">
+                              <div className="flex-1">
+                                <Autocomplete
+                                  disabled={true}
+                                  getOptionLabel={(option) => option.title}
+                                  isOptionEqualToValue={(option, value) => option.value === value.value}
+                                  value={
+                                    resourceOptions?.find((data) => data.value === values['resource'])
+                                      ? resourceOptions?.find((data) => data.value === values['resource'])
+                                      : null
+                                  }
+                                  options={resourceOptions}
+                                  onChange={(e, val: any) => {}}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      required={true}
+                                      margin="none"
+                                      size="small"
+                                      name="resource"
+                                      label="Resource"
+                                      variant="outlined"
+                                      error={touched['resource'] && Boolean(errors['resource'])}
+                                      helperText={touched['resource'] && errors['resource']}
+                                      fullWidth
+                                      slotProps={{ inputLabel: { shrink: true } }}
+                                    />
+                                  )}
                                 />
+                              </div>
+                              <IconButton
+                                onClick={() => setShowFieldsPanel(!showFieldsPanel)}
+                                disabled={!values?.resource}
+                                size="small"
+                                className="border"
+                                style={{ borderColor: 'var(--common-border-color)' }}
+                              >
+                                {showFieldsPanel ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                              </IconButton>
+
+                              {showFieldsPanel && values?.resource && (
+                                <div
+                                  className="absolute left-0 top-full z-50 mt-1 max-h-96 w-80 overflow-auto rounded border shadow-lg"
+                                  style={{
+                                    backgroundColor: 'var(--card-bg)',
+                                    borderColor: 'var(--common-border-color)'
+                                  }}
+                                >
+                                  <div className="p-3">
+                                    <div className="mb-3">
+                                      <FormControlLabel
+                                        control={
+                                          <Checkbox
+                                            size="small"
+                                            checked={(() => {
+                                              const availableFields = resourceFieldMap[values?.resource] || [];
+                                              return values?.fields?.length === availableFields?.length && availableFields?.length > 0;
+                                            })()}
+                                            indeterminate={(() => {
+                                              const availableFields = resourceFieldMap[values?.resource] || [];
+                                              return values?.fields?.length > 0 && values?.fields?.length < availableFields?.length;
+                                            })()}
+                                            onChange={(e) => {
+                                              const availableFields = resourceFieldMap[values?.resource] || [];
+                                              if (e.target.checked) {
+                                                setFieldValue(
+                                                  'fields',
+                                                  availableFields?.map((f) => f.fieldName)
+                                                );
+                                              } else {
+                                                setFieldValue('fields', []);
+                                              }
+                                            }}
+                                            disabled={!isEdit}
+                                          />
+                                        }
+                                        label="Select all"
+                                        className="text-sm font-medium"
+                                      />
+                                    </div>
+
+                                    <div className="pt-2" style={{ borderTop: '1px solid var(--common-border-color)' }}>
+                                      {(resourceFieldMap[values?.resource] || [])?.map((field) => (
+                                        <div key={field.fieldName} className="mb-1">
+                                          <FormControlLabel
+                                            control={
+                                              <Checkbox
+                                                size="small"
+                                                checked={(() => {
+                                                  const availableFields = resourceFieldMap[values?.resource] || [];
+                                                  const validFields = validateAndCleanFields(values?.fields, availableFields);
+                                                  return validFields.includes(field.fieldName);
+                                                })()}
+                                                onChange={(e) => {
+                                                  const availableFields = resourceFieldMap[values?.resource] || [];
+                                                  const validFields = validateAndCleanFields(values?.fields, availableFields);
+                                                  let newFields;
+                                                  if (e?.target?.checked) {
+                                                    newFields = [...validFields, field.fieldName];
+                                                  } else {
+                                                    newFields = validFields?.filter((f) => f !== field.fieldName);
+                                                  }
+                                                  setFieldValue('fields', newFields);
+                                                }}
+                                                disabled={!isEdit}
+                                              />
+                                            }
+                                            label={
+                                              <div className="flex items-center gap-2">
+                                                <span className="text-sm">{field.fieldLabel}</span>
+                                              </div>
+                                            }
+                                          />
+                                        </div>
+                                      ))}
+
+                                      {!(resourceFieldMap?.[values?.resource] || [])?.length && (
+                                        <div className="py-4 text-center">
+                                          <span className="text-sm" style={{ color: 'var(--dark-secondary-text, #6c757d)' }}>
+                                            No fields available
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
                               )}
-                            />
+                            </div>
                           </Grid>
-                          <Grid size={{ xs: 12, sm: 6, md: 6, lg: 6 }}>
-                            <Autocomplete
-                              disabled={!isEdit || !values?.resource}
-                              multiple
-                              limitTags={2}
-                              disableCloseOnSelect
-                              value={(() => {
-                                const availableFields = resourceFieldMap[values?.resource] || [];
-                                const validFields = validateAndCleanFields(values?.fields, availableFields);
-                                return (
-                                  availableFields
-                                    ?.filter((field) => validFields.includes(field.fieldName))
-                                    ?.map((field) => ({ fieldName: field.fieldName, fieldLabel: field.fieldLabel })) || []
-                                );
-                              })()}
-                              options={
-                                resourceFieldMap[values?.resource]?.map((field) => ({ fieldName: field.fieldName, fieldLabel: field.fieldLabel })) ||
-                                []
-                              }
-                              getOptionLabel={(option) => option.fieldLabel}
-                              isOptionEqualToValue={(option, val) => option.fieldName === val.fieldName}
-                              onChange={(e, val: any) => {
-                                const selectedFieldNames = val.map((v: any) => v.fieldName);
-                                setFieldValue('fields', selectedFieldNames);
-                              }}
-                              renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  required={true}
-                                  margin="none"
-                                  size="small"
-                                  name="fields"
-                                  label="Fields"
-                                  variant="outlined"
-                                  error={touched['fields'] && Boolean(errors['fields'])}
-                                  helperText={touched['fields'] && errors['fields']}
-                                  fullWidth
-                                  slotProps={{ inputLabel: { shrink: true } }}
-                                />
-                              )}
-                            />
+                          <Grid size={{ xs: 12, sm: 8, md: 8, lg: 8 }}>
+                            <Box className="mr-2 flex flex-wrap justify-end gap-3">
+                              <ThemeButton
+                                startIcon={<JoinInnerIcon />}
+                                onClick={() => addPipelineItem('lookup')}
+                                disabled={!isEdit || !values?.resource}
+                                buttonType="theme"
+                              >
+                                Join data
+                              </ThemeButton>
+
+                              <ThemeButton
+                                startIcon={<FunctionsIcon />}
+                                onClick={() => addPipelineItem('group')}
+                                disabled={!isEdit || !values?.resource}
+                                buttonType="theme"
+                              >
+                                Summarize
+                              </ThemeButton>
+
+                              <ThemeButton
+                                startIcon={<SortIcon />}
+                                onClick={() => addPipelineItem('sort')}
+                                disabled={!isEdit || hasSortItem || !values?.resource}
+                                buttonType="theme"
+                              >
+                                Sort
+                              </ThemeButton>
+
+                              <ThemeButton
+                                startIcon={<FormatListNumberedIcon />}
+                                onClick={() => addPipelineItem('limit')}
+                                disabled={!isEdit || hasLimitItem || !values?.resource}
+                                buttonType="theme"
+                              >
+                                Row limit
+                              </ThemeButton>
+                            </Box>
                           </Grid>
                         </Grid>
                       </Grid>
 
                       <Grid>
-                        <Box mb={3}>
-                          <Box display="flex" gap={2} mb={3} flexWrap="wrap">
-                            <ThemeButton
-                              startIcon={<JoinInnerIcon />}
-                              onClick={() => addPipelineItem('lookup')}
-                              disabled={!isEdit || !values?.resource}
-                              buttonType="theme"
-                            >
-                              Join data
-                            </ThemeButton>
-
-                            <ThemeButton
-                              startIcon={<FunctionsIcon />}
-                              onClick={() => addPipelineItem('group')}
-                              disabled={!isEdit || !values?.resource}
-                              buttonType="theme"
-                            >
-                              Summarize
-                            </ThemeButton>
-
-                            <ThemeButton
-                              startIcon={<SortIcon />}
-                              onClick={() => addPipelineItem('sort')}
-                              disabled={!isEdit || hasSortItem || !values?.resource}
-                              buttonType="theme"
-                            >
-                              Sort
-                            </ThemeButton>
-
-                            <ThemeButton
-                              startIcon={<FormatListNumberedIcon />}
-                              onClick={() => addPipelineItem('limit')}
-                              disabled={!isEdit || hasLimitItem || !values?.resource}
-                              buttonType="theme"
-                            >
-                              Row limit
-                            </ThemeButton>
-                          </Box>
-
-                          <Box>
-                            {pipeline?.map((item) => {
-                              switch (item.type) {
-                                case 'lookup':
-                                  return renderLookupComponent(item as LookupPipeline);
-                                case 'group':
-                                  return renderGroupComponent(item as GroupPipeline);
-                                case 'sort':
-                                  return renderSortComponent(item as SortPipeline);
-                                case 'limit':
-                                  return renderLimitComponent(item as LimitPipeline);
-                                case 'chart':
-                                  return renderChartComponent(item as ChartPipeline);
-                                default:
-                                  return null;
-                              }
-                            })}
-                          </Box>
+                        <Box>
+                          {pipeline?.map((item) => {
+                            switch (item.type) {
+                              case 'lookup':
+                                return renderLookupComponent(item as LookupPipeline);
+                              case 'group':
+                                return renderGroupComponent(item as GroupPipeline);
+                              case 'sort':
+                                return renderSortComponent(item as SortPipeline);
+                              case 'limit':
+                                return renderLimitComponent(item as LimitPipeline);
+                              case 'chart':
+                                return renderChartComponent(item as ChartPipeline);
+                              default:
+                                return null;
+                            }
+                          })}
                         </Box>
                       </Grid>
                     </Grid>

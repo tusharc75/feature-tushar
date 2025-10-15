@@ -428,11 +428,10 @@ const DynamicForm = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
+          message={`Are you sure you want to delete ${deleteRecord
               ? `${resourceLabel?.titleSingular?.toLowerCase()} ${primaryFieldName ? `: ${deleteRecord?.[primaryFieldName]}` : ''}`
               : `selected ${resourceLabel?.titlePlural?.toLowerCase()}`
-          } ?`}
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
