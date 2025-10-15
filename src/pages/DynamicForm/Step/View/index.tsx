@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { camelCase, startCase } from 'lodash';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getCellColorCode, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { Box, IconButton, MenuItem, Typography } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { MATERIAL_TYPE, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
@@ -95,15 +95,13 @@ const View = ({
       const lookUpField = step?.fields?.find((e) => e?.fieldName === statusColorField?.lookUpField)
       if (lookUpField && lookUpField?.lookupResource) {
         const resourcePolicy = await getResourcePolicy(user, permissions, lookUpField?.lookupResource);
-        if (resourcePolicy?.policy?.statusColor) {
-          resourcePolicy?.policy?.statusColor?.forEach((item) => {
-            if (Array.isArray(item?.status)) {
-              item.status.forEach((status) => {
+        if (resourcePolicy?.policy?.fieldColor) {
+          resourcePolicy?.policy?.fieldColor?.forEach((item) => {
+            item?.value?.forEach((status) => {
+              if (item?.fieldName === 'status') {
                 statusColors[status] = item.colorCode;
-              });
-            } else {
-              statusColors[item?.status] = item.colorCode;
-            }
+              }
+            });
           })
         }
       }
