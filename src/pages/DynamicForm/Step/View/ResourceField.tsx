@@ -62,9 +62,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
             o.cell = ({ row }) => (
               <div style={{
                 backgroundColor: (() => {
-                  return resourcePolicy?.policy?.fieldColor && getCellColorCode(resourcePolicy?.policy?.fieldColor, row?.original)
-                    ? getCellColorCode(resourcePolicy?.policy?.fieldColor, row?.original)
-                    : '';
+                  return getCellColorCode(resourcePolicy?.policy?.fieldColor, row?.original)
                 })()
               }}
               >

@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { camelCase, startCase } from 'lodash';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { getCellColorCode, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { Box, IconButton, MenuItem, Typography } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { MATERIAL_TYPE, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';

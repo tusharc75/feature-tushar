@@ -98,9 +98,7 @@ const DynamicForm = () => {
             <div
               style={{
                 backgroundColor: (() => {
-                  return resourcePolicy?.policy?.fieldColor && getCellColorCode(resourcePolicy?.policy?.fieldColor, row?.original)
-                    ? getCellColorCode(resourcePolicy?.policy?.fieldColor, row?.original)
-                    : '';
+                  return getCellColorCode(resourcePolicy?.policy?.fieldColor, row?.original)
                 })()
               }}
             >
