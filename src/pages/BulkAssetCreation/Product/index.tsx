@@ -13,6 +13,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { CHILD_RESOURCE, bulkAssetCreation, prepareDataForGrid } from 'src/constants/helpers';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import BulkAssetCreationQtyDialog from './BulkAssetCreationQtyDialog';
@@ -202,6 +203,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
               onClick={() => {
                 setShowDeleteConfirmBox(true);
                 setDeleteBulkAssetCreationProduct([row?.original?._id]);
+                setSelectedProductData(row?.original);
               }}
             >
               <DeleteIcon
@@ -336,33 +338,6 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
     )
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          color="primary"
-          disabled={selectedRecords.length === 0 || bulkAssetCreationData?.assetCreationInProgess}
-          onClick={() => {
-            setIsBulkEdit(true);
-            setShowProductDialog(true);
-          }}
-        >
-          Bulk Edit
-        </MenuItem>
-        <MenuItem
-          color="primary"
-          disabled={selectedRecords.length === 0 || loadingButton || bulkAssetCreationData?.assetCreationInProgess}
-          onClick={() => {
-            setShowDeleteConfirmBox(true);
-            setDeleteBulkAssetCreationProduct(selectedRecords.map((d) => d._id));
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <Fragment>
       {allowedToEdit && permissions?.bulkAssetCreation?.isUpdate && (
@@ -370,9 +345,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
           <DetailsPageHeader
             isAddButtonVisible={true}
             addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+            isActionButtonVisible={false}
             hasXpadding
             rightSideContents={rightSideContents()}
           />
@@ -389,6 +362,17 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
           hideAction={!allowedToEdit}
           hideSelection={!allowedToEdit}
           isClientSideGrid={true}
+          bulkActionItems={
+            <BulkActionItems
+              selectedRecords={selectedRecords}
+              bulkAssetCreationData={bulkAssetCreationData}
+              loadingButton={loadingButton}
+              setIsBulkEdit={setIsBulkEdit}
+              setShowProductDialog={setShowProductDialog}
+              setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+              setDeleteBulkAssetCreationProduct={setDeleteBulkAssetCreationProduct}
+            />
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -441,3 +425,37 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
 };
 
 export default Product;
+
+const BulkActionItems = ({ 
+  selectedRecords,
+  bulkAssetCreationData,
+  loadingButton,
+  setIsBulkEdit,
+  setShowProductDialog,
+  setShowDeleteConfirmBox,
+  setDeleteBulkAssetCreationProduct
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={selectedRecords.length === 0 || bulkAssetCreationData?.assetCreationInProgess}
+        onClick={() => {
+          setIsBulkEdit(true);
+          setShowProductDialog(true);
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        disabled={selectedRecords.length === 0 || loadingButton || bulkAssetCreationData?.assetCreationInProgess}
+        onClick={() => {
+          setShowDeleteConfirmBox(true);
+          setDeleteBulkAssetCreationProduct(selectedRecords.map((d) => d._id));
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
