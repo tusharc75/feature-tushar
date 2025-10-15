@@ -1,4 +1,4 @@
-import { Box, Checkbox, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, TextField, Tooltip, Typography } from '@mui/material';
+import { Box, Checkbox, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, TextField, Typography } from '@mui/material';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { ResourceDropdown } from '../resourceDropdown';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -6,6 +6,7 @@ import CheckboxDropdown from 'src/components/FormBuilder/Properties/CheckboxDrop
 import FieldList from 'src/components/FormBuilder/FieldList';
 import { NOT_ALLOW_INLINE_EDIT_FIELD_TYPE, OPERATION_ON_LINE_ITEMS } from 'src/components/FormBuilder/helper';
 import CopyFromHeaderFieldDropdown from 'src/components/FormBuilder/Properties/Setting/CopyFromHeaderFieldDropdown';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, section, touched, errors, module, brandId, formData = null }) => {
   return (
@@ -626,11 +627,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
         <Grid container>
           <Grid item xs={12} md={6}>
             {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && (
-              <Tooltip
-                title={values?.lookup ? 'Only for non lookup field' : ''}
-                disableHoverListener={!values?.lookup}
-                placement="top"
-              >
+              <HtmlTooltip title={values?.lookup ? 'Only for non lookup field' : ''}>
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -645,7 +642,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   }
                   label="Add Additional Option"
                 />
-              </Tooltip>
+              </HtmlTooltip>
             )}
           </Grid>
           <Grid item xs={12} md={6}></Grid>
@@ -655,11 +652,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
         <Grid container>
           <Grid item xs={12} md={6}>
             {fieldData.type === 'dropDown' && (
-              <Tooltip
-                title={values?.lookup ? 'Only for non lookup field' : ''}
-                disableHoverListener={!values?.lookup}
-                placement="top"
-              >
+              <HtmlTooltip title={values?.lookup ? 'Only for non lookup field' : ''}>
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -674,7 +667,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   }
                   label="Add Manual Option In Excel"
                 />
-              </Tooltip>
+              </HtmlTooltip>
             )}
           </Grid>
           <Grid item xs={12} md={6}></Grid>
@@ -763,11 +756,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
         <Grid container>
           <Grid item xs={12} md={6}>
             {fieldData.type === 'dropDown' && (
-              <Tooltip
-                title={!values?.lookup ? 'Only for lookup field' : ''}
-                disableHoverListener={values?.lookup}
-                placement="top"
-              >
+              <HtmlTooltip title={!values?.lookup ? 'Only for lookup field' : ''}  >
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -782,7 +771,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   }
                   label="Enable Clone"
                 />
-              </Tooltip>
+              </HtmlTooltip>
             )}
           </Grid>
           <Grid item xs={12} md={6}></Grid>
