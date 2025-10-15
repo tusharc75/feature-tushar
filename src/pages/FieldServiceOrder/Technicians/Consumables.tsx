@@ -38,7 +38,7 @@ import AddQuotationDataDialog from 'src/pages/FieldTicket/material/AddQuotationD
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const Consumables = ({
   allowedToEdit,
@@ -436,36 +436,6 @@ const Consumables = ({
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords?.some((e) => !e?.canDelete)}
-          onClick={() => {
-            setIsConsumableEdit({ open: true, data: null, showSaveAndNext: false });
-            setIsBulkEdit(true);
-          }}
-        >
-          Bulk Edit
-        </MenuItem>
-        <MenuItem
-          disabled={isDeleting || selectedRecords?.some((e) => !e?.canDelete)}
-          onClick={() => {
-            setDeleteData(
-              selectedRecords?.map((d) => {
-                return {
-                  id: d?._id
-                };
-              })
-            );
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <>
       {!setSelectedRecords && (
@@ -531,9 +501,7 @@ const Consumables = ({
                 [TECHNICIAN_STATUS.reserved, TECHNICIAN_STATUS.returned]?.includes(selectedTechnician?.status)
               }
               addButtonMenuItems={<AddButtonMenuItems />}
-              isActionButtonVisible={true}
-              actionButtonMenuItems={actionButtonMenuItems()}
-              actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+              isActionButtonVisible={false}
               hasXpadding
             />
             <Grid container spacing={2}>
@@ -550,6 +518,15 @@ const Consumables = ({
                     hideSelection={allowedToEdit ? false : true}
                     hideAction={allowedToEdit ? false : true}
                     refreshGrid={fetchConsumablesData}
+                    bulkActionItems={
+                      <BulkActionItems
+                        selectedRecords={selectedRecords}
+                        setIsConsumableEdit={setIsConsumableEdit}
+                        setIsBulkEdit={setIsBulkEdit}
+                        setDeleteData={setDeleteData}
+                        isDeleting={isDeleting}
+                      />
+                    }
                   />
                 ) : (
                   <Box p={2} height={300}>
@@ -631,3 +608,32 @@ const Consumables = ({
 };
 
 export default Consumables;
+
+const BulkActionItems = ({ selectedRecords, setIsConsumableEdit, setIsBulkEdit, setDeleteData, isDeleting }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={selectedRecords?.some((e) => !e?.canDelete)}
+        onClick={() => {
+          setIsConsumableEdit({ open: true, data: null, showSaveAndNext: false });
+          setIsBulkEdit(true);
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        buttonType="red"
+        disabled={isDeleting || selectedRecords?.some((e) => !e?.canDelete)}
+        onClick={() => {
+          setDeleteData(
+            selectedRecords?.map((d) => {
+              return { id: d?._id };
+            })
+          );
+        }}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

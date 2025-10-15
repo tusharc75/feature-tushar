@@ -53,6 +53,7 @@ import AddRentalDataDialog from 'src/pages/FieldTicket/material/AddRentalDataDia
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import FinalPriceBox from 'src/components/FinalPriceBox';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const Consumables = ({
   allowedToEdit,
@@ -724,17 +725,7 @@ const Consumables = ({
                     resources={resources}
                   />
                 }
-                isActionButtonVisible={!isOffline}
-                actionButtonMenuItems={
-                  <ActionButtonMenuItems
-                    setIsConsumableEdit={setIsConsumableEdit}
-                    setIsBulkEdit={setIsBulkEdit}
-                    isDeleting={isDeleting}
-                    setDeleteData={setDeleteData}
-                    selectedRecords={selectedRecords}
-                  />
-                }
-                actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+                isActionButtonVisible={false}
                 rightSideContents={
                   <RightSideContent
                     resourcePolicy={resourcePolicy}
@@ -766,6 +757,17 @@ const Consumables = ({
                     keys: [{ key: 'material', filterType: [MATERIAL_TYPE.product] }],
                     _id: fieldTicketData?._id
                   }}
+                  bulkActionItems={
+                    !isOffline ? (
+                      <BulkActionItems
+                        selectedRecords={selectedRecords}
+                        setIsConsumableEdit={setIsConsumableEdit}
+                        setIsBulkEdit={setIsBulkEdit}
+                        isDeleting={isDeleting}
+                        setDeleteData={setDeleteData}
+                      />
+                    ) : null
+                  }
                 />
               ) : (
                 <Box p={2} height={300}>
@@ -947,19 +949,19 @@ const RightSideContent = ({ resourcePolicy, selectedRecords, setOpenConsumablesQ
   );
 };
 
-const ActionButtonMenuItems = ({ setIsConsumableEdit, setIsBulkEdit, isDeleting, setDeleteData, selectedRecords }) => {
+const BulkActionItems = ({ selectedRecords, setIsConsumableEdit, setIsBulkEdit, isDeleting, setDeleteData }) => {
   return (
-    <>
-      <MenuItem
+    <BulkActionContainer>
+      <BulkActionContainer.Button
         onClick={() => {
           setIsConsumableEdit({ open: true, data: null, showSaveAndNext: false });
           setIsBulkEdit(true);
         }}
       >
         Bulk Edit
-      </MenuItem>
-
-      <MenuItem
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        buttonType="red"
         disabled={isDeleting || selectedRecords?.some((e) => e?.requestedQty || e?.consumedQty)}
         onClick={() => {
           setDeleteData(
@@ -972,8 +974,8 @@ const ActionButtonMenuItems = ({ setIsConsumableEdit, setIsBulkEdit, isDeleting,
         }}
       >
         Delete
-      </MenuItem>
-    </>
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
   );
 };
 
