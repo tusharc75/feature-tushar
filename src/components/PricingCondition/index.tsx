@@ -182,10 +182,7 @@ export const getCostPriceConditions = async (material: any[], type: string[], re
 export const getCostPriceValue = (row: any, costPriceData: any, currency: any, fields: any[]) => {
   let rateList = [];
   rateList = costPriceData?.filter((e) => {
-    const matchesMaterialId = row?.type === 'competency'
-      ? e.materialId === `${row?.competence}` || e.materialId === `${row?.technician}`
-      : e.materialId === `${row?.materialId}`;
-
+    const matchesMaterialId = row?.type === 'competency' ? e.materialId === `${row?.competence}` || e.materialId === `${row?.technician}` : e.materialId === `${row?.materialId}`;
     return (
       matchesMaterialId &&
       e.materialType === row?.type &&
@@ -193,8 +190,27 @@ export const getCostPriceValue = (row: any, costPriceData: any, currency: any, f
       e.pricingMethod === (row?.costingMethod || row?.pricingMethod)
     );
   });
+  let changeUnit = false;
+  if (!rateList?.length && fields?.find((e) => e?.fieldName === 'costingMethod')) {
+    rateList = costPriceData?.filter((e) => {
+      const matchesMaterialId = row?.type === 'competency' ? e.materialId === `${row?.competence}` || e.materialId === `${row?.technician}` : e.materialId === `${row?.materialId}`;
+      return (
+        matchesMaterialId &&
+        e.materialType === row?.type
+      );
+    });
+    changeUnit = true;
+  }
   if (rateList?.length) {
     const obj: any = {};
+
+    if (changeUnit) {
+      obj['unit'] = rateList[0].unit?.trim();
+      obj['costingMethod'] = rateList[0].pricingMethod?.trim();
+      const calValues1 = autoCalculateSpecificFields({ pricingMethod: row['costingMethod'] }, { ...row, ...obj }, fields);
+      Object.assign(row, calValues1);
+    }
+
     if (fields?.find(f => f?.fieldName === `costPrice`)) {
       obj[`costPrice_${currency?.toLowerCase()}`] = rateList[0]?.price || 0;
     }

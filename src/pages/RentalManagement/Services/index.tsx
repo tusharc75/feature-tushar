@@ -394,13 +394,13 @@ const Services = ({
                   : true;
         parent.nonSerializedQty =
           parent.type === MATERIAL_TYPE.service &&
-          !parent.serializedProduct &&
-          parent.assetQty === 0 &&
-          parent?.status &&
-          loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+            !parent.serializedProduct &&
+            parent.assetQty === 0 &&
+            parent?.status &&
+            loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
             ? loadingTicketProducts
-                ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
-                ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+              ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
             : 0;
         parent.subRows = generateNestedData(
           data.material,
@@ -493,13 +493,13 @@ const Services = ({
               : true;
       _subRow.nonSerializedQty =
         _subRow.type === MATERIAL_TYPE.service &&
-        !_subRow.serializedProduct &&
-        _subRow.assetQty === 0 &&
-        _subRow?.status &&
-        loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
+          !_subRow.serializedProduct &&
+          _subRow.assetQty === 0 &&
+          _subRow?.status &&
+          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
           ? loadingTicketProducts
-              ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
-              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+            ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
+            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : 0;
       _subRow.subRows = generateNestedData(
         material,
@@ -546,6 +546,11 @@ const Services = ({
       element.estimateJobDuration = 1;
       if (calValues && calValues['estimateJobDuration']) {
         element.estimateJobDuration = calValues['estimateJobDuration'];
+      }
+      if (allFields?.find((e) => e?.fieldName === 'costingMethod')) {
+        element.costingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
+        const calValues = autoCalculateSpecificFields({ costingMethod: element.costingMethod }, element, allFields);
+        Object.assign(element, calValues);
       }
       material.push(element);
     });

@@ -41,7 +41,7 @@ interface EditDialogProps {
   assetPolicyData?: any
 }
 
-const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
+const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition', 'costingMethod'];
 
 const RentalJobQtyDialog: FC<EditDialogProps> = ({
   onClose,
@@ -117,7 +117,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
         }
-        if (element.fieldName === 'pricingMethod') {
+        if (['pricingMethod', 'costingMethod']?.includes(element.fieldName)) {
           element.option = pricingMethodOptions;
         }
         if (element.fieldName === 'pricingCondition') {
@@ -158,7 +158,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
         }
-        if (element.fieldName === 'pricingMethod') {
+        if (['pricingMethod', 'costingMethod']?.includes(element.fieldName)) {
           element.option = pricingMethodOptions;
         }
         if (element.fieldName === 'wellNumber' && isArray(rentalManagementData?.wellNumber)) {
@@ -448,60 +448,65 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                                 setFieldValue('pricingMethod', '');
                                               }
                                             }
-                                            let priceValue;
-                                            let costPrice;
-                                            if (field.fieldName === 'pricingCondition') {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === value
-                                                && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']);
-                                            } else if (field.fieldName === 'pricingMethod') {
-                                              priceValue = priceConditionListConst?.find(
-                                                (d) => d.conditionId === values['pricingCondition'] &&
+
+                                            let result = {}
+
+                                            if (field.fieldName !== 'costingMethod') {
+                                              let priceValue;
+                                              let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
+
+                                              if (field.fieldName === 'pricingCondition') {
+                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']);
+                                              } else if (field.fieldName === 'pricingMethod') {
+                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] &&
                                                   d.pricingMethod === value &&
                                                   d.unit === values['unit']
+                                                );
+                                              } else {
+                                                priceValue = priceConditionListConst?.find((d) =>
+                                                  d.conditionId === values['pricingCondition'] &&
+                                                  d.pricingMethod === values['pricingMethod'] &&
+                                                  d.unit === value
+                                                );
+                                              }
+
+                                              const durationPrice = getDurationBasedPrice({ ...values, ...(field.fieldName === 'pricingCondition' ? { pricingCondition: value } : field.fieldName === 'pricingMethod' ? { pricingMethod: value } : { unit: value }), materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst)
+                                              result = autoCalculateSpecificFields(
+                                                { [priceFieldName]: durationPrice || priceValue?.mrp || 0, [field.fieldName]: value },
+                                                values,
+                                                initialData.fields
                                               );
-                                            } else {
-                                              priceValue = priceConditionListConst?.find((d) =>
-                                                d.conditionId === values['pricingCondition'] &&
-                                                d.pricingMethod === values['pricingMethod'] &&
-                                                d.unit === value
-                                              );
+
+                                              if (assetPolicyData?.inUseSubStatus?.length > 0) {
+                                                assetPolicyData?.inUseSubStatus?.forEach(subStatus => {
+                                                  const field = initialData.fields?.find(f => f?.fieldName === `${camelCase(subStatus)}Price`)
+                                                  if (field) {
+                                                    result[`${field?.fieldName}_${rentalManagementData?.currency?.toLowerCase()}`] = priceValue?.assetSubStatusPrice?.[`${camelCase(subStatus)}`] || 0
+                                                  }
+                                                });
+                                              }
                                             }
-                                            if (field.fieldName === 'pricingMethod') {
-                                              costPrice = costPriceConditionList?.find(
-                                                (d) =>
-                                                  d?.pricingMethod === value && d.unit === values?.['unit']
-                                              );
-                                            } else if (field.fieldName === 'unit') {
-                                              costPrice = costPriceConditionList?.find(
-                                                (d) =>
-                                                  d?.pricingMethod === values?.['pricingMethod'] && d.unit === value
-                                              );
-                                            }
-                                            let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
+
+
+                                            let costPrice;
                                             let costPriceFieldName = 'costPrice_' + rentalManagementData?.currency?.toLowerCase();
 
-                                            const durationPrice = getDurationBasedPrice({ ...values, ...(field.fieldName === 'pricingCondition' ? { pricingCondition: value } : field.fieldName === 'pricingMethod' ? { pricingMethod: value } : { unit: value }), materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst)
-                                            let result = autoCalculateSpecificFields(
-                                              { [priceFieldName]: durationPrice || priceValue?.mrp || 0, [field.fieldName]: value },
-                                              values,
-                                              initialData.fields
-                                            );
+                                            if (['costingMethod']?.includes(field.fieldName)) {
+                                              costPrice = costPriceConditionList?.find((d) => d?.pricingMethod === value && d.unit === values?.['unit']);
+                                            } if (['pricingMethod']?.includes(field.fieldName) && !allFields?.find((f) => f?.fieldName === `costingMethod`)) {
+                                              costPrice = costPriceConditionList?.find((d) => d?.pricingMethod === value && d.unit === values?.['unit']);
+                                            } else if (field.fieldName === 'unit') {
+                                              costPrice = costPriceConditionList?.find((d) =>
+                                                d?.pricingMethod === (values?.['costingMethod'] || values?.['pricingMethod']) && d.unit === value
+                                              );
+                                            }
 
-                                            if (!isEmpty(costPrice)) {
-                                              const costPriceResult = autoCalculateSpecificFields({ [costPriceFieldName]: costPrice?.price || 0 },
+                                            if (!isEmpty(costPrice) || field.fieldName === 'costingMethod') {
+                                              const costPriceResult = autoCalculateSpecificFields({ [costPriceFieldName]: costPrice?.price || 0, [field.fieldName]: value },
                                                 { ...values, ...result },
                                                 initialData.fields
                                               );
                                               result = { ...result, ...costPriceResult };
-                                            }
-
-                                            if (assetPolicyData?.inUseSubStatus?.length > 0) {
-                                              assetPolicyData?.inUseSubStatus?.forEach(subStatus => {
-                                                const field = initialData.fields?.find(f => f?.fieldName === `${camelCase(subStatus)}Price`)
-                                                if (field) {
-                                                  result[`${field?.fieldName}_${rentalManagementData?.currency?.toLowerCase()}`] = priceValue?.assetSubStatusPrice?.[`${camelCase(subStatus)}`] || 0
-                                                }
-                                              });
                                             }
 
                                             if (Object.keys(result).length >= 1) {
