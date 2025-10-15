@@ -12,7 +12,7 @@ import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import CustomContainer from 'src/components/CustomContainer';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getCellColorCode, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -225,20 +225,6 @@ const SerializedAsset = () => {
     const resourceDataResponce = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
     const resourceData = resourceDataResponce?.data?.data;
     setResourceData(resourceData);
-
-    const statusColors = {};
-    if (resourceData?.policy?.statusColor) {
-      for (const item of resourceData?.policy?.statusColor) {
-        if (Array.isArray(item.status)) {
-          item.status.forEach((status) => {
-            statusColors[status] = item.colorCode;
-          });
-        } else {
-          statusColors[item.status] = item.colorCode;
-        }
-      }
-    }
-
     const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(serializedAsset.resource, permissions?.serializedAsset?.isUpdate);
     setFields(JSON.parse(JSON.stringify(fieldsDataAll)));
     fieldsDataForRead?.some((o) => {
@@ -256,8 +242,8 @@ const SerializedAsset = () => {
           <div
             style={{
               backgroundColor: (() => {
-                return statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
-                  ? statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                return resourceData?.policy?.fieldColor && getCellColorCode(resourceData?.policy?.fieldColor, row?.original)
+                  ? getCellColorCode(resourceData?.policy?.fieldColor, row?.original)
                   : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
                     ? COLOUR_MASTER.lostAssets.background
                     : '';

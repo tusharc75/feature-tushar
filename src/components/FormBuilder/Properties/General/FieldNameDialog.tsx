@@ -12,7 +12,7 @@ import CustomDialogFooter from '../../../CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
 const FieldSchema = object().shape({
-  fieldName: string().required('Please enter field Name')
+  fieldName: string().required('Please enter field name')
 });
 
 const FieldNameDialog = ({ fieldData, handleSave, handleClose }) => {
@@ -104,7 +104,6 @@ const FieldNameDialog = ({ fieldData, handleSave, handleClose }) => {
             </CustomDialogFooter>
             {showConfirmDialog ? (
               <ConfirmCancelDialog
-                close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
                   setShowConfirmDialog(false);
