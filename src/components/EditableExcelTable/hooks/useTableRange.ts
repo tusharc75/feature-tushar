@@ -39,16 +39,17 @@ export const useTableRange = ({
     const rect2 = endCellRect.current!;
     const container = containerRef.current!;
     const containerRect = container.getBoundingClientRect();
+    // document.body.style.overflow = 'hidden';
 
-    const top = Math.min(rect1.top, rect2.top) - containerRect.top + container.scrollTop - window.scrollY;
-    const left = Math.min(rect1.left, rect2.left) - containerRect.left + container.scrollLeft - window.scrollX;
+    const top = Math.min(rect1.top, rect2.top) - containerRect.top + container.scrollTop;
+    const left = Math.min(rect1.left, rect2.left) - containerRect.left + container.scrollLeft;
     const bottom = Math.max(rect1.bottom, rect2.bottom) - containerRect.top + container.scrollTop;
     const right = Math.max(rect1.right, rect2.right) - containerRect.left + container.scrollLeft;
 
     borderElement.style.top = `${top - container.scrollTop + 1}px`;
     borderElement.style.left = `${left - container.scrollLeft + 1}px`;
-    borderElement.style.height = `${bottom - top + container.scrollTop - 4}px`;
-    borderElement.style.width = `${right - left + container.scrollLeft - 4}px`;
+    borderElement.style.height = `${bottom - top + container.scrollTop - 2}px`;
+    borderElement.style.width = `${right - left + container.scrollLeft - 2}px`;
   }, [containerRef, rangeRef]);
 
   const onMouseOver = useCallback(
@@ -68,7 +69,7 @@ export const useTableRange = ({
   const onMouseUp = useCallback(() => {
     document.body.removeEventListener('mouseover', onMouseOver);
     document.body.removeEventListener('mouseup', onMouseUp);
-
+    // document.body.style.overflow = '';
     if (startCellRef.current && endCellRef.current) {
       const { cells, map, twoDimentionalArray } = getRange(startCellRef.current, endCellRef.current);
       setSelectedRange(cells);

@@ -15,7 +15,7 @@ export type TableHeadProps = {
 export type TableBodyProps = {
   columns: EditableExcelTableProps['columns'];
   data: any[];
-  state: UseEditableExcelTable;
+  tableBodyRef: UseEditableExcelTable['tableBodyRef'];
   containerRef: React.MutableRefObject<HTMLDivElement>;
   rangeRef: React.MutableRefObject<HTMLDivElement>;
 };

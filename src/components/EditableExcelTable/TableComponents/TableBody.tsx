@@ -3,8 +3,8 @@ import { TableBodyProps, TableRowProps } from '../types';
 import { TableCell } from './TableCell';
 import { useTableRange } from 'src/components/EditableExcelTable/hooks/useTableRange';
 
-const TableBody = ({ columns, data, state, containerRef, rangeRef }: TableBodyProps) => {
-  const { onMouseDown } = useTableRange({ tableBodyRef: state.tableBodyRef, columns, data, containerRef, rangeRef });
+const TableBody = ({ columns, data, tableBodyRef, containerRef, rangeRef }: TableBodyProps) => {
+  const { onMouseDown } = useTableRange({ tableBodyRef, columns, data, containerRef, rangeRef });
 
   return (
     <>

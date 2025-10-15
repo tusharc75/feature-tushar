@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
+import { UseEditableExcelTable } from 'src/components/EditableExcelTable/types';
 import { cleanPastedValue } from 'src/components/EditableExcelTable/utils';
+import createFastContext from 'src/StateProvider/createFastContext';
 
 function parsePlainTextTable(text: string) {
   const rows = text.split(/\r?\n/).filter((r) => r.trim() !== '');
@@ -77,7 +79,6 @@ function handlePaste({
       }
       dirtyRows.push(newData[currentRowIndex]);
     }
-    console.log({ newData, columnsMap, dirtyRows });
     setDirtyRows(dirtyRows);
     return newData;
   });
@@ -124,3 +125,14 @@ const useEditableExcelTable = (data: any[], columns: TColType[]) => {
 };
 
 export default useEditableExcelTable;
+
+type StoreState = {
+  tableData: any[];
+  dirtyRows: any[] | null;
+};
+
+const { Provider: UseEditableTableProvider, useStore: useEditableTableStore } = createFastContext<StoreState | null>({
+  dirtyRows: null,
+  tableData: []
+});
+export { UseEditableTableProvider, useEditableTableStore };
