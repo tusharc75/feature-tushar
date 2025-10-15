@@ -120,7 +120,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        closeDropdown(); // Use helper to close
+        closeDropdown();
       }
       if (e.key === '{') {
         e.preventDefault();
