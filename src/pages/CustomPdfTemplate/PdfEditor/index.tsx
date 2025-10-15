@@ -126,7 +126,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
         e.preventDefault();
         const target = e.target as HTMLElement;
         const textField = target.closest<HTMLElement>('[id^="text-"]');
-        if (textField && textField.id === 'text-undefined') {
+        if (textField) {
           setIsTableFieldFocused(true);
         }
         const rect = target.getBoundingClientRect?.();
@@ -238,7 +238,9 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
               <div className="p-2 border-t">
                 <button
                   className="w-full bg-blue-500 text-white text-sm p-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
-                  onClick={handleInsertMulti}
+                  onFocus={(e) => e.preventDefault()}
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={(e) => { e.preventDefault(); handleInsertMulti(); }}
                   disabled={selectedMultiValues.length === 0}
                 >
                   Selected ({selectedMultiValues.length})
