@@ -593,7 +593,6 @@ const BulkActionItems = ({
     <BulkActionContainer>
       <BulkActionContainer.Button
         disabled={
-          selectedRecords.length === 0 ||
           selectedRecords.filter((asset) => asset?.hasOwnProperty('loadingTicket')).length > 0 ||
           selectedRecords.filter((asset: any) => asset?.status === 'Lost').length > 0
         }
@@ -642,7 +641,6 @@ const BulkActionItems = ({
       <BulkActionContainer.Button
         disabled={
           !canReceive ||
-          selectedRecords.length === 0 ||
           selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
         }
         onClick={() => {
@@ -654,7 +652,6 @@ const BulkActionItems = ({
       
       <BulkActionContainer.Button
         disabled={
-          selectedRecords.length === 0 ||
           selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
         }
         onClick={() => {
@@ -707,7 +704,6 @@ const BulkActionItems = ({
       <BulkActionContainer.Button
         disabled={
           !canReceive ||
-          selectedRecords.length === 0 ||
           selectedRecords.some(
             (e: any) => e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered || selectedRecords?.some((e: any) => e.receivingTicketId)
           )

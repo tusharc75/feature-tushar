@@ -483,7 +483,6 @@ const BulkActionItems = ({
     <BulkActionContainer>
       <BulkActionContainer.Button
         disabled={
-          selectedRecords.length === 0 ||
           assetWithNoTicket.length === 0 ||
           loadingTicketsNotDelivered.length > 0 ||
           selectedRecords.filter((asset: any) => asset?.status === ASSET_STATUS.lost).length > 0 ||
@@ -496,7 +495,6 @@ const BulkActionItems = ({
       
       <BulkActionContainer.Button
         disabled={
-          selectedRecords.length === 0 ||
           selectedRecords.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
         }
         onClick={() => {
