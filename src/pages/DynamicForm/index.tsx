@@ -82,6 +82,18 @@ const DynamicForm = () => {
 
   const fetchGridColumns = async () => {
     const resourcePolicy = await getResourcePolicy(user, permissions, resource);
+    const statusColors = {};
+    if (resourcePolicy?.policy?.statusColor) {
+      resourcePolicy?.policy?.statusColor?.forEach((item) => {
+        if (Array.isArray(item?.status)) {
+          item.status.forEach((status) => {
+            statusColors[status] = item.colorCode;
+          });
+        } else {
+          statusColors[item?.status] = item.colorCode;
+        }
+      })
+    }
     let data;
     const response = await axiosInstance().get(`/field?resource=${resource}`);
     data = response?.data?.data?.filter((d) => !HIDDEN_FIELD_TYPE.includes(d?.fieldData?.type));
@@ -92,27 +104,24 @@ const DynamicForm = () => {
     const primaryField = data?.find((e) => e?.fieldData?.primaryField);
     if (primaryField) {
       setPrimaryFieldName(primaryField?.fieldData?.fieldName);
-      newColumns?.forEach((o) => {
-        if (o?.accessor === primaryField?.fieldData?.fieldName) {
-          o.cell = ({ row }) => (
-            <div
-              style={{
-                backgroundColor: (() => {
-                  return getCellColorCode(resourcePolicy?.policy?.fieldColor, row?.original)
-                })()
+      if (!isEmpty(statusColors)) {
+        newColumns?.forEach((o) => {
+          if (o?.accessor === primaryField?.fieldData?.fieldName) {
+            o.cell = ({ row }) => (
+              <div style={{
+                backgroundColor: (() => { return statusColors[row?.original?.status] || '' })()
               }}
-            >
-              <Link
-                className="link text-truncate"
-                title={row?.original?.[primaryField?.fieldData?.fieldName]}
-                to={`${detailPagePath}/${row?.original?._id}`}
               >
-                {row?.original?.[primaryField?.fieldData?.fieldName]}
-              </Link>
-            </div>
-          );
-        }
-      });
+                <Link className="link text-truncate"
+                  title={row?.original?.[primaryField?.fieldData?.fieldName]}
+                  to={`${detailPagePath}/${row?.original?._id}`}>
+                  {row?.original?.[primaryField?.fieldData?.fieldName]}
+                </Link>
+              </div>
+            );
+          }
+        });
+      }
     }
     if (data?.find((ele) => ele?.fieldData?.fieldName === 'pdfTemplate')) {
       setIsPdfTemplateFieldExist(true);
