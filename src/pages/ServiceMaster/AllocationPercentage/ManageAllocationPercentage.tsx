@@ -49,7 +49,8 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
         .post(`${serviceMaster.api}/allocation`, {
           _id: referenceData._id,
           allocations: values?.allocations?.map(allocation => ({
-            name: allocation?.name,
+            revenueClass: allocation?.revenueClass,
+            department: allocation?.department,
             percentage: parseFloat(allocation?.percentage) || 0
           }))
         })
@@ -77,11 +78,17 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
 
     if (values?.allocations?.length > 0) {
       values?.allocations?.forEach((d, i) => {
-        if (!d.name) {
+        if (!d.revenueClass) {
           if (!errors?.allocations) {
             errors['allocations'] = [];
           }
-          errors.allocations[i] = { name: 'Allocation is required' };
+          errors.allocations[i] = { revenueClass: 'Revenue Class is required' };
+        }
+        if (!d.department) {
+          if (!errors?.allocations) {
+            errors['allocations'] = [];
+          }
+          errors.allocations[i] = { ...errors.allocations[i], department: 'Department is required' };
         }
         if (d.percentage === '' || d.percentage === null || d.percentage === undefined) {
           if (!errors?.allocations) {
@@ -143,12 +150,17 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
                 >
                   <Box p={1} bgcolor="var(--dark-secondary, grey.200)">
                     <Grid container>
-                      <Grid size={{ xs: 10, sm: 10, md: 5, lg: 5 }}>
+                      <Grid size={{ xs: 10, sm: 10, md: 3, lg: 3 }}>
                         <Box sx={{ ml: 1 }}>
-                          <Typography variant="body2">Allocation</Typography>
+                          <Typography variant="body2">Revenue Class</Typography>
                         </Box>
                       </Grid>
-                      <Grid size={{ xs: 10, sm: 10, md: 5, lg: 5 }}>
+                      <Grid size={{ xs: 10, sm: 10, md: 3, lg: 3 }}>
+                        <Box sx={{ ml: 1 }}>
+                          <Typography variant="body2">Department</Typography>
+                        </Box>
+                      </Grid>
+                      <Grid size={{ xs: 10, sm: 10, md: 4, lg: 4 }}>
                         <Box sx={{ ml: 1 }}>
                           <Typography variant="body2">Percentage</Typography>
                         </Box>
@@ -161,7 +173,8 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
                               aria-label="add"
                               onClick={() => {
                                 values.allocations.push({
-                                  name: '',
+                                  revenueClass: '',
+                                  department: '',
                                   percentage: ''
                                 });
                                 add();
@@ -184,39 +197,71 @@ const ManageAllocationPercentage = ({ onClose, onSuccess, referenceData, referen
                               return (
                                 <Box key={index} p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                                   <Grid container spacing={1} alignItems="center">
-                                    <Grid size={{ xs: 10, sm: 10, md: 5, lg: 5 }}>
+                                    <Grid size={{ xs: 10, sm: 10, md: 3, lg: 3 }}>
                                       <TextField
-                                        id="allocation-detail-field"
+                                        id="revenue-class-field"
                                         variant="outlined"
                                         margin="dense"
                                         size="small"
-                                        name="name"
-                                        label="Allocation"
+                                        name="revenueClass"
+                                        label="Revenue Class"
                                         autoComplete='off'
                                         fullWidth
-                                        value={allocation?.name || ''}
+                                        value={allocation?.revenueClass || ''}
                                         required
                                         onChange={(e) => {
                                           arrayHelpers.replace(index, {
                                             ...values?.allocations[index],
-                                            ['name']: e.target.value
+                                            ['revenueClass']: e.target.value
                                           });
                                         }}
                                         error={
                                           touched?.allocations &&
-                                          touched?.allocations[index]?.name &&
+                                          touched?.allocations[index]?.revenueClass &&
                                           errors?.allocations &&
-                                          Boolean(errors?.allocations[index]?.name)
+                                          Boolean(errors?.allocations[index]?.revenueClass)
                                         }
                                         helperText={
                                           touched?.allocations &&
-                                          touched?.allocations[index]?.name &&
+                                          touched?.allocations[index]?.revenueClass &&
                                           errors?.allocations &&
-                                          errors?.allocations[index]?.name
+                                          errors?.allocations[index]?.revenueClass
                                         }
                                       />
                                     </Grid>
-                                    <Grid size={{ xs: 10, sm: 10, md: 5, lg: 5 }}>
+                                    <Grid size={{ xs: 10, sm: 10, md: 3, lg: 3 }}>
+                                      <TextField
+                                        id="department-field"
+                                        variant="outlined"
+                                        margin="dense"
+                                        size="small"
+                                        name="department"
+                                        label="Department"
+                                        autoComplete='off'
+                                        fullWidth
+                                        value={allocation?.department || ''}
+                                        required
+                                        onChange={(e) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values?.allocations[index],
+                                            ['department']: e.target.value
+                                          });
+                                        }}
+                                        error={
+                                          touched?.allocations &&
+                                          touched?.allocations[index]?.department &&
+                                          errors?.allocations &&
+                                          Boolean(errors?.allocations[index]?.department)
+                                        }
+                                        helperText={
+                                          touched?.allocations &&
+                                          touched?.allocations[index]?.department &&
+                                          errors?.allocations &&
+                                          errors?.allocations[index]?.department
+                                        }
+                                      />
+                                    </Grid>
+                                    <Grid size={{ xs: 10, sm: 10, md: 4, lg: 4 }}>
                                       <TextField
                                         id="percentage-field"
                                         variant="outlined"

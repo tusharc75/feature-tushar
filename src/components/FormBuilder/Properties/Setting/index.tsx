@@ -6,6 +6,7 @@ import CheckboxDropdown from 'src/components/FormBuilder/Properties/CheckboxDrop
 import FieldList from 'src/components/FormBuilder/FieldList';
 import { NOT_ALLOW_INLINE_EDIT_FIELD_TYPE, OPERATION_ON_LINE_ITEMS } from 'src/components/FormBuilder/helper';
 import CopyFromHeaderFieldDropdown from 'src/components/FormBuilder/Properties/Setting/CopyFromHeaderFieldDropdown';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, section, touched, errors, module, brandId, formData = null }) => {
   return (
@@ -562,29 +563,6 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={values?.lookup}
-                    name="isAdditionalOption"
-                    checked={values['addAdditionalOption']}
-                    onChange={(e) => {
-                      setFieldValue('addAdditionalOption', e.target.checked);
-                    }}
-                    color="primary"
-                  />
-                }
-                label="Add Additional Option"
-              />
-            )}
-          </Grid>
-          <Grid item xs={12} md={6}></Grid>
-        </Grid>
-      </Box>
-      <Box>
-        <Grid container>
-          <Grid item xs={12} md={6}>
-            {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && (
-              <FormControlLabel
-                control={
-                  <Checkbox
                     name="addBulkOptions"
                     checked={values['addBulkOptions']}
                     onChange={(e) => {
@@ -607,20 +585,20 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
               fieldData.type === 'decimal' ||
               fieldData.type === 'currencyAmount' ||
               fieldData.type === 'currencyNumber') && (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="isAllowedMinus"
-                    checked={values['isAllowedMinus']}
-                    onChange={(e) => {
-                      setFieldValue('isAllowedMinus', e.target.checked);
-                    }}
-                    color="primary"
-                  />
-                }
-                label="Allow Negative Value"
-              />
-            )}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      name="isAllowedMinus"
+                      checked={values['isAllowedMinus']}
+                      onChange={(e) => {
+                        setFieldValue('isAllowedMinus', e.target.checked);
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Allow Negative Value"
+                />
+              )}
           </Grid>
           <Grid item xs={12} md={6}></Grid>
         </Grid>
@@ -648,21 +626,48 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
+            {(fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') && (
+              <HtmlTooltip title={values?.lookup ? 'Only for non lookup field' : ''}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      disabled={values?.lookup}
+                      name="isAdditionalOption"
+                      checked={values['addAdditionalOption']}
+                      onChange={(e) => {
+                        setFieldValue('addAdditionalOption', e.target.checked);
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Add Additional Option"
+                />
+              </HtmlTooltip>
+            )}
+          </Grid>
+          <Grid item xs={12} md={6}></Grid>
+        </Grid>
+      </Box>
+      <Box>
+        <Grid container>
+          <Grid item xs={12} md={6}>
             {fieldData.type === 'dropDown' && (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    disabled={values?.lookup}
-                    name="isManualOption"
-                    checked={values['addManualOptionInExcel']}
-                    onChange={(e) => {
-                      setFieldValue('addManualOptionInExcel', e.target.checked);
-                    }}
-                    color="primary"
-                  />
-                }
-                label="Add Manual Option In Excel"
-              />
+              <HtmlTooltip title={values?.lookup ? 'Only for non lookup field' : ''}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      disabled={values?.lookup}
+                      name="isManualOption"
+                      checked={values['addManualOptionInExcel']}
+                      onChange={(e) => {
+                        setFieldValue('addManualOptionInExcel', e.target.checked);
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Add Manual Option In Excel"
+                />
+              </HtmlTooltip>
             )}
           </Grid>
           <Grid item xs={12} md={6}></Grid>
@@ -742,6 +747,31 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                 }
                 label="Deletable"
               />
+            )}
+          </Grid>
+          <Grid item xs={12} md={6}></Grid>
+        </Grid>
+      </Box>
+      <Box>
+        <Grid container>
+          <Grid item xs={12} md={6}>
+            {fieldData.type === 'dropDown' && (
+              <HtmlTooltip title={!values?.lookup ? 'Only for lookup field' : ''}  >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      disabled={!values?.lookup}
+                      name="enableClone"
+                      checked={values['enableClone']}
+                      onChange={(e) => {
+                        setFieldValue('enableClone', e.target.checked);
+                      }}
+                      color="primary"
+                    />
+                  }
+                  label="Enable Clone"
+                />
+              </HtmlTooltip>
             )}
           </Grid>
           <Grid item xs={12} md={6}></Grid>

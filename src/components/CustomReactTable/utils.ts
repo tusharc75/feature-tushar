@@ -749,3 +749,14 @@ export const AccessorFunction = (data: any, fieldName: any) => {
       ? data[fieldName]?.optionLabel
       : data?.[fieldName];
 };
+
+export const getCellColorCode = (fieldColor, value) => {
+  let colorCode = ''
+  for (const ele of fieldColor) {
+    if (value[ele?.fieldName] && ele?.value?.includes(value[ele?.fieldName])) {
+      colorCode = ele?.colorCode;
+      break;
+    }
+  }
+  return colorCode;
+}

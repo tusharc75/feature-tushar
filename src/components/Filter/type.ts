@@ -14,6 +14,7 @@ export type ColumnData = {
   isDefaultValue?: boolean;
   disableOnEdit?: boolean;
   addAdditionalOption?: boolean;
+  enableClone?: boolean;
   defaultValue?: string;
   lookup?: boolean;
   lookupResource?: string;

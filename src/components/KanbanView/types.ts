@@ -81,6 +81,7 @@ export type Column<D> = {
   deletAble?: boolean;
   addManualOptionInExcel?: boolean;
   addAdditionalOption?: boolean;
+  enableClone?: boolean;
   disableFilters?: boolean;
   addBulkOptions?: boolean;
   disableSortBy?: boolean;
