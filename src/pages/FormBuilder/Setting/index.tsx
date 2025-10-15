@@ -1,13 +1,13 @@
 import { Autocomplete, Box, Checkbox, Dialog, FormControlLabel, TextField } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { resourcePolicy, statusColor } from 'src/components/FormBuilder/Tabs/helper';
+import { resourcePolicy, fieldColor } from 'src/components/FormBuilder/Tabs/helper';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import EntityResource from 'src/pages/FormBuilder/Setting/EntityResource';
@@ -61,11 +61,12 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
 
   useEffect(() => {
     if (resourceData && allFields) {
-      let currentPolicy = resourceData?.policy || {};
+      const currentPolicy = resourceData?.policy || {};
       let defaultPolicy: any = resourcePolicy.find((e) => e.resource === resource)?.policy || [];
-      if (isDynamicResource && allFields?.find((e) => e?.fieldData?.fieldName === 'status')) {
-        defaultPolicy = [statusColor]
+      if (allFields?.filter(e => ['dropDown', 'multiSelect'].includes(e?.fieldData?.type) && !e?.fieldData?.lookup)?.length > 0) {
+        defaultPolicy = [...defaultPolicy, fieldColor]
       }
+
       setInitialValues({
         ...initialValues,
         entityWiseResourceName: resourceData?.entityResources?.length > 0 ? true : false,
@@ -139,22 +140,21 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
     if (values.collaborateTools && !values?.collaborateToolsField) {
       errors['collaborateToolsField'] = 'Please Select Workspace Tools Field';
     }
-    if (resource === sidebarResource.serializedAsset) {
-      const validationFields = initialValues[`policies`]?.[0]?.fields?.filter((e) => e.required);
-      values.policies.forEach((value, index) => {
-        if (value.fieldName === 'statusChangeFields') {
-          value?.data?.forEach((ele, idx) => {
-            validationFields?.forEach((e) => {
-              if (!ele[e?.fieldName]) {
-                errors[`policies.${index}.data.${idx}.status`] = `${e?.fieldLabel} is required`;
-              } else if (e?.type === 'multiSelect' && (!ele[e?.fieldName] || !ele[e?.fieldName].length)) {
-                errors[`policies.${index}.data.${idx}.fields`] = `${e?.fieldLabel} is required`;
-              }
-            });
+    values.policies?.forEach((value, index) => {
+      if (Array.isArray(value?.data) && value?.data?.length > 0) {
+        const validationFields = value?.fields?.filter((e) => e.required);
+        value?.data?.forEach((ele, idx) => {
+          validationFields?.forEach((e) => {
+            if (!ele[e?.fieldName]) {
+              errors[`policies.${index}.data.${idx}.${e?.fieldName}`] = `${e?.fieldLabel} is required`;
+            } else if (e?.type === 'multiSelect' && (!ele[e?.fieldName] || !ele[e?.fieldName].length)) {
+              errors[`policies.${index}.data.${idx}.${e?.fieldName}`] = `${e?.fieldLabel} is required`;
+            }
           });
-        }
-      });
-    }
+        });
+      }
+    });
+
     return errors;
   };
 
