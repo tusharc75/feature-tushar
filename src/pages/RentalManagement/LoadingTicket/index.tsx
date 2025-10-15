@@ -10,7 +10,7 @@ import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq, uniqBy } fro
 import { useContext, useEffect, useState } from 'react';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getCellColorCode, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { actionDisable, rentalManagementActions, rentalManagementMessage, statusChangePermissionMsg } from 'src/constants/messageHelpers';
@@ -220,19 +220,6 @@ const LoadingTicket = ({
       rentalManagementData?.currency
     );
 
-    const statusColors = {};
-    if (assetPolicyData?.policy?.statusColor) {
-      for (const item of assetPolicyData?.policy?.statusColor) {
-        if (Array.isArray(item.status)) {
-          item.status.forEach((status) => {
-            statusColors[status] = item.colorCode;
-          });
-        } else {
-          statusColors[item.status] = item.colorCode;
-        }
-      }
-    }
-
     const column: any = [
       {
         accessor: 'index',
@@ -245,8 +232,8 @@ const LoadingTicket = ({
           <div
             style={{
               backgroundColor: (() => {
-                return statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
-                  ? statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                return assetPolicyData?.policy?.fieldColor && getCellColorCode(assetPolicyData?.policy?.fieldColor, row?.original)
+                  ? getCellColorCode(assetPolicyData?.policy?.fieldColor, row?.original)
                   : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
                     ? COLOUR_MASTER.lostAssets.background
                     : row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue && !row?.original?.loadingTicketId

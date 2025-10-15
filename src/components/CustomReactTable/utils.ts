@@ -751,6 +751,7 @@ export const AccessorFunction = (data: any, fieldName: any) => {
 };
 
 export const getCellColorCode = (fieldColor, value) => {
+  if (!fieldColor || (Array.isArray(fieldColor) && fieldColor?.length === 0)) return ''
   let colorCode = ''
   for (const ele of fieldColor) {
     if (value[ele?.fieldName] && ele?.value?.includes(value[ele?.fieldName])) {

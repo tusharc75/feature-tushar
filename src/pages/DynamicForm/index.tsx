@@ -6,7 +6,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { camelCase, isEmpty, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { useParams, Link, useHistory } from 'react-router-dom';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getCellColorCode, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -82,18 +82,6 @@ const DynamicForm = () => {
 
   const fetchGridColumns = async () => {
     const resourcePolicy = await getResourcePolicy(user, permissions, resource);
-    const statusColors = {};
-    if (resourcePolicy?.policy?.statusColor) {
-      resourcePolicy?.policy?.statusColor?.forEach((item) => {
-        if (Array.isArray(item?.status)) {
-          item.status.forEach((status) => {
-            statusColors[status] = item.colorCode;
-          });
-        } else {
-          statusColors[item?.status] = item.colorCode;
-        }
-      });
-    }
     let data;
     const response = await axiosInstance().get(`/field?resource=${resource}`);
     data = response?.data?.data?.filter((d) => !HIDDEN_FIELD_TYPE.includes(d?.fieldData?.type));
@@ -104,29 +92,27 @@ const DynamicForm = () => {
     const primaryField = data?.find((e) => e?.fieldData?.primaryField);
     if (primaryField) {
       setPrimaryFieldName(primaryField?.fieldData?.fieldName);
-      if (!isEmpty(statusColors)) {
-        newColumns?.forEach((o) => {
-          if (o?.accessor === primaryField?.fieldData?.fieldName) {
-            o.cell = ({ row }) => (
-              <div
-                style={{
-                  backgroundColor: (() => {
-                    return statusColors[row?.original?.status] || '';
-                  })()
-                }}
+      newColumns?.forEach((o) => {
+        if (o?.accessor === primaryField?.fieldData?.fieldName) {
+          o.cell = ({ row }) => (
+            <div
+              style={{
+                backgroundColor: (() => {
+                  return getCellColorCode(resourcePolicy?.policy?.fieldColor, row?.original)
+                })()
+              }}
+            >
+              <Link
+                className="link text-truncate"
+                title={row?.original?.[primaryField?.fieldData?.fieldName]}
+                to={`${detailPagePath}/${row?.original?._id}`}
               >
-                <Link
-                  className="link text-truncate"
-                  title={row?.original?.[primaryField?.fieldData?.fieldName]}
-                  to={`${detailPagePath}/${row?.original?._id}`}
-                >
-                  {row?.original?.[primaryField?.fieldData?.fieldName]}
-                </Link>
-              </div>
-            );
-          }
-        });
-      }
+                {row?.original?.[primaryField?.fieldData?.fieldName]}
+              </Link>
+            </div>
+          );
+        }
+      });
     }
     if (data?.find((ele) => ele?.fieldData?.fieldName === 'pdfTemplate')) {
       setIsPdfTemplateFieldExist(true);
@@ -429,8 +415,8 @@ const DynamicForm = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord
-              ? `${resourceLabel?.titleSingular?.toLowerCase()} ${primaryFieldName ? `: ${deleteRecord?.[primaryFieldName]}` : ''}`
-              : `selected ${resourceLabel?.titlePlural?.toLowerCase()}`
+            ? `${resourceLabel?.titleSingular?.toLowerCase()} ${primaryFieldName ? `: ${deleteRecord?.[primaryFieldName]}` : ''}`
+            : `selected ${resourceLabel?.titlePlural?.toLowerCase()}`
             } ?`}
           onClose={() => {
             setDeleteRecord(null);
