@@ -230,53 +230,49 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       disabled: true,
       Cell: ({ row }) =>
         row?.original?.detail ? (
-          <div>
-            <div className="flex items-center gap-2">
-              <h5
-                className="link text-truncate"
-                onClick={() => {
-                  handleOpen(row?.original._id);
-                }}
-              >
-                {row?.original?.detail}
-              </h5>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(
-                    `${row?.original?.materialType === 'Product'
-                      ? routes.productDetail.path
-                      : row?.original?.materialType === 'Service'
-                        ? routes.serviceMasterDetail.path
-                        : row?.original?.materialType === 'Package'
-                          ? routes.packagesDetail.path
-                          : routes?.competenciesDetail.path
-                    }/${row?.original?.materialId}`
-                  );
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-            <div>
-              {row?.original?.conditionType &&
-                <HtmlTooltip title={'Pricing Information'}>
-                  <IconButton
-                    aria-label="info"
-                    size="small"
-                    color="primary"
-                    onClick={(e) => {
-                      const data = condition?.find((ele) => ele._id === row?.original?._id);
-                      if (data) {
-                        setOpenConditionDetails({ anchorEl: e.currentTarget, data: data });
-                      }
-                    }}
-                  >
-                    <Info fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>
-              }
-            </div>
+          <div className="flex items-center gap-2">
+            <h5
+              className="link text-truncate"
+              onClick={() => {
+                handleOpen(row?.original._id);
+              }}
+            >
+              {row?.original?.detail}
+            </h5>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(
+                  `${row?.original?.materialType === 'Product'
+                    ? routes.productDetail.path
+                    : row?.original?.materialType === 'Service'
+                      ? routes.serviceMasterDetail.path
+                      : row?.original?.materialType === 'Package'
+                        ? routes.packagesDetail.path
+                        : routes?.competenciesDetail.path
+                  }/${row?.original?.materialId}`
+                );
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+            {row?.original?.conditionType &&
+              <HtmlTooltip title={'Pricing Information'}>
+                <IconButton
+                  aria-label="info"
+                  size="small"
+                  color="primary"
+                  onClick={(e) => {
+                    const data = condition?.find((ele) => ele._id === row?.original?._id);
+                    if (data) {
+                      setOpenConditionDetails({ anchorEl: e.currentTarget, data: data });
+                    }
+                  }}
+                >
+                  <Info fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            }
           </div>
         ) : (
           <NoDataCell />

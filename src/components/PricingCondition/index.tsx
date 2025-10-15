@@ -185,12 +185,12 @@ export const getCostPriceValue = (row: any, costPriceData: any, currency: any, f
     const matchesMaterialId = row?.type === 'competency'
       ? e.materialId === `${row?.competence}` || e.materialId === `${row?.technician}`
       : e.materialId === `${row?.materialId}`;
-  
+
     return (
       matchesMaterialId &&
       e.materialType === row?.type &&
       e.unit === row?.unit &&
-      e.pricingMethod === row?.pricingMethod
+      e.pricingMethod === (row?.costingMethod || row?.pricingMethod)
     );
   });
   if (rateList?.length) {
