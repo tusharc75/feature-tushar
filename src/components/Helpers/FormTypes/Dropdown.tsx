@@ -1,8 +1,8 @@
-import { Box, Grid, IconButton, ListSubheader, TextField, useMediaQuery } from '@mui/material';
+import { Box, Grid, IconButton, ListItemText, ListSubheader, TextField, useMediaQuery } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase, has, isArray, isEmpty } from 'lodash';
-import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -33,6 +33,7 @@ import AddMultiple from '../../../pages/DynamicForm/AddMultiple';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { isFieldVisible } from 'src/components/Helpers/FormTypes';
 import { ManagePackageCategory } from 'src/pages/PackageCategory/ManagePackageCategory';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 
 type renderRowProps = {
   setSize: (index: number, height: number) => void;
@@ -304,6 +305,7 @@ function Dropdown({
     state: { permissions }
   }: any = useData();
   const [lookupDialog, setLookupDialog] = React.useState(false);
+  const [showLookupDialog, setShowLookupDialog] = useState({ open: false, isClone: false, resource: '', data: null })
   const { newAddressOptionList, setNewAddressOptionList } = React.useContext(NewAddressOptionList);
   const addFieldOption = async (_id: null) => {
     if (fieldData?.lookupDependentOn && fieldData?.lookupDependentOnField && _id) {
@@ -463,36 +465,36 @@ function Dropdown({
                 onChange={
                   onChange
                     ? (e, value: any, reason) => {
-                        const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
-                        if (isSelectedAll) {
-                          onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
-                        } else {
-                          onChange(e, value, reason);
-                        }
+                      const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                      if (isSelectedAll) {
+                        onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
+                      } else {
+                        onChange(e, value, reason);
                       }
+                    }
                     : (e, value: any, reason) => {
-                        if (setFieldValue) {
-                          const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                      if (setFieldValue) {
+                        const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
 
-                          if (isSelectedAll) {
-                            // If "Select All" is selected, set all other options as values
-                            setFieldValue(
-                              name,
-                              dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
-                            );
-                          } else {
-                            // Remove "Select All" if it was selected and set the values accordingly
-                            setFieldValue(
-                              name,
-                              value.map((val) => val.optionValue)
-                            );
-                          }
-                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                          fieldChange?.forEach((val: any) => {
-                            setFieldValue(val.fieldName, val.value);
-                          });
+                        if (isSelectedAll) {
+                          // If "Select All" is selected, set all other options as values
+                          setFieldValue(
+                            name,
+                            dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
+                          );
+                        } else {
+                          // Remove "Select All" if it was selected and set the values accordingly
+                          setFieldValue(
+                            name,
+                            value.map((val) => val.optionValue)
+                          );
                         }
+                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                        fieldChange?.forEach((val: any) => {
+                          setFieldValue(val.fieldName, val.value);
+                        });
                       }
+                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -527,38 +529,38 @@ function Dropdown({
                     onChange
                       ? onChange
                       : (e, val) => {
-                          if (setFieldValue) {
-                            const overRideValues = {};
-                            handleChange(name, val && val.optionValue ? val.optionValue : '');
-                            overRideValues[name] = val && val.optionValue ? val.optionValue : '';
-                            const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                            fieldChange?.forEach((val: any) => {
-                              setFieldValue(val.fieldName, val.value);
-                              overRideValues[val.fieldName] = val && val.optionValue ? val.optionValue : '';
-                            });
+                        if (setFieldValue) {
+                          const overRideValues = {};
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          overRideValues[name] = val && val.optionValue ? val.optionValue : '';
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
+                            overRideValues[val.fieldName] = val && val.optionValue ? val.optionValue : '';
+                          });
 
-                            //Fixed Code For Handle Some Case Start
-                            if (name === 'customerAccount') {
-                              if (fields?.find((f) => f?.fieldName === 'toOpenInvoice')) {
-                                if (val?.defaultOpenInvoice) {
-                                  setFieldValue('toOpenInvoice', true);
-                                  overRideValues['toOpenInvoice'] = true;
-                                } else {
-                                  setFieldValue('toOpenInvoice', false);
-                                  overRideValues['toOpenInvoice'] = false;
-                                }
+                          //Fixed Code For Handle Some Case Start
+                          if (name === 'customerAccount') {
+                            if (fields?.find((f) => f?.fieldName === 'toOpenInvoice')) {
+                              if (val?.defaultOpenInvoice) {
+                                setFieldValue('toOpenInvoice', true);
+                                overRideValues['toOpenInvoice'] = true;
+                              } else {
+                                setFieldValue('toOpenInvoice', false);
+                                overRideValues['toOpenInvoice'] = false;
                               }
                             }
-                            if (['customerAccount', 'warehouse']?.includes(name) && values?.pricingCondition) {
-                              if (['customerAccount', 'warehouse', 'currency'].every((name) => fields?.some((f) => f?.fieldName === name))) {
-                                setFieldValue('pricingCondition', '');
-                              }
-                            }
-                            //Fixed Code For Handle Some Case End
-
-                            handleLookUpDependent(name, val, fields, setFieldValue, overRideValues);
                           }
+                          if (['customerAccount', 'warehouse']?.includes(name) && values?.pricingCondition) {
+                            if (['customerAccount', 'warehouse', 'currency'].every((name) => fields?.some((f) => f?.fieldName === name))) {
+                              setFieldValue('pricingCondition', '');
+                            }
+                          }
+                          //Fixed Code For Handle Some Case End
+
+                          handleLookUpDependent(name, val, fields, setFieldValue, overRideValues);
                         }
+                      }
                   }
                   selectOnFocus
                   clearOnBlur
@@ -576,6 +578,36 @@ function Dropdown({
                       required={required}
                     />
                   )}
+                  {...(fieldData?.enableClone && fieldData?.lookup && permissions?.[camelCase(fieldData?.lookupResource)]?.isCreate && {
+                    renderOption: (props, option: any) => {
+                      return (
+                        <Box
+                          component="li"
+                          {...props}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                          }}
+                          style={{
+                            paddingTop: 0,
+                            paddingBottom: 0,
+                          }}
+                        >
+                          <ListItemText primary={option?.optionLabel ?? ''} />
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowLookupDialog({ open: true, isClone: true, resource: fieldData?.lookupResource, data: option })
+                            }}
+                          >
+                            <FileCopyIcon style={{ fontSize: '15px' }} color="primary" />
+                          </IconButton>
+                        </Box>
+                      )
+                    },
+                  })}
                 />
                 {isDisabled && (
                   <span className="requiredStar px-1 text-[12px] text-green-500">{`Please select ${fieldDependentOn?.fieldLabel} first`}</span>
@@ -1005,7 +1037,7 @@ function Dropdown({
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
                         disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
-                        onClick={() => setLookupDialog(true)}
+                        onClick={() => setShowLookupDialog({ open: true, isClone: false, resource: fieldData?.lookupResource, data: null })}
                         size="small"
                         color="primary"
                         style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
@@ -1013,7 +1045,7 @@ function Dropdown({
                         <AddCircleIcon />
                       </IconButton>
                     </HtmlTooltip>
-                    {lookupDialog && (
+                    {/* {lookupDialog && (
                       <ManageAccount
                         open={lookupDialog}
                         onClose={() => setLookupDialog(false)}
@@ -1044,7 +1076,7 @@ function Dropdown({
                           }
                         }}
                       />
-                    )}
+                    )} */}
                   </div>
                 )}
                 {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.supplierAccount && permissions?.supplierAccount?.isCreate && (
@@ -1377,6 +1409,40 @@ function Dropdown({
               </>
             )}
           </>
+        )}
+        {showLookupDialog.open && showLookupDialog.resource === sidebarResource.customerAccount && (
+          <ManageAccount
+            open={showLookupDialog.open}
+            onClose={() => setShowLookupDialog({ open: false, isClone: false, resource: '', data: null })}
+            accountResource={'customerAccount'}
+            id={showLookupDialog.data ? showLookupDialog.data?.optionValue : ''}
+            accountApi={customerAccount.accountApi}
+            isClone={showLookupDialog.isClone}
+            isRedirectToDetailPage={false}
+            accountNameForClone={showLookupDialog.data ? showLookupDialog.data?.optionLabel : ''}
+            onSuccess={({ data }) => {
+              setShowLookupDialog({ open: false, isClone: false, resource: '', data: null })
+              if (data._id && (data?.active ?? true)) {
+                let tempNewOption = {
+                  default: true,
+                  optionLabel: data.accountName,
+                  optionValue: data._id,
+                  order: option.length,
+                  billingAddress: data?.billingAddress || [],
+                  shippingAddress: data?.shippingAddress || []
+                };
+                setOptionsList([tempNewOption, ...option]);
+                if (type === 'multiSelect') {
+                  handleChange(
+                    name,
+                    tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                  );
+                } else {
+                  handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                }
+              }
+            }}
+          />
         )}
       </div>
     </Box>
