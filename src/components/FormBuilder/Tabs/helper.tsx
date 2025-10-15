@@ -189,26 +189,6 @@ export const resourcePolicy = [
         required: false
       },
       {
-        fieldName: 'statusColor',
-        fieldLabel: 'Status/Sub Status Color',
-        type: 'multipleFields',
-        fields: [
-          {
-            fieldName: 'status',
-            fieldLabel: 'Status/Sub Status',
-            type: 'multiSelect',
-            required: true
-          },
-          {
-            fieldName: 'colorCode',
-            fieldLabel: 'Color Code',
-            type: 'colorPicker',
-            required: true
-          }
-        ],
-        defaultValue: []
-      },
-      {
         fieldName: 'inUseSubStatus',
         fieldLabel: 'In-Use Sub Status',
         type: 'multiSelect',
@@ -663,6 +643,33 @@ export const statusColor = {
     {
       fieldName: 'status',
       fieldLabel: 'Status',
+      type: 'multiSelect',
+      required: true
+    },
+    {
+      fieldName: 'colorCode',
+      fieldLabel: 'Color Code',
+      type: 'colorPicker',
+      required: true
+    }
+  ],
+  defaultValue: []
+}
+
+export const fieldColor = {
+  fieldName: 'fieldColor',
+  fieldLabel: 'Field Color',
+  type: 'multipleFields',
+  fields: [
+    {
+      fieldName: 'fieldName',
+      fieldLabel: 'field Name',
+      type: 'dropDown',
+      required: true
+    },
+    {
+      fieldName: 'value',
+      fieldLabel: 'Value',
       type: 'multiSelect',
       required: true
     },
