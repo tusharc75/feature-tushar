@@ -1,8 +1,8 @@
-import { Box, Grid, IconButton, ListItemText, ListSubheader, TextField, useMediaQuery } from '@mui/material';
+import { Box, IconButton, ListItemText, ListSubheader, TextField, useMediaQuery } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Autocomplete from '@mui/material/Autocomplete';
 import { camelCase, has, isArray, isEmpty } from 'lodash';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -35,7 +35,22 @@ import { isFieldVisible } from 'src/components/Helpers/FormTypes';
 import { ManagePackageCategory } from 'src/pages/PackageCategory/ManagePackageCategory';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 
-const lookupDialogResource = [sidebarResource.padMaster, sidebarResource.wellMaster, sidebarResource.wellNumber, sidebarResource.warehouse, sidebarResource.storageLocation, sidebarResource.competencyType, sidebarResource.competencies, sidebarResource.customerAccount, sidebarResource.customerContact, sidebarResource.supplierAccount, sidebarResource.supplierContact, sidebarResource.address, sidebarResource.marketSegment, sidebarResource.packageCategory]
+const lookupDialogResource = [
+  sidebarResource.padMaster,
+  sidebarResource.wellMaster,
+  sidebarResource.wellNumber,
+  sidebarResource.warehouse,
+  sidebarResource.storageLocation,
+  sidebarResource.competencyType,
+  sidebarResource.competencies,
+  sidebarResource.customerAccount,
+  sidebarResource.customerContact,
+  sidebarResource.supplierAccount,
+  sidebarResource.supplierContact,
+  sidebarResource.address,
+  sidebarResource.marketSegment,
+  sidebarResource.packageCategory
+]
 
 type renderRowProps = {
   setSize: (index: number, height: number) => void;
@@ -510,7 +525,9 @@ function Dropdown({
                     style={{ whiteSpace: 'nowrap' }}
                   />
                 )}
-                {...(fieldData?.enableClone && fieldData?.lookup && (lookupDialogResource?.includes(fieldData?.lookupResource) || !(camelCase(fieldData?.lookupResource) in routes)) && permissions?.[camelCase(fieldData?.lookupResource)]?.isCreate && fieldData?.lookupResource !== sidebarResource.address && {
+                {...(fieldData?.enableClone && fieldData?.lookup &&
+                  (lookupDialogResource?.includes(fieldData?.lookupResource) || !(camelCase(fieldData?.lookupResource) in routes))
+                  && permissions?.[camelCase(fieldData?.lookupResource)]?.isCreate && fieldData?.lookupResource !== sidebarResource.address && {
                   renderOption: (props, option: any) => {
                     return (
                       <Box
@@ -527,15 +544,17 @@ function Dropdown({
                         }}
                       >
                         <ListItemText primary={option?.optionLabel ?? ''} />
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowLookupDialog({ open: true, isClone: true, resource: fieldData?.lookupResource, data: option })
-                          }}
-                        >
-                          <FileCopyIcon style={{ fontSize: '15px' }} color="primary" />
-                        </IconButton>
+                        <HtmlTooltip title='Clone'>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowLookupDialog({ open: true, isClone: true, resource: fieldData?.lookupResource, data: option })
+                            }}
+                          >
+                            <FileCopyIcon style={{ fontSize: '15px' }} color="primary" />
+                          </IconButton>
+                        </HtmlTooltip>
                       </Box>
                     )
                   },
@@ -609,7 +628,7 @@ function Dropdown({
                       required={required}
                     />
                   )}
-                  {...(fieldData?.enableClone && fieldData?.lookup && (lookupDialogResource?.includes(fieldData?.lookupResource) || !(camelCase(fieldData?.lookupResource) in routes)) && permissions?.[camelCase(fieldData?.lookupResource)]?.isCreate && fieldData?.lookupResource !== sidebarResource.address && {
+                  {...(!isOffline && fieldData?.enableClone && fieldData?.lookup && (lookupDialogResource?.includes(fieldData?.lookupResource) || !(camelCase(fieldData?.lookupResource) in routes)) && permissions?.[camelCase(fieldData?.lookupResource)]?.isCreate && fieldData?.lookupResource !== sidebarResource.address && {
                     renderOption: (props, option: any) => {
                       return (
                         <Box
@@ -626,15 +645,17 @@ function Dropdown({
                           }}
                         >
                           <ListItemText primary={option?.optionLabel ?? ''} />
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowLookupDialog({ open: true, isClone: true, resource: fieldData?.lookupResource, data: option })
-                            }}
-                          >
-                            <FileCopyIcon style={{ fontSize: '15px' }} color="primary" />
-                          </IconButton>
+                          <HtmlTooltip title='Clone'>
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowLookupDialog({ open: true, isClone: true, resource: fieldData?.lookupResource, data: option })
+                              }}
+                            >
+                              <FileCopyIcon style={{ fontSize: '15px' }} color="primary" />
+                            </IconButton>
+                          </HtmlTooltip>
                         </Box>
                       )
                     },
@@ -697,27 +718,28 @@ function Dropdown({
               </div>
             ) : (
               <>
-                {fieldData?.lookup && (lookupDialogResource?.includes(fieldData?.lookupResource) || !(camelCase(fieldData?.lookupResource) in routes)) && permissions[camelCase(fieldData?.lookupResource)]?.isCreate && (
-                  <div className="mt-[2px] max-h-fit flex-shrink-0">
-                    <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
-                      <IconButton
-                        disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
-                        onClick={() => {
-                          if (lookupDialogResource?.includes(fieldData?.lookupResource)) {
-                            setShowLookupDialog({ open: true, isClone: false, resource: fieldData?.lookupResource, data: null })
-                          } else {
-                            setShowLookupDialog({ open: true, isClone: false, resource: 'dynamicForm', data: null })
-                          }
-                        }}
-                        size="small"
-                        color="primary"
-                        style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
-                      >
-                        <AddCircleIcon />
-                      </IconButton>
-                    </HtmlTooltip>
-                  </div>
-                )}
+                {fieldData?.lookup && (lookupDialogResource?.includes(fieldData?.lookupResource)
+                  || !(camelCase(fieldData?.lookupResource) in routes)) && permissions[camelCase(fieldData?.lookupResource)]?.isCreate && (
+                    <div className="mt-[2px] max-h-fit flex-shrink-0">
+                      <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                        <IconButton
+                          disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                          onClick={() => {
+                            if (lookupDialogResource?.includes(fieldData?.lookupResource)) {
+                              setShowLookupDialog({ open: true, isClone: false, resource: fieldData?.lookupResource, data: null })
+                            } else {
+                              setShowLookupDialog({ open: true, isClone: false, resource: 'dynamicForm', data: null })
+                            }
+                          }}
+                          size="small"
+                          color="primary"
+                          style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                        >
+                          <AddCircleIcon />
+                        </IconButton>
+                      </HtmlTooltip>
+                    </div>
+                  )}
               </>
             )}
           </>
