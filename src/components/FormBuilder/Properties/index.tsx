@@ -82,6 +82,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       if (!values.addAdditionalOption && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown')) {
         values.addAdditionalOption = false;
       }
+      if (!values.enableClone && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown')) {
+        values.enableClone = false;
+      }
       if (!values.addBulkOptions && (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown')) {
         values.addBulkOptions = false;
       }
@@ -223,6 +226,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.primaryField = values.primaryField;
             ele.addManualOptionInExcel = values.addManualOptionInExcel;
             ele.addAdditionalOption = values.addAdditionalOption;
+            ele.enableClone = values.enableClone;
             ele.addBulkOptions = values.addBulkOptions;
             ele.isAllowedMinus = values.isAllowedMinus;
             ele.lookup = values.lookup || false;

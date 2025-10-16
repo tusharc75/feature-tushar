@@ -41,6 +41,7 @@ export type FieldData = {
   lookup?: boolean;
   lookupResource?: string;
   addAdditionalOption?: boolean;
+  enableClone?: boolean;
   isDropdown?: boolean;
   isWarningTooltip?: boolean;
   warningTooltipMessage?: string;
@@ -211,6 +212,7 @@ export type SubField = {
   roleType: number;
   addManualOptionInExcel?: boolean;
   addAdditionalOption?: boolean;
+  enableClone?: boolean;
   addBulkOptions?: boolean;
   lookupDependentOn?: string;
 };

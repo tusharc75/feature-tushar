@@ -7,7 +7,7 @@ import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CustomContainer from 'src/components/CustomContainer';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getCellColorCode, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -97,18 +97,7 @@ const SerializedAssetInspection = () => {
   const fetchGridColumns = async () => {
     const resourceDataResponce = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
     const resourcePolicy = resourceDataResponce?.data?.data;
-    const statusColors = {};
-    if (resourcePolicy?.policy?.statusColor) {
-      for (const item of resourcePolicy?.policy?.statusColor) {
-        if (Array.isArray(item.status)) {
-          item.status.forEach((status) => {
-            statusColors[status] = item.colorCode;
-          });
-        } else {
-          statusColors[item.status] = item.colorCode;
-        }
-      }
-    }
+
     const { fieldsDataForRead } = await fetch_resource_view_fields(serializedAsset.resource, permissions?.serializedAsset?.isUpdate);
     let statusFieldOption = fieldsDataForRead?.find((e) => e?.fieldData?.fieldName === 'status')?.fieldData?.option || [];
     statusFieldOption = statusFieldOption?.filter(
@@ -123,8 +112,8 @@ const SerializedAssetInspection = () => {
           <div
             style={{
               backgroundColor: (() => {
-                return statusColors[row?.original?.status]
-                  ? statusColors[row?.original?.status]
+                return resourcePolicy?.policy?.fieldColor && getCellColorCode(resourcePolicy?.policy?.fieldColor, row?.original)
+                  ? getCellColorCode(resourcePolicy?.policy?.fieldColor, row?.original)
                   : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
                     ? COLOUR_MASTER.lostAssets.background
                     : '';

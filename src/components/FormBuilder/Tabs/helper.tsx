@@ -637,12 +637,12 @@ export const RESOURCE_ACTION_TYPE = {
 
 export const fieldColor = {
   fieldName: 'fieldColor',
-  fieldLabel: 'Field Color',
+  fieldLabel: 'Fields Color',
   type: 'multipleFields',
   fields: [
     {
       fieldName: 'fieldName',
-      fieldLabel: 'field Name',
+      fieldLabel: 'Field Name',
       type: 'dropDown',
       required: true
     },

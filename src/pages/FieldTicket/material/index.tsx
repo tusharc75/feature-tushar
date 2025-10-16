@@ -65,6 +65,7 @@ import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import StartStopServiceDateDialog from 'src/pages/RentalManagement/ReceivingTicket/StartStopServiceDateDialog';
 import ServiceLogDialog from 'src/pages/RentalManagement/ReceivingTicket/ServiceLogDialog';
 import CustomMessageDialog from 'src/components/MessageDialog';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const Material = ({
   fieldTicketData,
@@ -1021,23 +1022,7 @@ const Material = ({
                 setAddFieldServiceOrderDataDialog={setAddFieldServiceOrderDataDialog}
               />
             }
-            isActionButtonVisible={!isOffline}
-            actionButtonMenuItems={
-              <ActionButtonMenuItms
-                selectedRecords={selectedRecords}
-                setOpenMessageDialog={setOpenMessageDialog}
-                isStartStopServiceEnabled={isStartStopServiceEnabled}
-                setServiceConfirmationDialog={setServiceConfirmationDialog}
-                setDeleteServiceLogConfirmDialog={setDeleteServiceLogConfirmDialog}
-                setIsServiceEdit={setIsServiceEdit}
-                setIsBulkEdit={setIsBulkEdit}
-                setMaterialDialog={setMaterialDialog}
-                resources={resources}
-                isDeleting={isDeleting}
-                setDeleteData={setDeleteData}
-              />
-            }
-            actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+            isActionButtonVisible={false}
             hasXpadding
           />
         </>
@@ -1065,6 +1050,23 @@ const Material = ({
               ],
               _id: fieldTicketData?._id
             }}
+            bulkActionItems={
+              !isOffline ? (
+                <BulkActionItems
+                  selectedRecords={selectedRecords}
+                  setOpenMessageDialog={setOpenMessageDialog}
+                  isStartStopServiceEnabled={isStartStopServiceEnabled}
+                  setServiceConfirmationDialog={setServiceConfirmationDialog}
+                  setDeleteServiceLogConfirmDialog={setDeleteServiceLogConfirmDialog}
+                  setIsServiceEdit={setIsServiceEdit}
+                  setIsBulkEdit={setIsBulkEdit}
+                  setMaterialDialog={setMaterialDialog}
+                  resources={resources}
+                  isDeleting={isDeleting}
+                  setDeleteData={setDeleteData}
+                />
+              ) : null
+            }
           />
         </Box>
       ) : (
@@ -1399,7 +1401,7 @@ const AddButtonMenuItems = ({
   );
 };
 
-const ActionButtonMenuItms = ({
+const BulkActionItems = ({
   selectedRecords,
   setOpenMessageDialog,
   isStartStopServiceEnabled,
@@ -1439,10 +1441,10 @@ const ActionButtonMenuItms = ({
     return false;
   };
   return (
-    <>
+    <BulkActionContainer>
       {isStartStopServiceEnabled && selectedRecords?.every((e) => e.type === MATERIAL_TYPE.service) && (
         <>
-          <MenuItem
+          <BulkActionContainer.Button
             onClick={() => {
               if (!validateAction(fieldTicketActions.startService)) {
                 const dates = [];
@@ -1461,8 +1463,8 @@ const ActionButtonMenuItms = ({
             }}
           >
             Start Service(s)
-          </MenuItem>
-          <MenuItem
+          </BulkActionContainer.Button>
+          <BulkActionContainer.Button
             onClick={() => {
               if (!validateAction(fieldTicketActions.stopService)) {
                 const dates = [];
@@ -1486,8 +1488,8 @@ const ActionButtonMenuItms = ({
             }}
           >
             Stop Service(s)
-          </MenuItem>
-          <MenuItem
+          </BulkActionContainer.Button>
+          <BulkActionContainer.Button
             onClick={() => {
               if (!validateAction(fieldTicketActions.startService)) {
                 const dates = [];
@@ -1506,8 +1508,8 @@ const ActionButtonMenuItms = ({
             }}
           >
             Start/Stop Service(s)
-          </MenuItem>
-          <MenuItem
+          </BulkActionContainer.Button>
+          <BulkActionContainer.Button
             onClick={() => {
               if (!validateAction(fieldTicketActions.deleteServiceLog)) {
                 const data = [];
@@ -1522,10 +1524,10 @@ const ActionButtonMenuItms = ({
             }}
           >
             Delete Service Log(s)
-          </MenuItem>
+          </BulkActionContainer.Button>
         </>
       )}
-      <MenuItem
+      <BulkActionContainer.Button
         disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
         onClick={() => {
           setIsServiceEdit({ open: true, data: null, showSaveAndNext: false });
@@ -1533,9 +1535,9 @@ const ActionButtonMenuItms = ({
         }}
       >
         Bulk Edit
-      </MenuItem>
+      </BulkActionContainer.Button>
       {selectedRecords.some((e) => e.type === MATERIAL_TYPE.serializedAsset) && (
-        <MenuItem
+        <BulkActionContainer.Button
           onClick={() => {
             setMaterialDialog({
               open: true,
@@ -1547,9 +1549,10 @@ const ActionButtonMenuItms = ({
           }}
         >
           {`Perform ${resources?.serviceMaster?.titlePlural}`}
-        </MenuItem>
+        </BulkActionContainer.Button>
       )}
-      <MenuItem
+      <BulkActionContainer.Button
+        buttonType="red"
         disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
         onClick={() => {
           const obj: any = [];
@@ -1564,7 +1567,7 @@ const ActionButtonMenuItms = ({
         }}
       >
         Delete
-      </MenuItem>
-    </>
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
   );
 };

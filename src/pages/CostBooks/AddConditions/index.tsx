@@ -61,27 +61,25 @@ const AddConditions = ({ id, detailData }) => {
       .then(({ data: { data, count } }) => {
         setCondition(JSON.parse(JSON.stringify(data)));
         data.forEach((element) => {
-          element.detail = `${
-            element.materialType === MATERIAL_TYPE.product
-              ? element.productDetail?.productName
-              : element.materialType === MATERIAL_TYPE.service
-                ? element.serviceDetail?.serviceName
-                : element.materialType === MATERIAL_TYPE.package
-                  ? element.packageDetail?.packageName
-                  : element.materialType === 'technician'
-                    ? element.technicianDetail?.firstName + ' ' + element.technicianDetail?.lastName
-                    : element.competencyDetail.competencyName
-                  
-          }`;
-          element.description = `${
-            element.materialType === MATERIAL_TYPE.product
-              ? element?.productDetail?.productDescription || ''
-              : element.materialType === MATERIAL_TYPE.service
-                ? element?.serviceDetail?.serviceDescription || ''
-                : element.materialType === MATERIAL_TYPE.package
-                  ? element?.packageDetail?.packageDescription || ''
-                  : ''
-          }`;
+          element.detail = `${element.materialType === MATERIAL_TYPE.product
+            ? element.productDetail?.productName
+            : element.materialType === MATERIAL_TYPE.service
+              ? element.serviceDetail?.serviceName
+              : element.materialType === MATERIAL_TYPE.package
+                ? element.packageDetail?.packageName
+                : element.materialType === 'technician'
+                  ? element.technicianDetail?.firstName + ' ' + element.technicianDetail?.lastName
+                  : element.competencyDetail.competencyName
+
+            }`;
+          element.description = `${element.materialType === MATERIAL_TYPE.product
+            ? element?.productDetail?.productDescription || ''
+            : element.materialType === MATERIAL_TYPE.service
+              ? element?.serviceDetail?.serviceDescription || ''
+              : element.materialType === MATERIAL_TYPE.package
+                ? element?.packageDetail?.packageDescription || ''
+                : ''
+            }`;
           element.materialType = startCase(element.materialType);
           element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
             ?.map((e) => e.optionLabel)
@@ -222,56 +220,51 @@ const AddConditions = ({ id, detailData }) => {
       disabled: true,
       Cell: ({ row }) =>
         row?.original?.detail ? (
-          <div>
-            <div className="flex items-center gap-2">
-              <h5
-                className="link text-truncate"
-                onClick={() => {
-                  handleOpen(row?.original._id);
-                }}
-              >
-                {row?.original?.detail}
-              </h5>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(
-                    `${
-                      row?.original?.materialType === 'Product'
-                        ? routes.productDetail.path
-                        : row?.original?.materialType === 'Service'
-                          ? routes.serviceMasterDetail.path
-                          : row?.original?.materialType === 'Package'
-                            ? routes.packagesDetail.path
-                            : row?.original?.materialType === 'Technician'
-                              ? routes.employeeMasterDetail.path
-                              : routes?.competenciesDetail.path
-                    }/${row?.original?.materialId}`
-                  );
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-            <div>
-              {row?.original?.conditionType && (
-                <HtmlTooltip title={'Cost Information'}>
-                  <IconButton
-                    aria-label="info"
-                    size="small"
-                    color="primary"
-                    onClick={(e) => {
-                      const data = condition?.find((ele) => ele._id === row?.original?._id);
-                      if (data) {
-                        setOpenConditionDetails({ anchorEl: e.currentTarget, data: data });
-                      }
-                    }}
-                  >
-                    <Info fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>
-              )}
-            </div>
+          <div className="flex items-center gap-2">
+            <h5
+              className="link text-truncate"
+              onClick={() => {
+                handleOpen(row?.original._id);
+              }}
+            >
+              {row?.original?.detail}
+            </h5>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(
+                  `${row?.original?.materialType === 'Product'
+                    ? routes.productDetail.path
+                    : row?.original?.materialType === 'Service'
+                      ? routes.serviceMasterDetail.path
+                      : row?.original?.materialType === 'Package'
+                        ? routes.packagesDetail.path
+                        : row?.original?.materialType === 'Technician'
+                          ? routes.employeeMasterDetail.path
+                          : routes?.competenciesDetail.path
+                  }/${row?.original?.materialId}`
+                );
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+            {row?.original?.conditionType && (
+              <HtmlTooltip title={'Cost Information'}>
+                <IconButton
+                  aria-label="info"
+                  size="small"
+                  color="primary"
+                  onClick={(e) => {
+                    const data = condition?.find((ele) => ele._id === row?.original?._id);
+                    if (data) {
+                      setOpenConditionDetails({ anchorEl: e.currentTarget, data: data });
+                    }
+                  }}
+                >
+                  <Info fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
           </div>
         ) : (
           <NoDataCell />
@@ -432,7 +425,7 @@ const AddConditions = ({ id, detailData }) => {
                 Add Existing Competencies
               </MenuItem>
             )}
-            {permissions?.employeeMaster?.isRead &&(
+            {permissions?.employeeMaster?.isRead && (
               <MenuItem
                 onClick={() => {
                   closeAddActions();
@@ -675,13 +668,12 @@ const AddConditions = ({ id, detailData }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete cost book condition  ${
-            deleteRecord?.productDetail?.productName ||
+          message={`Are you sure you want to delete cost book condition  ${deleteRecord?.productDetail?.productName ||
             deleteRecord?.packageDetail?.packageName ||
             deleteRecord?.serviceDetail?.serviceName ||
             deleteRecord?.competencyDetail?.competencyName ||
             ''
-          } ?`}
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -764,7 +756,7 @@ const AddConditions = ({ id, detailData }) => {
                             {formatAmountWithCurrency(
                               detailData?.currency,
                               openConditionDetails?.data[
-                                `rent_${camelCase(method)}_${detailData?.currency?.toLowerCase()}_${camelCase(unit.toLowerCase())}`
+                              `rent_${camelCase(method)}_${detailData?.currency?.toLowerCase()}_${camelCase(unit.toLowerCase())}`
                               ]
                             )?.fullFormatAmount || ''}
                           </p>

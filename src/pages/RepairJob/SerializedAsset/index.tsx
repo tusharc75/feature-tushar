@@ -45,6 +45,7 @@ import CustomMessageDialog from 'src/components/MessageDialog';
 import { repairJobActions, repairJobMessage, statusChangePermissionMsg } from 'src/constants/messageHelpers';
 import { statusChangePermissionsAllowed } from 'src/pages/SerializedAsset/helper';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const SerializedAsset = ({
   repairJobData,
@@ -577,46 +578,46 @@ const SerializedAsset = ({
     return false;
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        {uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount ? (
-          <MenuItem
-            disabled={checkUniqSupplier() || checkUniqWarehouse()}
-            onClick={() => {
-              if (!validateAction(repairJobActions.receivedToPlant)) {
-                if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
-                  if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
-                    handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant);
-                  } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
-                    handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant);
-                  }
-                }
-              }
-            }}
-          >
-            {`Receive to ${resources?.warehouse?.titleSingular}`}
-          </MenuItem>
-        ) : null}
-        <MenuItem
-          disabled={checkUniqSupplier() || checkUniqWarehouse() || selectedRecords.some((s) => [ASSET_STATUS.needRepair].includes(s.status))}
-          onClick={() => {
-            if (!validateAction(repairJobActions.sendToSupplier)) {
-              if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
-                if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
-                  handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier);
-                } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
-                  handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.supplier);
-                }
-              }
-            }
-          }}
-        >
-          Send to Supplier
-        </MenuItem>
-      </>
-    );
-  };
+  // const actionButtonMenuItems = () => {
+  //   return (
+  //     <>
+  //       {uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount ? (
+  //         <MenuItem
+  //           disabled={checkUniqSupplier() || checkUniqWarehouse()}
+  //           onClick={() => {
+  //             if (!validateAction(repairJobActions.receivedToPlant)) {
+  //               if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
+  //                 if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
+  //                   handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant);
+  //                 } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
+  //                   handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant);
+  //                 }
+  //               }
+  //             }
+  //           }}
+  //         >
+  //           {`Receive to ${resources?.warehouse?.titleSingular}`}
+  //         </MenuItem>
+  //       ) : null}
+  //       <MenuItem
+  //         disabled={checkUniqSupplier() || checkUniqWarehouse() || selectedRecords.some((s) => [ASSET_STATUS.needRepair].includes(s.status))}
+  //         onClick={() => {
+  //           if (!validateAction(repairJobActions.sendToSupplier)) {
+  //             if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
+  //               if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
+  //                 handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier);
+  //               } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
+  //                 handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.supplier);
+  //               }
+  //             }
+  //           }
+  //         }}
+  //       >
+  //         Send to Supplier
+  //       </MenuItem>
+  //     </>
+  //   );
+  // };
 
   const previewDownloadProps = {
     fileName: `${resources?.repairJob?.titleSingular}-${repairJobData?.repairJobName}`,
@@ -633,11 +634,7 @@ const SerializedAsset = ({
     <>
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={allowedToEdit && allowedOperation && repairJobData?.status !== REPAIR_JOB_STATUS.completed}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{
-          disabled: selectedRecords.length === 0 || selectedRecords.some((s) => s.repaired === true) || checkUniqSupplier() || checkUniqWarehouse()
-        }}
+        isActionButtonVisible={false}
         previewDownloadProps={previewDownloadProps}
         rightSideContents={rightSideContents()}
         hasXpadding
@@ -656,6 +653,19 @@ const SerializedAsset = ({
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
             refreshGrid={fetchRecords}
+            bulkActionItems={
+              allowedToEdit && allowedOperation && repairJobData?.status !== REPAIR_JOB_STATUS.completed ? (
+                <BulkActionItems
+                  selectedRecords={selectedRecords}
+                  resources={resources}
+                  checkUniqSupplier={checkUniqSupplier}
+                  checkUniqWarehouse={checkUniqWarehouse}
+                  validateAction={validateAction}
+                  handleTicketDialog={handleTicketDialog}
+                  repairJobActions={repairJobActions}
+                />
+              ) : null
+            }
           />
         </Box>
       ) : (
@@ -749,3 +759,59 @@ const SerializedAsset = ({
 };
 
 export default SerializedAsset;
+
+const BulkActionItems = ({
+  selectedRecords,
+  resources,
+  checkUniqSupplier,
+  checkUniqWarehouse,
+  validateAction,
+  handleTicketDialog,
+  repairJobActions
+}) => {
+  const uniq = (arr) => Array.from(new Set(arr));
+  const map = (arr, key) => arr.map(i => i[key]);
+
+  return (
+    <BulkActionContainer>
+      {uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount ? (
+        <BulkActionContainer.Button
+          disabled={checkUniqSupplier() || checkUniqWarehouse()}
+          onClick={() => {
+            if (!validateAction(repairJobActions.receivedToPlant)) {
+              if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
+                if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
+                  handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant);
+                } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
+                  handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant);
+                }
+              }
+            }
+          }}
+        >
+          {`Receive to ${resources?.warehouse?.titleSingular}`}
+        </BulkActionContainer.Button>
+      ) : null}
+      <BulkActionContainer.Button
+        disabled={
+          checkUniqSupplier() ||
+          checkUniqWarehouse() ||
+          selectedRecords.some((s) => [ASSET_STATUS.needRepair].includes(s.status))
+        }
+        onClick={() => {
+          if (!validateAction(repairJobActions.sendToSupplier)) {
+            if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
+              if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
+                handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier);
+              } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
+                handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.supplier);
+              }
+            }
+          }
+        }}
+      >
+        Send to Supplier
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
