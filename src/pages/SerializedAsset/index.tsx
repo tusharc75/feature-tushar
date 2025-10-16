@@ -654,7 +654,10 @@ const SerializedAsset = () => {
             >
               <MenuItem
                 onClick={() => {
-                  if (user?.user?.brandPolicy?.serializedAssetScrapApproval && serializedAssetStatusChangeRequestFields?.length > 0) {
+                  if (user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest) {
+                    setStatusChangePermissionError(true);
+                  }
+                  else if (user?.user?.brandPolicy?.serializedAssetScrapApproval && serializedAssetStatusChangeRequestFields?.length > 0) {
                     setStatusChangeRequestDialog(true);
                   } else {
                     handleStatusChange(ASSET_STATUS.scrap);
@@ -669,8 +672,7 @@ const SerializedAsset = () => {
                       ASSET_STATUS.needRecert,
                       ...(otherStatusOptions?.map((o) => o?.optionValue) || [])
                     ].includes(o.status)
-                  )?.length !== selectedRecords?.length ||
-                    (user?.user?.brandPolicy?.serializedAssetScrapApproval && !user?.role?.selectedEntity?.policy?.scrapRequest)
+                  )?.length !== selectedRecords?.length
                     ? true
                     : false
                 }

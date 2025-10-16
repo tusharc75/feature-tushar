@@ -354,6 +354,17 @@ const SerializedAssetInspection = () => {
         return;
       }
     }
+
+    // Check for scrap permission
+    if (
+      status?.optionValue === ASSET_STATUS.scrap &&
+      user?.user?.brandPolicy?.serializedAssetScrapApproval &&
+      !user?.role?.selectedEntity?.policy?.scrapRequest
+    ) {
+      setStatusChangePermissionError(true);
+      return;
+    }
+
     if (
       status?.optionValue === ASSET_STATUS.scrap &&
       user?.user?.brandPolicy?.serializedAssetScrapApproval &&
@@ -573,7 +584,7 @@ const BulkActionItems = ({
                       onClick={() => {
                         handleActionMenuItemOnClick(status);
                       }}
-                      disabled={selectedRecords.some((record) => record.status === status?.optionLabel) || isDisabled}
+                      disabled={selectedRecords.some((record) => record.status === status?.optionLabel)}
                     >
                       {status?.optionLabel}
                     </MenuItem>

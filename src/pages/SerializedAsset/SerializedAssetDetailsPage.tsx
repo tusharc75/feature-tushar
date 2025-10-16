@@ -672,10 +672,12 @@ const SerializedAssetDetailsPage = () => {
                           <HtmlTooltip title={isDisabled ? scrapRequestDisable : ''}>
                             <MenuItem
                               key={o?.optionValue}
-                              disabled={!manualStatus.includes(o?.optionLabel) || o?.optionLabel === assetDetails?.status || isDisabled}
+                              disabled={!manualStatus.includes(o?.optionLabel) || o?.optionLabel === assetDetails?.status}
                               onClick={() => {
                                 closeActions();
-                                if (
+                                if (isDisabled) {
+                                  setStatusChangePermissionError(true);
+                                } else if (
                                   o?.optionValue === ASSET_STATUS.scrap &&
                                   user?.user?.brandPolicy?.serializedAssetScrapApproval &&
                                   serializedAssetStatusChangeRequestFields?.length > 0
