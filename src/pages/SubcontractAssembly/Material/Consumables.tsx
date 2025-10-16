@@ -351,6 +351,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
                     isDeleting={isDeleting}
                     selectedRecords={selectedRecords}
                     setDeleteData={setDeleteData}
+                    allowedToEdit={allowedToEdit}
                   />
                 }
               />
@@ -407,12 +408,13 @@ export default Consumables;
 const BulkActionItems = ({ 
   isDeleting,
   selectedRecords,
-  setDeleteData
+  setDeleteData,
+  allowedToEdit
 }) => {
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
-        disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
+        disabled={!allowedToEdit || isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
         onClick={() => {
           setDeleteData(
             selectedRecords?.map((d) => {

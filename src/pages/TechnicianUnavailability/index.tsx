@@ -336,7 +336,7 @@ const TechnicianUnavailability = ({ id }: { id?: string | null }) => {
               showOnlyShowFilteredRecordSwitch={true}
               bulkActionItems={
                 <BulkActionItems
-                  selectedRecords={selectedRecords}
+                  permissions={permissions}
                   setShowDeleteConfirmBox={setShowDeleteConfirmBox}
                 />
               }
@@ -380,7 +380,7 @@ const TechnicianUnavailability = ({ id }: { id?: string | null }) => {
 export default TechnicianUnavailability;
 
 const BulkActionItems = ({ 
-  selectedRecords,
+  permissions,
   setShowDeleteConfirmBox
 }) => {
   return (
@@ -389,7 +389,7 @@ const BulkActionItems = ({
         onClick={() => {
           setShowDeleteConfirmBox({ open: true, data: null });
         }}
-        disabled={!selectedRecords?.length}
+        disabled={!permissions?.technicianUnavailability?.isDelete}
         buttonType="red"
       >
         Delete

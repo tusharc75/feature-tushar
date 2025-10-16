@@ -1451,7 +1451,10 @@ const BulkActionItems = ({
     <BulkActionContainer>
       {!resourcePolicy?.hideAddExistingServices && (
         <BulkActionContainer.Button
-          disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
+          disabled={
+            !allowedToEdit ||
+            selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true
+          }
           onClick={() => {
             setAddServicesDialog({ open: true, new: false });
           }}
@@ -1461,7 +1464,10 @@ const BulkActionItems = ({
       )}
       {!resourcePolicy?.hideAddNewService && (
         <BulkActionContainer.Button
-          disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
+          disabled={
+            !allowedToEdit ||
+            selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true
+          }
           onClick={() => {
             setAddServicesDialog({ open: true, new: true });
           }}
@@ -1472,6 +1478,7 @@ const BulkActionItems = ({
       {!resourcePolicy?.hideAddConsumables && !user?.user?.brandPolicy?.workOrderConsumableHide && (
         <BulkActionContainer.Button
           disabled={
+            !allowedToEdit ||
             selectedRecords?.filter((d) => d?.workOrder && [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0
               ? false
               : true
@@ -1498,6 +1505,7 @@ const BulkActionItems = ({
       {!resourcePolicy?.hideAssignTechnician && (
         <BulkActionContainer.Button
           disabled={
+            !allowedToEdit ||
             selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 &&
               !selectedRecords?.find(
                 (d) =>
@@ -1534,6 +1542,7 @@ const BulkActionItems = ({
         </BulkActionContainer.Button>
       )}
       <BulkActionContainer.Button
+        disabled={!allowedToEdit}
         onClick={() => {
           setShowAttachmentDialog({
             open: true,
@@ -1553,6 +1562,7 @@ const BulkActionItems = ({
             setCompleteConfirmBox(true);
           }}
           disabled={
+            !allowedToEdit ||
             selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
               selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canAutoCompleteWorkOrder)
               ? false
@@ -1567,7 +1577,7 @@ const BulkActionItems = ({
           onClick={() => {
             setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
           }}
-          disabled={isDisabledCompleteService()}
+          disabled={!allowedToEdit || isDisabledCompleteService()}
         >
           Complete Service
         </BulkActionContainer.Button>
@@ -1577,7 +1587,7 @@ const BulkActionItems = ({
           onClick={() => {
             setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.skipped });
           }}
-          disabled={isDisabledCompleteService()}
+          disabled={!allowedToEdit || isDisabledCompleteService()}
         >
           Skip Service
         </BulkActionContainer.Button>
@@ -1585,6 +1595,7 @@ const BulkActionItems = ({
       {!resourcePolicy?.hideCompleteSkipRevertService && (
         <BulkActionContainer.Button
           disabled={
+            !allowedToEdit ||
             selectedRecords?.length &&
               selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending) &&
               !isWorkOrderCompleted(selectedRecords)
@@ -1606,6 +1617,7 @@ const BulkActionItems = ({
             setArrangeView({ open: true, workOrderIds: uniqueIds, currentIndex: 0 });
           }}
           disabled={
+            !allowedToEdit ||
             selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length && !isWorkOrderCompleted(selectedRecords) ? false : true
           }
         >
@@ -1615,6 +1627,7 @@ const BulkActionItems = ({
       {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0 &&
         selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canComplete) && (
           <BulkActionContainer.Button
+            disabled={!allowedToEdit}
             onClick={() => {
               setShowCloseReopenConfirmation({ open: true, type: 'Close' });
             }}
@@ -1625,6 +1638,7 @@ const BulkActionItems = ({
       {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0 &&
         selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canReopen) && (
           <BulkActionContainer.Button
+            disabled={!allowedToEdit}
             onClick={() => {
               setShowCloseReopenConfirmation({ open: true, type: 'Re-Open' });
             }}
@@ -1641,6 +1655,7 @@ const BulkActionItems = ({
           });
         }}
         disabled={
+          !allowedToEdit ||
           selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service).length > 0 && !isWorkOrderCompleted(selectedRecords) ? false : true
         }
       >
@@ -1651,7 +1666,7 @@ const BulkActionItems = ({
           setDeleteData(selectedRecords?.filter((e) => e?.canDelete));
           setShowConfirmBox(true);
         }}
-        disabled={selectedRecords?.some((e) => e?.canDelete) ? false : true}
+        disabled={!allowedToEdit || selectedRecords?.some((e) => e?.canDelete) ? false : true}
         buttonType="red"
       >
         Delete

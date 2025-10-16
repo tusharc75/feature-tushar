@@ -527,6 +527,7 @@ const Products = ({
                 selectedRecords={selectedRecords}
                 setAssignSerialNumbersDialog={setAssignSerialNumbersDialog}
                 setShowConfirmBox={setShowConfirmBox}
+                allowedToEdit={allowedToEdit}
               />
             }
             expander={true}
@@ -594,11 +595,12 @@ export default Products;
 const BulkActionItems = ({ 
   selectedRecords,
   setAssignSerialNumbersDialog,
-  setShowConfirmBox
+  setShowConfirmBox,
+  allowedToEdit
 }) => {
   return (
     <BulkActionContainer>
-      {selectedRecords?.filter((e) => e?.serializedProduct && e?.qty - e?.serialNumber?.length > 0)?.length > 0 && (
+      {allowedToEdit && selectedRecords?.filter((e) => e?.serializedProduct && e?.qty - e?.serialNumber?.length > 0)?.length > 0 && (
         <BulkActionContainer.Button
           onClick={() => {
             setAssignSerialNumbersDialog({ open: true, data: selectedRecords?.filter((s) => s.type !== 'serialNumber' && s?.serializedProduct) });
@@ -608,10 +610,10 @@ const BulkActionItems = ({
         </BulkActionContainer.Button>
       )}
       <BulkActionContainer.Button
+        disabled={!allowedToEdit || selectedRecords?.some((s) => !s.canDelete)}
         onClick={() => {
           setShowConfirmBox({ open: true, data: selectedRecords });
         }}
-        disabled={selectedRecords?.some((s) => !s.canDelete)}
         buttonType="red"
       >
         Delete

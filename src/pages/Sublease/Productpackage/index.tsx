@@ -465,6 +465,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
                 selectedRecords={selectedRecords}
                 setIsProductEdit={setIsProductEdit}
                 setDeleteData={setDeleteData}
+                allowedToEdit={allowedToEdit}
               />
             }
           />
@@ -569,12 +570,16 @@ export default Productpackage;
 const BulkActionItems = ({ 
   selectedRecords, 
   setIsProductEdit, 
-  setDeleteData 
+  setDeleteData,
+  allowedToEdit
 }) => {
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
-        disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
+        disabled={
+          !allowedToEdit ||
+          !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)
+        }
         onClick={() => {
           setIsProductEdit({ open: true, isBulkedit: true });
         }}
@@ -582,7 +587,10 @@ const BulkActionItems = ({
         Bulk Edit
       </BulkActionContainer.Button>
       <BulkActionContainer.Button
-        disabled={selectedRecords?.length && selectedRecords.every((e) => e.canDelete) ? false : true}
+        disabled={
+          !allowedToEdit ||
+          selectedRecords?.length && selectedRecords.every((e) => e.canDelete) ? false : true
+        }
         onClick={() => {
           const dataToDelete =
             selectedRecords &&
