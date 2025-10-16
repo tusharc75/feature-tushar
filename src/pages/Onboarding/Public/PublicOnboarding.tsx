@@ -129,7 +129,7 @@ const PublicOnboarding = () => {
       setAutoSaveStatus('error');
     } finally {
       setSaving(false);
-      setTimeout(() => setAutoSaveStatus(''), 2500);
+      setTimeout(() => setAutoSaveStatus(''), 2000);
     }
   };
 
@@ -240,7 +240,7 @@ const PublicOnboarding = () => {
   const AutoSave = ({ values }) => {
     const formik = useFormikContext();
     const { isValid, dirty } = formik;
-    const debouncedValues = useDebounce(values, 2500);
+    const debouncedValues = useDebounce(values, 2000);
     const isInitialMount = useRef(true);
 
     useEffect(() => {
@@ -253,7 +253,7 @@ const PublicOnboarding = () => {
       }
       if (!isValid) {
         setAutoSaveStatus('invalid');
-        setTimeout(() => setAutoSaveStatus(''), 2500);
+        setTimeout(() => setAutoSaveStatus(''), 2000);
         return;
       }
       if (debouncedValues) {
