@@ -1,5 +1,5 @@
 import type { Plugin, PDFRenderProps, Schema, UIRenderProps } from '@pdfme/common';
-import { rgb } from '@pdfme/pdf-lib';
+import { rgb, scale } from '@pdfme/pdf-lib';
 import { PLUGIN } from 'src/constants/helpers';
 
 interface MyGridSchema extends Schema {
@@ -201,8 +201,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                 editable.style.outline = 'none';
                 editable.style.boxShadow = 'none';
                 (editable as HTMLElement).style.outlineOffset = '0px';
-                editable.style.webkitAppearance = 'none';
-                editable.style.fontSize = `${typeof schema?.textSize === 'number' ? schema.textSize : 20}px`;
+                editable.style.fontSize = `${typeof schema?.textSize === 'number' ? schema.textSize : 10}px`;
                 editable.style.fontFamily = 'Roboto, Roboto-bold';
                 editable.style.fontWeight = (typeof schema?.textWeight === 'string' ? schema.textWeight : 'normal') as 'normal' | 'bold';
                 editable.style.color = typeof schema?.textColor === 'string' ? schema.textColor : '#000000';
@@ -815,7 +814,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
         }
 
         const padding = 4;
-        const textSize = ((typeof schema?.textSize === 'number' ? schema.textSize : 9));
+        const textSize = (((typeof schema?.textSize === 'number' ? schema.textSize : 9)) * 0.8);
         const textColorStr = typeof schema?.textColor === 'string' ? schema.textColor : '#000000';
         const textColor = parseColor(textColorStr);
 
@@ -856,7 +855,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             });
         });
     },
-
     propPanel: {
         schema: () => ({
             cols: {
@@ -921,7 +919,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             tableBorderColor: '#000000',
             colBorderWidth: 1,
             colBorderColor: '#000000',
-            textSize: 20,
+            textSize: 10,
             readOnly: true,
             required: false,
             textColor: '#000000',

@@ -651,13 +651,11 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
           hideDetailButton={true}
         />
       ) : (
-        <PreviewDownload
+        <PreviewDownloadNew
           fileName={`${resources?.workOrder?.titleSingular}-${workOrderData?.workOrderNumber}`}
           resource={sidebarResource.workOrder}
           referenceId={id}
-          columns={user?.user?.brandPolicy?.servicePrePost ? columns : columns?.filter((e) => e.accessor !== 'serviceType')}
           hideDetailButton={true}
-          hideDialog={workOrderData?.type === WORK_ORDER_TYPE.productionOrder ? true : false}
         />
       )
     },
