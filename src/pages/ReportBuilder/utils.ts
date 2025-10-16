@@ -1,3 +1,5 @@
+import { displayDate } from "src/constants/helpers";
+
 export const OPERATIONS = [
   { value: 'sum', label: 'Sum' },
   { value: 'count', label: 'Count' },
@@ -9,7 +11,7 @@ export const OPERATIONS = [
 
 export interface PipelineItem {
   _id: string;
-  type: 'lookup' | 'group' | 'sort' | 'limit' | 'chart';
+  type: 'lookup' | 'group' | 'sort' | 'limit' | 'chart' | 'filter';
   [key: string]: any;
 }
 
@@ -45,7 +47,7 @@ export interface LimitPipeline extends PipelineItem {
 
 export interface ChartPipeline extends PipelineItem {
   type: 'chart';
-  chartType: 'bar' | 'pie';
+  chartType: 'bar' | 'pie' | 'line';
   xAxis?: {
     field: string;
     label: string;
@@ -58,6 +60,16 @@ export interface ChartPipeline extends PipelineItem {
   label?: string;
 }
 
+export interface FilterPipeline extends PipelineItem {
+  type: 'filter';
+  fields: Array<{
+    fieldName: string;
+    value: any;
+    operation: string;
+    type: string;
+  }>;
+}
+
 export const reportBuilderTypeOptions = [
   { optionLabel: 'Report', optionValue: 'report' },
   { optionLabel: 'KPI', optionValue: 'kpi' }
@@ -65,8 +77,41 @@ export const reportBuilderTypeOptions = [
 
 export const chartTypeOptions = [
   { optionLabel: 'Bar', optionValue: 'bar' },
-  { optionLabel: 'Pie', optionValue: 'pie' }
+  { optionLabel: 'Pie', optionValue: 'pie' },
+  { optionLabel: 'Line', optionValue: 'line' }
 ];
+
+export const filterOperations = [
+  { optionValue: 'is', optionLabel: 'Is' },
+  { optionValue: 'isNot', optionLabel: 'Is not' },
+  { optionValue: 'contains', optionLabel: 'Contains' },
+  { optionValue: 'doesNotContain', optionLabel: 'Does not contain' },
+  { optionValue: 'startsWith', optionLabel: 'Starts with' },
+  { optionValue: 'endsWith', optionLabel: 'Ends with' },
+  { optionValue: 'isEmpty', optionLabel: 'Is empty' },
+  { optionValue: 'notEmpty', optionLabel: 'Not empty' }
+];
+
+export const dateFilterOperations = [
+  { optionValue: 'between', optionLabel: 'Between' },
+  { optionValue: 'before', optionLabel: 'Before' },
+  { optionValue: 'on', optionLabel: 'On' },
+  { optionValue: 'after', optionLabel: 'After' }
+];
+
+export const durationLabelMap = {
+  '1-year': 'Last 1 Year',
+  '6-months': 'Last 6 Months',
+  '3-months': 'Last 3 Months',
+  '1-month': 'Last 1 Month',
+  '1-week': 'Last 1 Week',
+  'current-year': 'Current Year',
+  'current-month': 'Current Month',
+  'current-week': 'Current Week',
+  'yesterday': 'Yesterday',
+  'today': 'Today',
+  'custom': 'Custom'
+}
 
 export const getUniqueResources = (pipeline: PipelineItem[], mainResource?: string): string[] => {
   const resources = new Set<string>();
@@ -82,6 +127,116 @@ export const getUniqueResources = (pipeline: PipelineItem[], mainResource?: stri
   });
 
   return Array.from(resources);
+};
+
+export const getChipLabel = (field: any, filter: any, operation: any) => {
+  const fieldLabel = field?.fieldLabel || filter?.fieldName;
+  const operationLabel = operation?.optionLabel || filter?.operation;
+
+  if (Array.isArray(filter?.value)) {
+    const valueText = `${filter?.value?.length} selection(s)`;
+    return `${fieldLabel} ${operationLabel} ${valueText}`;
+  } else if (filter?.type === 'date') {
+    if (filter?.value?.duration && filter?.value?.duration !== 'custom') {
+      return `${fieldLabel} ${operationLabel} ${durationLabelMap?.[filter?.value?.duration] || ''}`;
+    } else if (filter?.value?.from && filter?.value?.to) {
+      const fromDate = displayDate(filter?.value?.from);
+      const toDate = displayDate(filter?.value?.to);
+      return `${fieldLabel} ${operationLabel} ${fromDate} - ${toDate}`;
+    } else if (filter?.value) {
+      return `${fieldLabel} ${operationLabel} ${displayDate(filter?.value)}`;
+    }
+    return `${fieldLabel} ${operationLabel}`;
+  } else if (filter?.type === 'checkBox') {
+    return `${fieldLabel} ${operationLabel} ${filter?.value === true ? 'Yes' : 'No'}`;
+  } else {
+    const valueText = filter?.value ? ` ${filter?.value}` : '';
+    return `${fieldLabel} ${operationLabel}${valueText}`;
+  }
+};
+
+export const getAvailableFieldsForFilter = (
+  pipeline: PipelineItem[],
+  currentItemIndex: number,
+  mainResource: string,
+  resourceFieldMap: { [key: string]: any[] }
+): Array<any> => {
+  const pipelineBeforeFilter = pipeline.slice(0, currentItemIndex);
+
+  const lastGroupIndex = pipelineBeforeFilter
+    .map((item, index) => (item.type === 'group' ? index : -1))
+    .filter((index) => index !== -1)
+    .pop();
+
+  const mainResourceFields = resourceFieldMap[mainResource] || [];
+  const fields: Array<any> = [];
+
+  if (lastGroupIndex !== undefined) {
+    const groupItem = pipelineBeforeFilter[lastGroupIndex] as GroupPipeline;
+
+    groupItem.fields?.forEach((fieldName) => {
+      const field = mainResourceFields.find((f) => f.fieldName === fieldName);
+      if (field) {
+        fields.push({...field, resource: 'Summaries'});
+      }
+    });
+
+    groupItem.accumulator?.forEach((acc) => {
+      const field = mainResourceFields.find((f) => f.fieldName === acc.field);
+      if (acc.operation === 'count') {
+        fields.push({
+          fieldName: 'count',
+          fieldLabel: acc.outputField || OPERATIONS?.find((op) => op.value === acc.operation)?.label,
+          resource: 'Summaries'
+        });
+      } else {
+        fields.push({
+          ...field,
+          fieldLabel: acc.outputField || OPERATIONS?.find((op) => op.value === acc.operation)?.label,
+          resource: 'Summaries'
+        });
+      }
+    });
+
+    for (let idx = lastGroupIndex + 1; idx < pipelineBeforeFilter?.length; idx++) {
+      const item = pipelineBeforeFilter[idx];
+      if (item?.type === 'lookup') {
+        const lookupItem = item as LookupPipeline;
+        if (lookupItem?.withResource && lookupItem?.fields && lookupItem?.fields?.length > 0) {
+          const lookupResourceFields = resourceFieldMap[lookupItem.withResource] || [];
+          lookupItem?.fields?.forEach((fieldName) => {
+            const field = lookupResourceFields.find((f) => f.fieldName === fieldName);
+            if (field) {
+              fields.push(field);
+            }
+          });
+        }
+      }
+    }
+
+    return fields;
+  }
+
+  mainResourceFields.forEach((field) => {
+    fields.push(field);
+  });
+
+  pipelineBeforeFilter?.forEach((item) => {
+    if (item?.type === 'lookup') {
+      const lookupItem = item as LookupPipeline;
+      if (lookupItem?.withResource && lookupItem?.fields && lookupItem?.fields?.length > 0) {
+        const lookupResourceFields = resourceFieldMap[lookupItem.withResource] || [];
+        lookupItem?.fields?.forEach((fieldName) => {
+          const field = lookupResourceFields.find((f) => f.fieldName === fieldName);
+          if (field) {
+            fields.push(field);
+          }
+        });
+      }
+    }
+  });
+
+  return fields;
 };
 
 export const validatePipeline = (pipeline: PipelineItem[]): { [itemId: string]: string[] } => {
