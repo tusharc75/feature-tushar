@@ -919,7 +919,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             tableBorderColor: '#000000',
             colBorderWidth: 1,
             colBorderColor: '#000000',
-            textSize: 10,
+            textSize: 20,
             readOnly: true,
             required: false,
             textColor: '#000000',
