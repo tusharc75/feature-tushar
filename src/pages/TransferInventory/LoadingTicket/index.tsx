@@ -19,9 +19,9 @@ import ReceiveDialog from './ReceiveDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { MenuItem } from '@mui/material';
 import { map, uniq } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
@@ -351,70 +351,6 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
     }
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        {interPlantTransfer ? (
-          allowedToEdit &&
-          canReceive && (
-            <MenuItem
-              onClick={() => {
-                setShowConfirmInterPlantTransfer(true);
-              }}
-              id="receive-interplant-menu-item"
-            >
-              {`Receive`}
-            </MenuItem>
-          )
-        ) : (
-          <>
-            {allowedToEdit && canLoad && (
-              <MenuItem
-                disabled={selectedRecords.length === 0 || selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
-                onClick={() => {
-                  handleLoadingTicketDialog();
-                }}
-                id="create-loading-ticket-menu-item"
-              >
-                {`Create Loading Ticket`}
-              </MenuItem>
-            )}
-            {canReceive && (
-              <>
-                <MenuItem
-                  onClick={() => {
-                    setShowConfirmBoxReceive(true);
-                  }}
-                  disabled={
-                    selectedRecords.length === 0 ||
-                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
-                  }
-                  id="receive-menu-item"
-                >
-                  {`Receive`}
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setShowConformationCancleTicket(true);
-                  }}
-                  disabled={
-                    selectedRecords.length &&
-                      selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length
-                      ? false
-                      : true
-                  }
-                  id="cancel-delivered-loading-ticket-menu-item"
-                >
-                  Cancel Delivered Loading Ticket(s)
-                </MenuItem>
-              </>
-            )}
-          </>
-        )}
-      </>
-    );
-  };
-
   const previewDownloadProps = {
     fileName: `${resources?.transferInventory?.titleSingular}-${transferInventoryData?.transferNumber}`,
     hideDetailButton: true,
@@ -427,9 +363,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
     <Fragment>
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={transferInventoryData?.status !== TRANSFER_INVENTORY_STATUS.delivered}
-        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-        actionButtonMenuItems={actionButtonMenuItems()}
+        isActionButtonVisible={false}
         previewDownloadProps={previewDownloadProps}
       />
       <>
@@ -444,6 +378,20 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
             refreshGrid={fetchData}
             hideAction={!allowedToEdit || transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
             hideSelection={!allowedToEdit || transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
+            bulkActionItems={
+              <BulkActionItems
+                interPlantTransfer={interPlantTransfer}
+                allowedToEdit={allowedToEdit}
+                canReceive={canReceive}
+                canLoad={canLoad}
+                selectedRecords={selectedRecords}
+                setShowConfirmInterPlantTransfer={setShowConfirmInterPlantTransfer}
+                handleLoadingTicketDialog={handleLoadingTicketDialog}
+                setShowConfirmBoxReceive={setShowConfirmBoxReceive}
+                setShowConformationCancleTicket={setShowConformationCancleTicket}
+                DELIVERY_TICKET_STATUS={DELIVERY_TICKET_STATUS}
+              />
+            }
           />
         ) : (
           <Box p={2} height={500}>
@@ -517,3 +465,78 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
 };
 
 export default LoadingTicket;
+
+const BulkActionItems = ({ 
+  interPlantTransfer,
+  allowedToEdit,
+  canReceive,
+  canLoad,
+  selectedRecords,
+  setShowConfirmInterPlantTransfer,
+  handleLoadingTicketDialog,
+  setShowConfirmBoxReceive,
+  setShowConformationCancleTicket,
+  DELIVERY_TICKET_STATUS
+}) => {
+  return (
+    <BulkActionContainer>
+      {interPlantTransfer ? (
+        allowedToEdit &&
+        canReceive && (
+          <BulkActionContainer.Button
+            onClick={() => {
+              setShowConfirmInterPlantTransfer(true);
+            }}
+            id="receive-interplant-menu-item"
+          >
+            Receive
+          </BulkActionContainer.Button>
+        )
+      ) : (
+        <>
+          {allowedToEdit && canLoad && (
+            <BulkActionContainer.Button
+              disabled={selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
+              onClick={() => {
+                handleLoadingTicketDialog();
+              }}
+              id="create-loading-ticket-menu-item"
+            >
+              Create Loading Ticket
+            </BulkActionContainer.Button>
+          )}
+          {canReceive && (
+            <>
+              <BulkActionContainer.Button
+                onClick={() => {
+                  setShowConfirmBoxReceive(true);
+                }}
+                disabled={
+                  selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
+                }
+                id="receive-menu-item"
+              >
+                Receive
+              </BulkActionContainer.Button>
+              <BulkActionContainer.Button
+                onClick={() => {
+                  setShowConformationCancleTicket(true);
+                }}
+                disabled={
+                  selectedRecords.length &&
+                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length
+                    ? false
+                    : true
+                }
+                id="cancel-delivered-loading-ticket-menu-item"
+                buttonType="red"
+              >
+                Cancel Delivered Loading Ticket(s)
+              </BulkActionContainer.Button>
+            </>
+          )}
+        </>
+      )}
+    </BulkActionContainer>
+  );
+};

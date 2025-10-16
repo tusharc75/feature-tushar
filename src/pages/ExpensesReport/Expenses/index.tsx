@@ -18,6 +18,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import AddExistingExpenses from 'src/pages/ExpensesReport/AddExistingExpenses';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const Expenses = ({
   expenseIds,
@@ -214,33 +215,16 @@ const Expenses = ({
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          color="primary"
-          disabled={selectedRecords.length === 0}
-          onClick={() => {
-            setDeleteConfirmBox(true);
-            setDeleteData(selectedRecords.map((record) => record._id));
-          }}
-        >
-          {`Delete (${selectedRecords.length})`}
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <div className="main-container-v1">
       <>
         {allowedToEdit && (
           <DetailsPageHeader
             isAddButtonVisible={true}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
+            isActionButtonVisible={false}
+            // actionButtonMenuItems={actionButtonMenuItems()}
             addButtonMenuItems={addButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+            // actionButtonProps={{ disabled: selectedRecords.length === 0 }}
             hasXpadding
           />
         )}
@@ -256,6 +240,13 @@ const Expenses = ({
             refreshGrid={fetchData}
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
+            bulkActionItems={
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                setDeleteConfirmBox={setDeleteConfirmBox}
+                setDeleteData={setDeleteData}
+              />
+            }
           />
         ) : (
           <Box p={2} height={500}>
@@ -315,3 +306,20 @@ const Expenses = ({
 };
 
 export default Expenses;
+
+const BulkActionItems = ({ selectedRecords, setDeleteConfirmBox, setDeleteData }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        buttonType="red"
+        disabled={selectedRecords.length === 0}
+        onClick={() => {
+          setDeleteConfirmBox(true);
+          setDeleteData(selectedRecords.map((record) => record._id));
+        }}
+      >
+        {`Delete (${selectedRecords.length})`}
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

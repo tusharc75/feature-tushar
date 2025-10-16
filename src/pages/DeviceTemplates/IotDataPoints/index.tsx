@@ -14,6 +14,7 @@ import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import ManageIotDataPoints from 'src/pages/IotDataPoints/ManageIotDataPoints';
@@ -224,24 +225,6 @@ export default function IotDataPoints({ deviceTemplate }) {
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            if (selectedRecords.length === 1) {
-              setDeleteRecord(selectedRecords[0]);
-            } else {
-              setDeleteRecord(null);
-            }
-            setShowDeleteConfirmBox(true);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
   const rightSideContents = () => {
     return (
       <>
@@ -265,9 +248,7 @@ export default function IotDataPoints({ deviceTemplate }) {
       <DetailsPageHeader
         isAddButtonVisible={true}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={true}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+        isActionButtonVisible={false}
         rightSideContents={rightSideContents()}
         hasXpadding={false}
       />
@@ -283,6 +264,13 @@ export default function IotDataPoints({ deviceTemplate }) {
           showOnlyShowFilteredRecordSwitch={true}
           showFilters={true}
           resource={sidebarResource.iotDataPoints}
+          bulkActionItems={
+            <BulkActionItems
+              selectedRecords={selectedRecords}
+              setDeleteRecord={setDeleteRecord}
+              setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+            />
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -322,3 +310,27 @@ export default function IotDataPoints({ deviceTemplate }) {
     </Fragment>
   );
 }
+
+const BulkActionItems = ({ 
+  selectedRecords,
+  setDeleteRecord,
+  setShowDeleteConfirmBox
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          if (selectedRecords.length === 1) {
+            setDeleteRecord(selectedRecords[0]);
+          } else {
+            setDeleteRecord(null);
+          }
+          setShowDeleteConfirmBox(true);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

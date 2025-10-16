@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
@@ -12,6 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { ASSET_STATUS, MATERIAL_TYPE, OTHER_MATERIAL_TYPE, rentalManagement, SERIALIZED_PACKAGE_STATUS, sidebarResource } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@mui/icons-material';
@@ -478,67 +479,11 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
     return flatArray.length > 0;
   }
 
-  const actionButtonMenuItems = () => {
-    return (
-      fromInspection ? <>
-        <MenuItem
-          disabled={selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)?.some(r => r?.status === ASSET_STATUS.inTransit)}
-          onClick={() => {
-            setAssignDialog({
-              open: true,
-              type: MATERIAL_TYPE.serializedAsset,
-              replaceAsset: true,
-              products: getProducts(MATERIAL_TYPE.serializedAsset, 'replaceAsset')
-            });
-          }}
-        >
-          {`Replace ${resources?.serializedAsset?.titlePlural}`}
-        </MenuItem>
-      </>
-        : <>
-          {isVisible() && (
-            <MenuItem
-              onClick={() => {
-                setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: false, products: getProducts() });
-              }}
-            >
-              {`Assign ${resources?.serializedAsset?.titlePlural}`}
-            </MenuItem>
-          )}
-          {isVisible() && (
-            <MenuItem
-              onClick={() => {
-                setAssignDialog({ open: true, type: OTHER_MATERIAL_TYPE.serialNumber, replaceAsset: false, products: getProducts(OTHER_MATERIAL_TYPE.serialNumber) });
-              }}
-            >
-              Assign Serial Numbers
-            </MenuItem>
-          )}
-          {permissions?.serializedPackages?.isUpdate && (
-            <MenuItem
-              disabled={selectedRecords?.some((e) => e?.canDelete && [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(e.type)) ? false : true}
-              onClick={() => {
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              Unassign
-            </MenuItem>
-          )}
-        </>
-    );
-  };
-
   return (
     <>
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={allowedToEdit}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{
-          disabled: selectedRecords?.length === 0 ? true :
-            fromInspection ? selectedRecords.filter((f) => f.type === MATERIAL_TYPE.serializedAsset)?.length > 0 ? false : true :
-              !allowedToEdit
-        }}
+        isActionButtonVisible={false}
         hasXpadding
       />
       {columns ? (
@@ -553,6 +498,21 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
           expander={true}
           hideAction={!allowedToEdit}
           hideSelection={!allowedToEdit}
+          bulkActionItems={
+            <BulkActionItems
+              fromInspection={fromInspection}
+              selectedRecords={selectedRecords}
+              MATERIAL_TYPE={MATERIAL_TYPE}
+              ASSET_STATUS={ASSET_STATUS}
+              setAssignDialog={setAssignDialog}
+              getProducts={getProducts}
+              resources={resources}
+              isVisible={isVisible}
+              OTHER_MATERIAL_TYPE={OTHER_MATERIAL_TYPE}
+              permissions={permissions}
+              setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+            />
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -624,3 +584,69 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
 };
 
 export default Assign;
+
+const BulkActionItems = ({ 
+  fromInspection,
+  selectedRecords,
+  MATERIAL_TYPE,
+  ASSET_STATUS,
+  setAssignDialog,
+  getProducts,
+  resources,
+  isVisible,
+  OTHER_MATERIAL_TYPE,
+  permissions,
+  setShowDeleteConfirmBox
+}) => {
+  return (
+    <BulkActionContainer>
+      {fromInspection ? (
+        <BulkActionContainer.Button
+          disabled={selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)?.some(r => r?.status === ASSET_STATUS.inTransit)}
+          onClick={() => {
+            setAssignDialog({
+              open: true,
+              type: MATERIAL_TYPE.serializedAsset,
+              replaceAsset: true,
+              products: getProducts(MATERIAL_TYPE.serializedAsset, 'replaceAsset')
+            });
+          }}
+        >
+          {`Replace ${resources?.serializedAsset?.titlePlural}`}
+        </BulkActionContainer.Button>
+      ) : (
+        <>
+          {isVisible() && (
+            <BulkActionContainer.Button
+              onClick={() => {
+                setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: false, products: getProducts() });
+              }}
+            >
+              {`Assign ${resources?.serializedAsset?.titlePlural}`}
+            </BulkActionContainer.Button>
+          )}
+          {isVisible() && (
+            <BulkActionContainer.Button
+              onClick={() => {
+                setAssignDialog({ open: true, type: OTHER_MATERIAL_TYPE.serialNumber, replaceAsset: false, products: getProducts(OTHER_MATERIAL_TYPE.serialNumber) });
+              }}
+            >
+              Assign Serial Numbers
+            </BulkActionContainer.Button>
+          )}
+          {permissions?.serializedPackages?.isUpdate && (
+            <BulkActionContainer.Button
+              disabled={selectedRecords?.some((e) => e?.canDelete && [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(e.type)) ? false : true}
+              onClick={() => {
+                setShowDeleteConfirmBox(true);
+              }}
+              buttonType="red"
+            >
+              Unassign
+            </BulkActionContainer.Button>
+          )}
+        </>
+      )}
+    </BulkActionContainer>
+  );
+};

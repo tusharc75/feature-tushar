@@ -38,6 +38,7 @@ import MaterialQtyDialog from 'src/pages/FieldServiceOrder/Technicians/MaterialQ
 import AddQuotationDataDialog from 'src/pages/FieldTicket/material/AddQuotationDataDialog';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowedToEdit, handleChangeStatus, fetchData, setNextStep, resourcePolicy }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Services`;
@@ -526,41 +527,6 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
     );
   };
 
-  const ActionButtonMenuItms = () => {
-    return (
-      <>
-        <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-          <MenuItem
-            onClick={() => {
-              setIsServiceEdit({ open: true, data: null, showSaveAndNext: false });
-              setIsBulkEdit(true);
-            }}
-          >
-            Bulk Edit
-          </MenuItem>
-        </HtmlTooltip>
-        <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Delete selected records' : 'Select records to delete'}>
-          <MenuItem
-            disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
-            onClick={() => {
-              const obj: any = [];
-              const dataToDelete = selectedRecords && selectedRecords.filter((e) => !e.hideSelection);
-              dataToDelete?.forEach((ele) => {
-                obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
-              });
-              dataToDelete?.forEach((ele) => {
-                getNestedSubRows(obj, ele);
-              });
-              setDeleteData(obj);
-            }}
-          >
-            Delete
-          </MenuItem>
-        </HtmlTooltip>
-      </>
-    );
-  };
-
   return (
     <>
       {allowedToEdit && (
@@ -568,9 +534,7 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
           <DetailsPageHeader
             isAddButtonVisible={true}
             addButtonMenuItems={<AddButtonMenuItems />}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={<ActionButtonMenuItms />}
-            actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+            isActionButtonVisible={false}
             hasXpadding
           />
         </>
@@ -590,6 +554,15 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
             isClientSideGrid={true}
             refreshGrid={fetchMaterial}
             expander={true}
+            bulkActionItems={
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                setIsServiceEdit={setIsServiceEdit}
+                setIsBulkEdit={setIsBulkEdit}
+                setDeleteData={setDeleteData}
+                isDeleting={isDeleting}
+              />
+            }
           />
         </Box>
       ) : (
@@ -679,3 +652,35 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
 };
 
 export default Services;
+
+const BulkActionItems = ({ selectedRecords, setIsServiceEdit, setIsBulkEdit, setDeleteData, isDeleting }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          setIsServiceEdit({ open: true, data: null, showSaveAndNext: false });
+          setIsBulkEdit(true);
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        buttonType="red"
+        disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
+        onClick={() => {
+          const obj = [];
+          const dataToDelete = selectedRecords && selectedRecords.filter((e) => !e.hideSelection);
+          dataToDelete?.forEach((ele) => {
+            obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
+          });
+          dataToDelete?.forEach((ele) => {
+            getNestedSubRows(obj, ele);
+          });
+          setDeleteData(obj);
+        }}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

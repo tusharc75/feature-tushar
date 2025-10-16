@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Delete } from '@mui/icons-material';
 import { startCase, uniqBy } from 'lodash';
@@ -18,6 +18,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import {
   ASSET_STATUS,
   CHILD_RESOURCE,
@@ -387,29 +388,6 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
       });
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={
-            selectedRecords?.length &&
-              selectedRecords?.filter((e) => e.type === 'asset' && e.canDelete)?.length === selectedRecords?.filter((e) => e.type === 'asset')?.length
-              ? false
-              : true
-          }
-          onClick={() => {
-            const inventories = uniqBy(flattenArray(selectedRecords), '_id')
-              ?.filter((e) => e.type === 'asset')
-              ?.map((e) => e.inventory);
-            setShowConfirmBox(true);
-            setDeleteData(inventories);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
   const rightSideContents = () => {
     return (
       <>
@@ -433,9 +411,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
         <>
           <DetailsPageHeader
             isAddButtonVisible={false}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonProps={{ disabled: uniqBy(flattenArray(selectedRecords), '_id')?.filter((e) => e.type === 'asset')?.length === 0 }}
+            isActionButtonVisible={false}
             rightSideContents={rightSideContents()}
           />
         </>
@@ -456,6 +432,13 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                 renderedFrom={renderedFrom}
                 isClientSideGrid={true}
                 expander={true}
+                bulkActionItems={
+                  <BulkActionItems
+                    selectedRecords={selectedRecords}
+                    setShowConfirmBox={setShowConfirmBox}
+                    setDeleteData={setDeleteData}
+                  />
+                }
               />
             </Box>
           ) : (
@@ -506,3 +489,32 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
 }
 
 export default SerializedAsset;
+
+const BulkActionItems = ({ 
+  selectedRecords, 
+  setShowConfirmBox, 
+  setDeleteData 
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={
+          selectedRecords?.length &&
+            selectedRecords?.filter((e) => e.type === 'asset' && e.canDelete)?.length === selectedRecords?.filter((e) => e.type === 'asset')?.length
+            ? false
+            : true
+        }
+        onClick={() => {
+          const inventories = uniqBy(flattenArray(selectedRecords), '_id')
+            ?.filter((e) => e.type === 'asset')
+            ?.map((e) => e.inventory);
+          setShowConfirmBox(true);
+          setDeleteData(inventories);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

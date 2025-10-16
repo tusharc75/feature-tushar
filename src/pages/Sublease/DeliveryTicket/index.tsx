@@ -1,4 +1,4 @@
-import { IconButton, MenuItem } from '@mui/material';
+import { IconButton } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import { map, startCase, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -6,6 +6,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { subleaseActions, subleaseMessage } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -351,54 +352,11 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
     return new Set(selectedRecords.map((e) => e?.warehouse?.optionValue))?.size === 1;
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        {ticketType === DELIVERY_TICKET_TYPE.loading && (
-          <MenuItem
-            onClick={() => {
-              if (!validateAction(subleaseActions.createLoadingTicket)) {
-                handleDeliveryTicketDialog();
-              }
-            }}
-          >
-            Create Loading Ticket
-          </MenuItem>
-        )}
-        {ticketType === DELIVERY_TICKET_TYPE.receiving && (
-          <MenuItem
-            onClick={() => {
-              if (!validateAction(subleaseActions.createReceivingTicket)) {
-                handleDeliveryTicketDialog();
-              }
-            }}
-          >
-            Create Receiving Ticket
-          </MenuItem>
-        )}
-        <MenuItem
-          onClick={() => {
-            if (ticketType === DELIVERY_TICKET_TYPE.loading && !validateAction(subleaseActions.deliveredToWarehouse)) {
-              handelProcessTickets();
-            } else if (ticketType === DELIVERY_TICKET_TYPE.receiving && !validateAction(subleaseActions.receivedToWarehouse)) {
-              handelProcessTickets();
-            }
-          }}
-        >
-          {ticketType === DELIVERY_TICKET_TYPE.loading ? `Delivered to ${resources?.warehouse?.titleSingular}` : `Received at ${resources?.warehouse?.titleSingular}`}
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <>
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={true}
-        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-        hasXpadding
-        actionButtonMenuItems={actionButtonMenuItems()}
+        isActionButtonVisible={false}
       />
 
       {columns ? (
@@ -413,6 +371,16 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
             isClientSideGrid={true}
             hideSelection={!allowedToEdit}
             hideAction={true}
+            bulkActionItems={
+              <BulkActionItems
+                ticketType={ticketType}
+                validateAction={validateAction}
+                subleaseActions={subleaseActions}
+                handleDeliveryTicketDialog={handleDeliveryTicketDialog}
+                handelProcessTickets={handelProcessTickets}
+                resources={resources}
+              />
+            }
           />
         </Box>
       ) : (
@@ -448,3 +416,50 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
 };
 
 export default LoadingTicket;
+
+const BulkActionItems = ({ 
+  ticketType,
+  validateAction,
+  subleaseActions,
+  handleDeliveryTicketDialog,
+  handelProcessTickets,
+  resources
+}) => {
+  return (
+    <BulkActionContainer>
+      {ticketType === DELIVERY_TICKET_TYPE.loading && (
+        <BulkActionContainer.Button
+          onClick={() => {
+            if (!validateAction(subleaseActions.createLoadingTicket)) {
+              handleDeliveryTicketDialog();
+            }
+          }}
+        >
+          Create Loading Ticket
+        </BulkActionContainer.Button>
+      )}
+      {ticketType === DELIVERY_TICKET_TYPE.receiving && (
+        <BulkActionContainer.Button
+          onClick={() => {
+            if (!validateAction(subleaseActions.createReceivingTicket)) {
+              handleDeliveryTicketDialog();
+            }
+          }}
+        >
+          Create Receiving Ticket
+        </BulkActionContainer.Button>
+      )}
+      <BulkActionContainer.Button
+        onClick={() => {
+          if (ticketType === DELIVERY_TICKET_TYPE.loading && !validateAction(subleaseActions.deliveredToWarehouse)) {
+            handelProcessTickets();
+          } else if (ticketType === DELIVERY_TICKET_TYPE.receiving && !validateAction(subleaseActions.receivedToWarehouse)) {
+            handelProcessTickets();
+          }
+        }}
+      >
+        {ticketType === DELIVERY_TICKET_TYPE.loading ? `Delivered to ${resources?.warehouse?.titleSingular}` : `Received at ${resources?.warehouse?.titleSingular}`}
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

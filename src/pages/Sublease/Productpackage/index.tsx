@@ -9,6 +9,7 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { ownerAndColaborator, subleaseMessage } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -432,42 +433,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          color="primary"
-          disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
-          onClick={() => {
-            setIsProductEdit({ open: true, isBulkedit: true });
-          }}
-        >
-          {'Bulk Edit'}
-        </MenuItem>
-        <MenuItem
-          color="primary"
-          disabled={selectedRecords?.length && selectedRecords.every((e) => e.canDelete) ? false : true}
-          onClick={() => {
-            const dataToDelete =
-              selectedRecords &&
-              selectedRecords
-                .filter((e) => !e.hideSelection)
-                .map((rec: any) => {
-                  const obj: any = {};
-                  obj.id = rec._id;
-                  obj.type = rec?.type;
-                  obj.materialId = rec?.materialId;
-                  return obj;
-                });
-            setDeleteData(dataToDelete);
-          }}
-        >
-          {'Delete'}
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <Fragment>
       <DetailsPageHeader
@@ -477,12 +442,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           tooltip: !allowedToEdit ? ownerAndColaborator : '',
           disabled: !allowedToEdit
         }}
-        isActionButtonVisible={true}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{
-          tooltip: !allowedToEdit ? ownerAndColaborator : 'Actions',
-          disabled: selectedRecords?.length || !allowedToEdit ? false : true
-        }}
+        isActionButtonVisible={false}
         hasXpadding
       />
       {columns ? (
@@ -500,6 +460,13 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             expander={true}
+            bulkActionItems={
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                setIsProductEdit={setIsProductEdit}
+                setDeleteData={setDeleteData}
+              />
+            }
           />
         </Box>
       ) : (
@@ -598,3 +565,42 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
 };
 
 export default Productpackage;
+
+const BulkActionItems = ({ 
+  selectedRecords, 
+  setIsProductEdit, 
+  setDeleteData 
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
+        onClick={() => {
+          setIsProductEdit({ open: true, isBulkedit: true });
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        disabled={selectedRecords?.length && selectedRecords.every((e) => e.canDelete) ? false : true}
+        onClick={() => {
+          const dataToDelete =
+            selectedRecords &&
+            selectedRecords
+              .filter((e) => !e.hideSelection)
+              .map((rec: any) => {
+                const obj: any = {};
+                obj.id = rec._id;
+                obj.type = rec?.type;
+                obj.materialId = rec?.materialId;
+                return obj;
+              });
+          setDeleteData(dataToDelete);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

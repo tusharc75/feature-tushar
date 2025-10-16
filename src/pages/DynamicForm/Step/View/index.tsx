@@ -13,6 +13,7 @@ import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import ResourceField from './ResourceField';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -379,14 +380,6 @@ const View = ({
       });
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <MenuItem disabled={selectedRecords.length ? false : true} onClick={() => setShowDeleteConfirmBox(true)}>
-        Delete
-      </MenuItem>
-    );
-  };
-
   const addButtonMenuItems = () => {
     return step?.linkWithMaterial
       ? step?.linkedMaterial?.map((m) => (
@@ -426,9 +419,7 @@ const View = ({
                   <DetailsPageHeader
                     isAddButtonVisible={step?.linkWithMaterial ? true : false}
                     addButtonMenuItems={addButtonMenuItems()}
-                    isActionButtonVisible={true}
-                    actionButtonMenuItems={actionButtonMenuItems()}
-                    actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+                    isActionButtonVisible={false}
                     hasXpadding
                     leftSideContents={
                       <>
@@ -461,6 +452,12 @@ const View = ({
                       onSaveEdit={onSaveInlineEdit}
                       refreshGrid={fetchData}
                       expander={true}
+                      bulkActionItems={
+                        <BulkActionItems
+                          selectedRecords={selectedRecords}
+                          setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+                        />
+                      }
                     />
                   ) : (
                     <Box p={2} height={500}>
@@ -567,3 +564,20 @@ const View = ({
 };
 
 export default View;
+
+const BulkActionItems = ({ 
+  selectedRecords,
+  setShowDeleteConfirmBox
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={selectedRecords.length ? false : true}
+        onClick={() => setShowDeleteConfirmBox(true)}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

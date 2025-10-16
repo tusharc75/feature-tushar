@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
@@ -12,6 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import ManageCompetencies from 'src/pages/Competencies/ManageCompetencies';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
@@ -175,25 +176,6 @@ const Competencies = ({ competencyType }) => {
     )
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            if (selectedRecords.length === 1) {
-              setDeleteRecord(selectedRecords[0]);
-            } else {
-              setDeleteRecord(null);
-            }
-            setShowDeleteConfirmBox(true);
-          }}
-        >
-          {`Delete (${selectedRecords?.length})`}
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <Fragment>
       <DetailsPageHeader
@@ -203,9 +185,7 @@ const Competencies = ({ competencyType }) => {
             setOpenDialog({ open: true, id: null });
           }
         }}
-        isActionButtonVisible={permissions?.competencies?.isDelete}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+        isActionButtonVisible={false}
         hasXpadding={false}
       />
 
@@ -218,6 +198,13 @@ const Competencies = ({ competencyType }) => {
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           resource={sidebarResource.competencies}
+          bulkActionItems={
+            <BulkActionItems
+              selectedRecords={selectedRecords}
+              setDeleteRecord={setDeleteRecord}
+              setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+            />
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -256,3 +243,27 @@ const Competencies = ({ competencyType }) => {
 };
 
 export default Competencies;
+
+const BulkActionItems = ({ 
+  selectedRecords,
+  setDeleteRecord,
+  setShowDeleteConfirmBox
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          if (selectedRecords.length === 1) {
+            setDeleteRecord(selectedRecords[0]);
+          } else {
+            setDeleteRecord(null);
+          }
+          setShowDeleteConfirmBox(true);
+        }}
+        buttonType="red"
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
