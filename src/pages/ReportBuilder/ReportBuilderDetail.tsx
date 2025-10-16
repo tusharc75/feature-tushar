@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect, useCallback } from 'react';
 import Grid from '@mui/material/Grid2';
-import TextField from '@mui/material/TextField';
+import { TextField, Chip, Popper, Paper } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { Formik, Form } from 'formik';
@@ -10,17 +10,9 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete, Box, Card, CardContent, IconButton, Checkbox, FormControlLabel, Typography, ClickAwayListener } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SortIcon from '@mui/icons-material/Sort';
-import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
-import JoinInnerIcon from '@mui/icons-material/JoinInner';
-import FunctionsIcon from '@mui/icons-material/Functions';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { Add, Delete, Sort, FormatListNumbered, JoinInner, Functions, BarChart, ExpandMore, ExpandLess } from '@mui/icons-material';
 import {
   PipelineItem,
   LookupPipeline,
@@ -28,14 +20,20 @@ import {
   SortPipeline,
   LimitPipeline,
   ChartPipeline,
+  FilterPipeline,
   OPERATIONS,
   getUniqueResources,
   validatePipeline,
-  chartTypeOptions
+  chartTypeOptions,
+  filterOperations,
+  getAvailableFieldsForPipeline,
+  getChipLabel
 } from './utils';
 import { sidebarResource, UnCamelCase } from 'src/constants/helpers';
-import Popper from '@mui/material/Popper';
-import Paper from '@mui/material/Paper';
+import { BiFilterAlt } from 'react-icons/bi';
+import { FilterFieldSelectionDialog, FilterConfigurationDialog } from './Filters';
+import FieldSelectionPopper from './FieldSelectionPopper';
+
 
 const WithResourceFieldsPopper = ({ isEdit, item, lookupFields, updatePipelineItem }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -53,7 +51,7 @@ const WithResourceFieldsPopper = ({ isEdit, item, lookupFields, updatePipelineIt
   return (
     <>
       <IconButton onClick={handleToggle} disabled={!isEdit} size="small" className="border" style={{ borderColor: 'var(--common-border-color)' }}>
-        {open ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+        {open ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
       </IconButton>
 
       <Popper
@@ -88,7 +86,7 @@ const WithResourceFieldsPopper = ({ isEdit, item, lookupFields, updatePipelineIt
             </div>
 
             <div style={{ borderTop: '1px solid var(--common-border-color)' }} className="pt-2">
-              {lookupFields.map((field) => {
+              {lookupFields?.map((field) => {
                 const checked = item?.fields?.includes(field.fieldName);
                 return (
                   <div key={field.fieldName} className="mb-1">
@@ -137,7 +135,9 @@ const FieldMatchRow = ({
   isEdit,
   fetchResourceFields,
   updatePipelineItem,
-  pipelineErrors
+  pipelineErrors,
+  pipeline,
+  resourceFieldMap,
 }: {
   item: LookupPipeline;
   matchIndex: number;
@@ -152,9 +152,14 @@ const FieldMatchRow = ({
   fetchResourceFields: (resource: string, onFieldsLoaded: (fields: any[]) => void) => void;
   updatePipelineItem: (id: string, updates: Partial<PipelineItem>) => void;
   pipelineErrors: { [itemId: string]: string[] };
+  pipeline: PipelineItem[];
+  resourceFieldMap: { [resource: string]: any[] };
 }) => {
   const fromResourceName = resourceOptions?.find((r) => r.value === formValues?.resource)?.title || formValues?.resource;
   const withResourceName = resourceOptions?.find((r) => r.value === item.withResource)?.title || item.withResource;
+
+  const currentSortIndex = pipeline?.findIndex((p) => p?._id === item?._id);
+  const availableFields = getAvailableFieldsForPipeline(pipeline, currentSortIndex, formValues?.resource, resourceFieldMap);
 
   return (
     <>
@@ -186,7 +191,7 @@ const FieldMatchRow = ({
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 0.5 }} className="flex items-center justify-center">
-              <JoinInnerIcon color="primary" fontSize="small" />
+              <JoinInner color="primary" fontSize="small" />
             </Grid>
             <Grid size={{ xs: 12, sm: 2.5 }}>
               <div className="fields-panel-container relative flex items-center gap-2">
@@ -244,31 +249,26 @@ const FieldMatchRow = ({
         <Grid size={{ xs: 12, sm: matchIndex > 0 ? 2.5 : 2.5 }}>
           <Box display="flex" alignItems="center" gap={1}>
             <Box flex={1}>
-              <Autocomplete
-                disabled={!isEdit || !item.withResource}
-                value={localFields.find((f) => f.fieldName === item?.fieldToMatch?.[matchIndex]?.localField) || null}
-                options={localFields}
-                getOptionLabel={(option) => option.fieldLabel}
-                onChange={(e, val) => {
+              <FieldSelectionPopper
+                isEdit={isEdit && !!item.withResource}
+                availableFields={availableFields}
+                selectedField={availableFields?.find((f) => f?.fieldName === item?.fieldToMatch?.[matchIndex]?.localField)}
+                onFieldSelect={(field) => {
                   const updatedFieldToMatch = [...item.fieldToMatch];
-                  updatedFieldToMatch[matchIndex] = { ...updatedFieldToMatch[matchIndex], localField: val?.fieldName || '' };
+                  updatedFieldToMatch[matchIndex] = { ...updatedFieldToMatch[matchIndex], localField: field?.fieldName || '' };
                   onUpdate({ fieldToMatch: updatedFieldToMatch });
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    size="small"
-                    label={fromResourceName}
-                    variant="outlined"
-                    fullWidth
-                    required
-                    error={pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`)}
-                    helperText={
-                      pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`) ? `${fromResourceName} field is required` : ''
-                    }
-                    slotProps={{ inputLabel: { shrink: true } }}
-                  />
-                )}
+                textFieldProps={{
+                  size: "small",
+                  label: fromResourceName,
+                  variant: "outlined",
+                  fullWidth: true,
+                  required: true,
+                  error: pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`),
+                  helperText: pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`) ? `${fromResourceName} field is required` : '',
+                  slotProps: { inputLabel: { shrink: true } }
+                }}
+                popperProps={{ width: 350, maxHeight: 300 }}
               />
             </Box>
             <span className="text-lg font-medium" style={{ color: 'var(--primary-text)' }}>
@@ -299,9 +299,7 @@ const FieldMatchRow = ({
                     required
                     error={pipelineErrors[item._id]?.includes(`lookupResourceField_${matchIndex}_required`)}
                     helperText={
-                      pipelineErrors[item._id]?.includes(`lookupResourceField_${matchIndex}_required`)
-                        ? `${withResourceName} field is required`
-                        : ''
+                      pipelineErrors[item._id]?.includes(`lookupResourceField_${matchIndex}_required`) ? `${withResourceName} field is required` : ''
                     }
                     slotProps={{ inputLabel: { shrink: true } }}
                   />
@@ -320,12 +318,12 @@ const FieldMatchRow = ({
                 className="border"
                 style={{ borderColor: 'var(--common-border-color)' }}
               >
-                <AddIcon fontSize="small" />
+                <Add fontSize="small" />
               </IconButton>
             )}
             {matchIndex !== 0 && (
               <IconButton size="small" onClick={onRemove} disabled={!isEdit}>
-                <DeleteIcon fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
+                <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
               </IconButton>
             )}
           </Box>
@@ -407,12 +405,12 @@ const AccumulatorRow = ({
     <Grid size={{ xs: 12, sm: 1 }}>
       {onAddOperation && (
         <IconButton size="small" onClick={onAddOperation} disabled={!isEdit}>
-          <AddIcon fontSize="small" />
+          <Add fontSize="small" />
         </IconButton>
       )}
       {onRemove && (
         <IconButton size="small" onClick={onRemove} disabled={!isEdit}>
-          <DeleteIcon fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
+          <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
         </IconButton>
       )}
     </Grid>
@@ -439,6 +437,8 @@ export default function ReportBuilderDetail() {
   const [hasLimitItem, setHasLimitItem] = useState(false);
   const [pipelineErrors, setPipelineErrors] = useState<{ [itemId: string]: string[] }>({});
   const [showFieldsPanel, setShowFieldsPanel] = useState(false);
+  const [filterFieldSelect, setFilterFieldSelect] = useState({ open: false, item: null });
+  const [filterConfigurationDialog, setFilterConfigurationDialog] = useState({ open: false, field: null, editingFilter: null, editingIndex: null });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -555,6 +555,7 @@ export default function ReportBuilderDetail() {
         }
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formValues]);
 
   useEffect(() => {
@@ -583,7 +584,7 @@ export default function ReportBuilderDetail() {
 
   const generateId = (type: string) => `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-  const addPipelineItem = (type: 'lookup' | 'group' | 'sort' | 'limit') => {
+  const addPipelineItem = (type: 'lookup' | 'group' | 'sort' | 'limit' | 'filter') => {
     const _id = generateId(type);
     let newItem: PipelineItem;
 
@@ -620,6 +621,13 @@ export default function ReportBuilderDetail() {
           limit: 10
         } as LimitPipeline;
         setHasLimitItem(true);
+        break;
+      case 'filter':
+        newItem = {
+          _id,
+          type: 'filter',
+          fields: []
+        } as FilterPipeline;
         break;
       default:
         return;
@@ -673,59 +681,30 @@ export default function ReportBuilderDetail() {
     setIsUpdating(true);
 
     const submitData: any = {
-      name: values.name.trim(),
-      fields: values?.fields,
-      pipeline: pipeline,
-      resource: values?.resource,
-      type: values?.type
+      _id: id,
+      pipeline: pipeline
     };
 
-    if (id === '0') {
-      axiosInstance()
-        .post('/report-builder', submitData)
-        .then(({ data: { data, message } }) => {
-          if (isBreakCrumbPath) {
-            history.push({ pathname: isBreakCrumbPath });
-          } else {
-            history.push(`${routes.reportBuilderDetail.path}/${data._id}`);
-          }
-          setIsUpdating(false);
-          setIsEdit(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: message
-          });
-        })
-        .catch((error) => {
-          setIsUpdating(false);
-          toastConfig.setToastConfig(error);
+    axiosInstance()
+      .post('/report-builder/pipeline', submitData)
+      .then(({ data: { data, message } }) => {
+        if (isBreakCrumbPath) {
+          history.push({ pathname: isBreakCrumbPath });
+        } else {
+          fetchData();
+        }
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: message
         });
-    } else {
-      axiosInstance()
-        .put('/report-builder', {
-          _id: id,
-          ...submitData
-        })
-        .then(({ data: { data, message } }) => {
-          if (isBreakCrumbPath) {
-            history.push({ pathname: isBreakCrumbPath });
-          } else {
-            fetchData();
-          }
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: message
-          });
-          setIsUpdating(false);
-          setIsEdit(false);
-        })
-        .catch((error) => {
-          setIsUpdating(false);
-          toastConfig.setToastConfig(error);
-        });
-    }
+        setIsUpdating(false);
+        setIsEdit(false);
+      })
+      .catch((error) => {
+        setIsUpdating(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleClose = (path?: string) => {
@@ -741,15 +720,16 @@ export default function ReportBuilderDetail() {
         <CardContent>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
             <Box display="flex" alignItems="center" gap={1}>
-              <JoinInnerIcon color="primary" />
+              <JoinInner color="primary" />
               <span style={{ fontWeight: 500 }}>Join data</span>
             </Box>
             <IconButton size="small" onClick={() => removePipelineItem(item._id)} disabled={!isEdit}>
-              <DeleteIcon fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
+              <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
             </IconButton>
           </Box>
 
           <FieldMatchRow
+            pipeline={pipeline}
             item={item}
             matchIndex={0}
             localFields={localFields}
@@ -762,6 +742,7 @@ export default function ReportBuilderDetail() {
             fetchResourceFields={fetchResourceFields}
             updatePipelineItem={updatePipelineItem}
             pipelineErrors={pipelineErrors}
+            resourceFieldMap={resourceFieldMap}
           />
 
           {item?.fieldToMatch?.length > 1 &&
@@ -784,6 +765,8 @@ export default function ReportBuilderDetail() {
                 fetchResourceFields={fetchResourceFields}
                 updatePipelineItem={updatePipelineItem}
                 pipelineErrors={pipelineErrors}
+                pipeline={pipeline}
+                resourceFieldMap={resourceFieldMap}
               />
             ))}
         </CardContent>
@@ -801,11 +784,11 @@ export default function ReportBuilderDetail() {
         <CardContent>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
             <Box display="flex" alignItems="center" gap={1}>
-              <FunctionsIcon color="primary" />
+              <Functions color="primary" />
               <span style={{ fontWeight: 500 }}>Summarize</span>
             </Box>
             <IconButton size="small" onClick={() => removePipelineItem(item._id)} disabled={!isEdit}>
-              <DeleteIcon fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
+              <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
             </IconButton>
           </Box>
 
@@ -824,17 +807,17 @@ export default function ReportBuilderDetail() {
               onRemove={
                 item?.accumulator?.length > 1
                   ? () => {
-                      const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
-                      updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                    }
+                    const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
+                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                  }
                   : undefined
               }
               onAddOperation={
                 index === item?.accumulator?.length - 1
                   ? () => {
-                      const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
-                      updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                    }
+                    const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
+                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                  }
                   : undefined
               }
             />
@@ -876,49 +859,50 @@ export default function ReportBuilderDetail() {
   };
 
   const renderSortComponent = (item: SortPipeline) => {
-    const resourceFields = resourceFieldMap?.[formValues?.resource] || [];
     const sortField = Object.keys(item.sortBy)[0] || '';
     const sortOrder = item.sortBy[sortField] || 1;
     const itemErrors = pipelineErrors[item._id] || [];
+
+    const currentSortIndex = pipeline?.findIndex((p) => p?._id === item?._id);
+    const availableFields = getAvailableFieldsForPipeline(pipeline, currentSortIndex, formValues?.resource, resourceFieldMap);
+    const selectedField = availableFields?.find((f) => f?.fieldName === sortField);
 
     return (
       <Card key={item?._id} sx={{ mb: 2, border: itemErrors.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
         <CardContent>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
             <Box display="flex" alignItems="center" gap={1}>
-              <SortIcon color="primary" />
+              <Sort color="primary" />
               <span style={{ fontWeight: 500 }}>Sort</span>
             </Box>
             <IconButton size="small" onClick={() => removePipelineItem(item?._id)} disabled={!isEdit}>
-              <DeleteIcon fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
+              <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
             </IconButton>
           </Box>
 
           <Grid container spacing={2} alignItems="center">
             <Grid size={{ xs: 12, sm: 6 }}>
-              <Autocomplete
-                disabled={!isEdit}
-                value={resourceFields.find((f) => f.fieldName === sortField) || null}
-                options={resourceFields}
-                getOptionLabel={(option) => option.fieldLabel}
-                onChange={(e, val) => {
-                  updatePipelineItem(item?._id, {
-                    sortBy: val ? { [val.fieldName]: sortOrder } : {}
+              <FieldSelectionPopper
+                isEdit={isEdit}
+                availableFields={availableFields}
+                selectedField={selectedField}
+                onFieldSelect={(field) => {
+                  const currentSortBy = Object.keys(item.sortBy)[0] ? Object.values(item.sortBy)[0] : 1;
+                  updatePipelineItem(item._id, {
+                    sortBy: { [field.fieldName]: currentSortBy }
                   });
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    size="small"
-                    label="Sort Field"
-                    variant="outlined"
-                    fullWidth
-                    required
-                    error={pipelineErrors[item._id]?.includes('sortBy_required')}
-                    helperText={pipelineErrors[item._id]?.includes('sortBy_required') ? 'Sort Field is required' : ''}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                  />
-                )}
+                textFieldProps={{
+                  size: "small",
+                  label: "Sort Field",
+                  variant: "outlined",
+                  fullWidth: true,
+                  required: true,
+                  error: pipelineErrors[item._id]?.includes('sortBy_required'),
+                  helperText: pipelineErrors[item._id]?.includes('sortBy_required') ? 'Sort Field is required' : '',
+                  slotProps: { inputLabel: { shrink: true } }
+                }}
+                popperProps={{ width: 400, maxHeight: 400 }}
               />
             </Grid>
 
@@ -965,11 +949,11 @@ export default function ReportBuilderDetail() {
         <CardContent>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
             <Box display="flex" alignItems="center" gap={1}>
-              <FormatListNumberedIcon color="primary" />
+              <FormatListNumbered color="primary" />
               <span style={{ fontWeight: 500 }}>Row limit</span>
             </Box>
             <IconButton size="small" onClick={() => removePipelineItem(item?._id)} disabled={!isEdit}>
-              <DeleteIcon fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
+              <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
             </IconButton>
           </Box>
 
@@ -1011,7 +995,7 @@ export default function ReportBuilderDetail() {
       <Card key={item._id} sx={{ mb: 2, border: itemErrors.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
         <CardContent>
           <Box display="flex" alignItems="center" gap={1} mb={2}>
-            <BarChartIcon color="primary" />
+            <BarChart color="primary" />
             <span style={{ fontWeight: 500 }}>Chart</span>
           </Box>
 
@@ -1023,9 +1007,9 @@ export default function ReportBuilderDetail() {
                 options={chartTypeOptions}
                 getOptionLabel={(option) => option.optionLabel}
                 onChange={(e, val) => {
-                  if (val?.optionValue === 'bar') {
+                  if (['bar', 'line'].includes(val?.optionValue)) {
                     updatePipelineItem(item._id, {
-                      chartType: 'bar',
+                      chartType: val?.optionValue,
                       xAxis: { field: '', label: '' },
                       yAxis: { field: '', label: '' },
                       value: undefined,
@@ -1057,7 +1041,7 @@ export default function ReportBuilderDetail() {
               />
             </Grid>
 
-            {item.chartType === 'bar' && (
+            {['bar', 'line'].includes(item.chartType) && (
               <>
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
@@ -1182,6 +1166,94 @@ export default function ReportBuilderDetail() {
     );
   };
 
+  const renderFilterComponent = (item: FilterPipeline) => {
+    const currentFilterIndex = pipeline?.findIndex((p) => p._id === item._id);
+    const availableFields = getAvailableFieldsForPipeline(pipeline, currentFilterIndex, formValues?.resource, resourceFieldMap);
+
+    const handleRemoveFilter = (filterIndex: number) => {
+      const updatedFields = item?.fields?.filter((_, index) => index !== filterIndex);
+      updatePipelineItem(item._id, { fields: updatedFields });
+    };
+
+    return (
+      <Card key={item._id} sx={{ mb: 2 }}>
+        <CardContent>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <BiFilterAlt color="var(--theme-primary)" />
+              <span style={{ fontWeight: 500 }}>Filter</span>
+            </Box>
+            <IconButton size="small" onClick={() => removePipelineItem(item._id)} disabled={!isEdit}>
+              <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
+            </IconButton>
+          </Box>
+
+          <Box className="flex flex-wrap items-center gap-2">
+            {item?.fields?.map((filter, index) => {
+              const field = availableFields.find((f) => f.fieldName === filter.fieldName);
+              const operation = filterOperations.find((op) => op.optionValue === filter.operation);
+
+              const handleChipClick = () => {
+                if (!isEdit) return;
+
+                const fieldForEdit = availableFields.find((f) => f.fieldName === filter.fieldName);
+                setFilterFieldSelect({ open: false, item: item });
+                setFilterConfigurationDialog({
+                  open: true,
+                  field: fieldForEdit,
+                  editingFilter: filter,
+                  editingIndex: index
+                });
+              };
+
+              return (
+                <Chip
+                  key={index}
+                  label={getChipLabel(field, filter, operation)}
+                  onDelete={isEdit ? () => handleRemoveFilter(index) : undefined}
+                  onClick={handleChipClick}
+                  className={`filter-chip ${isEdit ? 'cursor-pointer' : ''}`}
+                  clickable={isEdit}
+                />
+              );
+            })}
+
+            {!item?.fields?.length ? (
+              <ThemeButton startIcon={<Add />} onClick={() => setFilterFieldSelect({ open: true, item: item })} disabled={!isEdit} buttonType="theme">
+                Add filters to narrow your answer
+              </ThemeButton>
+            ) : (
+              <IconButton onClick={() => setFilterFieldSelect({ open: true, item: item })} disabled={!isEdit}>
+                <Add fontSize="small" color={!isEdit ? 'disabled' : 'primary'} />
+              </IconButton>
+            )}
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const handleAddFilterToPipeline = (filter: { fieldName: string; operation: string; value: any, type: string, resource: string }) => {
+    const currentFilter = pipeline?.find((p) => p?._id === filterFieldSelect?.item?._id) as FilterPipeline;
+    if (isEmpty(currentFilter)) return;
+    let updatedFields = [...(currentFilter?.fields || [])];
+    if (filterConfigurationDialog?.editingIndex !== null) {
+      updatedFields[filterConfigurationDialog?.editingIndex] = filter;
+    } else {
+      updatedFields.push(filter);
+    }
+
+    updatePipelineItem(filterFieldSelect?.item._id, { fields: updatedFields });
+    setFilterConfigurationDialog({ open: false, field: null, editingFilter: null, editingIndex: null });
+    setFilterFieldSelect({ open: false, item: null });
+  };
+
+  const getCurrentAvailableFields = (item: PipelineItem) => {
+    if (!item?._id) return [];
+    const currentFilterIndex = pipeline?.findIndex((p) => p._id === item._id);
+    return getAvailableFieldsForPipeline(pipeline, currentFilterIndex, formValues?.resource, resourceFieldMap);
+  };
+
   return initialValues ? (
     <>
       <Formik initialValues={initialValues} onSubmit={handleSubmit} enableReinitialize={true}>
@@ -1246,173 +1318,138 @@ export default function ReportBuilderDetail() {
                       <Grid>
                         <Grid container spacing={2}>
                           <Grid size={{ xs: 12, sm: 4, md: 4, lg: 4 }}>
-                            <div className="fields-panel-container relative flex items-center gap-2">
-                              <div className="flex-1">
-                                <Autocomplete
-                                  disabled={true}
-                                  getOptionLabel={(option) => option.title}
-                                  isOptionEqualToValue={(option, value) => option.value === value.value}
-                                  value={
-                                    resourceOptions?.find((data) => data.value === values['resource'])
-                                      ? resourceOptions?.find((data) => data.value === values['resource'])
-                                      : null
-                                  }
-                                  options={resourceOptions}
-                                  onChange={(e, val: any) => {}}
-                                  renderInput={(params) => (
-                                    <TextField
-                                      {...params}
-                                      required={true}
-                                      margin="none"
-                                      size="small"
-                                      name="resource"
-                                      label="Resource"
-                                      variant="outlined"
-                                      error={touched['resource'] && Boolean(errors['resource'])}
-                                      helperText={touched['resource'] && errors['resource']}
-                                      fullWidth
-                                      slotProps={{ inputLabel: { shrink: true } }}
+                            <Card sx={{ overflow: 'visible' }}>
+                              <CardContent sx={{ overflow: 'visible', position: 'relative' }}>
+                                <div className="fields-panel-container relative flex items-center gap-2">
+                                  <div className="flex-1">
+                                    <Autocomplete
+                                      disabled={true}
+                                      getOptionLabel={(option) => option.title}
+                                      isOptionEqualToValue={(option, value) => option.value === value.value}
+                                      value={
+                                        resourceOptions?.find((data) => data.value === values['resource'])
+                                          ? resourceOptions?.find((data) => data.value === values['resource'])
+                                          : null
+                                      }
+                                      options={resourceOptions}
+                                      onChange={(e, val: any) => { }}
+                                      renderInput={(params) => (
+                                        <TextField
+                                          {...params}
+                                          required={true}
+                                          margin="none"
+                                          size="small"
+                                          name="resource"
+                                          label="Resource"
+                                          variant="outlined"
+                                          error={touched['resource'] && Boolean(errors['resource'])}
+                                          helperText={touched['resource'] && errors['resource']}
+                                          fullWidth
+                                          slotProps={{ inputLabel: { shrink: true } }}
+                                        />
+                                      )}
                                     />
-                                  )}
-                                />
-                              </div>
-                              <IconButton
-                                onClick={() => setShowFieldsPanel(!showFieldsPanel)}
-                                disabled={!values?.resource}
-                                size="small"
-                                className="border"
-                                style={{ borderColor: 'var(--common-border-color)' }}
-                              >
-                                {showFieldsPanel ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                              </IconButton>
+                                  </div>
+                                  <IconButton
+                                    onClick={() => setShowFieldsPanel(!showFieldsPanel)}
+                                    disabled={!values?.resource}
+                                    size="small"
+                                    className="border"
+                                    style={{ borderColor: 'var(--common-border-color)' }}
+                                  >
+                                    {showFieldsPanel ? <ExpandLess /> : <ExpandMore />}
+                                  </IconButton>
 
-                              {showFieldsPanel && values?.resource && (
-                                <div
-                                  className="absolute left-0 top-full z-50 mt-1 max-h-96 w-80 overflow-auto rounded border shadow-lg"
-                                  style={{
-                                    backgroundColor: 'var(--card-bg)',
-                                    borderColor: 'var(--common-border-color)'
-                                  }}
-                                >
-                                  <div className="p-3">
-                                    <div className="mb-3">
-                                      <FormControlLabel
-                                        control={
-                                          <Checkbox
-                                            size="small"
-                                            checked={(() => {
-                                              const availableFields = resourceFieldMap[values?.resource] || [];
-                                              return values?.fields?.length === availableFields?.length && availableFields?.length > 0;
-                                            })()}
-                                            indeterminate={(() => {
-                                              const availableFields = resourceFieldMap[values?.resource] || [];
-                                              return values?.fields?.length > 0 && values?.fields?.length < availableFields?.length;
-                                            })()}
-                                            onChange={(e) => {
-                                              const availableFields = resourceFieldMap[values?.resource] || [];
-                                              if (e.target.checked) {
-                                                setFieldValue(
-                                                  'fields',
-                                                  availableFields?.map((f) => f.fieldName)
-                                                );
-                                              } else {
-                                                setFieldValue('fields', []);
-                                              }
-                                            }}
-                                            disabled={!isEdit}
-                                          />
-                                        }
-                                        label="Select all"
-                                        className="text-sm font-medium"
-                                      />
-                                    </div>
-
-                                    <div className="pt-2" style={{ borderTop: '1px solid var(--common-border-color)' }}>
-                                      {(resourceFieldMap[values?.resource] || [])?.map((field) => (
-                                        <div key={field.fieldName} className="mb-1">
+                                  {showFieldsPanel && values?.resource && (
+                                    <div
+                                      className="absolute left-0 top-full z-50 mt-1 max-h-96 w-80 overflow-auto rounded border shadow-lg"
+                                      style={{
+                                        backgroundColor: 'var(--card-bg)',
+                                        borderColor: 'var(--common-border-color)'
+                                      }}
+                                    >
+                                      <div className="p-3">
+                                        <div className="mb-3">
                                           <FormControlLabel
                                             control={
                                               <Checkbox
                                                 size="small"
                                                 checked={(() => {
                                                   const availableFields = resourceFieldMap[values?.resource] || [];
-                                                  const validFields = validateAndCleanFields(values?.fields, availableFields);
-                                                  return validFields.includes(field.fieldName);
+                                                  return values?.fields?.length === availableFields?.length && availableFields?.length > 0;
+                                                })()}
+                                                indeterminate={(() => {
+                                                  const availableFields = resourceFieldMap[values?.resource] || [];
+                                                  return values?.fields?.length > 0 && values?.fields?.length < availableFields?.length;
                                                 })()}
                                                 onChange={(e) => {
                                                   const availableFields = resourceFieldMap[values?.resource] || [];
-                                                  const validFields = validateAndCleanFields(values?.fields, availableFields);
-                                                  let newFields;
-                                                  if (e?.target?.checked) {
-                                                    newFields = [...validFields, field.fieldName];
+                                                  if (e.target.checked) {
+                                                    setFieldValue(
+                                                      'fields',
+                                                      availableFields?.map((f) => f.fieldName)
+                                                    );
                                                   } else {
-                                                    newFields = validFields?.filter((f) => f !== field.fieldName);
+                                                    setFieldValue('fields', []);
                                                   }
-                                                  setFieldValue('fields', newFields);
                                                 }}
                                                 disabled={!isEdit}
                                               />
                                             }
-                                            label={
-                                              <div className="flex items-center gap-2">
-                                                <span className="text-sm">{field.fieldLabel}</span>
-                                              </div>
-                                            }
+                                            label="Select all"
+                                            className="text-sm font-medium"
                                           />
                                         </div>
-                                      ))}
 
-                                      {!(resourceFieldMap?.[values?.resource] || [])?.length && (
-                                        <div className="py-4 text-center">
-                                          <span className="text-sm" style={{ color: 'var(--dark-secondary-text, #6c757d)' }}>
-                                            No fields available
-                                          </span>
+                                        <div className="pt-2" style={{ borderTop: '1px solid var(--common-border-color)' }}>
+                                          {(resourceFieldMap[values?.resource] || [])?.map((field) => (
+                                            <div key={field.fieldName} className="mb-1">
+                                              <FormControlLabel
+                                                control={
+                                                  <Checkbox
+                                                    size="small"
+                                                    checked={(() => {
+                                                      const availableFields = resourceFieldMap[values?.resource] || [];
+                                                      const validFields = validateAndCleanFields(values?.fields, availableFields);
+                                                      return validFields.includes(field.fieldName);
+                                                    })()}
+                                                    onChange={(e) => {
+                                                      const availableFields = resourceFieldMap[values?.resource] || [];
+                                                      const validFields = validateAndCleanFields(values?.fields, availableFields);
+                                                      let newFields;
+                                                      if (e?.target?.checked) {
+                                                        newFields = [...validFields, field.fieldName];
+                                                      } else {
+                                                        newFields = validFields?.filter((f) => f !== field.fieldName);
+                                                      }
+                                                      setFieldValue('fields', newFields);
+                                                    }}
+                                                    disabled={!isEdit}
+                                                  />
+                                                }
+                                                label={
+                                                  <div className="flex items-center gap-2">
+                                                    <span className="text-sm">{field.fieldLabel}</span>
+                                                  </div>
+                                                }
+                                              />
+                                            </div>
+                                          ))}
+
+                                          {!(resourceFieldMap?.[values?.resource] || [])?.length && (
+                                            <div className="py-4 text-center">
+                                              <span className="text-sm" style={{ color: 'var(--dark-secondary-text, #6c757d)' }}>
+                                                No fields available
+                                              </span>
+                                            </div>
+                                          )}
                                         </div>
-                                      )}
+                                      </div>
                                     </div>
-                                  </div>
+                                  )}
                                 </div>
-                              )}
-                            </div>
-                          </Grid>
-                          <Grid size={{ xs: 12, sm: 8, md: 8, lg: 8 }}>
-                            <Box className="mr-2 flex flex-wrap justify-end gap-3">
-                              <ThemeButton
-                                startIcon={<JoinInnerIcon />}
-                                onClick={() => addPipelineItem('lookup')}
-                                disabled={!isEdit || !values?.resource}
-                                buttonType="theme"
-                              >
-                                Join data
-                              </ThemeButton>
-
-                              <ThemeButton
-                                startIcon={<FunctionsIcon />}
-                                onClick={() => addPipelineItem('group')}
-                                disabled={!isEdit || !values?.resource}
-                                buttonType="theme"
-                              >
-                                Summarize
-                              </ThemeButton>
-
-                              <ThemeButton
-                                startIcon={<SortIcon />}
-                                onClick={() => addPipelineItem('sort')}
-                                disabled={!isEdit || hasSortItem || !values?.resource}
-                                buttonType="theme"
-                              >
-                                Sort
-                              </ThemeButton>
-
-                              <ThemeButton
-                                startIcon={<FormatListNumberedIcon />}
-                                onClick={() => addPipelineItem('limit')}
-                                disabled={!isEdit || hasLimitItem || !values?.resource}
-                                buttonType="theme"
-                              >
-                                Row limit
-                              </ThemeButton>
-                            </Box>
+                              </CardContent>
+                            </Card>
                           </Grid>
                         </Grid>
                       </Grid>
@@ -1425,6 +1462,8 @@ export default function ReportBuilderDetail() {
                                 return renderLookupComponent(item as LookupPipeline);
                               case 'group':
                                 return renderGroupComponent(item as GroupPipeline);
+                              case 'filter':
+                                return renderFilterComponent(item as FilterPipeline);
                               case 'sort':
                                 return renderSortComponent(item as SortPipeline);
                               case 'limit':
@@ -1435,6 +1474,61 @@ export default function ReportBuilderDetail() {
                                 return null;
                             }
                           })}
+                        </Box>
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 8, md: 8, lg: 8 }}>
+                        <Box className="mr-2 flex flex-wrap justify-start gap-3">
+                          <ThemeButton
+                            startIcon={<JoinInner />}
+                            onClick={() => addPipelineItem('lookup')}
+                            disabled={!isEdit || !values?.resource}
+                            buttonType="theme"
+                          >
+                            Join data
+                          </ThemeButton>
+
+                          <ThemeButton
+                            startIcon={<Functions />}
+                            onClick={() => addPipelineItem('group')}
+                            disabled={!isEdit || !values?.resource}
+                            buttonType="theme"
+                          >
+                            Summarize
+                          </ThemeButton>
+                          <ThemeButton
+                            startIcon={<BiFilterAlt />}
+                            onClick={() => addPipelineItem('filter')}
+                            disabled={
+                              !isEdit ||
+                              !values?.resource ||
+                              !(
+                                pipeline?.length === 0 ||
+                                (values?.type === 'report' && ['lookup', 'group'].includes(pipeline?.[pipeline?.length - 1]?.type)) ||
+                                (values?.type === 'kpi' && ['lookup', 'group'].includes(pipeline?.[pipeline?.length - 2]?.type))
+                              )
+                            }
+                            buttonType="theme"
+                          >
+                            Filters
+                          </ThemeButton>
+
+                          <ThemeButton
+                            startIcon={<Sort />}
+                            onClick={() => addPipelineItem('sort')}
+                            disabled={!isEdit || hasSortItem || !values?.resource}
+                            buttonType="theme"
+                          >
+                            Sort
+                          </ThemeButton>
+
+                          <ThemeButton
+                            startIcon={<FormatListNumbered />}
+                            onClick={() => addPipelineItem('limit')}
+                            disabled={!isEdit || hasLimitItem || !values?.resource}
+                            buttonType="theme"
+                          >
+                            Row limit
+                          </ThemeButton>
                         </Box>
                       </Grid>
                     </Grid>
@@ -1457,6 +1551,27 @@ export default function ReportBuilderDetail() {
           );
         }}
       </Formik>
+
+      {filterFieldSelect?.open && (
+        <FilterFieldSelectionDialog
+          open={filterFieldSelect?.open}
+          onClose={() => setFilterFieldSelect({ open: false, item: null })}
+          onFieldSelect={(field: any) => {
+            setFilterConfigurationDialog({ open: true, field: field, editingFilter: null, editingIndex: null });
+          }}
+          availableFields={getCurrentAvailableFields(filterFieldSelect?.item)}
+        />
+      )}
+
+      {filterConfigurationDialog?.open && (
+        <FilterConfigurationDialog
+          open={filterConfigurationDialog?.open}
+          onClose={() => setFilterConfigurationDialog({ open: false, field: null, editingFilter: null, editingIndex: null })}
+          onAddFilter={handleAddFilterToPipeline}
+          selectedField={filterConfigurationDialog?.field}
+          filterData={filterConfigurationDialog?.editingFilter}
+        />
+      )}
     </>
   ) : null;
 }

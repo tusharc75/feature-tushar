@@ -9,6 +9,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
@@ -496,30 +497,6 @@ const Products = ({
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        {selectedRecords?.filter((e) => e?.serializedProduct && e?.qty - e?.serialNumber?.length > 0)?.length > 0 && (
-          <MenuItem
-            onClick={() => {
-              setAssignSerialNumbersDialog({ open: true, data: selectedRecords?.filter((s) => s.type !== 'serialNumber' && s?.serializedProduct) });
-            }}
-          >
-            {`Assign Serial Numbers`}
-          </MenuItem>
-        )}
-        <MenuItem
-          onClick={() => {
-            setShowConfirmBox({ open: true, data: selectedRecords });
-          }}
-          disabled={selectedRecords?.some((s) => !s.canDelete)}
-        >
-          {`Delete`}
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <React.Fragment>
       {allowedToEdit && [TRANSFER_INVENTORY_STATUS.new, TRANSFER_INVENTORY_STATUS.inProgress]?.includes(transferInventoryData?.status) && (
@@ -527,9 +504,7 @@ const Products = ({
           <DetailsPageHeader
             isAddButtonVisible
             addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={allowedToEdit}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e?.hideSelection)?.length ? false : true }}
+            isActionButtonVisible={false}
             hasXpadding
           />
         </>
@@ -547,6 +522,14 @@ const Products = ({
             hideAction={!allowedToEdit}
             hideSelection={!allowedToEdit}
             isClientSideGrid={true}
+            bulkActionItems={
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                setAssignSerialNumbersDialog={setAssignSerialNumbersDialog}
+                setShowConfirmBox={setShowConfirmBox}
+                allowedToEdit={allowedToEdit}
+              />
+            }
             expander={true}
           />
         ) : (
@@ -608,3 +591,33 @@ const Products = ({
 };
 
 export default Products;
+
+const BulkActionItems = ({ 
+  selectedRecords,
+  setAssignSerialNumbersDialog,
+  setShowConfirmBox,
+  allowedToEdit
+}) => {
+  return (
+    <BulkActionContainer>
+      {allowedToEdit && selectedRecords?.filter((e) => e?.serializedProduct && e?.qty - e?.serialNumber?.length > 0)?.length > 0 && (
+        <BulkActionContainer.Button
+          onClick={() => {
+            setAssignSerialNumbersDialog({ open: true, data: selectedRecords?.filter((s) => s.type !== 'serialNumber' && s?.serializedProduct) });
+          }}
+        >
+          Assign Serial Numbers
+        </BulkActionContainer.Button>
+      )}
+      <BulkActionContainer.Button
+        disabled={!allowedToEdit || selectedRecords?.some((s) => !s.canDelete)}
+        onClick={() => {
+          setShowConfirmBox({ open: true, data: selectedRecords });
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

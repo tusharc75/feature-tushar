@@ -22,6 +22,7 @@ import StartStopDateDialog from './StartStopDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import TechnicianAssign from 'src/components/TechnicianAssign';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFullScreen }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Technicians`;
@@ -360,89 +361,6 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       });
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords?.every((r) => r?.endDate || (!r?.startDate && !r?.endDate)) ? false : true}
-          onClick={() => {
-            const dates = [];
-            selectedRecords?.forEach((d: any) => {
-              if (d?.endDate) {
-                dates.push(new Date(d?.endDate));
-              }
-            });
-            let date = null;
-            if (dates?.length) {
-              date = new Date(Math.max(...dates));
-              date.setMinutes(date.getMinutes() + 1);
-            }
-            setStartEndDateConfermationDialog({
-              open: true,
-              type: 'start',
-              minDateTime: date,
-              data: null,
-              notes: ''
-            });
-          }}
-        >
-          Start
-        </MenuItem>
-        <MenuItem
-          disabled={selectedRecords?.every((r) => r?.startDate && !r?.endDate) ? false : true}
-          onClick={() => {
-            const dates = [];
-            selectedRecords?.forEach((d: any) => {
-              dates.push(new Date(d?.maxStartDate));
-            });
-            let date = null;
-            if (dates?.length) {
-              date = new Date(Math.max(...dates));
-            }
-            setStartEndDateConfermationDialog({
-              open: true,
-              type: 'stop',
-              minDateTime: date,
-              data: null,
-              notes: selectedRecords?.length === 1 ? selectedRecords[0]?.notes : ''
-            });
-          }}
-        >
-          Stop
-        </MenuItem>
-        <MenuItem
-          disabled={selectedRecords?.every((r) => (r?.startDate && r?.endDate) || (!r?.startDate && !r?.endDate)) ? false : true}
-          onClick={() => {
-            const dates = [];
-            selectedRecords?.forEach((d: any) => {
-              if (d?.endDate) {
-                dates.push(new Date(d?.endDate));
-              }
-            });
-            let date = null;
-            if (dates?.length) {
-              date = new Date(Math.max(...dates));
-              date.setMinutes(date.getMinutes() + 1);
-            }
-            setStartEndDateConfermationDialog({ open: true, type: 'startStop', minDateTime: date, data: null, notes: '' });
-          }}
-        >
-          Start/Stop
-        </MenuItem>
-        <HtmlTooltip title={Boolean(selectedRecords.length) ? 'Delete selected records' : 'Select records to delete'}>
-          <MenuItem
-            disabled={isDeleting}
-            onClick={() => {
-              setDeleteData(selectedRecords?.map((d) => d?._id));
-            }}
-          >
-            Delete
-          </MenuItem>
-        </HtmlTooltip>
-      </>
-    );
-  };
-
   return (
     <>
       <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
@@ -450,11 +368,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           <DetailsPageHeader
             isAddButtonVisible={true}
             addButtonProps={{ onClick: () => setTechnicianDialog(true), id: 'add-technician' }}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{
-              disabled: !Boolean(selectedRecords?.length)
-            }}
+            isActionButtonVisible={false}
             addButtonText="Assign"
             hasXpadding
           />
@@ -472,6 +386,14 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
                 hideSelection={!allowedToEdit}
                 hideAction={!allowedToEdit}
                 refreshGrid={fetchData}
+                bulkActionItems={
+                  <BulkActionItems
+                    selectedRecords={selectedRecords}
+                    setStartEndDateConfermationDialog={setStartEndDateConfermationDialog}
+                    isDeleting={isDeleting}
+                    setDeleteData={setDeleteData}
+                  />
+                }
               />
             ) : (
               <Box p={2} height={300}>
@@ -576,3 +498,85 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
 };
 
 export default Technicians;
+
+const BulkActionItems = ({ selectedRecords, setStartEndDateConfermationDialog, isDeleting, setDeleteData }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={selectedRecords?.every((r) => r?.endDate || (!r?.startDate && !r?.endDate)) ? false : true}
+        onClick={() => {
+          const dates = [];
+          selectedRecords?.forEach((d: any) => {
+            if (d?.endDate) {
+              dates.push(new Date(d?.endDate));
+            }
+          });
+          let date = null;
+          if (dates?.length) {
+            date = new Date(Math.max(...dates));
+            date.setMinutes(date.getMinutes() + 1);
+          }
+          setStartEndDateConfermationDialog({
+            open: true,
+            type: 'start',
+            minDateTime: date,
+            data: null,
+            notes: ''
+          });
+        }}
+      >
+        Start
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        disabled={selectedRecords?.every((r) => r?.startDate && !r?.endDate) ? false : true}
+        onClick={() => {
+          const dates = [];
+          selectedRecords?.forEach((d: any) => {
+            dates.push(new Date(d?.maxStartDate));
+          });
+          let date = null;
+          if (dates?.length) {
+            date = new Date(Math.max(...dates));
+          }
+          setStartEndDateConfermationDialog({
+            open: true,
+            type: 'stop',
+            minDateTime: date,
+            data: null,
+            notes: selectedRecords?.length === 1 ? selectedRecords[0]?.notes : ''
+          });
+        }}
+      >
+        Stop
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        disabled={selectedRecords?.every((r) => (r?.startDate && r?.endDate) || (!r?.startDate && !r?.endDate)) ? false : true}
+        onClick={() => {
+          const dates = [];
+          selectedRecords?.forEach((d: any) => {
+            if (d?.endDate) {
+              dates.push(new Date(d?.endDate));
+            }
+          });
+          let date = null;
+          if (dates?.length) {
+            date = new Date(Math.max(...dates));
+            date.setMinutes(date.getMinutes() + 1);
+          }
+          setStartEndDateConfermationDialog({ open: true, type: 'startStop', minDateTime: date, data: null, notes: '' });
+        }}
+      >
+        Start/Stop
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        buttonType="red"
+        disabled={isDeleting}
+        onClick={() => {
+          setDeleteData(selectedRecords?.map((d) => d?._id));
+        }}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

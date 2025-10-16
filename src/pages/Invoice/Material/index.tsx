@@ -31,6 +31,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import FinalPriceBox from 'src/components/FinalPriceBox';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit, updateDOASetup }) => {
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_Material`;
@@ -619,47 +620,12 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
-          onClick={() => {
-            setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
-          }}
-        >
-          Bulk Edit
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            const obj: any = [];
-            const dataToDelete = selectedRecords.filter((e) => !e.hideSelection);
-            dataToDelete?.forEach((ele) => {
-              obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
-            });
-            dataToDelete?.forEach((ele) => {
-              getNestedSubRows(obj, ele);
-            });
-            setDeleteData(obj);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <Fragment>
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={allowedToEdit}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{
-          disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length),
-          tooltip: Boolean(selectedRecords && selectedRecords.length) ? '' : 'Select records to edit'
-        }}
+        isActionButtonVisible={false}
         hasXpadding
       />
       {columns ? (
@@ -689,6 +655,15 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
                 ],
                 _id: invoiceData?._id
               }}
+              bulkActionItems={
+                allowedToEdit ? (
+                  <BulkActionItems
+                    selectedRecords={selectedRecords}
+                    setMaterialEdit={setMaterialEdit}
+                    setDeleteData={setDeleteData}
+                  />
+                ) : null
+              }
             />
             <FinalPriceBox allFields={invoiceFields} data={invoiceData} />
           </Box>
@@ -859,3 +834,34 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
 };
 
 export default Material;
+
+const BulkActionItems = ({ selectedRecords, setMaterialEdit, setDeleteData }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
+        onClick={() => {
+          setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        buttonType="red"
+        onClick={() => {
+          const obj = [];
+          const dataToDelete = selectedRecords.filter((e) => !e.hideSelection);
+          dataToDelete.forEach((ele) => {
+            obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
+          });
+          dataToDelete.forEach((ele) => {
+            getNestedSubRows(obj, ele);
+          });
+          setDeleteData(obj);
+        }}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

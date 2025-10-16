@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
@@ -12,6 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import ManageCompetencies from 'src/pages/Competencies/ManageCompetencies';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
@@ -167,31 +168,12 @@ const Competencies = ({ competencyType }) => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
       </>
     )
-  };
-
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            if (selectedRecords.length === 1) {
-              setDeleteRecord(selectedRecords[0]);
-            } else {
-              setDeleteRecord(null);
-            }
-            setShowDeleteConfirmBox(true);
-          }}
-        >
-          {`Delete (${selectedRecords?.length})`}
-        </MenuItem>
-      </>
-    );
   };
 
   return (
@@ -203,9 +185,7 @@ const Competencies = ({ competencyType }) => {
             setOpenDialog({ open: true, id: null });
           }
         }}
-        isActionButtonVisible={permissions?.competencies?.isDelete}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+        isActionButtonVisible={false}
         hasXpadding={false}
       />
 
@@ -218,6 +198,14 @@ const Competencies = ({ competencyType }) => {
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           resource={sidebarResource.competencies}
+          bulkActionItems={
+            <BulkActionItems
+              selectedRecords={selectedRecords}
+              setDeleteRecord={setDeleteRecord}
+              setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+              permissions={permissions}
+            />
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -239,11 +227,12 @@ const Competencies = ({ competencyType }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.competencies?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.competencies?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.competencyName || ''}`
-            : `selected ${resources?.competencies?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.competencies?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -256,3 +245,24 @@ const Competencies = ({ competencyType }) => {
 };
 
 export default Competencies;
+
+const BulkActionItems = ({ selectedRecords, setDeleteRecord, setShowDeleteConfirmBox, permissions }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          if (selectedRecords.length === 1) {
+            setDeleteRecord(selectedRecords[0]);
+          } else {
+            setDeleteRecord(null);
+          }
+          setShowDeleteConfirmBox(true);
+        }}
+        disabled={!permissions?.competencies?.isDelete}
+        buttonType="red"
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

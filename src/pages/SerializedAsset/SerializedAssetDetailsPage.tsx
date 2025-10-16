@@ -62,7 +62,7 @@ import { getMultipleResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
 import AssetServiceTickets from 'src/pages/AssetServiceTicket';
-import { scrapRequestDisable, statusChangePermissionMsg } from 'src/constants/messageHelpers';
+import { scrapRequestMsg, statusChangePermissionMsg } from 'src/constants/messageHelpers';
 import { statusChangePermissionsAllowed } from './helper';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 
@@ -111,7 +111,7 @@ const SerializedAssetDetailsPage = () => {
   const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
   const [subStatusToUpdate, setSubStatusToUpdate] = useState({ open: false, status: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusChangePermissionError, setStatusChangePermissionError] = useState(false);
+  const [statusChangePermissionError, setStatusChangePermissionError] = useState({ open: false, msg: '' });
 
   const extraFields = [
     ...(permissions?.rentalManagement?.isRead
@@ -330,15 +330,7 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleStatusChange = (o) => {
-    const { policy, statusChangePermissions } = resourcePolicyData;
-
-    if (statusChangePermissions?.length) {
-      let statusChangeAllowed = statusChangePermissionsAllowed(user, statusChangePermissions, [assetDetails?.status], o.optionValue);
-      if (!statusChangeAllowed) {
-        setStatusChangePermissionError(true)
-        return;
-      }
-    }
+    const { policy } = resourcePolicyData;
 
     const statusPolicy = policy?.statusChangeFields?.find((ele) =>
       ele.status === o.optionValue && (!ele?.products || ele?.products?.length === 0 || ele?.products?.includes(assetDetails?.product?.optionValue))
@@ -664,39 +656,45 @@ const SerializedAssetDetailsPage = () => {
                       onClose={closeActions}
                     >
                       {statusOptions?.map((o) => {
-                        const isPermissionDenied =
-                          o?.optionValue === ASSET_STATUS.scrap &&
-                          user?.user?.brandPolicy?.serializedAssetScrapApproval &&
-                          !user?.role?.selectedEntity?.policy?.scrapRequest;
                         return (
-                          <HtmlTooltip title={isPermissionDenied ? scrapRequestDisable : ''}>
-                            <MenuItem
-                              key={o?.optionValue}
-                              disabled={!manualStatus.includes(o?.optionLabel) || o?.optionLabel === assetDetails?.status}
-                              onClick={() => {
-                                closeActions();
-                                if (isPermissionDenied) {
-                                  setStatusChangePermissionError(true);
-                                } else if (
-                                  o?.optionValue === ASSET_STATUS.scrap &&
-                                  user?.user?.brandPolicy?.serializedAssetScrapApproval &&
-                                  serializedAssetStatusChangeRequestFields?.length > 0
-                                ) {
-                                  setStatusChangeRequestDialog(true);
-                                } else {
-                                  const { policy } = resourcePolicyData;
-                                  if (policy?.dataChangeStatus === o.optionValue && openDataChange()) {
-                                    setOpenUpdateDialog({ open: true, assetLogFields: policy.dataChangeAssetLogFields, updateStatus: o });
-                                  } else {
-                                    handleStatusChange(o);
-                                  }
+                          <MenuItem
+                            key={o?.optionValue}
+                            disabled={!manualStatus.includes(o?.optionLabel) || o?.optionLabel === assetDetails?.status}
+                            onClick={() => {
+                              closeActions();
+
+                              if (o?.optionValue === ASSET_STATUS.scrap && user?.user?.brandPolicy?.serializedAssetScrapApproval &&
+                                !user?.role?.selectedEntity?.policy?.scrapRequest
+                              ) {
+                                setStatusChangePermissionError({ open: true, msg: scrapRequestMsg })
+                                return;
+                              }
+
+                              const { statusChangePermissions } = resourcePolicyData;
+                              if (statusChangePermissions?.length) {
+                                let statusChangeAllowed = statusChangePermissionsAllowed(user, statusChangePermissions, [assetDetails?.status], o.optionValue);
+                                if (!statusChangeAllowed) {
+                                  setStatusChangePermissionError({ open: true, msg: statusChangePermissionMsg })
+                                  return;
                                 }
-                              }}
-                              value={o}
-                            >
-                              {o?.optionLabel}
-                            </MenuItem>
-                          </HtmlTooltip>
+                              }
+
+                              if (o?.optionValue === ASSET_STATUS.scrap
+                                && user?.user?.brandPolicy?.serializedAssetScrapApproval && serializedAssetStatusChangeRequestFields?.length > 0) {
+                                setStatusChangeRequestDialog(true);
+                              } else {
+                                const { policy } = resourcePolicyData;
+                                if (policy?.dataChangeStatus === o.optionValue && openDataChange()) {
+                                  setOpenUpdateDialog({ open: true, assetLogFields: policy.dataChangeAssetLogFields, updateStatus: o });
+                                } else {
+                                  handleStatusChange(o);
+                                }
+                              }
+                            }}
+                            value={o}
+                          >
+                            {o?.optionLabel}
+                          </MenuItem>
                         );
                       })}
                     </Menu>
@@ -940,12 +938,12 @@ const SerializedAssetDetailsPage = () => {
           }}
         />
       )}
-      {statusChangePermissionError && (
+      {statusChangePermissionError.open && (
         <MessageDialog
           open={true}
           header="Alert"
-          message={statusChangePermissionMsg}
-          onClose={() => setStatusChangePermissionError(false)}
+          message={statusChangePermissionError.msg}
+          onClose={() => setStatusChangePermissionError({ open: false, msg: '' })}
         />
       )}
     </Box>

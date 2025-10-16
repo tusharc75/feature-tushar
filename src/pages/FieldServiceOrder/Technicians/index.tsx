@@ -37,6 +37,7 @@ import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDia
 import { Visibility } from '@mui/icons-material';
 import { RiUserShared2Fill, RiUserReceived2Fill } from 'react-icons/ri';
 import TechnicianAssign from 'src/components/TechnicianAssign';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const Technicians = ({
   allowedToEdit,
@@ -149,72 +150,72 @@ const Technicians = ({
       },
       ...(resourcePolicy?.addServices
         ? [
-            {
-              accessor: 'service',
-              Header: 'Service',
-              width: 200,
-              Cell: ({ row }) =>
-                row?.original?.serviceId ? (
-                  <div className="flex items-center gap-2">
-                    <p className="text-truncate" title={row.original.service}>
-                      {row.original.service}
-                    </p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            accessor: 'service',
+            Header: 'Service',
+            width: 200,
+            Cell: ({ row }) =>
+              row?.original?.serviceId ? (
+                <div className="flex items-center gap-2">
+                  <p className="text-truncate" title={row.original.service}>
+                    {row.original.service}
+                  </p>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
         : []),
       ...(technicianFields?.find((e) => e.fieldName === 'competencyType')
         ? [
-            {
-              accessor: 'competencyType',
-              Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencyType',
-                    lookupResource: sidebarResource.competencyType
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencyType')
-            }
-          ]
+          {
+            accessor: 'competencyType',
+            Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencyType',
+                  lookupResource: sidebarResource.competencyType
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencyType')
+          }
+        ]
         : []),
       ...(technicianFields?.find((e) => e.fieldName === 'competencies')
         ? [
-            {
-              accessor: 'competencies',
-              Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencies',
-                    lookupResource: sidebarResource.competencies
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencies')
-            }
-          ]
+          {
+            accessor: 'competencies',
+            Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencies',
+                  lookupResource: sidebarResource.competencies
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencies')
+          }
+        ]
         : []),
       {
         accessor: 'startDate',
@@ -446,7 +447,7 @@ const Technicians = ({
   const fetchServices = async () => {
     let data;
     const response = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material?type=${MATERIAL_TYPE.service}`);
-    data = response?.data?.data?.material;
+    data = response?.data?.data?.material?.filter((e) => e?.type === MATERIAL_TYPE.service);
     const services = [{ optionLabel: 'All', optionValue: 'All', _id: null, competencyType: [], competencies: [] }];
     data?.map((d) => {
       services.push({
@@ -495,82 +496,6 @@ const Technicians = ({
         setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
-  };
-
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords?.every((r) => r?.endDate || (!r?.startDate && !r?.endDate)) ? false : true}
-          onClick={() => {
-            const dates = [];
-            selectedRecords?.forEach((d: any) => {
-              if (d?.endDate) {
-                dates.push(new Date(d?.endDate));
-              }
-            });
-            let date = null;
-            if (dates?.length) {
-              date = new Date(Math.max(...dates));
-              date.setMinutes(date.getMinutes() + 1);
-            }
-            if (allConsumables?.length) {
-              setConsumablesDialog({ open: true, consumables: allConsumables });
-              setStartEndDateConfermationDialog({
-                open: false,
-                type: 'start',
-                minDateTime: date,
-                notes: '',
-                products: [],
-                _id: null
-              });
-            } else {
-              setStartEndDateConfermationDialog({
-                open: true,
-                type: 'start',
-                minDateTime: date,
-                notes: '',
-                products: [],
-                _id: null
-              });
-            }
-          }}
-        >
-          Dispatch
-        </MenuItem>
-        <MenuItem
-          disabled={selectedRecords?.every((r) => r?.startDate && !r?.endDate) ? false : true}
-          onClick={() => {
-            const dates = [];
-            selectedRecords?.forEach((d: any) => {
-              dates.push(new Date(d?.maxStartDate));
-            });
-            let date = null;
-            if (dates?.length) {
-              date = new Date(Math.max(...dates));
-            }
-            setStartEndDateConfermationDialog({
-              open: true,
-              type: 'stop',
-              minDateTime: date,
-              notes: selectedRecords?.length === 1 ? selectedRecords[0]?.notes : '',
-              products: [],
-              _id: null
-            });
-          }}
-        >
-          Return
-        </MenuItem>
-        <MenuItem
-          disabled={selectedRecords?.every((e) => e?.canDelete) ? false : true}
-          onClick={() => {
-            setDeleteData(selectedRecords?.map((d) => d?._id));
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
   };
 
   const leftSideContents = () => {
@@ -644,9 +569,7 @@ const Technicians = ({
             isAddButtonVisible={true}
             addButtonProps={{ onClick: () => setTechnicianDialog(true), id: 'add-technician' }}
             addButtonText="Assign"
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+            isActionButtonVisible={false}
             leftSideContents={resourcePolicy?.addServices && serviceOption?.length > 1 ? leftSideContents() : null}
             hasXpadding
             previewDownloadProps={{
@@ -673,6 +596,15 @@ const Technicians = ({
               hideSelection={!allowedToEdit}
               hideAction={!allowedToEdit}
               refreshGrid={fetchData}
+              bulkActionItems={
+                <BulkActionItems
+                  selectedRecords={selectedRecords}
+                  allConsumables={allConsumables}
+                  setConsumablesDialog={setConsumablesDialog}
+                  setStartEndDateConfermationDialog={setStartEndDateConfermationDialog}
+                  setDeleteData={setDeleteData}
+                />
+              }
             />
           ) : (
             <Box p={2} height={300}>
@@ -821,3 +753,86 @@ const Technicians = ({
 };
 
 export default Technicians;
+
+const BulkActionItems = ({
+  selectedRecords,
+  allConsumables,
+  setConsumablesDialog,
+  setStartEndDateConfermationDialog,
+  setDeleteData
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={selectedRecords?.every((r) => r?.endDate || (!r?.startDate && !r?.endDate)) ? false : true}
+        onClick={() => {
+          const dates = [];
+          selectedRecords?.forEach((d) => {
+            if (d?.endDate) {
+              dates.push(new Date(d?.endDate));
+            }
+          });
+          let date = null;
+          if (dates?.length) {
+            date = new Date(Math.max(...dates));
+            date.setMinutes(date.getMinutes() + 1);
+          }
+          if (allConsumables?.length) {
+            setConsumablesDialog({ open: true, consumables: allConsumables });
+            setStartEndDateConfermationDialog({
+              open: false,
+              type: 'start',
+              minDateTime: date,
+              notes: '',
+              products: [],
+              _id: null
+            });
+          } else {
+            setStartEndDateConfermationDialog({
+              open: true,
+              type: 'start',
+              minDateTime: date,
+              notes: '',
+              products: [],
+              _id: null
+            });
+          }
+        }}
+      >
+        Dispatch
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        disabled={selectedRecords?.every((r) => r?.startDate && !r?.endDate) ? false : true}
+        onClick={() => {
+          const dates = [];
+          selectedRecords?.forEach((d) => {
+            dates.push(new Date(d?.maxStartDate));
+          });
+          let date = null;
+          if (dates?.length) {
+            date = new Date(Math.max(...dates));
+          }
+          setStartEndDateConfermationDialog({
+            open: true,
+            type: 'stop',
+            minDateTime: date,
+            notes: selectedRecords?.length === 1 ? selectedRecords[0]?.notes : '',
+            products: [],
+            _id: null
+          });
+        }}
+      >
+        Return
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        buttonType="red"
+        disabled={selectedRecords?.every((e) => e?.canDelete) ? false : true}
+        onClick={() => {
+          setDeleteData(selectedRecords?.map((d) => d?._id));
+        }}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

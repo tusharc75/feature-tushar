@@ -17,6 +17,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource, SUBCONTRACT_ASSEMBLY_STATUS } from 'src/constants/helpers';
 import Consumables from 'src/pages/SubcontractAssembly/Material/Consumables';
 import MaterialDialog from 'src/pages/SubcontractAssembly/Material/MaterialDialog';
@@ -240,26 +241,6 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
     setWalkmeData(walkmeData);
   };
 
-  const ActionButtonMenuItms = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
-          onClick={() => {
-            const obj: any = [];
-            selectedRecords?.forEach((ele) => {
-              obj.push({ id: ele._id, materialId: ele.materialId });
-            });
-            setDeleteData(obj);
-          }}
-          id="action-delete-menu-item"
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   const addMaterial = async (rows) => {
     setIsSubmitting(true);
     const material: any = [];
@@ -326,9 +307,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={<AddButtonMenuItems setOpen={setOpen} />}
-        isActionButtonVisible={allowedToEdit}
-        actionButtonMenuItems={<ActionButtonMenuItms />}
-        actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
+        isActionButtonVisible={false}
         hasXpadding
       />
       {columns ? (
@@ -343,6 +322,14 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
             refreshGrid={fetchMaterial}
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
+            bulkActionItems={
+              <BulkActionItems
+                isDeleting={isDeleting}
+                selectedRecords={selectedRecords}
+                setDeleteData={setDeleteData}
+                allowedToEdit={allowedToEdit}
+              />
+            }
           />
         </Box>
       ) : (
@@ -410,6 +397,31 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 };
 
 export default Material;
+
+const BulkActionItems = ({ 
+  isDeleting,
+  selectedRecords,
+  setDeleteData,
+  allowedToEdit
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={!allowedToEdit || isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
+        onClick={() => {
+          const obj: any = [];
+          selectedRecords?.forEach((ele) => {
+            obj.push({ id: ele._id, materialId: ele.materialId });
+          });
+          setDeleteData(obj);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
 
 const AddButtonMenuItems = ({ setOpen }) => {
   return (

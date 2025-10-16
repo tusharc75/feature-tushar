@@ -18,6 +18,7 @@ import routes from 'src/components/Helpers/Routes';
 import CustomContainer from 'src/components/CustomContainer';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 let employeeUnavailabilityTimeout;
@@ -319,11 +320,7 @@ const TechnicianUnavailability = ({ id }: { id?: string | null }) => {
                 setShowUnavailibilityDialog({ open: true, id: null, isClone: false });
               }
             }}
-            isActionButtonVisible={permissions?.technicianUnavailability?.isDelete}
-            actionButtonProps={{
-              disabled: !selectedRecords?.length
-            }}
-            actionButtonMenuItems={actionButtonMenuItems()}
+            isActionButtonVisible={false}
             hasXpadding={false}
           />
         )}
@@ -337,6 +334,12 @@ const TechnicianUnavailability = ({ id }: { id?: string | null }) => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
+              bulkActionItems={
+                <BulkActionItems
+                  permissions={permissions}
+                  setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+                />
+              }
             />
           </Box>
         ) : (
@@ -375,3 +378,22 @@ const TechnicianUnavailability = ({ id }: { id?: string | null }) => {
 };
 
 export default TechnicianUnavailability;
+
+const BulkActionItems = ({ 
+  permissions,
+  setShowDeleteConfirmBox
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          setShowDeleteConfirmBox({ open: true, data: null });
+        }}
+        disabled={!permissions?.technicianUnavailability?.isDelete}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

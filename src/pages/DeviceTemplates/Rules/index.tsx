@@ -14,6 +14,7 @@ import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { displayDate, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import ManageRules from './ManageRules';
@@ -217,33 +218,12 @@ export default function Rules({ deviceTemplate }) {
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            if (selectedRecords.length === 1) {
-              setDeleteRecord(selectedRecords[0]);
-            } else {
-              setDeleteRecord(null);
-            }
-            setShowDeleteConfirmBox(true);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <Fragment>
       <DetailsPageHeader
         isAddButtonVisible={true}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={true}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+        isActionButtonVisible={false}
         hasXpadding={false}
       />
 
@@ -258,6 +238,13 @@ export default function Rules({ deviceTemplate }) {
           showOnlyShowFilteredRecordSwitch={true}
           showFilters={false}
           isClientSideGrid={true}
+          bulkActionItems={
+            <BulkActionItems
+              selectedRecords={selectedRecords}
+              setDeleteRecord={setDeleteRecord}
+              setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+            />
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -293,3 +280,27 @@ export default function Rules({ deviceTemplate }) {
     </Fragment>
   );
 }
+
+const BulkActionItems = ({ 
+  selectedRecords,
+  setDeleteRecord,
+  setShowDeleteConfirmBox
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          if (selectedRecords.length === 1) {
+            setDeleteRecord(selectedRecords[0]);
+          } else {
+            setDeleteRecord(null);
+          }
+          setShowDeleteConfirmBox(true);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

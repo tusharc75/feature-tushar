@@ -13,7 +13,7 @@ import {
   sidebarResource
 } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { IconButton, MenuItem, TextField, Typography } from '@mui/material';
+import { IconButton, TextField, Typography } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -26,6 +26,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import MaterialDialog from 'src/pages/SubcontractAssembly/Material/MaterialDialog';
@@ -290,28 +291,6 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
     }
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
-          onClick={() => {
-            setDeleteData(
-              selectedRecords?.map((d) => {
-                return {
-                  id: d?._id,
-                  materialId: d?.materialId
-                };
-              })
-            );
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <>
       {allowedToEdit && productOption?.length > 0 && state && (
@@ -352,10 +331,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
         <DetailsPageHeader
           isAddButtonVisible={selectedProductOption?.optionValue !== 'All' && !selectedProductOption?.receivedQty}
           addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-consumable-button' }}
-          actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.length) }}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          hasXpadding
-          isActionButtonVisible={allowedToEdit}
+          isActionButtonVisible={false}
         />
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 12, sm: 12 }}>
@@ -370,6 +346,14 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
                 hideSelection={!allowedToEdit}
                 hideAction={!allowedToEdit}
                 refreshGrid={fetchMaterial}
+                bulkActionItems={
+                  <BulkActionItems
+                    isDeleting={isDeleting}
+                    selectedRecords={selectedRecords}
+                    setDeleteData={setDeleteData}
+                    allowedToEdit={allowedToEdit}
+                  />
+                }
               />
             ) : (
               <Box p={2} height={300}>
@@ -420,3 +404,31 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
 };
 
 export default Consumables;
+
+const BulkActionItems = ({ 
+  isDeleting,
+  selectedRecords,
+  setDeleteData,
+  allowedToEdit
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={!allowedToEdit || isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
+        onClick={() => {
+          setDeleteData(
+            selectedRecords?.map((d) => {
+              return {
+                id: d?._id,
+                materialId: d?.materialId
+              };
+            })
+          );
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

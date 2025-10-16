@@ -20,9 +20,9 @@ export const updateDisable = 'You do not have permission to Update';
 export const childDisable = 'You do not have permission to View Child';
 export const mobileNotSupported = 'Mobile device not supported.Kindly open this page in Laptop/Desktop browser.'
 export const approveDisable = 'You do not have permission to Approve';
-export const scrapRequestDisable = 'You do not have permission to create scrap requests';
 
 export const statusChangePermissionMsg = 'You don’t have permission to change the status. Please contact your supervisor.';
+export const scrapRequestMsg = 'You don’t have permission to request asset scrapping. Please contact your supervisor.';
 
 export const rentalManagementActions = {
   createLoadingTicket: 'Create Loading Ticket',
