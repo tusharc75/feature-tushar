@@ -1,8 +1,8 @@
 import { text, image, table, line, rectangle } from '@pdfme/schemas';
-import type { Plugin, Schema } from '@pdfme/common';
+import type { Plugin, Schema, UIRenderProps, PDFRenderProps, Template } from '@pdfme/common';
 import RobotoRegular from '../../../assets/font/Roboto-Regular.ttf';
 import RobotoBold from '../../../assets/font/Roboto-Bold.ttf';
-// import myGridPlugin from './newcustomtable';
+import myGridPlugin from './newcustomtable';
 
 type DesignerPluginSchema = Schema & {
     width: number;
@@ -26,6 +26,8 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
                 ...table.propPanel.defaultSchema,
                 content: '[]',
                 showHead: true,
+                readOnly: true,
+                required: false,
                 head: ['col1', 'col2', 'col3'],
                 headWidthPercentages: [30, 30, 40],
             },
@@ -123,8 +125,8 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
         content: textDefault.content,
         rotate: textDefault.rotate!,
         opacity: textDefault.opacity!,
-        readOnly: textDefault.readOnly!,
-        required: textDefault.required!,
+        readOnly: true,
+        required: false,
         __bodyRange: textDefault.__bodyRange!,
         __isSplit: textDefault.__isSplit!,
     }
@@ -160,6 +162,8 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
                 ...text.propPanel.defaultSchema,
                 fontName: 'Roboto',
                 bold: false,
+                readOnly: true,
+                required: false,
             } as DesignerPluginSchema,
             schema: (props) => {
                 const baseSchema = typeof text.propPanel.schema === 'function'
@@ -187,7 +191,7 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
         Text: customTextPlugin as DesignerExpectedPlugin,
         Variable: customVariablePlugin as unknown as DesignerExpectedPlugin,
         Table: customTablePlugin as unknown as DesignerExpectedPlugin,
-        // grid: myGridPlugin as unknown as DesignerExpectedPlugin,
+        grid: myGridPlugin as unknown as DesignerExpectedPlugin,
         Image: image as DesignerExpectedPlugin,
         Line: line as DesignerExpectedPlugin,
         Rectangle: rectangle as DesignerExpectedPlugin,
