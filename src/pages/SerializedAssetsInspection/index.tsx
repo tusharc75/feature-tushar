@@ -33,13 +33,11 @@ import {
 import axios, { CancelTokenSource } from 'axios';
 import ReasonDialog from '../SerializedAsset/ReasonDialog';
 import { ExpandMore } from '@mui/icons-material';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { RiExchange2Line } from 'react-icons/ri';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
 import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
-import { scrapRequestDisable, statusChangePermissionMsg } from 'src/constants/messageHelpers';
+import { scrapRequestMsg, statusChangePermissionMsg } from 'src/constants/messageHelpers';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import { statusChangePermissionsAllowed } from 'src/pages/SerializedAsset/helper';
 import { getMultipleResourcePolicy } from 'src/pages/DynamicForm/helper';
@@ -73,7 +71,7 @@ const SerializedAssetInspection = () => {
   const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
   const [serializedAssetStatusChangeRequestFields, setSerializedAssetStatusChangeRequestFields] = useState(null);
   const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
-  const [statusChangePermissionError, setStatusChangePermissionError] = useState(false);
+  const [statusChangePermissionError, setStatusChangePermissionError] = useState({ open: false, msg: '' });
 
   useEffect(() => {
     fetchGridColumns();
@@ -342,18 +340,22 @@ const SerializedAssetInspection = () => {
   };
 
   const handleActionMenuItemOnClick = (status) => {
+
+    if (status?.optionValue === ASSET_STATUS.scrap && user?.user?.brandPolicy?.serializedAssetScrapApproval &&
+      !user?.role?.selectedEntity?.policy?.scrapRequest
+    ) {
+      setStatusChangePermissionError({ open: true, msg: scrapRequestMsg })
+      return;
+    }
+
     if (serializedAssetPolicy?.statusChangePermissions?.length) {
-      let statusChangeAllowed = statusChangePermissionsAllowed(
-        user,
-        serializedAssetPolicy?.statusChangePermissions,
-        selectedRecords?.map((e) => e?.status),
-        status?.optionValue
-      );
+      let statusChangeAllowed = statusChangePermissionsAllowed(user, serializedAssetPolicy?.statusChangePermissions, selectedRecords?.map((e) => e?.status), status?.optionValue);
       if (!statusChangeAllowed) {
-        setStatusChangePermissionError(true);
+        setStatusChangePermissionError({ open: true, msg: statusChangePermissionMsg });
         return;
       }
     }
+
     if (
       status?.optionValue === ASSET_STATUS.scrap &&
       user?.user?.brandPolicy?.serializedAssetScrapApproval &&
@@ -471,7 +473,11 @@ const SerializedAssetInspection = () => {
         />
       )}
       {statusChangePermissionError && (
-        <MessageDialog open={true} header="Alert" message={statusChangePermissionMsg} onClose={() => setStatusChangePermissionError(false)} />
+        <MessageDialog
+          open={true}
+          header="Alert"
+          message={statusChangePermissionMsg}
+          onClose={() => setStatusChangePermissionError({ open: false, msg: '' })} />
       )}
     </section>
   );
@@ -562,22 +568,16 @@ const BulkActionItems = ({
           {statusOptions ? (
             <>
               {Object.entries(statusOptions).map(([key, status]: any) => {
-                const isDisabled =
-                  status?.optionValue === ASSET_STATUS.scrap &&
-                  user?.user?.brandPolicy?.serializedAssetScrapApproval &&
-                  !user?.role?.selectedEntity?.policy?.scrapRequest;
                 return (
-                  <HtmlTooltip title={isDisabled ? scrapRequestDisable : ''}>
-                    <MenuItem
-                      key={key}
-                      onClick={() => {
-                        handleActionMenuItemOnClick(status);
-                      }}
-                      disabled={selectedRecords.some((record) => record.status === status?.optionLabel) || isDisabled}
-                    >
-                      {status?.optionLabel}
-                    </MenuItem>
-                  </HtmlTooltip>
+                  <MenuItem
+                    key={key}
+                    onClick={() => {
+                      handleActionMenuItemOnClick(status);
+                    }}
+                    disabled={selectedRecords.some((record) => record.status === status?.optionLabel)}
+                  >
+                    {status?.optionLabel}
+                  </MenuItem>
                 );
               })}
             </>
