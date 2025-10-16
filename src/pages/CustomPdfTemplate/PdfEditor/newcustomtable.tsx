@@ -495,12 +495,11 @@ const myGridPlugin: Plugin<MyGridSchema> = {
         };
 
         rootElement.appendChild(mainContainer);
-        applyColWidthsToRows();
-        applyRowHeights();
-        createColResizers();
-        createRowResizers();
-
         if (isEditableMode) {
+            applyColWidthsToRows();
+            applyRowHeights();
+            createColResizers();
+            createRowResizers();
             const styleSmallBtn = (btn: HTMLButtonElement) => {
                 Object.assign(btn.style, {
                     width: '34px',
