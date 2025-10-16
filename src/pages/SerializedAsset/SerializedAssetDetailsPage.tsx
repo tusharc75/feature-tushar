@@ -664,18 +664,18 @@ const SerializedAssetDetailsPage = () => {
                       onClose={closeActions}
                     >
                       {statusOptions?.map((o) => {
-                        const isDisabled =
+                        const isPermissionDenied =
                           o?.optionValue === ASSET_STATUS.scrap &&
                           user?.user?.brandPolicy?.serializedAssetScrapApproval &&
                           !user?.role?.selectedEntity?.policy?.scrapRequest;
                         return (
-                          <HtmlTooltip title={isDisabled ? scrapRequestDisable : ''}>
+                          <HtmlTooltip title={isPermissionDenied ? scrapRequestDisable : ''}>
                             <MenuItem
                               key={o?.optionValue}
                               disabled={!manualStatus.includes(o?.optionLabel) || o?.optionLabel === assetDetails?.status}
                               onClick={() => {
                                 closeActions();
-                                if (isDisabled) {
+                                if (isPermissionDenied) {
                                   setStatusChangePermissionError(true);
                                 } else if (
                                   o?.optionValue === ASSET_STATUS.scrap &&

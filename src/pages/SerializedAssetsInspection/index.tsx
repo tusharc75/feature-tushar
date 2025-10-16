@@ -573,12 +573,12 @@ const BulkActionItems = ({
           {statusOptions ? (
             <>
               {Object.entries(statusOptions).map(([key, status]: any) => {
-                const isDisabled =
+                const isPermissionDenied =
                   status?.optionValue === ASSET_STATUS.scrap &&
                   user?.user?.brandPolicy?.serializedAssetScrapApproval &&
                   !user?.role?.selectedEntity?.policy?.scrapRequest;
                 return (
-                  <HtmlTooltip title={isDisabled ? scrapRequestDisable : ''}>
+                  <HtmlTooltip title={isPermissionDenied ? scrapRequestDisable : ''}>
                     <MenuItem
                       key={key}
                       onClick={() => {
