@@ -44,7 +44,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
         const { rootElement, onChange, mode, schema } = props;
         const incomingRows = parseContent(schema?.content);
         const incomingCols = (schema?.cols as number) ?? 1;
-        console.log(props)
+        const isEditableMode = (mode === 'designer' || mode === 'form');
 
         let state = stateMap.get(rootElement);
         if (!state) {
@@ -214,7 +214,6 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                 editable.style.caretColor = 'auto';
                 editable.tabIndex = 0;
 
-                const isEditableMode = (mode === 'designer' || mode === 'form');
                 if (isEditableMode) {
                     editable.contentEditable = 'true';
                     editable.innerText = cellContent;
@@ -496,12 +495,12 @@ const myGridPlugin: Plugin<MyGridSchema> = {
         };
 
         rootElement.appendChild(mainContainer);
+        applyColWidthsToRows();
+        applyRowHeights();
+        createColResizers();
+        createRowResizers();
 
-        if (mode == 'designer' || mode == 'form') {
-            applyColWidthsToRows();
-            applyRowHeights();
-            createColResizers();
-            createRowResizers();
+        if (isEditableMode) {
             const styleSmallBtn = (btn: HTMLButtonElement) => {
                 Object.assign(btn.style, {
                     width: '34px',
