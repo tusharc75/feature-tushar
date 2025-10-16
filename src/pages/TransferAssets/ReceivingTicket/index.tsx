@@ -429,6 +429,8 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
                   DELIVERY_TICKET_STATUS={DELIVERY_TICKET_STATUS}
                   setShowConfirmBoxReceive={setShowConfirmBoxReceive}
                   resources={resources}
+                  allowedToEdit={allowedToEdit}
+                  isTransferEnded={isTransferEnded}
                 />
               }
             />
@@ -477,12 +479,17 @@ const BulkActionItems = ({
   createReceivingTicket,
   DELIVERY_TICKET_STATUS,
   setShowConfirmBoxReceive,
-  resources
+  resources,
+  allowedToEdit,
+  isTransferEnded
 }) => {
+  const isActionDisabled = !allowedToEdit || isTransferEnded;
+  
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
         disabled={
+          isActionDisabled ||
           assetWithNoTicket.length === 0 ||
           loadingTicketsNotDelivered.length > 0 ||
           selectedRecords.filter((asset: any) => asset?.status === ASSET_STATUS.lost).length > 0 ||
@@ -495,6 +502,7 @@ const BulkActionItems = ({
       
       <BulkActionContainer.Button
         disabled={
+          isActionDisabled ||
           selectedRecords.filter((e: any) => e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
         }
         onClick={() => {

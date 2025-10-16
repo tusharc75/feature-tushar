@@ -479,6 +479,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                   permissions={permissions}
                   setShowConfirmBox={setShowConfirmBox}
                   setShowConformationDeliverdCancleTicket={setShowConformationDeliverdCancleTicket}
+                  allowedToEdit={allowedToEdit}
+                  isTransferEnded={isTransferEnded}
                 />
               }
             />
@@ -587,12 +589,17 @@ const BulkActionItems = ({
   setAddSerializedAssetDialog,
   permissions,
   setShowConfirmBox,
-  setShowConformationDeliverdCancleTicket
+  setShowConformationDeliverdCancleTicket,
+  allowedToEdit,
+  isTransferEnded
 }) => {
+  const isActionDisabled = !allowedToEdit || isTransferEnded;
+  
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
         disabled={
+          isActionDisabled ||
           selectedRecords.filter((asset) => asset?.hasOwnProperty('loadingTicket')).length > 0 ||
           selectedRecords.filter((asset: any) => asset?.status === 'Lost').length > 0
         }
@@ -640,6 +647,7 @@ const BulkActionItems = ({
       
       <BulkActionContainer.Button
         disabled={
+          isActionDisabled ||
           !canReceive ||
           selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
         }
@@ -652,6 +660,7 @@ const BulkActionItems = ({
       
       <BulkActionContainer.Button
         disabled={
+          isActionDisabled ||
           selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
         }
         onClick={() => {
@@ -680,6 +689,7 @@ const BulkActionItems = ({
         selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
         selectedRecords?.length && (
           <BulkActionContainer.Button
+            disabled={isActionDisabled}
             onClick={() => {
               setShowConfirmBox(true);
             }}
@@ -691,6 +701,7 @@ const BulkActionItems = ({
       
       <BulkActionContainer.Button
         disabled={
+          isActionDisabled ||
           selectedRecords.length && selectedRecords?.every((e) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit) ? false : true
         }
         onClick={() => {
@@ -703,6 +714,7 @@ const BulkActionItems = ({
       
       <BulkActionContainer.Button
         disabled={
+          isActionDisabled ||
           !canReceive ||
           selectedRecords.some(
             (e: any) => e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered || selectedRecords?.some((e: any) => e.receivingTicketId)

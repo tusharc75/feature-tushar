@@ -390,6 +390,8 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
                 setShowConfirmBoxReceive={setShowConfirmBoxReceive}
                 setShowConformationCancleTicket={setShowConformationCancleTicket}
                 DELIVERY_TICKET_STATUS={DELIVERY_TICKET_STATUS}
+                transferInventoryData={transferInventoryData}
+                TRANSFER_INVENTORY_STATUS={TRANSFER_INVENTORY_STATUS}
               />
             }
           />
@@ -476,13 +478,17 @@ const BulkActionItems = ({
   handleLoadingTicketDialog,
   setShowConfirmBoxReceive,
   setShowConformationCancleTicket,
-  DELIVERY_TICKET_STATUS
+  DELIVERY_TICKET_STATUS,
+  transferInventoryData,
+  TRANSFER_INVENTORY_STATUS
 }) => {
+  const isActionDisabled = transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered;
+  
   return (
     <BulkActionContainer>
       {interPlantTransfer ? (
         allowedToEdit &&
-        canReceive && (
+        canReceive && !isActionDisabled && (
           <BulkActionContainer.Button
             onClick={() => {
               setShowConfirmInterPlantTransfer(true);
@@ -494,7 +500,7 @@ const BulkActionItems = ({
         )
       ) : (
         <>
-          {allowedToEdit && canLoad && (
+          {allowedToEdit && canLoad && !isActionDisabled && (
             <BulkActionContainer.Button
               disabled={selectedRecords.filter((e: any) => !e?.loadingTicketId).length !== selectedRecords.length}
               onClick={() => {
@@ -505,7 +511,7 @@ const BulkActionItems = ({
               Create Loading Ticket
             </BulkActionContainer.Button>
           )}
-          {canReceive && (
+          {canReceive && !isActionDisabled && (
             <>
               <BulkActionContainer.Button
                 onClick={() => {

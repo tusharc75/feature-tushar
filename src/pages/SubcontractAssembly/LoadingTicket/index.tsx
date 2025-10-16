@@ -364,6 +364,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
                   handleDeliveryTicketDialog={handleDeliveryTicketDialog}
                   setShowConformationDeliverTicket={setShowConformationDeliverTicket}
                   setShowConformationCancleTicket={setShowConformationCancleTicket}
+                  allowedToEdit={allowedToEdit}
                 />
               }
             />
@@ -435,11 +436,13 @@ const BulkActionItems = ({
   subcontractAssemblyActions,
   handleDeliveryTicketDialog,
   setShowConformationDeliverTicket,
-  setShowConformationCancleTicket
+  setShowConformationCancleTicket,
+  allowedToEdit
 }) => {
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
+        disabled={!allowedToEdit}
         onClick={() => {
           if (!validateAction(subcontractAssemblyActions.createLoadingTicket)) {
             handleDeliveryTicketDialog();
@@ -449,6 +452,7 @@ const BulkActionItems = ({
         Create Loading Ticket
       </BulkActionContainer.Button>
       <BulkActionContainer.Button
+        disabled={!allowedToEdit}
         onClick={() => {
           if (!validateAction(subcontractAssemblyActions.deliveredLoadingTicket)) {
             setShowConformationDeliverTicket(true);
@@ -458,6 +462,7 @@ const BulkActionItems = ({
         Delivered Loading Ticket
       </BulkActionContainer.Button>
       <BulkActionContainer.Button
+        disabled={!allowedToEdit}
         onClick={() => {
           if (!validateAction(subcontractAssemblyActions.cancelLoadingTicket)) {
             setShowConformationCancleTicket(true);

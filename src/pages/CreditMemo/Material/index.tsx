@@ -695,6 +695,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
                 setMaterialEdit={setMaterialEdit}
                 getNestedSubRows={getNestedSubRows}
                 setDeleteData={setDeleteData}
+                allowedToEdit={allowedToEdit}
               />
             }
             height={'calc(100vh - 350px)'}
@@ -880,12 +881,17 @@ const BulkActionItems = ({
   MATERIAL_TYPE,
   setMaterialEdit,
   getNestedSubRows,
-  setDeleteData
+  setDeleteData,
+  allowedToEdit
 }) => {
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
-        disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
+        disabled={
+          !allowedToEdit ||
+          !Boolean(selectedRecords.filter((e) => !e.hideSelection).length) ||
+          selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
+        }
         onClick={() => {
           setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
         }}
@@ -893,6 +899,10 @@ const BulkActionItems = ({
         Bulk Edit
       </BulkActionContainer.Button>
       <BulkActionContainer.Button
+        disabled={
+          !allowedToEdit ||
+          !Boolean(selectedRecords.filter((e) => !e.hideSelection).length)
+        }
         onClick={() => {
           const obj: any = [];
           const dataToDelete = selectedRecords.filter((e) => !e.hideSelection);

@@ -511,6 +511,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, fromInspe
               OTHER_MATERIAL_TYPE={OTHER_MATERIAL_TYPE}
               permissions={permissions}
               setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+              allowedToEdit={allowedToEdit}
             />
           }
         />
@@ -596,13 +597,14 @@ const BulkActionItems = ({
   isVisible,
   OTHER_MATERIAL_TYPE,
   permissions,
-  setShowDeleteConfirmBox
+  setShowDeleteConfirmBox,
+  allowedToEdit
 }) => {
   return (
     <BulkActionContainer>
       {fromInspection ? (
         <BulkActionContainer.Button
-          disabled={selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)?.some(r => r?.status === ASSET_STATUS.inTransit)}
+          disabled={!allowedToEdit || selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)?.some(r => r?.status === ASSET_STATUS.inTransit)}
           onClick={() => {
             setAssignDialog({
               open: true,
@@ -616,7 +618,7 @@ const BulkActionItems = ({
         </BulkActionContainer.Button>
       ) : (
         <>
-          {isVisible() && (
+          {allowedToEdit && isVisible() && (
             <BulkActionContainer.Button
               onClick={() => {
                 setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: false, products: getProducts() });
@@ -625,7 +627,7 @@ const BulkActionItems = ({
               {`Assign ${resources?.serializedAsset?.titlePlural}`}
             </BulkActionContainer.Button>
           )}
-          {isVisible() && (
+          {allowedToEdit && isVisible() && (
             <BulkActionContainer.Button
               onClick={() => {
                 setAssignDialog({ open: true, type: OTHER_MATERIAL_TYPE.serialNumber, replaceAsset: false, products: getProducts(OTHER_MATERIAL_TYPE.serialNumber) });
@@ -636,7 +638,7 @@ const BulkActionItems = ({
           )}
           {permissions?.serializedPackages?.isUpdate && (
             <BulkActionContainer.Button
-              disabled={selectedRecords?.some((e) => e?.canDelete && [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(e.type)) ? false : true}
+              disabled={!allowedToEdit || selectedRecords?.some((e) => e?.canDelete && [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(e.type)) ? false : true}
               onClick={() => {
                 setShowDeleteConfirmBox(true);
               }}

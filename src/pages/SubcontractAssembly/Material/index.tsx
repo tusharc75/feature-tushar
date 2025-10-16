@@ -327,6 +327,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
                 isDeleting={isDeleting}
                 selectedRecords={selectedRecords}
                 setDeleteData={setDeleteData}
+                allowedToEdit={allowedToEdit}
               />
             }
           />
@@ -400,12 +401,13 @@ export default Material;
 const BulkActionItems = ({ 
   isDeleting,
   selectedRecords,
-  setDeleteData
+  setDeleteData,
+  allowedToEdit
 }) => {
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
-        disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
+        disabled={!allowedToEdit || isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
         onClick={() => {
           const obj: any = [];
           selectedRecords?.forEach((ele) => {
