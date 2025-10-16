@@ -749,15 +749,16 @@ const Productpackage = ({
                 Add Existing Services
               </MenuItem>
             )}
-        {permissions?.competencies?.isRead && (
-          <MenuItem
-            onClick={() => {
-              setAddDialog({ open: true, type: 'competency', parentId: null });
-            }}
-          >
-            Add Existing {resources?.competencies?.titlePlural}
-          </MenuItem>
-        )}
+        {permissions?.competencies &&
+          ([QUOTATION_TYPE.rentalJob, QUOTATION_TYPE.fieldJob]?.includes(quotationData?.type) || !quotationData?.type) && (
+            <MenuItem
+              onClick={() => {
+                setAddDialog({ open: true, type: 'competency', parentId: null });
+              }}
+            >
+              Add Existing {resources?.competencies?.titlePlural}
+            </MenuItem>
+          )}
         {costFields?.length > 0 && quotationData?.type != QUOTATION_TYPE.repairOrder && (
           <MenuItem
             onClick={() => {
@@ -1185,16 +1186,18 @@ const Productpackage = ({
                       Add Existing Services
                     </MenuItem>
                   )}
-            {permissions?.competencies?.isRead && addchildDialog?.parentType === MATERIAL_TYPE.service && (
-              <MenuItem
-                onClick={() => {
-                  setAddDialog({ open: true, type: 'competency', parentId: addchildDialog.parentId });
-                  setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
-                }}
-              >
-                Add Existing {resources?.competencies?.titlePlural}
-              </MenuItem>
-            )}
+            {permissions?.competencies &&
+              addchildDialog?.parentType === MATERIAL_TYPE.service &&
+              ([QUOTATION_TYPE.rentalJob, QUOTATION_TYPE.fieldJob]?.includes(quotationData?.type) || !quotationData?.type) && (
+                <MenuItem
+                  onClick={() => {
+                    setAddDialog({ open: true, type: 'competency', parentId: addchildDialog.parentId });
+                    setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
+                  }}
+                >
+                  Add Existing {resources?.competencies?.titlePlural}
+                </MenuItem>
+              )}
           </MenuList>
         </Popover>
       )}
