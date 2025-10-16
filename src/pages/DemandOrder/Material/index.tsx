@@ -397,11 +397,13 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
               dispatch={dispatch}
               refreshGrid={fetchData}
               bulkActionItems={
-                <BulkActionItems
-                  selectedRecords={selectedRecords}
-                  setMaterialEdit={setMaterialEdit}
-                  setDeleteData={setDeleteData}
-                />
+                allowedToEdit ? (
+                  <BulkActionItems
+                    selectedRecords={selectedRecords}
+                    setMaterialEdit={setMaterialEdit}
+                    setDeleteData={setDeleteData}
+                  />
+                ) : null
               }
             />
           </Box>
