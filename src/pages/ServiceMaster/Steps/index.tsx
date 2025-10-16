@@ -13,6 +13,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { gridLoadingTimeout, serviceMaster, sidebarResource } from 'src/constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -301,27 +302,6 @@ const Steps = ({ serviceId }) => {
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            setStepFieldsDialog({ open: true, stepIds: selectedRecords?.map((e) => e._id) });
-          }}
-        >
-          Add Bulk Fields
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <>
       {permissions?.serviceMaster?.isUpdate && (
@@ -329,9 +309,7 @@ const Steps = ({ serviceId }) => {
           <DetailsPageHeader
             isAddButtonVisible
             addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+            isActionButtonVisible={false}
             rightSideContents={rightSideContents()}
             hasXpadding={false}
           />
@@ -348,6 +326,13 @@ const Steps = ({ serviceId }) => {
           refreshGrid={fetchStepsData}
           hideAction={permissions?.serviceMaster?.isUpdate ? false : true}
           hideSelection={permissions?.serviceMaster?.isUpdate ? false : true}
+          bulkActionItems={
+            <BulkActionItems
+              selectedRecords={selectedRecords}
+              setStepFieldsDialog={setStepFieldsDialog}
+              setShowConfirmBox={setShowConfirmBox}
+            />
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -410,3 +395,30 @@ const Steps = ({ serviceId }) => {
 };
 
 export default Steps;
+
+const BulkActionItems = ({ 
+  selectedRecords,
+  setStepFieldsDialog,
+  setShowConfirmBox
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          setStepFieldsDialog({ open: true, stepIds: selectedRecords?.map((e) => e._id) });
+        }}
+      >
+        Add Bulk Fields
+      </BulkActionContainer.Button>
+      
+      <BulkActionContainer.Button
+        onClick={() => {
+          setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
