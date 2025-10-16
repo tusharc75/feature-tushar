@@ -19,7 +19,7 @@ import { getCostPriceConditions, getPricingConditions } from 'src/components/Pri
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
-const rateChangeFields = ['pricingMethod', 'pricingCondition', 'unit'];
+const rateChangeFields = ['pricingMethod', 'costingMethod', 'pricingCondition', 'unit'];
 
 const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
 
@@ -31,8 +31,9 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
   const [priceConditionListConst, setPriceConditionListConst] = useState([]);
 
   const [priceMethodListConst, setPriceMethodListConst] = useState([]);
-  const [priceConditionList, setPriceConditionList] = useState([]);
   const [priceMethodList, setPriceMethodList] = useState([]);
+
+  const [priceConditionList, setPriceConditionList] = useState([]);
   const [costPriceConditionList, setCostPriceConditionList] = useState([]);
   const [subStatusOptions, setSubStatusOptions] = useState([]);
 
@@ -68,7 +69,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
         setPriceMethodList(pricingMethodOptions);
       }
       data.forEach((element) => {
-        if (element.fieldName === 'pricingMethod') {
+        if (['pricingMethod', 'costingMethod']?.includes(element.fieldName)) {
           element.option = pricingMethodOptions;
         }
         if (element.fieldName === 'unit') {
@@ -300,25 +301,21 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
                                                   d.unit === value
                                                 );
                                               }
-                                              if (field.fieldName === 'pricingMethod') {
-                                                costPrice = costPriceConditionList?.find(
-                                                  (d) =>
-                                                    d?.pricingMethod === value && d.unit === values?.['unit']
-                                                );
+                                              if (['costingMethod']?.includes(field.fieldName)) {
+                                                costPrice = costPriceConditionList?.find((d) => d?.pricingMethod === value && d.unit === values?.['unit']);
+                                              } if (['pricingMethod']?.includes(field.fieldName) && !allFields?.find((f) => f?.fieldName === `costingMethod`)) {
+                                                costPrice = costPriceConditionList?.find((d) => d?.pricingMethod === value && d.unit === values?.['unit']);
                                               } else if (field.fieldName === 'unit') {
-                                                costPrice = costPriceConditionList?.find(
-                                                  (d) =>
-                                                    d?.pricingMethod === values?.['pricingMethod'] && d.unit === value
+                                                costPrice = costPriceConditionList?.find((d) =>
+                                                  d?.pricingMethod === (values?.['costingMethod'] || values?.['pricingMethod']) && d.unit === value
                                                 );
                                               }
                                               let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
                                               let costPriceFieldName = 'costPrice_' + rentalManagementData?.currency?.toLowerCase();
-                                              let result = autoCalculateSpecificFields(
-                                                { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
-                                                values,
-                                                initialData.fields
-                                              );
+                                              let result = autoCalculateSpecificFields({ [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
+                                                values, initialData.fields);
                                               if (!isEmpty(costPrice)) {
+
                                                 const obj: any = {
                                                   [costPriceFieldName]: costPrice?.price || 0
                                                 };

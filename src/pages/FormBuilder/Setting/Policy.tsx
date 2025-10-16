@@ -158,14 +158,14 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
         : data?.fieldOption
           ? fields?.find((e) => e?.fieldData?.fieldName === data?.fieldOption)?.fieldData?.option || []
           : fields
-              ?.filter((ele) => !ele.fieldData?.primaryField)
-              ?.map((e) => {
-                return {
-                  optionLabel: e?.fieldData?.fieldLabel,
-                  optionValue: e?.fieldData?.fieldName,
-                  order: e?.fieldData?.order
-                };
-              });
+            ?.filter((ele) => !ele.fieldData?.primaryField)
+            ?.map((e) => {
+              return {
+                optionLabel: e?.fieldData?.fieldLabel,
+                optionValue: e?.fieldData?.fieldName,
+                order: e?.fieldData?.order
+              };
+            });
     return (
       <>
         {!loading ? (
@@ -354,6 +354,8 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
   const [initialData, setInitialData] = useState({ fieldsData: [...Data?.data], fields: Data?.fields });
   const [optionLoading, setOptionLoading] = useState(false);
 
+  const [fieldColorFieldNameOptions, setFieldColorFieldNameOptions] = useState([]);
+
   useEffect(() => {
     fetchResourceFields();
   }, []);
@@ -390,8 +392,8 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
 
   useEffect(() => {
     let fieldsData = [...fields];
-    let statusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'status')?.fieldData?.option;
-    let subStatusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'subStatus')?.fieldData?.option || [];
+    const statusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'status')?.fieldData?.option || [];
+    const subStatusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'subStatus')?.fieldData?.option || [];
     setStatusOptions(statusOptions);
     setSubStatusOptions(subStatusOptions);
     fieldsData = fieldsData
@@ -404,17 +406,14 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
         };
       });
     setFieldOptions(fieldsData);
+    if (Data?.fieldName === 'fieldColor') {
+      setFieldColorFieldNameOptions(fields?.filter(f =>
+        ['dropDown', 'multiSelect'].includes(f?.fieldData?.type) && !f?.fieldData?.lookup)?.map(e => ({ optionLabel: e?.fieldData?.fieldLabel, optionValue: e?.fieldData?.fieldName })))
+    }
   }, [fields]);
 
   const getStatusOptions = (data) => {
     const statusTemp = [...statusOptions];
-    if (Data?.fieldName === 'statusColor') {
-      subStatusOptions?.forEach((e) => {
-        if (!statusTemp?.find((ele) => ele?.optionLabel === e?.optionLabel)) {
-          statusTemp.push(e);
-        }
-      });
-    }
     return statusTemp;
   };
 
@@ -423,11 +422,15 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
     return options ? options : subStatusOptions;
   };
 
+  const getValueOptions = (value) => {
+    return fields?.find(f => f?.fieldData?.fieldName === value?.fieldName)?.fieldData?.option || []
+  }
+
   return (
     <>
-      {statusOptions?.length > 0 && fieldOptions?.length && initialData && !optionLoading ? (
-        <div className="flex flex-col gap-2">
-          <div className="mx-2 flex items-center justify-between">
+      {(statusOptions?.length > 0 || fieldColorFieldNameOptions?.length > 0) && fieldOptions?.length && initialData && !optionLoading ? (
+        <div className="flex flex-col gap-2 border border-[var(--common-border-color)] mt-2 mb-2">
+          <div className="p-2 bg-gray-100 flex items-center justify-between">
             <Typography variant="subtitle2">{Data.fieldLabel}</Typography>
             <HtmlTooltip title={'Add'}>
               <IconButton
@@ -436,7 +439,11 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                 aria-label="delete"
                 onClick={() => {
                   const data = [...initialData?.fieldsData];
-                  data.push({ status: '', fields: [] });
+                  const obj: any = {}
+                  initialData?.fields?.forEach(f => {
+                    obj[f?.fieldName] = f?.type === 'multiSelect' ? [] : f?.type === 'colorPicker' ? '#000000' : ''
+                  });
+                  data.push(obj);
                   setInitialData((prevState) => ({ ...prevState, fieldsData: [...data] }));
                   onChange(null, data);
                 }}
@@ -446,7 +453,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
             </HtmlTooltip>
           </div>
           {initialData?.fieldsData?.map((value, index) => (
-            <div className="my-2 flex items-center justify-between gap-1 rounded-md border border-[var(--common-border-color)] p-2" key={index}>
+            <div className="my-2 flex items-center justify-between gap-1 border-b last:border-b-0 rounded-md p-2" key={index}>
               <div className="grid w-[94%] gap-2 sm:grid-cols-1 md:grid-cols-3">
                 {initialData?.fields?.map((field) =>
                   field?.type === 'checkBox' ? (
@@ -516,10 +523,14 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                             ? getStatusOptions(initialData?.fieldsData)
                             : field?.fieldName === 'subStatus'
                               ? getSubStatusOptions(initialData?.fieldsData)
-                              : fieldOptions
+                              : field?.fieldName === 'fieldName'
+                                ? fieldColorFieldNameOptions
+                                : field?.fieldName === 'value'
+                                  ? getValueOptions(value)
+                                  : fieldOptions
                       }
                       error={errors[`policies.${idx}.data.${index}.${field.fieldName}`]}
-                      touched={touched?.policies && touched.policies[idx].data[index][field.fieldName]}
+                      touched={touched?.policies && touched?.policies?.[idx]?.data[index]?.[field.fieldName]}
                       onChange={(e, val) => {
                         const updatedVal = isArray(val) ? val?.map((ele) => ele.optionValue) : val?.optionValue;
                         setFieldValue(`policies.${idx}.data.${index}.${field.fieldName}`, updatedVal);
@@ -527,6 +538,13 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                         updatedData[index][field.fieldName] = updatedVal;
                         setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
                         onChange(null, updatedData);
+                        if (field?.fieldName === 'fieldName') {
+                          setFieldValue(`policies.${idx}.data.${index}.value`, []);
+                          let updatedData = [...initialData?.fieldsData];
+                          updatedData[index].value = updatedVal;
+                          setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
+                          onChange(null, updatedData);
+                        }
                       }}
                       value={
                         field?.type === 'multiSelect'
@@ -536,10 +554,14 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                               ? getStatusOptions(initialData?.fieldsData)?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))
                               : field?.fieldName === 'subStatus'
                                 ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))
-                                : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
+                                : field?.fieldName === 'value'
+                                  ? getValueOptions(value)?.filter(ele => value[`${field.fieldName}`]?.includes(ele?.optionValue))
+                                  : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
                           : field?.fieldName === 'subStatus'
                             ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))[0]
-                            : getStatusOptions(initialData?.fieldsData)?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
+                            : field?.fieldName === 'status' ?
+                              getStatusOptions(initialData?.fieldsData)?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
+                              : fieldColorFieldNameOptions?.filter(ele => ele?.optionValue === value[`${field.fieldName}`])[0]
                       }
                       multiple={field?.type === 'multiSelect'}
                       fieldLabel={field?.fieldLabel}

@@ -146,9 +146,8 @@ const Step = ({
                             title={step?.stepName}
                             onClick={() => handleClick(step)}
                             data-active={index === step}
-                            className={`p-[18px] [border:1px_solid_var(--common-border-color)] ${
-                              i === 0 ? 'rounded-t-md' : ''
-                            } cursor-pointer last:rounded-b-md data-[active=true]:[border:1px_solid_var(--dark-active-border-color,#298B88)]`}
+                            className={`p-[18px] [border:1px_solid_var(--common-border-color)] ${i === 0 ? 'rounded-t-md' : ''
+                              } cursor-pointer last:rounded-b-md data-[active=true]:[border:1px_solid_var(--dark-active-border-color,#298B88)]`}
                           >
                             <div className="flex gap-2">
                               <span className="h-[20px] w-[20px] flex-shrink-0 rounded-full bg-[var(--dark-secondary,var(--primary))] text-center text-[10px] leading-[20px] text-white">

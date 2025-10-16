@@ -95,15 +95,13 @@ const View = ({
       const lookUpField = step?.fields?.find((e) => e?.fieldName === statusColorField?.lookUpField);
       if (lookUpField && lookUpField?.lookupResource) {
         const resourcePolicy = await getResourcePolicy(user, permissions, lookUpField?.lookupResource);
-        if (resourcePolicy?.policy?.statusColor) {
-          resourcePolicy?.policy?.statusColor?.forEach((item) => {
-            if (Array.isArray(item?.status)) {
-              item.status.forEach((status) => {
+        if (resourcePolicy?.policy?.fieldColor) {
+          resourcePolicy?.policy?.fieldColor?.forEach((item) => {
+            item?.value?.forEach((status) => {
+              if (item?.fieldName === 'status') {
                 statusColors[status] = item.colorCode;
-              });
-            } else {
-              statusColors[item?.status] = item.colorCode;
-            }
+              }
+            });
           });
         }
       }
@@ -491,25 +489,28 @@ const View = ({
               <>
                 {sidebarButton}
                 <Box mt={2}>
-                  {!loading ? <>
-                    <Box textAlign={'right'}>
-                      <HtmlTooltip title={allowedToEditState ? 'Edit' : editDisable}>
-                        <ThemeButton
-                          onClick={() => {
-                            setOpen({ open: true, id: dataRows[0] ? dataRows[0]?._id : null });
-                          }}
-                          disabled={!allowedToEditState}
-                          buttonType="theme"
-                        >
-                          Edit
-                        </ThemeButton>
-                      </HtmlTooltip>
-                    </Box>
-                    <DetailsPage data={dataRows[0] || {}} fields={step?.fields?.map((f) => ({ fieldData: f }))} />
-                  </> :
+                  {!loading ? (
+                    <>
+                      <Box textAlign={'right'}>
+                        <HtmlTooltip title={allowedToEditState ? 'Edit' : editDisable}>
+                          <ThemeButton
+                            onClick={() => {
+                              setOpen({ open: true, id: dataRows[0] ? dataRows[0]?._id : null });
+                            }}
+                            disabled={!allowedToEditState}
+                            buttonType="theme"
+                          >
+                            Edit
+                          </ThemeButton>
+                        </HtmlTooltip>
+                      </Box>
+                      <DetailsPage data={dataRows[0] || {}} fields={step?.fields?.map((f) => ({ fieldData: f }))} />
+                    </>
+                  ) : (
                     <Box p={2} height={500}>
                       <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                    </Box>}
+                    </Box>
+                  )}
                 </Box>
               </>
             )

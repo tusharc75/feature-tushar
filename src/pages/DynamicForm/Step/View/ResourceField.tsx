@@ -2,7 +2,7 @@ import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getCellColorCode, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -48,18 +48,6 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
     setColumns(null);
     try {
       const resourcePolicy = await getResourcePolicy(user, permissions, step?.linkResourceName);
-      const statusColors = {};
-      if (resourcePolicy?.policy?.statusColor) {
-        resourcePolicy?.policy?.statusColor?.forEach((item) => {
-          if (Array.isArray(item?.status)) {
-            item.status.forEach((status) => {
-              statusColors[status] = item.colorCode;
-            });
-          } else {
-            statusColors[item?.status] = item.colorCode;
-          }
-        });
-      }
       const {
         data: { data }
       } = await axiosInstance().get(`/field?resource=${step?.linkResourceName}`);
@@ -73,29 +61,27 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
       );
       const primaryField = data?.find((e) => e?.fieldData?.primaryField);
       if (primaryField) {
-        if (!isEmpty(statusColors)) {
-          newColumns?.forEach((o) => {
-            if (o?.accessor === primaryField?.fieldData?.fieldName) {
-              o.cell = ({ row }) => (
-                <div
-                  style={{
-                    backgroundColor: (() => {
-                      return statusColors[row?.original?.status] || '';
-                    })()
-                  }}
+        newColumns?.forEach((o) => {
+          if (o?.accessor === primaryField?.fieldData?.fieldName) {
+            o.cell = ({ row }) => (
+              <div
+                style={{
+                  backgroundColor: (() => {
+                    return getCellColorCode(resourcePolicy?.policy?.fieldColor, row?.original);
+                  })()
+                }}
+              >
+                <Link
+                  className="link text-truncate"
+                  title={row?.original?.[primaryField?.fieldData?.fieldName]}
+                  to={`${detailPagePath}/${row?.original?._id}`}
                 >
-                  <Link
-                    className="link text-truncate"
-                    title={row?.original?.[primaryField?.fieldData?.fieldName]}
-                    to={`${detailPagePath}/${row?.original?._id}`}
-                  >
-                    {row?.original?.[primaryField?.fieldData?.fieldName]}
-                  </Link>
-                </div>
-              );
-            }
-          });
-        }
+                  {row?.original?.[primaryField?.fieldData?.fieldName]}
+                </Link>
+              </div>
+            );
+          }
+        });
       }
       setColumns([
         ...newColumns,

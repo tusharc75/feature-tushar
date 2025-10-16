@@ -41,9 +41,14 @@ const AllocationPercentage = ({ referenceData, onRefresh }) => {
                       Index
                     </Typography>
                   </Grid>
-                  <Grid size={{ xs: 6 }} >
+                  <Grid size={{ xs: 3 }} >
                     <Typography className="table-head-v1  br-0 text-truncate" style={{ width: '100%' }} variant="body1">
-                      Allocation
+                      Revenue Class
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 3 }} >
+                    <Typography className="table-head-v1  br-0 text-truncate" style={{ width: '100%' }} variant="body1">
+                      Department
                     </Typography>
                   </Grid>
                   <Grid size={{ xs: 4 }} >
@@ -61,9 +66,14 @@ const AllocationPercentage = ({ referenceData, onRefresh }) => {
                         {index + 1}
                       </Typography>
                     </Grid>
-                    <Grid size={{ xs: 6 }} >
+                    <Grid size={{ xs: 3 }} >
                       <Typography className="table-body-v1 bt-0 br-0 text-truncate" style={{ width: '100%' }}>
-                        {allocation?.name || ''}
+                        {allocation?.revenueClass || '--'}
+                      </Typography>
+                    </Grid>
+                    <Grid size={{ xs: 3 }} >
+                      <Typography className="table-body-v1 bt-0 br-0 text-truncate" style={{ width: '100%' }}>
+                        {allocation?.department || '--'}
                       </Typography>
                     </Grid>
                     <Grid size={{ xs: 4 }} >
@@ -78,7 +88,7 @@ const AllocationPercentage = ({ referenceData, onRefresh }) => {
           ) : (
             <Box width={'100%'}>
               <Grid container>
-                <Grid size={{ xs: 6 }} justifyContent={'center'}>
+                <Grid size={{ xs: 12 }} justifyContent={'center'}>
                   <Typography variant="body2">No Data Found</Typography>
                 </Grid>
               </Grid>
