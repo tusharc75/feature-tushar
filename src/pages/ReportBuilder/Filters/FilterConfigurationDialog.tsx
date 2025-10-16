@@ -17,7 +17,7 @@ import { isEmpty } from 'lodash';
 interface FilterConfigurationDialogProps {
   open: boolean;
   onClose: () => void;
-  onAddFilter: (filter: { fieldName: string; operation: string; value: any, type: string }) => void;
+  onAddFilter: (filter: { fieldName: string; operation: string; value: any, type: string, resource: string }) => void;
   selectedField: any;
   filterData?: any;
 }
@@ -59,10 +59,11 @@ const FilterConfigurationDialog = ({
     if (!selectedField) return;
 
     onAddFilter({
-      fieldName: selectedField.fieldName,
+      fieldName: selectedField?.fieldName,
+      resource: selectedField?.resource,
       operation: filterOperation,
       value: filterValue,
-      type: selectedField?.type
+      type: selectedField?.type,
     });
 
     setFilterOperation('is');
