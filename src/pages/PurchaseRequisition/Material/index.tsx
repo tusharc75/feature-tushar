@@ -550,11 +550,13 @@ const Material = ({
             expander={true}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             bulkActionItems={
-              <BulkActionItems
-                selectedRecords={selectedRecords}
-                setMaterialEdit={setMaterialEdit}
-                setDeleteData={setDeleteData}
-              />
+              allowedToAddMaterial ? (
+                <BulkActionItems
+                  selectedRecords={selectedRecords}
+                  setMaterialEdit={setMaterialEdit}
+                  setDeleteData={setDeleteData}
+                />
+              ) : null
             }
           />
         </Box>

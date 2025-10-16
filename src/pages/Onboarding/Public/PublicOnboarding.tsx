@@ -1,7 +1,7 @@
-import { Box, Typography, Stepper, Step, StepLabel, Card, CardContent, Grid, Chip, CircularProgress, AppBar, Toolbar, Stack } from '@mui/material';
-import { useContext, useEffect, useState } from 'react';
+import { Box, Typography, Stepper, Step, StepLabel, Card, CardContent, Chip, CircularProgress, AppBar, Toolbar, Stack } from '@mui/material';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Form, Formik } from 'formik';
+import { Form, Formik, useFormikContext } from 'formik';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { SVG } from 'src/assets';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -11,6 +11,8 @@ import { sidebarResource, yupSchema } from 'src/constants/helpers';
 import { useScrollDirection } from 'src/hooks/useScroll';
 import styles from 'src/components/Header/Header.module.scss';
 import ThemeButton from 'src/components/Helpers/Buttons/ThemeButton';
+import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import { useDebounce } from 'src/hooks';
 
 const PublicOnboarding = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -26,6 +28,8 @@ const PublicOnboarding = () => {
   const [editableSteps, setEditableSteps] = useState([]);
   const [saving, setSaving] = useState(false);
   const [canComplete, setCanComplete] = useState(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -79,8 +83,10 @@ const PublicOnboarding = () => {
     setInitialValues(currentStepData);
   };
 
-  const saveCurrentStep = async (values) => {
+  const saveCurrentStep = async (values, isAutoSaved: boolean = false) => {
+    if (!values) return;
     setSaving(true);
+    setAutoSaveStatus('saving');
     try {
       const currentStepId = onboardingTemplateData.tabs[0].steps[activeStepIndex]._id;
 
@@ -110,15 +116,20 @@ const PublicOnboarding = () => {
       };
       const { data } = await axiosInstance().put(`${routes.onboarding.path}/public/${id}`, submitData);
       setCanComplete(data.data.canComplete || false);
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
-      });
+      setAutoSaveStatus('saved');
+      if (!isAutoSaved) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
+      setAutoSaveStatus('error');
     } finally {
       setSaving(false);
+      setTimeout(() => setAutoSaveStatus(''), 2000);
     }
   };
 
@@ -217,6 +228,57 @@ const PublicOnboarding = () => {
     return true;
   };
 
+  const handleConfirmSubmit = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    setConfirmDialogOpen(false);
+    try {
+      await handleFinalSubmit();
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const AutoSave = ({ values }) => {
+    const formik = useFormikContext();
+    const { isValid, dirty } = formik;
+    const debouncedValues = useDebounce(values, 2000);
+    const isInitialMount = useRef(true);
+
+    useEffect(() => {
+      if (isInitialMount.current) {
+        isInitialMount.current = false;
+        return;
+      }
+      if (!dirty) {
+        return;
+      }
+      if (!isValid) {
+        setAutoSaveStatus('invalid');
+        setTimeout(() => setAutoSaveStatus(''), 2000);
+        return;
+      }
+      if (debouncedValues) {
+        saveCurrentStep(debouncedValues, true);
+      }
+    }, [debouncedValues]);
+
+    return null;
+  };
+
+  const chipStatus = (() => {
+    switch (autoSaveStatus) {
+      case 'saving':
+        return { label: 'Saving...', color: 'primary' as const };
+      case 'saved':
+        return { label: 'Saved', color: 'success' as const };
+      case 'invalid':
+        return { label: 'Fix validation errors', color: 'warning' as const };
+      case 'error':
+        return { label: 'Save Error', color: 'error' as const };
+      default:
+        return null;
+    }
+  })();
+
   return (
     <Box className="main-container-v1" sx={{ p: { xs: 2, md: 4 }, minHeight: '100vh' }}>
       <AppBar
@@ -242,22 +304,30 @@ const PublicOnboarding = () => {
       </AppBar>
       <Box sx={{ pt: '80px', p: { xs: 2, md: 4 } }}>
         <Box className="headerbox-v1">
-          <Box className="nav-v1">
-            <Typography sx={{ fontSize: '1.7rem' }} fontWeight="bold">
-              {onboardingData?.name}
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              {onboardingData?.jobRole}
-            </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+            <Box className="nav-v1">
+              <Typography sx={{ fontSize: '1.7rem' }} fontWeight="bold">
+                {onboardingData?.name}
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                {onboardingData?.jobRole}
+              </Typography>
+            </Box>
+            <Box sx={{ pt : 1, pl : 2}}>
+            {chipStatus && (
+              <Chip
+                label={chipStatus.label}
+                color={chipStatus.color}
+                size="small"
+                variant="filled"
+              />
+            )}
+            </Box>
           </Box>
           {canComplete && !isCompleted && (
             <ThemeButton
-              onClick={() => {
-                if (window.confirm('Are you sure you want to submit? Once submitted, you cannot make changes.')) {
-                  handleFinalSubmit();
-                }
-              }}
-              buttonType="themeBorder"
+              onClick={() => setConfirmDialogOpen(true)}
+              buttonType="theme"
             >
               Submit
             </ThemeButton>
@@ -265,7 +335,7 @@ const PublicOnboarding = () => {
         </Box>
 
         <Box className="detail-container-v1">
-          <Box sx={{ bgcolor: 'background.paper', p: 1, borderRadius: 2 }}>
+          <Box sx={{ bgcolor: 'background.paper', pb: 1, borderRadius: 2 }}>
             <Stepper activeStep={activeStepIndex} alternativeLabel>
               {steps.map((step, index) => {
                 const completed = isStepCompleted(index);
@@ -310,8 +380,9 @@ const PublicOnboarding = () => {
             onSubmit={handleSaveAndNext}
             enableReinitialize
           >
-            {({ values, errors, touched, setFieldValue, submitForm, isValid, dirty }) => (
+            {({ values, errors, touched, setFieldValue, submitForm, isValid, dirty, validateForm, setTouched }) => (
               <Form>
+                <AutoSave values={values} />
                 <Card sx={{ mb: 3 }}>
                   <CardContent>
                     <InputField
@@ -333,7 +404,7 @@ const PublicOnboarding = () => {
                     <ThemeButton
                       onClick={() => handleStepChange(activeStepIndex - 1)}
                       disabled={activeStepIndex === 0}
-                      buttonType="theme"
+                      buttonType="themeBorder"
                     >
                       Back
                     </ThemeButton>
@@ -343,10 +414,21 @@ const PublicOnboarding = () => {
                   <Stack direction="row" spacing={2}>
                     {isCurrentStepEditable && !isCompleted && (
                       <ThemeButton
-                        onClick={() => saveCurrentStep(values)}
-                        disabled={saving || !isValid}
-                        buttonType="themeBorder"
-                        isLoading={saving}
+                        onClick={async () => {
+                          const errors = await validateForm();
+                          setTouched(
+                            Object.keys(values).reduce((acc, key) => {
+                              acc[key] = true;
+                              return acc;
+                            }, {})
+                          );
+                          
+                          if (Object.keys(errors).length === 0) {
+                            saveCurrentStep(values);
+                          }
+                        }}
+                        disabled={saving || !dirty}
+                        buttonType="theme"
                       >
                         {hasStepData(stepsData.find(step => step.stepId === activeStepData._id)) ? 'Update' : 'Save'}
                       </ThemeButton>
@@ -355,7 +437,7 @@ const PublicOnboarding = () => {
                     {!isLastStep && (
                       <ThemeButton
                         onClick={handleNextWithoutSave}
-                        buttonType="theme"
+                        buttonType="themeBorder"
                       >
                         Next
                       </ThemeButton>
@@ -364,9 +446,8 @@ const PublicOnboarding = () => {
                     {isCurrentStepEditable && !isLastStep && !isCompleted && (
                       <ThemeButton
                         onClick={submitForm}
-                        disabled={saving || !isValid}
-                        buttonType="themeBorder"
-                        isLoading={saving}
+                        disabled={saving || !dirty}
+                        buttonType="theme"
                       >
                         Save & Next
                       </ThemeButton>
@@ -378,6 +459,12 @@ const PublicOnboarding = () => {
           </Formik>
         </Box>
       </Box>
+      <ConfirmationDialogRaw
+        open={confirmDialogOpen}
+        message="Are you sure you want to submit? Once submitted, you cannot make changes."
+        onClose={() => setConfirmDialogOpen(false)}
+        onOk={handleConfirmSubmit}
+      />
     </Box>
   );
 };

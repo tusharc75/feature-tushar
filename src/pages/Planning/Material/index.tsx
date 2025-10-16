@@ -598,15 +598,17 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
             onSaveEdit={onSaveInlineEdit}
             expander={true}
             bulkActionItems={
-              <BulkActionItems
-                selectedRecords={selectedRecords}
-                planningData={planningData}
-                disableAssignSerializedAssets={disableAssignSerializedAssets}
-                setAssetAssignedProduct={setAssetAssignedProduct}
-                setAddDialog={setAddDialog}
-                setMaterialEdit={setMaterialEdit}
-                setDeleteData={setDeleteData}
-              />
+              allowedToEdit ? (
+                <BulkActionItems
+                  selectedRecords={selectedRecords}
+                  planningData={planningData}
+                  disableAssignSerializedAssets={disableAssignSerializedAssets}
+                  setAssetAssignedProduct={setAssetAssignedProduct}
+                  setAddDialog={setAddDialog}
+                  setMaterialEdit={setMaterialEdit}
+                  setDeleteData={setDeleteData}
+                />
+              ) : null
             }
           />
         </Box>
