@@ -1,9 +1,10 @@
 import type { Plugin, PDFRenderProps, Schema, UIRenderProps } from '@pdfme/common';
 import { rgb } from '@pdfme/pdf-lib';
 import { PLUGIN } from 'src/constants/helpers';
+
 interface MyGridSchema extends Schema {
     type: 'myGridType';
-    rows: string[][];
+    content: string; // JSON stringified 2D array
     cols: number;
     basePdf?: { width: number; height: number };
     colWidths?: number[];
@@ -18,6 +19,16 @@ const stateMap = new WeakMap<HTMLElement, {
     rowHeights?: number[];
 }>();
 
+const parseContent = (content: string | undefined): string[][] => {
+    if (!content || content.trim() === '') return [['']];
+    try {
+        const parsed = JSON.parse(content);
+        return Array.isArray(parsed) && parsed.length > 0 ? parsed : [['']];
+    } catch {
+        return [['']];
+    }
+};
+
 const ensureArrayLen = (arr: number[] | undefined, len: number, fill: number) => {
     const out = arr ? [...arr] : [];
     while (out.length < len) out.push(fill);
@@ -31,8 +42,9 @@ const MIN_ROW_PX = 24;
 const myGridPlugin: Plugin<MyGridSchema> = {
     ui: async (props: UIRenderProps<MyGridSchema>) => {
         const { rootElement, onChange, mode, schema } = props;
-        const incomingRows = (schema?.rows as string[][]) ?? [['']];
+        const incomingRows = parseContent(schema?.content);
         const incomingCols = (schema?.cols as number) ?? 1;
+
         let state = stateMap.get(rootElement);
         if (!state) {
             state = { rows: JSON.parse(JSON.stringify(incomingRows)), cols: incomingCols, focusedId: null };
@@ -202,7 +214,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                 editable.style.caretColor = 'auto';
                 editable.tabIndex = 0;
 
-                const isEditableMode = (mode === 'designer' || mode === 'form') && !schema?.readOnly;
+                const isEditableMode = (mode === 'designer' || mode === 'form');
                 if (isEditableMode) {
                     editable.contentEditable = 'true';
                     editable.innerText = cellContent;
@@ -254,7 +266,9 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             tableContainer.appendChild(rowWrapper);
             rowWrappers.push(rowWrapper);
         });
+
         mainContainer.appendChild(tableContainer);
+
         const resizerLayer = document.createElement('div');
         Object.assign(resizerLayer.style, {
             position: 'absolute',
@@ -270,12 +284,14 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             const total = (state!.colWidths!.reduce((a, b) => a + b, 0) || 1);
             return state!.colWidths!.map(w => `${(w / total) * 100}%`).join(' ');
         };
+
         const applyColWidthsToRows = () => {
             const tpl = getColPercentTemplate();
             rowWrappers.forEach(rw => {
                 (rw.style as any).gridTemplateColumns = tpl;
             });
         };
+
         const applyRowHeights = () => {
             rowWrappers.forEach((rw, idx) => {
                 rw.style.height = `${Math.max(MIN_ROW_PX, Math.round(state!.rowHeights![idx]))}px`;
@@ -285,10 +301,11 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                 }
             });
         };
+
         const persistAll = () => {
-            if (!onChange && schema?.type !== 'myGridType') return;
+            if (!onChange) return;
             onChange([
-                { key: 'rows', value: JSON.parse(JSON.stringify(state!.rows)) },
+                { key: 'content', value: JSON.stringify(state!.rows) },
                 { key: 'cols', value: state!.cols },
                 { key: 'colWidths', value: JSON.parse(JSON.stringify(state!.colWidths)) },
                 { key: 'rowHeights', value: JSON.parse(JSON.stringify(state!.rowHeights)) }
@@ -483,6 +500,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
         applyRowHeights();
         createColResizers();
         createRowResizers();
+
         if (true) {
             const styleSmallBtn = (btn: HTMLButtonElement) => {
                 Object.assign(btn.style, {
@@ -505,6 +523,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                     pointerEvents: 'auto'
                 });
             };
+
             const bottomWrapper = document.createElement('div');
             Object.assign(bottomWrapper.style, {
                 position: 'absolute',
@@ -545,6 +564,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
 
             bottomWrapper.appendChild(addRowBtn);
             bottomWrapper.appendChild(removeRowBtn);
+
             const leftColWrapper = document.createElement('div');
             Object.assign(leftColWrapper.style, {
                 position: 'absolute',
@@ -643,12 +663,15 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                 applyColWidthsToRows();
                 createColResizers();
             };
+
             rightColWrapper.appendChild(addColRight);
             rightColWrapper.appendChild(removeColRight);
+
             rootElement.appendChild(bottomWrapper);
             rootElement.appendChild(leftColWrapper);
             rootElement.appendChild(rightColWrapper);
         }
+
         rootElement.appendChild(resizerLayer);
 
         const focusCellIfNeededLocal = (root: HTMLElement) => {
@@ -676,8 +699,13 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             setTimeout(() => focusCellIfNeededLocal(rootElement), 0);
         }, 0);
     },
-    pdf: async ({ page, schema }: PDFRenderProps<MyGridSchema>) => {
-        const { position, rows = [['']], cols = 1, width, height } = schema;
+
+    pdf: async ({ page, schema, value }: PDFRenderProps<MyGridSchema>) => {
+        const contentStr = value || schema.content || '[[""]]';
+        const usedRows = parseContent(contentStr);
+
+        const { position, cols = 1, width, height } = schema;
+
         const pageWidth = page.getWidth();
         const pageHeight = page.getHeight();
         const baseWidth = schema.basePdf?.width ?? 210;
@@ -694,7 +722,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
         const y = pageHeight - scaledY - scaledHeight;
 
         const uiColWidths = Array.isArray(schema.colWidths) && schema.colWidths.length === cols ? schema.colWidths : undefined;
-        const uiRowHeights = Array.isArray(schema.rowHeights) && schema.rowHeights.length === rows.length ? schema.rowHeights : undefined;
+        const uiRowHeights = Array.isArray(schema.rowHeights) && schema.rowHeights.length === usedRows.length ? schema.rowHeights : undefined;
 
         let colWidthsPdf: number[] = [];
         if (uiColWidths && uiColWidths.reduce((a, b) => a + b, 0) > 0) {
@@ -710,8 +738,8 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             const total = uiRowHeights.reduce((a, b) => a + b, 0);
             rowHeightsPdf = uiRowHeights.map(h => (h / total) * scaledHeight);
         } else {
-            const rh = scaledHeight / Math.max(1, rows.length);
-            rowHeightsPdf = Array.from({ length: rows.length }, () => rh);
+            const rh = scaledHeight / Math.max(1, usedRows.length);
+            rowHeightsPdf = Array.from({ length: usedRows.length }, () => rh);
         }
 
         const tableBorderWidth = ((typeof schema?.tableBorderWidth === 'number' ? schema.tableBorderWidth : 1));
@@ -743,7 +771,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
 
         page.drawLine({
             start: { x, y },
-            end: { x: x + scaledWidth, y },
+            end: { x: x + scaledWidth, y: y },
             thickness: tableBorderWidth,
             color: tableColor,
         });
@@ -810,7 +838,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             }
         })();
 
-        rows.forEach((row, rowIndex) => {
+        usedRows.forEach((row, rowIndex) => {
             row.forEach((cellText, colIndex) => {
                 if (cellText == null || String(cellText).trim() === '') return;
                 const cellLeftX = colLefts[colIndex];
@@ -828,6 +856,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             });
         });
     },
+
     propPanel: {
         schema: () => ({
             cols: {
@@ -883,13 +912,18 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             position: { x: 50, y: 500 },
             width: 30,
             height: 20,
-            rows: [['', ''], ['', '']],
+            content: JSON.stringify([
+                ['', ''],
+                ['', '']
+            ]),
             cols: 2,
             tableBorderWidth: 1,
             tableBorderColor: '#000000',
             colBorderWidth: 1,
             colBorderColor: '#000000',
             textSize: 20,
+            readOnly: true,
+            required: false,
             textColor: '#000000',
             textWeight: 'normal'
         }
@@ -897,5 +931,3 @@ const myGridPlugin: Plugin<MyGridSchema> = {
 };
 
 export default myGridPlugin;
-
-
