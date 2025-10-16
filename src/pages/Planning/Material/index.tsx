@@ -29,6 +29,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData, setReserveAssetWarning }) => {
   const {
@@ -472,52 +473,50 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
     isSendEmail: true,
     toEmails: getEmailsFromContacts(planningData),
   };
-
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        {planningData.type === 'Rental Job' && (
-          <MenuItem
-            disabled={disableAssignSerializedAssets()}
-            onClick={() => {
-              setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === MATERIAL_TYPE.product && i?.productDetail?.serializedProduct));
-              setAddDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, parentId: null });
-            }}
-          >
-            Assign Serialized Asset
-          </MenuItem>
-        )}
-        <MenuItem
-          onClick={() => {
-            setMaterialEdit({
-              open: true,
-              data: selectedRecords?.filter((e) => !e.hideSelection && e?.type !== MATERIAL_TYPE.serializedAsset),
-              bulkedit: true,
-              showSaveAndNext: false
-            });
-          }}
-        >
-          Bulk Edit
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            const dataToDelete = selectedRecords
-              ?.filter((e) => !e.hideSelection)
-              .map((rec: any) => {
-                const obj: any = {};
-                obj.id = rec._id;
-                obj.type = rec?.type;
-                obj.materialId = rec?.materialId;
-                return obj;
-              });
-            setDeleteData(dataToDelete);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
+  //   return (
+  //     <>
+  //       {planningData.type === 'Rental Job' && (
+  //         <MenuItem
+  //           disabled={disableAssignSerializedAssets()}
+  //           onClick={() => {
+  //             setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === MATERIAL_TYPE.product && i?.productDetail?.serializedProduct));
+  //             setAddDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, parentId: null });
+  //           }}
+  //         >
+  //           Assign Serialized Asset
+  //         </MenuItem>
+  //       )}
+  //       <MenuItem
+  //         onClick={() => {
+  //           setMaterialEdit({
+  //             open: true,
+  //             data: selectedRecords?.filter((e) => !e.hideSelection && e?.type !== MATERIAL_TYPE.serializedAsset),
+  //             bulkedit: true,
+  //             showSaveAndNext: false
+  //           });
+  //         }}
+  //       >
+  //         Bulk Edit
+  //       </MenuItem>
+  //       <MenuItem
+  //         onClick={() => {
+  //           const dataToDelete = selectedRecords
+  //             ?.filter((e) => !e.hideSelection)
+  //             .map((rec: any) => {
+  //               const obj: any = {};
+  //               obj.id = rec._id;
+  //               obj.type = rec?.type;
+  //               obj.materialId = rec?.materialId;
+  //               return obj;
+  //             });
+  //           setDeleteData(dataToDelete);
+  //         }}
+  //       >
+  //         Delete
+  //       </MenuItem>
+  //     </>
+  //   );
+  // };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
@@ -578,9 +577,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={allowedToEdit}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+        isActionButtonVisible={false}
         previewDownloadProps={previewDownloadProps}
         leftSideContents
         rightSideContents
@@ -600,6 +597,17 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
             expander={true}
+            bulkActionItems={
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                planningData={planningData}
+                disableAssignSerializedAssets={disableAssignSerializedAssets}
+                setAssetAssignedProduct={setAssetAssignedProduct}
+                setAddDialog={setAddDialog}
+                setMaterialEdit={setMaterialEdit}
+                setDeleteData={setDeleteData}
+              />
+            }
           />
         </Box>
       ) : (
@@ -702,3 +710,60 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
 };
 
 export default Material;
+
+const BulkActionItems = ({
+  selectedRecords,
+  planningData,
+  disableAssignSerializedAssets,
+  setAssetAssignedProduct,
+  setAddDialog,
+  setMaterialEdit,
+  setDeleteData
+}) => {
+  return (
+    <BulkActionContainer>
+      {planningData.type === 'Rental Job' && (
+        <BulkActionContainer.Button
+          disabled={disableAssignSerializedAssets()}
+          onClick={() => {
+            setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === MATERIAL_TYPE.product && i?.productDetail?.serializedProduct));
+            setAddDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, parentId: null });
+          }}
+        >
+          Assign Serialized Asset
+        </BulkActionContainer.Button>
+      )}
+
+      <BulkActionContainer.Button
+        onClick={() => {
+          setMaterialEdit({
+            open: true,
+            data: selectedRecords?.filter((e) => !e.hideSelection && e?.type !== MATERIAL_TYPE.serializedAsset),
+            bulkedit: true,
+            showSaveAndNext: false
+          });
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+
+      <BulkActionContainer.Button
+        buttonType="red"
+        onClick={() => {
+          const dataToDelete = selectedRecords
+            ?.filter((e) => !e.hideSelection)
+            .map((rec: any) => {
+              const obj: any = {};
+              obj.id = rec._id;
+              obj.type = rec?.type;
+              obj.materialId = rec?.materialId;
+              return obj;
+            });
+          setDeleteData(dataToDelete);
+        }}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

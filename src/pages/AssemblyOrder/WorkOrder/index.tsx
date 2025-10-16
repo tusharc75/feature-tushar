@@ -46,6 +46,7 @@ import ProductQtyDialog from 'src/pages/AssemblyOrder/WorkOrder/ProductQtyDialog
 import PreviewDownloadNew from 'src/components/PreviewDownloadNew';
 import BulkEditWorkOrder from 'src/pages/WorkOrder/BulkEditWorkOrder';
 import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -941,38 +942,7 @@ const WorkOrder = ({
       )}
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={true}
-        actionButtonMenuItems={
-          <ActionButtonMenuItems
-            {...{
-              selectedRecords,
-              allowedToEdit,
-              permissions,
-              user,
-              checkUniqWorkOrder,
-              setDeleteData,
-              setShowDeleteConfirmBox,
-              setAutoCompleteData,
-              setCompleteConfirmBox,
-              checkParentProduct,
-              setAddServicesDialog,
-              setUserAssignDialog,
-              setWorkStationAssignDialog,
-              dataRows,
-              setConsumablesDialog,
-              setArrangeView,
-              setShowDrawingDialog,
-              updateWorkOrdetStatus,
-              getFilterSelectedRecords,
-              resources,
-              setBulkEditWorkOrderDialog,
-              setOpenSerializedPackageDialog,
-              setShowManageRepairJobDialog,
-              setRepairJobReceiveConfirmation
-            }}
-          />
-        }
-        actionButtonProps={{ disabled: getFilterSelectedRecords(selectedRecords)?.length === 0 }}
+        isActionButtonVisible={false}
         hasXpadding
         rightSideContents={rightSideContents()}
       />
@@ -991,6 +961,34 @@ const WorkOrder = ({
               hideAction={!allowedToEdit}
               expander={true}
               isClientSideGrid={true}
+              bulkActionItems={
+                <BulkActionItems
+                  selectedRecords={selectedRecords}
+                  allowedToEdit={allowedToEdit}
+                  permissions={permissions}
+                  user={user}
+                  checkUniqWorkOrder={checkUniqWorkOrder}
+                  setDeleteData={setDeleteData}
+                  setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+                  setAutoCompleteData={setAutoCompleteData}
+                  setCompleteConfirmBox={setCompleteConfirmBox}
+                  checkParentProduct={checkParentProduct}
+                  setAddServicesDialog={setAddServicesDialog}
+                  setUserAssignDialog={setUserAssignDialog}
+                  setWorkStationAssignDialog={setWorkStationAssignDialog}
+                  dataRows={dataRows}
+                  setConsumablesDialog={setConsumablesDialog}
+                  setArrangeView={setArrangeView}
+                  setShowDrawingDialog={setShowDrawingDialog}
+                  updateWorkOrdetStatus={updateWorkOrdetStatus}
+                  getFilterSelectedRecords={getFilterSelectedRecords}
+                  resources={resources}
+                  setBulkEditWorkOrderDialog={setBulkEditWorkOrderDialog}
+                  setOpenSerializedPackageDialog={setOpenSerializedPackageDialog}
+                  setShowManageRepairJobDialog={setShowManageRepairJobDialog}
+                  setRepairJobReceiveConfirmation={setRepairJobReceiveConfirmation}
+                />
+              }
             />
           </Box>
         </>
@@ -1237,7 +1235,7 @@ const WorkOrder = ({
 
 export default WorkOrder;
 
-const ActionButtonMenuItems = ({
+const BulkActionItems = ({
   selectedRecords,
   allowedToEdit,
   permissions,
@@ -1283,24 +1281,26 @@ const ActionButtonMenuItems = ({
   };
 
   return (
-    <>
-      <MenuItem
+    <BulkActionContainer>
+      <BulkActionContainer.Button
         disabled={!checkParentProduct(getFilterSelectedRecords(selectedRecords))}
         onClick={() => {
           setAddServicesDialog({ open: true, new: false });
         }}
       >
         Add Existing Services
-      </MenuItem>
-      <MenuItem
+      </BulkActionContainer.Button>
+
+      <BulkActionContainer.Button
         disabled={!checkParentProduct(getFilterSelectedRecords(selectedRecords))}
         onClick={() => {
           setAddServicesDialog({ open: true, new: true });
         }}
       >
         Add New Service
-      </MenuItem>
-      <MenuItem
+      </BulkActionContainer.Button>
+
+      <BulkActionContainer.Button
         disabled={getFilterSelectedRecords(selectedRecords)?.filter((d) => d.type === MATERIAL_TYPE.service)?.length ? false : true}
         onClick={() => {
           const uniqueAssignedUsers: any = flatMap(
@@ -1316,9 +1316,10 @@ const ActionButtonMenuItems = ({
         }}
       >
         Assign Technician
-      </MenuItem>
+      </BulkActionContainer.Button>
+
       {allowedToEdit && permissions?.workStations?.isRead && (
-        <MenuItem
+        <BulkActionContainer.Button
           disabled={getFilterSelectedRecords(selectedRecords)?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
           onClick={() => {
             const uniqueAssignedWorkStations: any = flatMap(
@@ -1334,12 +1335,14 @@ const ActionButtonMenuItems = ({
           }}
         >
           Assign Work Station
-        </MenuItem>
+        </BulkActionContainer.Button>
       )}
+
       {!user?.user?.brandPolicy?.workOrderConsumableHide && (
-        <MenuItem
+        <BulkActionContainer.Button
           disabled={
-            getFilterSelectedRecords(selectedRecords)?.filter((d) => [MATERIAL_TYPE.package, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 && checkUniqWorkOrder()
+            getFilterSelectedRecords(selectedRecords)?.filter((d) => [MATERIAL_TYPE.package, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
+            checkUniqWorkOrder()
               ? false
               : true
           }
@@ -1360,52 +1363,64 @@ const ActionButtonMenuItems = ({
           }}
         >
           Add Products/Consumables
-        </MenuItem>
+        </BulkActionContainer.Button>
       )}
-      <MenuItem
+
+      <BulkActionContainer.Button
         onClick={() => {
           setArrangeView(true);
         }}
         disabled={
           getFilterSelectedRecords(selectedRecords)?.length &&
-            getFilterSelectedRecords(selectedRecords)?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
-            getFilterSelectedRecords(selectedRecords)?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
+          getFilterSelectedRecords(selectedRecords)?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
+          getFilterSelectedRecords(selectedRecords)?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
             ? false
             : true
         }
       >
         Arrange Services
-      </MenuItem>
-      {getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.package && e?.status === WORK_ORDER_STATUS.draft)?.length > 0 &&
-        <MenuItem
+      </BulkActionContainer.Button>
+
+      {getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.package && e?.status === WORK_ORDER_STATUS.draft)?.length >
+        0 && (
+        <BulkActionContainer.Button
           onClick={() => {
-            updateWorkOrdetStatus()
+            updateWorkOrdetStatus();
           }}
         >
           Ready to Build
-        </MenuItem>}
-      <MenuItem
+        </BulkActionContainer.Button>
+      )}
+
+      <BulkActionContainer.Button
         onClick={() => {
           setAutoCompleteData(getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.canAutoCompleteWorkOrder));
           setCompleteConfirmBox(true);
         }}
         disabled={
           checkUniqWorkOrderType() &&
-            getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
-            getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.package).every((e) => e?.canAutoCompleteWorkOrder)
+          getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
+          getFilterSelectedRecords(selectedRecords)
+            ?.filter((e) => e.type === MATERIAL_TYPE.package)
+            .every((e) => e?.canAutoCompleteWorkOrder)
             ? false
             : true
         }
       >
         Auto Complete Work Order(s)
-      </MenuItem>
+      </BulkActionContainer.Button>
+
       {permissions?.repairJob?.isCreate && (
-        <MenuItem
+        <BulkActionContainer.Button
           onClick={() => {
-            if (getFilterSelectedRecords(selectedRecords)?.every(r => r?.serializedPackage)) {
-              setShowManageRepairJobDialog({ open: true, serializedPackage: getFilterSelectedRecords(selectedRecords)?.map(r => r?.serializedPackage?.optionValue) })
+            if (getFilterSelectedRecords(selectedRecords)?.every((r) => r?.serializedPackage)) {
+              setShowManageRepairJobDialog({ open: true, serializedPackage: getFilterSelectedRecords(selectedRecords)?.map((r) => r?.serializedPackage?.optionValue) });
             } else {
-              setOpenSerializedPackageDialog({ open: true, ids: getFilterSelectedRecords(selectedRecords)?.map(r => r?.workOrder?._id), createRepairJobDialog: true })
+              setOpenSerializedPackageDialog({
+                open: true,
+                ids: getFilterSelectedRecords(selectedRecords)?.map((r) => r?.workOrder?._id),
+                createRepairJobDialog: true
+              });
             }
           }}
           disabled={getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)?.length
@@ -1415,34 +1430,15 @@ const ActionButtonMenuItems = ({
                 && !r?.workOrder?.currentRepairJob && r?.workOrder?.canSendToSupplier) ? false : true}
         >
           {`Create ${resources?.repairJob?.titleSingular}`}
-        </MenuItem>
+        </BulkActionContainer.Button>
       )}
+
       {permissions?.repairJob?.isUpdate && (
-        <MenuItem
+        <BulkActionContainer.Button
           onClick={() => {
             setRepairJobReceiveConfirmation({ open: true, sendToCustomer: false });
           }}
-          disabled={getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)?.length &&
-            getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)
-              ?.every(
-                (r) =>
-                  r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder &&
-                  r?.workOrder?.currentRepairJob &&
-                  getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.currentRepairJob === r?.workOrder?.currentRepairJob
-              )
-            ? false
-            : true
-          }
-        >
-          {`Receive From Supplier`}
-        </MenuItem>
-      )}
-      {permissions?.repairJob?.isUpdate && (
-        <MenuItem
-          onClick={() => {
-            setRepairJobReceiveConfirmation({ open: true, sendToCustomer: true });
-          }}
-          disabled={getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package)?.length &&
+          disabled={
             getFilterSelectedRecords(selectedRecords)
               ?.filter((e) => e?.type === MATERIAL_TYPE.package)
               ?.every(
@@ -1451,18 +1447,41 @@ const ActionButtonMenuItems = ({
                   r?.workOrder?.currentRepairJob &&
                   getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.currentRepairJob === r?.workOrder?.currentRepairJob
               )
-            ? false
-            : true
+              ? false
+              : true
           }
         >
-          {`Send To Customer`}
-        </MenuItem>
+          Receive From Supplier
+        </BulkActionContainer.Button>
       )}
-      <MenuItem
+
+      {permissions?.repairJob?.isUpdate && (
+        <BulkActionContainer.Button
+          onClick={() => {
+            setRepairJobReceiveConfirmation({ open: true, sendToCustomer: true });
+          }}
+          disabled={
+            getFilterSelectedRecords(selectedRecords)
+              ?.filter((e) => e?.type === MATERIAL_TYPE.package)
+              ?.every(
+                (r) =>
+                  r?.workOrder?.type === WORK_ORDER_TYPE.assemblyOrder &&
+                  r?.workOrder?.currentRepairJob &&
+                  getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.currentRepairJob === r?.workOrder?.currentRepairJob
+              )
+              ? false
+              : true
+          }
+        >
+          Send To Customer
+        </BulkActionContainer.Button>
+      )}
+
+      <BulkActionContainer.Button
         disabled={
           checkUniqWorkOrder() &&
-            (getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-              getFilterSelectedRecords(selectedRecords)?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
+          (getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+            getFilterSelectedRecords(selectedRecords)?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
             ? false
             : true
         }
@@ -1477,16 +1496,29 @@ const ActionButtonMenuItems = ({
         }}
       >
         Upload Attachments
-      </MenuItem>
-      <MenuItem
-        disabled={getFilterSelectedRecords(selectedRecords)?.some(r => [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(r?.workOrder?.status)) || !permissions?.workOrder?.isUpdate}
+      </BulkActionContainer.Button>
+
+      <BulkActionContainer.Button
+        disabled={
+          getFilterSelectedRecords(selectedRecords)?.some((r) => [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(r?.workOrder?.status)) ||
+          !permissions?.workOrder?.isUpdate
+        }
         onClick={() => {
-          setBulkEditWorkOrderDialog({ open: true, _ids: uniq(getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.workOrder)?.map(r => r?.workOrder?._id)) })
+          setBulkEditWorkOrderDialog({
+            open: true,
+            _ids: uniq(
+              getFilterSelectedRecords(selectedRecords)
+                ?.filter((e) => e?.workOrder)
+                ?.map((r) => r?.workOrder?._id)
+            )
+          });
         }}
       >
         {`Bulk Edit ${resources?.workOrder?.titlePlural}`}
-      </MenuItem>
-      <MenuItem
+      </BulkActionContainer.Button>
+
+      <BulkActionContainer.Button
+        buttonType="red"
         onClick={() => {
           setDeleteData(getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.canDelete));
           setShowDeleteConfirmBox(true);
@@ -1494,7 +1526,7 @@ const ActionButtonMenuItems = ({
         disabled={getFilterSelectedRecords(selectedRecords)?.some((e) => e?.canDelete) ? false : true}
       >
         Delete
-      </MenuItem>
-    </>
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
   );
 };

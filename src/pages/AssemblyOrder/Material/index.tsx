@@ -32,6 +32,7 @@ import MaterialQtyDialog from 'src/pages/AssemblyOrder/Material/MaterialQtyDialo
 import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
 import { groupBy, orderBy } from 'lodash';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, fetchAssembleOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -533,47 +534,13 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     }
   }
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        {permissions?.serializedPackages?.isRead &&
-          getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.workOrderType === WORK_ORDER_TYPE.disassemblyOrder)?.length > 0 && (
-            <MenuItem
-              disabled={checkUniqueWarehouse(getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package))}
-              onClick={() => {
-                setOpenSerializedPackagesDialog(true);
-              }}
-            >{`Assign ${resources?.serializedPackages?.titleSingular}`}</MenuItem>
-          )}
-        <MenuItem
-          disabled={getFilterSelectedRecords(selectedRecords)?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
-          onClick={() => {
-            handleDeleteMultiple()
-          }}
-        >
-          Delete
-        </MenuItem>
-        <MenuItem
-          disabled={getFilterSelectedRecords(selectedRecords)?.every(r => r?.parentId && r?.type === MATERIAL_TYPE.package && r?.workOrder && r?.workOrder?.status !== WORK_ORDER_STATUS.completed) ? false : true}
-          onClick={() => {
-            setConfermPackageToProduct(true)
-          }}
-        >
-          {`Proceed Without ${resources?.workOrder?.titlePlural}`}
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <Fragment>
       {allowedToEdit && (
         <DetailsPageHeader
           isAddButtonVisible={true}
           addButtonMenuItems={addButtonMenuItems()}
-          isActionButtonVisible={true}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          actionButtonProps={{ disabled: getFilterSelectedRecords(selectedRecords)?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+          isActionButtonVisible={false}
           hasXpadding
         />
       )}
@@ -596,6 +563,18 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
               keys: [{ key: 'material', filterType: [MATERIAL_TYPE.package] }],
               _id: assemblyOrderData?._id
             }}
+            bulkActionItems={
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                permissions={permissions}
+                resources={resources}
+                setOpenSerializedPackagesDialog={setOpenSerializedPackagesDialog}
+                handleDeleteMultiple={handleDeleteMultiple}
+                setConfermPackageToProduct={setConfermPackageToProduct}
+                getFilterSelectedRecords={getFilterSelectedRecords}
+                checkUniqueWarehouse={checkUniqueWarehouse}
+              />
+            }
           />
         </Box>
       ) : (
@@ -756,3 +735,55 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
 };
 
 export default Material;
+
+const BulkActionItems = ({
+  selectedRecords,
+  permissions,
+  resources,
+  setOpenSerializedPackagesDialog,
+  handleDeleteMultiple,
+  setConfermPackageToProduct,
+  getFilterSelectedRecords,
+  checkUniqueWarehouse
+}) => {
+  return (
+    <BulkActionContainer>
+      {permissions?.serializedPackages?.isRead &&
+        getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.workOrderType === WORK_ORDER_TYPE.disassemblyOrder)?.length > 0 && (
+          <BulkActionContainer.Button
+            disabled={checkUniqueWarehouse(getFilterSelectedRecords(selectedRecords)?.filter((e) => e?.type === MATERIAL_TYPE.package))}
+            onClick={() => {
+              setOpenSerializedPackagesDialog(true);
+            }}
+          >
+            {`Assign ${resources?.serializedPackages?.titleSingular}`}
+          </BulkActionContainer.Button>
+        )}
+
+      <BulkActionContainer.Button
+        buttonType="red"
+        disabled={getFilterSelectedRecords(selectedRecords)?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
+        onClick={() => {
+          handleDeleteMultiple();
+        }}
+      >
+        Delete
+      </BulkActionContainer.Button>
+
+      <BulkActionContainer.Button
+        disabled={
+          getFilterSelectedRecords(selectedRecords)?.every(
+            (r) => r?.parentId && r?.type === MATERIAL_TYPE.package && r?.workOrder && r?.workOrder?.status !== WORK_ORDER_STATUS.completed
+          )
+            ? false
+            : true
+        }
+        onClick={() => {
+          setConfermPackageToProduct(true);
+        }}
+      >
+        {`Proceed Without ${resources?.workOrder?.titlePlural}`}
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

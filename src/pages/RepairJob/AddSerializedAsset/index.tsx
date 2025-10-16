@@ -27,6 +27,7 @@ import { editDisable, repairJobMessage } from 'src/constants/messageHelpers';
 import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
 import { startCase } from 'lodash';
 import { isMobile, isTablet } from 'react-device-detect';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const SerializedAsset = ({
   repairJobData,
@@ -407,35 +408,6 @@ const SerializedAsset = ({
     );
   };
 
-  const actionButtonMenuitems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords.length === 0}
-          onClick={() => {
-            setShowEditDialog({ open: true, isBulkedit: true, data: null, selectedRecords: selectedRecords, showSaveAndNext: false });
-          }}
-        >
-          {'Bulk Edit'}
-        </MenuItem>
-        <MenuItem
-          disabled={selectedRecords.length === 0 || selectedRecords.some((s) => {
-            if (s?.type === MATERIAL_TYPE.serializedPackage) {
-              return s?.status !== SERIALIZED_PACKAGE_STATUS.reserved
-            } else {
-              return s?.status !== ASSET_STATUS.reserved
-            }
-          })}
-          onClick={() => {
-            setShowRemoveConfirmationDialog({ open: true, data: selectedRecords });
-          }}
-        >
-          {'Delete'}
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <>
       {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
@@ -443,9 +415,7 @@ const SerializedAsset = ({
           <DetailsPageHeader
             isAddButtonVisible={allowedOperation}
             addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuitems()}
-            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+            isActionButtonVisible={false}
             hasXpadding
           />
         </>
@@ -464,6 +434,13 @@ const SerializedAsset = ({
             hideAction={!allowedToEdit}
             onSaveEdit={onSaveInlineEdit}
             refreshGrid={fetchRecords}
+            bulkActionItems={
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                setShowEditDialog={setShowEditDialog}
+                setShowRemoveConfirmationDialog={setShowRemoveConfirmationDialog}
+              />
+            }
           />
         </Box>
       ) : (
@@ -546,3 +523,36 @@ const SerializedAsset = ({
   );
 };
 export default SerializedAsset;
+
+const BulkActionItems = ({ selectedRecords, setShowEditDialog, setShowRemoveConfirmationDialog }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={selectedRecords.length === 0}
+        onClick={() => {
+          setShowEditDialog({ open: true, isBulkedit: true, data: null, selectedRecords: selectedRecords, showSaveAndNext: false });
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        buttonType="red"
+        disabled={
+          selectedRecords.length === 0 ||
+          selectedRecords.some((s) => {
+            if (s?.type === MATERIAL_TYPE.serializedPackage) {
+              return s?.status !== SERIALIZED_PACKAGE_STATUS.reserved
+            } else {
+              return s?.status !== ASSET_STATUS.reserved
+            }
+          })
+        }
+        onClick={() => {
+          setShowRemoveConfirmationDialog({ open: true, data: selectedRecords });
+        }}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
