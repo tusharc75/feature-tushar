@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, MenuItem, useMediaQuery } from '@mui/material';
+import { Box, useMediaQuery } from '@mui/material';
 import { serviceMaster, sidebarResource } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -16,6 +16,7 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { FiExternalLink } from 'react-icons/fi';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
@@ -281,20 +282,6 @@ function Product({ id }) {
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            setShowConfirmBox({ open: true, data: selectedRecords });
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <div>
       {permissions?.serviceMaster?.isUpdate && (
@@ -303,9 +290,7 @@ function Product({ id }) {
             isAddButtonVisible
             addButtonMenuItems
             addButtonProps={{ onClick: () => setOpenAssignProductDialog(true) }}
-            isActionButtonVisible
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+            isActionButtonVisible={false}
             rightSideContents={rightSideContents()}
             hasXpadding={false}
           />
@@ -323,6 +308,12 @@ function Product({ id }) {
           onSaveEdit={onSaveInlineEdit}
           hideAction={permissions?.serviceMaster?.isUpdate ? false : true}
           hideSelection={permissions?.serviceMaster?.isUpdate ? false : true}
+          bulkActionItems={
+            <BulkActionItems
+              selectedRecords={selectedRecords}
+              setShowConfirmBox={setShowConfirmBox}
+            />
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -357,3 +348,21 @@ function Product({ id }) {
 }
 
 export default Product;
+
+const BulkActionItems = ({ 
+  selectedRecords,
+  setShowConfirmBox
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          setShowConfirmBox({ open: true, data: selectedRecords });
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
