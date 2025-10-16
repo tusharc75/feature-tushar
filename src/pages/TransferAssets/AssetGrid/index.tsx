@@ -276,6 +276,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
                   setShowConfirmBox={setShowConfirmBox}
                   setRemoveData={setRemoveData}
                   resources={resources}
+                  permissions={permissions}
                 />
               }
             />
@@ -350,12 +351,16 @@ const BulkActionItems = ({
   selectedRecords,
   setShowConfirmBox,
   setRemoveData,
-  resources
+  resources,
+  permissions
 }) => {
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
-        disabled={selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0}
+        disabled={
+          !permissions?.transferAsset?.isUpdate || 
+          selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0
+        }
         onClick={() => {
           setShowConfirmBox(true);
           setRemoveData(selectedRecords.map((asset: any) => asset?._id));

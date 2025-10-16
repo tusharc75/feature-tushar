@@ -168,7 +168,7 @@ const Competencies = ({ competencyType }) => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -203,6 +203,7 @@ const Competencies = ({ competencyType }) => {
               selectedRecords={selectedRecords}
               setDeleteRecord={setDeleteRecord}
               setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+              permissions={permissions}
             />
           }
         />
@@ -226,11 +227,12 @@ const Competencies = ({ competencyType }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.competencies?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.competencies?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.competencyName || ''}`
-            : `selected ${resources?.competencies?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.competencies?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -244,11 +246,7 @@ const Competencies = ({ competencyType }) => {
 
 export default Competencies;
 
-const BulkActionItems = ({ 
-  selectedRecords,
-  setDeleteRecord,
-  setShowDeleteConfirmBox
-}) => {
+const BulkActionItems = ({ selectedRecords, setDeleteRecord, setShowDeleteConfirmBox, permissions }) => {
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
@@ -260,6 +258,7 @@ const BulkActionItems = ({
           }
           setShowDeleteConfirmBox(true);
         }}
+        disabled={!permissions?.competencies?.isDelete}
         buttonType="red"
       >
         {`Delete (${selectedRecords?.length})`}
