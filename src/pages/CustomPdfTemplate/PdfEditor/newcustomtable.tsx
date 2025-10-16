@@ -44,6 +44,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
         const { rootElement, onChange, mode, schema } = props;
         const incomingRows = parseContent(schema?.content);
         const incomingCols = (schema?.cols as number) ?? 1;
+        console.log(props)
 
         let state = stateMap.get(rootElement);
         if (!state) {
@@ -495,12 +496,12 @@ const myGridPlugin: Plugin<MyGridSchema> = {
         };
 
         rootElement.appendChild(mainContainer);
-        applyColWidthsToRows();
-        applyRowHeights();
-        createColResizers();
-        createRowResizers();
 
-        if (true) {
+        if (mode == 'designer' || mode == 'form') {
+            applyColWidthsToRows();
+            applyRowHeights();
+            createColResizers();
+            createRowResizers();
             const styleSmallBtn = (btn: HTMLButtonElement) => {
                 Object.assign(btn.style, {
                     width: '34px',
@@ -669,9 +670,8 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             rootElement.appendChild(bottomWrapper);
             rootElement.appendChild(leftColWrapper);
             rootElement.appendChild(rightColWrapper);
+            rootElement.appendChild(resizerLayer);
         }
-
-        rootElement.appendChild(resizerLayer);
 
         const focusCellIfNeededLocal = (root: HTMLElement) => {
             const s = stateMap.get(root);
@@ -695,7 +695,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             applyRowHeights();
             createColResizers();
             createRowResizers();
-            setTimeout(() => focusCellIfNeededLocal(rootElement), 0);
+            focusCellIfNeededLocal(rootElement);
         }, 0);
     },
 
