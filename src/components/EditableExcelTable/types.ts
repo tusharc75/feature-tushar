@@ -13,17 +13,18 @@ export type TableHeadProps = {
 };
 
 export type TableBodyProps = {
-  columns: EditableExcelTableProps['columns'];
-  data: any[];
   tableBodyRef: UseEditableExcelTable['tableBodyRef'];
   containerRef: React.MutableRefObject<HTMLDivElement>;
   rangeRef: React.MutableRefObject<HTMLDivElement>;
+  rowLineRef: React.MutableRefObject<HTMLDivElement>;
 };
 export type TableRowProps = {
   data: any;
   columns: EditableExcelTableProps['columns'];
   rowIndex: number;
   onMouseDown: UseTableRange['onMouseDown'];
+  containerRef: React.MutableRefObject<HTMLDivElement>;
+  rowLineRef: React.MutableRefObject<HTMLDivElement>;
 };
 
 export type TableCellProps = {
@@ -38,3 +39,16 @@ export type UseEditableExcelTable = ReturnType<typeof useEditableExcelTable>;
 export type UseTableRange = ReturnType<typeof useTableRange>;
 
 export type CellPosition = { row: number; col: number };
+
+export type CellProps = {
+  cellIndex: number;
+  rowIndex: number;
+  data: any;
+  column: TColType;
+  isEditing: boolean;
+  exitEditMode: () => void;
+  allowedEditing: boolean;
+  isSelected: boolean;
+};
+
+export type Option = { optionLabel: string; optionValue: string } & Record<string, any>;

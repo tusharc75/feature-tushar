@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import { CellPosition } from 'src/components/EditableExcelTable/types';
-import { copyRangeToClipboard, getCellValueText, getRange } from 'src/components/EditableExcelTable/utils';
+import { copyRangeToClipboard, getCellFormattedValue, getRange } from 'src/components/EditableExcelTable/utils';
 
 const DASHED_BORDER = ['outline-1', 'outline-blue-500', 'outline-dashed', 'outline-offset-[-2px]'];
 
@@ -24,6 +24,7 @@ export const useTableRange = ({
   const selectedrange2dArray = useRef<number[][]>(null);
   const startCellRect = useRef<DOMRect>(null);
   const endCellRect = useRef<DOMRect>(null);
+  const prevPositions = useRef<{ top: number; left: number }>({ top: Infinity, left: Infinity });
 
   // Refs to avoid stale closures inside event listeners
   const startCellRef = useRef<CellPosition | null>(null);
@@ -41,15 +42,28 @@ export const useTableRange = ({
     const containerRect = container.getBoundingClientRect();
     // document.body.style.overflow = 'hidden';
 
-    const top = Math.min(rect1.top, rect2.top) - containerRect.top + container.scrollTop;
-    const left = Math.min(rect1.left, rect2.left) - containerRect.left + container.scrollLeft;
+    let top = Math.min(rect1.top, rect2.top) - containerRect.top + container.scrollTop;
+    let left = Math.min(rect1.left, rect2.left) - containerRect.left + container.scrollLeft;
+
+    if (prevPositions.current.top < top) {
+      top = prevPositions.current.top;
+    } else {
+      prevPositions.current.top = top;
+    }
+
+    if (prevPositions.current.left < left) {
+      left = prevPositions.current.left;
+    } else {
+      prevPositions.current.left = left;
+    }
+
     const bottom = Math.max(rect1.bottom, rect2.bottom) - containerRect.top + container.scrollTop;
     const right = Math.max(rect1.right, rect2.right) - containerRect.left + container.scrollLeft;
 
-    borderElement.style.top = `${top - container.scrollTop + 1}px`;
-    borderElement.style.left = `${left - container.scrollLeft + 1}px`;
-    borderElement.style.height = `${bottom - top + container.scrollTop - 2}px`;
-    borderElement.style.width = `${right - left + container.scrollLeft - 2}px`;
+    borderElement.style.top = `${top}px`;
+    borderElement.style.left = `${left}px`;
+    borderElement.style.height = `${bottom - top - 2}px`;
+    borderElement.style.width = `${right - left - 2}px`;
   }, [containerRef, rangeRef]);
 
   const onMouseOver = useCallback(
@@ -69,6 +83,7 @@ export const useTableRange = ({
   const onMouseUp = useCallback(() => {
     document.body.removeEventListener('mouseover', onMouseOver);
     document.body.removeEventListener('mouseup', onMouseUp);
+    prevPositions.current = { top: Infinity, left: Infinity };
     // document.body.style.overflow = '';
     if (startCellRef.current && endCellRef.current) {
       const { cells, map, twoDimentionalArray } = getRange(startCellRef.current, endCellRef.current);
@@ -85,6 +100,7 @@ export const useTableRange = ({
     (e: React.MouseEvent<HTMLTableDataCellElement, MouseEvent>) => {
       const cell = (e.target as HTMLElement).closest('td');
       if (!cell) return;
+      prevPositions.current = { top: Infinity, left: Infinity };
       setCopied(false);
 
       const start = {
@@ -136,7 +152,7 @@ export const useTableRange = ({
           const tempData = [];
           if (row) {
             row.forEach((col) => {
-              tempData.push(getCellValueText(columns[col], data[i]));
+              tempData.push(getCellFormattedValue(columns[col], data[i]));
             });
             cellValues.push(tempData);
           }
@@ -148,7 +164,6 @@ export const useTableRange = ({
         } catch (error) {
           console.log(error);
         }
-        console.log(cellValues);
       }
     };
     document.addEventListener('keydown', handleKeyDown);

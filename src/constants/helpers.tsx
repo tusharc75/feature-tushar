@@ -1284,7 +1284,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length;) {
+        for (let i = 0; i < validationFields?.length; ) {
           const field = validationFields[i];
           const condition =
             field?.type === 'section'
@@ -1691,7 +1691,7 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
         });
       }
       return { permissions, resources };
-    } catch (e) { }
+    } catch (e) {}
   }
 };
 
@@ -2411,7 +2411,7 @@ export const ACTIVITY_RESOURCE = {
   expenseReport: 'expenseReport',
   contentPostPlanning: 'contentPostPlanning',
   assetServiceTicket: 'assetServiceTicket',
-  costBooks: 'costBooks',
+  costBooks: 'costBooks'
 };
 
 export const LOG_RESOURCE = {
@@ -3010,7 +3010,7 @@ export const WORK_ORDER_TYPE_LABEL = {
 
 export const PLUGIN = {
   CUSTOM_TABLE: 'CUSTOM_TABLE'
-}
+};
 
 export const IRT_APPROVER_STATUS = {
   send: 'Email Sent',
@@ -3595,6 +3595,20 @@ export function changeItemIndex<T>(array: T[], item: T, sourceIndex: number, des
   return newArray;
 }
 
+export function addItemAtExactIndex<T>(array: T[], item: T, destinationIndex: number): (T | undefined)[] {
+  const newArray = [...array];
+
+  // If index is beyond current length, pad with undefined
+  if (destinationIndex >= newArray.length) {
+    const padding = new Array(destinationIndex - newArray.length).fill(undefined);
+    return [...newArray, ...padding, item];
+  }
+
+  // Otherwise, splice normally
+  newArray.splice(destinationIndex, 0, item);
+  return newArray;
+}
+
 export function addItemAtIndex<T>(array: T[], item: T, destinationIndex: number) {
   const newArray = [...array];
   newArray.splice(destinationIndex, 0, item);
@@ -3764,8 +3778,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
-  if (typeof callBack !== 'function') callBack = (text) => { };
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
+  if (typeof callBack !== 'function') callBack = (text) => {};
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);

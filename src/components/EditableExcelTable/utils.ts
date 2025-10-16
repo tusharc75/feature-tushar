@@ -1,19 +1,37 @@
 import dayjs from 'dayjs';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
+import { StoreState } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
 import FieldList from 'src/components/FormBuilder/FieldList';
+import { dateFormat, dateTimeFormat, DEFAULT_TIME_ZONE, displayDate, displayDateTime, formatAmountWithCurrency } from 'src/constants/helpers';
+import { SetFastContextStore } from 'src/StateProvider/createFastContext';
+
+const user = JSON.parse(localStorage.getItem('userData') || '');
 
 export function cleanPastedValue({ key, columnsMap, value }: { key: string; columnsMap: Map<string, TColType>; value: string }) {
   const col = columnsMap.get(key);
-  const type = col.type;
-  if (([FieldList.DATE.type, FieldList.DATETIME.type] as (typeof col.type)[]).includes(type) && dayjs(value).isValid()) {
-    return dayjs.tz(value).toISOString();
+  const type = col.type as any;
+  if (FieldList.DATE.type === type) {
+    if (dayjs(value).isValid()) {
+      const timezone = user?.user?.timezone || DEFAULT_TIME_ZONE;
+      return dayjs.tz(value, dateFormat, timezone).toISOString();
+    } else {
+      return '';
+    }
+  }
+  if (FieldList.DATETIME.type === type) {
+    if (dayjs(value).isValid()) {
+      const timezone = user?.user?.timezone || DEFAULT_TIME_ZONE;
+      return dayjs.tz(value, dateTimeFormat, timezone).toISOString();
+    } else {
+      return '';
+    }
   }
   if (
     // prettier-ignore
     ([FieldList.CURRENCYAMOUNT.type, 
       FieldList.CURRENCYNUMBER.type, 
       FieldList.NUMBER.type, 
-      FieldList.DECIMAL.type] as (typeof col.type)[]).includes(type)
+      FieldList.DECIMAL.type]).includes(type)
   ) {
     return convertStringToNumber(value);
   }
@@ -21,14 +39,65 @@ export function cleanPastedValue({ key, columnsMap, value }: { key: string; colu
   return value;
 }
 
-export function getCellValueText(column: TColType, data: any) {
-  if (column?.lookup && column?.type === 'dropDown') {
+export function getCellValue(column: TColType, data: any) {
+  if (column?.lookup && column?.type === FieldList.DROPDOWN.type) {
     return data[`${column.id}Id`];
   }
-  if (column?.lookup && column?.type === 'multiSelect') {
-    return [...(data[`${column.id}Id`] ? [data[`${column.id}Id`]] : []), ...(data[`rest${column.id}`]?.map((o) => o?.optionValue) || [])];
+  if (column?.lookup && column?.type === FieldList.MULTISELECT.type) {
+    const newData = [];
+    if (data[`${column.id}Id`]) {
+      newData.push(data[`${column.id}Id`]);
+    }
+    data[`rest${column.id}`]?.forEach((o) => newData.push(o?.optionValue));
+    return newData;
   }
   return data[column.id];
+}
+
+export const getDropdownOptionValue = (column: TColType, data: any) => {
+  const value = getCellValue(column, data);
+  const options: TColType['option'] = [];
+  for (const option of column.option) {
+    if (typeof value === 'string' && option.optionValue === value) {
+      return option;
+    }
+    if (Array.isArray(value)) {
+      value.includes(option.optionValue);
+      options.push(option);
+    }
+  }
+  return options.length > 0 ? options : null;
+};
+
+export function getCellFormattedValue(column: TColType, data: any) {
+  const value = getCellValue(column, data);
+  const type = column.type as any;
+  const key = column.id || column.accessor;
+
+  if ([FieldList.CURRENCYAMOUNT.type, FieldList.CURRENCYNUMBER.type, FieldList.NUMBER.type, FieldList.DECIMAL.type].includes(type)) {
+    const currencyCode = user.user.currency;
+    return formatAmountWithCurrency(currencyCode, value).fullFormatAmount;
+  }
+  if (FieldList.DATE.type === type) {
+    return displayDate(value);
+  }
+  if (FieldList.DATETIME.type === type) {
+    return displayDateTime(value);
+  }
+  if (FieldList.MULTISELECT.type === type) {
+    const value: string[] = [];
+    if (data[key]) {
+      value.push(data[key]);
+    }
+    data[`rest${key}`]?.forEach((d) => {
+      value.push(d.optionLabel);
+    });
+    return value.join(', ');
+  }
+  if (FieldList.DROPDOWN.type === type) {
+    return data[key];
+  }
+  return value;
 }
 
 export function convertStringToNumber(value: string): number {
@@ -68,4 +137,161 @@ export function getRange(start: { row: number; col: number }, end: { row: number
     }
   }
   return { cells, map, twoDimentionalArray };
+}
+
+export const createEmptyRowData = (columns: TColType[]) => {
+  const data: any = {};
+  for (const col of columns) {
+    const accessor = col.accessor || col.id;
+    data[accessor] = null;
+  }
+  return data;
+};
+
+function parsePlainTextTable(text: string) {
+  const rows = text.split(/\r?\n/).filter((r) => r.trim() !== '');
+  const tableData = rows.map((row) => row.split(/\t/));
+  return tableData;
+}
+
+function parseHTMLTable(html: string) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const rows = [...doc.querySelectorAll('tr')];
+
+  const tableData = rows.map((row) => {
+    return [...row.querySelectorAll('td, th')].map((cell: HTMLElement) => cell.innerText.trim());
+  });
+  return tableData;
+}
+
+export const pasteListener = (event: ClipboardEvent, callBack: (e: ClipboardEvent, data: string[][]) => void) => {
+  const clipboardData = event.clipboardData || (window as any).clipboardData;
+
+  // Try HTML first (if copied from Excel/Sheets)
+  const htmlData = clipboardData.getData('text/html');
+  const textData = clipboardData.getData('text/plain');
+
+  let structure: string[][] = [];
+  if (htmlData) {
+    structure = parseHTMLTable(htmlData);
+  } else if (textData) {
+    structure = parsePlainTextTable(textData);
+  }
+  callBack(event, structure);
+};
+
+const setPastedValue = ({
+  columnsMap,
+  key,
+  value,
+  rowObj
+}: {
+  key: string;
+  columnsMap: Map<string, TColType>;
+  value: string | number;
+  rowObj: any;
+}) => {
+  const col = columnsMap.get(key);
+  const type = col.type;
+  let dirtyValue: any = value;
+  rowObj[key] = value;
+
+  if (col.lookup && FieldList.MULTISELECT.type === type && typeof value === 'string') {
+    const values = value.split(', ');
+    const options = col.option.filter((d) => values.includes(d.optionLabel));
+
+    dirtyValue = [];
+    options.forEach((d) => {
+      dirtyValue.push(d.optionValue);
+    });
+    const [first, ...rest] = options;
+    if (first) {
+      rowObj[key] = first.optionLabel;
+      rowObj[`${key}Id`] = first.optionValue;
+    }
+    if (rest.length) {
+      rowObj[`rest${key}`] = rest;
+    }
+  }
+  if (col.lookup && FieldList.DROPDOWN.type === type) {
+    if (typeof value === 'string') {
+      const option = col.option.find((d) => d.optionLabel === value);
+      if (option) {
+        rowObj[key] = option.optionLabel;
+        rowObj[`${key}Id`] = option.optionValue;
+        dirtyValue = option.optionValue;
+      } else {
+        rowObj[key] = '';
+        rowObj[`${key}Id`] = '';
+      }
+    } else {
+      rowObj[key] = '';
+      rowObj[`${key}Id`] = '';
+    }
+  }
+
+  return { dirtyValue };
+};
+
+export function handlePaste({
+  columnsMap,
+  event,
+  pastedData,
+  setStore
+}: {
+  event: ClipboardEvent;
+  pastedData: string[][];
+  columnsMap: Map<string, TColType>;
+  setStore: SetFastContextStore<StoreState>;
+}) {
+  const targetCell = (event.target as HTMLElement)?.closest('[data-row][data-col]') as HTMLElement | null;
+  if (pastedData.length === 0) return;
+  if (!targetCell) return;
+  event.preventDefault();
+  event.stopPropagation();
+
+  const sortedCells = [...targetCell.parentElement.querySelectorAll('td')]?.map((c) => c.getAttribute('data-key')).filter((d, i) => !!d && i !== 0);
+  const rowIndex = Number(targetCell.getAttribute('data-row'));
+  const colIndex = Number(targetCell.getAttribute('data-col'));
+
+  setStore((prev) => {
+    const newData = [...prev.tableData];
+    const dirtyRows = [...prev.dirtyRows];
+
+    for (let r = 0; r < pastedData.length; r++) {
+      const dataRow = pastedData[r];
+      const currentRowIndex = rowIndex + r;
+      if (!newData[currentRowIndex]) {
+        newData[currentRowIndex] = {} as any;
+      }
+      const dirtyRow: any = {};
+      for (let c = colIndex; c < colIndex + dataRow.length && c < sortedCells.length; c++) {
+        const colKey = sortedCells[c];
+
+        if (colKey) {
+          const cleanedValue = cleanPastedValue({ value: dataRow[c - colIndex], columnsMap, key: colKey });
+          const { dirtyValue } = setPastedValue({ columnsMap, key: colKey, rowObj: newData[currentRowIndex], value: cleanedValue });
+          dirtyRow[colKey] = dirtyValue;
+        }
+      }
+      dirtyRows[currentRowIndex] = { ...newData[currentRowIndex], ...dirtyRow };
+    }
+    return { tableData: newData, dirtyRows: dirtyRows, pasteKey: prev.pasteKey > 100 ? 0 : prev.pasteKey + 1 };
+  });
+}
+
+export function renderCellText(data: any, column: TColType) {
+  const cell = column.cell;
+  if (typeof cell === 'string') {
+    return cell;
+  } else if (typeof cell === 'function') {
+    const props = {
+      row: {
+        original: data
+      }
+    } as any;
+    return cell(props);
+  }
+  return null;
 }

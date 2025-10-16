@@ -37,13 +37,17 @@ export type TColType = {
   id: string;
   isVisible: undefined | boolean;
   show: undefined | boolean;
-  option: any;
+  option: ({ optionLabel: string; optionValue: string } & Record<string, any>)[];
   dataList?: undefined | boolean;
   dataListId?: undefined | string;
   width?: number;
   customContentExpanded: boolean;
   defaultVisible?: boolean;
   lookup?: boolean;
+  formula?: string;
+  isAllowedMinus?: boolean;
+  decimalPlaces?: number;
+  lookupResource?: string;
 } & ColumnDef<any>;
 
 const DebouncedInput = React.forwardRef(
