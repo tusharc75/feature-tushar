@@ -26,12 +26,22 @@ import RepairOrderQtyDialog from './RepairOrderQtyDialog';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddExistingSerializedAsset, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
 import { repairOrderMessage } from 'src/constants/messageHelpers';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const dataAdded = {
   nextButtonAdded: false
 };
 
-const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit, setHasAssetsAdded }) => {
+const Productpackage = ({
+  fetchRepairOrderData,
+  repairOrderData,
+  setNextStep,
+  setNextStepToolTip,
+  renderedFrom,
+  stepFullScreen,
+  allowedToEdit,
+  setHasAssetsAdded
+}) => {
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
@@ -138,11 +148,10 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, se
                 {row.original.detail}
               </p>
             )}
-            {allowedToEdit && (row.original.type === MATERIAL_TYPE.package ||
-              (row.original.type === MATERIAL_TYPE.product && row.original.qtyDisplay > row.original.assetQty)) && (
-                <HtmlTooltip
-                  title={row.original.type === MATERIAL_TYPE.package ? `Add Existing Product` : `Add`}
-                >
+            {allowedToEdit &&
+              (row.original.type === MATERIAL_TYPE.package ||
+                (row.original.type === MATERIAL_TYPE.product && row.original.qtyDisplay > row.original.assetQty)) && (
+                <HtmlTooltip title={row.original.type === MATERIAL_TYPE.package ? `Add Existing Product` : `Add`}>
                   <IconButton
                     onClick={(event) => {
                       if (row.original.type === MATERIAL_TYPE.product) {
@@ -315,14 +324,15 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, se
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.package
-        ? parent.packageDetail?.packageName
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent.serializedAssetDetail.assetNumber
-            : ''
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.package
+          ? parent.packageDetail?.packageName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent.serializedAssetDetail.assetNumber
+              : ''
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
@@ -334,9 +344,10 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, se
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
-      parent.assetQty = parent.type === MATERIAL_TYPE.product
-        ? data.material?.filter((m) => m?.parentId === parent?._id && m?.type === MATERIAL_TYPE.serializedAsset)?.length || 0
-        : 0;
+      parent.assetQty =
+        parent.type === MATERIAL_TYPE.product
+          ? data.material?.filter((m) => m?.parentId === parent?._id && m?.type === MATERIAL_TYPE.serializedAsset)?.length || 0
+          : 0;
       parent.isValid = true;
       parent.canDelete = parent.workOrder || !allowedToEdit ? false : true;
       parent.subRows = generateNestedData(data.material, parent);
@@ -346,28 +357,29 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, se
       }
     });
 
-    const materialTypesPresent = data.material?.reduce((acc, item) => {
-      if ([MATERIAL_TYPE.product, MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset].includes(item.type)) {
-        acc[item.type] = true;
+    const materialTypesPresent = data.material?.reduce(
+      (acc, item) => {
+        if ([MATERIAL_TYPE.product, MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset].includes(item.type)) {
+          acc[item.type] = true;
+        }
+        return acc;
+      },
+      {
+        [MATERIAL_TYPE.product]: false,
+        [MATERIAL_TYPE.package]: false,
+        [MATERIAL_TYPE.serializedAsset]: false
       }
-      return acc;
-    }, {
-      [MATERIAL_TYPE.product]: false,
-      [MATERIAL_TYPE.package]: false,
-      [MATERIAL_TYPE.serializedAsset]: false
-    });
+    );
 
     if (rows.length !== 0) {
       setHasAssetsAdded(true);
       if (rows.filter((_rows) => _rows.isValid === false).length > 0 || !materialTypesPresent?.[MATERIAL_TYPE.serializedAsset]) {
         if (materialTypesPresent?.[MATERIAL_TYPE.product] && !materialTypesPresent[MATERIAL_TYPE.package] && !nextStepMessage) {
           setNextStepToolTip(repairOrderMessage.assignAssets);
-        }
-        else {
+        } else {
           if (nextStepMessage) {
             setNextStepToolTip(nextStepMessage);
-          }
-          else {
+          } else {
             setNextStepToolTip(repairOrderMessage.assignAssets);
           }
         }
@@ -390,14 +402,15 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, se
     let canDelete = subRows?.find((e) => e.workOrder) || !allowedToEdit ? false : true;
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.package
-        ? _subRow.packageDetail?.packageName
-        : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.serializedAsset
-            ? _subRow.serializedAssetDetail.assetNumber
-            : ''
-        }`;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.package
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow.serializedAssetDetail.assetNumber
+              : ''
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription || ''
@@ -597,36 +610,6 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, se
       </>
     );
   };
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && e?.assetQty < e?.qtyDisplay)?.length > 0 && (
-          <MenuItem
-            onClick={() => {
-              setAddExistingProductDialog({
-                open: true,
-                type: MATERIAL_TYPE.serializedAsset,
-                parentId: null,
-                existing: true,
-                productId: null,
-                productCategory: null
-              });
-            }}
-          >
-            {`Assign ${resources?.serializedAsset?.titlePlural}`}
-          </MenuItem>
-        )}
-        <MenuItem
-          disabled={selectedRecords?.filter((e) => e.canDelete)?.length === selectedRecords?.length ? false : true}
-          onClick={() => {
-            handleDeleteMultiple();
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
 
   return (
     <Fragment>
@@ -635,9 +618,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, se
           <DetailsPageHeader
             isAddButtonVisible={allowedToEdit}
             addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+            isActionButtonVisible={false}
             hasXpadding
           />
         </>
@@ -656,6 +637,15 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, se
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             expander={user?.user?.brandPolicy?.repairOrderAddProductPackage ? true : false}
+            bulkActionItems={
+              <BulkActionItems
+                setAddExistingProductDialog={setAddExistingProductDialog}
+                isDeleting={isDeleting}
+                selectedRecords={selectedRecords}
+                handleDeleteMultiple={handleDeleteMultiple}
+                resources={resources}
+              />
+            }
           />
         </Box>
       ) : (
@@ -814,3 +804,37 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, se
 };
 
 export default Productpackage;
+
+const BulkActionItems = ({ setAddExistingProductDialog, isDeleting, selectedRecords, handleDeleteMultiple, resources }) => {
+  return (
+    <BulkActionContainer>
+      {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && e?.assetQty < e?.qtyDisplay)?.length > 0 && (
+        <BulkActionContainer.Button
+          buttonType="theme"
+          disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
+          onClick={() => {
+            setAddExistingProductDialog({
+              open: true,
+              type: MATERIAL_TYPE.serializedAsset,
+              parentId: null,
+              existing: true,
+              productId: null,
+              productCategory: null
+            });
+          }}
+        >
+          {`Assign ${resources?.serializedAsset?.titlePlural}`}
+        </BulkActionContainer.Button>
+      )}
+      <BulkActionContainer.Button
+        buttonType="red"
+        disabled={isDeleting || selectedRecords?.filter((e) => e.canDelete)?.length === selectedRecords?.length ? false : true}
+        onClick={() => {
+          handleDeleteMultiple();
+        }}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

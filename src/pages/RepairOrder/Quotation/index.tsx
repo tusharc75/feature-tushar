@@ -1,5 +1,4 @@
-import { Box, IconButton, Menu, MenuItem, Typography, useMediaQuery } from '@mui/material';
-import { ExpandMore } from '@mui/icons-material';
+import { Box, IconButton, Typography, useMediaQuery } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { capitalize } from 'lodash';
@@ -41,6 +40,7 @@ import { fetch_resource_fields } from 'src/components/ResourceFields';
 import AdditionalCostDialog from 'src/pages/Quotation/Productpackage/AdditionalCostDialog';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { rentalManagementMessage } from 'src/constants/messageHelpers';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 
 const dataAdded = {
   completeDataAdded: false,
@@ -76,7 +76,6 @@ const Quotation = ({
   const [isDeleting, setDeleting] = useState(false);
   const [material, setMaterial] = useState([]);
   const [columns, setColumns] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
   const [customerAcceptable, setCustomerAcceptable] = useState(false);
@@ -474,14 +473,6 @@ const Quotation = ({
     return subRows;
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
     axiosInstance().put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows }).then(() => {
@@ -817,65 +808,6 @@ const Quotation = ({
                     Create New Version
                   </ThemeButton>
                 ) : null)}
-              {repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.expired].includes(
-                quotationData?.versions[currentVersion]?.status
-              ) ? null : (
-                <ThemeButton
-                  mobileTooltip="Actions"
-                  buttonType="yellow"
-                  iconForMobile={<ExpandMore />}
-                  onClick={openActions}
-                  disabled={selectedRecords?.length === 0}
-                  endIcon={<ExpandMore />}
-                >
-                  Actions
-                </ThemeButton>
-              )}
-              <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  disabled={
-                    !Boolean(
-                      selectedRecords &&
-                      selectedRecords.filter((e) => !e.hideSelection).length &&
-                      !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
-                    )
-                  }
-                  onClick={() => {
-                    closeActions();
-                    setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
-                  }}
-                >
-                  Bulk Edit
-                </MenuItem>
-                <MenuItem
-                  disabled={selectedRecords?.length && selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset) ? false : true}
-                  onClick={() => {
-                    closeActions();
-                    setShowCostDialog({ open: true, showSaveAndNext: false, parentId: null });
-                  }}
-                >
-                  Add Manual Entry
-                </MenuItem>
-                {selectedRecords?.length > 0 && selectedRecords?.every((e) => e.type === MATERIAL_TYPE.manualEntry) &&
-                  <MenuItem
-                    onClick={() => {
-                      closeActions();
-                      setDeleteData(selectedRecords?.map((e) => e._id))
-                    }}
-                  >
-                    Delete
-                  </MenuItem>}
-              </Menu>
             </Box>
           )}
           {isMobileScreen && (
@@ -931,6 +863,14 @@ const Quotation = ({
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             expander={true}
+            bulkActionItems={
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                setIsProductEdit={setIsProductEdit}
+                setShowCostDialog={setShowCostDialog}
+                setDeleteData={setDeleteData}
+              />
+            }
           />
         </Box>
       ) : (
@@ -1032,3 +972,47 @@ const Quotation = ({
 };
 
 export default Quotation;
+
+const BulkActionItems = ({ 
+  selectedRecords, 
+  setIsProductEdit, 
+  setShowCostDialog, 
+  setDeleteData 
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={
+          !Boolean(
+            selectedRecords &&
+            selectedRecords.filter((e) => !e.hideSelection).length &&
+            !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
+          )
+        }
+        onClick={() => {
+          setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        disabled={selectedRecords?.length && selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset) ? false : true}
+        onClick={() => {
+          setShowCostDialog({ open: true, showSaveAndNext: false, parentId: null });
+        }}
+      >
+        Add Manual Entry
+      </BulkActionContainer.Button>
+      {selectedRecords?.length > 0 && selectedRecords?.every((e) => e.type === MATERIAL_TYPE.manualEntry) && (
+        <BulkActionContainer.Button
+          buttonType="red"
+          onClick={() => {
+            setDeleteData(selectedRecords?.map((e) => e._id));
+          }}
+        >
+          Delete
+        </BulkActionContainer.Button>
+      )}
+    </BulkActionContainer>
+  );
+};

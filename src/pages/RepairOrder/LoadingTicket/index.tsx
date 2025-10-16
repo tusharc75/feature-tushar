@@ -1,7 +1,6 @@
-import { IconButton, Menu, MenuItem } from '@mui/material';
+import { IconButton } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid2';
-import { ExpandMore } from '@mui/icons-material';
 import { map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
@@ -25,10 +24,10 @@ import {
   repairOrder
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { repairOrderMessage } from 'src/constants/messageHelpers';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 
 
 const LoadingTicket = ({ repairOrderData, setNextStep, setNextStepToolTip, renderedFrom, allowedToEdit }) => {
@@ -37,7 +36,6 @@ const LoadingTicket = ({ repairOrderData, setNextStep, setNextStepToolTip, rende
   const { selectedRecords } = state;
 
   const [columns, setColumns] = useState(null);
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
 
   const {
@@ -252,14 +250,6 @@ const LoadingTicket = ({ repairOrderData, setNextStep, setNextStepToolTip, rende
     setColumns(column);
   };
 
-  const openActions = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorActionEl(null);
-  };
-
   const handleDeliveryTicketDialog = () => {
     if (selectedRecords.length) {
       const data = {};
@@ -313,50 +303,6 @@ const LoadingTicket = ({ repairOrderData, setNextStep, setNextStepToolTip, rende
         <Box display="flex" alignItems="center">
           {allowedToEdit && (
             <Fragment>
-              <ThemeButton
-                mobileTooltip="Actions"
-                buttonType="yellow"
-                iconForMobile={<ExpandMore />}
-                onClick={openActions}
-                disabled={selectedRecords.length === 0}
-                endIcon={<ExpandMore />}
-                id={'details-page-action-button'}
-              >
-                Actions
-              </ThemeButton>
-              <Menu
-                anchorEl={anchorActionEl}
-                keepMounted
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-                id="action-menu"
-                open={Boolean(anchorActionEl)}
-                onClose={closeActions}
-              >
-                <MenuItem
-                  onClick={() => {
-                    closeActions();
-                    handleDeliveryTicketDialog();
-                  }}
-                  disabled={selectedRecords.length === 0 || selectedRecords.some((f) => f.hasOwnProperty('loadingTicketId'))}
-                >
-                  Create Loading Ticket
-                </MenuItem>
-                <MenuItem
-                  disabled={
-                    selectedRecords.length === 0 ||
-                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
-                  }
-                  onClick={() => {
-                    handelProcessTickets();
-                    closeActions();
-                  }}
-                >
-                  Delivered to Customer
-                </MenuItem>
-              </Menu>
               <Box mx={1} />
             </Fragment>
           )}
@@ -375,6 +321,13 @@ const LoadingTicket = ({ repairOrderData, setNextStep, setNextStepToolTip, rende
             hideSelection={!allowedToEdit}
             hideAction={true}
             setWholeRowsCellColor={(rowData) => (rowData?.status === ASSET_STATUS.scrap ? 'dark-gray-1' : '')}
+            bulkActionItems={
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                handleDeliveryTicketDialog={handleDeliveryTicketDialog}
+                handelProcessTickets={handelProcessTickets}
+              />
+            }
           />
         ) : (
           <Box p={2} height={500}>
@@ -401,3 +354,32 @@ const LoadingTicket = ({ repairOrderData, setNextStep, setNextStepToolTip, rende
 };
 
 export default LoadingTicket;
+
+const BulkActionItems = ({ 
+  selectedRecords, 
+  handleDeliveryTicketDialog, 
+  handelProcessTickets 
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={selectedRecords.some((f) => f.hasOwnProperty('loadingTicketId'))}
+        onClick={() => {
+          handleDeliveryTicketDialog();
+        }}
+      >
+        Create Loading Ticket
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        disabled={
+          selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
+        }
+        onClick={() => {
+          handelProcessTickets();
+        }}
+      >
+        Delivered to Customer
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
