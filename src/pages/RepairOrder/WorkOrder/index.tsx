@@ -1493,7 +1493,7 @@ const BulkActionItems = ({
             } else {
               const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
               ids = flattenArray(dataRows)
-                ?.filter((e) => e.serviceIds?.includes(e?.parentId))
+                ?.filter((e) => serviceIds?.includes(e?.parentId))
                 ?.map((e) => e.materialId);
             }
             setConsumablesDialog({ open: true, ids: ids, data: null });
