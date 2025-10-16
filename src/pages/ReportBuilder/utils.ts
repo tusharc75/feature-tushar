@@ -67,6 +67,7 @@ export interface FilterPipeline extends PipelineItem {
     value: any;
     operation: string;
     type: string;
+    resource: string;
   }>;
 }
 
@@ -155,13 +156,20 @@ export const getChipLabel = (field: any, filter: any, operation: any) => {
   }
 };
 
-export const getAvailableFieldsForFilter = (
+export const getAvailableFieldsForPipeline = (
   pipeline: PipelineItem[],
   currentItemIndex: number,
   mainResource: string,
   resourceFieldMap: { [key: string]: any[] }
 ): Array<any> => {
   const pipelineBeforeFilter = pipeline.slice(0, currentItemIndex);
+
+  const idField = {
+    'fieldName': '_id',
+    'fieldLabel': '_id',
+    'resource': mainResource,
+    'type': 'singleLine'
+  }
 
   const lastGroupIndex = pipelineBeforeFilter
     .map((item, index) => (item.type === 'group' ? index : -1))
@@ -214,7 +222,7 @@ export const getAvailableFieldsForFilter = (
       }
     }
 
-    return fields;
+    return [{...idField, resource: 'Summaries'}, ...fields];
   }
 
   mainResourceFields.forEach((field) => {
@@ -236,7 +244,7 @@ export const getAvailableFieldsForFilter = (
     }
   });
 
-  return fields;
+  return [idField, ...fields];
 };
 
 export const validatePipeline = (pipeline: PipelineItem[]): { [itemId: string]: string[] } => {

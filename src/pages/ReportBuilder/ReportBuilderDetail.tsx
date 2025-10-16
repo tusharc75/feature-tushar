@@ -26,12 +26,14 @@ import {
   validatePipeline,
   chartTypeOptions,
   filterOperations,
-  getAvailableFieldsForFilter,
+  getAvailableFieldsForPipeline,
   getChipLabel
 } from './utils';
 import { sidebarResource, UnCamelCase } from 'src/constants/helpers';
 import { BiFilterAlt } from 'react-icons/bi';
 import { FilterFieldSelectionDialog, FilterConfigurationDialog } from './Filters';
+import FieldSelectionPopper from './FieldSelectionPopper';
+
 
 const WithResourceFieldsPopper = ({ isEdit, item, lookupFields, updatePipelineItem }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -84,7 +86,7 @@ const WithResourceFieldsPopper = ({ isEdit, item, lookupFields, updatePipelineIt
             </div>
 
             <div style={{ borderTop: '1px solid var(--common-border-color)' }} className="pt-2">
-              {lookupFields.map((field) => {
+              {lookupFields?.map((field) => {
                 const checked = item?.fields?.includes(field.fieldName);
                 return (
                   <div key={field.fieldName} className="mb-1">
@@ -133,7 +135,9 @@ const FieldMatchRow = ({
   isEdit,
   fetchResourceFields,
   updatePipelineItem,
-  pipelineErrors
+  pipelineErrors,
+  pipeline,
+  resourceFieldMap,
 }: {
   item: LookupPipeline;
   matchIndex: number;
@@ -148,9 +152,14 @@ const FieldMatchRow = ({
   fetchResourceFields: (resource: string, onFieldsLoaded: (fields: any[]) => void) => void;
   updatePipelineItem: (id: string, updates: Partial<PipelineItem>) => void;
   pipelineErrors: { [itemId: string]: string[] };
+  pipeline: PipelineItem[];
+  resourceFieldMap: { [resource: string]: any[] };
 }) => {
   const fromResourceName = resourceOptions?.find((r) => r.value === formValues?.resource)?.title || formValues?.resource;
   const withResourceName = resourceOptions?.find((r) => r.value === item.withResource)?.title || item.withResource;
+
+  const currentSortIndex = pipeline?.findIndex((p) => p?._id === item?._id);
+  const availableFields = getAvailableFieldsForPipeline(pipeline, currentSortIndex, formValues?.resource, resourceFieldMap);
 
   return (
     <>
@@ -240,31 +249,26 @@ const FieldMatchRow = ({
         <Grid size={{ xs: 12, sm: matchIndex > 0 ? 2.5 : 2.5 }}>
           <Box display="flex" alignItems="center" gap={1}>
             <Box flex={1}>
-              <Autocomplete
-                disabled={!isEdit || !item.withResource}
-                value={localFields.find((f) => f.fieldName === item?.fieldToMatch?.[matchIndex]?.localField) || null}
-                options={localFields}
-                getOptionLabel={(option) => option.fieldLabel}
-                onChange={(e, val) => {
+              <FieldSelectionPopper
+                isEdit={isEdit && !!item.withResource}
+                availableFields={availableFields}
+                selectedField={availableFields?.find((f) => f?.fieldName === item?.fieldToMatch?.[matchIndex]?.localField)}
+                onFieldSelect={(field) => {
                   const updatedFieldToMatch = [...item.fieldToMatch];
-                  updatedFieldToMatch[matchIndex] = { ...updatedFieldToMatch[matchIndex], localField: val?.fieldName || '' };
+                  updatedFieldToMatch[matchIndex] = { ...updatedFieldToMatch[matchIndex], localField: field?.fieldName || '' };
                   onUpdate({ fieldToMatch: updatedFieldToMatch });
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    size="small"
-                    label={fromResourceName}
-                    variant="outlined"
-                    fullWidth
-                    required
-                    error={pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`)}
-                    helperText={
-                      pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`) ? `${fromResourceName} field is required` : ''
-                    }
-                    slotProps={{ inputLabel: { shrink: true } }}
-                  />
-                )}
+                textFieldProps={{
+                  size: "small",
+                  label: fromResourceName,
+                  variant: "outlined",
+                  fullWidth: true,
+                  required: true,
+                  error: pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`),
+                  helperText: pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`) ? `${fromResourceName} field is required` : '',
+                  slotProps: { inputLabel: { shrink: true } }
+                }}
+                popperProps={{ width: 350, maxHeight: 300 }}
               />
             </Box>
             <span className="text-lg font-medium" style={{ color: 'var(--primary-text)' }}>
@@ -725,6 +729,7 @@ export default function ReportBuilderDetail() {
           </Box>
 
           <FieldMatchRow
+            pipeline={pipeline}
             item={item}
             matchIndex={0}
             localFields={localFields}
@@ -737,6 +742,7 @@ export default function ReportBuilderDetail() {
             fetchResourceFields={fetchResourceFields}
             updatePipelineItem={updatePipelineItem}
             pipelineErrors={pipelineErrors}
+            resourceFieldMap={resourceFieldMap}
           />
 
           {item?.fieldToMatch?.length > 1 &&
@@ -759,6 +765,8 @@ export default function ReportBuilderDetail() {
                 fetchResourceFields={fetchResourceFields}
                 updatePipelineItem={updatePipelineItem}
                 pipelineErrors={pipelineErrors}
+                pipeline={pipeline}
+                resourceFieldMap={resourceFieldMap}
               />
             ))}
         </CardContent>
@@ -851,10 +859,13 @@ export default function ReportBuilderDetail() {
   };
 
   const renderSortComponent = (item: SortPipeline) => {
-    const resourceFields = resourceFieldMap?.[formValues?.resource] || [];
     const sortField = Object.keys(item.sortBy)[0] || '';
     const sortOrder = item.sortBy[sortField] || 1;
     const itemErrors = pipelineErrors[item._id] || [];
+
+    const currentSortIndex = pipeline?.findIndex((p) => p?._id === item?._id);
+    const availableFields = getAvailableFieldsForPipeline(pipeline, currentSortIndex, formValues?.resource, resourceFieldMap);
+    const selectedField = availableFields?.find((f) => f?.fieldName === sortField);
 
     return (
       <Card key={item?._id} sx={{ mb: 2, border: itemErrors.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
@@ -871,29 +882,27 @@ export default function ReportBuilderDetail() {
 
           <Grid container spacing={2} alignItems="center">
             <Grid size={{ xs: 12, sm: 6 }}>
-              <Autocomplete
-                disabled={!isEdit}
-                value={resourceFields.find((f) => f.fieldName === sortField) || null}
-                options={resourceFields}
-                getOptionLabel={(option) => option.fieldLabel}
-                onChange={(e, val) => {
-                  updatePipelineItem(item?._id, {
-                    sortBy: val ? { [val.fieldName]: sortOrder } : {}
+              <FieldSelectionPopper
+                isEdit={isEdit}
+                availableFields={availableFields}
+                selectedField={selectedField}
+                onFieldSelect={(field) => {
+                  const currentSortBy = Object.keys(item.sortBy)[0] ? Object.values(item.sortBy)[0] : 1;
+                  updatePipelineItem(item._id, {
+                    sortBy: { [field.fieldName]: currentSortBy }
                   });
                 }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    size="small"
-                    label="Sort Field"
-                    variant="outlined"
-                    fullWidth
-                    required
-                    error={pipelineErrors[item._id]?.includes('sortBy_required')}
-                    helperText={pipelineErrors[item._id]?.includes('sortBy_required') ? 'Sort Field is required' : ''}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                  />
-                )}
+                textFieldProps={{
+                  size: "small",
+                  label: "Sort Field",
+                  variant: "outlined",
+                  fullWidth: true,
+                  required: true,
+                  error: pipelineErrors[item._id]?.includes('sortBy_required'),
+                  helperText: pipelineErrors[item._id]?.includes('sortBy_required') ? 'Sort Field is required' : '',
+                  slotProps: { inputLabel: { shrink: true } }
+                }}
+                popperProps={{ width: 400, maxHeight: 400 }}
               />
             </Grid>
 
@@ -1159,7 +1168,7 @@ export default function ReportBuilderDetail() {
 
   const renderFilterComponent = (item: FilterPipeline) => {
     const currentFilterIndex = pipeline?.findIndex((p) => p._id === item._id);
-    const availableFields = getAvailableFieldsForFilter(pipeline, currentFilterIndex, formValues?.resource, resourceFieldMap);
+    const availableFields = getAvailableFieldsForPipeline(pipeline, currentFilterIndex, formValues?.resource, resourceFieldMap);
 
     const handleRemoveFilter = (filterIndex: number) => {
       const updatedFields = item?.fields?.filter((_, index) => index !== filterIndex);
@@ -1224,7 +1233,7 @@ export default function ReportBuilderDetail() {
     );
   };
 
-  const handleAddFilterToPipeline = (filter: { fieldName: string; operation: string; value: any, type: string }) => {
+  const handleAddFilterToPipeline = (filter: { fieldName: string; operation: string; value: any, type: string, resource: string }) => {
     const currentFilter = pipeline?.find((p) => p?._id === filterFieldSelect?.item?._id) as FilterPipeline;
     if (isEmpty(currentFilter)) return;
     let updatedFields = [...(currentFilter?.fields || [])];
@@ -1242,7 +1251,7 @@ export default function ReportBuilderDetail() {
   const getCurrentAvailableFields = (item: PipelineItem) => {
     if (!item?._id) return [];
     const currentFilterIndex = pipeline?.findIndex((p) => p._id === item._id);
-    return getAvailableFieldsForFilter(pipeline, currentFilterIndex, formValues?.resource, resourceFieldMap);
+    return getAvailableFieldsForPipeline(pipeline, currentFilterIndex, formValues?.resource, resourceFieldMap);
   };
 
   return initialValues ? (
