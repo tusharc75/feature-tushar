@@ -68,6 +68,7 @@ export type KPIListType = {
   currencyConverter?: boolean;
   filters: IFilterType[];
   redirectField?: string;
+  dynamic?: boolean
 };
 
 export const statuses = {
@@ -113,6 +114,6 @@ export const defaultFormConfigs: IFormDataType = {
 
 export const frequencyData = [
   { optionLabel: 'Monthly', optionValue: 'month' },
-  { optionLabel: 'Weekly', optionValue: 'week', optionNotSupportedInKpis : ['rentalJobCustomerWiseRevenue', 'rentalJobRevenue'] },
+  { optionLabel: 'Weekly', optionValue: 'week', optionNotSupportedInKpis: ['rentalJobCustomerWiseRevenue', 'rentalJobRevenue'] },
   { optionLabel: 'Daily', optionValue: 'day' }
 ];

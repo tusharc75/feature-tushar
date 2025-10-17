@@ -114,7 +114,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
     setFilterColumns([]);
     let filterColumns;
     if (resource.key === 'standardReport') {
-      const url = resource.url || `/report/${kebabCase(resource.type)}`
+      const url = resource.dynamic ? resource.url : `/report/${kebabCase(resource.type)}`
       let {
         data: {
           data: { columnFields, filterFields }
