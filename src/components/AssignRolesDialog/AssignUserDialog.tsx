@@ -80,7 +80,10 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
     let result = [];
     result = usersConst.filter((data) => {
       return data.concatedName.toLowerCase().search(value.toLowerCase()) !== -1 || data.email.toLowerCase().search(value.toLowerCase()) !== -1;
-    });
+    }).map((userData) => ({
+      ...userData,
+      isChecked: selectedUsers.includes(userData._id)
+    }));
     setUsers(result);
   };
 
@@ -96,7 +99,13 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
                 edge="start"
                 onChange={(e) => {
                   users.forEach((user) => (user.isChecked = e.target.checked));
-                  setSelectedUsers(users.filter((r) => r.isChecked).map((obj) => obj._id));
+                  if (e.target.checked) {
+                    const visibleUserIds = users.map(u => u._id);
+                    setSelectedUsers(prev => [...new Set([...prev, ...visibleUserIds])]);
+                  } else {
+                    const visibleUserIds = users.map(u => u._id);
+                    setSelectedUsers(prev => prev.filter(id => !visibleUserIds.includes(id)));
+                  }
                 }}
                 checked={users.every((x) => x.isChecked)}
                 inputProps={{
@@ -143,7 +152,11 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
                       edge="start"
                       onChange={(e) => {
                         user.isChecked = e.target.checked;
-                        setSelectedUsers(users.filter((r) => r.isChecked).map((obj) => obj._id));
+                        if (e.target.checked) {
+                          setSelectedUsers(prev => [...prev, user._id]);
+                        } else {
+                          setSelectedUsers(prev => prev.filter(id => id !== user._id));
+                        }
                       }}
                       checked={user.isChecked}
                       inputProps={{
