@@ -26,8 +26,6 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
                 ...table.propPanel.defaultSchema,
                 content: '[]',
                 showHead: true,
-                readOnly: true,
-                required: false,
                 head: ['col1', 'col2', 'col3'],
                 headWidthPercentages: [30, 30, 40],
             },
