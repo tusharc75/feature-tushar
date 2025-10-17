@@ -578,47 +578,6 @@ const SerializedAsset = ({
     return false;
   };
 
-  // const actionButtonMenuItems = () => {
-  //   return (
-  //     <>
-  //       {uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount ? (
-  //         <MenuItem
-  //           disabled={checkUniqSupplier() || checkUniqWarehouse()}
-  //           onClick={() => {
-  //             if (!validateAction(repairJobActions.receivedToPlant)) {
-  //               if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
-  //                 if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
-  //                   handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant);
-  //                 } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
-  //                   handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant);
-  //                 }
-  //               }
-  //             }
-  //           }}
-  //         >
-  //           {`Receive to ${resources?.warehouse?.titleSingular}`}
-  //         </MenuItem>
-  //       ) : null}
-  //       <MenuItem
-  //         disabled={checkUniqSupplier() || checkUniqWarehouse() || selectedRecords.some((s) => [ASSET_STATUS.needRepair].includes(s.status))}
-  //         onClick={() => {
-  //           if (!validateAction(repairJobActions.sendToSupplier)) {
-  //             if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
-  //               if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
-  //                 handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier);
-  //               } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
-  //                 handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.supplier);
-  //               }
-  //             }
-  //           }
-  //         }}
-  //       >
-  //         Send to Supplier
-  //       </MenuItem>
-  //     </>
-  //   );
-  // };
-
   const previewDownloadProps = {
     fileName: `${resources?.repairJob?.titleSingular}-${repairJobData?.repairJobName}`,
     subject: `${resources?.repairJob?.titleSingular}-${repairJobData?.repairJobName}`,

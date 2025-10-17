@@ -114,13 +114,13 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
       },
       ...(rentalJobChildFields?.find((r) => r?.fieldName === 'longDescription')
         ? [
-            {
-              accessor: 'longDescription',
-              Header: 'Long Description',
-              Cell: ({ row }) =>
-                row?.original?.longDescription ? <h5 className="text-truncate">{row?.original?.longDescription}</h5> : <NoDataCell />
-            }
-          ]
+          {
+            accessor: 'longDescription',
+            Header: 'Long Description',
+            Cell: ({ row }) =>
+              row?.original?.longDescription ? <h5 className="text-truncate">{row?.original?.longDescription}</h5> : <NoDataCell />
+          }
+        ]
         : []),
       {
         accessor: 'actualStartDate',
@@ -262,22 +262,6 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
 
   return (
     <Box>
-      {/* <DetailsPageHeader
-        isAddButtonVisible={false}
-        isActionButtonVisible={allowedToEdit && user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
-        actionButtonMenuItems={
-          <ActionButtonMenuItems
-            {...{
-              selectedRecords,
-              setOpenMessageDialog,
-              setServiceConfirmationDialog,
-              setDeleteServiceLogConfirmDialog
-            }}
-          />
-        }
-        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-        hasXpadding
-      /> */}
       <Grid container>
         <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
