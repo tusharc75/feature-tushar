@@ -681,7 +681,8 @@ export default function ReportBuilderDetail() {
 
     const submitData: any = {
       _id: id,
-      pipeline: pipeline
+      pipeline: pipeline,
+      fields: values?.fields
     };
 
     axiosInstance()
