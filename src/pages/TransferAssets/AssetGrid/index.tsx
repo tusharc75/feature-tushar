@@ -12,6 +12,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
@@ -244,22 +245,6 @@ const AssetsGrid: FC<AssetsGridProps> = ({
     );
   };
 
-  const ActionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords.length === 0 || selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0}
-          onClick={() => {
-            setShowConfirmBox(true);
-            setRemoveData(selectedRecords.map((asset: any) => asset?._id));
-          }}
-        >
-          {`Remove ${resources?.serializedAsset?.titlePlural}`}
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <Fragment>
       {allowedToEdit && (
@@ -267,11 +252,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
           <DetailsPageHeader
             isAddButtonVisible={true}
             addButtonMenuItems={<AddButtonMenuItems />}
-            isActionButtonVisible={permissions?.transferAsset?.isUpdate}
-            actionButtonMenuItems={<ActionButtonMenuItems />}
-            actionButtonProps={{
-              disabled: selectedRecords.length === 0 || selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0
-            }}
+            isActionButtonVisible={false}
             hasXpadding={true}
           />
         </>
@@ -289,6 +270,15 @@ const AssetsGrid: FC<AssetsGridProps> = ({
               hideAction={!allowedToEdit}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
+              bulkActionItems={
+                <BulkActionItems
+                  selectedRecords={selectedRecords}
+                  setShowConfirmBox={setShowConfirmBox}
+                  setRemoveData={setRemoveData}
+                  resources={resources}
+                  permissions={permissions}
+                />
+              }
             />
           </Box>
         ) : (
@@ -356,3 +346,29 @@ const AssetsGrid: FC<AssetsGridProps> = ({
 };
 
 export default AssetsGrid;
+
+const BulkActionItems = ({ 
+  selectedRecords,
+  setShowConfirmBox,
+  setRemoveData,
+  resources,
+  permissions
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={
+          !permissions?.transferAsset?.isUpdate || 
+          selectedRecords.filter((asset) => asset?.hasOwnProperty('deliveryTicket')).length > 0
+        }
+        onClick={() => {
+          setShowConfirmBox(true);
+          setRemoveData(selectedRecords.map((asset: any) => asset?._id));
+        }}
+        buttonType="red"
+      >
+        {`Remove ${resources?.serializedAsset?.titlePlural}`}
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

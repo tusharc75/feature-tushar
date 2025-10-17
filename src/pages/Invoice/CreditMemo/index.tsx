@@ -22,6 +22,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { RiExchange2Line } from 'react-icons/ri';
 import { deleteDisable } from 'src/constants/messageHelpers';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 function CreditMemo({ invoiceData, allowedToEdit }) {
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_credit_memo`;
@@ -262,14 +263,6 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
     }
   };
 
-  const handleClick = (event) => {
-    setAnchorActionEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorActionEl(null);
-  };
-
   const previewDownloadProps = {
     fileName: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
     subject: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
@@ -379,46 +372,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
               );
             })}
           </Menu>
-          {allowedToEdit && (
-            <ThemeButton
-              disabled={selectedRecords.length === 0}
-              onClick={handleClick}
-              endIcon={<ExpandMore />}
-              mobileTooltip="Actions"
-              buttonType="yellow"
-              iconForMobile={<ExpandMore />}
-            >
-              {'Actions'}
-            </ThemeButton>
-          )}
         </div>
-        <Menu
-          anchorEl={anchorActionEl}
-          keepMounted
-          open={Boolean(anchorActionEl)}
-          onClose={handleClose}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right'
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right'
-          }}
-        >
-          <MenuItem
-            disabled={!selectedRecords?.every((d) => d?.canDelete)}
-            onClick={() => {
-              setShowDeleteConfirmBox({
-                open: true,
-                ids: selectedRecords.map((item) => item._id)
-              });
-              handleClose();
-            }}
-          >
-            Delete
-          </MenuItem>
-        </Menu>
       </Box>
       {columns ? (
         <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'} pt={1}>
@@ -432,6 +386,14 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
             hideAction={allowedToEdit ? false : true}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
+            bulkActionItems={
+              allowedToEdit ? (
+                <BulkActionItems
+                  selectedRecords={selectedRecords}
+                  setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+                />
+              ) : null
+            }
           />
         </Box>
       ) : (
@@ -477,3 +439,22 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
 }
 
 export default CreditMemo;
+
+const BulkActionItems = ({ selectedRecords, setShowDeleteConfirmBox }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        buttonType="red"
+        disabled={selectedRecords.length === 0 || !selectedRecords?.every((d) => d?.canDelete)}
+        onClick={() => {
+          setShowDeleteConfirmBox({
+            open: true,
+            ids: selectedRecords.map((item) => item._id)
+          });
+        }}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

@@ -19,7 +19,6 @@ import {
   fieldServiceOrder,
   fieldTicket,
   getEmailsFromContacts,
-  prepareDataForGrid,
   quotation,
   sidebarResource
 } from 'src/constants/helpers';
@@ -109,14 +108,17 @@ const QuoteBuilder = ({
             <div>
               <p className="text-truncate">
                 {row.original.type === 'serializedAsset' ? 'Asset' : `${startCase(row.original.type)} `}
-                {row.original['type'] === 'product'
+                {row.original['type'] === MATERIAL_TYPE.product
                   ? row.original?.productDetail?.serializedProduct
                     ? '(Serialized)'
                     : '(Non-Serialized)'
-                  : row.original?.type === 'package'
+                  : row.original?.type === MATERIAL_TYPE.package
                     ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
-                      ? '(Product)' : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service ? '(Service)' : ''
-                    : row.original.type === 'service'
+                      ? '(Product)'
+                      : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service
+                        ? '(Service)'
+                        : ''
+                    : row.original.type === MATERIAL_TYPE.service
                       ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                       : ''}
               </p>
@@ -141,18 +143,21 @@ const QuoteBuilder = ({
                 <span>({row.original?.subRows?.length})</span>
               </>
             ) : null}
-            {['product', 'service', 'package', 'serializedAsset']?.includes(row.original.type) && (
+            {['product', 'service', 'package', 'serializedAsset', 'competency']?.includes(row.original.type) && (
               <IconButton
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${row.original.type === MATERIAL_TYPE.serializedAsset
-                      ? routes.serializedAssetDetail.path
-                      : row.original.type === MATERIAL_TYPE.product
-                        ? routes.productDetail.path
-                        : row.original.type === MATERIAL_TYPE.package
-                          ? routes.packagesDetail.path
-                          : routes.serviceMasterDetail.path
+                    `${
+                      row.original.type === MATERIAL_TYPE.serializedAsset
+                        ? routes.serializedAssetDetail.path
+                        : row.original.type === MATERIAL_TYPE.product
+                          ? routes.productDetail.path
+                          : row.original.type === MATERIAL_TYPE.package
+                            ? routes.packagesDetail.path
+                            : row.original.type === MATERIAL_TYPE.service
+                              ? routes.serviceMasterDetail.path
+                              : routes.competenciesDetail.path
                     }/${row.original.materialId}`
                   );
                 }}
@@ -165,19 +170,19 @@ const QuoteBuilder = ({
       },
       ...(user?.user?.brandPolicy?.leadTime
         ? [
-          {
-            accessor: 'leadTime',
-            Header: 'Lead Time (Days)',
-            Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
-            Footer: (info) => {
-              let rows = info.table.getExpandedRowModel().rows;
-              const total = rows
-                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-              return <>{total}</>;
+            {
+              accessor: 'leadTime',
+              Header: 'Lead Time (Days)',
+              Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+              Footer: (info) => {
+                let rows = info.table.getExpandedRowModel().rows;
+                const total = rows
+                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+                return <>{total}</>;
+              }
             }
-          }
-        ]
+          ]
         : []),
       {
         accessor: 'description',
@@ -205,15 +210,19 @@ const QuoteBuilder = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.service
-            ? parent.serviceDetail?.serviceName
-            : parent?.type === MATERIAL_TYPE.manualEntry ? parent?.detail
-              : parent.packageDetail?.packageName
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.serializedAsset
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.service
+              ? parent.serviceDetail?.serviceName
+              : parent?.type === MATERIAL_TYPE.manualEntry
+                ? parent?.detail
+                : parent.type === MATERIAL_TYPE.package
+                  ? parent.packageDetail?.packageName
+                  : parent.competencyDetail?.competencyName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -228,7 +237,11 @@ const QuoteBuilder = ({
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.subRows = generateNestedData(data.material, parent);
-      parent.hideSelection = parent?.fieldTicketCreated ? true : parent?.subRows?.lenght && parent?.subRows?.every((e) => e?.fieldTicketCreated) ? true : false;
+      parent.hideSelection = parent?.fieldTicketCreated
+        ? true
+        : parent?.subRows?.lenght && parent?.subRows?.every((e) => e?.fieldTicketCreated)
+          ? true
+          : false;
     });
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -266,14 +279,26 @@ const QuoteBuilder = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === MATERIAL_TYPE.serializedAsset ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.service ? _subRow.serviceDetail?.serviceName
-            : _subRow.type === MATERIAL_TYPE.package ? _subRow.packageDetail?.packageName : _subRow?.detail || '';
-      _subRow.description = _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription || ''
-        : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || ''
-            : _subRow?.description || '';
+      _subRow.detail =
+        _subRow.type === MATERIAL_TYPE.serializedAsset
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : _subRow.type === MATERIAL_TYPE.service
+              ? _subRow.serviceDetail?.serviceName
+              : _subRow.type === MATERIAL_TYPE.package
+                ? _subRow.packageDetail?.packageName
+                : _subRow.type === 'competency'
+                  ? _subRow.competencyDetail?.competencyName
+                  : _subRow?.detail || '';
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.service
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow?.description || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -480,7 +505,6 @@ const QuoteBuilder = ({
     <Fragment>
       <DetailsPageHeader
         isAddButtonVisible={false}
-
         previewDownloadProps={previewDownloadProps}
         rightSideContents={rightSideContents()}
         hasXpadding

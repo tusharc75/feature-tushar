@@ -22,6 +22,7 @@ import MaterialDialog from './MaterialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
+import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
   const renderedFrom = `${camelCase(sidebarResource?.demandOrder)}_material`;
@@ -370,44 +371,12 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
     columns: columns
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
-          }}
-        >
-          Bulk Edit
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            const dataToDelete = selectedRecords
-              ?.filter((e) => !e.hideSelection)
-              .map((rec: any) => {
-                const obj: any = {};
-                obj.id = rec._id;
-                obj.type = rec?.type;
-                obj.materialId = rec?.materialId;
-                return obj;
-              });
-            setDeleteData(dataToDelete);
-          }}
-        >
-          {`Delete (${selectedRecords?.length})`}
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <Fragment>
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={allowedToEdit}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+        isActionButtonVisible={false}
         previewDownloadProps={previewDownloadProps}
         hasXpadding={false}
       />
@@ -427,6 +396,15 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
               state={state}
               dispatch={dispatch}
               refreshGrid={fetchData}
+              bulkActionItems={
+                allowedToEdit ? (
+                  <BulkActionItems
+                    selectedRecords={selectedRecords}
+                    setMaterialEdit={setMaterialEdit}
+                    setDeleteData={setDeleteData}
+                  />
+                ) : null
+              }
             />
           </Box>
         </>
@@ -480,3 +458,35 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
 };
 
 export default Material;
+
+const BulkActionItems = ({ selectedRecords, setMaterialEdit, setDeleteData }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+
+      <BulkActionContainer.Button
+        buttonType="red"
+        onClick={() => {
+          const dataToDelete = selectedRecords
+            ?.filter((e) => !e.hideSelection)
+            .map((rec: any) => {
+              const obj: any = {};
+              obj.id = rec._id;
+              obj.type = rec?.type;
+              obj.materialId = rec?.materialId;
+              return obj;
+            });
+          setDeleteData(dataToDelete);
+        }}
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
