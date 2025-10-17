@@ -8,6 +8,7 @@ export type Report = {
   type?: string;
   label?: string;
   route: string;
+  dynamic?: boolean
 };
 
 export type ReportWithSection = {
@@ -20,6 +21,7 @@ export type CustomReport = {
   customReportName?: string;
   route: string;
   label: string;
+  dynamic?: boolean
 };
 
 export type FavouriteReport = {
@@ -30,6 +32,7 @@ export type FavouriteReport = {
   type?: string;
   reportType?: 'custom' | 'standard';
   route: string;
+  dynamic?: boolean
 };
 
 export const isReport = (item: any): item is Report => {
@@ -46,6 +49,7 @@ export type SelectedReport = {
   type: ReportType;
   resource: string;
   customReportData?: any;
+  dynamic?: boolean
 };
 
 export type ReportState = {
@@ -58,6 +62,7 @@ export type ReportState = {
   columns: TColType[] | null;
   isColumnsLoading: boolean;
   favouriteReports: FavouriteReport[];
+  dynamic?: boolean,
   favouritList: string[];
   reportList: any[];
 };

@@ -71,7 +71,7 @@ const useReport = () => {
       .map((d) => ({
         ...d,
         label: d.type === 'dynamic' && resources[d.key]?.titlePlural ? resources[d.key]?.titlePlural : d.title,
-        route: `/reports${d.type !== 'dynamic' ? `/${d.type === 'dynamicForm' ? 'dynamic-form' : kebabCase(d.key)}/${d.type === 'dynamicForm' ? kebabCase(d.key) : kebabCase(d.type)}` : routes[d.key]?.path}`
+        route: `/reports${d.type !== 'dynamic' ? `/${d.type === 'dynamicForm' ? 'dynamic-form' : kebabCase(d.key)}/${d.dynamic ? d.url : (d.type === 'dynamicForm' ? kebabCase(d.key) : kebabCase(d.type))}` : routes[d.key]?.path}`
       }));
   }, [state.reportList, permissions, resources]);
   const data = useMemo(() => groupBy(processedReportList, 'section'), [processedReportList]);
@@ -108,7 +108,7 @@ const useReport = () => {
   );
 
   const setSelectedReport = useCallback(
-    async (payload: { title: string; route: string }) => {
+    async (payload: { title: string; route: string, dynamic: boolean }) => {
       setColumns(null);
       setResourceColumns(null);
       if (selectedReport?.route === payload.route) {
@@ -194,7 +194,7 @@ const useReport = () => {
           report: name,
           setFavourite: set
         })
-        .then(() => {})
+        .then(() => { })
         .catch(() => {
           // revert optimistic update
           if (!set) {
@@ -278,7 +278,7 @@ const useReport = () => {
         setResourceColumns(null);
         const currentRouteData = [...processedReportList, ...customReports].find((d) => d.route === pathNameP);
         if (currentRouteData) {
-          const data = await handleGetRoute({ route: currentRouteData.route, title: currentRouteData.label });
+          const data = await handleGetRoute({ route: currentRouteData.route, title: currentRouteData.label, dynamic: currentRouteData.dynamic });
           dispatch({ type: 'setSelectedReport', payload: data });
           setIsColumnsLoading(true);
         }

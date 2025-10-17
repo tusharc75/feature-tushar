@@ -176,11 +176,12 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     try {
       setIsColumnsLoading(true);
       let columns = [];
+      const url = selectedReport.dynamic ? selectedReport.resource : `/report/${selectedReport.resource}`
       let {
         data: {
           data: { columnFields, filterFields }
         }
-      } = await axiosInstance().get(`/report/${selectedReport.resource}/column`);
+      } = await axiosInstance().get(`${url}/column`);
       let newColumns = generateColumns(selectedReport.resource, columnFields);
       newColumns?.forEach((o) => {
         if (resourceCamelCase === 'inventoryHistory') {
@@ -408,7 +409,8 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
 
-    var api = `/report/${selectedReport.resource}`;
+    var api = selectedReport.dynamic ? selectedReport.resource : `/report/${selectedReport.resource}`
+
     axiosInstance()
       .get(`${api}${filterQuery}`, {
         cancelToken: cancelTokenSource?.token

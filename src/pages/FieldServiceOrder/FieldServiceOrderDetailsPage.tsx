@@ -278,7 +278,7 @@ const ServiceOrderDetailsPage = () => {
             <CustomTab value={2}>{resources?.fieldTicket?.titlePlural}</CustomTab>
           )}
           {!isOffline && permissions?.invoice?.isRead && <CustomTab value={3}>{resources?.invoice?.titlePlural}</CustomTab>}
-          {serviceOrderData?.rentalJob && <CustomTab value={4}>On Field</CustomTab>}
+          {serviceOrderData?.rentalJob && <CustomTab value={4}>In the Field</CustomTab>}
           {!(isMobile && !isTablet) && !isOffline && <CustomTab value={5}>Views</CustomTab>}
           {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
