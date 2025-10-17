@@ -327,7 +327,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
       )}
       {showProductAssignDialog && (
         <AssignProductDialog
-          serialized={packageData?.packageType === PACKAGE_TYPE.service || !childItem ? false : null}
+          serialized={(packageData?.packageType === PACKAGE_TYPE.service || !childItem) ? false : null}
           handleCloseDialog={() => setShowProductAssignDialog(false)}
           ids={[...dataRows?.map((e) => e._id)]}
           onSuccess={(rows) => {
