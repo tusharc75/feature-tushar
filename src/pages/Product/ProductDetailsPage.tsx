@@ -74,6 +74,9 @@ const ProductDetailsPage = () => {
   const [productInventoryLoading, setProductInventoryLoading] = useState(false);
   const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
+  const [showProductImagesUpload, setShowProductImagesUpload] = useState(false);
+
+
   useEffect(() => {
     if (id) {
       getProductFieldsAndData();
@@ -146,6 +149,7 @@ const ProductDetailsPage = () => {
         );
         setCustomizedRoutes([{ ...routes.product, title: resources?.product?.titlePlural }, { title: `${data.productData.productName}` }]);
         setProductData(data.productData);
+        setShowProductImagesUpload(data.fields?.length && data?.productData?.productTemplate?.optionLabel ? true : false)
         setLoading(false);
       })
       .catch((error) => {
@@ -243,7 +247,7 @@ const ProductDetailsPage = () => {
           {permissions?.serviceMaster && <CustomTab value={2} label={'Services/Consumables'} />}
           {permissions?.serviceMaster && <CustomTab value={3} label={`Service ${resources?.packages?.titlePlural}`} />}
           {permissions?.repairType && <CustomTab value={4} label={'Repair Types'} />}
-          {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <CustomTab value={5} label={'Product Images'} />}
+          {permissions?.eCommercePolicy?.isRead && showProductImagesUpload && <CustomTab value={5} label={'Product Images'} />}
           {permissions?.packages && <CustomTab value={6} label={`Product ${resources?.packages?.titlePlural}`} />}
           {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab value={7} label={'Parent Products'} />}
           {permissions?.productInventory?.isRead && <CustomTab value={8} label={'History'} />}

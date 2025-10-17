@@ -103,7 +103,7 @@ const ProductConfiguration = (props: ConfigProps) => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`${routes.productTemplate.path}/fields/${productData.productTemplate.optionValue}`);
+      } = await axiosInstance().get(`${routes.productTemplate.path}/fields/${productData?.productTemplate?.optionValue}`);
       const { fields } = data;
       setSpecFields(fields);
       const newColumns = generateColumns(renderedFrom, fields, routes.product.path, true);
