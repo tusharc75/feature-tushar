@@ -1272,7 +1272,7 @@ export default function ReportBuilderDetail() {
 
             {!item?.fields?.length ? (
               <ThemeButton startIcon={<Add />} onClick={() => setFilterFieldSelect({ open: true, item: item })} disabled={!isEdit} buttonType="theme">
-                Add filters to narrow your answer
+                Add Filters
               </ThemeButton>
             ) : (
               <IconButton onClick={() => setFilterFieldSelect({ open: true, item: item })} disabled={!isEdit}>
