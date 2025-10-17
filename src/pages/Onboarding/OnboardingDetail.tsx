@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { Edit, Email } from '@mui/icons-material'; // Add Email icon
+import { Edit, Email } from '@mui/icons-material';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
