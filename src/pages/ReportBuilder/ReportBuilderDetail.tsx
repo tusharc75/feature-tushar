@@ -34,7 +34,6 @@ import { BiFilterAlt } from 'react-icons/bi';
 import { FilterFieldSelectionDialog, FilterConfigurationDialog } from './Filters';
 import FieldSelectionPopper from './FieldSelectionPopper';
 
-
 const WithResourceFieldsPopper = ({ isEdit, item, lookupFields, updatePipelineItem }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const open = Boolean(anchorEl);
@@ -137,7 +136,7 @@ const FieldMatchRow = ({
   updatePipelineItem,
   pipelineErrors,
   pipeline,
-  resourceFieldMap,
+  resourceFieldMap
 }: {
   item: LookupPipeline;
   matchIndex: number;
@@ -259,9 +258,9 @@ const FieldMatchRow = ({
                   onUpdate({ fieldToMatch: updatedFieldToMatch });
                 }}
                 textFieldProps={{
-                  size: "small",
+                  size: 'small',
                   label: fromResourceName,
-                  variant: "outlined",
+                  variant: 'outlined',
                   fullWidth: true,
                   required: true,
                   error: pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`),
@@ -573,8 +572,8 @@ export default function ReportBuilderDetail() {
           _id: `chart-${Date.now()}`,
           type: 'chart',
           chartType: 'bar',
-          xAxis: { field: '', label: '' },
-          yAxis: { field: '', label: '' }
+          xAxis: { field: '', label: '', resource: '' },
+          yAxis: { field: '', label: '', resource: '' }
         };
         setPipeline((prev) => [...prev, chartItem]);
       }
@@ -807,17 +806,17 @@ export default function ReportBuilderDetail() {
               onRemove={
                 item?.accumulator?.length > 1
                   ? () => {
-                    const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
-                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                  }
+                      const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
+                      updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                    }
                   : undefined
               }
               onAddOperation={
                 index === item?.accumulator?.length - 1
                   ? () => {
-                    const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
-                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                  }
+                      const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
+                      updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                    }
                   : undefined
               }
             />
@@ -893,9 +892,9 @@ export default function ReportBuilderDetail() {
                   });
                 }}
                 textFieldProps={{
-                  size: "small",
-                  label: "Sort Field",
-                  variant: "outlined",
+                  size: 'small',
+                  label: 'Sort Field',
+                  variant: 'outlined',
                   fullWidth: true,
                   required: true,
                   error: pipelineErrors[item._id]?.includes('sortBy_required'),
@@ -1010,16 +1009,16 @@ export default function ReportBuilderDetail() {
                   if (['bar', 'line'].includes(val?.optionValue)) {
                     updatePipelineItem(item._id, {
                       chartType: val?.optionValue,
-                      xAxis: { field: '', label: '' },
-                      yAxis: { field: '', label: '' },
+                      xAxis: { field: '', label: '', resource: '' },
+                      yAxis: { field: '', label: '', resource: '' },
                       value: undefined,
                       label: undefined
                     });
                   } else if (val?.optionValue === 'pie') {
                     updatePipelineItem(item._id, {
                       chartType: 'pie',
-                      value: '',
-                      label: '',
+                      value: { field: '', resource: '' },
+                      label: { field: '', resource: '' },
                       xAxis: undefined,
                       yAxis: undefined
                     });
@@ -1044,25 +1043,37 @@ export default function ReportBuilderDetail() {
             {['bar', 'line'].includes(item.chartType) && (
               <>
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField
-                    disabled={!isEdit}
-                    size="small"
-                    label="X-Axis Field"
-                    variant="outlined"
-                    fullWidth
-                    required
-                    value={item.xAxis?.field || ''}
-                    error={itemErrors.includes('xAxis_field_required')}
-                    helperText={itemErrors.includes('xAxis_field_required') ? 'X-Axis Field is required' : ''}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    onChange={(e) => {
-                      updatePipelineItem(item._id, {
-                        xAxis: { ...item.xAxis, field: e.target.value }
-                      });
+                  <FieldSelectionPopper
+                    isEdit={isEdit}
+                    availableFields={getAvailableFieldsForPipeline(
+                      pipeline,
+                      pipeline.findIndex((p) => p._id === item._id),
+                      formValues?.resource,
+                      resourceFieldMap
+                    )}
+                    selectedField={getAvailableFieldsForPipeline(
+                      pipeline,
+                      pipeline.findIndex((p) => p._id === item._id),
+                      formValues?.resource,
+                      resourceFieldMap
+                    )?.find((f) => f.fieldName === item.xAxis?.field)}
+                    onFieldSelect={(field) => {
+                      updatePipelineItem(item._id, { xAxis: { ...item.xAxis, field: field.fieldName, resource: field.resource } });
                     }}
+                    textFieldProps={{
+                      size: 'small',
+                      label: 'X-Axis Field',
+                      variant: 'outlined',
+                      fullWidth: true,
+                      required: true,
+                      error: itemErrors.includes('xAxis_field_required'),
+                      helperText: itemErrors.includes('xAxis_field_required') ? 'X-Axis Field is required' : '',
+                      slotProps: { inputLabel: { shrink: true } }
+                    }}
+                    popperProps={{ width: 400, maxHeight: 400 }}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
                     disabled={!isEdit}
                     size="small"
@@ -1080,27 +1091,39 @@ export default function ReportBuilderDetail() {
                       });
                     }}
                   />
-                </Grid>
+                </Grid> */}
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField
-                    disabled={!isEdit}
-                    size="small"
-                    label="Y-Axis Field"
-                    variant="outlined"
-                    fullWidth
-                    required
-                    value={item.yAxis?.field || ''}
-                    error={itemErrors.includes('yAxis_field_required')}
-                    helperText={itemErrors.includes('yAxis_field_required') ? 'Y-Axis Field is required' : ''}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    onChange={(e) => {
-                      updatePipelineItem(item._id, {
-                        yAxis: { ...item.yAxis, field: e.target.value }
-                      });
+                  <FieldSelectionPopper
+                    isEdit={isEdit}
+                    availableFields={getAvailableFieldsForPipeline(
+                      pipeline,
+                      pipeline.findIndex((p) => p._id === item._id),
+                      formValues?.resource,
+                      resourceFieldMap
+                    )}
+                    selectedField={getAvailableFieldsForPipeline(
+                      pipeline,
+                      pipeline.findIndex((p) => p._id === item._id),
+                      formValues?.resource,
+                      resourceFieldMap
+                    )?.find((f) => f.fieldName === item.yAxis?.field)}
+                    onFieldSelect={(field) => {
+                      updatePipelineItem(item._id, { yAxis: { ...item.yAxis, field: field.fieldName, resource: field.resource } });
                     }}
+                    textFieldProps={{
+                      size: 'small',
+                      label: 'Y-Axis Field',
+                      variant: 'outlined',
+                      fullWidth: true,
+                      required: true,
+                      error: itemErrors.includes('yAxis_field_required'),
+                      helperText: itemErrors.includes('yAxis_field_required') ? 'Y-Axis Field is required' : '',
+                      slotProps: { inputLabel: { shrink: true } }
+                    }}
+                    popperProps={{ width: 400, maxHeight: 400 }}
                   />
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
                     disabled={!isEdit}
                     size="small"
@@ -1118,44 +1141,72 @@ export default function ReportBuilderDetail() {
                       });
                     }}
                   />
-                </Grid>
+                </Grid> */}
               </>
             )}
 
             {item.chartType === 'pie' && (
               <>
                 <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField
-                    disabled={!isEdit}
-                    size="small"
-                    label="Value"
-                    variant="outlined"
-                    fullWidth
-                    required
-                    value={item.value || ''}
-                    error={itemErrors.includes('value_required')}
-                    helperText={itemErrors.includes('value_required') ? 'Value Field is required' : ''}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    onChange={(e) => {
-                      updatePipelineItem(item._id, { value: e.target.value });
+                  <FieldSelectionPopper
+                    isEdit={isEdit}
+                    availableFields={getAvailableFieldsForPipeline(
+                      pipeline,
+                      pipeline.findIndex((p) => p._id === item._id),
+                      formValues?.resource,
+                      resourceFieldMap
+                    )}
+                    selectedField={getAvailableFieldsForPipeline(
+                      pipeline,
+                      pipeline.findIndex((p) => p._id === item._id),
+                      formValues?.resource,
+                      resourceFieldMap
+                    )?.find((f) => f.fieldName === item.value?.field)}
+                    onFieldSelect={(field) => {
+                      updatePipelineItem(item._id, { value: { field: field.fieldName, resource: field.resource } });
                     }}
+                    textFieldProps={{
+                      size: 'small',
+                      label: 'Value Field',
+                      variant: 'outlined',
+                      fullWidth: true,
+                      required: true,
+                      error: itemErrors.includes('value_required'),
+                      helperText: itemErrors.includes('value_required') ? 'Value Field is required' : '',
+                      slotProps: { inputLabel: { shrink: true } }
+                    }}
+                    popperProps={{ width: 400, maxHeight: 400 }}
                   />
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <TextField
-                    disabled={!isEdit}
-                    size="small"
-                    label="Label"
-                    variant="outlined"
-                    fullWidth
-                    required
-                    value={item.label || ''}
-                    error={itemErrors.includes('label_required')}
-                    helperText={itemErrors.includes('label_required') ? 'Label Field is required' : ''}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    onChange={(e) => {
-                      updatePipelineItem(item._id, { label: e.target.value });
+                  <FieldSelectionPopper
+                    isEdit={isEdit}
+                    availableFields={getAvailableFieldsForPipeline(
+                      pipeline,
+                      pipeline.findIndex((p) => p._id === item._id),
+                      formValues?.resource,
+                      resourceFieldMap
+                    )}
+                    selectedField={getAvailableFieldsForPipeline(
+                      pipeline,
+                      pipeline.findIndex((p) => p._id === item._id),
+                      formValues?.resource,
+                      resourceFieldMap
+                    )?.find((f) => f.fieldName === item.label?.field)}
+                    onFieldSelect={(field) => {
+                      updatePipelineItem(item._id, { label: { field: field.fieldName, resource: field.resource } });
                     }}
+                    textFieldProps={{
+                      size: 'small',
+                      label: 'Label Field',
+                      variant: 'outlined',
+                      fullWidth: true,
+                      required: true,
+                      error: itemErrors.includes('label_required'),
+                      helperText: itemErrors.includes('label_required') ? 'Label Field is required' : '',
+                      slotProps: { inputLabel: { shrink: true } }
+                    }}
+                    popperProps={{ width: 400, maxHeight: 400 }}
                   />
                 </Grid>
               </>
@@ -1233,7 +1284,7 @@ export default function ReportBuilderDetail() {
     );
   };
 
-  const handleAddFilterToPipeline = (filter: { fieldName: string; operation: string; value: any, type: string, resource: string }) => {
+  const handleAddFilterToPipeline = (filter: { fieldName: string; operation: string; value: any; type: string; resource: string }) => {
     const currentFilter = pipeline?.find((p) => p?._id === filterFieldSelect?.item?._id) as FilterPipeline;
     if (isEmpty(currentFilter)) return;
     let updatedFields = [...(currentFilter?.fields || [])];
@@ -1332,7 +1383,7 @@ export default function ReportBuilderDetail() {
                                           : null
                                       }
                                       options={resourceOptions}
-                                      onChange={(e, val: any) => { }}
+                                      onChange={(e, val: any) => {}}
                                       renderInput={(params) => (
                                         <TextField
                                           {...params}
