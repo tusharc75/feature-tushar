@@ -51,7 +51,7 @@ export const rentalManagementSteps: stepInterface[] = [
   { name: 'Quotation', title: 'Quotation', icon: 'quote' },
   { name: 'Serialized Asset', title: 'Assign', icon: 'serializedAssets' },
   { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
-  { name: 'On Field', title: 'On Field', icon: 'onField' },
+  { name: 'On Field', title: 'In the Field', icon: 'onField' },
   { name: 'Receiving Ticket', title: 'Receiving', icon: 'ticket' },
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
