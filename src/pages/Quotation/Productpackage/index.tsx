@@ -12,6 +12,7 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
@@ -772,96 +773,6 @@ const Productpackage = ({
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        {[QUOTATION_TYPE.rentalJob, QUOTATION_TYPE.salesOrder]?.includes(quotationData?.type) && (
-          <MenuItem
-            disabled={products.length ? false : true}
-            onClick={() => {
-              setAddDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, parentId: null });
-            }}
-          >
-            {`Assign ${resources?.serializedAsset?.titlePlural}`}
-          </MenuItem>
-        )}
-        {permissions?.supplierAccount && (
-          <MenuItem
-            disabled={selectedRecords.length === 0 || selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
-            onClick={() => {
-              let tempSupplierAccountId = [];
-              selectedRecords?.forEach((element) => {
-                element?.supplierAccount?.forEach((e) => {
-                  if (tempSupplierAccountId.findIndex((d) => d === e?.optionValue) === -1) {
-                    tempSupplierAccountId.push(e?.optionValue);
-                  }
-                });
-              });
-              axiosInstance()
-                .get(
-                  `${supplierContact.contactApi}?filterById=${JSON.stringify([
-                    { field: 'accountName', term: { $in: tempSupplierAccountId } }
-                  ])}&filterType=and`
-                )
-                .then(({ data: { data, count } }) => {
-                  setSupplierContactData(data);
-                  setAskSupplierPriceDialog(true);
-                })
-                .catch((error) => {
-                  toastConfig.setToastConfig(error);
-                });
-            }}
-          >
-            Ask Supplier to Quote
-          </MenuItem>
-        )}
-        {permissions?.supplierAccount && (
-          <MenuItem
-            onClick={() => {
-              setSelectedType('Supplier');
-              setRequestDialog(true);
-            }}
-          >
-            View Supplier Quote
-          </MenuItem>
-        )}
-        <MenuItem
-          disabled={
-            !Boolean(
-              selectedRecords &&
-                selectedRecords.filter((e) => !e.hideSelection).length &&
-                !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
-            )
-          }
-          onClick={() => {
-            setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
-          }}
-        >
-          Bulk Edit
-        </MenuItem>
-        <MenuItem
-          disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) || isDeleting}
-          onClick={() => {
-            const dataToDelete =
-              selectedRecords &&
-              selectedRecords
-                .filter((e) => !e.hideSelection)
-                .map((rec: any) => {
-                  const obj: any = {};
-                  obj.id = rec._id;
-                  obj.type = rec?.type;
-                  obj.materialId = rec?.materialId;
-                  return obj;
-                });
-            setDeleteData(dataToDelete);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   const handleSaveLeadTime = (data) => {
     setSubmitting(true);
     const value = {
@@ -901,9 +812,7 @@ const Productpackage = ({
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={allowedToEdit}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: dataRows?.length > 0 ? false : true }}
+        isActionButtonVisible={false}
         rightSideContents={dataRows?.length > 0 ? RightSideContents : null}
         hasXpadding
       />
@@ -931,6 +840,27 @@ const Productpackage = ({
               _id: versionId,
               quotation: quotationData?._id
             }}
+            bulkActionItems={
+              <BulkActionItems
+                quotationData={quotationData}
+                products={products}
+                setAddDialog={setAddDialog}
+                MATERIAL_TYPE={MATERIAL_TYPE}
+                resources={resources}
+                permissions={permissions}
+                selectedRecords={selectedRecords}
+                axiosInstance={axiosInstance}
+                supplierContact={supplierContact}
+                setSupplierContactData={setSupplierContactData}
+                setAskSupplierPriceDialog={setAskSupplierPriceDialog}
+                toastConfig={toastConfig}
+                setSelectedType={setSelectedType}
+                setRequestDialog={setRequestDialog}
+                setIsProductEdit={setIsProductEdit}
+                isDeleting={isDeleting}
+                setDeleteData={setDeleteData}
+              />
+            }
           />
         </Box>
       ) : (
@@ -1206,3 +1136,112 @@ const Productpackage = ({
 };
 
 export default Productpackage;
+
+const BulkActionItems = ({
+  quotationData,
+  products,
+  setAddDialog,
+  MATERIAL_TYPE,
+  resources,
+  permissions,
+  selectedRecords,
+  axiosInstance,
+  supplierContact,
+  setSupplierContactData,
+  setAskSupplierPriceDialog,
+  toastConfig,
+  setSelectedType,
+  setRequestDialog,
+  setIsProductEdit,
+  isDeleting,
+  setDeleteData
+}) => {
+  return (
+    <BulkActionContainer>
+      {[QUOTATION_TYPE.rentalJob, QUOTATION_TYPE.salesOrder]?.includes(quotationData?.type) && (
+        <BulkActionContainer.Button
+          disabled={!products.length}
+          onClick={() => {
+            setAddDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, parentId: null });
+          }}
+        >
+          {`Assign ${resources?.serializedAsset?.titlePlural}`}
+        </BulkActionContainer.Button>
+      )}
+      {permissions?.supplierAccount && (
+        <BulkActionContainer.Button
+          disabled={selectedRecords.length === 0 || selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
+          onClick={() => {
+            let tempSupplierAccountId = [];
+            selectedRecords?.forEach((element) => {
+              element?.supplierAccount?.forEach((e) => {
+                if (tempSupplierAccountId.findIndex((d) => d === e?.optionValue) === -1) {
+                  tempSupplierAccountId.push(e?.optionValue);
+                }
+              });
+            });
+            axiosInstance()
+              .get(
+                `${supplierContact.contactApi}?filterById=${JSON.stringify([
+                  { field: 'accountName', term: { $in: tempSupplierAccountId } }
+                ])}&filterType=and`
+              )
+              .then(({ data: { data, count } }) => {
+                setSupplierContactData(data);
+                setAskSupplierPriceDialog(true);
+              })
+              .catch((error) => {
+                toastConfig.setToastConfig(error);
+              });
+          }}
+        >
+          Ask Supplier to Quote
+        </BulkActionContainer.Button>
+      )}
+      {permissions?.supplierAccount && (
+        <BulkActionContainer.Button
+          onClick={() => {
+            setSelectedType('Supplier');
+            setRequestDialog(true);
+          }}
+        >
+          View Supplier Quote
+        </BulkActionContainer.Button>
+      )}
+      <BulkActionContainer.Button
+        disabled={
+          !Boolean(
+            selectedRecords &&
+              selectedRecords.filter((e) => !e.hideSelection).length &&
+              !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
+          )
+        }
+        onClick={() => {
+          setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) || isDeleting}
+        onClick={() => {
+          const dataToDelete =
+            selectedRecords &&
+            selectedRecords
+              .filter((e) => !e.hideSelection)
+              .map((rec: any) => {
+                const obj: any = {};
+                obj.id = rec._id;
+                obj.type = rec?.type;
+                obj.materialId = rec?.materialId;
+                return obj;
+              });
+          setDeleteData(dataToDelete);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

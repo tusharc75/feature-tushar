@@ -1,10 +1,11 @@
-import { Box, IconButton, MenuItem, useMediaQuery } from '@mui/material';
+import { Box, IconButton, useMediaQuery } from '@mui/material';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { AiFillEdit } from 'react-icons/ai';
 import { useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -486,21 +487,6 @@ const QuoteBuilder = ({
     }
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords?.length ? false : true}
-          onClick={() => {
-            fetchFieldServiceOrderData();
-          }}
-        >
-          {`Create ${resources?.fieldTicket?.titleSingular}`}
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <Fragment>
       <DetailsPageHeader
@@ -513,8 +499,6 @@ const QuoteBuilder = ({
             ? user?.user?.brandPolicy?.createFieldTicketFromQuotation || false
             : false
         }
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
       />
       {columns ? (
         <Box zIndex={5}>
@@ -535,6 +519,9 @@ const QuoteBuilder = ({
             isClientSideGrid={true}
             expander={true}
             hideExportTable={true}
+            bulkActionItems={
+              <BulkActionItems selectedRecords={selectedRecords} fetchFieldServiceOrderData={fetchFieldServiceOrderData} resources={resources} />
+            }
           />
         </Box>
       ) : (
@@ -572,3 +559,18 @@ const QuoteBuilder = ({
 };
 
 export default QuoteBuilder;
+
+const BulkActionItems = ({ selectedRecords, fetchFieldServiceOrderData, resources }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={!selectedRecords?.length}
+        onClick={() => {
+          fetchFieldServiceOrderData();
+        }}
+      >
+        {`Create ${resources?.fieldTicket?.titleSingular}`}
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
