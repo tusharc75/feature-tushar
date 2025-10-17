@@ -8,6 +8,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import CreateProduct from 'src/components/Product/CreateProduct';
@@ -21,7 +22,15 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PACKAGE_TYPE, PRODUCTION_ORDER_STATUS, asyncForEach, productionOrder, sidebarResource } from '../../../constants/helpers';
+import {
+  CHILD_RESOURCE,
+  MATERIAL_TYPE,
+  PACKAGE_TYPE,
+  PRODUCTION_ORDER_STATUS,
+  asyncForEach,
+  productionOrder,
+  sidebarResource
+} from '../../../constants/helpers';
 import MaterialDialog from './MaterialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
@@ -411,37 +420,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
-          }}
-        >
-          Bulk Edit
-        </MenuItem>
-        <MenuItem
-          disabled={selectedRecords?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
-          onClick={() => {
-            const dataToDelete = selectedRecords
-              ?.filter((e) => !e.hideSelection && e.canDelete)
-              .map((rec: any) => {
-                const obj: any = {};
-                obj.id = rec._id;
-                obj.type = rec?.type;
-                obj.materialId = rec?.materialId;
-                return obj;
-              });
-            setDeleteData(dataToDelete);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   const rightSideContents = () => {
     return (
       <>
@@ -470,9 +448,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
           <DetailsPageHeader
             isAddButtonVisible={true}
             addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+            isActionButtonVisible={false}
             rightSideContents={rightSideContents()}
             hasXpadding
           />
@@ -491,6 +467,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               onSaveEdit={onSaveInlineEdit}
               hideSelection={!allowedToEdit}
               hideAction={!allowedToEdit}
+              bulkActionItems={<BulkActionItems selectedRecords={selectedRecords} setMaterialEdit={setMaterialEdit} setDeleteData={setDeleteData} />}
             />
           </Box>
         </>
@@ -526,7 +503,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
             handleAdd([
               {
                 ...d,
-                unitMain: d?.unit,
+                unitMain: d?.unit
               }
             ]);
           }}
@@ -562,3 +539,36 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
 };
 
 export default Material;
+
+const BulkActionItems = ({ selectedRecords, setMaterialEdit, setDeleteData }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={!Boolean(selectedRecords?.filter((e) => !e.hideSelection)?.length)}
+        onClick={() => {
+          setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        disabled={!selectedRecords?.every((e) => !e.hideSelection && e.canDelete)}
+        onClick={() => {
+          const dataToDelete = selectedRecords
+            ?.filter((e) => !e.hideSelection && e.canDelete)
+            .map((rec: any) => {
+              const obj: any = {};
+              obj.id = rec._id;
+              obj.type = rec?.type;
+              obj.materialId = rec?.materialId;
+              return obj;
+            });
+          setDeleteData(dataToDelete);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

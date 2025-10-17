@@ -8,6 +8,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -183,15 +184,6 @@ const ServicePackage = ({ renderedFrom, productId }) => {
       </>
     );
   };
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowDeleteConfirmBox(true)}>
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
 
   const rightSideContents = () => {
     return (
@@ -220,9 +212,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
           <DetailsPageHeader
             isAddButtonVisible={true}
             addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+            isActionButtonVisible={false}
             rightSideContents={rightSideContents()}
             hasXpadding={false}
           />
@@ -239,6 +229,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
           isClientSideGrid={true}
           hideSelection={!permissions?.product.isUpdate}
           hideAction={!permissions?.product.isUpdate}
+          bulkActionItems={<BulkActionItems setShowDeleteConfirmBox={setShowDeleteConfirmBox} />}
         />
       ) : (
         <Box p={2} height={500}>
@@ -273,3 +264,18 @@ const ServicePackage = ({ renderedFrom, productId }) => {
 };
 
 export default ServicePackage;
+
+const BulkActionItems = ({ setShowDeleteConfirmBox }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          setShowDeleteConfirmBox(true);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

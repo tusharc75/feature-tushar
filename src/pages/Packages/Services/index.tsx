@@ -7,6 +7,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DescriptionIcon from '@mui/icons-material/Description';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -278,20 +279,6 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     setTabValue(newValue);
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <MenuItem
-        disabled={selectedRecords.length === 0}
-        onClick={() => {
-          setDeleteRecord(selectedRecords);
-          setShowServiceConfirmBox(true);
-        }}
-      >
-        {`Delete (${selectedRecords?.length})`}
-      </MenuItem>
-    );
-  };
-
   return (
     <Box>
       {permissions?.assemblyOrder && (
@@ -309,9 +296,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
         <DetailsPageHeader
           isAddButtonVisible={allowedToEdit}
           addButtonMenuItems={addButtonMenuItems()}
-          isActionButtonVisible={allowedToEdit}
-          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          actionButtonMenuItems={actionButtonMenuItems()}
+          isActionButtonVisible={false}
           rightSideContents={rightSideContents()}
           hasXpadding
         />
@@ -329,6 +314,14 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
           hideAction={!allowedToEdit}
           hideSelection={!allowedToEdit}
           hideExportTable={true}
+          bulkActionItems={
+            <BulkActionItems
+              selectedRecords={selectedRecords}
+              setDeleteRecord={setDeleteRecord}
+              setShowServiceConfirmBox={setShowServiceConfirmBox}
+              allowedToEdit={allowedToEdit}
+            />
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -386,3 +379,27 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
 };
 
 export default ServiceTable;
+
+const BulkActionItems = ({ 
+  selectedRecords,
+  setDeleteRecord,
+  setShowServiceConfirmBox,
+  allowedToEdit,
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={
+          !allowedToEdit          
+        }
+        onClick={() => {
+          setDeleteRecord(selectedRecords);
+          setShowServiceConfirmBox(true);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

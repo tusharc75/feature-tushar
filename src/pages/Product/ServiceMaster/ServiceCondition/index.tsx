@@ -7,6 +7,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -173,31 +174,9 @@ export default function ServiceCondition({ renderedFrom, id }) {
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
-            setShowDeleteConfirmBox(true);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <Fragment>
-      <DetailsPageHeader
-        isAddButtonVisible={true}
-        addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={true}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-        hasXpadding={false}
-      />
+      <DetailsPageHeader isAddButtonVisible={true} addButtonMenuItems={addButtonMenuItems()} isActionButtonVisible={false} hasXpadding={false} />
 
       {columns ? (
         <CustomReactTable
@@ -209,6 +188,9 @@ export default function ServiceCondition({ renderedFrom, id }) {
           refreshGrid={fetchData}
           showFilters={false}
           isClientSideGrid={true}
+          bulkActionItems={
+            <BulkActionItems selectedRecords={selectedRecords} setShowDeleteConfirmBox={setShowDeleteConfirmBox} setDeleteRecord={setDeleteRecord} />
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -242,3 +224,19 @@ export default function ServiceCondition({ renderedFrom, id }) {
     </Fragment>
   );
 }
+
+const BulkActionItems = ({ selectedRecords, setShowDeleteConfirmBox, setDeleteRecord }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          selectedRecords.length === 1 && setDeleteRecord(selectedRecords[0]);
+          setShowDeleteConfirmBox(true);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

@@ -8,6 +8,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -102,7 +103,7 @@ const Products = ({ resource, referenceId, workOrderResourceTabs, allowedToEdit,
     axiosInstance()
       .put(`/work-order-material-master-data`, {
         _id: row._id,
-        qty: Number(data.qty),
+        qty: Number(data.qty)
       })
       .then(({ data }) => {
         setToastConfig({
@@ -120,7 +121,7 @@ const Products = ({ resource, referenceId, workOrderResourceTabs, allowedToEdit,
     const productIds = showProductConfirmBox?.data?.map((d) => d._id) || [];
     axiosInstance()
       .put(`/work-order-material-master-data/remove`, {
-        ids: productIds,
+        ids: productIds
       })
       .then(({ data }) => {
         setRemovingProducts(false);
@@ -173,21 +174,6 @@ const Products = ({ resource, referenceId, workOrderResourceTabs, allowedToEdit,
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords.length === 0 || isRemovingProducts}
-          onClick={() => {
-            setShowProductConfirmBox({ open: true, data: selectedRecords });
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   const handleArrangeUpdate = (rows: any) => {
     setIsArranging(true);
     rows?.forEach((e: any) => {
@@ -196,7 +182,7 @@ const Products = ({ resource, referenceId, workOrderResourceTabs, allowedToEdit,
     });
     axiosInstance()
       .put(`/work-order-material-master-data/order`, {
-        data: rows || [],
+        data: rows || []
       })
       .then(() => {
         fetchData();
@@ -252,9 +238,7 @@ const Products = ({ resource, referenceId, workOrderResourceTabs, allowedToEdit,
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={allowedToEdit}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
+        isActionButtonVisible={false}
         rightSideContents={rightSideContents()}
         hasXpadding
       />
@@ -271,6 +255,13 @@ const Products = ({ resource, referenceId, workOrderResourceTabs, allowedToEdit,
           hideAction={!allowedToEdit}
           hideSelection={!allowedToEdit}
           hideExportTable={true}
+          bulkActionItems={
+            <BulkActionItems
+              selectedRecords={selectedRecords}
+              isRemovingProducts={isRemovingProducts}
+              setShowProductConfirmBox={setShowProductConfirmBox}
+            />
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -317,3 +308,19 @@ const Products = ({ resource, referenceId, workOrderResourceTabs, allowedToEdit,
 };
 
 export default Products;
+
+const BulkActionItems = ({ selectedRecords, isRemovingProducts, setShowProductConfirmBox }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={isRemovingProducts}
+        onClick={() => {
+          setShowProductConfirmBox({ open: true, data: selectedRecords });
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
