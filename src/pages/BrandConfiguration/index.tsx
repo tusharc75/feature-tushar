@@ -9,7 +9,7 @@ import { Paper, Divider, Typography, Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import UpdateDetailsDialog from '../../components/Shared/UpdateDetailsDialog';
 import { useData } from '../../StateProvider/Provider';
-import { userType } from '../../constants/helpers';
+import { sidebarResource, userType } from '../../constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import EditIcon from '@mui/icons-material/Edit';
 
@@ -27,6 +27,7 @@ export default function BrandConfiguration() {
   useEffect(() => {
     if (user?.user?.userType === userType.brandAdmin) fetchBrandDetails();
   }, []);
+
   const fetchBrandDetails = () => {
     setLoading(true);
     axiosInstance()
@@ -42,11 +43,11 @@ export default function BrandConfiguration() {
         setLoading(false);
       });
   };
+
   const getBrandFields = (id) => {
-    axiosInstance()
-      .get(`/field?brand=${id}&resource=Brand`)
+    axiosInstance().get(`${'/brand'}/fields?resource=${sidebarResource.brand}`)
       .then(({ data: { data } }) => {
-        setBrandFields(data);
+        setBrandFields(data?.filter((d) => d?.fieldData?.sectionName !== 'Resource Access to Brand'));
         setLoading(false);
       })
       .catch(() => {
@@ -120,7 +121,7 @@ export default function BrandConfiguration() {
           openDialog={openUpdateDialog}
           onClose={closeUpdateDIalog}
           data={brandDetails}
-          fields={brandFields.filter((o) => o?.fieldData?.fieldName !== 'servicesAccess')}
+          fields={brandFields}
           isUpdating={isUpdating}
           handleUpdate={handleUpdate}
         />
