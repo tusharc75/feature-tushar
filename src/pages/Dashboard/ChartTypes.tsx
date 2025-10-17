@@ -194,7 +194,7 @@ const ChartTypes = ({
     const urlParams = getParams();
     setLoading(true);
 
-    let url = (chart.kpi.kpi.includes("report-builder") ? chart.kpi.kpi : `kpi/${chart.kpi.kpi}`);
+    let url = chart.kpi.dynamic ? chart.kpi.kpi : `kpi/${chart.kpi.kpi}`;
     url += `?entity=${selectedEntity}${urlParams}`
 
     axiosInstance()

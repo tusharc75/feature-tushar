@@ -4,7 +4,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { dateFormat } from 'src/constants/helpers';
 import { CustomReport, SelectedReport, Report, isCustomReport, isReport, FavouriteReport } from 'src/pages/Reports/types';
 
-export const handleGetRoute = async ({ route, title }: { route: string; title: string }): Promise<SelectedReport> => {
+export const handleGetRoute = async ({ route, title, dynamic }: { route: string; title: string, dynamic: boolean }): Promise<SelectedReport> => {
   const data: SelectedReport = {
     route: route,
     type: 'report',
@@ -18,7 +18,8 @@ export const handleGetRoute = async ({ route, title }: { route: string; title: s
   const isDynamicForm = routeArr[2] === 'dynamic-form';
   if (isStandardReport) {
     data.type = 'standard-report';
-    data.resource = [...routeArr].slice(3).join('/')
+    data.resource = dynamic ? [...routeArr].slice(3).join('/') : routeArr[3]
+    data.dynamic = dynamic
     return data;
   }
   if (isDynamicForm) {
