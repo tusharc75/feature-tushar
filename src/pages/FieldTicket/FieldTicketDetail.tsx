@@ -235,7 +235,7 @@ const FieldTicketDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {fieldTicketData?.rentalJob && <CustomTab value={2}>On Field</CustomTab>}
+          {fieldTicketData?.rentalJob && <CustomTab value={2}>In the Field</CustomTab>}
           {resourcePolicyData &&
             resourcePolicyData?.tabs?.length > 0 &&
             resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
