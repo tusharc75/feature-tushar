@@ -383,7 +383,7 @@ const ProductTemplate = () => {
               {({ submitForm, touched, errors, setFieldValue, values }) => (
                 <Form>
                   <Box py={1}>
-                    <div className="mb-2 grid md:grid-cols-2  md:gap-4 lg:grid-cols-[3fr_108px_3fr_180px]">
+                    <div className="mb-2 grid md:grid-cols-2  md:gap-4 lg:grid-cols-[3fr_108px_3fr_auto]">
                       <TextField
                         disabled={!hasPermissionToUpdate}
                         variant="outlined"

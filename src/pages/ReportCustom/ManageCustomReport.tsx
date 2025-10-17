@@ -114,11 +114,12 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
     setFilterColumns([]);
     let filterColumns;
     if (resource.key === 'standardReport') {
+      const url = resource.dynamic ? resource.url : `/report/${kebabCase(resource.type)}`
       let {
         data: {
           data: { columnFields, filterFields }
         }
-      } = await axiosInstance().get(`/report/${kebabCase(resource.type)}/column`);
+      } = await axiosInstance().get(`${url}/column`);
 
       filterColumns = filterFields;
       setResourceColumns(columnFields);

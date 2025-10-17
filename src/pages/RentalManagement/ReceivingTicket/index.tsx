@@ -112,6 +112,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 const globalStepDataAdded = { createReceivingTicket: false, receivedItems: false };
 
 const ReceivingTicket = ({
+  resource,
   currentStep,
   rentalManagementData,
   fetchRentalData,
@@ -241,7 +242,7 @@ const ReceivingTicket = ({
     if (rentalPolicyData?.loadingReceivingDefaultView) {
       setView(rentalPolicyData?.loadingReceivingDefaultView);
     }
-    if (rentalPolicyData?.enableTechnicianDispatchReturn) {
+    if (rentalPolicyData?.enableTechnicianDispatchReturn && [sidebarResource.rentalManagement, sidebarResource.rentalJobTechnicianView]?.includes(resource)) {
       setTechnicianDispatchReturn(rentalPolicyData?.enableTechnicianDispatchReturn);
     }
   }, [rentalPolicyData]);
@@ -2907,7 +2908,7 @@ const ReceivingTicket = ({
           <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
             <ContainedTab value={0} label={'Assets/Products'} />
             {serviceData?.length > 0 && <ContainedTab value={1} label={'Services'} />}
-            {technicianDispatchReturn && <ContainedTab value={2} label={'Technicians'} />}
+            {(technicianDispatchReturn && resource === sidebarResource.rentalManagement) && <ContainedTab value={2} label={'Technicians'} />}
             {technicianDispatchReturn && permissions?.fieldTicket?.isRead && <ContainedTab value={3} label={resources?.fieldTicket?.titlePlural} />}
           </ContainedTabs>
         )}

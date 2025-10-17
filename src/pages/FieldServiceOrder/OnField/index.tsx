@@ -52,9 +52,6 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
     try {
       const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.rentalManagement},${sidebarResource.serializedAsset},${sidebarResource.fleetDispatch}`)
       const rentalPolicy = data?.find((e) => e.resource === sidebarResource.rentalManagement)
-      if (rentalPolicy?.policy?.enableTechnicianDispatchReturn) {
-        rentalPolicy.policy.enableTechnicianDispatchReturn = false
-      }
       setRentalPolicyData(rentalPolicy);
       if (data?.find((e) => e.resource === sidebarResource.serializedAsset)) {
         setAssetPolicyData(data?.find((e) => e.resource === sidebarResource.serializedAsset));
@@ -127,6 +124,7 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
           rentalPolicyData={rentalPolicyData?.policy}
           assetPolicyData={assetPolicyData}
           fleetDispatchPolicyData={fleetDispatchPolicyData}
+          resource={sidebarResource.fieldServiceOrder}
         />
       ) : (
         <Box p={2} height={500}>
