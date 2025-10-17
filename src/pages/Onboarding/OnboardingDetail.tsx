@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { Edit } from '@mui/icons-material';
+import { Edit, Email } from '@mui/icons-material'; // Add Email icon
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
@@ -76,6 +76,22 @@ const OnboardingDetail = () => {
     setResourcePolicyData(data)
   };
 
+  const handleSendEmail = async () => {
+    setLoading(true);
+    try {
+      await axiosInstance().post(`${routes.onboarding.path}/${id}/send-email`);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: 'Email sent successfully'
+      });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDelete = () => {
     axiosInstance()
       .put(`${routes.onboarding.path}/remove`, { ids: [id] })
@@ -109,6 +125,15 @@ const OnboardingDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
+            <ThemeButton
+              buttonType='theme'
+              iconForMobile={<Email />}
+              onClick={handleSendEmail}
+              disabled={loading}
+              mobileTooltip="Send Email"
+            >
+              Send Email
+            </ThemeButton>
             {allowedToEdit && (
               <ThemeButton
                 iconForMobile={<Edit />}
