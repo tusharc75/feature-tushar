@@ -10,13 +10,9 @@ import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const AddConfigurationDialog = (props) => {
-  const { data, fields, close, id, fetchData } = props;
-  const [formData, setFormData] = React.useState({
-    values: {},
-    fields: [],
-    images: []
-  });
+const AddConfigurationDialog = ({ data, fields, close, id, fetchData }) => {
+
+  const [formData, setFormData] = React.useState({ values: {}, fields: [], images: [] });
   const [submitting, setSubmitting] = React.useState(false);
 
   React.useEffect(() => {
@@ -86,7 +82,7 @@ const AddConfigurationDialog = (props) => {
   return (
     <Dialog open onClose={close} TransitionComponent={CustomDialogTransition} maxWidth="md" fullWidth>
       <CustomDialogHeader
-        title="Add Images"
+        title={`${data ? `Edit` : `Add`} Images`}
         onClose={() => {
           if (submitting) return;
           close();
@@ -96,7 +92,7 @@ const AddConfigurationDialog = (props) => {
         <Box py={2}>
           <Grid container spacing={2}>
             {fields.map((field) => (
-              <Grid size={{xs:12, sm:6}} key={field.fieldName}>
+              <Grid size={{ xs: 12, sm: 6 }} key={field.fieldName}>
                 <FormTypes
                   fieldData={field}
                   values={formData.values}
@@ -115,7 +111,7 @@ const AddConfigurationDialog = (props) => {
                 />
               </Grid>
             ))}
-            <Grid size={{xs:12}}>
+            <Grid size={{ xs: 12 }}>
               <FormTypes
                 values={formData}
                 errors={{}}
