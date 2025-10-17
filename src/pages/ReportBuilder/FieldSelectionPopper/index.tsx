@@ -93,6 +93,7 @@ const FieldSelectionPopper = ({
         {...textFieldProps}
         value={selectedField?.fieldLabel || ''}
         onClick={handleToggle}
+        disabled={!isEdit}
         slotProps={{
           input: {
             readOnly: true,
