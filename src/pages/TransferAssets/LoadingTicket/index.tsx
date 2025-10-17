@@ -594,7 +594,7 @@ const BulkActionItems = ({
   isTransferEnded
 }) => {
   const isActionDisabled = !allowedToEdit || isTransferEnded;
-  
+
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
@@ -702,7 +702,7 @@ const BulkActionItems = ({
       <BulkActionContainer.Button
         disabled={
           isActionDisabled ||
-          selectedRecords.length && selectedRecords?.every((e) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit) ? false : true
+          (selectedRecords?.length && selectedRecords?.every((e) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit) ? false : true)
         }
         onClick={() => {
           setShowConformationDeliverdCancleTicket({ open: true, type: 'Non-Delivered' });
