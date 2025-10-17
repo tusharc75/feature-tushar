@@ -18,7 +18,7 @@ export const handleGetRoute = async ({ route, title }: { route: string; title: s
   const isDynamicForm = routeArr[2] === 'dynamic-form';
   if (isStandardReport) {
     data.type = 'standard-report';
-    data.resource = routeArr[3];
+    data.resource = [...routeArr].slice(3).join('/')
     return data;
   }
   if (isDynamicForm) {
