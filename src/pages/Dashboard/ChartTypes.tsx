@@ -193,7 +193,10 @@ const ChartTypes = ({
   const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     const urlParams = getParams();
     setLoading(true);
-    let url = `kpi/${chart.kpi.kpi}?entity=${selectedEntity}${urlParams}`;
+
+    let url = (chart.kpi.kpi.includes("report-builder") ? chart.kpi.kpi : `kpi/${chart.kpi.kpi}`);
+    url += `?entity=${selectedEntity}${urlParams}`
+
     axiosInstance()
       .get(url, { cancelToken: cancelTokenSource?.token })
       .then(async ({ data: { data } }) => {
