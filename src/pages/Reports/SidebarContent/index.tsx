@@ -16,7 +16,8 @@ const SidebarContent = ({ state }: SidebarContentProps) => {
           onClick={(report) =>
             setSelectedReport({
               route: report.route,
-              title: report.label
+              title: report.label,
+              dynamic: report.dynamic
             })
           }
           isFilled={() => true}
@@ -34,7 +35,8 @@ const SidebarContent = ({ state }: SidebarContentProps) => {
             onClick={(report) =>
               setSelectedReport({
                 route: report.route,
-                title: report.label
+                title: report.label,
+                dynamic: report.dynamic
               })
             }
             onButtonClick={(item) => setUserFavourites(item, !isFavourite(item))}
@@ -53,7 +55,8 @@ const SidebarContent = ({ state }: SidebarContentProps) => {
           onClick={(report) =>
             setSelectedReport({
               route: report.route,
-              title: report.customReportName
+              title: report.customReportName,
+              dynamic: report.dynamic
             })
           }
           onButtonClick={(item) => setUserFavourites(item, !isFavourite(item))}

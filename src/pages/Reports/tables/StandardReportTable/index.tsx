@@ -176,7 +176,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     try {
       setIsColumnsLoading(true);
       let columns = [];
-      const url = selectedReport.resource?.includes("report-builder") ? selectedReport.resource : `/report/${selectedReport.resource}`
+      const url = selectedReport.dynamic ? selectedReport.resource : `/report/${selectedReport.resource}`
       let {
         data: {
           data: { columnFields, filterFields }
@@ -409,7 +409,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
 
-    var api = selectedReport.resource?.includes("report-builder") ? selectedReport.resource : `/report/${selectedReport.resource}`
+    var api = selectedReport.dynamic ? selectedReport.resource : `/report/${selectedReport.resource}`
 
     axiosInstance()
       .get(`${api}${filterQuery}`, {
