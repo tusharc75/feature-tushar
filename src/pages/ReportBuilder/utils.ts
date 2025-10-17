@@ -51,13 +51,21 @@ export interface ChartPipeline extends PipelineItem {
   xAxis?: {
     field: string;
     label: string;
+    resource: string;
   };
   yAxis?: {
     field: string;
     label: string;
+    resource: string;
   };
-  value?: string;
-  label?: string;
+  value?: {
+    field: string;
+    resource: string;
+  };
+  label?: {
+    field: string;
+    resource: string;
+  };
 }
 
 export interface FilterPipeline extends PipelineItem {
@@ -306,19 +314,19 @@ export const validatePipeline = (pipeline: PipelineItem[]): { [itemId: string]: 
         if (!chartItem?.chartType) {
           itemErrors.push('chartType_required');
         }
-        if (chartItem?.chartType === 'bar') {
+        if (['bar', 'line'].includes(chartItem?.chartType)) {
           if (!chartItem?.xAxis?.field) {
             itemErrors.push('xAxis_field_required');
           }
-          if (!chartItem?.xAxis?.label) {
-            itemErrors.push('xAxis_label_required');
-          }
+          // if (!chartItem?.xAxis?.label) {
+          //   itemErrors.push('xAxis_label_required');
+          // }
           if (!chartItem?.yAxis?.field) {
             itemErrors.push('yAxis_field_required');
           }
-          if (!chartItem?.yAxis?.label) {
-            itemErrors.push('yAxis_label_required');
-          }
+          // if (!chartItem?.yAxis?.label) {
+          //   itemErrors.push('yAxis_label_required');
+          // }
         }
         if (chartItem?.chartType === 'pie') {
           if (!chartItem?.value) {
