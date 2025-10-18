@@ -330,9 +330,7 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleStatusChange = (o) => {
-    const { policy } = resourcePolicyData;
-
-    const statusPolicy = policy?.statusChangeFields?.find((ele) =>
+    const statusPolicy = resourcePolicyData?.policy?.statusChangeFields?.find((ele) =>
       ele.status === o.optionValue && (!ele?.products || ele?.products?.length === 0 || ele?.products?.includes(assetDetails?.product?.optionValue))
     );
     setStatus(o.optionValue);
@@ -682,9 +680,8 @@ const SerializedAssetDetailsPage = () => {
                                 && user?.user?.brandPolicy?.serializedAssetScrapApproval && serializedAssetStatusChangeRequestFields?.length > 0) {
                                 setStatusChangeRequestDialog(true);
                               } else {
-                                const { policy } = resourcePolicyData;
-                                if (policy?.dataChangeStatus === o.optionValue && openDataChange()) {
-                                  setOpenUpdateDialog({ open: true, assetLogFields: policy.dataChangeAssetLogFields, updateStatus: o });
+                                if (resourcePolicyData?.policy?.dataChangeStatus === o.optionValue && openDataChange()) {
+                                  setOpenUpdateDialog({ open: true, assetLogFields: resourcePolicyData?.policy.dataChangeAssetLogFields, updateStatus: o });
                                 } else {
                                   handleStatusChange(o);
                                 }
