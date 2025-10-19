@@ -1,10 +1,9 @@
 import type { Plugin, PDFRenderProps, Schema, UIRenderProps } from '@pdfme/common';
 import { rgb, scale } from '@pdfme/pdf-lib';
 import { PLUGIN } from 'src/constants/helpers';
-
 interface MyGridSchema extends Schema {
     type: 'myGridType';
-    content: string; // JSON stringified 2D array
+    content: string;
     cols: number;
     basePdf?: { width: number; height: number };
     colWidths?: number[];
@@ -207,7 +206,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                 editable.style.fontWeight = (typeof schema?.textWeight === 'string' ? schema.textWeight : 'normal') as 'normal' | 'bold';
                 editable.style.color = typeof schema?.textColor === 'string' ? schema.textColor : '#000000';
                 editable.style.background = 'transparent';
-                editable.style.padding = '4px';
+                editable.style.padding = '1px';
                 editable.style.overflow = 'auto';
                 editable.style.pointerEvents = 'auto';
                 editable.style.userSelect = 'text';
@@ -415,8 +414,8 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                         position: 'absolute',
                         left: '0px',
                         right: '0px',
-                        height: '10px',
-                        top: `${cumTop - 5}px`,
+                        height: '5px',
+                        top: `${cumTop}px`,
                         cursor: 'row-resize',
                         zIndex: '10002',
                         pointerEvents: 'auto',
@@ -428,10 +427,9 @@ const myGridPlugin: Plugin<MyGridSchema> = {
                         left: '10px',
                         right: '10px',
                         top: '50%',
-                        height: '2px',
+                        height: '0px',
                         transform: 'translateY(-50%)',
                         background: 'rgba(0,0,0,0.12)',
-                        borderRadius: '2px'
                     });
                     handle.appendChild(line);
 
@@ -697,7 +695,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
         }, 0);
     },
 
-    pdf: async ({ page, schema, value }: PDFRenderProps<MyGridSchema>) => {
+    pdf: async ({ page, schema, value, options }: PDFRenderProps<MyGridSchema>) => {
         const contentStr = value || schema.content || '[[""]]';
         const usedRows = parseContent(contentStr);
 
@@ -739,8 +737,8 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             rowHeightsPdf = Array.from({ length: usedRows.length }, () => rh);
         }
 
-        const tableBorderWidth = ((typeof schema?.tableBorderWidth === 'number' ? schema.tableBorderWidth : 1));
-        const colBorderWidth = ((typeof schema?.colBorderWidth === 'number' ? schema.colBorderWidth : 1));
+        const tableBorderWidth = (typeof schema?.tableBorderWidth === 'number' ? schema.tableBorderWidth : 1);
+        const colBorderWidth = (typeof schema?.colBorderWidth === 'number' ? schema.colBorderWidth : 1);
 
         const tableBorderColor = typeof schema?.tableBorderColor === 'string' ? schema.tableBorderColor : '#000000';
         const colBorderColor = typeof schema?.colBorderColor === 'string' ? schema.colBorderColor : '#e6e6e6';
@@ -812,7 +810,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
         }
 
         const padding = 4;
-        const textSize = (((typeof schema?.textSize === 'number' ? schema.textSize : 9)) * 0.8);
+        const textSize = ((typeof schema?.textSize === 'number' ? schema.textSize : 9) * 0.8);
         const textColorStr = typeof schema?.textColor === 'string' ? schema.textColor : '#000000';
         const textColor = parseColor(textColorStr);
 
@@ -835,20 +833,80 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             }
         })();
 
+        function measureTextWidth(text: string, size: number, fontForMeasure?: any) {
+            try {
+                if (fontForMeasure && typeof fontForMeasure.widthOfTextAtSize === 'function') {
+                    return fontForMeasure.widthOfTextAtSize(text, size);
+                }
+            } catch (e) {
+            }
+            return text.length * (size * 0.5);
+        }
+
+        function fitTextToWidth(text: string, size: number, maxWidth: number, fontForMeasure?: any) {
+            if (maxWidth <= 0) return '';
+
+            const fullWidth = measureTextWidth(text, size, fontForMeasure);
+            if (fullWidth <= maxWidth) return text;
+
+            const ell = '…';
+            const ellWidth = measureTextWidth(ell, size, fontForMeasure);
+
+            if (ellWidth >= maxWidth) return '';
+
+            let lo = 0;
+            let hi = text.length;
+            let fit = '';
+
+            while (lo <= hi) {
+                const mid = Math.floor((lo + hi) / 2);
+                const candidate = text.slice(0, mid);
+                const w = measureTextWidth(candidate, size, fontForMeasure) + ellWidth;
+                if (w <= maxWidth) {
+                    fit = candidate;
+                    lo = mid + 1;
+                } else {
+                    hi = mid - 1;
+                }
+            }
+
+            return fit + ell;
+        }
+
+        let fontForMeasure: any = undefined;
+        try {
+            if (schema && (schema as any).font) {
+                // @ts-ignore
+                fontForMeasure = (schema as any).font;
+            }
+            // @ts-ignore
+            if (!fontForMeasure && options && typeof (options as any).fonts === 'object') {
+                // @ts-ignore
+                const fvals = Object.values((options as any).fonts);
+                if (fvals.length) fontForMeasure = fvals[0];
+            }
+        } catch (e) {
+            fontForMeasure = undefined;
+        }
+
         usedRows.forEach((row, rowIndex) => {
             row.forEach((cellText, colIndex) => {
                 if (cellText == null || String(cellText).trim() === '') return;
                 const cellLeftX = colLefts[colIndex];
                 const cellWidthPdf = colWidthsPdf[colIndex];
                 const cellTopY = rowTops[rowIndex];
+                const availableWidth = Math.max(0, cellWidthPdf - padding);
+                const rawText = String(cellText).replace(/\r\n/g, ' ').replace(/\n/g, ' ');
+                const textToDraw = fitTextToWidth(rawText, textSize, availableWidth, fontForMeasure);
+                if (!textToDraw) return;
                 const textX = cellLeftX + padding;
                 const textY = cellTopY - padding - textSize;
-                page.drawText(String(cellText), {
+                page.drawText(textToDraw, {
                     x: textX,
                     y: textY,
                     size: textSize,
                     color: textColor,
-                    maxWidth: Math.max(0, cellWidthPdf - padding * 2),
+                    maxWidth: availableWidth,
                 });
             });
         });
@@ -917,7 +975,7 @@ const myGridPlugin: Plugin<MyGridSchema> = {
             tableBorderColor: '#000000',
             colBorderWidth: 1,
             colBorderColor: '#000000',
-            textSize: 20,
+            textSize: 14,
             readOnly: true,
             required: false,
             textColor: '#000000',

@@ -492,18 +492,15 @@ const SerializedAsset = () => {
   };
 
   const handleStatusChange = (status) => {
-    const { policy, statusChangePermissions } = resourceData;
-
-    if (statusChangePermissions?.length) {
-      let statusChangeAllowed = statusChangePermissionsAllowed(user, statusChangePermissions, selectedRecords?.map((e) => e?.status), status);
+    if (resourceData?.statusChangePermissions?.length) {
+      let statusChangeAllowed = statusChangePermissionsAllowed(user, resourceData?.statusChangePermissions, selectedRecords?.map((e) => e?.status), status);
       if (!statusChangeAllowed) {
         setStatusChangePermissionError({ open: true, msg: statusChangePermissionMsg })
         return;
       }
     }
-
     let statusPolicy = null;
-    const statusPolicyData = policy?.statusChangeFields?.find((ele) => ele.status === status);
+    const statusPolicyData = resourceData?.policy?.statusChangeFields?.find((ele) => ele.status === status);
     if (statusPolicyData) {
       if (statusPolicyData?.products?.length > 0) {
         if (selectedRecords?.every((r) => statusPolicyData?.products?.includes(r?.productId))) {
