@@ -345,7 +345,6 @@ const BulkActionItems = ({ selectedRecords, validateAction, salesOrderActions, h
             handleDeliveryTicketDialog();
           }
         }}
-        disabled={selectedRecords.length === 0}
       >
         Create Loading Ticket
       </BulkActionContainer.Button>

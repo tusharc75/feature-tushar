@@ -564,7 +564,6 @@ const BulkActionItems = ({ selectedRecords, fetchFieldServiceOrderData, resource
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
-        disabled={!selectedRecords?.length}
         onClick={() => {
           fetchFieldServiceOrderData();
         }}

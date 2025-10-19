@@ -398,7 +398,7 @@ const BulkActionItems = ({
         }}
         buttonType="red"
       >
-        Delete
+        {`Delete (${selectedRecords?.length})`}
       </BulkActionContainer.Button>
     </BulkActionContainer>
   );

@@ -313,7 +313,7 @@ const BulkActionItems = ({ selectedRecords, isRemovingProducts, setShowProductCo
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
-        disabled={isRemovingProducts}
+        disabled={isRemovingProducts || !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
         onClick={() => {
           setShowProductConfirmBox({ open: true, data: selectedRecords });
         }}

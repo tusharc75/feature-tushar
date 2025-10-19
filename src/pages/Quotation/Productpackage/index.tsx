@@ -1170,7 +1170,7 @@ const BulkActionItems = ({
       )}
       {permissions?.supplierAccount && (
         <BulkActionContainer.Button
-          disabled={selectedRecords.length === 0 || selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
+          disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
           onClick={() => {
             let tempSupplierAccountId = [];
             selectedRecords?.forEach((element) => {
@@ -1211,7 +1211,6 @@ const BulkActionItems = ({
       <BulkActionContainer.Button
         disabled={
           !Boolean(
-            selectedRecords &&
               selectedRecords.filter((e) => !e.hideSelection).length &&
               !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
           )

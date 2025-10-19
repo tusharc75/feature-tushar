@@ -933,6 +933,7 @@ const BulkActionItems = ({
       </BulkActionContainer.Button>
       {permissions?.purchaseOrder?.isDelete && (
         <BulkActionContainer.Button
+          disabled={!Boolean(selectedRecords?.filter((e) => !e.hideSelection)?.length)}
           onClick={() => {
             setShowDeleteConfirmBox(true);
             setDeletePurchaseOrderItem(selectedRecords?.filter((e) => !e.hideSelection));
