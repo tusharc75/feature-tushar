@@ -400,9 +400,8 @@ const SerializedAsset = ({
   };
 
   const checkPermissionForStatusChange = (status) => {
-    const { statusChangePermissions } = policyData;
-    if (statusChangePermissions?.length) {
-      let statusChangeAllowed = statusChangePermissionsAllowed(user, statusChangePermissions, selectedRecords?.map((e) => e?.status), status);
+    if (policyData?.statusChangePermissions?.length) {
+      let statusChangeAllowed = statusChangePermissionsAllowed(user, policyData?.statusChangePermissions, selectedRecords?.map((e) => e?.status), status);
       if (!statusChangeAllowed) {
         setStatusChangePermissionError(true)
         return false;

@@ -34,8 +34,8 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
     axiosInstance()
       .get(`/user`)
       .then(({ data: { data } }) => {
-        setUsers(data.filter((user) => !assignedUsers.some((item) => item?._id === user?._id)).map((obj) => ({ ...obj, isChecked: false })));
-        setUsersConst(data.filter((user) => !assignedUsers.some((item) => item?._id === user?._id)).map((obj) => ({ ...obj, isChecked: false })));
+        setUsers(data.filter((user) => !assignedUsers.some((item) => item?._id === user?._id)));
+        setUsersConst(data.filter((user) => !assignedUsers.some((item) => item?._id === user?._id)));
         setLoadingUsers(false);
       })
       .catch((error) => {
@@ -77,8 +77,7 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
   const handleSearch = (e) => {
     let value = e.target.value;
     setSearch(value);
-    let result = [];
-    result = usersConst.filter((data) => {
+    const result = usersConst.filter((data) => {
       return data.concatedName.toLowerCase().search(value.toLowerCase()) !== -1 || data.email.toLowerCase().search(value.toLowerCase()) !== -1;
     });
     setUsers(result);
@@ -95,10 +94,15 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
               <Checkbox
                 edge="start"
                 onChange={(e) => {
-                  users.forEach((user) => (user.isChecked = e.target.checked));
-                  setSelectedUsers(users.filter((r) => r.isChecked).map((obj) => obj._id));
+                  if (e.target.checked) {
+                    const visibleUserIds = users.map(u => u._id);
+                    setSelectedUsers(prev => [...new Set([...prev, ...visibleUserIds])]);
+                  } else {
+                    const visibleUserIds = users.map(u => u._id);
+                    setSelectedUsers(prev => prev.filter(id => !visibleUserIds.includes(id)));
+                  }
                 }}
-                checked={users.every((x) => x.isChecked)}
+                checked={users.length > 0 && users.every(user => selectedUsers.includes(user._id))}
                 inputProps={{
                   'aria-labelledby': `checkbox-list-label-select-all`
                 }}
@@ -142,10 +146,13 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
                     <Checkbox
                       edge="start"
                       onChange={(e) => {
-                        user.isChecked = e.target.checked;
-                        setSelectedUsers(users.filter((r) => r.isChecked).map((obj) => obj._id));
+                        if (e.target.checked) {
+                          setSelectedUsers(prev => [...prev, user._id]);
+                        } else {
+                          setSelectedUsers(prev => prev.filter(id => id !== user._id));
+                        }
                       }}
-                      checked={user.isChecked}
+                      checked={selectedUsers.includes(user._id)}
                       inputProps={{
                         'aria-labelledby': `checkbox-list-label-${user._id}`
                       }}

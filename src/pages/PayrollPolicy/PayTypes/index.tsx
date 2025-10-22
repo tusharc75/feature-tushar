@@ -7,6 +7,7 @@ import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
@@ -159,20 +160,6 @@ const PayTypes = ({ payrollPolicyId }) => {
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   const rightSideContents = () => {
     return (
       <>
@@ -200,9 +187,7 @@ const PayTypes = ({ payrollPolicyId }) => {
           <DetailsPageHeader
             isAddButtonVisible={true}
             addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+            isActionButtonVisible={false}
             rightSideContents={rightSideContents()}
             hasXpadding={false}
           />
@@ -217,6 +202,7 @@ const PayTypes = ({ payrollPolicyId }) => {
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           refreshGrid={fetchData}
+          bulkActionItems={<BulkActionItems selectedRecords={selectedRecords} setShowConfirmBox={setShowConfirmBox} />}
         />
       ) : (
         <Box p={2} height={500}>
@@ -252,3 +238,18 @@ const PayTypes = ({ payrollPolicyId }) => {
 };
 
 export default PayTypes;
+
+const BulkActionItems = ({ selectedRecords, setShowConfirmBox }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

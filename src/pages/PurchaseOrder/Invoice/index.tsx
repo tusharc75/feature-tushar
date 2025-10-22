@@ -2,6 +2,7 @@ import { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, IconButton, MenuItem } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { purchaseOrder, gridLoadingTimeout, displayDateTime } from '../../../constants/helpers';
 import AddInvoice from './AddInvoice';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -155,33 +156,10 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            const ids = selectedRecords.map((d) => d._id);
-            setShowDeleteConfirmBox(true);
-            setDeleteData(ids);
-          }}
-        >
-          {`Delete (${selectedRecords.length})`}
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <Fragment>
       {allowedToEdit && (
-        <DetailsPageHeader
-          isAddButtonVisible={true}
-          addButtonMenuItems={addButtonMenuItems()}
-          isActionButtonVisible={true}
-          actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          hasXpadding={false}
-        />
+        <DetailsPageHeader isAddButtonVisible={true} addButtonMenuItems={addButtonMenuItems()} isActionButtonVisible={false} hasXpadding={false} />
       )}
       <Box>
         {columns ? (
@@ -195,6 +173,9 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
             refreshGrid={fetchData}
             hideAction={!allowedToEdit}
             hideSelection={!allowedToEdit}
+            bulkActionItems={
+              <BulkActionItems selectedRecords={selectedRecords} setShowDeleteConfirmBox={setShowDeleteConfirmBox} setDeleteData={setDeleteData} />
+            }
           />
         ) : (
           <Box p={2} height={500}>
@@ -229,3 +210,20 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
 };
 
 export default Invoice;
+
+const BulkActionItems = ({ selectedRecords, setShowDeleteConfirmBox, setDeleteData }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          const ids = selectedRecords.map((d) => d._id);
+          setShowDeleteConfirmBox(true);
+          setDeleteData(ids);
+        }}
+        buttonType="red"
+      >
+        {`Delete (${selectedRecords.length})`}
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

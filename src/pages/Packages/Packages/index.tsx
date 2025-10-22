@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Box, IconButton, MenuItem } from '@mui/material';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { prepareDataForGrid, packages, sidebarResource, PACKAGE_TYPE } from 'src/constants/helpers';
@@ -231,31 +232,15 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       });
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <MenuItem
-        disabled={selectedRecords.length === 0}
-        onClick={() => {
-          setDeleteRecord(selectedRecords);
-          setShowProductConfirmBox(true);
-        }}
-      >
-        {`Delete (${selectedRecords?.length})`}
-      </MenuItem>
-    );
-  };
-
   return (
     <>
       {allowedToEdit && (
         <DetailsPageHeader
           isAddButtonVisible={allowedToEdit}
           addButtonMenuItems={addButtonMenuItems()}
-          isActionButtonVisible={allowedToEdit}
-          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          isActionButtonVisible={false}
           rightSideContents={rightSideContents()}
           hasXpadding
-          actionButtonMenuItems={actionButtonMenuItems()}
         />
       )}
       {columns ? (
@@ -271,6 +256,14 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
           hideAction={!allowedToEdit}
           hideSelection={!allowedToEdit}
           hideExportTable={true}
+          bulkActionItems={
+            <BulkActionItems
+              selectedRecords={selectedRecords}
+              setDeleteRecord={setDeleteRecord}
+              setShowProductConfirmBox={setShowProductConfirmBox}
+              allowedToEdit={allowedToEdit}
+            />
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -328,3 +321,28 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
 };
 
 export default PackagesTable;
+
+const BulkActionItems = ({ 
+  selectedRecords,
+  setDeleteRecord,
+  setShowProductConfirmBox,
+  allowedToEdit,
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={
+          !allowedToEdit
+        }
+        onClick={() => {
+          setDeleteRecord(selectedRecords);
+          setShowProductConfirmBox(true);
+        }}
+        buttonType="red"
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
+

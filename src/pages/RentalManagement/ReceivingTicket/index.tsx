@@ -2484,9 +2484,9 @@ const ReceivingTicket = ({
   };
 
   const handleChangeStatus = () => {
-    const { statusChangePermissions } = assetPolicyData;
-    if (statusChangePermissions?.length) {
-      let statusChangeAllowed = statusChangePermissionsAllowed(user, statusChangePermissions, getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map((e) => e?.status), statusToUpdate.status);
+    if (assetPolicyData?.statusChangePermissions?.length) {
+      let statusChangeAllowed = statusChangePermissionsAllowed(user,
+        assetPolicyData?.statusChangePermissions, getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map((e) => e?.status), statusToUpdate.status);
       if (!statusChangeAllowed) {
         setStatusChangePermissionError(true)
         setStatusToUpdate({ open: false, isUpdating: false, status: '', message: '' });

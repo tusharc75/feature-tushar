@@ -8,9 +8,10 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useParams } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import { serializedAsset, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, serializedAsset, sidebarResource } from 'src/constants/helpers';
 import ShowDoa from 'src/pages/DoaSetupNew/ShowDoa';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const SerializedAssetStatusChangeRequestDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -59,7 +60,16 @@ const SerializedAssetStatusChangeRequestDetail = () => {
           />
         </Box>
         <Box className="controls-v1">
-          <Box className="control-buttons-v1"></Box>
+          <Box className="control-buttons-v1">
+            <ActivityButton
+              referenceId={serializedAssetStatusChangeRequestData?.asset?.optionValue}
+              resource={ACTIVITY_RESOURCE.serializedAsset}
+              resourceLabel={serializedAssetStatusChangeRequestData?.asset?.optionLabel}
+              handleClose={() => {
+                fetchData();
+              }}
+            />
+          </Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>

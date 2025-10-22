@@ -7,6 +7,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -181,21 +182,6 @@ const ServiceTable = ({ resource, referenceId, workOrderResourceTabs, allowedToE
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords.length === 0 || isRemovingServices}
-          onClick={() => {
-            setShowServiceConfirmBox(true);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   const rightSideContents = () => {
     return (
       allowedToEdit && (
@@ -238,9 +224,7 @@ const ServiceTable = ({ resource, referenceId, workOrderResourceTabs, allowedToE
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={allowedToEdit}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: selectedRecords.length === 0 || isRemovingServices }}
+        isActionButtonVisible={false}
         rightSideContents={rightSideContents()}
         hasXpadding
       />
@@ -256,6 +240,7 @@ const ServiceTable = ({ resource, referenceId, workOrderResourceTabs, allowedToE
           onSaveEdit={onSaveInlineEdit}
           hideSelection={!allowedToEdit}
           hideExportTable={true}
+          bulkActionItems={<BulkActionItems isRemovingServices={isRemovingServices} setShowServiceConfirmBox={setShowServiceConfirmBox} />}
         />
       ) : (
         <Box p={2} height={500}>
@@ -301,3 +286,19 @@ const ServiceTable = ({ resource, referenceId, workOrderResourceTabs, allowedToE
 };
 
 export default ServiceTable;
+
+const BulkActionItems = ({ isRemovingServices, setShowServiceConfirmBox }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={isRemovingServices}
+        onClick={() => {
+          setShowServiceConfirmBox(true);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

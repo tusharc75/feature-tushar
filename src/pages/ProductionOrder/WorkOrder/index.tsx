@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem, TextField, Typography, useMediaQuery } from '@mui/material';
+import { Box, IconButton, TextField, Typography, useMediaQuery } from '@mui/material';
 import { CheckCircle, CloudUpload, Delete } from '@mui/icons-material';
 import DescriptionIcon from '@mui/icons-material/Description';
 import SyncIcon from '@mui/icons-material/Sync';
@@ -10,6 +10,7 @@ import { AutoCompleteWorkOrder } from 'src/assets/svg/svgIcons';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -949,35 +950,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       )}
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={true}
-        actionButtonMenuItems={
-          <ActionButtonMenuItems
-            {...{
-              setAddServicesDialog,
-              selectedRecords,
-              setUserAssignDialog,
-              allowedToEdit,
-              permissions,
-              setWorkStationAssignDialog,
-              user,
-              checkUniqWorkOrder,
-              dataRows,
-              setArrangeView,
-              setConsumablesDialog,
-              setAutoCompleteData,
-              setCompleteConfirmBox,
-              setShowServiceActionConfirmBox,
-              isDisabledCompleteService,
-              isDisabledRevertService,
-              handleReadyToBuild,
-              setDeleteData,
-              setShowConfirmBox,
-              setShowCloseReopenConfirmation,
-              setShowDrawingDialog,
-            }}
-          />
-        }
-        actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+        isActionButtonVisible={false}
         leftSideContents={leftSideContents()}
         rightSideContents={rightSideContents()}
         hasXpadding
@@ -996,6 +969,33 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               hideSelection={!allowedToEdit}
               hideAction={!allowedToEdit}
               expander={true}
+              bulkActionItems={
+                <BulkActionItems
+                  {...{
+                    setAddServicesDialog,
+                    selectedRecords,
+                    setUserAssignDialog,
+                    allowedToEdit,
+                    permissions,
+                    setWorkStationAssignDialog,
+                    user,
+                    checkUniqWorkOrder,
+                    dataRows,
+                    setArrangeView,
+                    setConsumablesDialog,
+                    setAutoCompleteData,
+                    setCompleteConfirmBox,
+                    setShowServiceActionConfirmBox,
+                    isDisabledCompleteService,
+                    isDisabledRevertService,
+                    handleReadyToBuild,
+                    setDeleteData,
+                    setShowConfirmBox,
+                    setShowCloseReopenConfirmation,
+                    setShowDrawingDialog,
+                  }}
+                />
+              }
             />
           </Box>
         </>
@@ -1176,7 +1176,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
 export default WorkOrder;
 
-const ActionButtonMenuItems = ({
+const BulkActionItems = ({
   setAddServicesDialog,
   selectedRecords,
   setUserAssignDialog,
@@ -1200,25 +1200,25 @@ const ActionButtonMenuItems = ({
   setShowDrawingDialog,
 }) => {
   return (
-    <>
-      <MenuItem
-        disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e.parentId)?.length ? false : true}
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={!selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e.parentId)?.length}
         onClick={() => {
           setAddServicesDialog({ open: true, new: false });
         }}
       >
         Add Existing Services
-      </MenuItem>
-      <MenuItem
-        disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e.parentId)?.length ? false : true}
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        disabled={!selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e.parentId)?.length}
         onClick={() => {
           setAddServicesDialog({ open: true, new: true });
         }}
       >
         Add New Service
-      </MenuItem>
-      <MenuItem
-        disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length ? false : true}
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        disabled={!selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length}
         onClick={() => {
           const uniqueAssignedUsers: any = flatMap(
             selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.assignedUsers || [])
@@ -1233,10 +1233,10 @@ const ActionButtonMenuItems = ({
         }}
       >
         Assign Technician
-      </MenuItem>
+      </BulkActionContainer.Button>
       {allowedToEdit && permissions?.workStations?.isRead && (
-        <MenuItem
-          disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 ? false : true}
+        <BulkActionContainer.Button
+          disabled={!selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length}
           onClick={() => {
             const uniqueAssignedWorkStations: any = flatMap(
               selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((e) => e?.assignedWorkStations || [])
@@ -1251,14 +1251,12 @@ const ActionButtonMenuItems = ({
           }}
         >
           Assign Work Station
-        </MenuItem>
+        </BulkActionContainer.Button>
       )}
       {!user?.user?.brandPolicy?.workOrderConsumableHide && (
-        <MenuItem
+        <BulkActionContainer.Button
           disabled={
-            selectedRecords?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 && checkUniqWorkOrder()
-              ? false
-              : true
+            !selectedRecords?.filter((d) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(d.type))?.length || !checkUniqWorkOrder()
           }
           onClick={() => {
             var ids = [];
@@ -1277,47 +1275,43 @@ const ActionButtonMenuItems = ({
           }}
         >
           Add Products/Consumables
-        </MenuItem>
+        </BulkActionContainer.Button>
       )}
-      <MenuItem
+      <BulkActionContainer.Button
         onClick={() => {
           setArrangeView(true);
         }}
         disabled={
-          selectedRecords?.length &&
-            selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) &&
-            selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
-            ? false
-            : true
+          !selectedRecords?.length ||
+          !selectedRecords?.find((d) => d.type === MATERIAL_TYPE.service || (d.type === MATERIAL_TYPE.product && !d?.parentId)) ||
+          !selectedRecords?.every((d) => d.workOrder?._id === selectedRecords[0]?.workOrder?._id)
         }
       >
         Arrange Services
-      </MenuItem>
-      <MenuItem
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
         onClick={() => {
           setAutoCompleteData(selectedRecords);
           setCompleteConfirmBox(true);
         }}
-        disabled={selectedRecords.some((e) => e?.canAutoCompleteWorkOrder) ? false : true}
+        disabled={!selectedRecords.some((e) => e?.canAutoCompleteWorkOrder)}
       >
         Auto Complete Work Order(s)
-      </MenuItem>
-      <MenuItem
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
         onClick={() => {
           const draftWorkOrders = selectedRecords?.filter((e) => e?.workOrderStatus === WORK_ORDER_STATUS.draft);
           handleReadyToBuild(draftWorkOrders);
         }}
-        disabled={selectedRecords?.some((e) => e?.workOrderStatus === WORK_ORDER_STATUS.draft) ? false : true}
+        disabled={!selectedRecords?.some((e) => e?.workOrderStatus === WORK_ORDER_STATUS.draft)}
       >
         Ready to Build
-      </MenuItem>
-      <MenuItem
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
         disabled={
-          checkUniqWorkOrder() &&
-            (selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-              selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
-            ? false
-            : true
+          !checkUniqWorkOrder() ||
+          !(selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+            selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && !e?.parentId)?.length === 1)
         }
         onClick={() => {
           const parentProduct = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product && !e?.parentId);
@@ -1330,51 +1324,52 @@ const ActionButtonMenuItems = ({
         }}
       >
         Upload Attachments
-      </MenuItem >
-      <MenuItem
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
         onClick={() => {
           setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
         }}
         disabled={isDisabledCompleteService()}
       >
         Complete Service
-      </MenuItem>
-      <MenuItem
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
         onClick={() => {
           setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.skipped });
         }}
         disabled={isDisabledCompleteService()}
       >
         Skip Service
-      </MenuItem>
-      <MenuItem
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
         disabled={isDisabledRevertService()}
         onClick={() => {
           setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
         }}
       >
         Revert Service
-      </MenuItem>
+      </BulkActionContainer.Button>
       {selectedRecords?.filter((e) => !e?.parentId && e?.type === MATERIAL_TYPE.product)?.length > 0 &&
         selectedRecords?.filter((e) => !e?.parentId && e?.type === MATERIAL_TYPE.product)?.every((r) => r?.canCloseWorkOrder) && (
-          <MenuItem
+          <BulkActionContainer.Button
             onClick={() => {
               setShowCloseReopenConfirmation({ open: true, type: 'Close' });
             }}
             id="close-work-order"
           >
             Close Work Order(s)
-          </MenuItem>
+          </BulkActionContainer.Button>
         )}
-      <MenuItem
+      <BulkActionContainer.Button
         onClick={() => {
           setDeleteData(selectedRecords?.filter((e) => e?.canDelete));
           setShowConfirmBox(true);
         }}
-        disabled={selectedRecords?.some((e) => e?.canDelete) ? false : true}
+        disabled={!selectedRecords?.some((e) => e?.canDelete)}
+        buttonType="red"
       >
         Delete
-      </MenuItem>
-    </>
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
   );
 };

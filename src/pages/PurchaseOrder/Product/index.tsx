@@ -11,6 +11,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -41,7 +42,16 @@ import { getTaxById } from 'src/components/PricingCondition';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import FinalPriceBox from 'src/components/FinalPriceBox';
 
-const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit: hasPermission, checkReceivedProduct, purchaseOrderFields, fetchPurchaseOrderData }) => {
+const Product = ({
+  purchaseOrderData,
+  setNextStep,
+  renderedFrom,
+  stepFullScreen,
+  allowedToEdit: hasPermission,
+  checkReceivedProduct,
+  purchaseOrderFields,
+  fetchPurchaseOrderData
+}) => {
   const toastConfig = useContext(CustomToastContext);
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
@@ -437,7 +447,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
       .then(() => {
         setAddProductDialog(false);
         fetchData();
-        fetchPurchaseOrderData()
+        fetchPurchaseOrderData();
         setAddingProducts(false);
       })
       .catch((error) => {
@@ -453,7 +463,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
       .then(() => {
         setAddProductDialog(false);
         fetchData();
-        fetchPurchaseOrderData()
+        fetchPurchaseOrderData();
         setAddingProducts(false);
         setIsBulkEdit(false);
         if (saveAndNext) {
@@ -499,7 +509,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
       await axiosInstance().post(`${purchaseOrder.api}/cost/${purchaseOrderData._id}/delete`, { ids: cost?.map((e) => e._id) });
     }
     fetchData();
-    fetchPurchaseOrderData()
+    fetchPurchaseOrderData();
     setShowDeleteConfirmBox(false);
     setDeletePurchaseOrderItem([]);
   };
@@ -510,7 +520,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
       .post(`${purchaseOrder.api}/cost/${purchaseOrderData._id}/add`, { additionalCost: rows })
       .then(() => {
         fetchData();
-        fetchPurchaseOrderData()
+        fetchPurchaseOrderData();
         setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
         setLoadingEdit(false);
       })
@@ -526,7 +536,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
       .put(`${purchaseOrder.api}/cost/${purchaseOrderData._id}/update`, { additionalCost: rows })
       .then(() => {
         fetchData();
-        fetchPurchaseOrderData()
+        fetchPurchaseOrderData();
         if (saveAndNext) {
           const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
           if (rowIndex < dataRows?.length - 1) {
@@ -571,7 +581,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
       .post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/add`, { services: tempServiceArray })
       .then(() => {
         fetchData();
-        fetchPurchaseOrderData()
+        fetchPurchaseOrderData();
         setAddServiceDialog(false);
         setSubmitting(false);
       })
@@ -587,7 +597,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
       .put(`${purchaseOrder.api}/service/${purchaseOrderData._id}/update`, { services: rows })
       .then(() => {
         fetchData();
-        fetchPurchaseOrderData()
+        fetchPurchaseOrderData();
         if (saveAndNext) {
           const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
           if (rowIndex < dataRows?.length - 1) {
@@ -679,54 +689,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
     );
   };
 
-  const ActionMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={
-            selectedRecords?.filter((e) => !e.hideSelection).length > 0 &&
-              uniq(
-                map(
-                  selectedRecords?.filter((e) => !e.hideSelection),
-                  'type'
-                )
-              )?.length === 1
-              ? false
-              : true
-          }
-          onClick={() => {
-            setIsBulkEdit(true);
-            const typeUniq: any = uniq(
-              map(
-                selectedRecords?.filter((e) => !e.hideSelection),
-                'type'
-              )
-            );
-            if (typeUniq[0] === 'Product') {
-              setShowProductDialog({ open: true, data: null, showSaveAndNext: false });
-            } else if (typeUniq[0] === 'Service') {
-              setShowServiceDialog({ open: true, data: null, showSaveAndNext: false });
-            } else {
-              setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
-            }
-          }}
-        >
-          Bulk Edit
-        </MenuItem>
-        {permissions?.purchaseOrder?.isDelete && (
-          <MenuItem
-            onClick={() => {
-              setShowDeleteConfirmBox(true);
-              setDeletePurchaseOrderItem(selectedRecords?.filter((e) => !e.hideSelection));
-            }}
-          >
-            Delete
-          </MenuItem>
-        )}
-      </>
-    );
-  };
-
   const previewDownloadProps = {
     fileName: `${resources?.purchaseOrder?.titleSingular}-${purchaseOrderData?.purchaseOrderNumber}`,
     subject: `${resources?.purchaseOrder?.titleSingular}-${purchaseOrderData?.purchaseOrderNumber}`,
@@ -757,9 +719,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
           <DetailsPageHeader
             isAddButtonVisible={true}
             addButtonMenuItems={<AddButtonMenuItems />}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={<ActionMenuItems />}
-            actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length ? false : true }}
+            isActionButtonVisible={false}
             previewDownloadProps={previewDownloadProps}
             hasXpadding={true}
           />
@@ -779,13 +739,20 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
+            bulkActionItems={
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                setIsBulkEdit={setIsBulkEdit}
+                setShowProductDialog={setShowProductDialog}
+                setShowServiceDialog={setShowServiceDialog}
+                setShowCostDialog={setShowCostDialog}
+                permissions={permissions}
+                setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+                setDeletePurchaseOrderItem={setDeletePurchaseOrderItem}
+              />
+            }
           />
-          <FinalPriceBox
-            allFields={purchaseOrderFields}
-            data={purchaseOrderData}
-            childFields={productFields}
-            material={dataRows}
-          />
+          <FinalPriceBox allFields={purchaseOrderFields} data={purchaseOrderData} childFields={productFields} material={dataRows} />
         </Box>
       ) : (
         <Box p={2} height={500}>
@@ -800,21 +767,21 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
           extraDeepFilter={
             purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false
               ? [
-                {
-                  field: 'expenseItem',
-                  term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
-                }
-              ]
+                  {
+                    field: 'expenseItem',
+                    term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
+                  }
+                ]
               : []
           }
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                {
-                  field: 'chartOfAccount',
-                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                }
-              ]
+                  {
+                    field: 'chartOfAccount',
+                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                  }
+                ]
               : []
           }
           isSubmitting={isAddingProducts}
@@ -876,11 +843,11 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                {
-                  field: 'chartOfAccount',
-                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                }
-              ]
+                  {
+                    field: 'chartOfAccount',
+                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                  }
+                ]
               : []
           }
         />
@@ -920,3 +887,62 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
 };
 
 export default Product;
+
+const BulkActionItems = ({
+  selectedRecords,
+  setIsBulkEdit,
+  setShowProductDialog,
+  setShowServiceDialog,
+  setShowCostDialog,
+  permissions,
+  setShowDeleteConfirmBox,
+  setDeletePurchaseOrderItem
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={
+          !(
+            selectedRecords?.filter((e) => !e.hideSelection).length > 0 &&
+            uniq(
+              map(
+                selectedRecords?.filter((e) => !e.hideSelection),
+                'type'
+              )
+            )?.length === 1
+          )
+        }
+        onClick={() => {
+          setIsBulkEdit(true);
+          const typeUniq: any = uniq(
+            map(
+              selectedRecords?.filter((e) => !e.hideSelection),
+              'type'
+            )
+          );
+          if (typeUniq[0] === 'Product') {
+            setShowProductDialog({ open: true, data: null, showSaveAndNext: false });
+          } else if (typeUniq[0] === 'Service') {
+            setShowServiceDialog({ open: true, data: null, showSaveAndNext: false });
+          } else {
+            setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
+          }
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+      {permissions?.purchaseOrder?.isDelete && (
+        <BulkActionContainer.Button
+          disabled={!Boolean(selectedRecords?.filter((e) => !e.hideSelection)?.length)}
+          onClick={() => {
+            setShowDeleteConfirmBox(true);
+            setDeletePurchaseOrderItem(selectedRecords?.filter((e) => !e.hideSelection));
+          }}
+          buttonType="red"
+        >
+          Delete
+        </BulkActionContainer.Button>
+      )}
+    </BulkActionContainer>
+  );
+};

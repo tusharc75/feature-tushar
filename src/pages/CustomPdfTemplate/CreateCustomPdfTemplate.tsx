@@ -17,7 +17,7 @@ import { isEqual } from 'lodash';
 import PdfEditor from './PdfEditor';
 import { CUSTOM_A4_PDF, Template } from '@pdfme/common';
 import { generate } from '@pdfme/generator';
-import { getPlugins } from './PdfEditor/plugin';
+import { getFonts, getPlugins } from './PdfEditor/plugin';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -270,6 +270,7 @@ export default function CreateCustomPdfTemplate() {
     try {
       setBtnLoading(true);
       const singleInput: { [key: string]: any } = {};
+      const fontObjects = await getFonts();
       if (!formValues || !formValues?.template) {
         throw new Error("No template available for preview.");
       }
@@ -284,7 +285,10 @@ export default function CreateCustomPdfTemplate() {
       const pdf = await generate({
         template: formValues?.template,
         inputs: finalInputs,
-        plugins: getPlugins(resourceFields, resourceTables)
+        plugins: getPlugins(resourceFields, resourceTables),
+        options: {
+          font: fontObjects
+        },
       });
       const pdfBytes: any = new Uint8Array(pdf.buffer);
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
