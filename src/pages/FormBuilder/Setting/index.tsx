@@ -64,10 +64,10 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
       const currentPolicy = resourceData?.policy || {};
       let defaultPolicy: any = resourcePolicy.find((e) => e.resource === resource)?.policy || [];
       let autoCreateWorkspaceAttachmentPolicy = autoCreateWorkspaceResources.includes(resource) ? autoCreateWorkspaceAttachment : {};
+      if (Object.keys(autoCreateWorkspaceAttachmentPolicy).length > 0) {
+        defaultPolicy = [...defaultPolicy, autoCreateWorkspaceAttachmentPolicy];
+      }
       if (allFields?.filter(e => ['dropDown', 'multiSelect'].includes(e?.fieldData?.type) && !e?.fieldData?.lookup)?.length > 0) {
-        if (Object.keys(autoCreateWorkspaceAttachmentPolicy).length > 0) {
-          defaultPolicy = [...defaultPolicy, autoCreateWorkspaceAttachmentPolicy];
-        }
         defaultPolicy = [...defaultPolicy, fieldColor];
       }
       setInitialValues({
