@@ -7,6 +7,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
@@ -145,19 +146,6 @@ const PaidTimeOff = ({ payrollPolicyData }) => {
       </>
     );
   };
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            setShowConfirmBox(true);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
 
   const rightSideContents = () => {
     return (
@@ -186,9 +174,7 @@ const PaidTimeOff = ({ payrollPolicyData }) => {
           <DetailsPageHeader
             isAddButtonVisible={true}
             addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+            isActionButtonVisible={false}
             rightSideContents={rightSideContents()}
             hasXpadding={false}
           />
@@ -204,6 +190,7 @@ const PaidTimeOff = ({ payrollPolicyData }) => {
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           refreshGrid={fetchData}
+          bulkActionItems={<BulkActionItems setShowConfirmBox={setShowConfirmBox} />}
         />
       ) : (
         <Box p={2} height={500}>
@@ -241,3 +228,18 @@ const PaidTimeOff = ({ payrollPolicyData }) => {
 };
 
 export default PaidTimeOff;
+
+const BulkActionItems = ({ setShowConfirmBox }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          setShowConfirmBox(true);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

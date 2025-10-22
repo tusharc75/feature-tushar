@@ -7,6 +7,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -161,28 +162,11 @@ const ProductRepairType = (props: Props) => {
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowDeleteConfirmBox(true)}>
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <Fragment>
       {permissions?.product?.isUpdate && (
         <>
-          <DetailsPageHeader
-            isAddButtonVisible={true}
-            addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
-            hasXpadding={false}
-          />
+          <DetailsPageHeader isAddButtonVisible={true} addButtonMenuItems={addButtonMenuItems()} isActionButtonVisible={false} hasXpadding={false} />
         </>
       )}
       {columns ? (
@@ -196,6 +180,7 @@ const ProductRepairType = (props: Props) => {
           isClientSideGrid={true}
           hideSelection={!permissions?.product.isUpdate}
           hideAction={!permissions?.product.isUpdate}
+          bulkActionItems={<BulkActionItems setShowDeleteConfirmBox={setShowDeleteConfirmBox} />}
         />
       ) : (
         <Box p={2} height={500}>
@@ -232,3 +217,18 @@ const ProductRepairType = (props: Props) => {
 };
 
 export default ProductRepairType;
+
+const BulkActionItems = ({ setShowDeleteConfirmBox }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          setShowDeleteConfirmBox(true);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

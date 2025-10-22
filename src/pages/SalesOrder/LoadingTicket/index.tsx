@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import { map, startCase, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -8,6 +8,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -140,19 +141,22 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
         Cell: ({ row }) =>
           row?.original?.loadingTicketStatus ? <h5 className="text-truncate">{row?.original?.loadingTicketStatus}</h5> : <NoDataCell />
       },
-      ...(user?.user?.brandPolicy?.leadTime ?
-        [{
-          accessor: 'leadTime',
-          Header: 'Lead Time (Days)',
-          Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
-          Footer: (info) => {
-            let rows = info.table.getExpandedRowModel().rows;
-            const total = rows
-              ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-              .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-            return <>{total}</>;
-          }
-        }] : [])
+      ...(user?.user?.brandPolicy?.leadTime
+        ? [
+            {
+              accessor: 'leadTime',
+              Header: 'Lead Time (Days)',
+              Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+              Footer: (info) => {
+                let rows = info.table.getExpandedRowModel().rows;
+                const total = rows
+                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+                return <>{total}</>;
+              }
+            }
+          ]
+        : [])
     ];
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
@@ -270,41 +274,8 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
     }
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            if (!validateAction(salesOrderActions.createLoadingTicket)) {
-              handleDeliveryTicketDialog();
-            }
-          }}
-          disabled={selectedRecords.length === 0}
-        >
-          Create Loading Ticket
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (!validateAction(salesOrderActions.deliveredLoadingTicket)) {
-              handelProcessTickets();
-            }
-          }}
-        >
-          Delivered Loading Ticket
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <>
-      <DetailsPageHeader
-        isAddButtonVisible={false}
-        isActionButtonVisible={true}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-        hasXpadding
-      />
       {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -315,6 +286,15 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             refreshGrid={fetchData}
+            bulkActionItems={
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                validateAction={validateAction}
+                salesOrderActions={salesOrderActions}
+                handleDeliveryTicketDialog={handleDeliveryTicketDialog}
+                handelProcessTickets={handelProcessTickets}
+              />
+            }
           />
         </Box>
       ) : (
@@ -355,3 +335,28 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 };
 
 export default LoadingTicket;
+
+const BulkActionItems = ({ selectedRecords, validateAction, salesOrderActions, handleDeliveryTicketDialog, handelProcessTickets }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          if (!validateAction(salesOrderActions.createLoadingTicket)) {
+            handleDeliveryTicketDialog();
+          }
+        }}
+      >
+        Create Loading Ticket
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        onClick={() => {
+          if (!validateAction(salesOrderActions.deliveredLoadingTicket)) {
+            handelProcessTickets();
+          }
+        }}
+      >
+        Delivered Loading Ticket
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

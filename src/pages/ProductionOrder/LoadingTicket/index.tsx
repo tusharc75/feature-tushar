@@ -1,11 +1,12 @@
-import { IconButton, MenuItem } from '@mui/material';
+import { IconButton } from '@mui/material';
 import Box from '@mui/material/Box/Box';
-import Grid from '@mui/material/Grid2';import { map, startCase, uniq } from 'lodash';
+import Grid from '@mui/material/Grid2';
+import { map, startCase, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -254,45 +255,9 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
     }
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            handleDeliveryTicketDialog();
-          }}
-          disabled={selectedRecords?.length === 0 || selectedRecords?.some((f) => f.hasOwnProperty('loadingTicketId'))}
-        >
-          Create Loading Ticket
-        </MenuItem>
-        <MenuItem
-          disabled={
-            selectedRecords?.length === 0 ||
-            selectedRecords?.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords?.length
-          }
-          onClick={() => {
-            handelProcessTickets();
-          }}
-        >
-          Delivered to Customer
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <>
-      {allowedToEdit && (
-        <DetailsPageHeader
-          isAddButtonVisible={false}
-          isActionButtonVisible={true}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
-          hasXpadding
-        />
-      )}
-
-      <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
+      <Grid size={{ xs: 12, md: 12, sm: 12 }} className="mt-3">
         {columns ? (
           <Box zIndex={5} width={'100%'}>
             <CustomReactTable
@@ -304,6 +269,13 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
               refreshGrid={fetchRecords}
               hideSelection={!allowedToEdit}
               hideAction={!allowedToEdit}
+              bulkActionItems={
+                <BulkActionItems
+                  selectedRecords={selectedRecords}
+                  handleDeliveryTicketDialog={handleDeliveryTicketDialog}
+                  handelProcessTickets={handelProcessTickets}
+                />
+              }
             />
           </Box>
         ) : (
@@ -331,3 +303,26 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
 };
 
 export default LoadingTicket;
+
+const BulkActionItems = ({ selectedRecords, handleDeliveryTicketDialog, handelProcessTickets }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          handleDeliveryTicketDialog();
+        }}
+        disabled={selectedRecords?.some((f) => f.hasOwnProperty('loadingTicketId'))}
+      >
+        Create Loading Ticket
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        disabled={selectedRecords?.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords?.length}
+        onClick={() => {
+          handelProcessTickets();
+        }}
+      >
+        Delivered to Customer
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

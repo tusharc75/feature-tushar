@@ -11,6 +11,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
@@ -21,14 +22,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import {
-  CHILD_RESOURCE,
-  MATERIAL_TYPE,
-  PRICING_SETUP_TYPE,
-  SALES_ORDER_STATUS,
-  salesOrder,
-  sidebarResource
-} from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, SALES_ORDER_STATUS, salesOrder, sidebarResource } from '../../../constants/helpers';
 import SalesOrderQtyDialog from './SalesOrderQtyDialog';
 import { flattenArray } from 'src/constants/columns';
 import AdditionalCostDialog from './AdditionalCostDialog';
@@ -185,19 +179,19 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
       },
       ...(user?.user?.brandPolicy?.leadTime
         ? [
-          {
-            accessor: 'leadTime',
-            Header: 'Lead Time (Days)',
-            Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
-            Footer: (info) => {
-              let rows = info.table.getExpandedRowModel().rows;
-              const total = rows
-                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-              return <>{total}</>;
+            {
+              accessor: 'leadTime',
+              Header: 'Lead Time (Days)',
+              Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+              Footer: (info) => {
+                let rows = info.table.getExpandedRowModel().rows;
+                const total = rows
+                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+                return <>{total}</>;
+              }
             }
-          }
-        ]
+          ]
         : [])
     ];
     coloum = [...coloum, ...newColumns];
@@ -286,14 +280,15 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     rows = [...rows, ...additionalCost];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.package
-            ? parent.packageDetail?.packageName
-            : parent.detail || ''
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
+            ? parent.serviceDetail?.serviceName
+            : parent.type === MATERIAL_TYPE.package
+              ? parent.packageDetail?.packageName
+              : parent.detail || ''
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
@@ -322,20 +317,30 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
-        : _subRow.type === MATERIAL_TYPE.service ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.package ? _subRow.packageDetail?.packageName
-            : _subRow.type === MATERIAL_TYPE.serializedAsset ? _subRow.serializedAssetDetail?.assetNumber
-              : _subRow?.detail
-        ;
-      _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription
-        : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription
-          : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription
-            : _subRow.type === MATERIAL_TYPE.serializedAsset ? _subRow?.serializedAssetDetail?.assetDescription
-              : _subRow?.description;
+      _subRow.detail =
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow.packageDetail?.packageName
+              : _subRow.type === MATERIAL_TYPE.serializedAsset
+                ? _subRow.serializedAssetDetail?.assetNumber
+                : _subRow?.detail;
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productDescription
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow.type === MATERIAL_TYPE.service
+              ? _subRow?.serviceDetail?.serviceDescription
+              : _subRow.type === MATERIAL_TYPE.serializedAsset
+                ? _subRow?.serializedAssetDetail?.assetDescription
+                : _subRow?.description;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] || _subRow.type === MATERIAL_TYPE.serializedAsset ? true : false;
+      _subRow.isValid =
+        _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] || _subRow.type === MATERIAL_TYPE.serializedAsset ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
@@ -606,40 +611,6 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords.length === 0 || selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
-          onClick={() => {
-            setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
-          }}
-        >
-          Bulk Edit
-        </MenuItem>
-
-        <MenuItem
-          onClick={() => {
-            const dataToDelete =
-              selectedRecords &&
-              selectedRecords
-                .filter((e) => !e.hideSelection)
-                .map((rec: any) => {
-                  const obj: any = {};
-                  obj.id = rec._id;
-                  obj.type = rec?.type;
-                  obj.materialId = rec?.materialId;
-                  return obj;
-                });
-            setDeleteData(dataToDelete);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   const handleSaveLeadTime = (data) => {
     setSubmitting(true);
     const value = {
@@ -670,16 +641,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
       <DetailsPageHeader
         isAddButtonVisible={true}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={allowedToEdit}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{
-          tooltip: Boolean(selectedRecords && selectedRecords.length) ? 'Delete selected records' : 'Select records to delete',
-          disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)
-        }}
-        addButtonProps={{
-          disabled: !allowedToEdit,
-          tooltip: !allowedToEdit ? ownerAndColaborator : ``
-        }}
+        isActionButtonVisible={false}
         leftSideContents
         rightSideContents
         hasXpadding
@@ -699,6 +661,14 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
               isClientSideGrid={true}
               hideSelection={!allowedToEdit}
               hideAction={!allowedToEdit}
+              bulkActionItems={
+                <BulkActionItems
+                  selectedRecords={selectedRecords}
+                  setIsProductEdit={setIsProductEdit}
+                  setDeleteData={setDeleteData}
+                  MATERIAL_TYPE={MATERIAL_TYPE}
+                />
+              }
             />
           </Box>
         </>
@@ -860,3 +830,39 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
 };
 
 export default Material;
+
+const BulkActionItems = ({ selectedRecords, setIsProductEdit, setDeleteData, MATERIAL_TYPE }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={
+          !Boolean(selectedRecords.filter((e) => !e.hideSelection).length) || selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
+        }
+        onClick={() => {
+          setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
+        }}
+      >
+        Bulk Edit
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        onClick={() => {
+          const dataToDelete =
+            selectedRecords &&
+            selectedRecords
+              .filter((e) => !e.hideSelection)
+              .map((rec: any) => {
+                const obj: any = {};
+                obj.id = rec._id;
+                obj.type = rec?.type;
+                obj.materialId = rec?.materialId;
+                return obj;
+              });
+          setDeleteData(dataToDelete);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

@@ -18,6 +18,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import { useData } from 'src/StateProvider/Provider';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -243,16 +244,6 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowDeleteConfirmBox(true)}>
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <Fragment>
       <Dialog
@@ -419,9 +410,7 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                       <DetailsPageHeader
                         isAddButtonVisible={true}
                         addButtonMenuItems={addButtonMenuItems()}
-                        isActionButtonVisible={true}
-                        actionButtonMenuItems={actionButtonMenuItems()}
-                        actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+                        isActionButtonVisible={false}
                         hasXpadding={false}
                       />
                       {columns ? (
@@ -433,6 +422,7 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                           refreshGrid={fetchData}
                           renderedFrom={renderedFrom}
                           isClientSideGrid={true}
+                          bulkActionItems={<BulkActionItems setShowDeleteConfirmBox={setShowDeleteConfirmBox} />}
                         />
                       ) : (
                         <Box p={2} height={500}>
@@ -499,3 +489,18 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
 };
 
 export default ManageServiceConditional;
+
+const BulkActionItems = ({setShowDeleteConfirmBox }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          setShowDeleteConfirmBox(true);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
