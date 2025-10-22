@@ -15,7 +15,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { sidebarResource } from 'src/constants/helpers';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import ManageOnboardingTemplate from 'src/pages/OnboardingTemplate/ManageOnboardingTemplate';
-import DynamicTabs from 'src/components/FormBuilder/Tabs';
+import Steps from 'src/components/FormBuilder/Tabs/Steps';
 
 const OnboardingTemplateDetail = () => {
 
@@ -117,7 +117,7 @@ const OnboardingTemplateDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleTabChange}>
           <CustomTab value={0}>Header</CustomTab>
-          <CustomTab value={1}>Tabs</CustomTab>
+          <CustomTab value={1}>Steps</CustomTab>
         </CustomTabs>
 
         <TabPanel value={tabValue} index={0}>
@@ -132,11 +132,15 @@ const OnboardingTemplateDetail = () => {
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
-          <DynamicTabs
-            onboardingTemplateId={id}
-            resource={sidebarResource.onboardingTemplate}
-          />
-        </TabPanel>
+          <Box sx={{ mb: 3 }}>
+            <Steps
+              resourceData={onboardingTemplateData}
+              tab={onboardingTemplateData?.tabs[0] || [] }
+              fetchData={fetchData}
+              onboardingTemplateId={id}
+            />
+          </Box>
+        </TabPanel> 
       </Box>
 
       {showConfirmBox && (
