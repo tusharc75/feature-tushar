@@ -69,8 +69,8 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
     axiosInstance()
       .get(`/user`)
       .then(({ data: { data } }) => {
-        setUser(data.filter((user) => !assignedUsers.some((item) => item?._id === user?._id)).map((obj) => ({ ...obj, isChecked: false })));
-        setUserConst(data.filter((user) => !assignedUsers.some((item) => item?._id === user?._id)).map((obj) => ({ ...obj, isChecked: false })));
+        setUser(data.filter((user) => !assignedUsers.some((item) => item?._id === user?._id)));
+        setUserConst(data.filter((user) => !assignedUsers.some((item) => item?._id === user?._id)));
         setLoadingData(false);
       })
       .catch((error) => {
@@ -81,8 +81,8 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
     axiosInstance()
       .get(`/entity`)
       .then(({ data: { data } }) => {
-        setEntity(data.filter((item) => entityAccessIds.includes(item._id)).map((obj) => ({ ...obj, isChecked: false })));
-        setEntityConst(data.filter((item) => entityAccessIds.includes(item._id)).map((obj) => ({ ...obj, isChecked: false })));
+        setEntity(data.filter((item) => entityAccessIds.includes(item._id)));
+        setEntityConst(data.filter((item) => entityAccessIds.includes(item._id)));
         setLoadingData(false);
       })
       .catch((error) => {
@@ -95,14 +95,13 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
   const handleSearch = (e) => {
     let value = e?.target?.value || '';
     setSearch(value);
-    let resultUser = [];
-    let resultEntity = [];
 
-    resultUser = userConst.filter((data) => {
+    const resultUser = userConst.filter((data) => {
       return data.concatedName?.toLowerCase().search(value.toLowerCase()) !== -1 || data.email?.toLowerCase().search(value.toLowerCase()) !== -1;
     });
     setUser(resultUser);
-    resultEntity = entityConst.filter((data) => {
+
+    const resultEntity = entityConst.filter((data) => {
       return data.entityName?.toLowerCase().search(value.toLowerCase()) !== -1;
     });
     setEntity(resultEntity);
@@ -144,10 +143,13 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
                   <Checkbox
                     edge="start"
                     onChange={(e) => {
-                      d.isChecked = e.target.checked;
-                      setSelectedUser(user.filter((d) => d.isChecked).map((obj) => obj._id));
+                      if (e.target.checked) {
+                        setSelectedUser(prev => [...prev, d._id]);
+                      } else {
+                        setSelectedUser(prev => prev.filter(id => id !== d._id));
+                      }
                     }}
-                    checked={d.isChecked}
+                    checked={selectedUser.includes(d._id)}
                     inputProps={{
                       'aria-labelledby': `checkbox-list-label-${d._id}`
                     }}
@@ -167,10 +169,13 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
                   <Checkbox
                     edge="start"
                     onChange={(e) => {
-                      d.isChecked = e.target.checked;
-                      setSelectedEntity(entity.filter((r) => r.isChecked).map((obj) => obj._id));
+                      if (e.target.checked) {
+                        setSelectedEntity(prev => [...prev, d._id]);
+                      } else {
+                        setSelectedEntity(prev => prev.filter(id => id !== d._id));
+                      }
                     }}
-                    checked={d.isChecked}
+                    checked={selectedEntity.includes(d._id)}
                     inputProps={{
                       'aria-labelledby': `checkbox-list-label-${d._id}`
                     }}
@@ -199,14 +204,27 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
                 className="m-0"
                 onChange={(e) => {
                   if (activeStep === 0) {
-                    user.forEach((d) => (d.isChecked = e.target.checked));
-                    setSelectedUser(user.filter((r) => r.isChecked).map((obj) => obj._id));
+                    if (e.target.checked) {
+                      const visibleUserIds = user.map(u => u._id);
+                      setSelectedUser(prev => [...new Set([...prev, ...visibleUserIds])]);
+                    } else {
+                      const visibleUserIds = user.map(u => u._id);
+                      setSelectedUser(prev => prev.filter(id => !visibleUserIds.includes(id)));
+                    }
                   } else {
-                    entity.forEach((d) => (d.isChecked = e.target.checked));
-                    setSelectedEntity(entity.filter((r) => r.isChecked).map((obj) => obj._id));
+                    if (e.target.checked) {
+                      const visibleEntityIds = entity.map(e => e._id);
+                      setSelectedEntity(prev => [...new Set([...prev, ...visibleEntityIds])]);
+                    } else {
+                      const visibleEntityIds = entity.map(e => e._id);
+                      setSelectedEntity(prev => prev.filter(id => !visibleEntityIds.includes(id)));
+                    }
                   }
                 }}
-                checked={activeStep === 0 ? user.every((x) => x.isChecked) : entity.every((x) => x.isChecked)}
+                checked={activeStep === 0 ?
+                  user.length > 0 && user.every(u => selectedUser.includes(u._id)) :
+                  entity.length > 0 && entity.every(e => selectedEntity.includes(e._id))
+                }
                 inputProps={{
                   'aria-labelledby': `checkbox-list-label-select-all`
                 }}
