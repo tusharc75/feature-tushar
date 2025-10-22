@@ -52,6 +52,17 @@ const ReportsTable = ({ state: reportState, isSidebarOpen, dynamicForm = false }
   const [filterTerm, setFilterTerm] = useState({});
   const [selectedReportView, setSelectedReportView] = useState(null);
 
+  const getFilteredColumn = (column) => {
+    let tempColumn = column;
+    if (resourceStartCase === sidebarResource.serializedAsset) {
+      const displayLastRentalJobFilter = deepFilters?.find((e) => e.field === 'displayLastRentalJob');
+      if (!displayLastRentalJobFilter || displayLastRentalJobFilter?.term === 'No') {
+        tempColumn = tempColumn?.filter((e) => !['rentalJob', 'rentalJobActualStartDate', 'rentalJobActualEndDate'].includes(e.accessor));
+      }
+    }
+    return tempColumn;
+  };
+
   const fetchGridColumns = useCallback(async () => {
     setIsColumnsLoading(true);
     const {
@@ -356,7 +367,7 @@ const ReportsTable = ({ state: reportState, isSidebarOpen, dynamicForm = false }
           columns={
             selectedReport?.type === 'custom-report' && customReportData && customReportData?.column?.length > 0
               ? columns?.filter((t) => customReportData?.column?.includes(t?.accessor))
-              : columns
+              : getFilteredColumn(columns)
           }
           state={state}
           resource={dynamicForm ? resourceStartCase : sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
