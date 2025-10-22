@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -6,6 +6,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
@@ -170,21 +171,6 @@ const DataListItems = ({ dataListId }) => {
       });
   };
 
-  const ActionMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
-          onClick={() => {
-            setShowDeleteConfirmBox(true);
-          }}
-        >
-          {`Delete (${selectedRecords?.length})`}
-        </MenuItem>
-      </>
-    );
-  };
-
   const rightSideContents = () => {
     return (
       <>
@@ -208,15 +194,13 @@ const DataListItems = ({ dataListId }) => {
     <Fragment>
       <DetailsPageHeader
         isAddButtonVisible={true}
-        isActionButtonVisible={permissions?.dataLists?.isDelete}
-        actionButtonMenuItems={<ActionMenuItems />}
+        isActionButtonVisible={false}
         addButtonProps={{
           disabled: !permissions?.dataLists.isCreate,
           onClick: () => {
             setShowManageDialog({ open: true, isEdit: false, idToEdit: null });
           }
         }}
-        actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
         rightSideContents={rightSideContents()}
         hasXpadding={false}
       />
@@ -230,6 +214,13 @@ const DataListItems = ({ dataListId }) => {
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           showArrangeView={false}
+          bulkActionItems={
+            <BulkActionItems
+              selectedRecords={selectedRecords}
+              setShowDeleteConfirmBox={setShowDeleteConfirmBox}
+              permissions={permissions}
+            />
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -271,3 +262,26 @@ const DataListItems = ({ dataListId }) => {
 };
 
 export default DataListItems;
+
+const BulkActionItems = ({ 
+  selectedRecords,
+  setShowDeleteConfirmBox,
+  permissions
+}) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={
+          !permissions?.dataLists?.isDelete ||
+          !((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)
+        }
+        onClick={() => {
+          setShowDeleteConfirmBox(true);
+        }}
+        buttonType="red"
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

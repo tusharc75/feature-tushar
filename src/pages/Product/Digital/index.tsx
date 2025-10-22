@@ -5,6 +5,7 @@ import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -175,32 +176,11 @@ const Digital = ({ renderedFrom, productId }) => {
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   return (
     <>
       {permissions?.product?.isUpdate && (
         <>
-          <DetailsPageHeader
-            isAddButtonVisible={true}
-            addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-            hasXpadding={false}
-          />
+          <DetailsPageHeader isAddButtonVisible={true} addButtonMenuItems={addButtonMenuItems()} isActionButtonVisible={false} hasXpadding={false} />
         </>
       )}
       {columns ? (
@@ -214,6 +194,7 @@ const Digital = ({ renderedFrom, productId }) => {
           isClientSideGrid={true}
           hideAction={!permissions?.product?.isUpdate}
           hideSelection={!permissions?.product?.isUpdate}
+          bulkActionItems={<BulkActionItems selectedRecords={selectedRecords} setShowConfirmBox={setShowConfirmBox} />}
         />
       ) : (
         <Box p={2} height={500}>
@@ -248,3 +229,18 @@ const Digital = ({ renderedFrom, productId }) => {
 };
 
 export default Digital;
+
+const BulkActionItems = ({ selectedRecords, setShowConfirmBox }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          setShowConfirmBox({ open: true, ids: selectedRecords?.map((e) => e._id) });
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

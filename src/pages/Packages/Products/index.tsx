@@ -8,6 +8,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
@@ -18,7 +19,15 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { packages, sidebarResource, prepareDataForGrid, WORK_ORDER_TYPE_LABEL, WORK_ORDER_TYPE, PACKAGE_TYPE, MATERIAL_SUB_TYPE } from 'src/constants/helpers';
+import {
+  packages,
+  sidebarResource,
+  prepareDataForGrid,
+  WORK_ORDER_TYPE_LABEL,
+  WORK_ORDER_TYPE,
+  PACKAGE_TYPE,
+  MATERIAL_SUB_TYPE
+} from 'src/constants/helpers';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import { cH } from '@fullcalendar/core/internal-common';
@@ -228,20 +237,6 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
       });
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <MenuItem
-        disabled={selectedRecords.length === 0}
-        onClick={() => {
-          setDeleteRecord(selectedRecords);
-          setShowProductConfirmBox(true);
-        }}
-      >
-        {`Delete (${selectedRecords?.length})`}
-      </MenuItem>
-    );
-  };
-
   const rightSideContents = () => {
     return (
       allowedToEdit && (
@@ -294,17 +289,15 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
           </ContainedTabs>
         </>
       )}
-      {allowedToEdit &&
+      {allowedToEdit && (
         <DetailsPageHeader
           isAddButtonVisible={allowedToEdit}
           addButtonMenuItems={addButtonMenuItems()}
           rightSideContents={rightSideContents()}
-          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          isActionButtonVisible={allowedToEdit}
+          isActionButtonVisible={false}
           hasXpadding
         />
-      }
+      )}
       {columns ? (
         <CustomReactTable
           height={fullHeight ? 'calc(100vh - 250px)' : 'calc(100vh - 393px)'}
@@ -318,6 +311,14 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
           hideAction={!allowedToEdit}
           hideSelection={!allowedToEdit}
           hideExportTable={true}
+          bulkActionItems={
+            <BulkActionItems
+              selectedRecords={selectedRecords}
+              setDeleteRecord={setDeleteRecord}
+              setShowProductConfirmBox={setShowProductConfirmBox}
+              allowedToEdit={allowedToEdit}
+            />
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -364,3 +365,20 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
 };
 
 export default Products;
+
+const BulkActionItems = ({ selectedRecords, setDeleteRecord, setShowProductConfirmBox, allowedToEdit }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        disabled={!allowedToEdit}
+        onClick={() => {
+          setDeleteRecord(selectedRecords);
+          setShowProductConfirmBox(true);
+        }}
+        buttonType="red"
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

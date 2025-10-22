@@ -7,6 +7,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
@@ -151,20 +152,6 @@ const Holidays = ({ payrollPolicyData }) => {
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          onClick={() => {
-            setShowConfirmBox(true);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   const rightSideContents = () => {
     return (
       <>
@@ -192,9 +179,7 @@ const Holidays = ({ payrollPolicyData }) => {
           <DetailsPageHeader
             isAddButtonVisible={true}
             addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+            isActionButtonVisible={false}
             rightSideContents={rightSideContents()}
             hasXpadding={false}
           />
@@ -210,6 +195,9 @@ const Holidays = ({ payrollPolicyData }) => {
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           refreshGrid={fetchData}
+          bulkActionItems={
+            <BulkActionItems setShowConfirmBox={setShowConfirmBox} selectedRecords={selectedRecords} setDeleteRecord={setDeleteRecord} />
+          }
         />
       ) : (
         <Box p={2} height={500}>
@@ -247,3 +235,23 @@ const Holidays = ({ payrollPolicyData }) => {
 };
 
 export default Holidays;
+
+const BulkActionItems = ({ setShowConfirmBox, selectedRecords, setDeleteRecord }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          if (selectedRecords.length === 1) {
+            setDeleteRecord(selectedRecords[0]);
+          } else {
+            setDeleteRecord(null);
+          }
+          setShowConfirmBox(true);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};

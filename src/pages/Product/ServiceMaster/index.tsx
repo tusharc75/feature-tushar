@@ -13,6 +13,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
+import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -512,38 +513,6 @@ const ServiceMaster = (props: Props) => {
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem disabled={selectedRecords.length === 0} onClick={() => setShowDeleteConfirmBox(true)}>
-          Delete
-        </MenuItem>
-        <MenuItem
-          disabled={selectedRecords?.filter((p) => p.type === 'Service')?.length > 0 ? false : true}
-          onClick={() => {
-            handleUpdate({
-              ids: selectedRecords?.filter((p) => p.type === 'Service')?.map((d) => d._id),
-              default: true
-            });
-          }}
-        >
-          Set Default
-        </MenuItem>
-        <MenuItem
-          disabled={selectedRecords?.filter((p) => p.type === 'Service')?.length > 0 ? false : true}
-          onClick={() => {
-            handleUpdate({
-              ids: selectedRecords?.filter((p) => p.type === 'Service')?.map((d) => d._id),
-              default: false
-            });
-          }}
-        >
-          Remove Default
-        </MenuItem>
-      </>
-    );
-  };
-
   const rightSideContents = () => {
     return (
       <>
@@ -586,9 +555,7 @@ const ServiceMaster = (props: Props) => {
             <DetailsPageHeader
               isAddButtonVisible={true}
               addButtonMenuItems={addButtonMenuItems()}
-              isActionButtonVisible={true}
-              actionButtonMenuItems={actionButtonMenuItems()}
-              actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+              isActionButtonVisible={false}
               rightSideContents={rightSideContents()}
               hasXpadding={false}
             />
@@ -605,6 +572,9 @@ const ServiceMaster = (props: Props) => {
             expander={true}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
+            bulkActionItems={
+              <BulkActionItems selectedRecords={selectedRecords} setShowDeleteConfirmBox={setShowDeleteConfirmBox} handleUpdate={handleUpdate} />
+            }
           />
         ) : (
           <Box p={2} height={500}>
@@ -743,3 +713,40 @@ const ServiceMaster = (props: Props) => {
 };
 
 export default ServiceMaster;
+
+const BulkActionItems = ({ selectedRecords, setShowDeleteConfirmBox, handleUpdate }) => {
+  return (
+    <BulkActionContainer>
+      <BulkActionContainer.Button
+        onClick={() => {
+          setShowDeleteConfirmBox(true);
+        }}
+        buttonType="red"
+      >
+        Delete
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        disabled={selectedRecords?.filter((p) => p.type === 'Service')?.length === 0}
+        onClick={() => {
+          handleUpdate({
+            ids: selectedRecords?.filter((p) => p.type === 'Service')?.map((d) => d._id),
+            default: true
+          });
+        }}
+      >
+        Set Default
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        disabled={selectedRecords?.filter((p) => p.type === 'Service')?.length === 0}
+        onClick={() => {
+          handleUpdate({
+            ids: selectedRecords?.filter((p) => p.type === 'Service')?.map((d) => d._id),
+            default: false
+          });
+        }}
+      >
+        Remove Default
+      </BulkActionContainer.Button>
+    </BulkActionContainer>
+  );
+};
