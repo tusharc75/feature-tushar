@@ -35,7 +35,7 @@ const ignoreField = ['priceTemplate'];
 
 const CreateProduct = (props) => {
   const {
-    state: { permissions, user, selectedEntity }
+    state: { permissions, user, selectedEntity, resources }
   }: any = useData();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -208,28 +208,29 @@ const CreateProduct = (props) => {
       delete values.brand;
       axiosInstance()
         .post(`/product`, values)
-        .then(({ data: { data } }) => {
-          const productId = data._id;
+        .then(({ data }) => {
+          const productData = data?.data
+          const productId = productData._id;
           setSubmitting(false);
           handleClose();
           if (isAddInBuilder) {
-            delete data.brand;
-            delete data.createdBy;
-            delete data.updatedBy;
-            delete data.fields;
-            data.productId = data._id;
-            delete data._id;
-            data.isEditable = true;
-            addProductInBuilder([data]);
+            delete productData.brand;
+            delete productData.createdBy;
+            delete productData.updatedBy;
+            delete productData.fields;
+            productData.productId = productData._id;
+            delete productData._id;
+            productData.isEditable = true;
+            addProductInBuilder([productData]);
           }
           if (isRedirectToDetailPage) {
             history.push(`/product/detail/${productId}`);
           }
-          onSuccess(data);
+          onSuccess(data?.data);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: 'Product Created Successfully'
+            message: data?.message
           });
         })
         .catch((error) => {
@@ -297,7 +298,7 @@ const CreateProduct = (props) => {
                           ...getObjKeys('', newField),
                           ...ref?.current?.values,
                           productTemplate: defaultproductTemplate,
-                          priceTemplate: defaultpriceTemplate
+                          ...(defaultpriceTemplate ? { priceTemplate: defaultpriceTemplate } : {})
                         }
                       });
                       EvaluteproductFields(newField);
@@ -533,8 +534,8 @@ const CreateProduct = (props) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={`${productId && !isClone ? `Edit Product - ${values?.productName}` : productId && isClone ? `Clone - ${cloneHeading}` : `New Product`
-                  }`}
+                title={`${productId && !isClone ? `Edit ${resources.product.titleSingular} - ${values?.productName}` : productId && isClone ?
+                  `Clone - ${cloneHeading}` : `Create ${resources.product.titleSingular}`}`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
