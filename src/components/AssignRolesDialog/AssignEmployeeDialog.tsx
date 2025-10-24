@@ -1,4 +1,4 @@
-import { Box, Dialog, TextField } from '@mui/material';
+import { Box, Dialog, TextField, Badge } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -18,9 +18,13 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import { ThemeButton } from '../Helpers/Buttons';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import RadiusFilterDialog from './RadiusFilterDialog';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, ids = [], defaultCompetencyType = [], extraStaticFilter = [], warehouse = null,
-  currentCompetencyType = '', currentCompetencies = [] }) => {
+  currentCompetencyType = '', currentCompetencies = [], location = null }) => {
   const renderedFrom = `${sidebarResource.employeeMaster}`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -40,6 +44,10 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
   const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse);
   const [selectedCompetencyType, setSelectedCompetencyType] = useState(defaultCompetencyType?.every((e) => e?.optionLabel) ? defaultCompetencyType : []);
   const [selectedCompetencies, setSelectedCompetencies] = useState(defaultCompetencyType?.every((e) => e?.optionLabel) ? defaultCompetencyType : []);
+  const [showRadiusFilter, setShowRadiusFilter] = useState(false);
+  const [radiusFilter, setRadiusFilter] = useState({ radius: null, latitude: '', longitude: '' });
+
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     fetchGridColumns();
@@ -54,7 +62,7 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedCompetencyType, selectedWarehouse, selectedCompetencies]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedCompetencyType, selectedWarehouse, selectedCompetencies, radiusFilter]);
 
   const fetchOptionsData = () => {
     axiosInstance()
@@ -156,6 +164,11 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
         updatedDeepFilters.push(e);
       });
     }
+
+    if (radiusFilter?.latitude && radiusFilter?.longitude && radiusFilter?.radius) {
+      deepFilter = `${deepFilter}&radiusFilter=${encodeURIComponent(JSON.stringify(radiusFilter))}`;
+    }
+
     if (updatedDeepFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedDeepFilters))}`;
     }
@@ -272,66 +285,101 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
             />
           )}
         />
+        {location?.latitude && location?.longitude && (
+          <Badge
+            badgeContent={radiusFilter?.radius}
+            color="primary"
+            overlap="rectangular"
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+          >
+            <ThemeButton
+              onClick={() => setShowRadiusFilter(true)}
+              startIcon={<LocationOnIcon />}
+              tooltip='Radius Filter'
+            >
+              Radius Filter
+            </ThemeButton>
+          </Badge>
+        )}
       </>
     );
   };
 
   return (
-    <Dialog
-      TransitionComponent={CustomDialogTransition}
-      fullWidth
-      maxWidth="md"
-      fullScreen={true}
-      open={true}
-      onClose={handleClose}
-      aria-labelledby="assign-roles-dialog"
-    >
-      <CustomDialogHeader
-        title={`Assign ${resources?.employeeMaster?.titlePlural}`}
-        showManimizeMaximize={false}
-        showRequiredLabel={false}
+    <>
+      <Dialog
+        TransitionComponent={CustomDialogTransition}
+        fullWidth
+        maxWidth="md"
+        fullScreen={true}
+        open={true}
         onClose={handleClose}
-      />
-      <CustomDialogContent isFooterPresent={false}>
-        {competencyOptions && columns ? (
-          <>
-            <ListingPageHeader
-              showSearchInMobile={true}
-              searchValue={search}
-              onSearch={handleSearch}
-              isActionButtonVisible={false}
-              leftSideContents={leftSideContents()}
-              addButtonProps={{
-                iconsEnabled: false,
-                disabled: isSubmitting || disableSaveButton || selectedRecords?.length === 0,
-                loading: isSubmitting,
-                text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
-                customTextAdd: 'Assign'
-              }}
-              addButtonOnclick={handleSubmit}
-              isAddButtonVisible
-              setQueryString={false}
-            />
-            <CustomReactTable
-              height={'calc(100vh - 200px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              onSaveEdit={onSaveEdit}
-              refreshGrid={fetchData}
-              showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
-              resource={sidebarResource.employeeMaster}
-            />
-          </>
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-      </CustomDialogContent>
-    </Dialog>
+        aria-labelledby="assign-roles-dialog"
+      >
+        <CustomDialogHeader
+          title={`Assign ${resources?.employeeMaster?.titlePlural}` + " Panda"}
+          showManimizeMaximize={false}
+          showRequiredLabel={false}
+          onClose={handleClose}
+        />
+        <CustomDialogContent isFooterPresent={false}>
+          {competencyOptions && columns ? (
+            <>
+              <ListingPageHeader
+                showSearchInMobile={true}
+                searchValue={search}
+                onSearch={handleSearch}
+                isActionButtonVisible={false}
+                leftSideContents={leftSideContents()}
+                addButtonProps={{
+                  iconsEnabled: false,
+                  disabled: isSubmitting || disableSaveButton || selectedRecords?.length === 0,
+                  loading: isSubmitting,
+                  text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
+                  customTextAdd: 'Assign'
+                }}
+                addButtonOnclick={handleSubmit}
+                isAddButtonVisible
+                setQueryString={false}
+              />
+              <CustomReactTable
+                height={'calc(100vh - 200px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                onSaveEdit={onSaveEdit}
+                refreshGrid={fetchData}
+                showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={sidebarResource.employeeMaster}
+              />
+            </>
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
+        </CustomDialogContent>
+      </Dialog>
+
+      {showRadiusFilter && (
+        <RadiusFilterDialog
+          onClose={() => { setShowRadiusFilter(false); setFullScreen(false); }}
+          location={location}
+          onApply={(filter) => {
+            setRadiusFilter(filter);
+            setShowRadiusFilter(false);
+          }}
+          currentFilter={radiusFilter}
+          onMinimizeMaximize={() => { setFullScreen((prevState) => !prevState); }}
+          fullScreen={fullScreen || isMobile || isTablet}
+        />
+      )}
+    </>
   );
 };
 

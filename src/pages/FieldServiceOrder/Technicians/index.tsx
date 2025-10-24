@@ -661,6 +661,7 @@ const Technicians = ({
                   : []
               : []
           }
+          location={{ "latitude": serviceOrderData?.shippingAddress?.latitude, "longitude": serviceOrderData?.shippingAddress?.longitude }}
         />
       )}
       {deleteData && (
