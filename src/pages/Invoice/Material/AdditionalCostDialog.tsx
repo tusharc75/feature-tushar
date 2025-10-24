@@ -25,7 +25,7 @@ const AdditionalCostDialog = ({ costData, onClose, handleAddCost, handleUpdateCo
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceCost, costData?.currency, true);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceCost, invoiceData?.currency, true);
     if (costData) {
       setInitialData({
         fields: data,
