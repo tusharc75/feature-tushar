@@ -167,56 +167,56 @@ const Consumables = ({
       },
       ...(productsNewColumns?.length > 0
         ? productsNewColumns?.map((e) => {
-            if (e?.fieldName === 'productName') {
-              return {
-                accessor: e?.fieldName,
-                Header: e?.fieldLabel,
-                width: 250,
-                primaryField: true,
-                disabled: true,
-                Cell: ({ row }) => {
-                  return row.original[e?.fieldName] ? (
-                    <div className="flex items-center gap-2">
-                      {hasChildFields &&
+          if (e?.fieldName === 'productName') {
+            return {
+              accessor: e?.fieldName,
+              Header: e?.fieldLabel,
+              width: 250,
+              primaryField: true,
+              disabled: true,
+              Cell: ({ row }) => {
+                return row.original[e?.fieldName] ? (
+                  <div className="flex items-center gap-2">
+                    {hasChildFields &&
                       allowedToEdit &&
                       ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) ? (
-                        <p
-                          className={'link text-truncate'}
-                          onClick={() => {
-                            setUpdateDialog({
-                              open: true,
-                              data: row.original
-                            });
-                          }}
-                        >
-                          {row.original[e?.fieldName]}
-                        </p>
-                      ) : (
-                        <p className={'text-truncate'}>{row.original[e?.fieldName]}</p>
-                      )}
-                      {row?.original?.type != OTHER_MATERIAL_TYPE.serialNumber && (
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            if (row?.original?.type === MATERIAL_TYPE.serializedAsset) {
-                              window.open(`${routes.serializedAssetDetail.path}/${row.original?.serializedAssetId}`);
-                            } else {
-                              window.open(`${routes.productDetail.path}/${row.original?.productId}`);
-                            }
-                          }}
-                        >
-                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                        </IconButton>
-                      )}
-                    </div>
-                  ) : (
-                    <NoDataCell />
-                  );
-                }
-              };
-            }
-            return e;
-          })
+                      <p
+                        className={'link text-truncate'}
+                        onClick={() => {
+                          setUpdateDialog({
+                            open: true,
+                            data: row.original
+                          });
+                        }}
+                      >
+                        {row.original[e?.fieldName]}
+                      </p>
+                    ) : (
+                      <p className={'text-truncate'}>{row.original[e?.fieldName]}</p>
+                    )}
+                    {row?.original?.type != OTHER_MATERIAL_TYPE.serialNumber && (
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          if (row?.original?.type === MATERIAL_TYPE.serializedAsset) {
+                            window.open(`${routes.serializedAssetDetail.path}/${row.original?.serializedAssetId}`);
+                          } else {
+                            window.open(`${routes.productDetail.path}/${row.original?.productId}`);
+                          }
+                        }}
+                      >
+                        <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                      </IconButton>
+                    )}
+                  </div>
+                ) : (
+                  <NoDataCell />
+                );
+              }
+            };
+          }
+          return e;
+        })
         : []),
       {
         accessor: 'serializedProduct',
@@ -277,24 +277,24 @@ const Consumables = ({
       },
       ...(user?.user?.brandPolicy?.workOrderConsumableRequest && !user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-            {
-              accessor: 'requestedQty',
-              Header: 'Requested Qty',
-              width: 150,
-              Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-            }
-          ]
+          {
+            accessor: 'requestedQty',
+            Header: 'Requested Qty',
+            width: 150,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+          }
+        ]
         : []),
       ...(!user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-            {
-              accessor: 'consumedQty',
-              Header: 'Consumed Qty',
-              primaryField: true,
-              width: 150,
-              Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-            }
-          ]
+          {
+            accessor: 'consumedQty',
+            Header: 'Consumed Qty',
+            primaryField: true,
+            width: 150,
+            Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+          }
+        ]
         : [])
     ];
     extracolumns.push({
@@ -471,7 +471,7 @@ const Consumables = ({
     }: any = await axiosInstance().get(`${workOrder.api}/service/service/${workOrderId}`);
     if (data?.length) {
       const serviceData = data?.map((s) => ({
-        optionLabel: `${s?.serviceDetail?.optionLabel}${s?.parentProductName ? ` - ${s?.parentProductName}` : ''}`,
+        optionLabel: `${s?.serviceDetail?.optionLabel}${s?.parentProductName ? ` (${s?.parentProductName})` : ''}`,
         optionValue: s?.serviceDetail?.optionValue,
         uniqueId: s?._id
       }));
@@ -569,7 +569,7 @@ const Consumables = ({
   const createNewVersionQuote = async (quoteId, quoteVersionId) => {
     axiosInstance()
       .post(`/quotation/clone-version/${quoteId}/${quoteVersionId}`)
-      .then(() => {})
+      .then(() => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });

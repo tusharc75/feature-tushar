@@ -43,6 +43,7 @@ import GridView, { GridViewRef } from './GridView';
 import { handlePdfPreview } from 'src/pages/WorkOrderSupervisor/helper';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import InfoIcon from '@mui/icons-material/Info';
 
 type Columns = typeof WORKORDER_TECHNICIAN_SERVICE_STATUS;
 
@@ -132,6 +133,9 @@ const WorkOrderTechnician = () => {
           finalObject['serviceId'] = u?.service?._id;
           finalObject['customServiceStatus'] = u?.status;
           finalObject['workOrderId'] = u?.workOrderDetail?._id;
+          finalObject['parentProductId'] = u?.parentProduct?._id;
+          finalObject['parentProductName'] = u?.parentProduct?.productName;
+          finalObject['parentProductDescription'] = u?.parentProduct?.productDescription;
           finalObject['uniqueId'] = u?._id;
           delete workOrderDetailData?._id;
           delete workOrderDetailData?.id;
@@ -172,7 +176,6 @@ const WorkOrderTechnician = () => {
       const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.workOrder, permissions?.workOrder?.isUpdate);
       const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.workOrderDetail?.path);
       const columns = newColumns.filter((ele) => ele.accessor !== 'workOrderNumber');
-
       const extraColumns = [
         {
           accessor: 'service',
@@ -262,6 +265,25 @@ const WorkOrderTechnician = () => {
           )
         },
         {
+          accessor: 'parentProductName',
+          Header: `Parent ${resources?.product?.titleSingular}`,
+          defaultVisible: true,
+          Cell: ({ row }) => (
+            row.original['parentProductName'] ? (
+              <div className="flex items-center gap-2">
+                <p title={row?.original?.parentProductName}>{row?.original?.parentProductName}</p>
+                {row?.original?.parentProductDescription &&
+                  <HtmlTooltip title={row?.original?.parentProductDescription}>
+                    <InfoIcon fontSize="small" color={'primary'} />
+                  </HtmlTooltip>
+                }
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+          )
+        },
+        {
           accessor: 'assignedWorkStations',
           Header: 'Work Stations',
           disableFilters: true,
@@ -280,9 +302,10 @@ const WorkOrderTechnician = () => {
             ) : (
               <NoDataCell />
             )
-        }
+        },
+
       ];
-      const finalColumns = [...extraColumns.slice(0, 2), ...columns, ...extraColumns.slice(2), ActionsRenderer].map((c) => {
+      const finalColumns = [...extraColumns.slice(0, 3), ...columns, ...extraColumns.slice(3), ActionsRenderer].map((c) => {
         const id = c.id || c.accessor;
         if (defaultVisibleRows.includes(id)) {
           return { ...c, defaultVisible: true };

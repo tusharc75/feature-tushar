@@ -149,6 +149,9 @@ const GridView = React.forwardRef<GridViewRef, Props>(
             finalObject['customerAccountId'] = u?.[camelCase(u?.workOrderDetail?.type)]?.customerAccount?.optionValue;
             finalObject['oriAssignedUsers'] = u?.assignedUsers;
             finalObject['oriAssignedWorkStations'] = u?.assignedWorkStations;
+            finalObject['parentProductId'] = u?.parentProduct?._id;
+            finalObject['parentProductName'] = u?.parentProduct?.productName;
+            finalObject['parentProductDescription'] = u?.parentProduct?.productDescription;
             finalObject['uniqueId'] = u?._id;
             delete workOrderDetailData?._id;
             delete workOrderDetailData?.id;

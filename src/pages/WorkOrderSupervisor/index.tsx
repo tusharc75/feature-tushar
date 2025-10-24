@@ -55,6 +55,7 @@ import routes from '../../components/Helpers/Routes';
 import AssignTechniciansDialog from '../WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import InfoIcon from '@mui/icons-material/Info';
 
 type ViewType = 'card-view' | 'table-view' | 'calendar-view';
 
@@ -72,6 +73,7 @@ const keyGetter = (d: any) => d?.['_id'] as string;
 const defaultVisibleRows = [
   'customerAccount',
   'workOrderNumber',
+  'parentProductName',
   'warehouse',
   'createDate',
   'estimateCompleteDate',
@@ -246,6 +248,9 @@ const WorkOrderSupervisor = () => {
             finalObject['customerAccountId'] = u?.[camelCase(u?.workOrderDetail?.type)]?.customerAccount?.optionValue;
             finalObject['oriAssignedUsers'] = u?.assignedUsers;
             finalObject['oriAssignedWorkStations'] = u?.assignedWorkStations;
+            finalObject['parentProductId'] = u?.parentProduct?._id;
+            finalObject['parentProductName'] = u?.parentProduct?.productName;
+            finalObject['parentProductDescription'] = u?.parentProduct?.productDescription;
             delete workOrderDetailData?._id;
             delete workOrderDetailData?.id;
             return { ...finalObject, ...workOrderDetailData };
@@ -376,6 +381,25 @@ const WorkOrderSupervisor = () => {
           }
         },
         {
+          accessor: 'parentProductName',
+          Header: `Parent ${resources?.product?.titleSingular}`,
+          defaultVisible: true,
+          Cell: ({ row }) => (
+            row.original['parentProductName'] ? (
+              <div className="flex items-center gap-2">
+                <p title={row?.original?.parentProductName}>{row?.original?.parentProductName}</p>
+                {row?.original?.parentProductDescription &&
+                  <HtmlTooltip title={row?.original?.parentProductDescription}>
+                    <InfoIcon fontSize="small" color={'primary'} />
+                  </HtmlTooltip>
+                }
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+          )
+        },
+        {
           accessor: 'assignedUsers',
           Header: 'Technician',
           disableFilters: true,
@@ -417,7 +441,7 @@ const WorkOrderSupervisor = () => {
         }
       ];
 
-      const finalColumns = [...extraColumns.slice(0, 3), ...columns, ...extraColumns.slice(3)].map((c) => {
+      const finalColumns = [...extraColumns.slice(0, 4), ...columns, ...extraColumns.slice(4)].map((c) => {
         const id = c.id || c.accessor;
         if (defaultVisibleRows.includes(id)) {
           return { ...c, defaultVisible: true };
