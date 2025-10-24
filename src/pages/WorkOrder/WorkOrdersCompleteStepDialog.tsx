@@ -157,7 +157,7 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                           className="border"
                           defaultExpanded
                           head={<h6 className="text-base font-semibold">{`${service?.serviceName}${service?.parentId ? ` - ${products?.find(p => p?._id === service?.parentId)?.productDetail?.productName}` : ''}`}</h6>}
-                          headProps={{ className: 'sticky top-0 z-[1]' }}
+                          headProps={{ className: 'sticky top-0 z-[1] p-2' }}
                         >
                           <div className={`w-full space-y-2 overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] p-2`}>
                             {service?.steps && service?.steps?.length > 0 && service?.steps?.map((step, stepIndex) => {
@@ -169,7 +169,7 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                                   className="border"
                                   defaultExpanded
                                   head={<h6 className="text-base font-semibold">{step?.stepName}</h6>}
-                                  headProps={{ className: 'sticky top-0 z-[1]' }}
+                                  headProps={{ className: 'sticky top-0 z-[1] p-2' }}
                                 >
                                   <div>
                                     {step?.fields && step?.fields?.length > 0 && values?.value[index1]?.stepData?.[index2] ? (
