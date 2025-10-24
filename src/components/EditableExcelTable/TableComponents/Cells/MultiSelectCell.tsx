@@ -3,7 +3,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { useEditableTableStore } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
 import DropDownHelper from 'src/components/EditableExcelTable/TableComponents/Cells/DropDownHelper';
 import { CellProps, Option } from 'src/components/EditableExcelTable/types';
-import { getDropdownOptionValue } from 'src/components/EditableExcelTable/utils';
+import { cleanDirtyRowData, getDropdownOptionValue } from 'src/components/EditableExcelTable/utils';
 
 const MultiSelectCell = ({ cellIndex, column, data, exitEditMode, isEditing, rowIndex, allowedEditing, isSelected, ...rest }: CellProps) => {
   const [options, setOptions] = useState<Option[]>([]);
@@ -11,6 +11,7 @@ const MultiSelectCell = ({ cellIndex, column, data, exitEditMode, isEditing, row
   const [hasFocus, setHasFocus] = useState(false);
   const [value, setValue] = useState<Option[] | null>((getDropdownOptionValue(column, data) || []) as Option[]);
   const [, setStore] = useEditableTableStore((prev) => prev.pasteKey);
+  const [columns] = useEditableTableStore((prev) => prev.columns);
 
   useEffect(() => {
     if (!hasFocus) return;
@@ -33,8 +34,16 @@ const MultiSelectCell = ({ cellIndex, column, data, exitEditMode, isEditing, row
     }
   }, [column, hasFocus]);
 
-  const handleBlur = (newValue: Option[]) => {
+  const handleCleanDirtyRows = (dirtyRows) => {
+    return cleanDirtyRowData(
+      dirtyRows,
+      columns.map((d) => d.id ?? d.accessor)
+    );
+  };
+
+  const setValueToState = (newValue: Option[]) => {
     setHasFocus(false);
+    setValue(newValue);
     setStore((prev) => {
       const tableData = [...prev.tableData];
       const dirtyRows = [...prev.dirtyRows];
@@ -48,8 +57,8 @@ const MultiSelectCell = ({ cellIndex, column, data, exitEditMode, isEditing, row
         tableData[rowIndex][`${key}Id`] = '';
       }
       tableData[rowIndex][`rest${key}`] = rest ?? [];
-      dirtyRows[rowIndex] = newValue.map((d) => d.optionValue);
-      setValue(newValue);
+      dirtyRows[rowIndex] = handleCleanDirtyRows({ ...tableData[rowIndex], [key]: newValue.map((d) => d.optionValue) });
+
       return {
         dirtyRows,
         tableData
@@ -65,14 +74,14 @@ const MultiSelectCell = ({ cellIndex, column, data, exitEditMode, isEditing, row
         options={options}
         loading={hasFocus && loading}
         value={value}
-        onChange={(e, value) => setValue(value)}
+        onChange={(e, value) => setValueToState(value)}
         id={`${column.id}-${rowIndex}-selector`}
         getOptionLabel={(option: Option) => option.optionLabel || ''}
         getOptionKey={(d) => d.optionValue}
         isOptionEqualToValue={(option1, option2) => (option1._id ? option1._id === option2._id : option1.optionValue === option2.optionValue)}
         inputProps={{
           onFocus: () => setHasFocus(true),
-          onBlur: () => handleBlur(value)
+          onBlur: () => setValueToState(value)
         }}
       />
     </>
