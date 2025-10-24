@@ -1,24 +1,17 @@
 import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
+import { MATERIAL_TYPE, WORK_ORDER_STATUS, WORKORDER_SERVICE_STATUS } from 'src/constants/helpers';
 
-const ServicesBulkActionItems = ({ selectedServices }) => {
+const ServicesBulkActionItems = ({ selectedServices, workOrderData, onClickCompleteServices }) => {
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
-        id={'test-button-1'} // Use a meaningful ID when modifying the button.
+        id={'complete-services'}
+        disabled={[WORK_ORDER_STATUS.draft, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.completed]?.includes(workOrderData?.status) || !selectedServices?.every(e => [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(e?.status))}
         onClick={() => {
-          console.log(selectedServices);
+          onClickCompleteServices(selectedServices?.filter(e => e?.type === MATERIAL_TYPE.service)?.map(e => ({ service: e?._id, uniqueId: e?.uniqueId })))
         }}
       >
-        Test 1 button
-      </BulkActionContainer.Button>
-      <BulkActionContainer.Button
-        buttonType="red"
-        id={'test-button-2'} // Use a meaningful ID when modifying the button.
-        onClick={() => {
-          console.log(selectedServices);
-        }}
-      >
-        Test 2 button
+        Complete Services
       </BulkActionContainer.Button>
     </BulkActionContainer>
   );
