@@ -716,7 +716,6 @@ const RentalManagementDetailsPage = () => {
               return (
                 <TabPanel value={tabValue} index={i + 2}>
                   <Step
-                    showTableInput={true}
                     tab={tab}
                     resourcePolicyId={resourcePolicyData?._id}
                     resourceId={id}

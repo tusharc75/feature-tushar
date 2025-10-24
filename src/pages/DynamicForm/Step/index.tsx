@@ -24,7 +24,6 @@ const Step = ({
   data,
   allowedToEdit,
   referenceData = null,
-  showTableInput = false
 }) => {
   const {
     state: { user, permissions }
@@ -106,7 +105,6 @@ const Step = ({
               />
             )}
             <View
-              showTableInput={showTableInput}
               step={steps[currentStep]}
               allowedToEdit={allowedToEdit}
               data={data}
@@ -176,7 +174,6 @@ const Step = ({
                       </IconButton>
                     </HtmlTooltip>
                   }
-                  showTableInput={showTableInput}
                   step={index}
                   allowedToEdit={allowedToEdit}
                   data={data}

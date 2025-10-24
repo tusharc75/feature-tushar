@@ -41,8 +41,7 @@ const View = ({
   fromAccordian = false,
   stepFullScreen = false,
   referenceData,
-  sidebarButton = null,
-  showTableInput = false
+  sidebarButton = null
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -130,51 +129,51 @@ const View = ({
       },
       ...(step?.linkWithMaterial
         ? [
-            {
-              accessor: 'type',
-              Header: 'Type',
-              disableFilters: true,
-              sticky: isMobile || isTablet ? 'none' : 'left',
-              width: 200,
-              Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
-            },
-            {
-              accessor: 'detail',
-              Header: 'Details',
-              minWidth: 300,
-              width: 300,
-              disabled: true,
-              sticky: isMobile || isTablet ? 'none' : 'left',
-              Cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                  <p className="text-truncate" title={row.original.detail}>
-                    {row.original.detail}
-                  </p>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      if (row.original.type === MATERIAL_TYPE.product) {
-                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                      }
-                      if (row.original.type === MATERIAL_TYPE.service) {
-                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                      }
-                      if (row.original.type === MATERIAL_TYPE.package) {
-                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                      }
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              )
-            },
-            {
-              accessor: 'description',
-              Header: 'Description',
-              Cell: ({ row }) => (row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'type',
+            Header: 'Type',
+            disableFilters: true,
+            sticky: isMobile || isTablet ? 'none' : 'left',
+            width: 200,
+            Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
+          },
+          {
+            accessor: 'detail',
+            Header: 'Details',
+            minWidth: 300,
+            width: 300,
+            disabled: true,
+            sticky: isMobile || isTablet ? 'none' : 'left',
+            Cell: ({ row }) => (
+              <div className="flex items-center gap-2">
+                <p className="text-truncate" title={row.original.detail}>
+                  {row.original.detail}
+                </p>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === MATERIAL_TYPE.product) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    }
+                    if (row.original.type === MATERIAL_TYPE.service) {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    }
+                    if (row.original.type === MATERIAL_TYPE.package) {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              </div>
+            )
+          },
+          {
+            accessor: 'description',
+            Header: 'Description',
+            Cell: ({ row }) => (row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />)
+          }
+        ]
         : [])
     ];
     const newColumns = await generateColumns(renderedFrom, step?.fields || [], null, false, data?.currency);
@@ -392,8 +391,8 @@ const View = ({
   const addButtonMenuItems = () => {
     return step?.linkWithMaterial
       ? step?.linkedMaterial?.map((m) => (
-          <MenuItem onClick={() => setOpenMaterial({ open: true, type: m })}>Add Existing {startCase(m) + 's'}</MenuItem>
-        ))
+        <MenuItem onClick={() => setOpenMaterial({ open: true, type: m })}>Add Existing {startCase(m) + 's'}</MenuItem>
+      ))
       : null;
   };
 
@@ -419,7 +418,6 @@ const View = ({
     <>
       {step?.linkWithResource ? (
         <ResourceField
-          showTableInput={showTableInput}
           step={step}
           renderedFrom={renderedFrom}
           data={data}
@@ -488,7 +486,7 @@ const View = ({
                 <Box mt={2}>
                   {!loading ? (
                     <>
-                      <Box textAlign={'right'}>
+                      <Box textAlign={'right'} mb={2}>
                         <HtmlTooltip title={allowedToEditState ? 'Edit' : editDisable}>
                           <ThemeButton
                             onClick={() => {
@@ -584,7 +582,7 @@ const View = ({
 
 export default View;
 
-const BulkActionItems = ({ 
+const BulkActionItems = ({
   selectedRecords,
   setShowDeleteConfirmBox
 }) => {

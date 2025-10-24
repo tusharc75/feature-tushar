@@ -28,10 +28,10 @@ export function cleanPastedValue({ key, columnsMap, value }: { key: string; colu
   }
   if (
     // prettier-ignore
-    ([FieldList.CURRENCYAMOUNT.type, 
-      FieldList.CURRENCYNUMBER.type, 
-      FieldList.NUMBER.type, 
-      FieldList.DECIMAL.type]).includes(type)
+    ([FieldList.CURRENCYAMOUNT.type,
+    FieldList.CURRENCYNUMBER.type,
+    FieldList.NUMBER.type,
+    FieldList.DECIMAL.type]).includes(type)
   ) {
     return convertStringToNumber(value);
   }
