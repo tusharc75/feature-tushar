@@ -61,6 +61,7 @@ import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
 import useServiceSelection from 'src/pages/WorkOrder/Service/RenderServices/useServiceSelection';
 import ModernBulkAction from 'src/components/CustomReactTable/GridHeader/ModernBulkAction';
 import ServicesBulkActionItems from 'src/pages/WorkOrder/Service/RenderServices/ServicesBulkActionItems';
+import WorkOrdersCompleteStepDialog from 'src/pages/WorkOrder/WorkOrdersCompleteStepDialog';
 
 const Service = ({
   workOrderId,
@@ -113,6 +114,7 @@ const Service = ({
   const [isSubmitting, setSubmitting] = useState(false);
   const [reviseQuotation, setReviseQuotation] = useState(false);
   const [openProperties, setOpenProperties] = useState(false);
+  const [workOrdersCompleteServicesDialog, setWorkOrdersCompleteServicesDialog] = useState({ open: false, workOrders: null })
 
   useEffect(() => {
     fetchServiceData();
@@ -592,7 +594,14 @@ const Service = ({
           {useServiceSelectionState.selectedRecords.length > 0 && (
             <div className="mb-2">
               <ModernBulkAction
-                bulkActionItems={<ServicesBulkActionItems selectedServices={useServiceSelectionState.selectedRecords} />}
+                bulkActionItems={
+                  <ServicesBulkActionItems
+                    selectedServices={useServiceSelectionState.selectedRecords}
+                    onClickCompleteServices={(services) => {
+                      setWorkOrdersCompleteServicesDialog({ open: true, workOrders: [{ workOrder: workOrderData?._id, services: services }] })
+                    }}
+                  />
+                }
                 dispatch={useServiceSelectionState.dispatch}
                 state={useServiceSelectionState as any}
               />
@@ -865,8 +874,8 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  isAllowedToServiceEdit &&
-                  selectedService?.clickable
+                    isAllowedToServiceEdit &&
+                    selectedService?.clickable
                     ? false
                     : true
                 }
@@ -886,9 +895,9 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   allowedToEdit &&
-                  quotationData?.status != QUOTATION_STATUS.sentToCustomer &&
-                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                  !completed
+                    quotationData?.status != QUOTATION_STATUS.sentToCustomer &&
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                    !completed
                     ? false
                     : true
                 }
@@ -908,8 +917,8 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                  !completed &&
-                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                    !completed &&
+                    quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
@@ -928,7 +937,7 @@ const Service = ({
                 id={'AssignWorkStations'}
                 disabled={
                   ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                    quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
@@ -968,8 +977,8 @@ const Service = ({
               id={'completeService'}
               disabled={
                 isAllowedToServiceEdit &&
-                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                   ? false
                   : true
               }
@@ -987,8 +996,8 @@ const Service = ({
               id="skipService"
               disabled={
                 isAllowedToServiceEdit &&
-                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                   ? false
                   : true
               }
@@ -1071,9 +1080,9 @@ const Service = ({
                 id={'delete'}
                 disabled={
                   allowedToEdit &&
-                  selectedService?.status === WORKORDER_SERVICE_STATUS.pending &&
-                  !completed &&
-                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                    selectedService?.status === WORKORDER_SERVICE_STATUS.pending &&
+                    !completed &&
+                    quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
@@ -1342,6 +1351,18 @@ const Service = ({
           }}
           reference={'workOrder'}
           fields={selectedService?.fields || []}
+        />
+      )}
+
+      {workOrdersCompleteServicesDialog.open && (
+        <WorkOrdersCompleteStepDialog
+          workOrders={workOrdersCompleteServicesDialog.workOrders}
+          onClose={() => setWorkOrdersCompleteServicesDialog({ open: false, workOrders: null })}
+          onSuccess={() => {
+            setWorkOrdersCompleteServicesDialog({ open: false, workOrders: null })
+            fetchServiceData()
+            fetchWorkOrderData()
+          }}
         />
       )}
     </Box>

@@ -1484,7 +1484,7 @@ const BulkActionItems = ({
           }
           setWorkOrdersCompleteStepDialog({ open: true, workOrders: data })
         }}
-        disabled={!checkUniqWorkOrder()}
+        disabled={!checkUniqWorkOrder() || getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.status === WORK_ORDER_STATUS.draft}
       >
         Complete Services
       </BulkActionContainer.Button>
