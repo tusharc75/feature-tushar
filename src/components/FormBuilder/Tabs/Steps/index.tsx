@@ -69,6 +69,9 @@ const Steps = ({ resourceData, tab, fetchData, workflowId = null, onboardingTemp
             message: data.message
           });
           setOpen({ open: false, data: null });
+          if (onboardingTemplateId) {
+            setSettingsOpen({ open: true, data: data?.data || values });
+          }
         })
         .catch((error) => {
           setIsSubmitting(false);
