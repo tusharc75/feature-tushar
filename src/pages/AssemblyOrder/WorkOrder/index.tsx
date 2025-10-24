@@ -1465,8 +1465,7 @@ const BulkActionItems = ({
         disabled={
           checkUniqWorkOrderType() &&
             getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
-            getFilterSelectedRecords(selectedRecords)
-              ?.filter((e) => e.type === MATERIAL_TYPE.package)
+            getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.package)
               .every((e) => e?.canAutoCompleteWorkOrder)
             ? false
             : true
@@ -1484,11 +1483,13 @@ const BulkActionItems = ({
           }
           setWorkOrdersCompleteStepDialog({ open: true, workOrders: data })
         }}
-        disabled={!checkUniqWorkOrder() || [WORK_ORDER_STATUS.draft, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.completed].includes(getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.status) || !getFilterSelectedRecords(selectedRecords)?.filter(e => e?.type === MATERIAL_TYPE.service)?.every(e => [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(e?.status))}
+        disabled={!getFilterSelectedRecords(selectedRecords)?.filter(e => e?.type === MATERIAL_TYPE.service)?.every(e =>
+          [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(e?.status) &&
+          ![WORK_ORDER_STATUS.draft, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.completed].includes(e?.workOrder?.status)
+        )}
       >
         Complete Services
       </BulkActionContainer.Button>
-
       {permissions?.repairJob?.isCreate && (
         <BulkActionContainer.Button
           onClick={() => {

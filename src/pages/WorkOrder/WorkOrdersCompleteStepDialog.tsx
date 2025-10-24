@@ -38,9 +38,10 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
             const selectedWorkOrder = workOrders?.find(e => e?.workOrder === _data?._id)
             if (_data?.services?.length > 0) {
               const filteredServices = _data?.services?.filter(e => selectedWorkOrder?.services?.some(s => s?.service === e?._id && s?.uniqueId === e?.uniqueId))
+              const preServices = orderBy(filteredServices?.filter(e => !e?.parentId && e?.preWork), ['order'], ['asc']);
               const productServices = orderBy(filteredServices?.filter(e => e?.parentId), ['order'], ['asc']);
-              const _services = orderBy(filteredServices?.filter(e => !e?.parentId), ['order'], ['asc']);
-              const services = [...productServices, ..._services]
+              const postServices = orderBy(filteredServices?.filter(e => !e?.parentId && !e?.preWork), ['order'], ['asc']);
+              const services = [...preServices, ...productServices, ...postServices]
               setServices(services)
               const stepData: any = []
               services?.forEach(ele => {
