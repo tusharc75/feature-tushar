@@ -121,7 +121,7 @@ export default function QrAuthPage() {
                     handleSubmit(value);
                   }
                 }}
-                TextFieldsProps={{ size: 'small' }}
+                TextFieldsProps={{ size: 'small', type: 'password' }}
                 autoFocus
                 length={4}
               />
