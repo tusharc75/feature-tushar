@@ -722,7 +722,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct: false });
               }}
             >
-              Product
+              Add Existing Product
             </MenuItem>
             <MenuItem
               onClick={() => {
@@ -730,7 +730,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct: false });
               }}
             >
-              Package
+              Add Existing Package
             </MenuItem>
             <MenuItem
               onClick={() => {
@@ -738,7 +738,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
                 setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct: false });
               }}
             >
-              Services
+              Add Existing Services
             </MenuItem>
             {addchildDialog.isSerializedProduct && (
               <MenuItem
@@ -747,7 +747,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
                   setAddchildDialog({ open: false, parentId: null, top: null, bottom: null, isSerializedProduct: false });
                 }}
               >
-                Assets
+                Add Existing Assets
               </MenuItem>
             )}
           </MenuList>

@@ -368,12 +368,6 @@ export const resourcePolicy = [
         defaultValue: ''
       },
       {
-        fieldName: 'autoUploadPdfInWorkspace',
-        fieldLabel: 'Auto Upload PDF In Workspace',
-        type: 'checkBox',
-        defaultValue: false
-      },
-      {
         fieldName: 'editRestrictionStatus',
         fieldLabel: 'Edit Restriction Status',
         type: 'multiSelect',
@@ -661,3 +655,18 @@ export const fieldColor = {
   ],
   defaultValue: []
 }
+
+export const autoCreateWorkspaceAttachment = {
+  fieldName: 'autoUploadPdfInWorkspace',
+  fieldLabel: 'Auto Upload PDF In Workspace',
+  type: 'checkBox',
+  defaultValue: false
+}
+export const autoCreateWorkspaceResources = [
+  sidebarResource.invoice,
+  sidebarResource.salesOrder,
+  sidebarResource.purchaseOrder,
+  sidebarResource.quotation,
+  sidebarResource.transferAsset,
+  sidebarResource.transferInventory
+];

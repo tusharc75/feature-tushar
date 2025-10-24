@@ -37,6 +37,7 @@ const OnboardingDetail = () => {
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [resourcePolicyData, setResourcePolicyData] = useState(null);
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -77,7 +78,7 @@ const OnboardingDetail = () => {
   };
 
   const handleSendEmail = async () => {
-    setLoading(true);
+    setSendingEmail(true);
     try {
       await axiosInstance().post(`${routes.onboarding.path}/${id}/send-email`);
       toastConfig.setToastConfig({
@@ -88,7 +89,7 @@ const OnboardingDetail = () => {
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
-      setLoading(false);
+      setSendingEmail(false);
     }
   };
 
@@ -129,7 +130,8 @@ const OnboardingDetail = () => {
               buttonType='theme'
               iconForMobile={<Email />}
               onClick={handleSendEmail}
-              disabled={loading}
+              disabled={sendingEmail || loading}
+              isLoading={sendingEmail}
               mobileTooltip="Send Email"
             >
               Send Email

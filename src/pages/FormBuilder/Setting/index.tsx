@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { resourcePolicy, fieldColor } from 'src/components/FormBuilder/Tabs/helper';
+import { resourcePolicy, fieldColor, autoCreateWorkspaceResources, autoCreateWorkspaceAttachment } from 'src/components/FormBuilder/Tabs/helper';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import EntityResource from 'src/pages/FormBuilder/Setting/EntityResource';
@@ -63,8 +63,12 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
     if (resourceData && allFields) {
       const currentPolicy = resourceData?.policy || {};
       let defaultPolicy: any = resourcePolicy.find((e) => e.resource === resource)?.policy || [];
+      let autoCreateWorkspaceAttachmentPolicy = autoCreateWorkspaceResources.includes(resource) ? autoCreateWorkspaceAttachment : {};
+      if (Object.keys(autoCreateWorkspaceAttachmentPolicy).length > 0) {
+        defaultPolicy = [...defaultPolicy, autoCreateWorkspaceAttachmentPolicy];
+      }
       if (allFields?.filter(e => ['dropDown', 'multiSelect'].includes(e?.fieldData?.type) && !e?.fieldData?.lookup)?.length > 0) {
-        defaultPolicy = [...defaultPolicy, fieldColor]
+        defaultPolicy = [...defaultPolicy, fieldColor];
       }
       setInitialValues({
         ...initialValues,

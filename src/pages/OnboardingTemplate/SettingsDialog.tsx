@@ -205,33 +205,33 @@ const SettingsDialog = ({
                 ))
               }
             />
-            
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formik.values.filledByCandidate}
-                  onChange={(e) => 
-                    formik.setFieldValue('filledByCandidate', e.target.checked)
-                  }
-                  name="filledByCandidate"
-                />
-              }
-              label="Filled By Candidate"
-            />
+            <Box sx={{ display: 'flex', flexDirection: 'column'}}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formik.values.filledByCandidate}
+                    onChange={(e) => 
+                      formik.setFieldValue('filledByCandidate', e.target.checked)
+                    }
+                    name="filledByCandidate"
+                  />
+                }
+                label="Filled By Candidate"
+              />
 
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formik.values.createEquiptAccount}
-                  onChange={(e) => 
-                    formik.setFieldValue('createEquiptAccount', e.target.checked)
-                  }
-                  name="createEquiptAccount"
-                />
-              }
-              label="Create Equipt Account"
-            />
-
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={formik.values.createEquiptAccount}
+                    onChange={(e) => 
+                      formik.setFieldValue('createEquiptAccount', e.target.checked)
+                    }
+                    name="createEquiptAccount"
+                  />
+                }
+                label="Create Equipt Account"
+              />
+            </Box>
             {formik.values.createEquiptAccount && (
               <>
                 <Autocomplete
