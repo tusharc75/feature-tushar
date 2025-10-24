@@ -71,10 +71,6 @@ const ProductionOrder = () => {
   ];
 
   useEffect(() => {
-    dispatch({ type: 'filter', filters: { status: { filter: [PRODUCTION_ORDER_STATUS.new, PRODUCTION_ORDER_STATUS.inProgress] } } });
-  }, []);
-
-  useEffect(() => {
     fetchGridColumns();
   }, []);
 
@@ -340,9 +336,9 @@ const ProductionOrder = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.productionOrder?.titleSingular?.toLowerCase()} :
+            ? `${resources?.productionOrder?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.productionOrderNumber || ''}`
-              : `selected ${resources?.productionOrder?.titlePlural?.toLowerCase()}`
+            : `selected ${resources?.productionOrder?.titlePlural?.toLowerCase()}`
             } ?`}
           onClose={() => {
             setDeleteRecord(null);
