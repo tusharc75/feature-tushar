@@ -208,6 +208,7 @@ const RenderService = ({
                     servicesButtons={servicesButtons}
                     {...{
                       serviceSteps: serviceSteps?.filter((e) => e?.preWork),
+                      allServiceSteps: serviceSteps,
                       isColapsed,
                       stylesForEveryTab,
                       selectedService,
@@ -261,6 +262,7 @@ const RenderService = ({
                   servicesButtons={servicesButtons}
                   {...{
                     serviceSteps: serviceSteps?.filter((e) => !e?.preWork),
+                    allServiceSteps: serviceSteps,
                     isColapsed,
                     stylesForEveryTab,
                     selectedService,

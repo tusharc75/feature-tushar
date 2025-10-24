@@ -53,7 +53,7 @@ const useServiceSelection = () => {
     [selectedServicesMap]
   );
 
-  // ModernBulkAction component adapter
+  // adapter for ModernBulkAction component
   const dispatch = useCallback((payload: { type: 'selection'; selectedRecords: any[] }) => {
     setSelectedServicesMap(new Map());
   }, []);
