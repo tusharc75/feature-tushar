@@ -4,6 +4,7 @@ const useServiceSelection = () => {
   const [selectedServicesMap, setSelectedServicesMap] = useState<Map<string, any>>(new Map());
 
   const handleSelectService = useCallback((service: any) => {
+    if (!service?.clickable) return;
     setSelectedServicesMap((prev) => {
       const selectedServices = new Map(prev);
       if (prev.has(service.uniqueId)) {
@@ -19,10 +20,12 @@ const useServiceSelection = () => {
     setSelectedServicesMap((prev) => {
       const selectedServices = new Map(prev);
       services.forEach((s) => {
-        if (checked) {
-          selectedServices.set(s.uniqueId, s);
-        } else {
-          selectedServices.delete(s.uniqueId);
+        if (s?.clickable) {
+          if (checked) {
+            selectedServices.set(s.uniqueId, s);
+          } else {
+            selectedServices.delete(s.uniqueId);
+          }
         }
       });
 
@@ -32,15 +35,17 @@ const useServiceSelection = () => {
 
   const isGroupSelected = useCallback(
     (services: any[]) => {
-      return services.every((d) => selectedServicesMap.has(d.uniqueId));
+      const selectableServices = services.filter((d) => d.clickable);
+      return selectableServices.every((d) => selectedServicesMap.has(d.uniqueId));
     },
     [selectedServicesMap]
   );
 
   const isGroupIndeterminate = useCallback(
     (services: any[]) => {
+      const selectableServices = services.filter((d) => d.clickable);
       const isAllSelectedInGroup = isGroupSelected(services);
-      const isSomeSelected = services.some((d) => selectedServicesMap.has(d.uniqueId));
+      const isSomeSelected = selectableServices.some((d) => selectedServicesMap.has(d.uniqueId));
       return isSomeSelected && !isAllSelectedInGroup;
     },
     [selectedServicesMap, isGroupSelected]

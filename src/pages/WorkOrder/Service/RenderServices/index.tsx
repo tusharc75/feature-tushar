@@ -1,5 +1,5 @@
-import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
+import { ArrowBackIos, ArrowForwardIos, CheckCircle, CheckCircleOutline, RadioButtonUnchecked } from '@mui/icons-material';
+import { Checkbox, IconButton } from '@mui/material';
 import React, { useEffect, useMemo, useState } from 'react';
 import { MdKeyboardDoubleArrowUp } from 'react-icons/md';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -121,6 +121,8 @@ const RenderService = ({
     return null;
   }, [policy, allServices, products]);
 
+  const { handleSelectMultiple, isGroupIndeterminate, isGroupSelected } = useServiceSelectionState;
+
   return (
     <>
       <div className={`${isMobile ? 'p-3' : 'min-h-full border'} relative isolate`}>
@@ -183,8 +185,26 @@ const RenderService = ({
           </>
         ) : (
           <>
-            <div className={`mb-1 flex flex-wrap gap-2 p-[20px_20px_0px] ${isColapsed ? 'justify-around' : 'justify-end'} items-center`}>
-              {isColapsed ? null : <h6 className="mr-auto text-[16px]">Services</h6>}
+            <div className={`mb-1 flex flex-wrap gap-2 p-[20px_20px_0px] ${isColapsed ? 'justify-around' : 'justify-between'} items-center`}>
+              {isColapsed ? null : (
+                <div className="flex items-center gap-1">
+                  <Checkbox
+                    id="select-all-services"
+                    checked={isGroupSelected(allServices)}
+                    indeterminate={isGroupIndeterminate(allServices)}
+                    onChange={(e) => {
+                      handleSelectMultiple(e.target.checked, allServices);
+                    }}
+                    checkedIcon={<CheckCircle />}
+                    indeterminateIcon={<CheckCircleOutline />}
+                    icon={<RadioButtonUnchecked />}
+                    sx={{ p: '4px' }}
+                  />
+                  <label htmlFor="select-all-services" className="mr-auto cursor-pointer text-[16px] font-semibold">
+                    Services
+                  </label>
+                </div>
+              )}
               {policy && policy.enableServicesOnConsumables ? null : (
                 <div className="mb-2 mt-2 flex items-center justify-end gap-2">
                   {servicesButtons.map(({ id, children, visible, ...rest }) => {
