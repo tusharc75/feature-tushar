@@ -21,7 +21,6 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialValues, setInitialValues] = useState({ value: [] })
   const [services, setServices] = useState(null)
-  const [products, setProducts] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
@@ -66,9 +65,6 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                 workOrder: _data?._id,
                 stepData: stepData
               })
-            }
-            if (_data?.products?.length) {
-              setProducts(_data?.products)
             }
           });
           setInitialValues({ value: stepsData })
@@ -156,8 +152,8 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                           element="li"
                           className="border"
                           defaultExpanded
-                          head={<h6 className="text-base font-semibold">{`${service?.serviceName}${service?.parentId ? ` - ${products?.find(p => p?._id === service?.parentId)?.productDetail?.productName}` : ''}`}</h6>}
-                          headProps={{ className: 'sticky top-0 z-[1] p-2' }}
+                          head={<h6 className="text-base font-semibold">{`${service?.serviceName}${service?.parentProduct ? ` (${service?.parentProduct?.productName})` : ''}`}</h6>}
+                          headProps={{ className: 'sticky top-0 z-[1]' }}
                         >
                           <div className={`w-full space-y-2 overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] p-2`}>
                             {service?.steps && service?.steps?.length > 0 && service?.steps?.map((step, stepIndex) => {
