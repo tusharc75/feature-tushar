@@ -1,6 +1,7 @@
 import { Delete, MoreVert } from '@mui/icons-material';
 import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem, MenuList } from '@mui/material';
 import React, { useState } from 'react';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useEditableTableStore } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
 import { createEmptyRowData } from 'src/components/EditableExcelTable/utils';
 import RippleButton from 'src/components/RippleButton';
@@ -24,11 +25,13 @@ const IndexCell = React.memo(
   ({
     rowIndex,
     rowLineRef,
-    containerRef
+    containerRef,
+    onDelete
   }: {
     rowIndex: number;
     rowLineRef: React.MutableRefObject<HTMLDivElement>;
     containerRef: React.MutableRefObject<HTMLDivElement>;
+    onDelete: (data: any) => void;
   }) => {
     const [data, setStore] = useEditableTableStore((prev) => prev.tableData);
     const [columns] = useEditableTableStore((prev) => prev.columns);
@@ -46,19 +49,21 @@ const IndexCell = React.memo(
             onMouseOut={(e) => handleMouseOut(e, containerRef.current, rowLineRef.current)}
             className="top group/inner absolute -top-[6px] left-0 hidden hover:-top-[9px] hover:z-[11] group-hover:block "
           >
-            <RippleButton
-              onClick={() => {
-                setStore((prev) => ({
-                  tableData: addItemAtIndex(prev.tableData, createEmptyRowData(columns), rowIndex),
-                  dirtyRows: addItemAtExactIndex(prev.dirtyRows, undefined, rowIndex),
-                  // pastekey is require to update
-                  pasteKey: prev.pasteKey > 100 ? 0 : prev.pasteKey + 1
-                }));
-              }}
-              className="block min-h-[10px] min-w-[10px] rounded-full border border-theme bg-[var(--dark-primary,white)] text-[12px] leading-[1]"
-            >
-              <span className="hidden h-[16px] w-[16px] items-center justify-center group-hover/inner:flex ">+</span>
-            </RippleButton>
+            <HtmlTooltip title={'Add a new row'}>
+              <RippleButton
+                onClick={() => {
+                  setStore((prev) => ({
+                    tableData: addItemAtIndex(prev.tableData, createEmptyRowData(columns), rowIndex),
+                    dirtyRows: addItemAtExactIndex(prev.dirtyRows, undefined, rowIndex),
+                    // pastekey is require to update
+                    pasteKey: prev.pasteKey > 100 ? 0 : prev.pasteKey + 1
+                  }));
+                }}
+                className="block min-h-[10px] min-w-[10px] rounded-full border border-theme bg-[var(--dark-primary,white)] text-[12px] leading-[1]"
+              >
+                <span className="hidden h-[16px] w-[16px] items-center justify-center group-hover/inner:flex ">+</span>
+              </RippleButton>
+            </HtmlTooltip>
           </span>
           <div className="flex items-center">
             <span className={cn(' flex items-center justify-center group-hover:opacity-100', anchorEl ? '' : 'opacity-0')}>
@@ -110,14 +115,21 @@ const IndexCell = React.memo(
             <MenuItem
               onClick={() => {
                 handleClose();
-                setStore((prev) => ({ tableData: removeItemAtIndex(prev.tableData, rowIndex) }));
+                setStore((prev) => {
+                  if (typeof onDelete === 'function' && prev.tableData[rowIndex]._id) {
+                    onDelete?.(prev.tableData[rowIndex]);
+                  }
+                  const tableData = [...prev.tableData];
+                  tableData[rowIndex] = {};
+                  return { tableData };
+                });
               }}
               color="error"
             >
               <ListItemIcon>
-                <Delete fontSize="small" />
+                <Delete fontSize="small" color="error" />
               </ListItemIcon>
-              <ListItemText>Delete</ListItemText>
+              <ListItemText>Clear</ListItemText>
             </MenuItem>
           </MenuList>
         </Menu>

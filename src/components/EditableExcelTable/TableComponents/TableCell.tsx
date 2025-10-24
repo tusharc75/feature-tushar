@@ -1,12 +1,18 @@
 import { ClickAwayListener } from '@mui/material';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import EditableCells from 'src/components/EditableExcelTable/TableComponents/Cells';
 import { cn } from 'src/constants/helpers';
 import { TableCellProps } from '../types';
+import useSelectedCell from 'src/components/EditableExcelTable/hooks/useSelectedCell';
 
-export const TableCell = React.memo(({ data, column, cellIndex, rowIndex, onMouseDown }: TableCellProps) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSelected, setIsSelected] = useState(false);
+export const TableCell = React.memo(({ data, column, cellIndex, rowIndex, onMouseDown, totalColumns, totalRows }: TableCellProps) => {
+  const { handleKeyDown, cellRef, isEditing, isSelected, setIsEditing, setIsSelected } = useSelectedCell({
+    colIndex: cellIndex,
+    rowIndex,
+    totalColumns,
+    totalRows
+  });
+
   const placeholderInput = useRef<HTMLInputElement>(null);
   const allowedEditing = useMemo(() => {
     return !['action'].includes(column.id || column.accessor);
@@ -34,12 +40,14 @@ export const TableCell = React.memo(({ data, column, cellIndex, rowIndex, onMous
       }}
     >
       <td
+        ref={cellRef}
         onClick={() => setIsSelected(true)}
         onDoubleClick={() => setIsEditing(true)}
         className={cn(
-          'relative min-w-[150px] cursor-cell select-none border p-1 [&_*]:!text-sm [&_*]:font-normal',
+          'relative min-w-[150px] cursor-cell select-none border p-1 [&_*:not(.no-inherit)]:!text-sm [&_*:not(.no-inherit)]:font-normal',
           isSelected || isEditing ? 'outline-offset-[-2px] [outline:2px_solid_var(--new-theme-color)]' : ''
         )}
+        onKeyDown={handleKeyDown}
         data-col={cellIndex}
         data-key={column.id || column.accessor}
         data-row={rowIndex}

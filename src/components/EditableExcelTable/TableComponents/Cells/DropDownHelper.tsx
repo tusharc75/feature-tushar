@@ -1,6 +1,8 @@
-import { ArrowDropDown } from '@mui/icons-material';
+import { ArrowDropDown, Close } from '@mui/icons-material';
 import { CircularProgress, Popper, useAutocomplete, UseAutocompleteProps } from '@mui/material';
-import { useRef } from 'react';
+import { useCallback, useRef } from 'react';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import RippleButton from 'src/components/RippleButton';
 import { cn } from 'src/constants/helpers';
 
 type DropDownHelperProps<Option, Multiple extends boolean, DisableClearable extends boolean, FreeSolo extends boolean> = UseAutocompleteProps<
@@ -21,11 +23,11 @@ const DropDownHelper = <Option, Multiple extends boolean = false, DisableClearab
   allowPointer: boolean;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { getRootProps, getInputProps, getListboxProps, getOptionProps, groupedOptions, focused } = useAutocomplete({
-    options: options,
-    getOptionKey: (option) =>
-      props.getOptionKey
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const getOptionKey = useCallback(
+    (option: Option) => {
+      return props.getOptionKey
         ? props.getOptionKey(option)
         : option['_id']
           ? option['_id']
@@ -33,7 +35,14 @@ const DropDownHelper = <Option, Multiple extends boolean = false, DisableClearab
             ? option['optionValue']
             : option['optionLabel']
               ? option['optionLabel']
-              : props.getOptionLabel(option) || '',
+              : props.getOptionLabel(option) || '';
+    },
+    [props]
+  );
+
+  const { getRootProps, getInputProps, getListboxProps, getOptionProps, groupedOptions, focused, value, getTagProps } = useAutocomplete({
+    options: options,
+    getOptionKey: getOptionKey,
     ...props
   });
 
@@ -66,16 +75,59 @@ const DropDownHelper = <Option, Multiple extends boolean = false, DisableClearab
       // } else if (inputProps?.ref) {
       //   (inputProps.ref as React.MutableRefObject<HTMLInputElement | null>).current = node;
       // }
-      inputRef.current = node;
     }
   };
 
+  const handleRemoveItem = useCallback(
+    (option: Option) => {
+      const key = getOptionKey(option);
+      return (value as Option[]).filter((d) => getOptionKey(d) !== key);
+    },
+    [getOptionKey, value]
+  );
+
   return (
     <>
-      <div {...getRootProps()} className="absolute inset-0">
+      <div {...getRootProps()} className="absolute inset-0 flex overflow-hidden" ref={containerRef}>
+        {props.multiple && (
+          <div>
+            {(value as Option[]).length > 0 && (
+              <HtmlTooltip
+                title={
+                  <div className="p-2">
+                    <ul className="flex list-none flex-wrap gap-2">
+                      {(value as Option[])?.map((option, index) => {
+                        const { key, ...itemProps } = getTagProps({ index });
+                        return (
+                          <li
+                            key={key}
+                            {...itemProps}
+                            className="no-inherit flex max-w-fit items-center gap-1 rounded-full bg-slate-700 px-2 py-1 text-sm text-white dark:bg-[var(--dark-secondary)]"
+                          >
+                            {props.getOptionLabel!(option)}
+                            <RippleButton
+                              className="rounded-full bg-slate-500"
+                              onClick={(e) => {
+                                (props.onChange as any)?.(e as any, handleRemoveItem(option));
+                              }}
+                            >
+                              <Close className="!size-[16px] text-white" />
+                            </RippleButton>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                }
+              >
+                <p className="no-inherit pl-2 pt-2 text-xs">{(value as Option[]).length}&nbsp;item(s)</p>
+              </HtmlTooltip>
+            )}
+          </div>
+        )}
         <input
           className={cn(
-            'absolute inset-0 min-w-0 bg-transparent  text-sm text-[currentcolor] outline-none',
+            'h-full w-full min-w-0 bg-transparent  text-sm text-[currentcolor] outline-none',
             allowPointer ? '' : 'pointer-events-none',
             loading ? 'p-[4px_43px_4px_4px]' : 'p-[4px_27px_4px_4px]'
           )}
@@ -92,7 +144,7 @@ const DropDownHelper = <Option, Multiple extends boolean = false, DisableClearab
         </span>
       </div>
 
-      <Popper open={groupedOptions.length > 0} anchorEl={inputRef.current}>
+      <Popper open={groupedOptions.length > 0} anchorEl={containerRef.current}>
         {groupedOptions.length > 0 ? (
           <ul
             {...getListboxProps()}
@@ -102,7 +154,7 @@ const DropDownHelper = <Option, Multiple extends boolean = false, DisableClearab
             )}
             ref={(node) => {
               if (node) {
-                node.style.width = `${inputRef.current?.clientWidth}px`;
+                node.style.width = `${containerRef.current?.clientWidth}px`;
               }
             }}
           >

@@ -33,8 +33,9 @@ const DropDownCell = ({ cellIndex, column, data, exitEditMode, isEditing, rowInd
     }
   }, [column, hasFocus]);
 
-  const handleBlur = (newValue: Option | null) => {
+  const setValueToState = (newValue: Option | null) => {
     setHasFocus(false);
+    setValue(newValue as Option);
     setStore((prev) => {
       const tableData = [...prev.tableData];
       const dirtyRows = [...prev.dirtyRows];
@@ -54,7 +55,6 @@ const DropDownCell = ({ cellIndex, column, data, exitEditMode, isEditing, rowInd
         }
         dirtyRows[rowIndex] = { ...tableData[rowIndex], [key]: '' };
       }
-      setValue(getDropdownOptionValue(column, data) as Option);
       return {
         dirtyRows,
         tableData
@@ -69,12 +69,12 @@ const DropDownCell = ({ cellIndex, column, data, exitEditMode, isEditing, rowInd
         options={options}
         loading={hasFocus && loading}
         value={value}
-        onChange={(e, value) => setValue(value)}
+        onChange={(e, value) => setValueToState(value)}
         id={`${column.id}-${rowIndex}-selector`}
         getOptionLabel={(option: Option) => option.optionLabel || ''}
         inputProps={{
           onFocus: () => setHasFocus(true),
-          onBlur: () => handleBlur(value)
+          onBlur: () => setValueToState(value)
         }}
       />
     </>

@@ -48,6 +48,8 @@ export type TColType = {
   isAllowedMinus?: boolean;
   decimalPlaces?: number;
   lookupResource?: string;
+  isCounterSubField?: boolean;
+  required?: boolean;
 } & ColumnDef<any>;
 
 const DebouncedInput = React.forwardRef(

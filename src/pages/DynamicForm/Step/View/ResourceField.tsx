@@ -262,7 +262,14 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
       <Box mt={1}>
         {columns ? (
           <>
-            {showTableInput && <EditableExcelTable columns={columns} data={state.dataRows} onChange={console.log} />}
+            {showTableInput && (
+              <EditableExcelTable
+                columns={columns}
+                data={state.dataRows}
+                onChange={(rows) => console.log(rows)}
+                onDelete={(row) => console.log(row)}
+              />
+            )}
             <CustomReactTable
               height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
               columns={columns}

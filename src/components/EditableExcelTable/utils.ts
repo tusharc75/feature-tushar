@@ -5,7 +5,7 @@ import FieldList from 'src/components/FormBuilder/FieldList';
 import { dateFormat, dateTimeFormat, DEFAULT_TIME_ZONE, displayDate, displayDateTime, formatAmountWithCurrency } from 'src/constants/helpers';
 import { SetFastContextStore } from 'src/StateProvider/createFastContext';
 
-const user = JSON.parse(localStorage.getItem('userData') || '');
+const user = JSON.parse(localStorage.getItem('userData'));
 
 export function cleanPastedValue({ key, columnsMap, value }: { key: string; columnsMap: Map<string, TColType>; value: string }) {
   const col = columnsMap.get(key);
@@ -57,13 +57,13 @@ export function getCellValue(column: TColType, data: any) {
 export const getDropdownOptionValue = (column: TColType, data: any) => {
   const value = getCellValue(column, data);
   const options: TColType['option'] = [];
+  const isValueArray = Array.isArray(value);
   for (const option of column.option) {
     if (typeof value === 'string' && option.optionValue === value) {
       return option;
     }
-    if (Array.isArray(value)) {
-      value.includes(option.optionValue);
-      options.push(option);
+    if (isValueArray) {
+      if (value.includes(option.optionValue)) options.push(option);
     }
   }
   return options.length > 0 ? options : null;
@@ -234,6 +234,24 @@ const setPastedValue = ({
   return { dirtyValue };
 };
 
+const cleanDirtyRowData = (data: Record<string, any>, sortedCells: string[]) => {
+  const dirtyRowMap = new Map(Object.entries(data));
+
+  // delete multiselect cell rest values
+  for (const cell of sortedCells) {
+    if (dirtyRowMap.has(`rest${cell}`)) {
+      dirtyRowMap.delete(`rest${cell}`);
+    }
+  }
+  dirtyRowMap.forEach((d, key) => {
+    if (key !== '_id' && !sortedCells.includes(key)) {
+      dirtyRowMap.delete(key);
+    }
+  });
+
+  return Object.fromEntries(dirtyRowMap);
+};
+
 export function handlePaste({
   columnsMap,
   event,
@@ -275,7 +293,9 @@ export function handlePaste({
           dirtyRow[colKey] = dirtyValue;
         }
       }
-      dirtyRows[currentRowIndex] = { ...newData[currentRowIndex], ...dirtyRow };
+      const dirtyRowData = cleanDirtyRowData({ ...newData[currentRowIndex], ...dirtyRow }, sortedCells);
+
+      dirtyRows[currentRowIndex] = dirtyRowData;
     }
     return { tableData: newData, dirtyRows: dirtyRows, pasteKey: prev.pasteKey > 100 ? 0 : prev.pasteKey + 1 };
   });

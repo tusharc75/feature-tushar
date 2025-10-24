@@ -6,6 +6,7 @@ export type EditableExcelTableProps = {
   columns: TColType[];
   data: any[];
   onChange: (data: any[]) => void;
+  onDelete: (row: any) => void;
 };
 
 export type TableHeadProps = {
@@ -17,6 +18,7 @@ export type TableBodyProps = {
   containerRef: React.MutableRefObject<HTMLDivElement>;
   rangeRef: React.MutableRefObject<HTMLDivElement>;
   rowLineRef: React.MutableRefObject<HTMLDivElement>;
+  onDelete: (row: any) => void;
 };
 export type TableRowProps = {
   data: any;
@@ -25,6 +27,9 @@ export type TableRowProps = {
   onMouseDown: UseTableRange['onMouseDown'];
   containerRef: React.MutableRefObject<HTMLDivElement>;
   rowLineRef: React.MutableRefObject<HTMLDivElement>;
+  totalRows: number;
+  totalColumns: number;
+  onDelete: (row: any) => void;
 };
 
 export type TableCellProps = {
@@ -33,6 +38,8 @@ export type TableCellProps = {
   cellIndex: number;
   rowIndex: number;
   onMouseDown: UseTableRange['onMouseDown'];
+  totalRows: number;
+  totalColumns: number;
 };
 
 export type UseEditableExcelTable = ReturnType<typeof useEditableExcelTable>;

@@ -3,6 +3,7 @@ import DatePickerCell from 'src/components/EditableExcelTable/TableComponents/Ce
 import DateTimePickerCell from 'src/components/EditableExcelTable/TableComponents/Cells/DateTimePickerCell';
 import DropDownCell from 'src/components/EditableExcelTable/TableComponents/Cells/DropDownCell';
 import Input from 'src/components/EditableExcelTable/TableComponents/Cells/Input';
+import MultiSelectCell from 'src/components/EditableExcelTable/TableComponents/Cells/MultiSelectCell';
 import { CellProps } from 'src/components/EditableExcelTable/types';
 
 const EditableCells = (props: CellProps) => {
@@ -14,7 +15,7 @@ const EditableCells = (props: CellProps) => {
       return <DropDownCell {...props} />;
     }
     case 'multiSelect': {
-      return <DropDownCell {...props} />;
+      return <MultiSelectCell {...props} />;
     }
     case 'date': {
       return <DatePickerCell {...props} />;
@@ -22,6 +23,9 @@ const EditableCells = (props: CellProps) => {
     case 'dateTime': {
       return <DateTimePickerCell {...props} />;
     }
+    case 'number':
+    case 'currencyAmount':
+    case 'currencyNumber':
     case 'decimal': {
       return <Input {...props} type={'number'} />;
     }

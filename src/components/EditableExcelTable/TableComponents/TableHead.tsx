@@ -28,7 +28,10 @@ const TableHead = React.memo(({ columns }: TableHeadProps) => {
           className="sticky top-0 z-[9] min-w-[150px] border-b border-r bg-[var(--dark-primary,white)] p-1 text-left text-sm font-semibold text-gray-500 dark:text-gray-400 "
           key={col.id || col.accessor || (col as any)._id}
         >
-          <span className="relative z-[-1]">{renderHeadText(col) ?? ''}</span>
+          <span className="relative z-[-1]">
+            {renderHeadText(col) ?? ''}
+            {col.required ? '*' : ''}
+          </span>
           <span className="absolute bottom-[-1px] left-0 right-0 z-10 h-[1px] w-full bg-[var(--common-border-color)]" />
         </th>
       ))}

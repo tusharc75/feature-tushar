@@ -1,24 +1,25 @@
 import { useRef } from 'react';
-import useEditableExcelTable, { UseEditableTableProvider } from './hooks/useEditableExcelTable';
+import { cn } from 'src/constants/helpers';
+import useEditableExcelTable, { UseEditableTableProvider, useEditableTableStore } from './hooks/useEditableExcelTable';
 import TableBody from './TableComponents/TableBody';
 import TableHead from './TableComponents/TableHead';
 import { EditableExcelTableProps } from './types';
-import { cn } from 'src/constants/helpers';
 
-const EditableExcelTableImpl = ({ columns, data, onChange }: EditableExcelTableProps) => {
-  const { tableBodyRef } = useEditableExcelTable(data, columns);
+const EditableExcelTableImpl = ({ columns, data, onChange, onDelete }: EditableExcelTableProps) => {
+  const { tableBodyRef } = useEditableExcelTable(data, columns, onChange);
   const containerRef = useRef<HTMLDivElement>(null);
   const rangeRef = useRef<HTMLDivElement>(null);
   const rowLineRef = useRef<HTMLDivElement>(null);
+  const [stableColumns] = useEditableTableStore((store) => store.columns);
 
   return (
     <div ref={containerRef} className="relative isolate max-h-[max(400px,_calc(100vh-300px))] overflow-auto overscroll-contain border">
       <table className={cn('min-h-[60px] min-w-full table-fixed border-collapse', '[&_.no-data-cell]:hidden [&_.show-in-export]:!hidden')}>
         <thead>
-          <TableHead columns={columns} />
+          <TableHead columns={stableColumns} />
         </thead>
         <tbody ref={tableBodyRef}>
-          <TableBody tableBodyRef={tableBodyRef} containerRef={containerRef} rangeRef={rangeRef} rowLineRef={rowLineRef} />
+          <TableBody onDelete={onDelete} tableBodyRef={tableBodyRef} containerRef={containerRef} rangeRef={rangeRef} rowLineRef={rowLineRef} />
         </tbody>
       </table>
       <div

@@ -33,28 +33,23 @@ const MultiSelectCell = ({ cellIndex, column, data, exitEditMode, isEditing, row
     }
   }, [column, hasFocus]);
 
-  const handleBlur = (newValue: Option[] | null) => {
+  const handleBlur = (newValue: Option[]) => {
     setHasFocus(false);
     setStore((prev) => {
       const tableData = [...prev.tableData];
       const dirtyRows = [...prev.dirtyRows];
       const key = column.accessor || column.id;
-      if (newValue) {
-        tableData[rowIndex][key] = newValue.optionLabel;
-        if (column.lookup) {
-          tableData[rowIndex][key] = newValue.optionLabel;
-          tableData[rowIndex][`${key}Id`] = newValue.optionValue;
-        }
-        dirtyRows[rowIndex] = { ...tableData[rowIndex], [key]: newValue.optionValue };
+      const [first, ...rest] = newValue;
+      if (first) {
+        tableData[rowIndex][key] = newValue[0].optionLabel;
+        tableData[rowIndex][`${key}Id`] = newValue[0].optionValue;
       } else {
         tableData[rowIndex][key] = '';
-        if (column.lookup) {
-          tableData[rowIndex][key] = '';
-          tableData[rowIndex][`${key}Id`] = '';
-        }
-        dirtyRows[rowIndex] = { ...tableData[rowIndex], [key]: '' };
+        tableData[rowIndex][`${key}Id`] = '';
       }
-      setValue((getDropdownOptionValue(column, data) || []) as Option[]);
+      tableData[rowIndex][`rest${key}`] = rest ?? [];
+      dirtyRows[rowIndex] = newValue.map((d) => d.optionValue);
+      setValue(newValue);
       return {
         dirtyRows,
         tableData
@@ -73,6 +68,8 @@ const MultiSelectCell = ({ cellIndex, column, data, exitEditMode, isEditing, row
         onChange={(e, value) => setValue(value)}
         id={`${column.id}-${rowIndex}-selector`}
         getOptionLabel={(option: Option) => option.optionLabel || ''}
+        getOptionKey={(d) => d.optionValue}
+        isOptionEqualToValue={(option1, option2) => (option1._id ? option1._id === option2._id : option1.optionValue === option2.optionValue)}
         inputProps={{
           onFocus: () => setHasFocus(true),
           onBlur: () => handleBlur(value)

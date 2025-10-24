@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useEditableTableStore } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
 import { CellProps } from 'src/components/EditableExcelTable/types';
 import { getCellValue, renderCellText } from 'src/components/EditableExcelTable/utils';
+import { handleAutoCalculation } from 'src/constants/formulaUtility';
 import { cn } from 'src/constants/helpers';
 
 function isValidNumberString(allowNegative: boolean, input: string, decimalPlaces: number): boolean {
@@ -26,27 +27,35 @@ const Input = ({
   data,
   exitEditMode,
   isEditing,
+  isSelected,
   rowIndex,
   allowedEditing,
   type = 'text',
   ...rest
 }: CellProps & React.InputHTMLAttributes<HTMLInputElement>) => {
   const [, setStore] = useEditableTableStore((prev) => prev.pasteKey);
+  const [columns] = useEditableTableStore((prev) => prev.columns);
   const inputRef = useRef<HTMLInputElement>(null);
   const [inputValue, setInputValue] = useState(getCellValue(column, data));
+  const timeoutRef = useRef<NodeJS.Timeout>(null);
 
-  const handleBlur = (newValue: string | number) => {
+  const setValueToState = (newValue: string | number) => {
+    const key = column.accessor || column.id;
     if (type === 'number') {
       newValue = `${newValue}`.replace(/,/g, '');
       newValue = Number(newValue);
     }
+    setInputValue(newValue);
     setStore((prev) => {
       const tableData = [...prev.tableData];
       const dirtyRows = [...prev.dirtyRows];
-      const key = column.accessor || column.id;
+      const result = handleAutoCalculation(column, columns, tableData[rowIndex], key, '', '', newValue);
       tableData[rowIndex][key] = newValue;
       dirtyRows[rowIndex] = { ...tableData[rowIndex], [key]: newValue };
-      setInputValue(`${getCellValue(column, tableData[rowIndex]) || ''}`);
+      if (Object.keys(result).length > 0) {
+        tableData[rowIndex] = { ...tableData[rowIndex], ...result };
+        dirtyRows[rowIndex] = { ...tableData[rowIndex], ...result };
+      }
       return {
         dirtyRows,
         tableData
@@ -63,6 +72,10 @@ const Input = ({
 
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
+    window.clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setValueToState(value);
+    }, 1000);
     if (type === 'number') {
       const input = value.replace(/,/g, '');
       if (isValidNumberString(column?.isAllowedMinus, input, column.decimalPlaces || 0)) {
@@ -79,11 +92,14 @@ const Input = ({
         ref={(node) => {
           if (node) {
             node.focus();
+            if (isSelected && !isEditing) {
+              node.select();
+            }
           }
           inputRef.current = node;
         }}
         {...rest}
-        onBlur={() => handleBlur(inputValue)}
+        onBlur={() => setValueToState(inputValue)}
         onKeyDown={handleKeyDown}
         className={cn(
           'absolute inset-0 min-w-0 bg-transparent p-1 text-sm text-[currentcolor] outline-none',
