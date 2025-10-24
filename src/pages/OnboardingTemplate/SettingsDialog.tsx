@@ -10,6 +10,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import routes from 'src/components/Helpers/Routes';
+import { sidebarResource } from 'src/constants/helpers';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -29,13 +30,13 @@ interface FormValues {
   accountCreateEntity: string[];
 }
 
-const SettingsDialog = ({ 
-  open, 
-  onClose, 
-  step, 
-  onboardingTemplateId, 
-  tabId, 
-  fetchData 
+const SettingsDialog = ({
+  open,
+  onClose,
+  step,
+  onboardingTemplateId,
+  tabId,
+  fetchData
 }: SettingsDialogProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [users, setUsers] = useState<any[]>([]);
@@ -75,23 +76,16 @@ const SettingsDialog = ({
 
   const fetchUsersRolesAndEntities = async () => {
     setLoading(true);
-    try {
-      const [usersResponse, rolesResponse, entitiesResponse] = await Promise.all([
-        axiosInstance().get('/sa-formbuilder/lookup?lookupResource=User'),
-        axiosInstance().get('/sa-formbuilder/lookup?lookupResource=Role'),
-        axiosInstance().get('/sa-formbuilder/lookup?lookupResource=Entity')
-      ]);
-      setUsers(usersResponse.data.data?.User || []);
-      setRoles(rolesResponse.data.data?.Role || []);
-      setEntities(entitiesResponse.data.data?.Entity || []);
-    } catch (error) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'error',
-        message: 'Failed to fetch users and roles'
-      });
-    }
-    setLoading(false);
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.user},${sidebarResource.role},${sidebarResource.entity}`).then(
+      ({ data: { data } }) => {
+        setUsers(data?.[sidebarResource.user] || []);
+        setRoles(data?.[sidebarResource.role] || []);
+        setEntities(data?.[sidebarResource.entity] || []);
+      }
+    ).catch((error) => {
+      setLoading(false);
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const handleSettingsSave = async (properties: FormValues) => {
@@ -104,26 +98,24 @@ const SettingsDialog = ({
       return;
     }
     setIsSubmitting(true);
-    try {
-      const api = `${routes.onboardingTemplate.path}/tabs/steps/${onboardingTemplateId}/${tabId}/settings`;
-      await axiosInstance().put(api, {
-        stepId: step?._id,
-        properties
-      });
+    const api = `${routes.onboardingTemplate.path}/tabs/steps/${onboardingTemplateId}/${tabId}/settings`;
+    axiosInstance().put(api, {
+      stepId: step?._id,
+      properties
+    }).then(({ data }) => {
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
-        message: 'Properties saved successfully'
+        message: data.message
       });
       if (fetchData) {
         fetchData();
       }
       onClose();
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    } finally {
+    }).catch((error) => {
       setIsSubmitting(false);
-    }
+      toastConfig.setToastConfig(error);
+    });
   };
 
   return (
@@ -138,100 +130,102 @@ const SettingsDialog = ({
         showManimizeMaximize={true}
         showRequiredLabel={false}
       />
-      
       <form onSubmit={formik.handleSubmit}>
         <CustomDialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
-            <Autocomplete
-              multiple
-              options={users}
-              loading={loading}
-              getOptionLabel={(option) => option.optionLabel || ''}
-              value={users.filter(user => formik.values.users.includes(user.optionValue)) || []}
-              onChange={(e, newValue) => {
-                formik.setFieldValue(
-                  'users', 
-                  newValue.map(user => user.optionValue)
-                );
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Select Users"
-                  variant="outlined"
-                  size="small"
-                />
-              )}
-              renderTags={(tagValue, getTagProps) =>
-                tagValue.map((option, index) => (
-                  <Chip
-                    label={option.optionLabel}
-                    {...getTagProps({ index })}
-                    size="small"
-                    key={option.optionValue}
-                  />
-                ))
-              }
-            />
-            
-            <Autocomplete
-              multiple
-              options={roles}
-              loading={loading}
-              getOptionLabel={(option) => option.optionLabel || ''}
-              value={roles.filter(role => formik.values.roles.includes(role.optionValue)) || []}
-              onChange={(e, newValue) => {
-                formik.setFieldValue(
-                  'roles', 
-                  newValue.map(role => role.optionValue)
-                );
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Select Roles"
-                  variant="outlined"
-                  size="small"
-                />
-              )}
-              renderTags={(tagValue, getTagProps) =>
-                tagValue.map((option, index) => (
-                  <Chip
-                    label={option.optionLabel}
-                    {...getTagProps({ index })}
-                    size="small"
-                    key={option.optionValue}
-                  />
-                ))
-              }
-            />
-            <Box sx={{ display: 'flex', flexDirection: 'column'}}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formik.values.filledByCandidate}
-                    onChange={(e) => 
-                      formik.setFieldValue('filledByCandidate', e.target.checked)
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formik.values.filledByCandidate}
+                  onChange={(e) => {
+                    formik.setFieldValue('filledByCandidate', e.target.checked)
+                    if (e.target.checked) {
+                      formik.setFieldValue('users', [])
+                      formik.setFieldValue('roles', [])
                     }
-                    name="filledByCandidate"
-                  />
-                }
-                label="Filled By Candidate"
-              />
-
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formik.values.createEquiptAccount}
-                    onChange={(e) => 
-                      formik.setFieldValue('createEquiptAccount', e.target.checked)
-                    }
-                    name="createEquiptAccount"
-                  />
-                }
-                label="Create Equipt Account"
-              />
-            </Box>
+                  }}
+                  name="filledByCandidate"
+                />
+              }
+              label="Filled By Candidate"
+            />
+            {!formik.values.filledByCandidate &&
+              <>
+                <Autocomplete
+                  multiple
+                  options={users}
+                  loading={loading}
+                  getOptionLabel={(option) => option.optionLabel || ''}
+                  value={users.filter(user => formik.values.users.includes(user.optionValue)) || []}
+                  onChange={(e, newValue) => {
+                    formik.setFieldValue('users',
+                      newValue.map(user => user.optionValue)
+                    );
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Select Users"
+                      variant="outlined"
+                      size="small"
+                    />
+                  )}
+                  renderTags={(tagValue, getTagProps) =>
+                    tagValue.map((option, index) => (
+                      <Chip
+                        label={option.optionLabel}
+                        {...getTagProps({ index })}
+                        size="small"
+                        key={option.optionValue}
+                      />
+                    ))
+                  }
+                />
+                <Autocomplete
+                  multiple
+                  options={roles}
+                  loading={loading}
+                  getOptionLabel={(option) => option.optionLabel || ''}
+                  value={roles.filter(role => formik.values.roles.includes(role.optionValue)) || []}
+                  onChange={(e, newValue) => {
+                    formik.setFieldValue(
+                      'roles',
+                      newValue.map(role => role.optionValue)
+                    );
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Select Roles"
+                      variant="outlined"
+                      size="small"
+                    />
+                  )}
+                  renderTags={(tagValue, getTagProps) =>
+                    tagValue.map((option, index) => (
+                      <Chip
+                        label={option.optionLabel}
+                        {...getTagProps({ index })}
+                        size="small"
+                        key={option.optionValue}
+                      />
+                    ))
+                  }
+                />
+              </>
+            }
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formik.values.createEquiptAccount}
+                  onChange={(e) =>
+                    formik.setFieldValue('createEquiptAccount', e.target.checked)
+                  }
+                  name="createEquiptAccount"
+                />
+              }
+              label="Create Equipt Account"
+            />
             {formik.values.createEquiptAccount && (
               <>
                 <Autocomplete
@@ -242,7 +236,7 @@ const SettingsDialog = ({
                   value={entities.filter(entity => formik.values.accountCreateEntity.includes(entity.optionValue)) || []}
                   onChange={(e, newValue) => {
                     formik.setFieldValue(
-                      'accountCreateEntity', 
+                      'accountCreateEntity',
                       newValue.map(entity => entity.optionValue)
                     );
                   }}
@@ -265,7 +259,6 @@ const SettingsDialog = ({
                     ))
                   }
                 />
-                
                 <Autocomplete
                   multiple
                   options={roles}
@@ -274,7 +267,7 @@ const SettingsDialog = ({
                   value={roles.filter(role => formik.values.accountCreateRole.includes(role.optionValue)) || []}
                   onChange={(e, newValue) => {
                     formik.setFieldValue(
-                      'accountCreateRole', 
+                      'accountCreateRole',
                       newValue.map(role => role.optionValue)
                     );
                   }}
@@ -301,16 +294,16 @@ const SettingsDialog = ({
             )}
           </Box>
         </CustomDialogContent>
-        
+
         <CustomDialogFooter>
-          <ThemeButton 
-            onClick={onClose} 
+          <ThemeButton
+            onClick={onClose}
             buttonType="transparent"
             type="button"
           >
             Cancel
           </ThemeButton>
-          <ThemeButton 
+          <ThemeButton
             type="submit"
             buttonType="theme"
             loading={isSubmitting}
