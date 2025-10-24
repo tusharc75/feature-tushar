@@ -9,6 +9,8 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import { SET_SELECTED_ENTITY, SET_USER } from '../../StateProvider/actionTypes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import routes from 'src/components/Helpers/Routes';
+import { camelCase } from 'lodash';
 
 export default function QrAuthPage() {
   const { qrLoginId } = useParams();
@@ -57,7 +59,13 @@ export default function QrAuthPage() {
               payload: userData.role.selectedEntity._id
             });
           }
-          history.push('/');
+          if (userData?.user?.defaultResource) {
+            if (routes[camelCase(userData?.user?.defaultResource)]?.path) {
+              history.push({ pathname: routes[camelCase(userData?.user?.defaultResource)]?.path });
+            }
+          } else {
+            history.push('/');
+          }
         } else {
           toastConfig.setToastConfig({
             open: true,
