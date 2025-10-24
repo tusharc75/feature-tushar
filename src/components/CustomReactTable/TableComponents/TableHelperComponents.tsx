@@ -11,6 +11,11 @@ import { RenderInputField } from 'src/components/CustomReactTable/TableComponent
 import { cn } from 'src/constants/helpers';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { getCellValue, getStickyPosition } from '../utils';
+import FieldList from 'src/components/FormBuilder/FieldList';
+
+type TFieldList = typeof FieldList;
+
+type ColTypeType = TFieldList[keyof TFieldList]['type'];
 
 export type TColType = {
   Header: string;
@@ -18,23 +23,7 @@ export type TColType = {
   isHideColumnSum?: boolean;
   disabled?: boolean;
   Footer?: (data: any) => React.ReactNode;
-  type?:
-    | 'mobileNumber'
-    | 'phone'
-    | 'email'
-    | 'imageUpload'
-    | 'date'
-    | 'dateTime'
-    | 'colorPicker'
-    | 'checkBox'
-    | 'number'
-    | 'signature'
-    | 'decimal'
-    | 'currencyAmount'
-    | 'converter'
-    | 'singleLine'
-    | 'dropDown'
-    | 'multiSelect';
+  type?: ColTypeType;
   currency?: string;
   accessorFn: (data: any) => string;
   sticky: undefined | 'left' | 'right';
@@ -48,12 +37,19 @@ export type TColType = {
   id: string;
   isVisible: undefined | boolean;
   show: undefined | boolean;
-  option: any;
+  option: ({ optionLabel: string; optionValue: string } & Record<string, any>)[];
   dataList?: undefined | boolean;
   dataListId?: undefined | string;
   width?: number;
   customContentExpanded: boolean;
   defaultVisible?: boolean;
+  lookup?: boolean;
+  formula?: string;
+  isAllowedMinus?: boolean;
+  decimalPlaces?: number;
+  lookupResource?: string;
+  isCounterSubField?: boolean;
+  required?: boolean;
 } & ColumnDef<any>;
 
 const DebouncedInput = React.forwardRef(
