@@ -106,10 +106,6 @@ const WorkOrder = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly, selectedResource]);
 
-  useEffect(() => {
-    dispatch({ type: 'filter', filters: { status: { filter: [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress] } } });
-  }, []);
-
   const fetchGridColumns = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.workOrder, permissions?.workOrder?.isUpdate);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.workOrderDetail?.path, true);
