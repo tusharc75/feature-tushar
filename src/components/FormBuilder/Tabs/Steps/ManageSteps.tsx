@@ -71,6 +71,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
         linkResourceName: data?.linkResourceName || '',
         linkResourceField: data?.linkResourceField || '',
         readOnly: data?.readOnly || false,
+        excelLikeEntry: data?.excelLikeEntry || false,
         fields: data?.fields || [],
         createActions: data?.createActions || []
       });
@@ -86,6 +87,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
         linkResourceName: '',
         linkResourceField: '',
         readOnly: false,
+        excelLikeEntry: false,
         fields: [],
         createActions: []
       });
@@ -318,6 +320,20 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
                           />
                         }
                         label="Read Only"
+                      />
+                    </Box>
+                    <Box>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name="excelLikeEntry"
+                            checked={values['excelLikeEntry']}
+                            onChange={(e) => {
+                              setFieldValue('excelLikeEntry', e.target.checked);
+                            }}
+                          />
+                        }
+                        label="Excel Like Entry"
                       />
                     </Box>
                   </>

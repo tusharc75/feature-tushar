@@ -1,4 +1,4 @@
-import { Box, IconButton, Menu, MenuItem } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -19,7 +19,7 @@ import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { Link } from 'react-router-dom';
 import EditableExcelTable from 'src/components/EditableExcelTable';
 
-const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, referenceData, showTableInput = false }) => {
+const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, referenceData }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -88,51 +88,50 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
         ...(step?.readOnly
           ? []
           : [
-              {
-                accessor: 'action',
-                Header: 'Actions',
-                minWidth: 100,
-                width: 110,
-                sticky: 'right',
-                disableFilters: true,
-                disableSortBy: true,
-                canDrag: false,
-                Cell: ({ row }) => (
-                  <>
-                    <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
-                      <span>
-                        <IconButton
-                          size="small"
-                          aria-label="Edit"
-                          disabled={allowedToEdit ? false : true}
-                          onClick={() => {
-                            setOpen({ open: true, id: row?.original?._id });
-                          }}
-                        >
-                          <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                        </IconButton>
-                      </span>
-                    </HtmlTooltip>
-
-                    <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
-                      <span>
-                        <IconButton
-                          size="small"
-                          aria-label="Delete"
-                          disabled={allowedToDelete ? false : true}
-                          onClick={() => {
-                            setDeleteRecord(row?.original);
-                            setShowDeleteConfirmBox(true);
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
-                        </IconButton>
-                      </span>
-                    </HtmlTooltip>
-                  </>
-                )
-              }
-            ])
+            {
+              accessor: 'action',
+              Header: 'Actions',
+              minWidth: 100,
+              width: 110,
+              sticky: 'right',
+              disableFilters: true,
+              disableSortBy: true,
+              canDrag: false,
+              Cell: ({ row }) => (
+                <>
+                  <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
+                    <span>
+                      <IconButton
+                        size="small"
+                        aria-label="Edit"
+                        disabled={allowedToEdit ? false : true}
+                        onClick={() => {
+                          setOpen({ open: true, id: row?.original?._id });
+                        }}
+                      >
+                        <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
+                  <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
+                    <span>
+                      <IconButton
+                        size="small"
+                        aria-label="Delete"
+                        disabled={allowedToDelete ? false : true}
+                        onClick={() => {
+                          setDeleteRecord(row?.original);
+                          setShowDeleteConfirmBox(true);
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
+                </>
+              )
+            }
+          ])
       ]);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -240,7 +239,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
 
   return (
     <>
-      {allowedToEdit && !step?.readOnly && (
+      {allowedToEdit && !step?.readOnly && !step?.excelLikeEntry && (
         <DetailsPageHeader
           isAddButtonVisible={false}
           isActionButtonVisible={true}
@@ -262,25 +261,23 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
       <Box mt={1}>
         {columns ? (
           <>
-            {showTableInput && (
+            {step?.excelLikeEntry ?
               <EditableExcelTable
                 columns={columns}
                 data={state.dataRows}
                 onChange={(rows) => console.log(rows)}
                 onDelete={(row) => console.log(row)}
-              />
-            )}
-            <CustomReactTable
-              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              resource={step?.linkResourceName}
-              hideSelection={step?.readOnly}
-              hideAction={step?.readOnly}
-            />
+              /> : <CustomReactTable
+                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchData}
+                resource={step?.linkResourceName}
+                hideSelection={step?.readOnly}
+                hideAction={step?.readOnly}
+              />}
           </>
         ) : (
           <Box p={2} height={500}>
@@ -288,7 +285,6 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
           </Box>
         )}
       </Box>
-
       {open.open && (
         <ManageDynamicForm
           resource={step?.linkResourceName}
@@ -306,7 +302,6 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
           }}
         />
       )}
-
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
