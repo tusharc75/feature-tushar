@@ -33,7 +33,8 @@ const ViewServiceStepDataDialog = ({ servicesData, products, stepsData, handleCl
       });
       const columns = fetchGridColumns(sd?.steps);
       services.push({
-        optionLabel: `${sd.serviceName}${sd?.parentId && products?.some(e => e?._id === sd?.parentId) ? ` - ${products?.find(e => e?._id === sd?.parentId)?.productDetail?.productName}` : ''}`,
+        optionLabel: `${sd.serviceName}${sd?.parentId &&
+          products?.some(e => e?._id === sd?.parentId) ? ` (${products?.find(e => e?._id === sd?.parentId)?.productDetail?.productName})` : ''}`,
         optionValue: sd?._id,
         uniqueId: sd?.uniqueId,
         steps: sd?.steps,
