@@ -244,6 +244,12 @@ export const resourcePolicy = [
         fieldLabel: 'Hide Steps Drawings',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'autoAssignOnServiceStartDisabled',
+        fieldLabel: 'Auto Assign On Service Start Disabled',
+        type: 'checkBox',
+        defaultValue: false
       }
     ]
   },
