@@ -198,13 +198,15 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
     return deepFilter;
   };
 
-  const handleDelete = () => {
+  const handleDelete = (row: any = null) => {
     setIsSubmitting(true);
     let ids = [];
-    if (deleteRecord) {
-      ids.push(deleteRecord._id);
+    if (!isEmpty(row)) {
+      ids.push(row?._id);
+    } else if (deleteRecord) {
+      ids.push(deleteRecord?._id);
     } else {
-      ids = selectedRecords?.map((d) => d._id);
+      ids = selectedRecords?.map((d) => d?._id);
     }
     axiosInstance()
       .put(
@@ -237,6 +239,32 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
     );
   };
 
+  const handleExcelChange = (rows) => {
+    rows = rows?.map((r) => ({
+      ...r,
+      [step?.linkResourceField]: linkResourceFieldType === 'multiSelect' && !isArray(data?._id) ? [data?._id] : data?._id
+    }));
+    dispatch({ type: 'loading', loading: true });
+    axiosInstance()
+    .post(`/dynamic-form/bulk`, rows, {
+      headers: {
+        Resource: step?.linkResourceName
+      }
+    })
+    .then(({ data: { data, message } }) => {
+      fetchData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: message
+      });
+    })
+    .catch((error) => {
+      fetchData();
+      toastConfig.setToastConfig(error);
+    });
+  };
+
   return (
     <>
       {allowedToEdit && !step?.readOnly && !step?.excelLikeEntry && (
@@ -265,8 +293,8 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
               <EditableExcelTable
                 columns={columns}
                 data={state.dataRows}
-                onChange={(rows) => console.log(rows)}
-                onDelete={(row) => console.log(row)}
+                onChange={(rows) => handleExcelChange(rows)}
+                onDelete={(row) => handleDelete(row)}
               /> : <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
