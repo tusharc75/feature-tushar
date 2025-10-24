@@ -138,9 +138,8 @@ const RenderService = ({
                   if (!visible) return null;
                   return (
                     <span
-                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${
-                        isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
-                      }`}
+                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
+                        }`}
                       style={{ top: isMobileSlideOpen ? `-${(index + 1) * 32 + (index + 1) * 8}px` : '-24px', transition: `top 0.${index + 2}s` }}
                     >
                       <ThemeButton key={id} {...rest} className={`${isColapsed ? 'hidden' : ''} round`}>
@@ -187,7 +186,7 @@ const RenderService = ({
           <>
             <div className={`mb-1 flex flex-wrap gap-2 p-[20px_20px_0px] ${isColapsed ? 'justify-around' : 'justify-between'} items-center`}>
               {isColapsed ? null : (
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 pl-2">
                   <Checkbox
                     id="select-all-services"
                     checked={isGroupSelected(allServices)}
