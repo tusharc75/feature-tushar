@@ -1,5 +1,5 @@
-import { Info, KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
-import { Collapse } from '@mui/material';
+import { CheckCircle, CheckCircleOutline, Info, KeyboardArrowDown, KeyboardArrowUp, RadioButtonUnchecked } from '@mui/icons-material';
+import { Checkbox, Collapse } from '@mui/material';
 import { useMemo, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -29,6 +29,8 @@ const RenderSingleGroup = ({
   useServiceSelectionState
 }) => {
   const [expanded, setExpanded] = useState(false);
+
+  const { handleSelectMultiple, isGroupIndeterminate, isGroupSelected } = useServiceSelectionState;
 
   const isSelected = useMemo(() => {
     return !!selectedService && !!group?.serviceSteps.find((d) => d._id === selectedService?._id && selectedService.parentId === group._id);
@@ -64,6 +66,17 @@ const RenderSingleGroup = ({
             </HtmlTooltip>
           ) : (
             <>
+              <Checkbox
+                checked={isGroupSelected(group.serviceSteps)}
+                indeterminate={isGroupIndeterminate(group.serviceSteps)}
+                onChange={(e) => {
+                  handleSelectMultiple(e.target.checked, group.serviceSteps);
+                }}
+                checkedIcon={<CheckCircle />}
+                indeterminateIcon={<CheckCircleOutline />}
+                icon={<RadioButtonUnchecked />}
+                sx={{ p: '4px' }}
+              />
               <div className="flex flex-grow items-center justify-between">
                 <h6 className={'text-base font-medium leading-[24px]'}>{group.product}</h6>
                 <RenderServiceCountBadge serviceSteps={group.serviceSteps} />
