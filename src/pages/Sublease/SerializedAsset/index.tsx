@@ -16,7 +16,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
 import BulkActionContainer from 'src/components/CustomReactTable/GridHeader/ModernBulkAction/BulkActionContainer';
 import {
@@ -30,7 +29,6 @@ import {
   treeToFlatArray
 } from 'src/constants/helpers';
 import { subleaseMessage } from 'src/constants/messageHelpers';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowedToEdit, stepFullScreen, renderedFrom }) {
   const toastConfig = useContext(CustomToastContext);
@@ -364,14 +362,6 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
     }
   };
 
-  const disableAssignSerializedAssets = () => {
-    if (selectedRecords.length === 0) return true;
-    const flatArray = treeToFlatArray(selectedRecords, 'subRows').filter(
-      (f) => f.type === 'product' && f.serializedProduct && f.realAssetQty > f.realAssetAssignedQty
-    );
-    return flatArray.length === 0;
-  };
-
   const handleRemoveAsset = () => {
     axiosInstance()
       .put(`${sublease.api}/asset/${subleaseData._id}/remove`, { ids: deleteData })
@@ -388,34 +378,8 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
       });
   };
 
-  const rightSideContents = () => {
-    return (
-      <>
-        <ThemeButton
-          buttonType="theme"
-          disabled={disableAssignSerializedAssets()}
-          onClick={() => {
-            setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === 'product' && i?.productDetail?.serializedProduct));
-            setAddSerializedAssetDialog(true);
-          }}
-        >
-          {`Assign ${resources?.serializedAsset?.titlePlural}`}
-        </ThemeButton>
-      </>
-    );
-  };
-
   return (
     <Fragment>
-      {allowedToEdit && (
-        <>
-          <DetailsPageHeader
-            isAddButtonVisible={false}
-            isActionButtonVisible={false}
-            rightSideContents={rightSideContents()}
-          />
-        </>
-      )}
       <Grid container spacing={2}>
         <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
@@ -437,6 +401,9 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                     selectedRecords={selectedRecords}
                     setShowConfirmBox={setShowConfirmBox}
                     setDeleteData={setDeleteData}
+                    resources={resources}
+                    setAssetAssignedProduct={setAssetAssignedProduct}
+                    setAddSerializedAssetDialog={setAddSerializedAssetDialog}
                   />
                 }
               />
@@ -490,19 +457,40 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
 
 export default SerializedAsset;
 
-const BulkActionItems = ({ 
-  selectedRecords, 
-  setShowConfirmBox, 
-  setDeleteData 
+const BulkActionItems = ({
+  selectedRecords,
+  setShowConfirmBox,
+  setDeleteData,
+  resources,
+  setAssetAssignedProduct,
+  setAddSerializedAssetDialog
 }) => {
+
+  const disableAssignSerializedAssets = () => {
+    if (selectedRecords.length === 0) return true;
+    const flatArray = treeToFlatArray(selectedRecords, 'subRows').filter(
+      (f) => f.type === 'product' && f.serializedProduct && f.realAssetQty > f.realAssetAssignedQty
+    );
+    return flatArray.length === 0;
+  };
+
   return (
     <BulkActionContainer>
       <BulkActionContainer.Button
-        disabled={
-          selectedRecords?.length &&
-            selectedRecords?.filter((e) => e.type === 'asset' && e.canDelete)?.length === selectedRecords?.filter((e) => e.type === 'asset')?.length
-            ? false
-            : true
+        buttonType="theme"
+        disabled={disableAssignSerializedAssets()}
+        onClick={() => {
+          setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === MATERIAL_TYPE.product && i?.productDetail?.serializedProduct));
+          setAddSerializedAssetDialog(true);
+        }}
+      >
+        {`Assign ${resources?.serializedAsset?.titlePlural}`}
+      </BulkActionContainer.Button>
+      <BulkActionContainer.Button
+        disabled={selectedRecords?.filter((e) => e.type === 'asset' && e.canDelete)?.length &&
+          selectedRecords?.filter((e) => e.type === 'asset' && e.canDelete)?.length === selectedRecords?.filter((e) => e.type === 'asset')?.length
+          ? false
+          : true
         }
         onClick={() => {
           const inventories = uniqBy(flattenArray(selectedRecords), '_id')
@@ -513,7 +501,7 @@ const BulkActionItems = ({
         }}
         buttonType="red"
       >
-        Delete
+        Remove
       </BulkActionContainer.Button>
     </BulkActionContainer>
   );
