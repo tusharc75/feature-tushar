@@ -6,7 +6,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import { useEditableTableStore } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
 import { CellProps } from 'src/components/EditableExcelTable/types';
-import { getCellValue, renderCellText } from 'src/components/EditableExcelTable/utils';
+import { cleanDirtyRowData, getCellValue, renderCellText } from 'src/components/EditableExcelTable/utils';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const getCellDate = (column: TColType, data: any) => {
@@ -26,6 +26,7 @@ const DatePickerCell = ({
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [, setStore] = useEditableTableStore((prev) => prev.pasteKey);
+  const [columns] = useEditableTableStore((prev) => prev.columns);
   const [value, setValue] = useState(getCellDate(column, data));
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -43,7 +44,10 @@ const DatePickerCell = ({
       const dirtyRows = [...prev.dirtyRows];
       const key = column.accessor || column.id;
       tableData[rowIndex][key] = newValue.toISOString();
-      dirtyRows[rowIndex] = { ...tableData[rowIndex], [key]: newValue.toISOString() };
+      dirtyRows[rowIndex] = cleanDirtyRowData(
+        { ...tableData[rowIndex], [key]: newValue.toISOString() },
+        columns.map((d) => d.id ?? d.accessor)
+      );
       setValue(getCellDate(column, tableData[rowIndex]));
       return {
         dirtyRows,

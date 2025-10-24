@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useEditableTableStore } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
 import { CellProps } from 'src/components/EditableExcelTable/types';
-import { getCellValue, renderCellText } from 'src/components/EditableExcelTable/utils';
+import { cleanDirtyRowData, getCellValue, renderCellText } from 'src/components/EditableExcelTable/utils';
 import { handleAutoCalculation } from 'src/constants/formulaUtility';
 import { cn } from 'src/constants/helpers';
 
@@ -54,7 +54,10 @@ const Input = ({
       dirtyRows[rowIndex] = { ...tableData[rowIndex], [key]: newValue };
       if (Object.keys(result).length > 0) {
         tableData[rowIndex] = { ...tableData[rowIndex], ...result };
-        dirtyRows[rowIndex] = { ...tableData[rowIndex], ...result };
+        dirtyRows[rowIndex] = cleanDirtyRowData(
+          { ...tableData[rowIndex], ...result },
+          columns.map((d) => d.id ?? d.accessor)
+        );
       }
       return {
         dirtyRows,

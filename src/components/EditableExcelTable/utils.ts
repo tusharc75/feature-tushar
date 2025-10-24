@@ -234,7 +234,7 @@ const setPastedValue = ({
   return { dirtyValue };
 };
 
-const cleanDirtyRowData = (data: Record<string, any>, sortedCells: string[]) => {
+export const cleanDirtyRowData = (data: Record<string, any>, sortedCells: string[]) => {
   const dirtyRowMap = new Map(Object.entries(data));
 
   // delete multiselect cell rest values

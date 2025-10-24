@@ -3,7 +3,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { useEditableTableStore } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
 import DropDownHelper from 'src/components/EditableExcelTable/TableComponents/Cells/DropDownHelper';
 import { CellProps, Option } from 'src/components/EditableExcelTable/types';
-import { getDropdownOptionValue } from 'src/components/EditableExcelTable/utils';
+import { cleanDirtyRowData, getDropdownOptionValue } from 'src/components/EditableExcelTable/utils';
 
 const DropDownCell = ({ cellIndex, column, data, exitEditMode, isEditing, rowIndex, allowedEditing, isSelected, ...rest }: CellProps) => {
   const [options, setOptions] = useState<Option[]>([]);
@@ -11,6 +11,7 @@ const DropDownCell = ({ cellIndex, column, data, exitEditMode, isEditing, rowInd
   const [hasFocus, setHasFocus] = useState(false);
   const [value, setValue] = useState<Option | null>(getDropdownOptionValue(column, data) as Option);
   const [, setStore] = useEditableTableStore((prev) => prev.pasteKey);
+  const [columns] = useEditableTableStore((prev) => prev.columns);
 
   useEffect(() => {
     if (!hasFocus) return;
@@ -33,6 +34,13 @@ const DropDownCell = ({ cellIndex, column, data, exitEditMode, isEditing, rowInd
     }
   }, [column, hasFocus]);
 
+  const handleCleanDirtyRows = (dirtyRows) => {
+    return cleanDirtyRowData(
+      dirtyRows,
+      columns.map((d) => d.id ?? d.accessor)
+    );
+  };
+
   const setValueToState = (newValue: Option | null) => {
     setHasFocus(false);
     setValue(newValue as Option);
@@ -46,14 +54,14 @@ const DropDownCell = ({ cellIndex, column, data, exitEditMode, isEditing, rowInd
           tableData[rowIndex][key] = newValue.optionLabel;
           tableData[rowIndex][`${key}Id`] = newValue.optionValue;
         }
-        dirtyRows[rowIndex] = { ...tableData[rowIndex], [key]: newValue.optionValue };
+        dirtyRows[rowIndex] = handleCleanDirtyRows({ ...tableData[rowIndex], [key]: newValue.optionValue });
       } else {
         tableData[rowIndex][key] = '';
         if (column.lookup) {
           tableData[rowIndex][key] = '';
           tableData[rowIndex][`${key}Id`] = '';
         }
-        dirtyRows[rowIndex] = { ...tableData[rowIndex], [key]: '' };
+        dirtyRows[rowIndex] = handleCleanDirtyRows({ ...tableData[rowIndex], [key]: '' });
       }
       return {
         dirtyRows,
