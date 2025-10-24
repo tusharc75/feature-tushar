@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Dialog, Grid2, Typography } from "@mui/material";
+import { Box, Dialog, Grid2 } from "@mui/material";
 import { Formik } from "formik";
 import { orderBy } from "lodash";
 import { useContext, useEffect, useState } from "react";
@@ -30,7 +30,7 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
 
   const fetchWorkOrderData = () => {
     setServices(null)
-    axiosInstance().get(`${workOrder.api}/service//pending-services?workOrderIds=${workOrders?.map(e => e?.workOrder)}`)
+    axiosInstance().get(`${workOrder.api}/service/pending-services?workOrderIds=${workOrders?.map(e => e?.workOrder)}`)
       .then(({ data: { data } }) => {
         if (data && data?.length > 0) {
           const stepsData: any = []
@@ -40,11 +40,12 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
               const filteredServices = _data?.services?.filter(e => selectedWorkOrder?.services?.some(s => s?.service === e?._id && s?.uniqueId === e?.uniqueId))
               const productServices = orderBy(filteredServices?.filter(e => e?.parentId), ['order'], ['asc']);
               const _services = orderBy(filteredServices?.filter(e => !e?.parentId), ['order'], ['asc']);
-              setServices([...productServices, ..._services])
+              const services = [...productServices, ..._services]
+              setServices(services)
 
               const stepData: any = []
 
-              filteredServices?.forEach(ele => {
+              services?.forEach(ele => {
                 if (ele?.steps && ele?.steps?.length > 0) {
                   ele?.steps?.forEach(step => {
                     let tempInitialData: any = {};
@@ -84,7 +85,7 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
 
   const getFields = (stepData) => {
     const service = services?.find(s => s?._id === stepData?.serviceId && s?.uniqueId === stepData?.uniqueId)
-    const fields = service?.steps?.find(s => s?._id === stepData?.stepId)
+    const fields = service?.steps?.find(s => s?._id === stepData?.stepId)?.fields
     return fields && fields?.length > 0 ? fields : []
   }
 
@@ -101,14 +102,17 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
   }
 
   const validate = (values) => {
-    const errors: any = {}
+    const errors: any = { value: [{ stepData: [] }] }
     values?.value?.forEach(ele => {
-      ele?.stepData?.forEach(stepData => {
+      ele?.stepData?.forEach((stepData, i) => {
         const fields = getFields(stepData)
         if (fields?.length > 0) {
           fields?.forEach(field => {
             if (field?.required && !stepData[field?.fieldName]) {
-              errors[``] = `${field?.fieldLabel} is required`
+              if (!errors?.value[0]?.stepData[i]) {
+                errors.value[0].stepData[i] = {}
+              }
+              errors.value[0].stepData[i][`${field?.fieldName}`] = `${field?.fieldLabel} is required`
             }
           });
         }
@@ -131,7 +135,7 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
       }}
     >
       <CustomDialogHeader
-        title={`Complete Step`}
+        title={`Complete Services`}
         onClose={onClose}
         isMinimized={!fullScreen}
         onMinimizeMaximize={() => {
@@ -151,43 +155,21 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                         <CustomCollapsible
                           element="li"
                           className="border"
-                          toggleTriggerArea="onlyToggleButton"
-                          toggleIconPosition={'end'}
-                          defaultExpanded={true}
-                          head={
-                            <div>
-                              <h6
-                                title={service?.serviceName}
-                                className={`flex-grow [word-break:break-all] max-md:line-clamp-[1] max-md:w-full max-md:!text-[14px]`}
-                                style={{ fontWeight: '500', fontSize: '15px' }}
-                              >
-                                {`${service?.serviceName}${service?.parentId ? ` - ${products?.find(p => p?._id === service?.parentId)?.productDetail?.productName}` : ''}`}
-                              </h6>
-                            </div>
-                          }
+                          defaultExpanded
+                          head={<h6 className="text-base font-semibold">{`${service?.serviceName}${service?.parentId ? ` - ${products?.find(p => p?._id === service?.parentId)?.productDetail?.productName}` : ''}`}</h6>}
+                          headProps={{ className: 'sticky top-0 z-[1]' }}
                         >
                           <div className={`w-full space-y-2 overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] p-2`}>
-                            {service?.steps && service?.steps?.length > 0 && orderBy(service?.steps, ['order'], ['asc'])?.map(step => {
+                            {service?.steps && service?.steps?.length > 0 && service?.steps?.map((step, stepIndex) => {
                               const index1 = values?.value?.findIndex(e => e?.workOrder === workOrders[0]?.workOrder)
                               const index2 = values?.value[index1]?.stepData?.findIndex(e => e?.serviceId === service?._id && e?.uniqueId === service?.uniqueId && e?.stepId === step?._id)
                               return (
                                 <CustomCollapsible
                                   element="li"
                                   className="border"
-                                  toggleTriggerArea="onlyToggleButton"
-                                  toggleIconPosition={'end'}
-                                  defaultExpanded={true}
-                                  head={
-                                    <div>
-                                      <h6
-                                        title={service?.serviceName}
-                                        className={`flex-grow [word-break:break-all] max-md:line-clamp-[1] max-md:w-full max-md:!text-[14px]`}
-                                        style={{ fontWeight: '500', fontSize: '15px' }}
-                                      >
-                                        {step?.stepName}
-                                      </h6>
-                                    </div>
-                                  }
+                                  defaultExpanded
+                                  head={<h6 className="text-base font-semibold">{step?.stepName}</h6>}
+                                  headProps={{ className: 'sticky top-0 z-[1]' }}
                                 >
                                   <div>
                                     {step?.fields && step?.fields?.length > 0 && values?.value[index1]?.stepData?.[index2] ? (
@@ -200,14 +182,13 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                                                 fieldData={field}
                                                 disabled={field?.disableOnEdit}
                                                 values={values?.value[index1]?.stepData?.[index2]}
-                                                errors={errors}
-                                                touched={touched}
+                                                errors={errors?.value?.[index1]?.stepData?.[index2] ? errors?.value?.[index1]?.stepData?.[index2] : {}}
+                                                touched={touched?.value?.[index1]?.stepData?.[index2] ? touched?.value?.[index1]?.stepData?.[index2] : {}}
                                                 label={field.fieldLabel}
                                                 name={field.fieldName}
                                                 type={field.type}
                                                 options={field.option}
                                                 setFieldValue={(name, value) => {
-
                                                   setFieldValue(`value[${index1}].stepData[${index2}].${name}`, value)
                                                 }}
                                                 required={field.required}
@@ -251,7 +232,13 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                 disabled={isSubmitting}
                 isLoading={isSubmitting}
                 buttonType="theme"
-                onClick={submitForm}
+                onClick={() => {
+                  if (validate(values)?.value[0]?.stepData?.length <= 0) {
+                    handleSave(values)
+                  } else {
+                    submitForm()
+                  }
+                }}
               >
                 Save
               </ThemeButton>

@@ -1427,16 +1427,16 @@ const BulkActionItems = ({
 
       <BulkActionContainer.Button
         onClick={() => {
-          const groupedWorkOrder = groupBy(getFilterSelectedRecords(selectedRecords), 'workOrderId');
+          const groupedWorkOrder = groupBy(getFilterSelectedRecords(selectedRecords)?.filter(e => !!e?.workOrderId), 'workOrderId');
           const data: any = []
           for (const workOrderId in groupedWorkOrder) {
-            data.push({ workOrder: workOrderId, workOrderNumber: groupedWorkOrder[workOrderId][0]?.workOrder?.workOrderNumber, services: groupedWorkOrder[workOrderId]?.filter(e => e?.type === MATERIAL_TYPE.service)?.map(e => ({ service: e?.serviceDetail?._id, uniqueId: e?.uniqueId })) })
+            data.push({ workOrder: workOrderId, services: groupedWorkOrder[workOrderId]?.filter(e => e?.type === MATERIAL_TYPE.service)?.map(e => ({ service: e?.serviceDetail?._id, uniqueId: e?.uniqueId })) })
           }
           setWorkOrdersCompleteStepDialog({ open: true, workOrders: data })
         }}
         disabled={!checkUniqWorkOrder()}
       >
-        Complete Steps
+        Complete Services
       </BulkActionContainer.Button>
 
       {permissions?.repairJob?.isCreate && (
