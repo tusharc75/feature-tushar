@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem, Typography } from '@mui/material';
+import { Autocomplete, Box, IconButton, MenuItem, TextField, Typography } from '@mui/material';
 import { CheckCircle, Delete, Edit } from '@mui/icons-material';
 import { flatMap, groupBy, map, orderBy, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -91,6 +91,8 @@ const WorkOrder = ({
   const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, serializedPackage: null });
   const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState({ open: false, sendToCustomer: false });
   const [workOrdersCompleteStepDialog, setWorkOrdersCompleteStepDialog] = useState({ open: false, workOrders: null })
+  const [serviceOptions, setServiceOptions] = useState([]);
+  const [selectedServiceOption, setSelectedServiceOption] = useState(null);
 
   const { generateColumns, getMaterialLabel } = useColumns();
 
@@ -457,6 +459,7 @@ const WorkOrder = ({
 
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
+    setSelectedServiceOption(null);
 
     const {
       data: { data }
@@ -807,6 +810,52 @@ const WorkOrder = ({
       });
   };
 
+  useEffect(() => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.serviceMaster}`)
+      .then(({ data: { data } }) => {
+        setServiceOptions(data[sidebarResource.serviceMaster]);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }, []);
+
+  const handleServiceSelect = (newValue) => {
+    setSelectedServiceOption(newValue);
+    if (newValue) {
+      dispatch({ type: 'selection', selectedRecords: [] });
+      setTimeout(() => {
+        dispatch({
+          type: 'selection',
+          selectedRecords: flattenArray(dataRows)?.filter((_f) => [newValue?.optionValue].includes(_f?.serviceDetail?._id) && !_f?.hideSelection)
+        });
+      }, 100);
+    } else {
+      dispatch({ type: 'selection', selectedRecords: [] });
+    }
+  };
+
+  const leftSideContents = () => {
+    return (
+      <>
+        {allowedToEdit && (
+          <Autocomplete
+            className="min-w-[200px] max-w-[400px] flex-grow"
+            options={serviceOptions}
+            getOptionLabel={(option) => option?.optionLabel || ''}
+            size="small"
+            renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Select Service" variant="outlined" />}
+            value={selectedServiceOption}
+            onChange={(event: any, newValue: any) => {
+              handleServiceSelect(newValue);
+            }}
+          />
+        )}
+      </>
+    );
+  };
+
   const rightSideContents = () => {
     return (
       <> {assemblyOrderData?.customPdfTemplate ?
@@ -946,6 +995,7 @@ const WorkOrder = ({
         isAddButtonVisible={false}
         isActionButtonVisible={false}
         hasXpadding
+        leftSideContents={leftSideContents()}
         rightSideContents={rightSideContents()}
       />
       {columns ? (
