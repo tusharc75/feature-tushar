@@ -49,7 +49,7 @@ import CustomCollapsible from 'src/components/CustomCollapsible';
 import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
 import { autoCalculateSpecificFields, getFormulaValue } from 'src/constants/formulaUtility';
 
-const getValueOfMatchedFieldName = (fields: any, productData: any, workOrderData: any, products: any) => {
+export const getValueOfMatchedFieldName = (fields: any, productData: any, workOrderData: any, products: any) => {
   let data: any = {};
   const referenceData = { ...(workOrderData || {}), ...(productData || {}) };
   if (fields?.length > 0 && referenceData) {

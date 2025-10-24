@@ -51,7 +51,7 @@ const RenderSingleGroup = ({
             'flex items-center gap-2 rounded-[inherit] ',
             'data-[selected=true]:![outline:2px_solid_var(--new-theme-color)] ',
             group?.serviceSteps?.length === 1 ? 'cursor-pointer ' : '',
-            isColapsed ? 'justify-center py-4' : 'justify-between p-4 '
+            isColapsed ? 'justify-center py-2' : 'justify-between pt-4 pb-4 pr-4 pl-2'
           )}
           data-selected={isSelected}
           onClick={(e) => {
@@ -81,7 +81,6 @@ const RenderSingleGroup = ({
                 <h6 className={'text-base font-medium leading-[24px]'}>{group.product}</h6>
                 <RenderServiceCountBadge serviceSteps={group.serviceSteps} />
               </div>
-              {/* pass fail */}
               {group?.serviceSteps?.length === 1 && (
                 <>
                   {data?.type === 'service' && data?.serviceStatus && (

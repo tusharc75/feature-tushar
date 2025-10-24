@@ -13,6 +13,7 @@ import { isMobile, isTablet } from "react-device-detect";
 import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
 import { ThemeButton } from "src/components/Helpers/Buttons";
 import CustomCollapsible from "src/components/CustomCollapsible";
+import { getValueOfMatchedFieldName } from "src/pages/WorkOrder/Service/Steps";
 
 const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
 
@@ -51,7 +52,10 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                     if (_stepData) {
                       tempInitialData = getObjKeysWithValues(_stepData, step?.fields && step?.fields?.length > 0 ? step?.fields : [])
                     } else {
-                      tempInitialData = getObjKeys('', step?.fields && step?.fields?.length > 0 ? step?.fields : []);
+                      tempInitialData = {
+                        ...getObjKeys('', step?.fields && step?.fields?.length > 0 ? step?.fields : []),
+                        ...getValueOfMatchedFieldName(step?.fields, {}, {}, _data?.products)
+                      };
                     }
                     stepData.push({
                       serviceId: ele?._id,
