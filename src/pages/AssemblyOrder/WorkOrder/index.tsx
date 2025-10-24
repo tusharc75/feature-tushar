@@ -47,6 +47,7 @@ import PreviewDownloadNew from 'src/components/PreviewDownloadNew';
 import BulkEditWorkOrder from 'src/pages/WorkOrder/BulkEditWorkOrder';
 import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
 import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
+import WorkOrdersCompleteStepDialog from 'src/pages/WorkOrder/WorkOrdersCompleteStepDialog';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -89,6 +90,7 @@ const WorkOrder = ({
   const [bulkEditWorkOrderDialog, setBulkEditWorkOrderDialog] = useState({ open: false, _ids: [] });
   const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false, serializedPackage: null });
   const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState({ open: false, sendToCustomer: false });
+  const [workOrdersCompleteStepDialog, setWorkOrdersCompleteStepDialog] = useState({ open: false, workOrders: null })
 
   const { generateColumns, getMaterialLabel } = useColumns();
 
@@ -987,6 +989,7 @@ const WorkOrder = ({
                   setOpenSerializedPackageDialog={setOpenSerializedPackageDialog}
                   setShowManageRepairJobDialog={setShowManageRepairJobDialog}
                   setRepairJobReceiveConfirmation={setRepairJobReceiveConfirmation}
+                  setWorkOrdersCompleteStepDialog={setWorkOrdersCompleteStepDialog}
                 />
               }
             />
@@ -1229,6 +1232,17 @@ const WorkOrder = ({
         />
       )}
 
+      {workOrdersCompleteStepDialog.open && (
+        <WorkOrdersCompleteStepDialog
+          workOrders={workOrdersCompleteStepDialog.workOrders}
+          onClose={() => setWorkOrdersCompleteStepDialog({ open: false, workOrders: null })}
+          onSuccess={() => {
+            setWorkOrdersCompleteStepDialog({ open: false, workOrders: null })
+            fetchData()
+          }}
+        />
+      )}
+
     </>
   );
 };
@@ -1259,7 +1273,8 @@ const BulkActionItems = ({
   setBulkEditWorkOrderDialog,
   setOpenSerializedPackageDialog,
   setShowManageRepairJobDialog,
-  setRepairJobReceiveConfirmation
+  setRepairJobReceiveConfirmation,
+  setWorkOrdersCompleteStepDialog
 }) => {
   const checkUniqWorkOrderType = () => {
     if (getFilterSelectedRecords(selectedRecords).length === 0) {
@@ -1342,7 +1357,7 @@ const BulkActionItems = ({
         <BulkActionContainer.Button
           disabled={
             getFilterSelectedRecords(selectedRecords)?.filter((d) => [MATERIAL_TYPE.package, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0 &&
-            checkUniqWorkOrder()
+              checkUniqWorkOrder()
               ? false
               : true
           }
@@ -1372,8 +1387,8 @@ const BulkActionItems = ({
         }}
         disabled={
           getFilterSelectedRecords(selectedRecords)?.length &&
-          getFilterSelectedRecords(selectedRecords)?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
-          getFilterSelectedRecords(selectedRecords)?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
+            getFilterSelectedRecords(selectedRecords)?.find((d) => d.type === MATERIAL_TYPE.service || checkParentProduct([d], d?.parentId)) &&
+            getFilterSelectedRecords(selectedRecords)?.every((d) => d.workOrderId === selectedRecords[0]?.workOrderId)
             ? false
             : true
         }
@@ -1383,14 +1398,14 @@ const BulkActionItems = ({
 
       {getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.package && e?.status === WORK_ORDER_STATUS.draft)?.length >
         0 && (
-        <BulkActionContainer.Button
-          onClick={() => {
-            updateWorkOrdetStatus();
-          }}
-        >
-          Ready to Build
-        </BulkActionContainer.Button>
-      )}
+          <BulkActionContainer.Button
+            onClick={() => {
+              updateWorkOrdetStatus();
+            }}
+          >
+            Ready to Build
+          </BulkActionContainer.Button>
+        )}
 
       <BulkActionContainer.Button
         onClick={() => {
@@ -1399,15 +1414,29 @@ const BulkActionItems = ({
         }}
         disabled={
           checkUniqWorkOrderType() &&
-          getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
-          getFilterSelectedRecords(selectedRecords)
-            ?.filter((e) => e.type === MATERIAL_TYPE.package)
-            .every((e) => e?.canAutoCompleteWorkOrder)
+            getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.package)?.length > 0 &&
+            getFilterSelectedRecords(selectedRecords)
+              ?.filter((e) => e.type === MATERIAL_TYPE.package)
+              .every((e) => e?.canAutoCompleteWorkOrder)
             ? false
             : true
         }
       >
         Auto Complete Work Order(s)
+      </BulkActionContainer.Button>
+
+      <BulkActionContainer.Button
+        onClick={() => {
+          const groupedWorkOrder = groupBy(getFilterSelectedRecords(selectedRecords), 'workOrderId');
+          const data: any = []
+          for (const workOrderId in groupedWorkOrder) {
+            data.push({ workOrder: workOrderId, workOrderNumber: groupedWorkOrder[workOrderId][0]?.workOrder?.workOrderNumber, services: groupedWorkOrder[workOrderId]?.filter(e => e?.type === MATERIAL_TYPE.service)?.map(e => ({ service: e?.serviceDetail?._id, uniqueId: e?.uniqueId })) })
+          }
+          setWorkOrdersCompleteStepDialog({ open: true, workOrders: data })
+        }}
+        disabled={!checkUniqWorkOrder()}
+      >
+        Complete Steps
       </BulkActionContainer.Button>
 
       {permissions?.repairJob?.isCreate && (
@@ -1480,8 +1509,8 @@ const BulkActionItems = ({
       <BulkActionContainer.Button
         disabled={
           checkUniqWorkOrder() &&
-          (getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
-            getFilterSelectedRecords(selectedRecords)?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
+            (getFilterSelectedRecords(selectedRecords)?.filter((e) => e.type === MATERIAL_TYPE.service)?.length === 1 ||
+              getFilterSelectedRecords(selectedRecords)?.filter((e) => checkParentProduct([e], e?.parentId))?.length === 1)
             ? false
             : true
         }
