@@ -42,9 +42,7 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
               const _services = orderBy(filteredServices?.filter(e => !e?.parentId), ['order'], ['asc']);
               const services = [...productServices, ..._services]
               setServices(services)
-
               const stepData: any = []
-
               services?.forEach(ele => {
                 if (ele?.steps && ele?.steps?.length > 0) {
                   ele?.steps?.forEach(step => {
@@ -64,18 +62,15 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                   });
                 }
               });
-
               stepsData.push({
                 workOrder: _data?._id,
                 stepData: stepData
               })
             }
-
             if (_data?.products?.length) {
               setProducts(_data?.products)
             }
           });
-
           setInitialValues({ value: stepsData })
         }
       }).catch((err) => {
@@ -91,8 +86,13 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
 
   const handleSave = (values) => {
     setIsSubmitting(true)
-    axiosInstance().put(`${workOrder.api}/complete-multiple-service-steps`, values?.value)
-      .then(({ data: { data } }) => {
+    axiosInstance().put(`${workOrder.api}/complete-multiple-services`, values?.value)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
         setIsSubmitting(false)
         onSuccess()
       }).catch((err) => {
