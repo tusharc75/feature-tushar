@@ -135,45 +135,45 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       },
       ...(technicianFields?.find((e) => e.fieldName === 'competencyType')
         ? [
-            {
-              accessor: 'competencyType',
-              Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencyType',
-                    lookupResource: sidebarResource.competencyType
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencyType')
-            }
-          ]
+          {
+            accessor: 'competencyType',
+            Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencyType',
+                  lookupResource: sidebarResource.competencyType
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencyType')
+          }
+        ]
         : []),
       ...(technicianFields?.find((e) => e.fieldName === 'competencies')
         ? [
-            {
-              accessor: 'competencies',
-              Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencies',
-                    lookupResource: sidebarResource.competencies
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencies')
-            }
-          ]
+          {
+            accessor: 'competencies',
+            Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencies',
+                  lookupResource: sidebarResource.competencies
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencies')
+          }
+        ]
         : []),
       {
         accessor: 'startDate',
@@ -428,6 +428,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           }}
           warehouse={fieldTicketData?.warehouse?.optionValue}
           ids={dataRows?.map((d) => d?.technicianId)}
+          location={{ "latitude": fieldTicketData?.shippingAddress?.latitude, "longitude": fieldTicketData?.shippingAddress?.longitude }}
         />
       )}
 

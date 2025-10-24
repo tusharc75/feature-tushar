@@ -440,6 +440,7 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
           warehouse={rentalManagementData?.warehouse?.optionValue}
           currentCompetencyType={selectedService?.competencyType}
           currentCompetencies={selectedService?.competencies}
+          location={{ "latitude": rentalManagementData?.shippingAddress?.latitude, "longitude": rentalManagementData?.shippingAddress?.longitude }}
         />
       )}
       {technicianAssign.open && (
