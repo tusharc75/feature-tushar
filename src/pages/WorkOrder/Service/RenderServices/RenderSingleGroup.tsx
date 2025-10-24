@@ -25,7 +25,8 @@ const RenderSingleGroup = ({
   setShowConfirmBox,
   getFieldsWithOtherDetails,
   isMobile,
-  completed
+  completed,
+  useServiceSelectionState
 }) => {
   const [expanded, setExpanded] = useState(false);
 
@@ -142,7 +143,8 @@ const RenderSingleGroup = ({
               setShowConfirmBox,
               getFieldsWithOtherDetails,
               isMobile,
-              completed
+              completed,
+              useServiceSelectionState
             }}
           />
         </div>

@@ -9,6 +9,7 @@ import useTab from './useTab';
 import RenderServicesList from 'src/pages/WorkOrder/Service/RenderServices/RenderServicesList';
 import RenderSingleGroup from 'src/pages/WorkOrder/Service/RenderServices/RenderSingleGroup';
 import RenderServiceGroup from 'src/pages/WorkOrder/Service/RenderServices/RenderServiceGroup';
+import useServiceSelection from 'src/pages/WorkOrder/Service/RenderServices/useServiceSelection';
 
 export type ServicesButtons = { visible: boolean; id: string | number } & ThemeButtonProps;
 
@@ -32,6 +33,7 @@ type RenderServiceProps = {
   isMobile: boolean;
   initialTabIndex: number;
   completed: boolean;
+  useServiceSelectionState: ReturnType<typeof useServiceSelection>;
 };
 
 const RenderService = ({
@@ -53,7 +55,8 @@ const RenderService = ({
   servicesButtons,
   isMobile,
   initialTabIndex = 0,
-  completed
+  completed,
+  useServiceSelectionState
 }: RenderServiceProps) => {
   const [isMobileSlideOpen, setIsMobileSlideOpen] = useState(false);
   const [policy, setPolicy] = useState(null);
@@ -168,7 +171,8 @@ const RenderService = ({
                     setShowConfirmBox,
                     getFieldsWithOtherDetails,
                     isMobile,
-                    completed
+                    completed,
+                    useServiceSelectionState
                   }}
                 />
               </div>
@@ -218,7 +222,8 @@ const RenderService = ({
                       getFieldsWithOtherDetails,
                       isMobile,
                       completed,
-                      preWork: true
+                      preWork: true,
+                      useServiceSelectionState
                     }}
                   />
                 </div>
@@ -244,7 +249,8 @@ const RenderService = ({
                         setShowConfirmBox,
                         getFieldsWithOtherDetails,
                         isMobile,
-                        completed
+                        completed,
+                        useServiceSelectionState
                       }}
                     />
                   ))}
@@ -269,7 +275,8 @@ const RenderService = ({
                     getFieldsWithOtherDetails,
                     isMobile,
                     completed,
-                    preWork: false
+                    preWork: false,
+                    useServiceSelectionState
                   }}
                 />
               ) : (
@@ -289,7 +296,8 @@ const RenderService = ({
                     setShowConfirmBox,
                     getFieldsWithOtherDetails,
                     isMobile,
-                    completed
+                    completed,
+                    useServiceSelectionState
                   }}
                 />
               )}

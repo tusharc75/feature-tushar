@@ -18,7 +18,8 @@ const RenderServiceGroup = ({
   getFieldsWithOtherDetails,
   isMobile,
   completed,
-  preWork
+  preWork,
+  useServiceSelectionState
 }) => {
   return (
     <div className="relative isolate min-w-0 max-w-full ">
@@ -50,7 +51,8 @@ const RenderServiceGroup = ({
           setShowConfirmBox,
           getFieldsWithOtherDetails,
           isMobile,
-          completed
+          completed,
+          useServiceSelectionState
         }}
       />
     </div>

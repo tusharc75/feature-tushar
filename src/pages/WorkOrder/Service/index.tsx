@@ -58,6 +58,9 @@ import Steps from './Steps';
 import StepsInOtherServices from './StepsInOtherService';
 import ViewServiceStepDataDialog from './ViewServiceStepDataDialog';
 import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
+import useServiceSelection from 'src/pages/WorkOrder/Service/RenderServices/useServiceSelection';
+import ModernBulkAction from 'src/components/CustomReactTable/GridHeader/ModernBulkAction';
+import ServicesBulkActionItems from 'src/pages/WorkOrder/Service/RenderServices/ServicesBulkActionItems';
 
 const Service = ({
   workOrderId,
@@ -80,8 +83,8 @@ const Service = ({
   } = useData();
 
   const [serviceSteps, setServiceSteps] = useState(null);
-  const [allServices, setAllServices] = useState([])
-  const [products, setProducts] = useState([])
+  const [allServices, setAllServices] = useState([]);
+  const [products, setProducts] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [stepSubmitedData, setStepSubmitedData] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -227,11 +230,11 @@ const Service = ({
           }
         }
 
-        const productServices = services?.filter(s => s?.parentId)
-        if (productServices?.length && !productServices?.every(s => s?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed)) {
-          services?.forEach(s => {
+        const productServices = services?.filter((s) => s?.parentId);
+        if (productServices?.length && !productServices?.every((s) => s?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed)) {
+          services?.forEach((s) => {
             if (!s?.parentId && !s?.preWork) {
-              s.clickable = false
+              s.clickable = false;
             }
           });
         }
@@ -247,8 +250,8 @@ const Service = ({
           }
         }
       }
-      setServiceSteps(services?.filter(s => !s?.parentId));
-      setAllServices(services)
+      setServiceSteps(services?.filter((s) => !s?.parentId));
+      setAllServices(services);
       if (![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.deleted, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)) {
         if (
           (workOrderData?.canComplete &&
@@ -267,7 +270,7 @@ const Service = ({
       setServiceSteps([]);
     }
     if (workOrderDetail?.products?.length) {
-      setProducts(workOrderDetail?.products)
+      setProducts(workOrderDetail?.products);
     }
   };
 
@@ -411,7 +414,6 @@ const Service = ({
       setIsColapsed(false);
     }
   }, [mobScreen]);
-
 
   const stylesForEveryTab = (selectedService, data, index): React.CSSProperties => {
     const commonStyle: React.CSSProperties = { overflow: 'hidden' };
@@ -569,7 +571,7 @@ const Service = ({
       disabled: allowedToEdit && !completed ? false : true,
       iconForMobile: <LowPriority />,
       onClick: (e, tabId = null) => {
-        setArrangeView({ open: true, tabId: tabId })
+        setArrangeView({ open: true, tabId: tabId });
       },
       children: (
         <>
@@ -581,10 +583,21 @@ const Service = ({
     }
   ];
 
+  const useServiceSelectionState = useServiceSelection();
+
   return (
     <Box>
       {serviceSteps ? (
         <>
+          {useServiceSelectionState.selectedRecords.length > 0 && (
+            <div className="mb-2">
+              <ModernBulkAction
+                bulkActionItems={<ServicesBulkActionItems selectedServices={useServiceSelectionState.selectedRecords} />}
+                dispatch={useServiceSelectionState.dispatch}
+                state={useServiceSelectionState as any}
+              />
+            </div>
+          )}
           <div
             className={cn(
               'grid min-h-[calc(100vh-300px)] transition-all max-md:mb-[100px] max-md:grid-cols-1',
@@ -613,7 +626,8 @@ const Service = ({
                     servicesButtons: servicesButtons,
                     isMobile: false,
                     initialTabIndex: prevOrder.current,
-                    completed
+                    completed,
+                    useServiceSelectionState
                   }}
                 />
               </div>
@@ -662,7 +676,7 @@ const Service = ({
                       )}
                     </div>
                   </CustomCollapsible>
-                  {(!user?.user?.brandPolicy?.workOrderConsumableHide && !workOrderPolicyData?.policy?.hideStepsProductsConsumables) && (
+                  {!user?.user?.brandPolicy?.workOrderConsumableHide && !workOrderPolicyData?.policy?.hideStepsProductsConsumables && (
                     <CustomCollapsible
                       head={<h6 className="text-base font-semibold">Products/Consumables</h6>}
                       headProps={{ className: 'sticky top-0 z-[1]' }}
@@ -703,7 +717,7 @@ const Service = ({
                       </div>
                     </CustomCollapsible>
                   )}
-                  {!workOrderPolicyData?.policy?.hideStepsDrawings &&
+                  {!workOrderPolicyData?.policy?.hideStepsDrawings && (
                     <CustomCollapsible
                       head={<h6 className="text-base font-semibold">Drawings</h6>}
                       headProps={{ className: 'sticky top-0 z-[1]' }}
@@ -726,7 +740,7 @@ const Service = ({
                         />
                       </div>
                     </CustomCollapsible>
-                  }
+                  )}
                 </ul>
               </div>
             )}
@@ -756,7 +770,8 @@ const Service = ({
                   servicesButtons: servicesButtons,
                   isMobile: true,
                   initialTabIndex: prevOrder.current,
-                  completed
+                  completed,
+                  useServiceSelectionState
                 }}
               />
             </div>
@@ -806,7 +821,13 @@ const Service = ({
                 group="Add/Assign"
                 disabled={!isAllowedToServiceEdit}
                 onClick={() => {
-                  setServiceDialog({ open: true, type: 'service', uniqueId: selectedService.uniqueId, preWork: selectedService.preWork, parentId: null });
+                  setServiceDialog({
+                    open: true,
+                    type: 'service',
+                    uniqueId: selectedService.uniqueId,
+                    preWork: selectedService.preWork,
+                    parentId: null
+                  });
                   setAnchorEl(null);
                 }}
                 searchKey="Add Existing Services"
@@ -844,8 +865,8 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    isAllowedToServiceEdit &&
-                    selectedService?.clickable
+                  isAllowedToServiceEdit &&
+                  selectedService?.clickable
                     ? false
                     : true
                 }
@@ -865,9 +886,9 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   allowedToEdit &&
-                    quotationData?.status != QUOTATION_STATUS.sentToCustomer &&
-                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                    !completed
+                  quotationData?.status != QUOTATION_STATUS.sentToCustomer &&
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                  !completed
                     ? false
                     : true
                 }
@@ -887,8 +908,8 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                    !completed &&
-                    quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                  !completed &&
+                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
@@ -907,7 +928,7 @@ const Service = ({
                 id={'AssignWorkStations'}
                 disabled={
                   ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                    quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
@@ -947,8 +968,8 @@ const Service = ({
               id={'completeService'}
               disabled={
                 isAllowedToServiceEdit &&
-                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  selectedService?.clickable
+                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                selectedService?.clickable
                   ? false
                   : true
               }
@@ -966,8 +987,8 @@ const Service = ({
               id="skipService"
               disabled={
                 isAllowedToServiceEdit &&
-                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  selectedService?.clickable
+                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                selectedService?.clickable
                   ? false
                   : true
               }
@@ -1050,9 +1071,9 @@ const Service = ({
                 id={'delete'}
                 disabled={
                   allowedToEdit &&
-                    selectedService?.status === WORKORDER_SERVICE_STATUS.pending &&
-                    !completed &&
-                    quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                  selectedService?.status === WORKORDER_SERVICE_STATUS.pending &&
+                  !completed &&
+                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
@@ -1150,7 +1171,7 @@ const Service = ({
           }
           title={'Arrange'}
           handleClose={() => {
-            setArrangeView({ open: false, tabId: null })
+            setArrangeView({ open: false, tabId: null });
           }}
           handleSubmit={handleArrangeUpdate}
           loading={false}

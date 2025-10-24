@@ -1,6 +1,6 @@
-import { FormatQuote, Message, MoreHoriz, People } from '@mui/icons-material';
+import { CheckCircle, FormatQuote, Message, MoreHoriz, People, RadioButtonUnchecked } from '@mui/icons-material';
 import ApartmentIcon from '@mui/icons-material/Apartment';
-import { Chip, IconButton } from '@mui/material';
+import { Checkbox, Chip, IconButton } from '@mui/material';
 import { PostWorkIcon, PreWorkIcon } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn, getChipColor } from 'src/constants/helpers';
@@ -22,8 +22,10 @@ const RenderServicesList = ({
   setShowConfirmBox,
   getFieldsWithOtherDetails,
   isMobile,
-  completed
+  completed,
+  useServiceSelectionState
 }) => {
+  const { handleSelectService, isServiceSelected } = useServiceSelectionState;
   if (!serviceSteps || serviceSteps?.length === 0) {
     return (
       <div
@@ -55,8 +57,10 @@ const RenderServicesList = ({
               isColapsed ? 'p-1' : '',
               index === 0 && 'rounded-t-[5px]',
               index === serviceSteps.length - 1 && 'rounded-b-[5px]',
-              serviceSteps.length === 1 && 'rounded-[5px]'
+              serviceSteps.length === 1 && 'rounded-[5px]',
+              'group'
             )}
+            data-selected={isServiceSelected(data)}
             style={{
               ...style
             }}
@@ -74,15 +78,34 @@ const RenderServicesList = ({
                 arrow
                 title={isMobile ? data?.serviceName : ''}
               >
-                {data?.type === 'service' ? (
-                  <div
-                    className={`flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center rounded-full bg-[var(--dark-secondary,_var(--primary))] text-center text-[10px] text-white transition-all duration-300`}
+                <div className="relative">
+                  {data?.type === 'service' ? (
+                    <div
+                      className={`flex h-[20px] w-[20px] flex-shrink-0 items-center justify-center rounded-full bg-[var(--dark-secondary,_var(--primary))] text-center text-[10px] text-white transition-all duration-300`}
+                    >
+                      <span>{data?.order}</span>
+                    </div>
+                  ) : (
+                    data?.type === 'quotation' && <FormatQuote style={{ maxWidth: '20px', marginRight: '-10px' }} />
+                  )}
+                  <span
+                    className={cn(
+                      'absolute left-[-6px] top-[-6px] rounded-full bg-[var(--dark-primary,white)] opacity-[0] transition-opacity group-hover:opacity-100 group-data-[selected=true]:opacity-100'
+                      // isMobile ? 'opacity-100' : ''
+                    )}
                   >
-                    <span>{data?.order}</span>
-                  </div>
-                ) : (
-                  data?.type === 'quotation' && <FormatQuote style={{ maxWidth: '20px', marginRight: '-10px' }} />
-                )}
+                    <Checkbox
+                      sx={{ p: '4px' }}
+                      checkedIcon={<CheckCircle />}
+                      icon={<RadioButtonUnchecked />}
+                      checked={isServiceSelected(data)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        handleSelectService(data);
+                      }}
+                    />
+                  </span>
+                </div>
               </HtmlTooltip>
 
               <div className={`relative flex items-center gap-2 ${isColapsed ? 'hidden' : ''}`}>
