@@ -1484,7 +1484,7 @@ const BulkActionItems = ({
           }
           setWorkOrdersCompleteStepDialog({ open: true, workOrders: data })
         }}
-        disabled={!checkUniqWorkOrder() || getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.status === WORK_ORDER_STATUS.draft}
+        disabled={!checkUniqWorkOrder() || [WORK_ORDER_STATUS.draft, WORK_ORDER_STATUS.onHold, WORK_ORDER_STATUS.completed].includes(getFilterSelectedRecords(selectedRecords)[0]?.workOrder?.status) || !getFilterSelectedRecords(selectedRecords)?.filter(e => e?.type === MATERIAL_TYPE.service)?.every(e => [WORKORDER_SERVICE_STATUS.inProgress, WORKORDER_SERVICE_STATUS.pending].includes(e?.status))}
       >
         Complete Services
       </BulkActionContainer.Button>

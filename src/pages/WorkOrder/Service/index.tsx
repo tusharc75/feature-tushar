@@ -597,6 +597,7 @@ const Service = ({
                 bulkActionItems={
                   <ServicesBulkActionItems
                     selectedServices={useServiceSelectionState.selectedRecords}
+                    workOrderData={workOrderData}
                     onClickCompleteServices={(services) => {
                       setWorkOrdersCompleteServicesDialog({ open: true, workOrders: [{ workOrder: workOrderData?._id, services: services }] })
                     }}
