@@ -381,6 +381,7 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
       });
   };
 
+  console.log("selectedService", selectedService);
   return (
     <>
       <div className={'flex min-h-[32px] w-full flex-wrap items-center gap-2 py-2'}>
@@ -439,7 +440,7 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
           }}
           warehouse={rentalManagementData?.warehouse?.optionValue}
           currentCompetencyType={selectedService?.competencyType}
-          currentCompetencies={selectedService?.competencies}
+          currentCompetencies={selectedService?.optionValue !== 'All' ? selectedService?.competencies : rentalManagementData?.customerAccount?.competencies || []}
           location={{ "latitude": rentalManagementData?.shippingAddress?.latitude, "longitude": rentalManagementData?.shippingAddress?.longitude }}
         />
       )}
