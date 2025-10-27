@@ -21,6 +21,7 @@ import {
   displayDate,
   dateFormatToSend,
   PACKAGE_TYPE,
+  RENTAL_INTERNAL_ASSET_STATUS,
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -31,7 +32,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { camelCase, groupBy, isEqual, startCase, sum } from 'lodash';
+import { camelCase, groupBy, isEqual, orderBy, startCase, sum } from 'lodash';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
@@ -284,30 +285,32 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     const currency = rentalManagementData?.currency?.toLowerCase();
     const start = dayjs.tz(new Date(element.actualStartDate)).startOf("day");
     const end = dayjs(new Date(endDate));;
-    const filteredLogs = logs?.filter(item => {
+    let filteredLogs = logs?.filter(item => {
       const itemStart = dayjs(item?.startDate);
       const itemEnd = dayjs(item?.endDate);
       return item?.uniqueId === element?.uniqueId && item?.inventory === element?.inventory && itemStart.isSameOrAfter(start) && itemEnd.isSameOrBefore(end);
     });
     if (filteredLogs?.length) {
-      const groupedByStatus = groupBy(filteredLogs, 'status');
-      for (const [key, value] of Object.entries(groupedByStatus)) {
+      filteredLogs = orderBy(filteredLogs, [(item) => new Date(item.endDate)], ['asc'])
+      filteredLogs?.forEach((ele, index) => {
         const values: any = {}
         let calValues: any = {}
-        if (value?.length > 0) {
-          if (key !== ASSET_STATUS.inUse) {
-            values[`price_${currency}`] = element[`${camelCase(key)}Price_${currency}`]
-          }
-          values.actualJobDuration = sum(value?.map(item => {
-            const start = dayjs(item.startDate).startOf('day');
-            const end = dayjs(item.endDate).endOf('day');
-            const diffInDays = end.diff(start, 'day');
-            return diffInDays + 1;
-          }))
-          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, materialFields);
-          rows.push({ ...element, ...calValues })
+        if (ele?.status !== ASSET_STATUS.inUse) {
+          values[`price_${currency}`] = element[`${camelCase(ele?.status)}Price_${currency}`] || 0
+          values[`costPrice_${currency}`] = element[`${camelCase(ele?.status)}CostPrice_${currency}`] || 0
         }
-      }
+        let endDate = ele.endDate;
+        if (index === filteredLogs?.length - 1 && ele?.status === RENTAL_INTERNAL_ASSET_STATUS.inUse) {
+          endDate = element.estimateEndDate;
+        }
+        values.actualStartDate = ele.startDate;
+        values.actualEndDate = endDate;
+        const start = dayjs(ele.startDate).startOf('day');
+        const end = dayjs(endDate).endOf('day');
+        values.actualJobDuration = end.diff(start, 'day') + 1
+        calValues = autoCalculateSpecificFields(values, { ...element, ...values }, materialFields);
+        rows.push({ ...element, ...calValues })
+      })
     }
     else {
       rows.push({ ...element })
