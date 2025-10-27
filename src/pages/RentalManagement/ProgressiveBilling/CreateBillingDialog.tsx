@@ -302,7 +302,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         }
         let endDate = ele.endDate;
         if (index === filteredLogs?.length - 1) {
-          endDate = element.actualEndDate;
+          endDate = new Date(element.actualEndDate);
         }
         values.actualStartDate = ele.startDate;
         values.actualEndDate = endDate;
