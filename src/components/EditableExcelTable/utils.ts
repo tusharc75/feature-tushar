@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
+import { SelectedRange } from 'src/components/EditableExcelTable/CustomEvents';
 import { StoreState } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
 import FieldList from 'src/components/FormBuilder/FieldList';
 import { dateFormat, dateTimeFormat, DEFAULT_TIME_ZONE, displayDate, displayDateTime, formatAmountWithCurrency } from 'src/constants/helpers';
@@ -255,22 +256,29 @@ export function handlePaste({
   columnsMap,
   event,
   pastedData,
-  setStore
+  setStore,
+  selectedRange,
+  tableBody
 }: {
   event: ClipboardEvent;
   pastedData: string[][];
   columnsMap: Map<string, TColType>;
   setStore: SetFastContextStore<StoreState>;
+  selectedRange: SelectedRange | null;
+  tableBody: HTMLElement | null;
 }) {
-  const targetCell = (event.target as HTMLElement)?.closest('[data-row][data-col]') as HTMLElement | null;
+  if (!selectedRange) return;
+  if (!tableBody) return;
+
+  const targetRow = tableBody.querySelector(`tr[data-row="${selectedRange.startCell.row}"]`);
+
   if (pastedData.length === 0) return;
-  if (!targetCell) return;
   event.preventDefault();
   event.stopPropagation();
 
-  const sortedCells = [...targetCell.parentElement.querySelectorAll('td')]?.map((c) => c.getAttribute('data-key')).filter((d, i) => !!d && i !== 0);
-  const rowIndex = Number(targetCell.getAttribute('data-row'));
-  const colIndex = Number(targetCell.getAttribute('data-col'));
+  const sortedCells = [...targetRow.querySelectorAll('td')]?.map((c) => c.getAttribute('data-key')).filter((d, i) => !!d && i !== 0);
+  const rowIndex = Number(selectedRange.startCell.row);
+  const colIndex = Number(selectedRange.startCell.col);
 
   setStore((prev) => {
     const newData = [...prev.tableData];

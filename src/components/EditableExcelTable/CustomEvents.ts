@@ -1,3 +1,5 @@
+import { CellPosition } from 'src/components/EditableExcelTable/types';
+
 export const CELL_EDIT_EVENT = 'cellEdit';
 export type CellEditEvent = {
   accessor: string;
@@ -28,4 +30,19 @@ export function dispatchMoveCellEvent(element: HTMLElement, details: TMoveCellEv
     cancelable: true
   });
   element.dispatchEvent(moveCellEvent);
+}
+
+export type SelectedRange = {
+  startCell: CellPosition;
+  endCell: CellPosition;
+  selectedRange: CellPosition[];
+};
+export const SELECTED_RANGE = 'selectedRange';
+export function dispatchSelectionEvent(element: HTMLElement, details: SelectedRange | null) {
+  const selectedRangeEvent = new CustomEvent(SELECTED_RANGE, {
+    detail: details,
+    bubbles: true,
+    cancelable: true
+  });
+  element.dispatchEvent(selectedRangeEvent);
 }
