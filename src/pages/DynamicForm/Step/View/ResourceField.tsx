@@ -280,19 +280,31 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
               Add
             </ThemeButton>
           }
+          rightSideContents={
+            <AiImport
+              referenceData={{
+                [step?.linkResourceField]: linkResourceFieldType === 'multiSelect' && !isArray(data?._id) ? [data?._id] : data?._id,
+                linkResourceName: step?.linkResourceName
+              }}
+              onSuccess={() => fetchData()}
+              isDynamicForm={true}
+            />
+          }
         />
       )}
       <Box mt={1}>
-        <Box className="mb-3 flex justify-end">
-          <AiImport
-            referenceData={{
-              [step?.linkResourceField]: linkResourceFieldType === 'multiSelect' && !isArray(data?._id) ? [data?._id] : data?._id,
-              linkResourceName: step?.linkResourceName
-            }}
-            onSuccess={() => fetchData()}
-            isDynamicForm={true}
-          />
-        </Box>
+        {step?.excelLikeEntry && (
+          <Box className="mb-3 flex justify-end">
+            <AiImport
+              referenceData={{
+                [step?.linkResourceField]: linkResourceFieldType === 'multiSelect' && !isArray(data?._id) ? [data?._id] : data?._id,
+                linkResourceName: step?.linkResourceName
+              }}
+              onSuccess={() => fetchData()}
+              isDynamicForm={true}
+            />
+          </Box>
+        )}
         {columns ? (
           <>
             {step?.excelLikeEntry ? (
@@ -348,7 +360,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
             setShowDeleteConfirmBox(false);
           }}
           okBtnLoading={isSubmitting}
-          onOk={handleDelete}
+          onOk={() => handleDelete()}
         />
       )}
     </>
