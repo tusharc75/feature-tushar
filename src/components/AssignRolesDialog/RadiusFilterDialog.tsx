@@ -7,7 +7,6 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { ThemeButton } from '../Helpers/Buttons';
 
-
 const RadiusFilterDialog = ({ onClose, location, onApply, currentFilter, onMinimizeMaximize, fullScreen }) => {
   const [selectedRadius, setSelectedRadius] = useState(currentFilter?.radius || 50);
   const [themeColor] = useAppTheme();
@@ -17,7 +16,7 @@ const RadiusFilterDialog = ({ onClose, location, onApply, currentFilter, onMinim
     { value: 25, label: '25 Miles' },
     { value: 50, label: '50 Miles' },
     { value: 75, label: '75 Miles' },
-    { value: 100, label: '100 Miles' }
+    { value: 100, label: '100 Miles' },
   ];
 
   const mapDarkTheme: GoogleMapProps['options']['styles'] = [
@@ -135,10 +134,10 @@ const RadiusFilterDialog = ({ onClose, location, onApply, currentFilter, onMinim
       fullScreen={fullScreen}
       aria-labelledby="radius-filter-dialog"
     >
-      <CustomDialogHeader title="Location Radius Filter" showManimizeMaximize={true} onClose={onClose} onMinimizeMaximize={onMinimizeMaximize} />
+      <CustomDialogHeader showRequiredLabel={false} title="Radius Filter" showManimizeMaximize={true} onClose={onClose} onMinimizeMaximize={onMinimizeMaximize} />
       <CustomDialogContent>
         <Box display="flex" flexDirection="column" gap={2}>
-          <Box height={fullScreen ? 'calc(100vh - 250px)' : 400} width={'100%'} borderRadius={4} overflow="hidden">
+          <Box height={fullScreen ? 'calc(100vh - 250px)' : 400} width={'100%'} overflow="hidden">
             <GoogleMap
               key={`${themeColor}-${selectedRadius}`}
               options={{
@@ -168,7 +167,6 @@ const RadiusFilterDialog = ({ onClose, location, onApply, currentFilter, onMinim
               />
             </GoogleMap>
           </Box>
-
           <Box px={2}>
             <Slider
               onChange={(event, newValue) => setSelectedRadius(newValue as number)}
@@ -184,13 +182,13 @@ const RadiusFilterDialog = ({ onClose, location, onApply, currentFilter, onMinim
       </CustomDialogContent>
       <CustomDialogFooter>
         <ThemeButton onClick={handleClear} buttonType="transparent">
-          Clear Filter
+          Clear
         </ThemeButton>
         <ThemeButton onClick={onClose} buttonType="transparent">
           Cancel
         </ThemeButton>
         <ThemeButton onClick={handleApply} buttonType="theme">
-          Apply Filter
+          Apply
         </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
