@@ -381,7 +381,6 @@ const Technicians = ({ serviceOption, allowedToEdit, rentalManagementData, stepF
       });
   };
 
-  console.log("selectedService", selectedService);
   return (
     <>
       <div className={'flex min-h-[32px] w-full flex-wrap items-center gap-2 py-2'}>
