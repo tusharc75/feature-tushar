@@ -284,10 +284,10 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
             <AiImport
               referenceData={{
                 [step?.linkResourceField]: linkResourceFieldType === 'multiSelect' && !isArray(data?._id) ? [data?._id] : data?._id,
-                linkResourceName: step?.linkResourceName
+                isResourceData: 'true'
               }}
               onSuccess={() => fetchData()}
-              isDynamicForm={true}
+              resource={step?.linkResourceName}
             />
           }
         />
@@ -298,10 +298,10 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
             <AiImport
               referenceData={{
                 [step?.linkResourceField]: linkResourceFieldType === 'multiSelect' && !isArray(data?._id) ? [data?._id] : data?._id,
-                linkResourceName: step?.linkResourceName
+                isResourceData: 'true'
               }}
               onSuccess={() => fetchData()}
-              isDynamicForm={true}
+              resource={step?.linkResourceName}
             />
           </Box>
         )}
