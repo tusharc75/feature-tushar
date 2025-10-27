@@ -110,7 +110,6 @@ export async function copyRangeToClipboard(data: string[][]) {
   const tsv = data.map((row) => row.join('\t')).join('\n');
   try {
     await navigator.clipboard.writeText(tsv);
-    console.log('Copied to clipboard!');
   } catch (err) {
     console.error('Failed to copy: ', err);
   }
