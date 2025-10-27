@@ -211,9 +211,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
 
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
-      let conditionType = [QUOTATION_TYPE.salesOrder, QUOTATION_TYPE.repairOrder].includes(quotationData.type)
-        ? PRICING_SETUP_TYPE.price
-        : PRICING_SETUP_TYPE.rent;
+      const conditionType = [QUOTATION_TYPE.rentalJob, QUOTATION_TYPE.fieldJob, QUOTATION_TYPE.assemblyOrder]?.includes(quotationData.type)
+        ? PRICING_SETUP_TYPE.rent : PRICING_SETUP_TYPE.price;
       let priceData: any = await getPricingConditions(sidebarResource.quotation,
         quotationData,
         [

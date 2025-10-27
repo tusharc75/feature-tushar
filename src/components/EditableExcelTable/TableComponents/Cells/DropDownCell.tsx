@@ -81,8 +81,7 @@ const DropDownCell = ({ cellIndex, column, data, exitEditMode, isEditing, rowInd
         id={`${column.id}-${rowIndex}-selector`}
         getOptionLabel={(option: Option) => option.optionLabel || ''}
         inputProps={{
-          onFocus: () => setHasFocus(true),
-          onBlur: () => setValueToState(value)
+          onFocus: () => setHasFocus(true)
         }}
       />
     </>

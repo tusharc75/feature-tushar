@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useEditableTableStore } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
-import { dispatchMoveCellEvent, TMoveCellEvent } from 'src/components/EditableExcelTable/TableComponents/CustomEvents';
+import { dispatchMoveCellEvent, dispatchSelectionEvent, TMoveCellEvent } from 'src/components/EditableExcelTable/CustomEvents';
 
 const directionMap: Record<string, TMoveCellEvent['direction']> = {
   ArrowRight: 'right',
@@ -70,12 +70,35 @@ const useSelectedCell = ({
     const cellPos = getNextSelectedCell({ direction: moveEventData.direction, prev: moveEventData.prev, totalColumns, totalRows });
     if (cellPos.colIndex === colIndex && cellPos.rowIndex === rowIndex) {
       setIsSelected(true);
+      cellRef.current?.focus();
     }
   }, [moveEventData, colIndex, rowIndex, totalColumns, totalRows]);
 
+  const handleClick = useCallback(() => {
+    dispatchSelectionEvent(document.body, {
+      startCell: { row: rowIndex, col: colIndex },
+      endCell: { row: rowIndex, col: colIndex },
+      selectedRange: [{ row: rowIndex, col: colIndex }]
+    });
+    setIsSelected(true);
+  }, [colIndex, rowIndex]);
+
+  const exitEditMode = useCallback(() => {
+    setIsSelected(false);
+    setIsEditing(false);
+  }, []);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key === 'Escape') {
+      exitEditMode();
+    }
+    if (!e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey && e.key.length === 1) {
+      setIsEditing(true);
+    }
     const direction = directionMap[e.key];
     if (!direction || !cellRef.current) return;
+    e.preventDefault();
+    e.stopPropagation();
     const payload: TMoveCellEvent = {
       prev: {
         colIndex,
@@ -92,6 +115,8 @@ const useSelectedCell = ({
     setIsEditing,
     setIsSelected,
     handleKeyDown,
+    exitEditMode,
+    handleClick,
     cellRef
   };
 };

@@ -80,8 +80,7 @@ const MultiSelectCell = ({ cellIndex, column, data, exitEditMode, isEditing, row
         getOptionKey={(d) => d.optionValue}
         isOptionEqualToValue={(option1, option2) => (option1._id ? option1._id === option2._id : option1.optionValue === option2.optionValue)}
         inputProps={{
-          onFocus: () => setHasFocus(true),
-          onBlur: () => setValueToState(value)
+          onFocus: () => setHasFocus(true)
         }}
       />
     </>
