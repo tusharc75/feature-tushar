@@ -22,6 +22,7 @@ import {
   dateFormatToSend,
   PACKAGE_TYPE,
   RENTAL_INTERNAL_ASSET_STATUS,
+  ASSET_SUB_STATUS,
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -295,13 +296,13 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       filteredLogs?.forEach((ele, index) => {
         const values: any = {}
         let calValues: any = {}
-        if (ele?.status !== ASSET_STATUS.inUse) {
+        if (![ASSET_SUB_STATUS.inUse, ASSET_SUB_STATUS.operational]?.includes(ele?.status)) {
           values[`price_${currency}`] = element[`${camelCase(ele?.status)}Price_${currency}`] || 0
           values[`costPrice_${currency}`] = element[`${camelCase(ele?.status)}CostPrice_${currency}`] || 0
         }
         let endDate = ele.endDate;
-        if (index === filteredLogs?.length - 1 && ele?.status === RENTAL_INTERNAL_ASSET_STATUS.inUse) {
-          endDate = element.estimateEndDate;
+        if (index === filteredLogs?.length - 1) {
+          endDate = element.actualEndDate;
         }
         values.actualStartDate = ele.startDate;
         values.actualEndDate = endDate;
@@ -768,7 +769,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, materialFields);
         }
         element.isAppliedBill = true;
-        if (rentalResourceData?.policy?.subStatusDateWiseCapture && assetLogs?.find((e) => e?.uniqueId === element?.uniqueId && e?.inventory === element?.inventory)) {
+        if (rentalResourceData?.policy?.subStatusDateWiseCapture
+          && assetLogs?.find((e) => e?.uniqueId === element?.uniqueId && e?.inventory === element?.inventory) && element?.pricingMethod === 'Per Day') {
           getMaterialLogs({ ...element, ...calValues }, assetLogs, rows)
         } else {
           rows.push({ ...element, ...calValues });
