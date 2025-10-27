@@ -18,6 +18,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { Link } from 'react-router-dom';
 import EditableExcelTable from 'src/components/EditableExcelTable';
+import AiImport from 'src/components/AiImport';
 
 const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, referenceData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -88,50 +89,50 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
         ...(step?.readOnly
           ? []
           : [
-            {
-              accessor: 'action',
-              Header: 'Actions',
-              minWidth: 100,
-              width: 110,
-              sticky: 'right',
-              disableFilters: true,
-              disableSortBy: true,
-              canDrag: false,
-              Cell: ({ row }) => (
-                <>
-                  <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
-                    <span>
-                      <IconButton
-                        size="small"
-                        aria-label="Edit"
-                        disabled={allowedToEdit ? false : true}
-                        onClick={() => {
-                          setOpen({ open: true, id: row?.original?._id });
-                        }}
-                      >
-                        <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                  <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
-                    <span>
-                      <IconButton
-                        size="small"
-                        aria-label="Delete"
-                        disabled={allowedToDelete ? false : true}
-                        onClick={() => {
-                          setDeleteRecord(row?.original);
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                </>
-              )
-            }
-          ])
+              {
+                accessor: 'action',
+                Header: 'Actions',
+                minWidth: 100,
+                width: 110,
+                sticky: 'right',
+                disableFilters: true,
+                disableSortBy: true,
+                canDrag: false,
+                Cell: ({ row }) => (
+                  <>
+                    <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="Edit"
+                          disabled={allowedToEdit ? false : true}
+                          onClick={() => {
+                            setOpen({ open: true, id: row?.original?._id });
+                          }}
+                        >
+                          <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
+                    <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="Delete"
+                          disabled={allowedToDelete ? false : true}
+                          onClick={() => {
+                            setDeleteRecord(row?.original);
+                            setShowDeleteConfirmBox(true);
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
+                  </>
+                )
+              }
+            ])
       ]);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -246,23 +247,18 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
     }));
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-    .post(`/dynamic-form/bulk`, rows, {
-      headers: {
-        Resource: step?.linkResourceName
-      }
-    })
-    .then(({ data: { data, message } }) => {
-      fetchData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: message
+      .post(`/dynamic-form/bulk`, rows, {
+        headers: {
+          Resource: step?.linkResourceName
+        }
+      })
+      .then(({ data: { data, message } }) => {
+        fetchData();
+      })
+      .catch((error) => {
+        fetchData();
+        toastConfig.setToastConfig(error);
       });
-    })
-    .catch((error) => {
-      fetchData();
-      toastConfig.setToastConfig(error);
-    });
   };
 
   return (
@@ -287,15 +283,27 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
         />
       )}
       <Box mt={1}>
+        <Box className="mb-3 flex justify-end">
+          <AiImport
+            referenceData={{
+              [step?.linkResourceField]: linkResourceFieldType === 'multiSelect' && !isArray(data?._id) ? [data?._id] : data?._id,
+              linkResourceName: step?.linkResourceName
+            }}
+            onSuccess={() => fetchData()}
+            isDynamicForm={true}
+          />
+        </Box>
         {columns ? (
           <>
-            {step?.excelLikeEntry ?
+            {step?.excelLikeEntry ? (
               <EditableExcelTable
                 columns={columns}
                 data={state.dataRows}
                 onChange={(rows) => handleExcelChange(rows)}
                 onDelete={(row) => handleDelete(row)}
-              /> : <CustomReactTable
+              />
+            ) : (
+              <CustomReactTable
                 height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
                 columns={columns}
                 state={state}
@@ -305,7 +313,8 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
                 resource={step?.linkResourceName}
                 hideSelection={step?.readOnly}
                 hideAction={step?.readOnly}
-              />}
+              />
+            )}
           </>
         ) : (
           <Box p={2} height={500}>
