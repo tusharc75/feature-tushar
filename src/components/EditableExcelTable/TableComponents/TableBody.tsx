@@ -35,7 +35,7 @@ const TableRow = React.memo(
   ({ data, columns, rowIndex, onMouseDown, rowLineRef, containerRef, totalRows, totalColumns, onDelete }: TableRowProps) => {
     const [pasteKey] = useEditableTableStore((prev) => prev.pasteKey);
     return (
-      <tr className="group">
+      <tr className="group" data-row={rowIndex}>
         <IndexCell onDelete={onDelete} rowIndex={rowIndex} rowLineRef={rowLineRef} containerRef={containerRef} />
         {columns.map((c, i) => (
           <TableCell

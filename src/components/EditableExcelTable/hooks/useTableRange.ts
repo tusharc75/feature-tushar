@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
+import { dispatchSelectionEvent } from 'src/components/EditableExcelTable/CustomEvents';
 import { CellPosition } from 'src/components/EditableExcelTable/types';
 import { copyRangeToClipboard, getCellFormattedValue, getRange } from 'src/components/EditableExcelTable/utils';
 
@@ -87,6 +88,12 @@ export const useTableRange = ({
     // document.body.style.overflow = '';
     if (startCellRef.current && endCellRef.current) {
       const { cells, map, twoDimentionalArray } = getRange(startCellRef.current, endCellRef.current);
+
+      dispatchSelectionEvent(tableBodyRef.current, {
+        endCell: endCellRef.current,
+        startCell: startCellRef.current,
+        selectedRange: cells
+      });
       setSelectedRange(cells);
       setSelectedRangeMap(map);
       selectedrange2dArray.current = twoDimentionalArray;
@@ -94,7 +101,7 @@ export const useTableRange = ({
 
     startCellRef.current = null;
     endCellRef.current = null;
-  }, [onMouseOver]);
+  }, [onMouseOver, tableBodyRef]);
 
   const onMouseDown = useCallback(
     (e: React.MouseEvent<HTMLTableDataCellElement, MouseEvent>) => {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
-import { MOVE_SELECTED_CELL, TMoveCellEvent } from 'src/components/EditableExcelTable/TableComponents/CustomEvents';
+import { MOVE_SELECTED_CELL, SELECTED_RANGE, SelectedRange, TMoveCellEvent } from 'src/components/EditableExcelTable/CustomEvents';
 import { handlePaste, pasteListener } from 'src/components/EditableExcelTable/utils';
 import { useEffectEvent } from 'src/hooks/useEffectEvent';
 import createFastContext from 'src/StateProvider/createFastContext';
@@ -39,6 +39,7 @@ const stableEmptyArray = [];
 const useEditableExcelTable = (data: any[], columns: TColType[], onChange: (data: any[]) => void) => {
   const [stableColumns, setStableColumns] = useState(() => columns.filter((d) => !EXCLUDED_COLUMNS.includes(d.id ?? d.accessor)));
   const sendUpdateTimeout = useRef<NodeJS.Timeout>(null);
+  const selectedRange = useRef<SelectedRange | null>(null);
 
   useEffect(() => {
     const handleListen = (e: CustomEvent<TMoveCellEvent>) => {
@@ -47,6 +48,18 @@ const useEditableExcelTable = (data: any[], columns: TColType[], onChange: (data
     window.addEventListener(MOVE_SELECTED_CELL, handleListen);
     return () => {
       window.removeEventListener(MOVE_SELECTED_CELL, handleListen);
+    };
+  }, []);
+
+  // listen for range change
+  useEffect(() => {
+    const handleRangeChange = (e: CustomEvent<SelectedRange>) => {
+      selectedRange.current = e.detail;
+    };
+
+    window.addEventListener(SELECTED_RANGE, handleRangeChange);
+    return () => {
+      window.removeEventListener(SELECTED_RANGE, handleRangeChange);
     };
   }, []);
 
@@ -87,7 +100,10 @@ const useEditableExcelTable = (data: any[], columns: TColType[], onChange: (data
 
     const pasteWrapper = (e: ClipboardEvent) => {
       // The cell where paste happened
-      pasteListener(e, (event, pastedData) => handlePaste({ event, columnsMap, setStore, pastedData }));
+
+      pasteListener(e, (event, pastedData) => {
+        handlePaste({ event, columnsMap, setStore, pastedData, selectedRange: selectedRange.current, tableBody: tableBodyRef.current });
+      });
     };
 
     tbody.addEventListener('paste', pasteWrapper);
