@@ -7,7 +7,6 @@ export type EditableExcelTableProps = {
   data: any[];
   onChange: (data: any[]) => void;
   onDelete: (row: any) => void;
-  onAiImport?: (formData: FormData) => Promise<void> | void;
 };
 
 export type TableHeadProps = {

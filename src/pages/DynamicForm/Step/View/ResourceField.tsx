@@ -18,6 +18,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { Link } from 'react-router-dom';
 import EditableExcelTable from 'src/components/EditableExcelTable';
+import AiImport from 'src/components/AiImport';
 
 const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, referenceData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -253,35 +254,11 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
       })
       .then(({ data: { data, message } }) => {
         fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: message
-        });
       })
       .catch((error) => {
         fetchData();
         toastConfig.setToastConfig(error);
       });
-  };
-
-  const handleAiImport = async (formData: FormData) => {
-    try {
-      formData.append(step?.linkResourceField, linkResourceFieldType === 'multiSelect' && !isArray(data?._id) ? [data?._id] : data?._id);
-      const res = await axiosInstance().post(`/dynamic-form/ai-import`, formData, {
-        headers: {
-          Resource: step?.linkResourceName
-        }
-      });
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: 'AI Import successful'
-      });
-      fetchData();
-    } catch (err) {
-      toastConfig.setToastConfig(err);
-    }
   };
 
   return (
@@ -306,6 +283,16 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
         />
       )}
       <Box mt={1}>
+        <Box className="mb-3 flex justify-end">
+          <AiImport
+            referenceData={{
+              [step?.linkResourceField]: linkResourceFieldType === 'multiSelect' && !isArray(data?._id) ? [data?._id] : data?._id,
+              linkResourceName: step?.linkResourceName
+            }}
+            onSuccess={() => fetchData()}
+            isDynamicForm={true}
+          />
+        </Box>
         {columns ? (
           <>
             {step?.excelLikeEntry ? (
@@ -314,7 +301,6 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
                 data={state.dataRows}
                 onChange={(rows) => handleExcelChange(rows)}
                 onDelete={(row) => handleDelete(row)}
-                onAiImport={handleAiImport}
               />
             ) : (
               <CustomReactTable
