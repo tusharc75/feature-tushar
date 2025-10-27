@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
+import AiButton from 'src/components/Helpers/Buttons/AiButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const AiImport = ({ referenceData, onSuccess, isDynamicForm = false }) => {
@@ -51,9 +51,10 @@ const AiImport = ({ referenceData, onSuccess, isDynamicForm = false }) => {
           e.target.value = '';
         }}
       />
-      <ThemeButton buttonType="theme" onClick={() => document.getElementById('ai-import-input')?.click()}>
+      <AiButton
+        onClick={() => document.getElementById('ai-import-input')?.click()}>
         AI Import
-      </ThemeButton>
+      </AiButton>
     </>
   );
 };
