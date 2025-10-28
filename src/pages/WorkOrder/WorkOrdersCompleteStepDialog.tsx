@@ -1,6 +1,6 @@
 import { Box, Dialog, Grid2 } from "@mui/material";
 import { Formik } from "formik";
-import { orderBy } from "lodash";
+import { orderBy, uniqueId } from "lodash";
 import { useContext, useEffect, useState } from "react";
 import axiosInstance from "src/axios/axiosInstance";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
@@ -23,6 +23,7 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
   const [initialValues, setInitialValues] = useState({ value: [] })
   const [services, setServices] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [servicesWithWorkOrder, setServicesWithWorkOrder] = useState(null)
 
   useEffect(() => {
     fetchWorkOrderData()
@@ -30,46 +31,47 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
 
   const fetchWorkOrderData = () => {
     setServices(null)
-    axiosInstance().get(`${workOrder.api}/service/pending-services?workOrderIds=${workOrders?.map(e => e?.workOrder)}`)
-      .then(({ data: { data } }) => {
-        if (data && data?.length > 0) {
+    axiosInstance().get(`${workOrder.api}/service/pending-services?workOrderIds=${workOrders?.map(w => w?.workOrder)}`)
+      .then(({ data: { data: { workOrders: workOrdersData, services: commonServices, products, stepData } } }) => {
+        if (commonServices && commonServices?.length > 0) {
+          setServicesWithWorkOrder(workOrdersData)
+          const workOrderServices = workOrders?.find(w => w?.workOrder === workOrdersData[0]?._id)?.services;
+          const filteredServices = commonServices?.filter(e => workOrderServices?.some(s => s?.service === e?._id && s?.uniqueId === e?.uniqueId))
+          const preServices = orderBy(filteredServices?.filter(e => !e?.parentId && e?.preWork), ['order'], ['asc']);
+          const productServices = orderBy(filteredServices?.filter(e => e?.parentId), ['order'], ['asc']);
+          const postServices = orderBy(filteredServices?.filter(e => !e?.parentId && !e?.preWork), ['order'], ['asc']);
+          const services = [...preServices, ...productServices, ...postServices]
+          setServices(services)
           const stepsData: any = []
-          data?.forEach(_data => {
-            const selectedWorkOrder = workOrders?.find(e => e?.workOrder === _data?._id)
-            if (_data?.services?.length > 0) {
-              const filteredServices = _data?.services?.filter(e => selectedWorkOrder?.services?.some(s => s?.service === e?._id && s?.uniqueId === e?.uniqueId))
-              const preServices = orderBy(filteredServices?.filter(e => !e?.parentId && e?.preWork), ['order'], ['asc']);
-              const productServices = orderBy(filteredServices?.filter(e => e?.parentId), ['order'], ['asc']);
-              const postServices = orderBy(filteredServices?.filter(e => !e?.parentId && !e?.preWork), ['order'], ['asc']);
-              const services = [...preServices, ...productServices, ...postServices]
-              setServices(services)
-              const stepData: any = []
-              services?.forEach(ele => {
-                if (ele?.steps && ele?.steps?.length > 0) {
-                  ele?.steps?.forEach(step => {
-                    let tempInitialData: any = {};
-                    const _stepData = data?.stepData?.find(e => e?.stepId === step?._id && e?.serviceId === ele?._id && e?.uniqueId === ele?.uniqueId)
-                    if (_stepData) {
-                      tempInitialData = getObjKeysWithValues(_stepData, step?.fields && step?.fields?.length > 0 ? step?.fields : [])
-                    } else {
-                      tempInitialData = {
-                        ...getObjKeys('', step?.fields && step?.fields?.length > 0 ? step?.fields : []),
-                        ...getValueOfMatchedFieldName(step?.fields, {}, {}, _data?.products)
-                      };
-                    }
-                    stepData.push({
-                      serviceId: ele?._id,
-                      uniqueId: ele?.uniqueId,
-                      stepId: step?._id,
-                      ...tempInitialData
-                    })
-                  });
+          services?.forEach(ele => {
+            if (ele?.steps && ele?.steps?.length > 0) {
+              ele?.steps?.forEach(step => {
+                let tempInitialData: any = {};
+                const _stepData = stepData?.find(e => e?.stepId === step?._id && e?.serviceId === ele?._id)
+                if (_stepData) {
+                  tempInitialData = getObjKeysWithValues(_stepData, step?.fields && step?.fields?.length > 0 ? step?.fields : [])
+                } else {
+                  tempInitialData = {
+                    ...getObjKeys('', step?.fields && step?.fields?.length > 0 ? step?.fields : []),
+                    ...getValueOfMatchedFieldName(step?.fields, {}, {}, products)
+                  };
                 }
+                const uniqueIds: any = [ele?.uniqueId]
+                const [_, ...rest] = workOrdersData;
+                rest?.map(r => {
+                  r?.services?.map(s => {
+                    if (s?._id === ele?._id) {
+                      uniqueIds.push(s?.uniqueId)
+                    }
+                  })
+                })
+                stepsData.push({
+                  serviceId: ele?._id,
+                  stepId: step?._id,
+                  uniqueIds,
+                  ...tempInitialData
+                })
               });
-              stepsData.push({
-                workOrder: _data?._id,
-                stepData: stepData
-              })
             }
           });
           setInitialValues({ value: stepsData })
@@ -80,13 +82,27 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
   }
 
   const getFields = (stepData) => {
-    const service = services?.find(s => s?._id === stepData?.serviceId && s?.uniqueId === stepData?.uniqueId)
+    const service = services?.find(s => s?._id === stepData?.serviceId && stepData?.uniqueIds?.includes(s?.uniqueId))
     const fields = service?.steps?.find(s => s?._id === stepData?.stepId)?.fields
     return fields && fields?.length > 0 ? fields : []
   }
 
   const handleSave = (values) => {
     setIsSubmitting(true)
+    const data: any = []
+    servicesWithWorkOrder?.forEach(ele => {
+      const obj: any = { workOrder: ele?._id, stepData: [] }
+      ele?.services?.forEach(e => {
+        e?.steps.forEach(step => {
+          const stepData = values?.value?.find(v => v?.serviceId === e?._id && v?.uniqueIds?.includes(e?.uniqueId) && v?.stepId === step?._id)
+          if (stepData) {
+            const { uniqueIds, ...rest } = stepData
+            obj.stepData.push({ ...rest, uniqueId: e?.uniqueId })
+          }
+        });
+      });
+      data.push(obj)
+    });
     axiosInstance().put(`${workOrder.api}/complete-multiple-services`, values?.value)
       .then(({ data }) => {
         toastConfig.setToastConfig({
@@ -103,21 +119,19 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
   }
 
   const validate = (values) => {
-    const errors: any = { value: [{ stepData: [] }] }
-    values?.value?.forEach(ele => {
-      ele?.stepData?.forEach((stepData, i) => {
-        const fields = getFields(stepData)
-        if (fields?.length > 0) {
-          fields?.forEach(field => {
-            if (field?.required && !stepData[field?.fieldName]) {
-              if (!errors?.value[0]?.stepData[i]) {
-                errors.value[0].stepData[i] = {}
-              }
-              errors.value[0].stepData[i][`${field?.fieldName}`] = `${field?.fieldLabel} is required`
+    const errors: any = { value: [] }
+    values?.value?.forEach((ele, i) => {
+      const fields = getFields(ele)
+      if (fields?.length > 0) {
+        fields?.forEach(field => {
+          if (field?.required && !ele[field?.fieldName]) {
+            if (!errors?.value[i]) {
+              errors.value[i] = {}
             }
-          });
-        }
-      });
+            errors.value[i][`${field?.fieldName}`] = `${field?.fieldLabel} is required`
+          }
+        });
+      }
     });
     return errors
   }
@@ -161,9 +175,8 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                           headProps={{ className: 'sticky top-0 z-[1]' }}
                         >
                           <div className={`w-full space-y-2 overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] p-2`}>
-                            {service?.steps && service?.steps?.length > 0 && service?.steps?.map((step, stepIndex) => {
-                              const index1 = values?.value?.findIndex(e => e?.workOrder === workOrders[0]?.workOrder)
-                              const index2 = values?.value[index1]?.stepData?.findIndex(e => e?.serviceId === service?._id && e?.uniqueId === service?.uniqueId && e?.stepId === step?._id)
+                            {service?.steps && service?.steps?.length > 0 && service?.steps?.map((step) => {
+                              const index = values?.value?.findIndex(v => v?.serviceId === service?._id && v?.stepId === step?._id && v?.uniqueIds?.includes(service?.uniqueId))
                               return (
                                 <CustomCollapsible
                                   element="li"
@@ -173,7 +186,7 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                                   headProps={{ className: 'sticky top-0 z-[1] p-2' }}
                                 >
                                   <div>
-                                    {step?.fields && step?.fields?.length > 0 && values?.value[index1]?.stepData?.[index2] ? (
+                                    {step?.fields && step?.fields?.length > 0 && values?.value[index] ? (
                                       <div className="p-2 mt-2">
                                         <Grid2 spacing={2} container>
                                           {step?.fields?.map((field, i) => (
@@ -182,15 +195,15 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                                                 {...field}
                                                 fieldData={field}
                                                 disabled={field?.disableOnEdit}
-                                                values={values?.value[index1]?.stepData?.[index2]}
-                                                errors={errors?.value?.[index1]?.stepData?.[index2] ? errors?.value?.[index1]?.stepData?.[index2] : {}}
-                                                touched={touched?.value?.[index1]?.stepData?.[index2] ? touched?.value?.[index1]?.stepData?.[index2] : {}}
+                                                values={values?.value[index]}
+                                                errors={errors?.value?.[index] ? errors?.value?.[index] : {}}
+                                                touched={touched?.value?.[index] ? touched?.value?.[index] : {}}
                                                 label={field.fieldLabel}
                                                 name={field.fieldName}
                                                 type={field.type}
                                                 options={field.option}
                                                 setFieldValue={(name, value) => {
-                                                  setFieldValue(`value[${index1}].stepData[${index2}].${name}`, value)
+                                                  setFieldValue(`value[${index}].${name}`, value)
                                                 }}
                                                 required={field.required}
                                                 fullWidth
@@ -234,7 +247,7 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                 isLoading={isSubmitting}
                 buttonType="theme"
                 onClick={() => {
-                  if (validate(values)?.value[0]?.stepData?.length <= 0) {
+                  if (validate(values)?.value?.length <= 0) {
                     handleSave(values)
                   } else {
                     submitForm()
