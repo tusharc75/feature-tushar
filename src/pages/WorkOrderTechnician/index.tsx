@@ -43,7 +43,6 @@ import GridView, { GridViewRef } from './GridView';
 import { handlePdfPreview } from 'src/pages/WorkOrderSupervisor/helper';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
-import InfoIcon from '@mui/icons-material/Info';
 
 type Columns = typeof WORKORDER_TECHNICIAN_SERVICE_STATUS;
 
@@ -270,13 +269,22 @@ const WorkOrderTechnician = () => {
           defaultVisible: true,
           Cell: ({ row }) => (
             row.original['parentProductName'] ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center">
                 <p title={row?.original?.parentProductName}>{row?.original?.parentProductName}</p>
-                {row?.original?.parentProductDescription &&
-                  <HtmlTooltip title={row?.original?.parentProductDescription}>
-                    <InfoIcon fontSize="small" color={'primary'} />
-                  </HtmlTooltip>
-                }
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+          )
+        },
+        {
+          accessor: 'parentProductDescription',
+          Header: `Parent ${resources?.product?.titleSingular} Description`,
+          defaultVisible: true,
+          Cell: ({ row }) => (
+            row.original['parentProductDescription'] ? (
+              <div className="flex items-center gap-2">
+                <p title={row?.original?.parentProductDescription}>{row?.original?.parentProductDescription}</p>
               </div>
             ) : (
               <NoDataCell />
@@ -305,7 +313,7 @@ const WorkOrderTechnician = () => {
         },
 
       ];
-      const finalColumns = [...extraColumns.slice(0, 3), ...columns, ...extraColumns.slice(3), ActionsRenderer].map((c) => {
+      const finalColumns = [...extraColumns.slice(0, 4), ...columns, ...extraColumns.slice(4), ActionsRenderer].map((c) => {
         const id = c.id || c.accessor;
         if (defaultVisibleRows.includes(id)) {
           return { ...c, defaultVisible: true };
