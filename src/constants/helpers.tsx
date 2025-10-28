@@ -3001,7 +3001,8 @@ export const WORK_ORDER_TYPE = {
   assemblyOrder: 'Assembly Order',
   preInspectionOrder: 'Pre Inspection Order',
   postInspectionOrder: 'Post Inspection Order',
-  disassemblyOrder: 'Disassembly Order'
+  disassemblyOrder: 'Disassembly Order',
+  job: 'Job'
 };
 
 export const WORK_ORDER_TYPE_LABEL = {

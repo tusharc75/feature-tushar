@@ -193,7 +193,7 @@ const RenderService = ({
                     checked={isGroupSelected(allServices)}
                     indeterminate={isGroupIndeterminate(allServices)}
                     onChange={(e) => {
-                      handleSelectMultiple(e.target.checked, allServices);
+                      handleSelectMultiple(e.target.checked, allServices?.filter((e) => e?.type !== 'quotation'));
                     }}
                     checkedIcon={<CheckCircle />}
                     indeterminateIcon={<CheckCircleOutline />}
