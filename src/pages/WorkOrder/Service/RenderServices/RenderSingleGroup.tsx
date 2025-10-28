@@ -79,10 +79,10 @@ const RenderSingleGroup = ({
               />
               <div className="flex flex-grow items-center justify-between">
                 <div className="flex flex-col">
-                  <h6 className="text-sm font-medium text-gray-700 leading-[18px]">
+                  <h6 className="text-sx text-gray-400">
                     {group.productName}
                   </h6>
-                  <h6 className="text-base font-semibold text-gray-900 leading-[20px] mt-0.5">
+                  <h6 className="text-sm font-medium text-gray-600 mt-0.5">
                     {group.productDescription}
                   </h6>
                 </div>
