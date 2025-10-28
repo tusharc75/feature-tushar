@@ -79,7 +79,9 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
                 <Link
                   className="link text-truncate"
                   title={row?.original?.[primaryField?.fieldData?.fieldName]}
-                  to={`${detailPagePath}/${row?.original?._id}`}
+                  onClick={() => {
+                    window.open(`${detailPagePath}/${row?.original?._id}`)
+                  }}
                 >
                   {row?.original?.[primaryField?.fieldData?.fieldName]}
                 </Link>
@@ -321,7 +323,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
         {columns ? (
           counterField ? (
             <div className="grid grid-cols-1 gap-2 md:grid-cols-[400px_1fr]">
-              <div className="container-with-border p-[20px] ">
+              <div className="container-with-border p-[10px]">
                 <CustomReactTable
                   showOnlyMobileView={true}
                   height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
@@ -341,8 +343,12 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
                   onRowClick={onRowClick}
                 />
               </div>
-              <div className="container-with-border py-5">
-                {selectedRow && <ShowCounterField fields={counterField?.fieldData?.subFields} resource={step?.linkResourceName} selectedRow={selectedRow} />}
+              <div className="container-with-border">
+                {selectedRow &&
+                  <ShowCounterField
+                    fields={counterField?.fieldData?.subFields}
+                    resource={step?.linkResourceName}
+                    selectedRow={selectedRow} />}
               </div>
             </div>
           ) : (
