@@ -4,7 +4,7 @@ import AIUploadLoader from 'src/components/AiImport/AIUploadLoader';
 import AiButton from 'src/components/Helpers/Buttons/AiButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const AiImport = ({ referenceData, onSuccess, isDynamicForm = false }) => {
+const AiImport = ({ referenceData, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
 
@@ -13,12 +13,10 @@ const AiImport = ({ referenceData, onSuccess, isDynamicForm = false }) => {
       setLoading(true);
       let api = `/dynamic-form/ai-import`;
       let headers = {};
-      if (isDynamicForm) {
+      if (resource) {
         headers = {
-          Resource: referenceData?.linkResourceName
+          Resource: resource
         };
-        formData.append('isDynamicForm', 'true');
-        delete referenceData?.linkResourceName;
       }
       Object?.keys(referenceData)?.forEach((key) => {
         formData.append(key, referenceData[key]);

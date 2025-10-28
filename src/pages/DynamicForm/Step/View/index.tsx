@@ -30,6 +30,7 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { useData } from 'src/StateProvider/Provider';
 import { Add } from '@mui/icons-material';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import AiImport from 'src/components/AiImport';
 
 const View = ({
   step,
@@ -399,6 +400,15 @@ const View = ({
   const rightSideContents = () => {
     return (
       <>
+        <AiImport
+          referenceData={{
+            isStepData: 'true',
+            stepId: step?._id,
+            resourceId: resourceId
+          }}
+          onSuccess={() => fetchData()}
+          resource={resource}
+        />
         <ImportExportMenu
           permissions={{ isCreate: true, isRead: true }}
           module={resource}
@@ -417,13 +427,7 @@ const View = ({
   return (
     <>
       {step?.linkWithResource ? (
-        <ResourceField
-          step={step}
-          renderedFrom={renderedFrom}
-          data={data}
-          stepFullScreen={stepFullScreen}
-          referenceData={referenceData}
-        />
+        <ResourceField step={step} renderedFrom={renderedFrom} data={data} stepFullScreen={stepFullScreen} referenceData={referenceData} />
       ) : (
         <>
           {step?.fields?.length || step?.linkWithMaterial ? (
@@ -466,12 +470,7 @@ const View = ({
                       onSaveEdit={onSaveInlineEdit}
                       refreshGrid={fetchData}
                       expander={true}
-                      bulkActionItems={
-                        <BulkActionItems
-                          selectedRecords={selectedRecords}
-                          setShowDeleteConfirmBox={setShowDeleteConfirmBox}
-                        />
-                      }
+                      bulkActionItems={<BulkActionItems selectedRecords={selectedRecords} setShowDeleteConfirmBox={setShowDeleteConfirmBox} />}
                     />
                   ) : (
                     <Box p={2} height={500}>
@@ -582,17 +581,10 @@ const View = ({
 
 export default View;
 
-const BulkActionItems = ({
-  selectedRecords,
-  setShowDeleteConfirmBox
-}) => {
+const BulkActionItems = ({ selectedRecords, setShowDeleteConfirmBox }) => {
   return (
     <BulkActionContainer>
-      <BulkActionContainer.Button
-        disabled={selectedRecords.length ? false : true}
-        onClick={() => setShowDeleteConfirmBox(true)}
-        buttonType="red"
-      >
+      <BulkActionContainer.Button disabled={selectedRecords.length ? false : true} onClick={() => setShowDeleteConfirmBox(true)} buttonType="red">
         Delete
       </BulkActionContainer.Button>
     </BulkActionContainer>
