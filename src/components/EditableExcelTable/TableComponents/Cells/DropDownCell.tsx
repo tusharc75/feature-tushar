@@ -15,23 +15,23 @@ const DropDownCell = ({ cellIndex, column, data, exitEditMode, isEditing, rowInd
 
   useEffect(() => {
     if (!hasFocus) return;
-    if (column.lookup) {
-      const lookupResource = column.lookupResource === 'Quote' ? 'quoteBuilder' : column.lookupResource;
-      axiosInstance()
-        .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
-        .then(({ data: { data } }) => {
-          setOptions(data[lookupResource] || []);
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error(error);
-          setOptions([]);
-          setLoading(false);
-        });
-    } else {
-      setOptions(column?.option || []);
-      setLoading(false);
-    }
+    // if (column.lookup) {
+    //   const lookupResource = column.lookupResource === 'Quote' ? 'quoteBuilder' : column.lookupResource;
+    //   axiosInstance()
+    //     .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
+    //     .then(({ data: { data } }) => {
+    //       setOptions(data[lookupResource] || []);
+    //       setLoading(false);
+    //     })
+    //     .catch((error) => {
+    //       console.error(error);
+    //       setOptions([]);
+    //       setLoading(false);
+    //     });
+    // } else {
+    setOptions(column?.option || []);
+    setLoading(false);
+    //}
   }, [column, hasFocus]);
 
   const handleCleanDirtyRows = (dirtyRows) => {
