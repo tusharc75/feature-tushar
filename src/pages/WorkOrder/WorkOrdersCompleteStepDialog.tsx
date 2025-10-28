@@ -103,7 +103,7 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
       });
       data.push(obj)
     });
-    axiosInstance().put(`${workOrder.api}/complete-multiple-services`, values?.value)
+    axiosInstance().put(`${workOrder.api}/complete-multiple-services`, data)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
