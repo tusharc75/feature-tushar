@@ -323,6 +323,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'autoCreateWorkOrderOnQuotationApproval',
+        fieldLabel: 'Auto Create Work Order on Quotation Approval',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'loadingReceivingDefaultView',
         fieldLabel: 'Loading Receiving Default View',
         type: 'dropDown',
