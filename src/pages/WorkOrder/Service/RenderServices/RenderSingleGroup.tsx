@@ -61,7 +61,7 @@ const RenderSingleGroup = ({
           }}
         >
           {isColapsed ? (
-            <HtmlTooltip title={group.product}>
+            <HtmlTooltip title={group.productName}>
               <Info />
             </HtmlTooltip>
           ) : (
@@ -78,7 +78,14 @@ const RenderSingleGroup = ({
                 sx={{ p: '4px' }}
               />
               <div className="flex flex-grow items-center justify-between">
-                <h6 className={'text-base font-medium leading-[24px]'}>{group.product}</h6>
+                <div className="flex flex-col">
+                  <h6 className="text-sm font-medium text-gray-700 leading-[18px]">
+                    {group.productName}
+                  </h6>
+                  <h6 className="text-base font-semibold text-gray-900 leading-[20px] mt-0.5">
+                    {group.productDescription}
+                  </h6>
+                </div>
                 <RenderServiceCountBadge serviceSteps={group.serviceSteps} />
               </div>
               {group?.serviceSteps?.length === 1 && (
