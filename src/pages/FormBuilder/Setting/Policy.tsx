@@ -430,7 +430,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
     <>
       {(statusOptions?.length > 0 || fieldColorFieldNameOptions?.length > 0) && fieldOptions?.length && initialData && !optionLoading ? (
         <div className="flex flex-col gap-2 border border-[var(--common-border-color)] mt-2 mb-2">
-          <div className="p-2 bg-gray-100 flex items-center justify-between">
+          <div className="p-2 bg-[var(--dark-secondary)] flex items-center justify-between">
             <Typography variant="subtitle2">{Data.fieldLabel}</Typography>
             <HtmlTooltip title={'Add'}>
               <IconButton
