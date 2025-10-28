@@ -92,13 +92,13 @@ const RenderSingleGroup = ({
                 <>
                   {data?.type === 'service' && data?.serviceStatus && (
                     <RenderStatusIcon
-                      className={`${isMobile ? 'h-[20px] max-w-[20px]' : 'h-[24px] max-w-[24px]'} mt-[3px] flex-shrink-0`}
+                      className={`${isMobile ? 'h-[20px] max-w-[20px]' : 'h-[24px] w-[24px]'} mt-[3px] flex-shrink-0`}
                       stepStatus={data?.serviceStatus}
                     />
                   )}
                   {data?.type === 'quotation' && quotationData && (
                     <RenderStatusIcon
-                      className={`${isMobile ? 'h-[20px] max-w-[20px]' : 'h-[24px] max-w-[24px]'} mt-[3px] flex-shrink-0`}
+                      className={`${isMobile ? 'h-[20px] max-w-[20px]' : 'h-[24px] w-[24px]'} mt-[3px] flex-shrink-0`}
                       stepStatus={quotationData?.status}
                     />
                   )}
