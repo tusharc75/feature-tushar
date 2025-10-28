@@ -47,13 +47,21 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
             if (ele?.steps && ele?.steps?.length > 0) {
               ele?.steps?.forEach(step => {
                 let tempInitialData: any = {};
-                const _stepData = stepData?.find(e => e?.stepId === step?._id && e?.serviceId === ele?._id)
-                if (_stepData) {
+                const _stepData = stepData?.find(e => e?.stepId === step?._id && e?.serviceId === ele?._id && e?.uniqueId === ele?.uniqueId)
+                let isDataAlreadyAdded = false;
+                const fieldNames = step?.fields?.map((e) => e.fieldName);
+                for (var key in _stepData) {
+                  if (fieldNames?.includes(key)) {
+                    isDataAlreadyAdded = true;
+                  }
+                }
+                if (isDataAlreadyAdded) {
                   tempInitialData = getObjKeysWithValues(_stepData, step?.fields && step?.fields?.length > 0 ? step?.fields : [])
                 } else {
+                  const productData = products?.find((p) => p?._id === ele?.parentId)?.productDetail || null;
                   tempInitialData = {
                     ...getObjKeys('', step?.fields && step?.fields?.length > 0 ? step?.fields : []),
-                    ...getValueOfMatchedFieldName(step?.fields, {}, {}, products)
+                    ...getValueOfMatchedFieldName(step?.fields, productData, {}, products)
                   };
                 }
                 const uniqueIds: any = [ele?.uniqueId]
@@ -218,7 +226,7 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                                         </Grid2>
                                       </div>
                                     ) : (
-                                      <div className="text-center">
+                                      <div className="text-center p-2">
                                         No Fields
                                       </div>
                                     )}
@@ -232,7 +240,7 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                     })}
                   </div>
                 ) : (
-                  <Box p={2} height={500}>
+                  <Box height={500}>
                     <CommonSkeleton lenArray={[...Array(10).keys()]} />
                   </Box>
                 )}
