@@ -61,6 +61,40 @@ const ShowCounterField = ({ fields, resource, selectedRow }) => {
       });
   };
 
+  const handleUpdate = (row) => {
+    dispatch({ type: 'loading', loading: true });
+    axiosInstance()
+      .put(`/dynamic-form/counter/${selectedRow?._id}`, row, {
+        headers: {
+          Resource: resource
+        }
+      })
+      .then(({ data }) => {
+        fetchData();
+      })
+      .catch((error) => {
+        fetchData();
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleDelete = (row) => {
+    dispatch({ type: 'loading', loading: true });
+    axiosInstance()
+      .put(`/dynamic-form/counter/${selectedRow?._id}/remove`, { ids: [row?._id] }, {
+        headers: {
+          Resource: resource
+        }
+      })
+      .then(({ data }) => {
+        fetchData();
+      })
+      .catch((error) => {
+        fetchData();
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <>
       {columns ? (
@@ -68,8 +102,8 @@ const ShowCounterField = ({ fields, resource, selectedRow }) => {
           <EditableExcelTable
             columns={columns}
             data={state.dataRows}
-            onChange={(rows) => { }}
-            onDelete={(row) => { }}
+            onChange={(rows) => handleUpdate(rows[0])}
+            onDelete={(row) => handleDelete(row)}
           />
         </div>
       ) : (
