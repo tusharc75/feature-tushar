@@ -44,9 +44,7 @@ const ListView = ({ topRightSlot }) => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isEdit: false, idToEdit: null });
   const [selectedStatus, setSelectedStatus] = useState(localStorage.getItem('contentPostPlanningStatus') || "All");
-  const [statusOptions, setStatusOptions] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null, data: null });
-  const [allowedToEdit, setAllowedToEdit] = useState(false);
 
   const types = [
     {
@@ -72,12 +70,6 @@ const ListView = ({ topRightSlot }) => {
       staticFields.forEach((field) => {
         if (field.id !== 'lastActivityBy') {
           newColumns.push(checkStaticField(pageTitle, field));
-        }
-      });
-      fieldsDataForRead?.some((o) => {
-        if (o?.fieldData?.fieldName === 'status') {
-          setStatusOptions([...o.fieldData.option?.filter((e) => e.optionValue)]);
-          return true;
         }
       });
       setColumns([...newColumns, ActionsRenderer]);
@@ -221,7 +213,6 @@ const ListView = ({ topRightSlot }) => {
           finalObject['canEdit'] = checkIsAllowedToEdit(user, sidebarResource.contentPostPlanning, u)
           return finalObject;
         });
-        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.contentPostPlanning, rows[0]));
         dispatch({ type: 'initialize', data: rows, count: count });
         dispatch({ type: 'loading', loading: false });
       }
@@ -331,7 +322,7 @@ const ListView = ({ topRightSlot }) => {
                   {`Approve `}
                 </MenuItem>
               )}
-              {selectedRecords[0]?.status === CONTENT_POST_PLANNING_STATUS.scheduled && allowedToEdit && (
+              {selectedRecords[0]?.status === CONTENT_POST_PLANNING_STATUS.scheduled && (
                 <MenuItem
                   onClick={() => {
                     handleChangeStatus(CONTENT_POST_PLANNING_STATUS.published);
