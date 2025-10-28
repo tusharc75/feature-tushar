@@ -5,7 +5,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useEditableTableStore } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
 import { createEmptyRowData } from 'src/components/EditableExcelTable/utils';
 import RippleButton from 'src/components/RippleButton';
-import { addItemAtIndex, cn, removeItemAtIndex, addItemAtExactIndex } from 'src/constants/helpers';
+import { addItemAtExactIndex, addItemAtIndex, cn } from 'src/constants/helpers';
 
 const LINE_HEIGHT = 2;
 
@@ -129,7 +129,7 @@ const IndexCell = React.memo(
               <ListItemIcon>
                 <Delete fontSize="small" color="error" />
               </ListItemIcon>
-              <ListItemText>Clear</ListItemText>
+              <ListItemText>Delete</ListItemText>
             </MenuItem>
           </MenuList>
         </Menu>
