@@ -133,18 +133,17 @@ const Service = ({
     const workOrderDetailResponce: any = await axiosInstance().get(`${workOrder.api}/${workOrderId}/detail`);
     const workOrderDetail = workOrderDetailResponce?.data?.data;
 
-    if (workOrderDetail.type === WORK_ORDER_TYPE.repairOrder && workOrderDetail?.repairOrder) {
-      if (workOrderDetail?.repairOrder?.addQuotationStep) {
+    if ((workOrderDetail.type === WORK_ORDER_TYPE.repairOrder && workOrderDetail?.repairOrder && workOrderDetail?.repairOrder?.addQuotationStep)
+      || workOrderDetail.type === WORK_ORDER_TYPE.job) {
+      if (workOrderDetail?.quotation?.version) {
         isQuotation = true;
-        if (workOrderDetail?.quotation?.version) {
-          quotation = {
-            _id: workOrderDetail?.quotation?._id,
-            versionId: workOrderDetail?.quotation?.version?._id,
-            quotationNumber: workOrderDetail?.quotation?.quotationNumber,
-            status: workOrderDetail?.quotation?.version?.status
-          };
-          setQuotationData(quotation);
-        }
+        quotation = {
+          _id: workOrderDetail?.quotation?._id,
+          versionId: workOrderDetail?.quotation?.version?._id,
+          quotationNumber: workOrderDetail?.quotation?.quotationNumber,
+          status: workOrderDetail?.quotation?.version?.status
+        };
+        setQuotationData(quotation);
       }
     }
 
@@ -876,8 +875,8 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  isAllowedToServiceEdit &&
-                  selectedService?.clickable
+                    isAllowedToServiceEdit &&
+                    selectedService?.clickable
                     ? false
                     : true
                 }
@@ -897,9 +896,9 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   allowedToEdit &&
-                  quotationData?.status != QUOTATION_STATUS.sentToCustomer &&
-                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                  !completed
+                    quotationData?.status != QUOTATION_STATUS.sentToCustomer &&
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                    !completed
                     ? false
                     : true
                 }
@@ -919,8 +918,8 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                  !completed &&
-                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                    !completed &&
+                    quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
@@ -939,7 +938,7 @@ const Service = ({
                 id={'AssignWorkStations'}
                 disabled={
                   ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                    quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
@@ -979,8 +978,8 @@ const Service = ({
               id={'completeService'}
               disabled={
                 isAllowedToServiceEdit &&
-                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                   ? false
                   : true
               }
@@ -998,8 +997,8 @@ const Service = ({
               id="skipService"
               disabled={
                 isAllowedToServiceEdit &&
-                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                   ? false
                   : true
               }
@@ -1082,9 +1081,9 @@ const Service = ({
                 id={'delete'}
                 disabled={
                   allowedToEdit &&
-                  selectedService?.status === WORKORDER_SERVICE_STATUS.pending &&
-                  !completed &&
-                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                    selectedService?.status === WORKORDER_SERVICE_STATUS.pending &&
+                    !completed &&
+                    quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }

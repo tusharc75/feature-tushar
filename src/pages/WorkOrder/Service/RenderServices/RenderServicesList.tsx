@@ -94,16 +94,18 @@ const RenderServicesList = ({
                       // isMobile ? 'opacity-100' : ''
                     )}
                   >
-                    <Checkbox
-                      sx={{ p: '4px' }}
-                      checkedIcon={<CheckCircle />}
-                      icon={<RadioButtonUnchecked />}
-                      checked={isServiceSelected(data)}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        handleSelectService(data);
-                      }}
-                    />
+                    {data?.type !== 'quotation' &&
+                      <Checkbox
+                        sx={{ p: '4px' }}
+                        checkedIcon={<CheckCircle />}
+                        icon={<RadioButtonUnchecked />}
+                        checked={isServiceSelected(data)}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          handleSelectService(data);
+                        }}
+                      />
+                    }
                   </span>
                 </div>
               </HtmlTooltip>
