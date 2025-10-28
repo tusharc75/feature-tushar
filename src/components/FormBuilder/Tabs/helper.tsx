@@ -644,19 +644,33 @@ export const RESOURCE_ACTION_TYPE = {
 export const fieldColor = {
   fieldName: 'fieldColor',
   fieldLabel: 'Fields Color',
-  type: 'multipleFields',
+  type: 'fieldColorMultiple',
   fields: [
     {
-      fieldName: 'fieldName',
-      fieldLabel: 'Field Name',
-      type: 'dropDown',
-      required: true
-    },
-    {
-      fieldName: 'value',
-      fieldLabel: 'Value',
-      type: 'multiSelect',
-      required: true
+      fieldName: 'fields',
+      fieldLabel: 'Fields',
+      type: 'fieldColorConditions',
+      required: true,
+      fields: [
+        {
+          fieldName: 'fieldName',
+          fieldLabel: 'Field Name',
+          type: 'dropDown',
+          required: true
+        },
+        {
+          fieldName: 'operator',
+          fieldLabel: 'Operator',
+          type: 'dropDown',
+          required: true
+        },
+        {
+          fieldName: 'value',
+          fieldLabel: 'Value',
+          type: 'multiSelect',
+          required: true
+        }
+      ]
     },
     {
       fieldName: 'colorCode',

@@ -10,6 +10,29 @@ import { FieldArray } from 'formik';
 import { getLabel } from 'src/components/Helpers/FormTypes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
+const OPERATOR_OPTIONS = [
+  {
+    optionLabel: 'Less than',
+    optionValue: 'lessThan'
+  },
+  {
+    optionLabel: 'Less than or equals',
+    optionValue: 'lessThanOrEquals'
+  },
+  {
+    optionLabel: 'Equals To',
+    optionValue: 'equalsTo'
+  },
+  {
+    optionLabel: 'Greater than',
+    optionValue: 'greaterThan'
+  },
+  {
+    optionLabel: 'Greater than or equals',
+    optionValue: 'greaterThanOrEquals'
+  }
+];
+
 const Policy = ({ values, setFieldValue, errors, touched, resource, initialValues }) => {
   const [fields, setFields] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -138,6 +161,19 @@ export default Policy;
 const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource, setFieldValue, fields, loading }) => {
   if (type === 'checkBox') {
     return <CheckBoxField data={data} onChange={onChange} />;
+  } else if (type === 'fieldColorMultiple') {
+    return (
+      <FieldColorMultipleFormFields
+        idx={idx}
+        data={data}
+        onChange={onChange}
+        resource={resource}
+        errors={errors}
+        touched={touched}
+        setFieldValue={setFieldValue}
+        fields={fields}
+      />
+    );
   } else if (type === 'multipleFields') {
     return (
       <MultipleFormFields
@@ -525,9 +561,11 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                               ? getSubStatusOptions(initialData?.fieldsData)
                               : field?.fieldName === 'fieldName'
                                 ? fieldColorFieldNameOptions
-                                : field?.fieldName === 'value'
-                                  ? getValueOptions(value)
-                                  : fieldOptions
+                                : field?.fieldName === 'operator'
+                                  ? OPERATOR_OPTIONS
+                                  : field?.fieldName === 'value'
+                                    ? getValueOptions(value)
+                                    : fieldOptions
                       }
                       error={errors[`policies.${idx}.data.${index}.${field.fieldName}`]}
                       touched={touched?.policies && touched?.policies?.[idx]?.data[index]?.[field.fieldName]}
@@ -561,7 +599,11 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                             ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))[0]
                             : field?.fieldName === 'status' ?
                               getStatusOptions(initialData?.fieldsData)?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
-                              : fieldColorFieldNameOptions?.filter(ele => ele?.optionValue === value[`${field.fieldName}`])[0]
+                              : field?.fieldName === 'fieldName'
+                                ? fieldColorFieldNameOptions?.filter(ele => ele?.optionValue === value[`${field.fieldName}`])[0]
+                                : field?.fieldName === 'operator'
+                                  ? OPERATOR_OPTIONS?.filter(ele => ele?.optionValue === value[`${field.fieldName}`])[0]
+                                  : fieldOptions?.filter(ele => ele?.optionValue === value[`${field.fieldName}`])[0]
                       }
                       multiple={field?.type === 'multiSelect'}
                       fieldLabel={field?.fieldLabel}
@@ -595,5 +637,311 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
         </Box>
       )}
     </>
+  );
+};
+
+const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resource, setFieldValue, fields }) => {
+  const [fieldOptions, setFieldOptions] = useState([]);
+  const [statusOptions, setStatusOptions] = useState([]);
+  const [subStatusOptions, setSubStatusOptions] = useState([]);
+  const [initialData, setInitialData] = useState({ fieldsData: [...(Data?.data || [])], fields: Data?.fields });
+  const [optionLoading, setOptionLoading] = useState(false);
+  const [fieldColorFieldNameOptions, setFieldColorFieldNameOptions] = useState([]);
+
+  useEffect(() => {
+    fetchResourceFields();
+  }, []);
+
+  const fetchResourceFields = async () => {
+    setOptionLoading(true);
+    const updatedFields = [...Data.fields];
+    const lookupResources = updatedFields.reduce((acc, ele) => {
+      if (ele?.lookupResource) {
+        acc.push(ele.lookupResource);
+      }
+      return acc;
+    }, []);
+    const lookupString = lookupResources?.join(',');
+    if (lookupString) {
+      axiosInstance()
+        .get(`/sa-formbuilder/lookup?lookupResource=${lookupString}`)
+        .then(({ data: { data: options } }) => {
+          for (const ele of updatedFields) {
+            if (ele?.lookupResource) {
+              ele.option = options[ele.lookupResource];
+            }
+          }
+          setInitialData((prevState) => ({ ...prevState, fields: updatedFields }));
+          setOptionLoading(false);
+        })
+        .catch((err) => {
+          setOptionLoading(false);
+        });
+    } else {
+      setOptionLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let fieldsData = [...fields];
+    const statusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'status')?.fieldData?.option || [];
+    const subStatusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'subStatus')?.fieldData?.option || [];
+    setStatusOptions(statusOptions);
+    setSubStatusOptions(subStatusOptions);
+    fieldsData = fieldsData
+      ?.filter((ele) => !ele.fieldData?.primaryField)
+      ?.map((e) => {
+        return {
+          optionLabel: e?.fieldData?.fieldLabel,
+          optionValue: e?.fieldData?.fieldName,
+          order: e?.fieldData?.order
+        };
+      });
+    setFieldOptions(fieldsData);
+    if (Data?.fieldName === 'fieldColor') {
+      setFieldColorFieldNameOptions(fields?.filter(f =>
+        ['dropDown', 'decimal', 'number'].includes(f?.fieldData?.type) && !f?.fieldData?.lookup)?.map(e => ({ optionLabel: e?.fieldData?.fieldLabel, optionValue: e?.fieldData?.fieldName })))
+    }
+  }, [fields]);
+
+  const getStatusOptions = (data) => {
+    const statusTemp = [...statusOptions];
+    return statusTemp;
+  };
+
+  const getSubStatusOptions = (data) => {
+    const options = subStatusOptions?.filter((ele) => !data?.some((e) => e?.status === ele.optionValue));
+    return options ? options : subStatusOptions;
+  };
+
+  const getValueOptions = (value) => {
+    return fields?.find(f => f?.fieldData?.fieldName === value?.fieldName)?.fieldData?.option || []
+  }
+
+  return (
+    <>
+      {fieldColorFieldNameOptions?.length > 0 && fieldOptions?.length && !optionLoading ? (
+        <div className="flex flex-col gap-2 border border-[var(--common-border-color)] mt-2 mb-2">
+          <div className="p-2 bg-[var(--dark-secondary)] flex items-center justify-between">
+            <Typography variant="subtitle2">{Data.fieldLabel}</Typography>
+            <HtmlTooltip title={'Add'}>
+              <IconButton
+                size="small"
+                color="primary"
+                aria-label="add"
+                onClick={() => {
+                  const data = [...initialData?.fieldsData];
+                  const obj = {
+                    fields: [
+                      {
+                        fieldName: '',
+                        operator: '',
+                        value: []
+                      }
+                    ],
+                    colorCode: '#000000'
+                  };
+                  data.push(obj);
+                  setInitialData((prevState) => ({ ...prevState, fieldsData: [...data] }));
+                  onChange(null, data);
+                }}
+              >
+                <AddCircleOutline fontSize="small" />
+              </IconButton>
+            </HtmlTooltip>
+          </div>
+
+          {initialData?.fieldsData?.map((colorItem, colorIndex) => (
+            <div key={colorIndex} className="border-b last:border-b-0 p-2">
+              <fieldset className="rounded-md border border-dashed border-gray-200 p-3 dark:border-gray-800 mb-3">
+                <legend className="px-1 text-sm font-semibold flex items-center justify-between w-full">
+                  <span>Fields</span>
+                  <div className="flex gap-1">
+                    <HtmlTooltip title={'Remove Color Group'}>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          const updatedData = [...initialData.fieldsData];
+                          updatedData.splice(colorIndex, 1);
+                          setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
+                          onChange(null, updatedData);
+                        }}
+                      >
+                        <RemoveCircleOutline fontSize="small" color={'error'} />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </div>
+                </legend>
+
+                <div className="space-y-2">
+                  {(colorItem.fields || []).map((field, fieldIndex) => (
+                    <div key={fieldIndex} className="flex items-center justify-between gap-1 rounded-md">
+                      <div className="grid w-[94%] gap-2 sm:grid-cols-1 md:grid-cols-3">
+                        <DropDownField
+                          options={fieldColorFieldNameOptions}
+                          error={errors[`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.fieldName`]}
+                          touched={touched?.policies?.[idx]?.data?.[colorIndex]?.fields?.[fieldIndex]?.fieldName}
+                          onChange={(e, val) => {
+                            const updatedData = [...initialData.fieldsData];
+                            updatedData[colorIndex].fields[fieldIndex].fieldName = val?.optionValue || '';
+                            updatedData[colorIndex].fields[fieldIndex].value = []; // Reset value when field changes
+                            setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
+                            onChange(null, updatedData);
+                          }}
+                          value={fieldColorFieldNameOptions?.filter(ele => ele?.optionValue === field.fieldName)[0] || null}
+                          multiple={false}
+                          fieldLabel="Field Name"
+                          fieldName="fieldName"
+                          required={true}
+                        />
+
+                        <DropDownField
+                          options={OPERATOR_OPTIONS}
+                          error={errors[`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.operator`]}
+                          touched={touched?.policies?.[idx]?.data?.[colorIndex]?.fields?.[fieldIndex]?.operator}
+                          onChange={(e, val) => {
+                            const updatedData = [...initialData.fieldsData];
+                            updatedData[colorIndex].fields[fieldIndex].operator = val?.optionValue || '';
+                            setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
+                            onChange(null, updatedData);
+                          }}
+                          value={OPERATOR_OPTIONS?.filter(ele => ele?.optionValue === field.operator)[0] || null}
+                          multiple={false}
+                          fieldLabel="Operator"
+                          fieldName="operator"
+                          required={true}
+                        />
+
+                        {field.fieldName && (
+                          <DynamicFormField
+                            fieldName={field.fieldName}
+                            value={field.value}
+                            error={errors[`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.value`]}
+                            touched={touched?.policies?.[idx]?.data?.[colorIndex]?.fields?.[fieldIndex]?.value}
+                            formikField={`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.value`}
+                            field={fields?.find(f => f?.fieldData?.fieldName === field.fieldName)?.fieldData}
+                            setFieldValue={(fieldPath, value) => {
+                              const updatedData = [...initialData.fieldsData];
+                              updatedData[colorIndex].fields[fieldIndex].value = value;
+                              setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
+                              onChange(null, updatedData);
+                            }}
+                            label="Value"
+                          />
+                        )}
+                      </div>
+
+                      <div className="flex gap-1 items-center">
+                        <HtmlTooltip title="Remove Field">
+                          <IconButton
+                            size="small"
+                            disabled={colorItem.fields?.length === 1}
+                            onClick={() => {
+                              const updatedData = [...initialData.fieldsData];
+                              updatedData[colorIndex].fields.splice(fieldIndex, 1);
+                              setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
+                              onChange(null, updatedData);
+                            }}
+                          >
+                            <RemoveCircleOutline fontSize="small" color={colorItem.fields?.length === 1 ? 'disabled' : 'error'} />
+                          </IconButton>
+                        </HtmlTooltip>
+                        <HtmlTooltip title="Add Field">
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => {
+                              const updatedData = [...initialData.fieldsData];
+                              if (!updatedData[colorIndex].fields) {
+                                updatedData[colorIndex].fields = [];
+                              }
+                              updatedData[colorIndex].fields.splice(fieldIndex + 1, 0, {
+                                fieldName: '',
+                                operator: '',
+                                value: []
+                              });
+                              setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
+                              onChange(null, updatedData);
+                            }}
+                          >
+                            <AddCircleOutline fontSize="small" />
+                          </IconButton>
+                        </HtmlTooltip>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </fieldset>
+
+              <div className="flex items-center justify-between gap-1 rounded-md">
+                <div className="grid w-[94%] gap-2 sm:grid-cols-1 md:grid-cols-3">
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Typography variant="body2">Color Code</Typography>
+                    <input
+                      type="color"
+                      value={colorItem?.colorCode || '#000000'}
+                      onChange={(e) => {
+                        const updatedData = [...initialData.fieldsData];
+                        updatedData[colorIndex].colorCode = e.target.value;
+                        setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
+                        onChange(null, updatedData);
+                      }}
+                      style={{
+                        width: '40px',
+                        height: '32px',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    />
+                  </Box>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <Box className="h-fit" p={2}>
+          <CommonSkeleton lenArray={[...Array(5).keys()]} />
+        </Box>
+      )}
+    </>
+  );
+};
+
+const DynamicFormField = ({ fieldName, value, field, setFieldValue, formikField, error, touched, label }) => {
+  if (field.type === 'dropDown') {
+    return (
+      <DropDownField
+        options={field.option || []}
+        error={error}
+        touched={touched}
+        onChange={(e, val) => {
+          const newValue = Array.isArray(val) ? val?.map((ele) => ele.optionValue) : [val?.optionValue].filter(Boolean);
+          setFieldValue(formikField, newValue);
+        }}
+        value={(field.option || []).filter(ele => (value || []).includes(ele?.optionValue)) || []}
+        multiple={true}
+        fieldLabel={label}
+        fieldName="value"
+        required={true}
+      />
+    );
+  }
+
+  return (
+    <TextField
+      fullWidth
+      size="small"
+      label={label}
+      value={value || ''}
+      onChange={(e) => setFieldValue(formikField, e.target.value)}
+      error={touched && Boolean(error)}
+      helperText={touched && error}
+      variant="outlined"
+      required={true}
+      type={field.type === 'number' || field.type === 'decimal' ? 'number' : 'text'}
+      margin="dense"
+    />
   );
 };
