@@ -170,6 +170,7 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
         errors={errors}
         touched={touched}
         fields={fields}
+        setFieldValue={setFieldValue}
       />
     );
   } else if (type === 'multipleFields') {
@@ -368,7 +369,7 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, touc
           name={fieldName}
           label={fieldLabel}
           error={touched && Boolean(error)}
-          helperText={touched && error}
+          helperText={touched && error && typeof error === 'string' ? error : ''}
           variant="outlined"
           required={required}
           size="small"
@@ -638,7 +639,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
   );
 };
 
-const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touched, fields }) => {
+const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touched, fields, setFieldValue }) => {
   const [fieldOptions, setFieldOptions] = useState([]);
   const [initialData, setInitialData] = useState({ fieldsData: [...(Data?.data || [])], fields: Data?.fields });
   const [optionLoading, setOptionLoading] = useState(false);
@@ -757,16 +758,18 @@ const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touch
                       <div className="grid w-[94%] gap-2 sm:grid-cols-1 md:grid-cols-3">
                         <DropDownField
                           options={fieldColorFieldNameOptions}
-                          error={errors[`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.fieldName`]}
+                          error={errors?.policies?.[idx]?.data?.[colorIndex]?.fields?.[fieldIndex]?.fieldName}
                           touched={touched?.policies?.[idx]?.data?.[colorIndex]?.fields?.[fieldIndex]?.fieldName}
                           onChange={(e, val) => {
                             const updatedData = [...initialData.fieldsData];
                             updatedData[colorIndex].fields[fieldIndex].fieldName = val?.optionValue || '';
                             updatedData[colorIndex].fields[fieldIndex].value = [];
+                            setFieldValue(`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.fieldName`, val?.optionValue || '');
+                            setFieldValue(`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.value`, []);
                             setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
                             onChange(null, updatedData);
                           }}
-                          value={fieldColorFieldNameOptions?.filter(ele => ele?.optionValue === field.fieldName)[0]}
+                          value={fieldColorFieldNameOptions?.filter(ele => ele?.optionValue === field.fieldName)[0] || null}
                           multiple={false}
                           fieldLabel="Field Name"
                           fieldName="fieldName"
@@ -775,15 +778,16 @@ const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touch
 
                         <DropDownField
                           options={OPERATOR_OPTIONS}
-                          error={errors[`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.operator`]}
+                          error={errors?.policies?.[idx]?.data?.[colorIndex]?.fields?.[fieldIndex]?.operator}
                           touched={touched?.policies?.[idx]?.data?.[colorIndex]?.fields?.[fieldIndex]?.operator}
                           onChange={(e, val) => {
                             const updatedData = [...initialData.fieldsData];
                             updatedData[colorIndex].fields[fieldIndex].operator = val?.optionValue || '';
+                            setFieldValue(`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.operator`, val?.optionValue || '');
                             setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
                             onChange(null, updatedData);
                           }}
-                          value={OPERATOR_OPTIONS?.filter(ele => ele?.optionValue === field.operator)[0]}
+                          value={OPERATOR_OPTIONS?.filter(ele => ele?.optionValue === field.operator)[0] || null}
                           multiple={false}
                           fieldLabel="Operator"
                           fieldName="operator"
@@ -794,13 +798,14 @@ const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touch
                           <DynamicFormField
                             fieldName={field.fieldName}
                             value={field.value}
-                            error={errors[`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.value`]}
+                            error={errors?.policies?.[idx]?.data?.[colorIndex]?.fields?.[fieldIndex]?.value}
                             touched={touched?.policies?.[idx]?.data?.[colorIndex]?.fields?.[fieldIndex]?.value}
                             formikField={`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.value`}
                             field={fields?.find(f => f?.fieldData?.fieldName === field.fieldName)?.fieldData}
                             setFieldValue={(fieldPath, value) => {
                               const updatedData = [...initialData.fieldsData];
                               updatedData[colorIndex].fields[fieldIndex].value = value;
+                              setFieldValue(fieldPath, value);
                               setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
                               onChange(null, updatedData);
                             }}
@@ -915,7 +920,7 @@ const DynamicFormField = ({ fieldName, value, field, setFieldValue, formikField,
       value={value || ''}
       onChange={(e) => setFieldValue(formikField, e.target.value)}
       error={touched && Boolean(error)}
-      helperText={touched && error}
+      helperText={touched && error && typeof error === 'string' ? error : ''}
       variant="outlined"
       required={true}
       type={field.type === 'number' || field.type === 'decimal' ? 'number' : 'text'}

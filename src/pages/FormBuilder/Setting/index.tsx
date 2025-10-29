@@ -145,16 +145,34 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
     }
     values.policies?.forEach((value, index) => {
       if (Array.isArray(value?.data) && value?.data?.length > 0) {
-        const validationFields = value?.fields?.filter((e) => e.required);
-        value?.data?.forEach((ele, idx) => {
-          validationFields?.forEach((e) => {
-            if (!ele[e?.fieldName]) {
-              errors[`policies.${index}.data.${idx}.${e?.fieldName}`] = `${e?.fieldLabel} is required`;
-            } else if (e?.type === 'multiSelect' && (!ele[e?.fieldName] || !ele[e?.fieldName].length)) {
-              errors[`policies.${index}.data.${idx}.${e?.fieldName}`] = `${e?.fieldLabel} is required`;
+        if (value?.type === 'fieldColorMultiple') {
+          value?.data?.forEach((colorItem, colorIndex) => {
+            if (colorItem?.fields && Array.isArray(colorItem.fields)) {
+              colorItem.fields.forEach((field, fieldIndex) => {
+                if (!field.fieldName || field.fieldName === '') {
+                  errors[`policies.${index}.data.${colorIndex}.fields.${fieldIndex}.fieldName`] = 'Field Name is required';
+                }
+                if (!field.operator || field.operator === '') {
+                  errors[`policies.${index}.data.${colorIndex}.fields.${fieldIndex}.operator`] = 'Operator is required';
+                }
+                if (!field.value || (Array.isArray(field.value) && field.value.length === 0) || field.value === '') {
+                  errors[`policies.${index}.data.${colorIndex}.fields.${fieldIndex}.value`] = 'Value is required';
+                }
+              });
             }
           });
-        });
+        } else {
+          const validationFields = value?.fields?.filter((e) => e.required);
+          value?.data?.forEach((ele, idx) => {
+            validationFields?.forEach((e) => {
+              if (!ele[e?.fieldName]) {
+                errors[`policies.${index}.data.${idx}.${e?.fieldName}`] = `${e?.fieldLabel} is required`;
+              } else if (e?.type === 'multiSelect' && (!ele[e?.fieldName] || !ele[e?.fieldName].length)) {
+                errors[`policies.${index}.data.${idx}.${e?.fieldName}`] = `${e?.fieldLabel} is required`;
+              }
+            });
+          });
+        }
       }
     });
 
