@@ -20,7 +20,7 @@ type TableViewStatus =
   | typeof WORKORDER_SERVICE_STATUS.skipped
   | typeof WORKORDER_SERVICE_STATUS.inProgressByOther;
 
-const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, dispatch, filterQuery, permissions, tableHead = null, columns }, ref) => {
+const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, dispatch, filterQuery, permissions, tableHead = null, columns, resource = '' }, ref) => {
   const toastConfig = useContext(CustomToastContext);
   const [tableViewStatus, setTableViewStatus] = useState<TableViewStatus>('Pending');
 
@@ -70,14 +70,14 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
       fetchData(cancelToken);
     }
     return () => cancelToken.cancel();
-  }, [page, limit, sorting, tableViewStatus, filterQuery, filters]);
+  }, [page, limit, sorting, tableViewStatus, filterQuery, filters, resource]);
 
   useEffect(() => {
     dispatch({ type: 'selection', selectedRecords: [] });
   }, [tableViewStatus]);
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&status=${tableViewStatus}`;
+    let deepFilter = `?page=${page}&limit=${limit}&status=${tableViewStatus}&type=${resource}`;
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterQuery?.length) {
       filterQuery?.forEach((e) => {

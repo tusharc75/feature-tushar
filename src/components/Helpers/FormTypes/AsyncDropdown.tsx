@@ -15,10 +15,13 @@ interface Props {
   fieldName: string;
   required: boolean;
   onChange: (_: React.SyntheticEvent, value: any) => void;
-  disableCloseOnSelect?: boolean
+  disableCloseOnSelect?: boolean;
+  lookupDependentOn?: string;
+  resourceOfLookupDependentOn?: string;
+  lookupDependentOnValue?: string;
 }
 
-const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel, onChange, fieldName, required = false, disableCloseOnSelect = true }: Props) => {
+const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel, onChange, fieldName, required = false, disableCloseOnSelect = true, lookupDependentOn = '', resourceOfLookupDependentOn = '', lookupDependentOnValue = '' }: Props) => {
   const {
     state: { selectedEntity }
   } = useData();
@@ -39,6 +42,15 @@ const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel,
           setOptions([]);
         }
         let query = `sa-field/options?resource=${resource}&limit=25&page=${page}&entity=${selectedEntity}&search=${searchKey}`;
+        if (lookupDependentOn) {
+          query = `${query}&lookupDependentOn=${lookupDependentOn}`
+        }
+        if (resourceOfLookupDependentOn) {
+          query = `${query}&resourceOfLookupDependentOn=${resourceOfLookupDependentOn}`
+        }
+        if (lookupDependentOnValue) {
+          query = `${query}&lookupDependentOnValue=${lookupDependentOnValue}`
+        }
         const response = await axiosInstance().get(query);
         let data = response?.data?.data;
 
@@ -53,7 +65,7 @@ const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel,
         setToastConfig(error);
       }
     }, 1000),
-    [resource, selectedEntity]);
+    [resource, selectedEntity, lookupDependentOn, resourceOfLookupDependentOn, lookupDependentOnValue]);
 
   return (
     <>

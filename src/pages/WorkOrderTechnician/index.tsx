@@ -43,6 +43,7 @@ import GridView, { GridViewRef } from './GridView';
 import { handlePdfPreview } from 'src/pages/WorkOrderSupervisor/helper';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import ResourceFilter from 'src/pages/WorkOrderTechnician/ResourceFilter';
 
 type Columns = typeof WORKORDER_TECHNICIAN_SERVICE_STATUS;
 
@@ -94,6 +95,7 @@ const WorkOrderTechnician = () => {
   const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resourceData, setResourceData] = useState(null);
+  const [selectedResource, setSelectedResource] = useState(null)
 
   const resetSelectedRecords = () => {
     cardState.resetSelection();
@@ -118,8 +120,8 @@ const WorkOrderTechnician = () => {
   };
 
   const fetchSingleColumnData = useCallback(
-    async ({ column, filterQuery, limit, page, cancelToken }: FetchSingleColumnProps<any, Columns>) => {
-      const api = `/work-order-technician?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
+    async ({ column, filterQuery, limit, page, resource, cancelToken }: FetchSingleColumnProps<any, Columns>) => {
+      const api = `/work-order-technician?page=${page}&status=${column}&limit=${limit}&type=${resource}${filterQuery}`;
       try {
         const response = await axiosInstance().get(api, { cancelToken });
         const {
@@ -377,94 +379,6 @@ const WorkOrderTechnician = () => {
       isRead: permissions && permissions?.serviceMaster ? permissions?.serviceMaster?.isRead : false,
       isCreate: permissions && permissions?.serviceMaster ? permissions?.serviceMaster?.isCreate : false,
       isUpdate: permissions && permissions?.serviceMaster ? permissions?.serviceMaster?.isUpdate : false
-    },
-    {
-      fieldData: {
-        _id: '630dc2429ec41869032395b3',
-        fieldName: '_id',
-        fieldLabel: resources?.workOrder?.titlePlural,
-        lookup: true,
-        lookupResource: sidebarResource.workOrder,
-        resource: sidebarResource.workOrderTechnician,
-        type: 'dropDown',
-        order: 2,
-        required: false,
-        sectionName: 'Work Order Technician Filter',
-        isTooltip: false,
-        editAble: false,
-        brand: user?.brand,
-        roleType: 0,
-        sectionProperties: ''
-      },
-      isRead: permissions && permissions?.workOrder ? permissions?.workOrder?.isRead : false,
-      isCreate: permissions && permissions?.workOrder ? permissions?.workOrder?.isCreate : false,
-      isUpdate: permissions && permissions?.workOrder ? permissions?.workOrder?.isUpdate : false
-    },
-    {
-      fieldData: {
-        _id: '630dc2429ec41869032395b4',
-        fieldName: 'repairOrder',
-        fieldLabel: resources?.repairOrder?.titlePlural,
-        lookup: true,
-        lookupResource: sidebarResource.repairOrder,
-        resource: sidebarResource.workOrderTechnician,
-        type: 'dropDown',
-        order: 3,
-        required: false,
-        sectionName: 'Work Order Technician Filter',
-        isTooltip: false,
-        editAble: false,
-        brand: user?.brand,
-        roleType: 0,
-        sectionProperties: ''
-      },
-      isRead: permissions && permissions?.repairOrder ? permissions?.repairOrder?.isRead : false,
-      isCreate: permissions && permissions?.repairOrder ? permissions?.repairOrder?.isCreate : false,
-      isUpdate: permissions && permissions?.repairOrder ? permissions?.repairOrder?.isUpdate : false
-    },
-    {
-      fieldData: {
-        _id: '630dc2429ec41869032395b5',
-        fieldName: 'productionOrder',
-        fieldLabel: resources?.productionOrder?.titlePlural,
-        lookup: true,
-        lookupResource: sidebarResource.productionOrder,
-        resource: sidebarResource.workOrderTechnician,
-        type: 'dropDown',
-        order: 4,
-        required: false,
-        sectionName: 'Work Order Technician Filter',
-        isTooltip: false,
-        editAble: false,
-        brand: user?.brand,
-        roleType: 0,
-        sectionProperties: ''
-      },
-      isRead: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isRead : false,
-      isCreate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isCreate : false,
-      isUpdate: permissions && permissions?.productionOrder ? permissions?.productionOrder?.isUpdate : false
-    },
-    {
-      fieldData: {
-        _id: '630dc2429ea41869032395b5',
-        fieldName: 'assemblyOrder',
-        fieldLabel: resources?.assemblyOrder?.titlePlural,
-        lookup: true,
-        lookupResource: sidebarResource.assemblyOrder,
-        resource: sidebarResource.workOrderTechnician,
-        type: 'dropDown',
-        order: 4,
-        required: false,
-        sectionName: 'Work Order Technician Filter',
-        isTooltip: false,
-        editAble: false,
-        brand: user?.brand,
-        roleType: 0,
-        sectionProperties: ''
-      },
-      isRead: permissions && permissions?.assemblyOrder ? permissions?.assemblyOrder?.isRead : false,
-      isCreate: permissions && permissions?.assemblyOrder ? permissions?.assemblyOrder?.isCreate : false,
-      isUpdate: permissions && permissions?.assemblyOrder ? permissions?.assemblyOrder?.isUpdate : false
     }
   ];
 
@@ -560,6 +474,12 @@ const WorkOrderTechnician = () => {
     return () => cancelToken.cancel();
   }, [resourceData]);
 
+  useEffect(() => {
+    if (viewType === 'card-view') {
+      cardState.setResource(selectedResource?.resource || '')
+    }
+  }, [selectedResource, viewType])
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -609,10 +529,11 @@ const WorkOrderTechnician = () => {
                   newActionButtonProps={newActionButtonProps}
                   actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
                   leftSideContents={
-                    <div className="flex items-center gap-2">
+                    <div className="w-full flex items-center gap-2">
+                      <ResourceFilter selectedResource={selectedResource} setSelectedResource={setSelectedResource} filterByIds={filterByIds} setFilterByIds={setFilterByIds} handleApplyFilter={handleApplyFilter} />
                       <ThemeButton
                         mobileTooltip="Apply Filters"
-                        startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
+                        startIcon={<BiFilterAlt className="ml-1 mr-1 mt-[1px]" />}
                         iconForMobile={<BiFilterAlt />}
                         onClick={() => {
                           setShowFilter(true);
@@ -624,7 +545,7 @@ const WorkOrderTechnician = () => {
                         filterTerm={filterTerm}
                         resourceColumns={FIELD_TO_FILTER}
                         deepFilters={[]}
-                        filterByIds={filterByIds}
+                        filterByIds={filterByIds?.filter(e => e?.field === 'service')}
                         fetchResourceData={(deepFilter, filterById) => {
                           handleApplyFilter(filterById);
                         }}
@@ -651,7 +572,7 @@ const WorkOrderTechnician = () => {
               renderedFrom={renderedFrom}
               state={tableState}
               tableHead={
-                <div className="max-md:w-full">
+                <div className="w-full">
                   <DetailsPageHeader
                     isAddButtonVisible={false}
                     className="flex-grow"
@@ -660,7 +581,8 @@ const WorkOrderTechnician = () => {
                     newActionButtonProps={newActionButtonProps}
                     actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
                     leftSideContents={
-                      <>
+                      <div className="w-full flex items-center gap-2">
+                        <ResourceFilter selectedResource={selectedResource} setSelectedResource={setSelectedResource} filterByIds={filterByIds} setFilterByIds={setFilterByIds} handleApplyFilter={handleApplyFilter} />
                         <ThemeButton
                           mobileTooltip="Apply Filters"
                           startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
@@ -675,14 +597,14 @@ const WorkOrderTechnician = () => {
                           filterTerm={filterTerm}
                           resourceColumns={FIELD_TO_FILTER}
                           deepFilters={[]}
-                          filterByIds={filterByIds}
+                          filterByIds={filterByIds?.filter(e => e?.field === 'service')}
                           fetchResourceData={(deepFilter, filterById) => {
                             handleApplyFilter(filterById);
                           }}
                           setDeepFilters={null}
                           setFilterByIds={setFilterByIds}
                         />
-                      </>
+                      </div>
                     }
                     hasXpadding={false}
                     hasYpadding={false}
@@ -693,6 +615,7 @@ const WorkOrderTechnician = () => {
               dispatch={tableDispatch}
               filterQuery={filterQuery}
               permissions={permissions?.workOrderTechnician}
+              resource={selectedResource?.resource}
             />
           </div>
         )}

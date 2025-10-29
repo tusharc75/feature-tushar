@@ -5,15 +5,15 @@ import { TColType } from 'src/components/CustomReactTable/TableComponents/TableH
 export type SelectedView =
   | GridViewSavedData
   | {
-      _id: string;
-      hide: string[];
-      order: string[];
-      sizes: {
-        [key: string]: number;
-      };
-      name?: string;
-      id?: string;
+    _id: string;
+    hide: string[];
+    order: string[];
+    sizes: {
+      [key: string]: number;
     };
+    name?: string;
+    id?: string;
+  };
 
 export type UseCardColState<D, C extends readonly string[]> = {
   columns: C;
@@ -28,6 +28,7 @@ export type UseCardColState<D, C extends readonly string[]> = {
   visible: Record<string, boolean>;
   selectedView: SelectedView | null;
   selectedRecordObj: Partial<Record<C[number], D[]>>;
+  resource: string;
 };
 
 export type UseCardColActions<D, C extends readonly string[]> =
@@ -35,6 +36,7 @@ export type UseCardColActions<D, C extends readonly string[]> =
   | { type: 'setSelectedRecordObj'; payload: UseCardColState<D, C>['selectedRecordObj'] }
   | { type: 'setStateData'; payload: Partial<UseCardColState<D, C>> }
   | { type: 'setColumns'; payload: UseCardColState<D, C>['columns'] }
+  | { type: 'setResource'; payload: UseCardColState<D, C>['resource'] }
   | { type: 'setColumnDef'; payload: UseCardColState<D, C>['columnDef'] }
   | { type: 'setVisibleColumns'; payload: UseCardColState<D, C>['visibleColumns'] }
   | { type: 'setRefreshSignal'; payload: UseCardColState<D, C>['refreshSignal'] }
@@ -68,6 +70,7 @@ export type FetchSingleColumnProps<D, C extends readonly string[]> = {
   filterQuery: UseCardColState<D, C>['filterQuery'];
   limit: number;
   cancelToken?: CancelToken;
+  resource?: string;
 };
 
 export type UseCardColTimeline<D, C extends readonly string[]> = {

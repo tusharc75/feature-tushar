@@ -24,7 +24,7 @@ const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, col
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [initialLoading, setInitialLoading] = useState(true);
-  const { keyGetter, fetchSingleColumn, refreshSignal, limit, filterQuery, columnDef, resetSelectionSignal, selectedRecordObj, setState } = state;
+  const { keyGetter, fetchSingleColumn, resource, refreshSignal, limit, filterQuery, columnDef, resetSelectionSignal, selectedRecordObj, setState } = state;
   const [selectedRecordMap, setSelectedRecordmap] = useState<Map<string, boolean>>(new Map());
 
   const colors = getColColors(column);
@@ -32,10 +32,10 @@ const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, col
   const isInitialLoading = initialLoading || columnDef?.length === 0;
 
   const handleFetchSingleColumnWrapper = useCallback(
-    async (page = 0, pushData = false, cancelToken?: CancelToken) => {
+    async (page = 0, pushData = false, cancelToken?: CancelToken, resource?: string) => {
       try {
         setLoading(true);
-        const { count, data } = await fetchSingleColumn({ column, filterQuery, limit, page, cancelToken });
+        const { count, data } = await fetchSingleColumn({ column, filterQuery, limit, page, resource, cancelToken });
         if (pushData) {
           setData((prev) => [...prev, ...data]);
         } else {
@@ -98,7 +98,7 @@ const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, col
     const cancelToken = axios.CancelToken.source();
     const fetchInitialData = async () => {
       setInitialLoading(true);
-      await handleFetchSingleColumnWrapper(0, false, cancelToken.token);
+      await handleFetchSingleColumnWrapper(0, false, cancelToken.token, resource);
       setInitialLoading(false);
     };
     fetchInitialData();
@@ -107,7 +107,7 @@ const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, col
       cancelToken.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshSignal, filterQuery]);
+  }, [refreshSignal, filterQuery, resource]);
 
   useEffect(() => {
     setSelectedRecordmap(new Map());
