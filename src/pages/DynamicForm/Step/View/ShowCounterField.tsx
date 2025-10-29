@@ -1,17 +1,17 @@
-import { Box } from "@mui/material";
-import { camelCase } from "lodash";
-import { useContext, useEffect, useState } from "react";
-import axiosInstance from "src/axios/axiosInstance";
-import { useColumns, useTableReducer } from "src/components/CustomReactTable";
-import EditableExcelTable from "src/components/EditableExcelTable";
-import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
-import { gridLoadingTimeout, prepareDataForGrid } from "src/constants/helpers";
-import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import { useData } from "src/StateProvider/Provider";
+import { Box } from '@mui/material';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
+import { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import EditableExcelTable from 'src/components/EditableExcelTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 
 const ShowCounterField = ({ fields, resource, selectedRow }) => {
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(resource)
+  const renderedFrom = camelCase(resource);
 
   const {
     state: { user }
@@ -23,18 +23,18 @@ const ShowCounterField = ({ fields, resource, selectedRow }) => {
   const { generateColumns } = useColumns();
 
   useEffect(() => {
-    fetchColumn()
-  }, [])
+    fetchColumn();
+  }, []);
 
   const fetchColumn = () => {
-    setColumns(null)
+    setColumns(null);
     const newColumns = generateColumns(renderedFrom, fields);
-    setColumns(newColumns)
-  }
+    setColumns(newColumns);
+  };
 
   useEffect(() => {
-    fetchData()
-  }, [selectedRow])
+    fetchData();
+  }, [selectedRow]);
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -49,7 +49,7 @@ const ShowCounterField = ({ fields, resource, selectedRow }) => {
           let finalObject = prepareDataForGrid(u, user);
           return finalObject;
         });
-        dispatch({ type: 'initialize', data: rows, count: count });
+        dispatch({ type: 'initialize', data: rows.reverse(), count: count });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -68,8 +68,8 @@ const ShowCounterField = ({ fields, resource, selectedRow }) => {
           <EditableExcelTable
             columns={columns}
             data={state.dataRows}
-            onChange={(rows) => { }}
-            onDelete={(row) => { }}
+            onChange={(rows) => dispatch({ type: 'initialize', data: [...rows], count: rows.length })}
+            onDelete={(row) => {}}
           />
         </div>
       ) : (
@@ -78,7 +78,7 @@ const ShowCounterField = ({ fields, resource, selectedRow }) => {
         </Box>
       )}
     </>
-  )
-}
+  );
+};
 
 export default ShowCounterField;

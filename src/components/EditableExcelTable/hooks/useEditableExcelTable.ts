@@ -80,7 +80,7 @@ const useEditableExcelTable = (data: any[], columns: TColType[], onChange: (data
   }, [columns, setStore]);
 
   useEffect(() => {
-    const newData = data;
+    const newData = [...data];
     if (data.length < MIN_DATA) {
       for (let i = data.length; i < MIN_DATA; i++) {
         newData.push({});
