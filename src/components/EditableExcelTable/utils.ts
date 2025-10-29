@@ -234,15 +234,37 @@ const setPastedValue = ({
   return { dirtyValue };
 };
 
-export const cleanDirtyRowData = (data: Record<string, any>, sortedCells: string[]) => {
+export const cleanDirtyRowData = (data: Record<string, any>, columns: TColType[]) => {
+  const sortedCells = columns.map((d) => d.id || d.accessor);
   const dirtyRowMap = new Map(Object.entries(data));
 
   // delete multiselect cell rest values
-  for (const cell of sortedCells) {
+  for (let i = 0; i < sortedCells.length; i++) {
+    const cell = sortedCells[i];
+    const type = columns[i].type;
+
+    // for dropdown
+    if (type === 'dropDown' && dirtyRowMap.has(`${cell}Id`)) {
+      dirtyRowMap.set(cell, dirtyRowMap.get(`${cell}Id`));
+    }
+
+    // for multi select
+    if (type === 'multiSelect' && !Array.isArray(dirtyRowMap.get(cell))) {
+      const newValues = [];
+      if (dirtyRowMap.has(`${cell}Id`)) {
+        newValues.push(dirtyRowMap.get(`${cell}Id`));
+      }
+      if (dirtyRowMap.has(`rest${cell}`)) {
+        newValues.push(...dirtyRowMap.get(`rest${cell}`).map((d) => d.optionValue));
+      }
+      dirtyRowMap.set(cell, newValues);
+    }
+
     if (dirtyRowMap.has(`rest${cell}`)) {
       dirtyRowMap.delete(`rest${cell}`);
     }
   }
+
   dirtyRowMap.forEach((d, key) => {
     if (key !== '_id' && !sortedCells.includes(key)) {
       dirtyRowMap.delete(key);
@@ -316,7 +338,7 @@ export function handlePaste({
           dirtyRow[colKey] = dirtyValue;
         }
       }
-      const dirtyRowData = cleanDirtyRowData({ ...newData[currentRowIndex], ...dirtyRow }, sortedCells);
+      const dirtyRowData = cleanDirtyRowData({ ...newData[currentRowIndex], ...dirtyRow }, prev.columns);
 
       dirtyRows[currentRowIndex] = dirtyRowData;
     }

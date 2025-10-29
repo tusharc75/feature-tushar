@@ -43,10 +43,7 @@ const DateTimePickerCell = ({
       const dirtyRows = [...prev.dirtyRows];
       const key = column.accessor || column.id;
       tableData[rowIndex][key] = newValue.toISOString();
-      dirtyRows[rowIndex] = cleanDirtyRowData(
-        { ...tableData[rowIndex], [key]: newValue.toISOString() },
-        columns.map((d) => d.id ?? d.accessor)
-      );
+      dirtyRows[rowIndex] = cleanDirtyRowData({ ...tableData[rowIndex], [key]: newValue.toISOString() }, columns);
       setValue(getCellDateTime(column, tableData[rowIndex]));
       return {
         dirtyRows,

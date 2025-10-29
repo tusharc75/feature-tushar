@@ -19,10 +19,7 @@ const DropDownCell = ({ cellIndex, column, data, exitEditMode, isEditing, rowInd
   }, [column, hasFocus]);
 
   const handleCleanDirtyRows = (dirtyRows) => {
-    return cleanDirtyRowData(
-      dirtyRows,
-      columns.map((d) => d.id ?? d.accessor)
-    );
+    return cleanDirtyRowData(dirtyRows, columns);
   };
 
   useEffect(() => {

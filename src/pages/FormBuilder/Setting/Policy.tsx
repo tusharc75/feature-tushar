@@ -195,14 +195,14 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
         : data?.fieldOption
           ? fields?.find((e) => e?.fieldData?.fieldName === data?.fieldOption)?.fieldData?.option || []
           : fields
-            ?.filter((ele) => !ele.fieldData?.primaryField)
-            ?.map((e) => {
-              return {
-                optionLabel: e?.fieldData?.fieldLabel,
-                optionValue: e?.fieldData?.fieldName,
-                order: e?.fieldData?.order
-              };
-            });
+              ?.filter((ele) => !ele.fieldData?.primaryField)
+              ?.map((e) => {
+                return {
+                  optionLabel: e?.fieldData?.fieldLabel,
+                  optionValue: e?.fieldData?.fieldName,
+                  order: e?.fieldData?.order
+                };
+              });
     return (
       <>
         {!loading ? (
@@ -316,7 +316,7 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
                 variant="outlined"
                 margin="dense"
                 size="small"
-                helperText='Type and press Enter to add'
+                helperText="Type and press Enter to add"
                 label={getLabel(data?.fieldLabel)}
                 name={data?.fieldName}
                 required={false}
@@ -444,8 +444,11 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
       });
     setFieldOptions(fieldsData);
     if (Data?.fieldName === 'fieldColor') {
-      setFieldColorFieldNameOptions(fields?.filter(f =>
-        ['dropDown', 'multiSelect'].includes(f?.fieldData?.type) && !f?.fieldData?.lookup)?.map(e => ({ optionLabel: e?.fieldData?.fieldLabel, optionValue: e?.fieldData?.fieldName })))
+      setFieldColorFieldNameOptions(
+        fields
+          ?.filter((f) => ['dropDown', 'multiSelect'].includes(f?.fieldData?.type) && !f?.fieldData?.lookup)
+          ?.map((e) => ({ optionLabel: e?.fieldData?.fieldLabel, optionValue: e?.fieldData?.fieldName }))
+      );
     }
   }, [fields]);
 
@@ -460,14 +463,14 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
   };
 
   const getValueOptions = (value) => {
-    return fields?.find(f => f?.fieldData?.fieldName === value?.fieldName)?.fieldData?.option || []
-  }
+    return fields?.find((f) => f?.fieldData?.fieldName === value?.fieldName)?.fieldData?.option || [];
+  };
 
   return (
     <>
       {(statusOptions?.length > 0 || fieldColorFieldNameOptions?.length > 0) && fieldOptions?.length && initialData && !optionLoading ? (
-        <div className="flex flex-col gap-2 border border-[var(--common-border-color)] mt-2 mb-2">
-          <div className="p-2 bg-[var(--dark-secondary)] flex items-center justify-between">
+        <div className="mb-2 mt-2 flex flex-col gap-2 border border-[var(--common-border-color)]">
+          <div className="flex items-center justify-between bg-[var(--dark-secondary)] p-2">
             <Typography variant="subtitle2">{Data.fieldLabel}</Typography>
             <HtmlTooltip title={'Add'}>
               <IconButton
@@ -476,9 +479,9 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                 aria-label="delete"
                 onClick={() => {
                   const data = [...initialData?.fieldsData];
-                  const obj: any = {}
-                  initialData?.fields?.forEach(f => {
-                    obj[f?.fieldName] = f?.type === 'multiSelect' ? [] : f?.type === 'colorPicker' ? '#000000' : ''
+                  const obj: any = {};
+                  initialData?.fields?.forEach((f) => {
+                    obj[f?.fieldName] = f?.type === 'multiSelect' ? [] : f?.type === 'colorPicker' ? '#000000' : '';
                   });
                   data.push(obj);
                   setInitialData((prevState) => ({ ...prevState, fieldsData: [...data] }));
@@ -490,7 +493,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
             </HtmlTooltip>
           </div>
           {initialData?.fieldsData?.map((value, index) => (
-            <div className="my-2 flex items-center justify-between gap-1 border-b last:border-b-0 rounded-md p-2" key={index}>
+            <div className="my-2 flex items-center justify-between gap-1 rounded-md border-b p-2 last:border-b-0" key={index}>
               <div className="grid w-[94%] gap-2 sm:grid-cols-1 md:grid-cols-3">
                 {initialData?.fields?.map((field) =>
                   field?.type === 'checkBox' ? (
@@ -592,13 +595,13 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                               : field?.fieldName === 'subStatus'
                                 ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))
                                 : field?.fieldName === 'value'
-                                  ? getValueOptions(value)?.filter(ele => value[`${field.fieldName}`]?.includes(ele?.optionValue))
+                                  ? getValueOptions(value)?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))
                                   : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
                           : field?.fieldName === 'subStatus'
                             ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))[0]
-                            : field?.fieldName === 'status' ?
-                              getStatusOptions(initialData?.fieldsData)?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
-                              : fieldColorFieldNameOptions?.filter(ele => ele?.optionValue === value[`${field.fieldName}`])[0]
+                            : field?.fieldName === 'status'
+                              ? getStatusOptions(initialData?.fieldsData)?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
+                              : fieldColorFieldNameOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
                       }
                       multiple={field?.type === 'multiSelect'}
                       fieldLabel={field?.fieldLabel}
@@ -627,7 +630,8 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
           ))}
         </div>
       ) : (
-        <Box className="h-fit" p={2}>p
+        <Box className="h-fit" p={2}>
+          p
           <CommonSkeleton lenArray={[...Array(5).keys()]} />
         </Box>
       )}
@@ -651,16 +655,19 @@ const MultipleFieldColor = ({ data: Data, idx, onChange, errors, touched, fields
         };
       });
     if (Data?.fieldName === 'fieldColor') {
-      setFieldColorFieldNameOptions(fields?.filter(f =>
-        ['dropDown', 'decimal', 'number'].includes(f?.fieldData?.type) && !f?.fieldData?.lookup)?.map(e => ({ optionLabel: e?.fieldData?.fieldLabel, optionValue: e?.fieldData?.fieldName })))
+      setFieldColorFieldNameOptions(
+        fields
+          ?.filter((f) => ['dropDown', 'decimal', 'number'].includes(f?.fieldData?.type) && !f?.fieldData?.lookup)
+          ?.map((e) => ({ optionLabel: e?.fieldData?.fieldLabel, optionValue: e?.fieldData?.fieldName }))
+      );
     }
   }, [fields]);
 
   return (
     <>
       {fieldColorFieldNameOptions?.length > 0 ? (
-        <div className="flex flex-col gap-2 border border-[var(--common-border-color)] mt-2 mb-2">
-          <div className="p-2 bg-[var(--dark-secondary)] flex items-center justify-between">
+        <div className="mb-2 mt-2 flex flex-col gap-2 border border-[var(--common-border-color)]">
+          <div className="flex items-center justify-between bg-[var(--dark-secondary)] p-2">
             <Typography variant="subtitle2">{Data.fieldLabel}</Typography>
             <HtmlTooltip title={'Add'}>
               <IconButton
@@ -690,24 +697,22 @@ const MultipleFieldColor = ({ data: Data, idx, onChange, errors, touched, fields
           </div>
 
           {initialData?.fieldsData?.map((colorItem, colorIndex) => (
-            <div key={colorIndex} className="border-b last:border-b-0 p-2">
-              <fieldset className="rounded-md border border-gray-200 p-3 dark:border-gray-800 mb-3">
-                <legend className="px-1 text-sm font-semibold flex items-center justify-end w-full">
-                  <div className="flex gap-1">
-                    <HtmlTooltip title={'Remove Color Group'}>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          const updatedData = [...initialData.fieldsData];
-                          updatedData.splice(colorIndex, 1);
-                          setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
-                          onChange(null, updatedData);
-                        }}
-                      >
-                        <RemoveCircleOutline fontSize="small" color={'error'} />
-                      </IconButton>
-                    </HtmlTooltip>
-                  </div>
+            <div key={colorIndex} className="px-2 last:mb-3">
+              <fieldset className=" rounded-md border border-gray-200 p-3 dark:border-gray-800">
+                <legend className="ml-auto flex w-full max-w-fit items-center justify-end px-1 text-sm font-semibold">
+                  <HtmlTooltip title={'Remove Color Group'}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        const updatedData = [...initialData.fieldsData];
+                        updatedData.splice(colorIndex, 1);
+                        setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
+                        onChange(null, updatedData);
+                      }}
+                    >
+                      <RemoveCircleOutline fontSize="small" color={'error'} />
+                    </IconButton>
+                  </HtmlTooltip>
                 </legend>
                 <div className="space-y-2">
                   {(colorItem.fields || []).map((field, fieldIndex) => (
@@ -727,7 +732,7 @@ const MultipleFieldColor = ({ data: Data, idx, onChange, errors, touched, fields
                             setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
                             onChange(null, updatedData);
                           }}
-                          value={fieldColorFieldNameOptions?.filter(ele => ele?.optionValue === field.fieldName)[0] || null}
+                          value={fieldColorFieldNameOptions?.filter((ele) => ele?.optionValue === field.fieldName)[0] || null}
                           multiple={false}
                           fieldLabel="Field Name"
                           fieldName="fieldName"
@@ -745,7 +750,7 @@ const MultipleFieldColor = ({ data: Data, idx, onChange, errors, touched, fields
                             setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
                             onChange(null, updatedData);
                           }}
-                          value={OPERATOR_OPTIONS?.filter(ele => ele?.optionValue === field.operator)[0] || null}
+                          value={OPERATOR_OPTIONS?.filter((ele) => ele?.optionValue === field.operator)[0] || null}
                           multiple={false}
                           fieldLabel="Operator"
                           fieldName="operator"
@@ -758,7 +763,7 @@ const MultipleFieldColor = ({ data: Data, idx, onChange, errors, touched, fields
                             error={errors?.policies?.[idx]?.data?.[colorIndex]?.fields?.[fieldIndex]?.value}
                             touched={touched?.policies?.[idx]?.data?.[colorIndex]?.fields?.[fieldIndex]?.value}
                             formikField={`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.value`}
-                            field={fields?.find(f => f?.fieldData?.fieldName === field.fieldName)?.fieldData}
+                            field={fields?.find((f) => f?.fieldData?.fieldName === field.fieldName)?.fieldData}
                             setFieldValue={(fieldPath, value) => {
                               const updatedData = [...initialData.fieldsData];
                               updatedData[colorIndex].fields[fieldIndex].value = value;
@@ -772,7 +777,7 @@ const MultipleFieldColor = ({ data: Data, idx, onChange, errors, touched, fields
                         )}
                       </div>
 
-                      <div className="flex gap-1 items-center">
+                      <div className="flex items-center gap-1">
                         <HtmlTooltip title="Remove Field">
                           <IconButton
                             size="small"
@@ -812,7 +817,7 @@ const MultipleFieldColor = ({ data: Data, idx, onChange, errors, touched, fields
                     </div>
                   ))}
                 </div>
-                <div className="flex items-center justify-between gap-1 pt-3 rounded-md">
+                <div className="flex items-center justify-between gap-1 rounded-md pt-3">
                   <div className="grid w-[94%] gap-2 sm:grid-cols-1 md:grid-cols-3">
                     <Box display="flex" alignItems="center" gap={2}>
                       <Typography variant="body2">Color Code</Typography>
@@ -860,7 +865,7 @@ const DynamicFormField = ({ fieldName, value, field, setFieldValue, formikField,
           const newValue = Array.isArray(val) ? val?.map((ele) => ele.optionValue) : [val?.optionValue].filter(Boolean);
           setFieldValue(formikField, newValue);
         }}
-        value={(field.option || []).filter(ele => (value || []).includes(ele?.optionValue)) || []}
+        value={(field.option || []).filter((ele) => (value || []).includes(ele?.optionValue)) || []}
         multiple={true}
         fieldLabel={label}
         fieldName="value"

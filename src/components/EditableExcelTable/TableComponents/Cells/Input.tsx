@@ -64,10 +64,7 @@ const Input = ({
       dirtyRows[rowIndex] = { ...tableData[rowIndex], [key]: newValue };
       if (Object.keys(result).length > 0) {
         tableData[rowIndex] = { ...tableData[rowIndex], ...result };
-        dirtyRows[rowIndex] = cleanDirtyRowData(
-          { ...tableData[rowIndex], ...result },
-          columns.map((d) => d.id ?? d.accessor)
-        );
+        dirtyRows[rowIndex] = cleanDirtyRowData({ ...tableData[rowIndex], ...result }, columns);
       }
       return {
         dirtyRows,
