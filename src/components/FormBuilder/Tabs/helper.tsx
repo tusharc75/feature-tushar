@@ -644,42 +644,7 @@ export const RESOURCE_ACTION_TYPE = {
 export const fieldColor = {
   fieldName: 'fieldColor',
   fieldLabel: 'Fields Color',
-  type: 'fieldColorMultiple',
-  fields: [
-    {
-      fieldName: 'fields',
-      fieldLabel: 'Fields',
-      type: 'fieldColorConditions',
-      required: true,
-      fields: [
-        {
-          fieldName: 'fieldName',
-          fieldLabel: 'Field Name',
-          type: 'dropDown',
-          required: true
-        },
-        {
-          fieldName: 'operator',
-          fieldLabel: 'Operator',
-          type: 'dropDown',
-          required: true
-        },
-        {
-          fieldName: 'value',
-          fieldLabel: 'Value',
-          type: 'multiSelect',
-          required: true
-        }
-      ]
-    },
-    {
-      fieldName: 'colorCode',
-      fieldLabel: 'Color Code',
-      type: 'colorPicker',
-      required: true
-    }
-  ],
-  defaultValue: []
+  type: 'multipleFieldsColor',
 }
 
 export const autoCreateWorkspaceAttachment = {

@@ -145,18 +145,29 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
     }
     values.policies?.forEach((value, index) => {
       if (Array.isArray(value?.data) && value?.data?.length > 0) {
-        if (value?.type === 'fieldColorMultiple') {
+        if (value?.type === 'multipleFieldsColor') {
           value?.data?.forEach((colorItem, colorIndex) => {
             if (colorItem?.fields && Array.isArray(colorItem.fields)) {
               colorItem.fields.forEach((field, fieldIndex) => {
+                const fieldErrors: any = {};
+
                 if (!field.fieldName || field.fieldName === '') {
-                  errors[`policies.${index}.data.${colorIndex}.fields.${fieldIndex}.fieldName`] = 'Field Name is required';
+                  fieldErrors.fieldName = 'Field Name is required';
                 }
                 if (!field.operator || field.operator === '') {
-                  errors[`policies.${index}.data.${colorIndex}.fields.${fieldIndex}.operator`] = 'Operator is required';
+                  fieldErrors.operator = 'Operator is required';
                 }
                 if (!field.value || (Array.isArray(field.value) && field.value.length === 0) || field.value === '') {
-                  errors[`policies.${index}.data.${colorIndex}.fields.${fieldIndex}.value`] = 'Value is required';
+                  fieldErrors.value = 'Value is required';
+                }
+
+                if (Object.keys(fieldErrors).length > 0) {
+                  if (!errors.policies) errors.policies = [];
+                  if (!errors.policies[index]) errors.policies[index] = {};
+                  if (!errors.policies[index].data) errors.policies[index].data = [];
+                  if (!errors.policies[index].data[colorIndex]) errors.policies[index].data[colorIndex] = {};
+                  if (!errors.policies[index].data[colorIndex].fields) errors.policies[index].data[colorIndex].fields = [];
+                  errors.policies[index].data[colorIndex].fields[fieldIndex] = fieldErrors;
                 }
               });
             }
@@ -179,6 +190,59 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
     return errors;
   };
 
+  const handleValidateAndSubmit = async (validateForm, setTouched, touched, submitForm) => {
+    const validationErrors = await validateForm();
+
+    if (validationErrors && Object.keys(validationErrors).length > 0) {
+      const touchedFields: any = { ...touched };
+      if (validationErrors.entityResources) {
+        touchedFields.entityResources = validationErrors.entityResources;
+      }
+
+      if (validationErrors.collaborateToolsField) {
+        touchedFields.collaborateToolsField = true;
+      }
+
+      if (validationErrors.policies && Array.isArray(validationErrors.policies)) {
+        touchedFields.policies = validationErrors.policies.map((policyError: any, policyIndex: number) => {
+          if (!policyError) return touched?.policies?.[policyIndex] || {};
+
+          const policyTouched: any = { ...(touched?.policies?.[policyIndex] || {}) };
+
+          if (policyError.data) {
+            policyTouched.data = policyError.data.map((dataError: any, dataIndex: number) => {
+              if (!dataError) return touched?.policies?.[policyIndex]?.data?.[dataIndex] || {};
+
+              const dataTouched: any = { ...(touched?.policies?.[policyIndex]?.data?.[dataIndex] || {}) };
+
+              if (dataError.fields) {
+                dataTouched.fields = dataError.fields.map((fieldError: any) => {
+                  if (!fieldError) return {};
+                  return {
+                    fieldName: !!fieldError.fieldName,
+                    operator: !!fieldError.operator,
+                    value: !!fieldError.value
+                  };
+                });
+              }
+
+              Object.keys(dataError).forEach((key) => {
+                if (key !== 'fields') {
+                  dataTouched[key] = true;
+                }
+              });
+              return dataTouched;
+            });
+          }
+          return policyTouched;
+        });
+      }
+      setTouched(touchedFields);
+      return;
+    }
+    submitForm();
+  };
+
   return (
     <Dialog
       maxWidth="md"
@@ -193,8 +257,8 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
         }
       }}
     >
-      <Formik enableReinitialize={true} initialValues={initialValues} onSubmit={handleSave} validate={validation}>
-        {({ submitForm, touched, errors, setFieldValue, values }) => (
+      <Formik enableReinitialize={true} initialValues={initialValues} onSubmit={handleSave} validate={validation} validateOnChange={true} validateOnBlur={true}>
+        {({ submitForm, touched, errors, setFieldValue, setFieldTouched, values, setTouched, validateForm }) => (
           <>
             <CustomDialogHeader
               title={`Settings/Policy`}
@@ -274,6 +338,7 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
                 <Policy
                   values={values}
                   setFieldValue={setFieldValue}
+                  setFieldTouched={setFieldTouched}
                   errors={errors}
                   touched={touched}
                   resource={resource}
@@ -285,7 +350,12 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
               <ThemeButton disabled={isSubmitting} buttonType="transparent" onClick={onClose}>
                 Cancel
               </ThemeButton>
-              <ThemeButton disabled={isSubmitting} isLoading={isSubmitting} buttonType="theme" onClick={submitForm}>
+              <ThemeButton
+                disabled={isSubmitting}
+                isLoading={isSubmitting}
+                buttonType="theme"
+                onClick={() => handleValidateAndSubmit(validateForm, setTouched, touched, submitForm)}
+              >
                 Save
               </ThemeButton>
             </CustomDialogFooter>

@@ -33,7 +33,7 @@ const OPERATOR_OPTIONS = [
   }
 ];
 
-const Policy = ({ values, setFieldValue, errors, touched, resource, initialValues }) => {
+const Policy = ({ values, setFieldValue, setFieldTouched, errors, touched, resource, initialValues }) => {
   const [fields, setFields] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lookupCache, setLookupCache] = useState({});
@@ -128,6 +128,7 @@ const Policy = ({ values, setFieldValue, errors, touched, resource, initialValue
                   touched={touched}
                   resource={resource}
                   setFieldValue={setFieldValue}
+                  setFieldTouched={setFieldTouched}
                   onChange={(e, val) => {
                     arrayHelpers.replace(index, {
                       ...values?.policies[index],
@@ -158,12 +159,12 @@ const Policy = ({ values, setFieldValue, errors, touched, resource, initialValue
 
 export default Policy;
 
-const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource, setFieldValue, fields, loading }) => {
+const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource, setFieldValue, setFieldTouched, fields, loading }) => {
   if (type === 'checkBox') {
     return <CheckBoxField data={data} onChange={onChange} />;
-  } else if (type === 'fieldColorMultiple') {
+  } else if (type === 'multipleFieldsColor') {
     return (
-      <FieldColorMultipleFormFields
+      <MultipleFormFieldsColor
         idx={idx}
         data={data}
         onChange={onChange}
@@ -171,6 +172,7 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
         touched={touched}
         fields={fields}
         setFieldValue={setFieldValue}
+        setFieldTouched={setFieldTouched}
       />
     );
   } else if (type === 'multipleFields') {
@@ -639,45 +641,9 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
   );
 };
 
-const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touched, fields, setFieldValue }) => {
-  const [fieldOptions, setFieldOptions] = useState([]);
-  const [initialData, setInitialData] = useState({ fieldsData: [...(Data?.data || [])], fields: Data?.fields });
-  const [optionLoading, setOptionLoading] = useState(false);
+const MultipleFormFieldsColor = ({ data: Data, idx, onChange, errors, touched, fields, setFieldValue, setFieldTouched }) => {
+  const [initialData, setInitialData] = useState({ fieldsData: [...(Data?.data || [])] });
   const [fieldColorFieldNameOptions, setFieldColorFieldNameOptions] = useState([]);
-
-  useEffect(() => {
-    fetchResourceFields();
-  }, []);
-
-  const fetchResourceFields = async () => {
-    setOptionLoading(true);
-    const updatedFields = [...Data.fields];
-    const lookupResources = updatedFields.reduce((acc, ele) => {
-      if (ele?.lookupResource) {
-        acc.push(ele.lookupResource);
-      }
-      return acc;
-    }, []);
-    const lookupString = lookupResources?.join(',');
-    if (lookupString) {
-      axiosInstance()
-        .get(`/sa-formbuilder/lookup?lookupResource=${lookupString}`)
-        .then(({ data: { data: options } }) => {
-          for (const ele of updatedFields) {
-            if (ele?.lookupResource) {
-              ele.option = options[ele.lookupResource];
-            }
-          }
-          setInitialData((prevState) => ({ ...prevState, fields: updatedFields }));
-          setOptionLoading(false);
-        })
-        .catch((err) => {
-          setOptionLoading(false);
-        });
-    } else {
-      setOptionLoading(false);
-    }
-  };
 
   useEffect(() => {
     let fieldsData = [...fields];
@@ -690,7 +656,6 @@ const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touch
           order: e?.fieldData?.order
         };
       });
-    setFieldOptions(fieldsData);
     if (Data?.fieldName === 'fieldColor') {
       setFieldColorFieldNameOptions(fields?.filter(f =>
         ['dropDown', 'decimal', 'number'].includes(f?.fieldData?.type) && !f?.fieldData?.lookup)?.map(e => ({ optionLabel: e?.fieldData?.fieldLabel, optionValue: e?.fieldData?.fieldName })))
@@ -699,7 +664,7 @@ const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touch
 
   return (
     <>
-      {fieldColorFieldNameOptions?.length > 0 && fieldOptions?.length && !optionLoading ? (
+      {fieldColorFieldNameOptions?.length > 0 ? (
         <div className="flex flex-col gap-2 border border-[var(--common-border-color)] mt-2 mb-2">
           <div className="p-2 bg-[var(--dark-secondary)] flex items-center justify-between">
             <Typography variant="subtitle2">{Data.fieldLabel}</Typography>
@@ -766,6 +731,7 @@ const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touch
                             updatedData[colorIndex].fields[fieldIndex].value = [];
                             setFieldValue(`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.fieldName`, val?.optionValue || '');
                             setFieldValue(`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.value`, []);
+                            setFieldTouched(`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.fieldName`, true, false);
                             setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
                             onChange(null, updatedData);
                           }}
@@ -784,6 +750,7 @@ const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touch
                             const updatedData = [...initialData.fieldsData];
                             updatedData[colorIndex].fields[fieldIndex].operator = val?.optionValue || '';
                             setFieldValue(`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.operator`, val?.optionValue || '');
+                            setFieldTouched(`policies.${idx}.data.${colorIndex}.fields.${fieldIndex}.operator`, true, false);
                             setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
                             onChange(null, updatedData);
                           }}
@@ -806,6 +773,7 @@ const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touch
                               const updatedData = [...initialData.fieldsData];
                               updatedData[colorIndex].fields[fieldIndex].value = value;
                               setFieldValue(fieldPath, value);
+                              setFieldTouched(fieldPath, true, false);
                               setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
                               onChange(null, updatedData);
                             }}
