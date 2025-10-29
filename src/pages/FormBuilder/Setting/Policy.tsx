@@ -162,9 +162,9 @@ export default Policy;
 const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource, setFieldValue, setFieldTouched, fields, loading }) => {
   if (type === 'checkBox') {
     return <CheckBoxField data={data} onChange={onChange} />;
-  } else if (type === 'multipleFieldsColor') {
+  } else if (type === 'multipleFieldColor') {
     return (
-      <MultipleFormFieldsColor
+      <MultipleFieldColor
         idx={idx}
         data={data}
         onChange={onChange}
@@ -635,7 +635,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
   );
 };
 
-const MultipleFormFieldsColor = ({ data: Data, idx, onChange, errors, touched, fields, setFieldValue, setFieldTouched }) => {
+const MultipleFieldColor = ({ data: Data, idx, onChange, errors, touched, fields, setFieldValue, setFieldTouched }) => {
   const [initialData, setInitialData] = useState({ fieldsData: [...(Data?.data || [])] });
   const [fieldColorFieldNameOptions, setFieldColorFieldNameOptions] = useState([]);
 
@@ -691,9 +691,8 @@ const MultipleFormFieldsColor = ({ data: Data, idx, onChange, errors, touched, f
 
           {initialData?.fieldsData?.map((colorItem, colorIndex) => (
             <div key={colorIndex} className="border-b last:border-b-0 p-2">
-              <fieldset className="rounded-md border border-dashed border-gray-200 p-3 dark:border-gray-800 mb-3">
-                <legend className="px-1 text-sm font-semibold flex items-center justify-between w-full">
-                  <span>Fields</span>
+              <fieldset className="rounded-md border border-gray-200 p-3 dark:border-gray-800 mb-3">
+                <legend className="px-1 text-sm font-semibold flex items-center justify-end w-full">
                   <div className="flex gap-1">
                     <HtmlTooltip title={'Remove Color Group'}>
                       <IconButton
@@ -710,7 +709,6 @@ const MultipleFormFieldsColor = ({ data: Data, idx, onChange, errors, touched, f
                     </HtmlTooltip>
                   </div>
                 </legend>
-
                 <div className="space-y-2">
                   {(colorItem.fields || []).map((field, fieldIndex) => (
                     <div key={fieldIndex} className="flex items-center justify-between gap-1 rounded-md">
@@ -735,7 +733,6 @@ const MultipleFormFieldsColor = ({ data: Data, idx, onChange, errors, touched, f
                           fieldName="fieldName"
                           required={true}
                         />
-
                         <DropDownField
                           options={OPERATOR_OPTIONS}
                           error={errors?.policies?.[idx]?.data?.[colorIndex]?.fields?.[fieldIndex]?.operator}
@@ -754,7 +751,6 @@ const MultipleFormFieldsColor = ({ data: Data, idx, onChange, errors, touched, f
                           fieldName="operator"
                           required={true}
                         />
-
                         {field.fieldName && (
                           <DynamicFormField
                             fieldName={field.fieldName}
@@ -816,32 +812,31 @@ const MultipleFormFieldsColor = ({ data: Data, idx, onChange, errors, touched, f
                     </div>
                   ))}
                 </div>
-              </fieldset>
-
-              <div className="flex items-center justify-between gap-1 rounded-md">
-                <div className="grid w-[94%] gap-2 sm:grid-cols-1 md:grid-cols-3">
-                  <Box display="flex" alignItems="center" gap={2}>
-                    <Typography variant="body2">Color Code</Typography>
-                    <input
-                      type="color"
-                      value={colorItem?.colorCode || '#000000'}
-                      onChange={(e) => {
-                        const updatedData = [...initialData.fieldsData];
-                        updatedData[colorIndex].colorCode = e.target.value;
-                        setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
-                        onChange(null, updatedData);
-                      }}
-                      style={{
-                        width: '56px',
-                        height: '28px',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                      }}
-                    />
-                  </Box>
+                <div className="flex items-center justify-between gap-1 pt-3 rounded-md">
+                  <div className="grid w-[94%] gap-2 sm:grid-cols-1 md:grid-cols-3">
+                    <Box display="flex" alignItems="center" gap={2}>
+                      <Typography variant="body2">Color Code</Typography>
+                      <input
+                        type="color"
+                        value={colorItem?.colorCode || '#000000'}
+                        onChange={(e) => {
+                          const updatedData = [...initialData.fieldsData];
+                          updatedData[colorIndex].colorCode = e.target.value;
+                          setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
+                          onChange(null, updatedData);
+                        }}
+                        style={{
+                          width: '56px',
+                          height: '28px',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      />
+                    </Box>
+                  </div>
                 </div>
-              </div>
+              </fieldset>
             </div>
           ))}
         </div>

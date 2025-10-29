@@ -644,7 +644,7 @@ export const RESOURCE_ACTION_TYPE = {
 export const fieldColor = {
   fieldName: 'fieldColor',
   fieldLabel: 'Fields Color',
-  type: 'multipleFieldsColor',
+  type: 'multipleFieldColor',
 }
 
 export const autoCreateWorkspaceAttachment = {

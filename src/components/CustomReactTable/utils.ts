@@ -750,14 +750,36 @@ export const AccessorFunction = (data: any, fieldName: any) => {
       : data?.[fieldName];
 };
 
-export const getCellColorCode = (fieldColor, value) => {
+export const getCellColorCode = (fieldColor, values) => {
   if (!fieldColor || (Array.isArray(fieldColor) && fieldColor?.length === 0)) return ''
   let colorCode = ''
   for (const ele of fieldColor) {
-    if (value[ele?.fieldName] && ele?.value?.includes(value[ele?.fieldName])) {
+    let meetsAllConditions = true;
+    for (const checkField of ele?.fields) {
+      if (checkField?.value && isArray(checkField?.value)) {
+        if (!checkField?.value?.includes(values[checkField?.fieldName])) {
+          meetsAllConditions = false;
+        }
+      }
+      else {
+        const comparisonFn = operatorOperations[checkField?.operator];
+        if (!comparisonFn(parseFloat(values[checkField?.fieldName]), parseFloat(checkField?.value))) {
+          meetsAllConditions = false;
+        }
+      }
+    }
+    if (meetsAllConditions) {
       colorCode = ele?.colorCode;
       break;
     }
   }
   return colorCode;
 }
+
+export const operatorOperations: Record<string, (a: any, b: any) => boolean> = {
+  lessThan: (a, b) => a < b,
+  lessThanOrEquals: (a, b) => a <= b,
+  equalsTo: (a, b) => a === b,
+  greaterThan: (a, b) => a > b,
+  greaterThanOrEquals: (a, b) => a >= b,
+};

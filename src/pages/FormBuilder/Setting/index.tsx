@@ -145,7 +145,7 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
     }
     values.policies?.forEach((value, index) => {
       if (Array.isArray(value?.data) && value?.data?.length > 0) {
-        if (value?.type === 'multipleFieldsColor') {
+        if (value?.type === 'multipleFieldColor') {
           value?.data?.forEach((colorItem, colorIndex) => {
             if (colorItem?.fields && Array.isArray(colorItem.fields)) {
               colorItem.fields.forEach((field, fieldIndex) => {
