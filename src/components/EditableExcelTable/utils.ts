@@ -283,10 +283,12 @@ export function handlePaste({
   setStore((prev) => {
     const newData = [...prev.tableData];
     const dirtyRows = [...prev.dirtyRows];
+    const touchedRows = new Map(prev.touchedRows);
 
     for (let r = 0; r < pastedData.length; r++) {
       const dataRow = pastedData[r];
       const currentRowIndex = rowIndex + r;
+      touchedRows.set(currentRowIndex, true);
       if (!newData[currentRowIndex]) {
         newData[currentRowIndex] = {} as any;
       }
@@ -304,7 +306,7 @@ export function handlePaste({
 
       dirtyRows[currentRowIndex] = dirtyRowData;
     }
-    return { tableData: newData, dirtyRows: dirtyRows, pasteKey: prev.pasteKey > 100 ? 0 : prev.pasteKey + 1 };
+    return { tableData: newData, dirtyRows: dirtyRows, pasteKey: prev.pasteKey > 100 ? 0 : prev.pasteKey + 1, touchedRows };
   });
 }
 
@@ -321,4 +323,29 @@ export function renderCellText(data: any, column: TColType) {
     return cell(props);
   }
   return null;
+}
+
+export function setValidRows({
+  prev,
+  rowIndex,
+  errorMessage,
+  accessor
+}: {
+  prev: StoreState;
+  rowIndex: number;
+  errorMessage: string;
+  accessor: string;
+}) {
+  const rowErrors = [...prev.rowErrors];
+  if (!rowErrors[rowIndex]) {
+    rowErrors[rowIndex] = new Map();
+  }
+  rowErrors[rowIndex].set(accessor, errorMessage);
+  if (!errorMessage || `${errorMessage}`.length === 0) {
+    rowErrors[rowIndex].delete(accessor);
+  }
+  if (rowErrors[rowIndex].size === 0) {
+    rowErrors[rowIndex] = null;
+  }
+  return { rowErrors } as const;
 }

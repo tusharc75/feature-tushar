@@ -41,7 +41,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
   const [allowedToEdit, setAllowedToEdit] = useState(permissions?.[camelCase(step?.linkResourceName)]?.isUpdate);
   const [allowedToDelete, setAllowedToDelete] = useState(permissions?.[camelCase(step?.linkResourceName)]?.isDelete);
   const [linkResourceFieldType, setLinkResourceFieldType] = useState(null);
-  const [counterField, setCounterField] = useState(null)
+  const [counterField, setCounterField] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
 
   useEffect(() => {
@@ -56,7 +56,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
         data: { data }
       } = await axiosInstance().get(`/field?resource=${step?.linkResourceName}`);
       setLinkResourceFieldType(data?.find((d) => d?.fieldData?.fieldName === step?.linkResourceField)?.fieldData?.type);
-      setCounterField(data?.find(d => d?.fieldData?.type === 'counter'))
+      setCounterField(data?.find((d) => d?.fieldData?.type === 'counter'));
       const detailPagePath = `/${kebabCase(step?.linkResourceName)}/detail`;
       const newColumns = generateColumns(
         camelCase(step?.linkResourceName),
@@ -80,7 +80,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
                   className="link text-truncate"
                   title={row?.original?.[primaryField?.fieldData?.fieldName]}
                   onClick={() => {
-                    window.open(`${detailPagePath}/${row?.original?._id}`)
+                    window.open(`${detailPagePath}/${row?.original?._id}`);
                   }}
                 >
                   {row?.original?.[primaryField?.fieldData?.fieldName]}
@@ -95,50 +95,50 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
         ...(step?.readOnly
           ? []
           : [
-            {
-              accessor: 'action',
-              Header: 'Actions',
-              minWidth: 100,
-              width: 110,
-              sticky: 'right',
-              disableFilters: true,
-              disableSortBy: true,
-              canDrag: false,
-              Cell: ({ row }) => (
-                <>
-                  <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
-                    <span>
-                      <IconButton
-                        size="small"
-                        aria-label="Edit"
-                        disabled={allowedToEdit ? false : true}
-                        onClick={() => {
-                          setOpen({ open: true, id: row?.original?._id });
-                        }}
-                      >
-                        <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                  <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
-                    <span>
-                      <IconButton
-                        size="small"
-                        aria-label="Delete"
-                        disabled={allowedToDelete ? false : true}
-                        onClick={() => {
-                          setDeleteRecord(row?.original);
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                </>
-              )
-            }
-          ])
+              {
+                accessor: 'action',
+                Header: 'Actions',
+                minWidth: 100,
+                width: 110,
+                sticky: 'right',
+                disableFilters: true,
+                disableSortBy: true,
+                canDrag: false,
+                Cell: ({ row }) => (
+                  <>
+                    <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="Edit"
+                          disabled={allowedToEdit ? false : true}
+                          onClick={() => {
+                            setOpen({ open: true, id: row?.original?._id });
+                          }}
+                        >
+                          <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
+                    <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="Delete"
+                          disabled={allowedToDelete ? false : true}
+                          onClick={() => {
+                            setDeleteRecord(row?.original);
+                            setShowDeleteConfirmBox(true);
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
+                  </>
+                )
+              }
+            ])
       ]);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -167,9 +167,9 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
           return finalObject;
         });
         if (counterField) {
-          setSelectedRow(rows[0])
+          setSelectedRow(rows[0]);
         }
-        dispatch({ type: 'initialize', data: rows, count: count });
+        dispatch({ type: 'initialize', data: rows.reverse(), count: count });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -344,11 +344,9 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
                 />
               </div>
               <div className="container-with-border">
-                {selectedRow &&
-                  <ShowCounterField
-                    fields={counterField?.fieldData?.subFields}
-                    resource={step?.linkResourceName}
-                    selectedRow={selectedRow} />}
+                {selectedRow && (
+                  <ShowCounterField fields={counterField?.fieldData?.subFields} resource={step?.linkResourceName} selectedRow={selectedRow} />
+                )}
               </div>
             </div>
           ) : (
