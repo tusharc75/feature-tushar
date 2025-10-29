@@ -127,8 +127,8 @@ const Pagination: FC<PaginationProps> = ({
     <div className={`${className} pagination py-3 @container max-[768px]:mt-3`} {...others}>
       <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end sm:gap-3">
         <div className="rows-per-page sm:justify-[unset] flex items-center justify-center gap-2 min-[768px]:ml-auto max-[768px]:[&_.MuiSelect-iconOutlined]:[right:2px_!important] max-[768px]:[&_.MuiSelect-select]:[padding:5.5px_29px_5.5px_10px_!important]">
-          <span className="max-[768px]:sr-only">
-            <span className="hidden @[420px]:block">Rows </span>Per Page:
+          <span className="flex gap-1 max-[768px]:sr-only">
+            <span className="hidden @[420px]:inline">Rows</span>Per Page:
           </span>
           <FormControl size="small" margin="none" style={{ width: 'max-content' }} disabled={disabled}>
             <Select
