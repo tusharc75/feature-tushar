@@ -15,7 +15,8 @@ const getInitialState = <D, C extends readonly string[]>(): UseCardColState<D, C
     visible: null,
     selectedView: null,
     selectedRecordObj: {},
-    resetSelectionSignal: false
+    resetSelectionSignal: false,
+    resource: ''
   };
 };
 
@@ -46,6 +47,8 @@ const reducer = <D, C extends readonly string[]>(state: UseCardColState<D, C>, a
       return { ...state, defaultVisibleRows: action.payload } as UseCardColState<D, C>;
     case 'setLimit':
       return { ...state, limit: action.payload } as UseCardColState<D, C>;
+    case 'setResource':
+      return { ...state, resource: action.payload } as UseCardColState<D, C>;
   }
 };
 
@@ -61,6 +64,10 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
 
   const setColumns = useCallback((payload: UseCardColState<D, C>['columns']) => {
     setState({ type: 'setColumns', payload: payload });
+  }, []);
+
+  const setResource = useCallback((payload: UseCardColState<D, C>['resource']) => {
+    setState({ type: 'setResource', payload: payload });
   }, []);
 
   const setVisibleColumns = useCallback((payload: UseCardColState<D, C>['visibleColumns']) => {
@@ -129,6 +136,7 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
   return {
     ...state,
     setColumns,
+    setResource,
     setVisibleColumns,
     refreshAllColumns,
     setLimit,
