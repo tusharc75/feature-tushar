@@ -24,7 +24,7 @@ import RadiusFilterDialog from './RadiusFilterDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 
 const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, ids = [], defaultCompetencyType = [], extraStaticFilter = [], warehouse = null,
-  currentCompetencyType = '', currentCompetencies = [], location = null }) => {
+  currentCompetencyType = '', currentCompetencies = [], location }) => {
   const renderedFrom = `${sidebarResource.employeeMaster}`;
   const toastConfig = useContext(CustomToastContext);
 

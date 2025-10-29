@@ -230,6 +230,8 @@ export type Step = {
   returnToStepOnFail?: string;
 };
 export type IngAddress = {
+  longitude?: any;
+  latitude?: any;
   city?: string;
   zipCode?: string;
   optionValue?: string;
