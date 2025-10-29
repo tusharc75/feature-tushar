@@ -19,10 +19,7 @@ const MultiSelectCell = ({ cellIndex, column, data, exitEditMode, isEditing, row
   }, [column, hasFocus]);
 
   const handleCleanDirtyRows = (dirtyRows) => {
-    return cleanDirtyRowData(
-      dirtyRows,
-      columns.map((d) => d.id ?? d.accessor)
-    );
+    return cleanDirtyRowData(dirtyRows, columns);
   };
 
   useEffect(() => {
@@ -52,7 +49,6 @@ const MultiSelectCell = ({ cellIndex, column, data, exitEditMode, isEditing, row
       }
       tableData[rowIndex][`rest${key}`] = rest ?? [];
       dirtyRows[rowIndex] = handleCleanDirtyRows({ ...tableData[rowIndex], [key]: newValue.map((d) => d.optionValue) });
-
       return {
         dirtyRows,
         tableData

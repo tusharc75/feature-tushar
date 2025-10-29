@@ -56,7 +56,7 @@ const useEditableExcelTable = (data: any[], columns: TColType[], onChange: (data
     return () => {
       window.removeEventListener(MOVE_SELECTED_CELL, handleListen);
     };
-  }, []);
+  }, [setStore]);
 
   // listen for range change
   useEffect(() => {
