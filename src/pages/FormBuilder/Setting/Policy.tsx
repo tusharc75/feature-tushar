@@ -167,10 +167,8 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
         idx={idx}
         data={data}
         onChange={onChange}
-        resource={resource}
         errors={errors}
         touched={touched}
-        setFieldValue={setFieldValue}
         fields={fields}
       />
     );
@@ -632,7 +630,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
           ))}
         </div>
       ) : (
-        <Box className="h-fit" p={2}>
+        <Box className="h-fit" p={2}>p
           <CommonSkeleton lenArray={[...Array(5).keys()]} />
         </Box>
       )}
@@ -640,10 +638,8 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
   );
 };
 
-const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resource, setFieldValue, fields }) => {
+const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touched, fields }) => {
   const [fieldOptions, setFieldOptions] = useState([]);
-  const [statusOptions, setStatusOptions] = useState([]);
-  const [subStatusOptions, setSubStatusOptions] = useState([]);
   const [initialData, setInitialData] = useState({ fieldsData: [...(Data?.data || [])], fields: Data?.fields });
   const [optionLoading, setOptionLoading] = useState(false);
   const [fieldColorFieldNameOptions, setFieldColorFieldNameOptions] = useState([]);
@@ -684,10 +680,6 @@ const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touch
 
   useEffect(() => {
     let fieldsData = [...fields];
-    const statusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'status')?.fieldData?.option || [];
-    const subStatusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'subStatus')?.fieldData?.option || [];
-    setStatusOptions(statusOptions);
-    setSubStatusOptions(subStatusOptions);
     fieldsData = fieldsData
       ?.filter((ele) => !ele.fieldData?.primaryField)
       ?.map((e) => {
@@ -703,20 +695,6 @@ const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touch
         ['dropDown', 'decimal', 'number'].includes(f?.fieldData?.type) && !f?.fieldData?.lookup)?.map(e => ({ optionLabel: e?.fieldData?.fieldLabel, optionValue: e?.fieldData?.fieldName })))
     }
   }, [fields]);
-
-  const getStatusOptions = (data) => {
-    const statusTemp = [...statusOptions];
-    return statusTemp;
-  };
-
-  const getSubStatusOptions = (data) => {
-    const options = subStatusOptions?.filter((ele) => !data?.some((e) => e?.status === ele.optionValue));
-    return options ? options : subStatusOptions;
-  };
-
-  const getValueOptions = (value) => {
-    return fields?.find(f => f?.fieldData?.fieldName === value?.fieldName)?.fieldData?.option || []
-  }
 
   return (
     <>
@@ -784,11 +762,11 @@ const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touch
                           onChange={(e, val) => {
                             const updatedData = [...initialData.fieldsData];
                             updatedData[colorIndex].fields[fieldIndex].fieldName = val?.optionValue || '';
-                            updatedData[colorIndex].fields[fieldIndex].value = []; // Reset value when field changes
+                            updatedData[colorIndex].fields[fieldIndex].value = [];
                             setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
                             onChange(null, updatedData);
                           }}
-                          value={fieldColorFieldNameOptions?.filter(ele => ele?.optionValue === field.fieldName)[0] || null}
+                          value={fieldColorFieldNameOptions?.filter(ele => ele?.optionValue === field.fieldName)[0]}
                           multiple={false}
                           fieldLabel="Field Name"
                           fieldName="fieldName"
@@ -805,7 +783,7 @@ const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touch
                             setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
                             onChange(null, updatedData);
                           }}
-                          value={OPERATOR_OPTIONS?.filter(ele => ele?.optionValue === field.operator)[0] || null}
+                          value={OPERATOR_OPTIONS?.filter(ele => ele?.optionValue === field.operator)[0]}
                           multiple={false}
                           fieldLabel="Operator"
                           fieldName="operator"
@@ -887,8 +865,8 @@ const FieldColorMultipleFormFields = ({ data: Data, idx, onChange, errors, touch
                         onChange(null, updatedData);
                       }}
                       style={{
-                        width: '40px',
-                        height: '32px',
+                        width: '56px',
+                        height: '28px',
                         border: 'none',
                         borderRadius: '4px',
                         cursor: 'pointer'
