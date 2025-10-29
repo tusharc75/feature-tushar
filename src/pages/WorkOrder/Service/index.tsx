@@ -354,7 +354,7 @@ const Service = ({
       .post(`${workOrder.api}/service/${workOrderId}`, data)
       .then(() => {
         setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null, parentId: null });
-        if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired]?.includes(quotationData?.status)) {
+        if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired]?.includes(quotationData?.status) && workOrderData?.type !== WORK_ORDER_TYPE.job) {
           setReviseQuotation(true);
         } else {
           fetchServiceData();
@@ -380,7 +380,7 @@ const Service = ({
           message: data?.message
         });
         prevOrder.current = serviceSteps?.findIndex((s) => s?.uniqueId === selectedService?.uniqueId) + 1;
-        if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired]?.includes(quotationData?.status)) {
+        if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired]?.includes(quotationData?.status) && workOrderData?.type !== WORK_ORDER_TYPE.job) {
           setReviseQuotation(true);
         } else {
           fetchServiceData();
