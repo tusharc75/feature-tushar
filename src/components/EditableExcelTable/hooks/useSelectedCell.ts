@@ -62,6 +62,7 @@ const useSelectedCell = ({
   const [isSelected, setIsSelected] = useState(false);
   const cellRef = useRef<HTMLTableDataCellElement>(null);
   const [moveEventData] = useEditableTableStore((state) => state.moveEventData);
+  const [, setStore] = useEditableTableStore((store) => store.pasteKey);
 
   useEffect(() => {
     if (!moveEventData) return;
@@ -80,8 +81,19 @@ const useSelectedCell = ({
       endCell: { row: rowIndex, col: colIndex },
       selectedRange: [{ row: rowIndex, col: colIndex }]
     });
+
     setIsSelected(true);
   }, [colIndex, rowIndex]);
+
+  // set touchede rows
+  useEffect(() => {
+    if (!isSelected) return;
+    setStore((prev) => {
+      const touchedRows = new Map(prev.touchedRows);
+      touchedRows.set(rowIndex, isSelected);
+      return { touchedRows };
+    });
+  }, [isSelected, rowIndex, setStore]);
 
   const exitEditMode = useCallback(() => {
     setIsSelected(false);
@@ -97,8 +109,8 @@ const useSelectedCell = ({
     }
     const direction = directionMap[e.key];
     if (!direction || !cellRef.current) return;
-    e.preventDefault();
-    e.stopPropagation();
+    // e.preventDefault();
+    // e.stopPropagation();
     const payload: TMoveCellEvent = {
       prev: {
         colIndex,

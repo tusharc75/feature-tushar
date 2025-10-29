@@ -1,6 +1,6 @@
-import { FormControl, MenuItem, Select, IconButton } from '@mui/material';
+import { FormControl, MenuItem, Select, IconButton, SelectChangeEvent } from '@mui/material';
 import { ChevronLeft, ChevronRight } from '@mui/icons-material';
-import React, { FC, useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { FC, useState, useCallback, useMemo, useEffect, useRef, ReactNode } from 'react';
 import { useDebounce } from 'src/hooks';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -64,7 +64,7 @@ const Pagination: FC<PaginationProps> = ({
     }
   };
 
-  const handleRowsPerPageChange = (e: React.ChangeEvent<{ value: unknown }>) => {
+  const handleRowsPerPageChange = (e: SelectChangeEvent<number>, child: ReactNode) => {
     const target = e.target as HTMLInputElement;
     const value = parseInt(target.value);
     setIsConfirmDialogOpen({ value, loading: false });
@@ -124,12 +124,21 @@ const Pagination: FC<PaginationProps> = ({
   }, [debouncedTextValue]);
 
   return (
-    <div className={`${className} pagination py-3 max-[768px]:mt-3`} {...others}>
+    <div className={`${className} pagination py-3 @container max-[768px]:mt-3`} {...others}>
       <div className="flex flex-wrap items-center justify-between gap-2 sm:justify-end sm:gap-3">
         <div className="rows-per-page sm:justify-[unset] flex items-center justify-center gap-2 min-[768px]:ml-auto max-[768px]:[&_.MuiSelect-iconOutlined]:[right:2px_!important] max-[768px]:[&_.MuiSelect-select]:[padding:5.5px_29px_5.5px_10px_!important]">
-          <span className="max-[768px]:sr-only">Rows Per Page:</span>
+          <span className="max-[768px]:sr-only">
+            <span className="hidden @[420px]:block">Rows </span>Per Page:
+          </span>
           <FormControl size="small" margin="none" style={{ width: 'max-content' }} disabled={disabled}>
-            <Select labelId="label" size="small" id="select" value={rowsPerPage || rowsPerPageOptions[0]} variant="outlined" onChange={handleRowsPerPageChange}>
+            <Select
+              labelId="label"
+              size="small"
+              id="select"
+              value={rowsPerPage || rowsPerPageOptions[0]}
+              variant="outlined"
+              onChange={handleRowsPerPageChange}
+            >
               {rowsPerPageOptions.map((option) => (
                 <MenuItem value={option} key={option}>
                   {option}

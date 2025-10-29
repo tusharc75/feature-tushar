@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
-import { SelectedRange } from 'src/components/EditableExcelTable/CustomEvents';
+import { dispatchPastedRangeEvent, SelectedRange } from 'src/components/EditableExcelTable/CustomEvents';
 import { StoreState } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
 import FieldList from 'src/components/FormBuilder/FieldList';
 import { dateFormat, dateTimeFormat, DEFAULT_TIME_ZONE, displayDate, displayDateTime, formatAmountWithCurrency } from 'src/constants/helpers';
@@ -270,7 +270,7 @@ export function handlePaste({
   if (!selectedRange) return;
   if (!tableBody) return;
 
-  const targetRow = tableBody.querySelector(`tr[data-row="${selectedRange.startCell.row}"]`);
+  const targetRow = tableBody.querySelector(`tr[data-row="${selectedRange.startCell.row}"]`) as HTMLElement;
 
   if (pastedData.length === 0) return;
   event.preventDefault();
@@ -280,13 +280,29 @@ export function handlePaste({
   const rowIndex = Number(selectedRange.startCell.row);
   const colIndex = Number(selectedRange.startCell.col);
 
+  const lastRowIndex = rowIndex + pastedData.length - 1;
+  const lastColIndex = colIndex + pastedData[0].length - 1;
+
+  dispatchPastedRangeEvent(targetRow, {
+    startCell: {
+      col: colIndex,
+      row: rowIndex
+    },
+    endCell: {
+      col: lastColIndex,
+      row: lastRowIndex
+    }
+  });
+
   setStore((prev) => {
     const newData = [...prev.tableData];
     const dirtyRows = [...prev.dirtyRows];
+    const touchedRows = new Map(prev.touchedRows);
 
     for (let r = 0; r < pastedData.length; r++) {
       const dataRow = pastedData[r];
       const currentRowIndex = rowIndex + r;
+      touchedRows.set(currentRowIndex, true);
       if (!newData[currentRowIndex]) {
         newData[currentRowIndex] = {} as any;
       }
@@ -304,7 +320,7 @@ export function handlePaste({
 
       dirtyRows[currentRowIndex] = dirtyRowData;
     }
-    return { tableData: newData, dirtyRows: dirtyRows, pasteKey: prev.pasteKey > 100 ? 0 : prev.pasteKey + 1 };
+    return { tableData: newData, dirtyRows: dirtyRows, pasteKey: prev.pasteKey > 100 ? 0 : prev.pasteKey + 1, touchedRows };
   });
 }
 
@@ -321,4 +337,29 @@ export function renderCellText(data: any, column: TColType) {
     return cell(props);
   }
   return null;
+}
+
+export function setValidRows({
+  prev,
+  rowIndex,
+  errorMessage,
+  accessor
+}: {
+  prev: StoreState;
+  rowIndex: number;
+  errorMessage: string;
+  accessor: string;
+}) {
+  const rowErrors = [...prev.rowErrors];
+  if (!rowErrors[rowIndex]) {
+    rowErrors[rowIndex] = new Map();
+  }
+  rowErrors[rowIndex].set(accessor, errorMessage);
+  if (!errorMessage || `${errorMessage}`.length === 0) {
+    rowErrors[rowIndex].delete(accessor);
+  }
+  if (rowErrors[rowIndex].size === 0) {
+    rowErrors[rowIndex] = null;
+  }
+  return { rowErrors } as const;
 }
