@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import axiosInstance from 'src/axios/axiosInstance';
 import { useEditableTableStore } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
 import DropDownHelper from 'src/components/EditableExcelTable/TableComponents/Cells/DropDownHelper';
 import { CellProps, Option } from 'src/components/EditableExcelTable/types';
-import { cleanDirtyRowData, getDropdownOptionValue } from 'src/components/EditableExcelTable/utils';
+import { cleanDirtyRowData, getDropdownOptionValue, setValidRows } from 'src/components/EditableExcelTable/utils';
 
 const MultiSelectCell = ({ cellIndex, column, data, exitEditMode, isEditing, rowIndex, allowedEditing, isSelected, ...rest }: CellProps) => {
   const [options, setOptions] = useState<Option[]>([]);
@@ -15,31 +14,23 @@ const MultiSelectCell = ({ cellIndex, column, data, exitEditMode, isEditing, row
 
   useEffect(() => {
     if (!hasFocus) return;
-    if (column.lookup) {
-      const lookupResource = column.lookupResource === 'Quote' ? 'quoteBuilder' : column.lookupResource;
-      axiosInstance()
-        .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
-        .then(({ data: { data } }) => {
-          setOptions(data[lookupResource] || []);
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error(error);
-          setOptions([]);
-          setLoading(false);
-        });
-    } else {
-      setOptions(column?.option || []);
-      setLoading(false);
-    }
+    setOptions(column?.option || []);
+    setLoading(false);
   }, [column, hasFocus]);
 
   const handleCleanDirtyRows = (dirtyRows) => {
-    return cleanDirtyRowData(
-      dirtyRows,
-      columns.map((d) => d.id ?? d.accessor)
-    );
+    return cleanDirtyRowData(dirtyRows, columns);
   };
+
+  useEffect(() => {
+    let errorMessage = '';
+    if (column.required && value?.length === 0) {
+      errorMessage = `${column.Header} is required`;
+    } else {
+      errorMessage = '';
+    }
+    setStore((prev) => setValidRows({ prev, accessor: column.id || column.accessor, rowIndex, errorMessage }));
+  }, [value, column.id, column.accessor, column.required, setStore, rowIndex, column.Header]);
 
   const setValueToState = (newValue: Option[]) => {
     setHasFocus(false);
@@ -58,7 +49,6 @@ const MultiSelectCell = ({ cellIndex, column, data, exitEditMode, isEditing, row
       }
       tableData[rowIndex][`rest${key}`] = rest ?? [];
       dirtyRows[rowIndex] = handleCleanDirtyRows({ ...tableData[rowIndex], [key]: newValue.map((d) => d.optionValue) });
-
       return {
         dirtyRows,
         tableData
