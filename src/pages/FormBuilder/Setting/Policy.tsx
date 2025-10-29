@@ -371,7 +371,7 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, touc
           name={fieldName}
           label={fieldLabel}
           error={touched && Boolean(error)}
-          helperText={touched && error && typeof error === 'string' ? error : ''}
+          helperText={touched && error}
           variant="outlined"
           required={required}
           size="small"
@@ -562,11 +562,9 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                               ? getSubStatusOptions(initialData?.fieldsData)
                               : field?.fieldName === 'fieldName'
                                 ? fieldColorFieldNameOptions
-                                : field?.fieldName === 'operator'
-                                  ? OPERATOR_OPTIONS
-                                  : field?.fieldName === 'value'
-                                    ? getValueOptions(value)
-                                    : fieldOptions
+                                : field?.fieldName === 'value'
+                                  ? getValueOptions(value)
+                                  : fieldOptions
                       }
                       error={errors[`policies.${idx}.data.${index}.${field.fieldName}`]}
                       touched={touched?.policies && touched?.policies?.[idx]?.data[index]?.[field.fieldName]}
@@ -600,11 +598,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                             ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))[0]
                             : field?.fieldName === 'status' ?
                               getStatusOptions(initialData?.fieldsData)?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
-                              : field?.fieldName === 'fieldName'
-                                ? fieldColorFieldNameOptions?.filter(ele => ele?.optionValue === value[`${field.fieldName}`])[0]
-                                : field?.fieldName === 'operator'
-                                  ? OPERATOR_OPTIONS?.filter(ele => ele?.optionValue === value[`${field.fieldName}`])[0]
-                                  : fieldOptions?.filter(ele => ele?.optionValue === value[`${field.fieldName}`])[0]
+                              : fieldColorFieldNameOptions?.filter(ele => ele?.optionValue === value[`${field.fieldName}`])[0]
                       }
                       multiple={field?.type === 'multiSelect'}
                       fieldLabel={field?.fieldLabel}
