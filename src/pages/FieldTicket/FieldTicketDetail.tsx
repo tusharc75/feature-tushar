@@ -273,7 +273,6 @@ const FieldTicketDetail = () => {
                 fieldTicketFields={fields}
                 allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep}
-                handleChangeStatus={handleChangeStatus}
                 resourcePolicy={resourcePolicyData?.policy}
                 stepFullScreen={stepFullScreen}
                 fetchData={fetchData}
