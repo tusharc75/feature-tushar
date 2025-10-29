@@ -380,6 +380,7 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
           currentFilter={radiusFilter}
           onMinimizeMaximize={() => { setFullScreen((prevState) => !prevState); }}
           fullScreen={fullScreen || isMobile || isTablet}
+          technicians={dataRows}
         />
       )}
     </>
