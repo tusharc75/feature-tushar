@@ -1,6 +1,6 @@
 import { AccountCircle } from '@mui/icons-material';
 import { Avatar, Box, Dialog, Slider } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { GoogleMap, GoogleMapProps, Marker, Circle, MarkerClusterer, InfoWindow } from '@react-google-maps/api';
 import { useAppTheme } from 'src/constants/AppConfig';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
@@ -9,6 +9,7 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { ThemeButton } from '../Helpers/Buttons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { displayDateTime } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const RadiusFilterDialog = ({ onClose, location, onApply, currentFilter, onMinimizeMaximize, fullScreen, technicians }) => {
   const [selectedRadius, setSelectedRadius] = useState(currentFilter?.radius || 50);
@@ -18,6 +19,7 @@ const RadiusFilterDialog = ({ onClose, location, onApply, currentFilter, onMinim
   const [selectedTechnician, setSelectedTechnician] = useState(null);
   const [showCenterInfo, setShowCenterInfo] = useState(false);
   const [mapCenter, setMapCenter] = useState(null);
+  const toastConfig = useContext(CustomToastContext);
 
   const fetchData = async () => {
     setLoading(true);
@@ -29,7 +31,7 @@ const RadiusFilterDialog = ({ onClose, location, onApply, currentFilter, onMinim
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      console.error('Error fetching technician data:', error);
+      toastConfig.setToastConfig(error);
     }
   }
 
