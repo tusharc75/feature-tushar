@@ -73,8 +73,10 @@ export const useTableRange = ({
       const { endCell, startCell } = e.detail;
       startCellRect.current = tableBodyRef.current
         ?.querySelector?.(`td[data-row="${startCell.row}"][data-col="${startCell.col}"]`)
-        .getBoundingClientRect();
-      endCellRect.current = tableBodyRef.current?.querySelector?.(`td[data-row="${endCell.row}"][data-col="${endCell.col}"]`).getBoundingClientRect();
+        ?.getBoundingClientRect?.();
+      endCellRect.current = tableBodyRef.current
+        ?.querySelector?.(`td[data-row="${endCell.row}"][data-col="${endCell.col}"]`)
+        ?.getBoundingClientRect?.();
       if (startCellRect.current && endCellRect.current) {
         updateRangeBox();
       }
