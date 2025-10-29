@@ -698,8 +698,8 @@ const MultipleFieldColor = ({ data: Data, idx, onChange, errors, touched, fields
 
           {initialData?.fieldsData?.map((colorItem, colorIndex) => (
             <div key={colorIndex} className="px-2 last:mb-3">
-              <fieldset className=" rounded-md border border-gray-200 p-3 dark:border-gray-800">
-                <legend className="ml-auto flex w-full max-w-fit items-center justify-end px-1 text-sm font-semibold">
+              <fieldset className=" rounded-md border border-gray-200 p-3 shadow-sm dark:border-gray-800 dark:bg-slate-800">
+                <legend className="ml-auto flex w-full max-w-fit items-center justify-end  text-sm font-semibold">
                   <HtmlTooltip title={'Remove Color Group'}>
                     <IconButton
                       size="small"
