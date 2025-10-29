@@ -46,3 +46,17 @@ export function dispatchSelectionEvent(element: HTMLElement, details: SelectedRa
   });
   element.dispatchEvent(selectedRangeEvent);
 }
+
+export type PastedRange = {
+  startCell: CellPosition;
+  endCell: CellPosition;
+};
+export const PASTED_RANGE = 'pastedRange';
+export function dispatchPastedRangeEvent(element: HTMLElement, details: PastedRange) {
+  const pastedRangeEvent = new CustomEvent(PASTED_RANGE, {
+    detail: details,
+    bubbles: true,
+    cancelable: true
+  });
+  element.dispatchEvent(pastedRangeEvent);
+}

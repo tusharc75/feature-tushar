@@ -109,8 +109,8 @@ const useSelectedCell = ({
     }
     const direction = directionMap[e.key];
     if (!direction || !cellRef.current) return;
-    e.preventDefault();
-    e.stopPropagation();
+    // e.preventDefault();
+    // e.stopPropagation();
     const payload: TMoveCellEvent = {
       prev: {
         colIndex,

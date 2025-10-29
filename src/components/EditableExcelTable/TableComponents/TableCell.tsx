@@ -1,11 +1,11 @@
-import { ClickAwayListener } from '@mui/material';
+import { ClickAwayListener, Tooltip } from '@mui/material';
 import React, { useMemo } from 'react';
 import useSelectedCell from 'src/components/EditableExcelTable/hooks/useSelectedCell';
 import EditableCells from 'src/components/EditableExcelTable/TableComponents/Cells';
 import { cn } from 'src/constants/helpers';
 import { TableCellProps } from '../types';
 import { useEditableTableStore } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
-import { Info } from '@mui/icons-material';
+import { Info, Warning } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 export const TableCell = React.memo(({ data, column, cellIndex, rowIndex, onMouseDown, totalColumns, totalRows }: TableCellProps) => {
@@ -51,11 +51,22 @@ export const TableCell = React.memo(({ data, column, cellIndex, rowIndex, onMous
           )}
         >
           {isRowTouched && rowErrors?.get?.(column.id || column.accessor) ? (
-            <HtmlTooltip title={rowErrors?.get?.(column.id || column.accessor)} className="block">
-              <span className="absolute right-[2px] top-[2px] block cursor-pointer">
-                <Info color="error" />
+            <Tooltip
+              title={
+                <p className="text-center">
+                  <Warning color="warning" className="mx-auto" />
+                  {rowErrors?.get?.(column.id || column.accessor)}, <p>Data cannot be saved.</p>
+                </p>
+              }
+              className="block"
+              arrow
+              placement="top"
+              enterTouchDelay={0}
+            >
+              <span className="absolute right-[2px] top-[2px] block cursor-help">
+                <Warning color="error" />
               </span>
-            </HtmlTooltip>
+            </Tooltip>
           ) : null}
         </span>
         <EditableCells

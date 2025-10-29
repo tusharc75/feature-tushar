@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
-import { SelectedRange } from 'src/components/EditableExcelTable/CustomEvents';
+import { dispatchPastedRangeEvent, SelectedRange } from 'src/components/EditableExcelTable/CustomEvents';
 import { StoreState } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
 import FieldList from 'src/components/FormBuilder/FieldList';
 import { dateFormat, dateTimeFormat, DEFAULT_TIME_ZONE, displayDate, displayDateTime, formatAmountWithCurrency } from 'src/constants/helpers';
@@ -270,7 +270,7 @@ export function handlePaste({
   if (!selectedRange) return;
   if (!tableBody) return;
 
-  const targetRow = tableBody.querySelector(`tr[data-row="${selectedRange.startCell.row}"]`);
+  const targetRow = tableBody.querySelector(`tr[data-row="${selectedRange.startCell.row}"]`) as HTMLElement;
 
   if (pastedData.length === 0) return;
   event.preventDefault();
@@ -279,6 +279,20 @@ export function handlePaste({
   const sortedCells = [...targetRow.querySelectorAll('td')]?.map((c) => c.getAttribute('data-key')).filter((d, i) => !!d && i !== 0);
   const rowIndex = Number(selectedRange.startCell.row);
   const colIndex = Number(selectedRange.startCell.col);
+
+  const lastRowIndex = rowIndex + pastedData.length - 1;
+  const lastColIndex = colIndex + pastedData[0].length - 1;
+
+  dispatchPastedRangeEvent(targetRow, {
+    startCell: {
+      col: colIndex,
+      row: rowIndex
+    },
+    endCell: {
+      col: lastColIndex,
+      row: lastRowIndex
+    }
+  });
 
   setStore((prev) => {
     const newData = [...prev.tableData];
