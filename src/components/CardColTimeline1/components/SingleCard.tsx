@@ -63,6 +63,15 @@ const SingleCard = <D, C extends readonly string[]>({
     setSize(index, rowRef.current?.getBoundingClientRect().height, true);
   }, [index, setSize]);
 
+  const setSelectedWrapper = useCallback(
+    (selected: boolean) => {
+      const isCardSelected = selectedRecordMap?.has(keyGetter(rowData)) || false;
+      if (selected === isCardSelected) return;
+      handleSelectSingle(rowData);
+    },
+    [handleSelectSingle, keyGetter, rowData, selectedRecordMap]
+  );
+
   if (!rowData) return null;
 
   return (
@@ -122,11 +131,8 @@ const SingleCard = <D, C extends readonly string[]>({
           {defaultDisplay?.map((d) => {
             const cell = renderCell(d, rowData);
             return (
-              <div className="mb-[2px] min-w-[calc(50%-8px)] flex-shrink flex-grow [&:has(.no-data-cell)]:hidden [&_*>*:has(.md\:sr-only)]:flex">
-                <h6
-                  className="line-clamp-1 max-w-[14ch] flex-shrink-0 text-xs font-normal leading-[1.5] text-gray-400 dark:text-gray-400 "
-                  title={d.Header}
-                >
+              <div className="mb-[2px] min-w-[calc(50%-4px)] flex-shrink flex-grow [&:has(.no-data-cell)]:hidden [&_*>*:has(.md\:sr-only)]:flex">
+                <h6 className="line-clamp-1 flex-shrink-0 text-xs font-normal leading-[1.5] text-gray-400 dark:text-gray-400 " title={d.Header}>
                   {d.Header}
                 </h6>
                 <div className="quote-name line-clamp-1 [&_*:not(.flex)]:line-clamp-1 [&_*]:!font-medium [&_*]:!text-[rgba(0,0,0,0.87)] [&_*]:![font-size:13px] [&_*]:![white-space:unset] dark:[&_*]:!text-[white] ">
@@ -140,9 +146,10 @@ const SingleCard = <D, C extends readonly string[]>({
           <>
             {customContent({
               row: rowData,
-              height: 200,
               renderCellText: renderCell,
               recalculateHeight,
+              isSelected: selectedRecordMap?.has(keyGetter(rowData)) || false,
+              handleSelect: setSelectedWrapper,
               getPreRenderedCell: (c, data) => {
                 const cell = renderCell(c, data);
                 return (

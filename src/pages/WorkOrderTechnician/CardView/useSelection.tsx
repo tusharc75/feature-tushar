@@ -9,7 +9,7 @@ const useSelection = <D,>(getId: (data: D) => string = (d) => d['_id']) => {
   const getIdStable = useEffectEvent(getId);
 
   const handleSelect = useCallback(
-    (data) => {
+    (data: D, allData: D[], callBack: (isAllSelcted: boolean) => void = () => {}) => {
       setSelectedRowMap((prev) => {
         const id = getIdStable(data);
         const newSelectedRowmap = new Map(prev);
@@ -18,6 +18,8 @@ const useSelection = <D,>(getId: (data: D) => string = (d) => d['_id']) => {
         } else {
           newSelectedRowmap.set(id, data);
         }
+        const isAllSelcted = allData.every((d) => newSelectedRowmap.has(getIdStable(d)));
+        callBack(isAllSelcted);
         return newSelectedRowmap;
       });
     },
@@ -55,9 +57,14 @@ const useSelection = <D,>(getId: (data: D) => string = (d) => d['_id']) => {
     [getIdStable, getIsAllSelected]
   );
 
+  const handleUnselectAll = useCallback(() => {
+    setSelectedRowMap(new Map());
+  }, []);
+
   return {
     selectedRows,
     selectedRowMap,
+    handleUnselectAll,
     handleSelect,
     getIsAllSelected,
     handleSelectAll,

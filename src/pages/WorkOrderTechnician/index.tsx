@@ -153,10 +153,6 @@ const WorkOrderTechnician = () => {
 
           return { ...finalObject, ...workOrderDetailData };
         });
-        if (column === 'Pending') {
-          console.log(rows);
-        }
-
         return { data: rows, count } as { data: any; count: number };
       } catch (error) {
         throw error;

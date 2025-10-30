@@ -95,10 +95,11 @@ export type CardColTimelineProps<D, C extends readonly string[]> = {
   estimatedItemSize?: number;
   customContent?: (props: {
     row: any;
-    height: number;
     getPreRenderedCell: (column: TColType, data: any) => React.ReactNode;
     renderCellText: (col: TColType, data: any) => any;
     recalculateHeight: () => void;
+    isSelected: boolean;
+    handleSelect: (selected: boolean) => void;
   }) => React.ReactNode;
   getColColors: (col: C[number]) => ColumnColor;
   cardOnClick?: (data: D) => void;
