@@ -15,7 +15,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getCellColorCode, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -38,6 +38,7 @@ import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRentalManagementDialog from './ManageRental';
 import { rentalJobClearOffline, rentalJobOfflineUpdate } from './rentalOfflineHelper';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const RentalManagement = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -218,6 +219,7 @@ const RentalManagement = () => {
 
   const fetchGridColumns = async () => {
     let data;
+    let resourcePolicy;
     if (isOffline) {
       data = await findOne(objectStore.resource, sidebarResource.rentalManagement);
     } else {
@@ -229,14 +231,13 @@ const RentalManagement = () => {
       } catch (e) {
         console.error(`Rental Offline: ${e.message}`);
       }
+      resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.rentalManagement);
     }
-
     let newColumns = generateColumns(renderedFrom, data, routes.rentalManagementDetail.path, true);
-
     newColumns?.forEach((o) => {
       if (o.accessor === 'rentalJobName') {
         o.cell = ({ row }) => (
-          <div>
+          <div style={{ backgroundColor: (() => { return getCellColorCode(resourcePolicy?.policy?.fieldColor, row?.original) })() }}>
             <Link
               className="link text-truncate"
               title={row?.original?.rentalJobName}
@@ -244,7 +245,7 @@ const RentalManagement = () => {
             >
               {row?.original?.rentalJobName}
             </Link>
-          </div>
+          </div >
         );
       } else {
         if (isOffline) {
@@ -560,12 +561,11 @@ const RentalManagement = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.rentalManagement?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.rentalJobName}`
-                : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.rentalManagement?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

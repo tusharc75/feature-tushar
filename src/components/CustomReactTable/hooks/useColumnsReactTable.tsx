@@ -36,6 +36,7 @@ import RichTextEditorCell from 'src/components/CustomReactTable/Cells/RichTextEd
 import { NOT_ALLOW_INLINE_EDIT_FIELD_TYPE } from 'src/components/FormBuilder/helper';
 import ImageUploadCell from 'src/components/CustomReactTable/Cells/ImageUploadCell';
 import CounterCell from 'src/components/CustomReactTable/Cells/CounterCell';
+import { getCellColorCode } from 'src/components/CustomReactTable/utils';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -72,10 +73,12 @@ export function useColumns() {
   );
 
   const generateColumns = useCallback(
-    (renderedFrom, fields, detailScreenRoute = null, masterPage = false, currency = null) => {
+    (renderedFrom, fields, detailScreenRoute = null, masterPage = false, currency = null, fieldColor = null) => {
       if (!currency) {
         currency = user?.user?.brandCurrency || 'USD';
       }
+
+      console.log(fieldColor)
 
       let updatedTitle = camelCase(renderedFrom);
       const column = [];
@@ -212,30 +215,31 @@ export function useColumns() {
             accessorKey: fieldName,
             cell: ({ row }) =>
               permissions[permissionForLinks[field?.resource]]?.isRead || permissions[updatedTitle]?.isRead ? (
-                <span>
-                  {row?.original?.[fieldName] ? (
-                    <>
-                      <Link
-                        className="link text-truncate"
-                        title={row?.original?.[fieldName]}
-                        to={`${detailScreenRoute}/${row?.original?._id}`}
-                        target={masterPage ? '_self' : '_blank'}
-                        rel="noopener noreferrer"
-                      >
-                        {row?.original?.[fieldName]}
-                      </Link>
-                      {row?.original?.deleted && (
-                        <Box ml={1}>
-                          <HtmlTooltip title={`Deleted`}>
-                            <InfoIcon className="cursor-pointer" fontSize="small" color="error" />
-                          </HtmlTooltip>
-                        </Box>
-                      )}
-                    </>
-                  ) : (
-                    <NoDataCell />
-                  )}
-                </span>
+                <div style={{
+                  backgroundColor: (() => { return getCellColorCode(fieldColor, row?.original) })()
+                }}>   {row?.original?.[fieldName] ? (
+                  <>
+                    <Link
+                      className="link text-truncate"
+                      title={row?.original?.[fieldName]}
+                      to={`${detailScreenRoute}/${row?.original?._id}`}
+                      target={masterPage ? '_self' : '_blank'}
+                      rel="noopener noreferrer"
+                    >
+                      {row?.original?.[fieldName]}
+                    </Link>
+                    {row?.original?.deleted && (
+                      <Box ml={1}>
+                        <HtmlTooltip title={`Deleted`}>
+                          <InfoIcon className="cursor-pointer" fontSize="small" color="error" />
+                        </HtmlTooltip>
+                      </Box>
+                    )}
+                  </>
+                ) : (
+                  <NoDataCell />
+                )}
+                </div>
               ) : (
                 <p className="text-truncate">{row?.original?.[fieldName] ? <p>{row?.original?.[fieldName]}</p> : <NoDataCell />}</p>
               )
