@@ -1,6 +1,6 @@
 import { Box, Dialog, Grid2 } from "@mui/material";
 import { Formik } from "formik";
-import { orderBy, uniqueId } from "lodash";
+import { isEmpty, orderBy, uniqueId } from "lodash";
 import { useContext, useEffect, useState } from "react";
 import axiosInstance from "src/axios/axiosInstance";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
@@ -51,7 +51,7 @@ const WorkOrdersCompleteStepDialog = ({ workOrders, onClose, onSuccess }) => {
                 let isDataAlreadyAdded = false;
                 const fieldNames = step?.fields?.map((e) => e.fieldName);
                 for (var key in _stepData) {
-                  if (fieldNames?.includes(key)) {
+                  if (fieldNames?.includes(key) && !isEmpty(_stepData[key])) {
                     isDataAlreadyAdded = true;
                   }
                 }

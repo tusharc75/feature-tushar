@@ -28,6 +28,8 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
       if ((isArray(values[name]) && values[name]?.length == 0) || !values[name]) {
         handelSetDefault()
       }
+    } else if (isArray(values[name])) {
+      setCount(`${values[name]?.length}`)
     }
   }, [setFieldValue, name]);
 
