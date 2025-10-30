@@ -6,7 +6,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { cn, sidebarResourceObjectFromValues } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 
-type NumberCellProps = {
+type CounterCellProps = {
   rowData: any[];
   field: any;
   enableDilaog?: boolean;
@@ -14,7 +14,7 @@ type NumberCellProps = {
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
-const NumberCellImpl = ({ rowData, field, enableDilaog = true }: NumberCellProps) => {
+const CounterCellImpl = ({ rowData, field, enableDilaog = true }: CounterCellProps) => {
   const {
     state: { permissions }
   }: any = useData();
@@ -59,5 +59,5 @@ const NumberCellImpl = ({ rowData, field, enableDilaog = true }: NumberCellProps
   );
 };
 
-const NumberCell = memo(NumberCellImpl);
-export default NumberCell;
+const CounterCell = memo(CounterCellImpl);
+export default CounterCell;
