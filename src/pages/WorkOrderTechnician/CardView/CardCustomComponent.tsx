@@ -27,8 +27,6 @@ const CardCustomComponent = React.memo(
     useEffect(() => {
       if (isSelected) {
         handleSelectAll(row.services);
-      } else {
-        handleUnselectAll();
       }
     }, [isSelected]);
 
