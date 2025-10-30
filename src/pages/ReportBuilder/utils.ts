@@ -28,7 +28,10 @@ export interface LookupPipeline extends PipelineItem {
 
 export interface GroupPipeline extends PipelineItem {
   type: 'group';
-  fields: string[];
+  fields: Array<{
+    fieldName: string;
+    resource: string;
+  }>;
   accumulator: Array<{
     field: string;
     operation: string;
