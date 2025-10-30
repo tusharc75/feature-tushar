@@ -1,22 +1,24 @@
 import { CheckCircle, CheckCircleOutline, RadioButtonUnchecked } from '@mui/icons-material';
 import { Checkbox, Skeleton } from '@mui/material';
 import axios, { CancelToken } from 'axios';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getRandomNumber } from 'src/components/AiChatbox/utils';
 import CardColTimelineLoader from 'src/components/CardColTimeline1/CardColTimelineLoader';
+import useHandleSelection from 'src/components/CardColTimeline1/components/useHandleSelection';
 import { cn } from 'src/constants/helpers';
-import { CommonProps } from './types';
 import Column from './Column';
+import { CommonProps } from './types';
 
-const ColumnWrapper = <D, C extends readonly string[]>({ state, getColColors, column, ...rest }: CommonProps<D, C>) => {
+const ColumnWrapper = <D, C extends readonly string[]>({ state, getColColors, column, subItemAccessor, getChildId, ...rest }: CommonProps<D, C>) => {
   const [data, setData] = useState<D[] | null>(null);
   const [count, setCount] = useState(0);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [initialLoading, setInitialLoading] = useState(true);
-  const { keyGetter, fetchSingleColumn, resource, refreshSignal, limit, filterQuery, columnDef, resetSelectionSignal, selectedRecordObj, setState } =
+  const { fetchSingleColumn, resource, refreshSignal, limit, filterQuery, columnDef, resetSelectionSignal, selectedRecordMap, setSelectedRecordMap } =
     state;
-  const [selectedRecordMap, setSelectedRecordmap] = useState<Map<string, boolean>>(new Map());
+
+  const { handleSelectAll, handleSelectSingle, isAllSelected } = useHandleSelection({ column, data, getChildId, state, subItemAccessor });
 
   const colors = getColColors(column);
   const isDataLoading = loading;
@@ -42,48 +44,7 @@ const ColumnWrapper = <D, C extends readonly string[]>({ state, getColColors, co
     },
     [column, fetchSingleColumn, filterQuery, limit]
   );
-
-  const isAllSelected = useMemo(() => {
-    return selectedRecordMap.size === data?.length;
-  }, [data?.length, selectedRecordMap]);
-
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
-
-  const handleSelectAll = () => {
-    if (isAllSelected) {
-      setState({ type: 'setSelectedRecordObj', payload: { ...selectedRecordObj, [column]: [] } });
-      setSelectedRecordmap(new Map());
-    } else {
-      const newSelectedMap: Map<string, boolean> = new Map();
-      data?.forEach((d) => {
-        newSelectedMap.set(keyGetter(d), true);
-      });
-      setState({ type: 'setSelectedRecordObj', payload: { ...selectedRecordObj, [column]: data } });
-      setSelectedRecordmap(newSelectedMap);
-    }
-  };
-
-  const handleSelectSingle = (data: D) => {
-    setSelectedRecordmap((prev) => {
-      const newData = new Map(prev);
-      if (prev.has(keyGetter(data))) {
-        newData.delete(keyGetter(data));
-        setState({
-          type: 'setSelectedRecordObj',
-          payload: { ...selectedRecordObj, [column]: selectedRecordObj[column].filter((d) => keyGetter(d) !== keyGetter(data)) }
-        });
-      } else {
-        newData.set(keyGetter(data), true);
-        if (selectedRecordObj[column]) {
-          setState({ type: 'setSelectedRecordObj', payload: { ...selectedRecordObj, [column]: [...selectedRecordObj[column], data] } });
-        } else {
-          setState({ type: 'setSelectedRecordObj', payload: { ...selectedRecordObj, [column]: [data] } });
-        }
-      }
-
-      return newData;
-    });
-  };
 
   useEffect(() => {
     const cancelToken = axios.CancelToken.source();
@@ -101,19 +62,8 @@ const ColumnWrapper = <D, C extends readonly string[]>({ state, getColColors, co
   }, [refreshSignal, filterQuery, resource]);
 
   useEffect(() => {
-    setSelectedRecordmap(new Map());
+    setSelectedRecordMap(new Map());
   }, [resetSelectionSignal]);
-
-  useEffect(() => {
-    if (selectedRecordObj[column]?.length) {
-      const newSelectedMap: Map<string, boolean> = new Map();
-      selectedRecordObj[column]?.forEach((d) => {
-        newSelectedMap.set(keyGetter(d), true);
-      });
-      setSelectedRecordmap(newSelectedMap);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
 
   return (
     <div className="min-w-[min(90%,400px)] max-w-[400px] flex-shrink-0 snap-start ">
@@ -149,8 +99,9 @@ const ColumnWrapper = <D, C extends readonly string[]>({ state, getColColors, co
             getColColors={getColColors}
             state={state}
             handleSelectSingle={handleSelectSingle}
-            selectedRecordMap={selectedRecordMap}
             colors={colors}
+            subItemAccessor={subItemAccessor}
+            getChildId={getChildId}
             {...rest}
           />
         ) : (

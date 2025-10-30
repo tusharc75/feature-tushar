@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { UseCardColActions, UseCardColState, UseCardColTimelineProps } from 'src/components/CardColTimeline1/types';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 
@@ -14,9 +14,9 @@ const getInitialState = <D, C extends readonly string[]>(): UseCardColState<D, C
     order: null,
     visible: null,
     selectedView: null,
-    selectedRecordObj: {},
     resetSelectionSignal: false,
-    resource: ''
+    resource: '',
+    expandedSubRows: new Set()
   };
 };
 
@@ -26,14 +26,17 @@ const reducer = <D, C extends readonly string[]>(state: UseCardColState<D, C>, a
       return { ...state, ...action.payload } as UseCardColState<D, C>;
     case 'resetSelection':
       return { ...state, resetSelectionSignal: !state.resetSelectionSignal };
-    case 'setSelectedRecordObj':
-      return { ...state, selectedRecordObj: action.payload };
+
     case 'setColumns':
       return { ...state, columns: action.payload } as UseCardColState<D, C>;
     case 'setVisibleColumns':
       return { ...state, visibleColumns: action.payload } as UseCardColState<D, C>;
     case 'setSelectedView':
       return { ...state, selectedView: action.payload };
+
+    case 'setExpandedSubRows': {
+      return { ...state, expandedSubRows: action.payload };
+    }
     case 'setColumnDef': {
       const payload = {
         ...state,
@@ -59,6 +62,8 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
   columnDef,
   keyGetter
 }: UseCardColTimelineProps<D, C>) => {
+  const [selectedSubItemsMap, setSelectedSubItemsMap] = useState<Map<string, Map<string, any>>>(new Map());
+  const [selectedRecordMap, setSelectedRecordMap] = useState<Map<string, Map<string, D>>>(new Map());
   const initialState = useMemo(() => getInitialState<D, C>(), []);
   const [state, setState] = useReducer(reducer, initialState);
 
@@ -95,6 +100,10 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
     const preparedColumnDef = prepareColumnDef(payload);
     setState({ type: 'setColumnDef', payload: preparedColumnDef });
   }, []);
+
+  const setExpandedSubRows = useCallback((payload: UseCardColState<D, C>['expandedSubRows']) => {
+    setState({ type: 'setExpandedSubRows', payload });
+  }, []);
   const setFilterQuery = useCallback(
     (payload: UseCardColState<D, C>['filterQuery']) => {
       setState({
@@ -106,7 +115,7 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
   );
 
   const resetSelection = () => {
-    setState({ type: 'setSelectedRecordObj', payload: {} });
+    setSelectedRecordMap(new Map());
     setState({ type: 'resetSelection' });
   };
 
@@ -129,12 +138,24 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
   }, [columnDef, columns, initialVisibleColumns]);
 
   const selectedRecords = useMemo(() => {
-    const data = Object.values(state.selectedRecordObj).flat() as D[];
+    const data = Array.from(selectedRecordMap.values())
+      .flatMap((innerMap) => Array.from(innerMap.values()))
+      .flat() as D[];
     return data;
-  }, [state.selectedRecordObj]);
+  }, [selectedRecordMap]);
+
+  const selectedSubRows = useMemo(() => {
+    const data = Array.from(selectedSubItemsMap.values())
+      .flatMap((innerMap) => Array.from(innerMap.values()))
+      .flat() as D[];
+    return data;
+  }, [selectedSubItemsMap]);
 
   return {
     ...state,
+    selectedSubRows,
+    selectedRecordMap,
+    setSelectedRecordMap,
     setColumns,
     setResource,
     setVisibleColumns,
@@ -149,6 +170,9 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
     setOrderAndVisibility,
     setSelectedView,
     resetSelection,
+    selectedSubItemsMap,
+    setSelectedSubItemsMap,
+    setExpandedSubRows,
     selectedRecords
   };
 };
