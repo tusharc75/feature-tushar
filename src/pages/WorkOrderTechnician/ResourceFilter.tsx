@@ -27,7 +27,6 @@ const ResourceFilter = ({ selectedResource, setSelectedResource, filterByIds, se
         title: resources?.repairOrder?.titleSingular
       }
     ];
-
     const options: any = [];
     data?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead) {
@@ -35,7 +34,7 @@ const ResourceFilter = ({ selectedResource, setSelectedResource, filterByIds, se
       }
     });
     return options;
-  }, [permissions, resources?.assemblyOrder?.titleSingular, resources?.repairOrder?.titleSingular, resources?.productionOrder?.titleSingular]);
+  }, [permissions]);
 
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
@@ -43,7 +42,6 @@ const ResourceFilter = ({ selectedResource, setSelectedResource, filterByIds, se
   useEffect(() => {
     let filterById = [...filterByIds];
     filterById = filterById?.filter((e) => !['assemblyOrder', 'productionOrder', 'repairOrder', '_id'].includes(e?.field));
-
     if (selectedResourceData) {
       filterById = [...filterById, { field: selectedResource?.key, term: [selectedResourceData] }];
     }
@@ -79,7 +77,7 @@ const ResourceFilter = ({ selectedResource, setSelectedResource, filterByIds, se
           setSelectedWorkOrder(null);
         }}
         size="small"
-        renderInput={(params) => <TextField {...params} margin="none" label={`Select Resource`} variant="outlined" />}
+        renderInput={(params) => <TextField {...params} margin="none" label={`Resource`} variant="outlined" />}
       />
       {selectedResource && (
         <div style={{ width: '270px' }}>
@@ -89,7 +87,7 @@ const ResourceFilter = ({ selectedResource, setSelectedResource, filterByIds, se
             errors={false}
             touched={false}
             value={selectedResourceData}
-            fieldLabel={`Select ${selectedResource?.title}`}
+            fieldLabel={`${selectedResource?.title}`}
             onChange={(e, val) => {
               setSelectedResourceData(val);
               setSelectedWorkOrder(null);
@@ -108,7 +106,7 @@ const ResourceFilter = ({ selectedResource, setSelectedResource, filterByIds, se
             errors={false}
             touched={false}
             value={selectedWorkOrder}
-            fieldLabel={`Select ${resources?.workOrder?.titleSingular}`}
+            fieldLabel={`${resources?.workOrder?.titleSingular}`}
             onChange={(e, val) => {
               setSelectedWorkOrder(val);
             }}
