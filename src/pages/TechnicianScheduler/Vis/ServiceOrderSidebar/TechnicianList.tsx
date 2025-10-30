@@ -154,7 +154,7 @@ export const SingleRow = memo(({ row, index, fieldLabels, setSize, selectedResou
     return [
       {
         id: 'resourceNumber',
-        head: 'Job Number',
+        head: `${selectedResource?.titleSingular} Number`,
         cell: row['resourceNumber'] ? (
           <div className="flex items-center ">
             <p title={row.resourceNumber} className="line-clamp-1">

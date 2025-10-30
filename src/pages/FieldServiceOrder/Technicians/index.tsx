@@ -410,9 +410,7 @@ const Technicians = ({
           res.competencies = u?.technician?.competencies;
           return res;
         });
-        if (rows?.length > 0) {
-          setNextStep(true);
-        }
+        setNextStep(true);
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
         fetchAllConsumables();
