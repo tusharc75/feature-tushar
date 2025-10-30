@@ -31,6 +31,7 @@ import { createSubleaseFlow } from 'src/pages/Sublease/walkmeSteps';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageSublease from './ManageSublease';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const Sublease = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -86,8 +87,9 @@ const Sublease = () => {
 
   const fetchGridColumns = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.sublease, permissions?.sublease?.isUpdate);
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.sublease);
     setWalkmeData([createSubleaseFlow(fieldsDataForRead, resources?.sublease?.titlePlural)]);
-    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.subleaseDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.subleaseDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
@@ -363,9 +365,9 @@ const Sublease = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.sublease?.titleSingular?.toLowerCase()} :
+            ? `${resources?.sublease?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.subleaseName || ''}`
-              : `selected ${resources?.sublease?.titlePlural?.toLowerCase()}`
+            : `selected ${resources?.sublease?.titlePlural?.toLowerCase()}`
             } ?`}
           onClose={() => {
             setDeleteRecord(null);
