@@ -106,27 +106,24 @@ const GridView = React.forwardRef<GridViewRef, any>(
         .then(({ data: { data, count } }) => {
           let rows = data.map((u) => {
             let finalObject: any = prepareDataForGrid(u, user);
-
-            let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail || {}, user);
-            finalObject['serviceName'] = u?.service?.serviceName;
-            finalObject['serviceId'] = u?.service?._id;
-            finalObject['workOrderId'] = u?.workOrderDetail?._id;
-            finalObject['parentProductId'] = u?.parentProduct?._id;
-            finalObject['parentProductName'] = u?.parentProduct?.productName;
-            finalObject['parentProductDescription'] = u?.parentProduct?.productDescription;
-
-            finalObject['customServiceStatus'] = u?.status;
-            finalObject['uniqueId'] = u?._id;
-            finalObject['services'] =
-              u.services?.map((d) => {
-                let newData = { ...d, ...d.service, serviceId: d.service._id };
-                delete newData['service'];
-                newData['_id'] = d._id;
-                return newData;
-              }) || [];
-            delete workOrderDetailData?._id;
-            delete workOrderDetailData?.id;
-            return { ...finalObject, ...workOrderDetailData };
+            finalObject['workOrderId'] = u?._id;
+            finalObject['services'] = u.services?.map((d) => {
+              let newData = {
+                ...d,
+                ...d.service,
+                serviceId: d.service._id
+              };
+              delete newData['service'];
+              newData['customServiceStatus'] = d?.status;
+              newData['parentProductId'] = d?.parentProduct?._id;
+              newData['parentProductName'] = d?.parentProduct?.productName;
+              newData['parentProductDescription'] = d?.parentProduct?.productDescription;
+              newData['_id'] = d._id;
+              newData['uniqueId'] = d._id;
+              newData['workOrderId'] = u?._id;
+              return newData;
+            }) || [];
+            return { ...finalObject };
           });
           dispatch({ type: 'initialize', data: rows, count: count });
           dispatch({ type: 'loading', loading: false });

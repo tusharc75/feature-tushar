@@ -20,8 +20,6 @@ const GridCustomComponent = React.memo(
       dispatch({ type: 'loading', loading: false });
     });
 
-    console.log(row);
-
     useEffect(() => {
       getData();
     }, [getData]);

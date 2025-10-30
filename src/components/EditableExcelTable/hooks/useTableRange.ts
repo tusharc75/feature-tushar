@@ -189,7 +189,6 @@ export const useTableRange = ({
           setCopied(true);
           rangeRef.current.classList.add(...DASHED_BORDER);
         } catch (error) {
-          console.log(error);
         }
       }
     };
