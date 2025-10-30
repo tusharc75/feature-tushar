@@ -220,7 +220,7 @@ const Dialogs = ({
           currentCompetencies={openTechnicianDialog?.data?.competencies}
           ids={[]}
           isSubmitting={isAssigning}
-          location={{ "latitude": openTechnicianDialog?.data?.shippingAddress?.latitude, "longitude": openTechnicianDialog?.data?.shippingAddress?.longitude }}
+          location={openTechnicianDialog?.data?.shippingAddress}
         />
       )}
       {unAssignTechnicianDialog.open && (
