@@ -211,11 +211,15 @@ export const getCostPriceValue = (row: any, costPriceData: any, currency: any, f
       const calValues1 = autoCalculateSpecificFields({ pricingMethod: row['costingMethod'] }, { ...row, ...obj }, fields);
       Object.assign(row, calValues1);
     }
-    row[priceFieldName] = rateList[0].price;
 
-    if (fields?.find(f => f?.fieldName === `costPrice`)) {
+    const pricingConditionField = fields?.find(f => f?.fieldName === "pricingCondition")
+    if (pricingConditionField && pricingConditionField?.lookupResource === sidebarResource.costBooks) {
+      obj[priceFieldName] = rateList[0]?.price || 0;
+      row[priceFieldName] = rateList[0].price;
+    } else if (fields?.find(f => f?.fieldName === `costPrice`)) {
       obj[`costPrice_${currency?.toLowerCase()}`] = rateList[0]?.price || 0;
     }
+
     Object?.keys(rateList[0]?.subStatusCost)?.forEach(key => {
       if (fields?.find(f => f?.fieldName === `${camelCase(key)}CostPrice`)) {
         obj[`${key}CostPrice_${currency?.toLowerCase()}`] = rateList[0]?.subStatusCost?.[key] || 0;
@@ -231,8 +235,6 @@ export const getCostPriceValue = (row: any, costPriceData: any, currency: any, f
     Object.assign(row, obj);
     const calValues = autoCalculateSpecificFields(obj, row, fields);
     Object.assign(row, calValues);
-    const calValues2 = autoCalculateSpecificFields({ [priceFieldName]: rateList[0].price }, row, fields);
-    Object.assign(row, calValues2);
   }
   return row;
 };
