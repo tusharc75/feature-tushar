@@ -1103,7 +1103,15 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
       } else {
         obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
       }
-    } else if (key.type === 'counter' || key.type === 'multiFileUpload' || key.type === 'multiImageUpload') {
+    } else if (key.type === 'counter') {
+      const value: any = []
+      if (dataObj[key.fieldName] && dataObj[key.fieldName]?.length > 0) {
+        dataObj[key.fieldName]?.forEach(ele => {
+          value.push({ ...getObjKeysWithValues(ele, key.subFields), ...(isClone ? {} : { _id: ele?._id }) })
+        });
+      }
+      obj[key.fieldName] = value;
+    } else if (key.type === 'multiFileUpload' || key.type === 'multiImageUpload') {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : [];
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
