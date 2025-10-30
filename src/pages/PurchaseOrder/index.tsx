@@ -35,6 +35,7 @@ import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createPurchaseOrderFlow } from './walkmeSteps';
 import CustomContent from 'src/pages/PurchaseOrder/CustomContent';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const PurchaseOrder = () => {
   let renderedFrom = camelCase(sidebarResource.purchaseOrder);
@@ -103,7 +104,8 @@ const PurchaseOrder = () => {
 
   const fetchGridColumns = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.purchaseOrder, permissions?.purchaseOrder?.isUpdate);
-    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.purchaseOrderDetail.path, true);
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.purchaseOrder);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.purchaseOrderDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     let extraColumn = [
       {
         accessor: 'totalPrice',
