@@ -4,9 +4,10 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getCellColorCode, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
+import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import { camelCase, isArray, isEmpty, kebabCase } from 'lodash';
@@ -29,7 +30,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
-  const [open, setOpen] = useState({ open: false, id: null });
+  const [open, setOpen] = useState({ open: false, isClone: false, id: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,6 +41,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
 
   const [allowedToEdit, setAllowedToEdit] = useState(permissions?.[camelCase(step?.linkResourceName)]?.isUpdate);
   const [allowedToDelete, setAllowedToDelete] = useState(permissions?.[camelCase(step?.linkResourceName)]?.isDelete);
+  const [allowedToCreate, setAllowedToCreate] = useState(permissions?.[camelCase(step?.linkResourceName)]?.isCreate);
   const [linkResourceFieldType, setLinkResourceFieldType] = useState(null);
   const [counterField, setCounterField] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -95,50 +97,64 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
         ...(step?.readOnly
           ? []
           : [
-              {
-                accessor: 'action',
-                Header: 'Actions',
-                minWidth: 100,
-                width: 110,
-                sticky: 'right',
-                disableFilters: true,
-                disableSortBy: true,
-                canDrag: false,
-                Cell: ({ row }) => (
-                  <>
-                    <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
-                      <span>
-                        <IconButton
-                          size="small"
-                          aria-label="Edit"
-                          disabled={allowedToEdit ? false : true}
-                          onClick={() => {
-                            setOpen({ open: true, id: row?.original?._id });
-                          }}
-                        >
-                          <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                        </IconButton>
-                      </span>
-                    </HtmlTooltip>
-                    <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
-                      <span>
-                        <IconButton
-                          size="small"
-                          aria-label="Delete"
-                          disabled={allowedToDelete ? false : true}
-                          onClick={() => {
-                            setDeleteRecord(row?.original);
-                            setShowDeleteConfirmBox(true);
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
-                        </IconButton>
-                      </span>
-                    </HtmlTooltip>
-                  </>
-                )
-              }
-            ])
+            {
+              accessor: 'action',
+              Header: 'Actions',
+              minWidth: 100,
+              width: 110,
+              sticky: 'right',
+              disableFilters: true,
+              disableSortBy: true,
+              canDrag: false,
+              Cell: ({ row }) => (
+                <>
+                  <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
+                    <span>
+                      <IconButton
+                        size="small"
+                        aria-label="Edit"
+                        disabled={allowedToEdit ? false : true}
+                        onClick={() => {
+                          setOpen({ open: true, isClone: false, id: row?.original?._id });
+                        }}
+                      >
+                        <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
+                  <HtmlTooltip title={allowedToCreate ? 'Clone' : cloneDisable}>
+                    <span>
+                      <IconButton
+                        size="small"
+                        aria-label="Clone"
+                        disabled={allowedToCreate ? false : true}
+                        onClick={() => {
+                          setOpen({ open: true, isClone: true, id: row?.original?._id });
+                        }}
+                      >
+                        <FileCopyIcon fontSize="small" color={allowedToCreate ? 'primary' : 'disabled'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
+                  <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
+                    <span>
+                      <IconButton
+                        size="small"
+                        aria-label="Delete"
+                        disabled={allowedToDelete ? false : true}
+                        onClick={() => {
+                          setDeleteRecord(row?.original);
+                          setShowDeleteConfirmBox(true);
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
+                      </IconButton>
+                    </span>
+                  </HtmlTooltip>
+                </>
+              )
+            }
+          ])
       ]);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -288,7 +304,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
           leftSideContents={
             <ThemeButton
               onClick={() => {
-                setOpen({ open: true, id: null });
+                setOpen({ open: true, isClone: false, id: null });
               }}
               buttonType="theme"
             >
@@ -383,12 +399,12 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
         <ManageDynamicForm
           resource={step?.linkResourceName}
           redirected={false}
-          isClone={false}
+          isClone={open.isClone}
           id={open.id}
-          onClose={() => setOpen({ open: false, id: null })}
+          onClose={() => setOpen({ open: false, isClone: false, id: null })}
           onSuccess={() => {
             fetchData();
-            setOpen({ open: false, id: null });
+            setOpen({ open: false, isClone: false, id: null });
           }}
           referenceData={{
             [step?.linkResourceField]: linkResourceFieldType === 'multiSelect' && !isArray(data?._id) ? [data?._id] : data?._id,
