@@ -122,7 +122,11 @@ const WorkOrderTechnician = () => {
 
   const fetchSingleColumnData = useCallback(
     async ({ column, filterQuery, limit, page, resource, cancelToken }: FetchSingleColumnProps<any, Columns>) => {
-      const api = `/work-order-technician?page=${page}&status=${column}&limit=${limit}&type=${resource}${filterQuery}`;
+      let api = `/work-order-technician?page=${page}&status=${column}&limit=${limit}`;
+      if (resource) {
+        api += `&type=${resource}`
+      }
+      api += `${filterQuery}`
       try {
         const response = await axiosInstance().get(api, { cancelToken });
         const {
@@ -130,33 +134,25 @@ const WorkOrderTechnician = () => {
         } = response;
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
-
-          let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail || {}, user);
-          finalObject['serviceName'] = u?.service?.serviceName;
-          finalObject['serviceId'] = u?.service?._id;
-          finalObject['workOrderId'] = u?.workOrderDetail?._id;
-          finalObject['parentProductId'] = u?.parentProduct?._id;
-          finalObject['parentProductName'] = u?.parentProduct?.productName;
-          finalObject['parentProductDescription'] = u?.parentProduct?.productDescription;
-
-          finalObject['customServiceStatus'] = u?.status;
-          finalObject['uniqueId'] = u?._id;
-          finalObject['services'] =
-            u.services?.map((d) => {
-              let newData = { ...d, ...d.service, serviceId: d.service._id };
-              delete newData['service'];
-              newData['_id'] = d._id;
-              return newData;
-            }) || [];
-          delete workOrderDetailData?._id;
-          delete workOrderDetailData?.id;
-
-          return { ...finalObject, ...workOrderDetailData };
+          finalObject['workOrderId'] = u?._id;
+          finalObject['services'] = u.services?.map((d) => {
+            let newData = {
+              ...d,
+              ...d.service,
+              serviceId: d.service._id
+            };
+            delete newData['service'];
+            newData['customServiceStatus'] = d?.status;
+            newData['parentProductId'] = d?.parentProduct?._id;
+            newData['parentProductName'] = d?.parentProduct?.productName;
+            newData['parentProductDescription'] = d?.parentProduct?.productDescription;
+            newData['_id'] = d._id;
+            newData['uniqueId'] = d._id;
+            newData['workOrderId'] = u?._id;
+            return newData;
+          }) || [];
+          return { ...finalObject };
         });
-        if (column === 'Pending') {
-          console.log(rows);
-        }
-
         return { data: rows, count } as { data: any; count: number };
       } catch (error) {
         throw error;
@@ -327,9 +323,8 @@ const WorkOrderTechnician = () => {
                   <Box ml={1}>
                     <HtmlTooltip title={`${row?.original?.priority} Priority`}>
                       <span
-                        className={`no-inherit inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${
-                          row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
-                        } `}
+                        className={`no-inherit inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
+                          } `}
                       >
                         {row?.original?.priority}
                       </span>
@@ -461,9 +456,9 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-            selectedRecords?.filter(
-              (s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.status !== WORK_ORDER_STATUS.onHold && s?.canPerform
-            )?.length === selectedRecords?.length
+              selectedRecords?.filter(
+                (s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.status !== WORK_ORDER_STATUS.onHold && s?.canPerform
+              )?.length === selectedRecords?.length
               ? false
               : true,
           label: `Complete Service(s)`,
