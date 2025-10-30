@@ -4969,3 +4969,29 @@ td.google-visualization-orgchart-node {
     display: none;
   }
 }
+
+.glaring-text {
+  position: relative;
+  color: var(--text-color, #ffd700); /* base visible text color */
+  overflow: hidden;
+}
+
+.glaring-text::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent 0%, var(--dark-primary, rgba(255, 255, 255, 0.8)) 50%, transparent 100%);
+  animation: glare 2.5s linear infinite;
+}
+
+@keyframes glare {
+  0% {
+    left: -75%;
+  }
+  100% {
+    left: 125%;
+  }
+}

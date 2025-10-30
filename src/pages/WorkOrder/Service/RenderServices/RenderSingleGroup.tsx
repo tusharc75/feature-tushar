@@ -61,7 +61,7 @@ const RenderSingleGroup = ({
           }}
         >
           {isColapsed ? (
-            <HtmlTooltip title={group.product}>
+            <HtmlTooltip title={group.productName}>
               <Info />
             </HtmlTooltip>
           ) : (
@@ -78,20 +78,27 @@ const RenderSingleGroup = ({
                 sx={{ p: '4px' }}
               />
               <div className="flex flex-grow items-center justify-between">
-                <h6 className={'text-base font-medium leading-[24px]'}>{group.product}</h6>
+                <div className="flex flex-col">
+                  <h6 className="text-sx text-gray-400">
+                    {group.productName}
+                  </h6>
+                  <h6 className="text-sm font-medium text-gray-600 mt-0.5">
+                    {group.productDescription}
+                  </h6>
+                </div>
                 <RenderServiceCountBadge serviceSteps={group.serviceSteps} />
               </div>
               {group?.serviceSteps?.length === 1 && (
                 <>
                   {data?.type === 'service' && data?.serviceStatus && (
                     <RenderStatusIcon
-                      className={`${isMobile ? 'h-[20px] max-w-[20px]' : 'h-[24px] max-w-[24px]'} mt-[3px] flex-shrink-0`}
+                      className={`${isMobile ? 'h-[20px] max-w-[20px]' : 'h-[24px] w-[24px]'} mt-[3px] flex-shrink-0`}
                       stepStatus={data?.serviceStatus}
                     />
                   )}
                   {data?.type === 'quotation' && quotationData && (
                     <RenderStatusIcon
-                      className={`${isMobile ? 'h-[20px] max-w-[20px]' : 'h-[24px] max-w-[24px]'} mt-[3px] flex-shrink-0`}
+                      className={`${isMobile ? 'h-[20px] max-w-[20px]' : 'h-[24px] w-[24px]'} mt-[3px] flex-shrink-0`}
                       stepStatus={quotationData?.status}
                     />
                   )}

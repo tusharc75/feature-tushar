@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
+import { dispatchPastedRangeEvent, SelectedRange } from 'src/components/EditableExcelTable/CustomEvents';
 import { StoreState } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
 import FieldList from 'src/components/FormBuilder/FieldList';
 import { dateFormat, dateTimeFormat, DEFAULT_TIME_ZONE, displayDate, displayDateTime, formatAmountWithCurrency } from 'src/constants/helpers';
@@ -110,7 +111,6 @@ export async function copyRangeToClipboard(data: string[][]) {
   const tsv = data.map((row) => row.join('\t')).join('\n');
   try {
     await navigator.clipboard.writeText(tsv);
-    console.log('Copied to clipboard!');
   } catch (err) {
     console.error('Failed to copy: ', err);
   }
@@ -234,15 +234,37 @@ const setPastedValue = ({
   return { dirtyValue };
 };
 
-export const cleanDirtyRowData = (data: Record<string, any>, sortedCells: string[]) => {
+export const cleanDirtyRowData = (data: Record<string, any>, columns: TColType[]) => {
+  const sortedCells = columns.map((d) => d.id || d.accessor);
   const dirtyRowMap = new Map(Object.entries(data));
 
   // delete multiselect cell rest values
-  for (const cell of sortedCells) {
+  for (let i = 0; i < sortedCells.length; i++) {
+    const cell = sortedCells[i];
+    const type = columns[i].type;
+
+    // for dropdown
+    if (type === 'dropDown' && dirtyRowMap.has(`${cell}Id`)) {
+      dirtyRowMap.set(cell, dirtyRowMap.get(`${cell}Id`));
+    }
+
+    // for multi select
+    if (type === 'multiSelect' && !Array.isArray(dirtyRowMap.get(cell))) {
+      const newValues = [];
+      if (dirtyRowMap.has(`${cell}Id`)) {
+        newValues.push(dirtyRowMap.get(`${cell}Id`));
+      }
+      if (dirtyRowMap.has(`rest${cell}`)) {
+        newValues.push(...dirtyRowMap.get(`rest${cell}`).map((d) => d.optionValue));
+      }
+      dirtyRowMap.set(cell, newValues);
+    }
+
     if (dirtyRowMap.has(`rest${cell}`)) {
       dirtyRowMap.delete(`rest${cell}`);
     }
   }
+
   dirtyRowMap.forEach((d, key) => {
     if (key !== '_id' && !sortedCells.includes(key)) {
       dirtyRowMap.delete(key);
@@ -256,30 +278,53 @@ export function handlePaste({
   columnsMap,
   event,
   pastedData,
-  setStore
+  setStore,
+  selectedRange,
+  tableBody
 }: {
   event: ClipboardEvent;
   pastedData: string[][];
   columnsMap: Map<string, TColType>;
   setStore: SetFastContextStore<StoreState>;
+  selectedRange: SelectedRange | null;
+  tableBody: HTMLElement | null;
 }) {
-  const targetCell = (event.target as HTMLElement)?.closest('[data-row][data-col]') as HTMLElement | null;
+  if (!selectedRange) return;
+  if (!tableBody) return;
+
+  const targetRow = tableBody.querySelector(`tr[data-row="${selectedRange.startCell.row}"]`) as HTMLElement;
+
   if (pastedData.length === 0) return;
-  if (!targetCell) return;
   event.preventDefault();
   event.stopPropagation();
 
-  const sortedCells = [...targetCell.parentElement.querySelectorAll('td')]?.map((c) => c.getAttribute('data-key')).filter((d, i) => !!d && i !== 0);
-  const rowIndex = Number(targetCell.getAttribute('data-row'));
-  const colIndex = Number(targetCell.getAttribute('data-col'));
+  const sortedCells = [...targetRow.querySelectorAll('td')]?.map((c) => c.getAttribute('data-key')).filter((d, i) => !!d && i !== 0);
+  const rowIndex = Number(selectedRange.startCell.row);
+  const colIndex = Number(selectedRange.startCell.col);
+
+  const lastRowIndex = rowIndex + pastedData.length - 1;
+  const lastColIndex = colIndex + pastedData[0].length - 1;
+
+  dispatchPastedRangeEvent(targetRow, {
+    startCell: {
+      col: colIndex,
+      row: rowIndex
+    },
+    endCell: {
+      col: lastColIndex,
+      row: lastRowIndex
+    }
+  });
 
   setStore((prev) => {
     const newData = [...prev.tableData];
     const dirtyRows = [...prev.dirtyRows];
+    const touchedRows = new Map(prev.touchedRows);
 
     for (let r = 0; r < pastedData.length; r++) {
       const dataRow = pastedData[r];
       const currentRowIndex = rowIndex + r;
+      touchedRows.set(currentRowIndex, true);
       if (!newData[currentRowIndex]) {
         newData[currentRowIndex] = {} as any;
       }
@@ -293,11 +338,11 @@ export function handlePaste({
           dirtyRow[colKey] = dirtyValue;
         }
       }
-      const dirtyRowData = cleanDirtyRowData({ ...newData[currentRowIndex], ...dirtyRow }, sortedCells);
+      const dirtyRowData = cleanDirtyRowData({ ...newData[currentRowIndex], ...dirtyRow }, prev.columns);
 
       dirtyRows[currentRowIndex] = dirtyRowData;
     }
-    return { tableData: newData, dirtyRows: dirtyRows, pasteKey: prev.pasteKey > 100 ? 0 : prev.pasteKey + 1 };
+    return { tableData: newData, dirtyRows: dirtyRows, pasteKey: prev.pasteKey > 100 ? 0 : prev.pasteKey + 1, touchedRows };
   });
 }
 
@@ -314,4 +359,29 @@ export function renderCellText(data: any, column: TColType) {
     return cell(props);
   }
   return null;
+}
+
+export function setValidRows({
+  prev,
+  rowIndex,
+  errorMessage,
+  accessor
+}: {
+  prev: StoreState;
+  rowIndex: number;
+  errorMessage: string;
+  accessor: string;
+}) {
+  const rowErrors = [...prev.rowErrors];
+  if (!rowErrors[rowIndex]) {
+    rowErrors[rowIndex] = new Map();
+  }
+  rowErrors[rowIndex].set(accessor, errorMessage);
+  if (!errorMessage || `${errorMessage}`.length === 0) {
+    rowErrors[rowIndex].delete(accessor);
+  }
+  if (rowErrors[rowIndex].size === 0) {
+    rowErrors[rowIndex] = null;
+  }
+  return { rowErrors } as const;
 }

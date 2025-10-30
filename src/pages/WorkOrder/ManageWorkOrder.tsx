@@ -52,7 +52,8 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
 
   const fetchFields = async () => {
     try {
-      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.workOrder, ['productionOrder', 'repairOrder', 'repairJob', 'assemblyOrder', 'serviceProcessStatus']);
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.workOrder, ['productionOrder', 'repairOrder', 'repairJob', 'assemblyOrder', 'rentalJob',
+        'serviceProcessStatus']);
 
       let assetOption = []
       let serializedAssetFieldIndex = fieldsDataAll.findIndex((e) => e?.fieldName === 'serializedAsset');

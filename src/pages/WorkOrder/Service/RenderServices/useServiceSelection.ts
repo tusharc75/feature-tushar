@@ -3,6 +3,10 @@ import { useCallback, useState } from 'react';
 const useServiceSelection = () => {
   const [selectedServicesMap, setSelectedServicesMap] = useState<Map<string, any>>(new Map());
 
+  const unselectAll = useCallback(() => {
+    setSelectedServicesMap(new Map());
+  }, []);
+
   const handleSelectService = useCallback((service: any) => {
     if (!service?.clickable) return;
     setSelectedServicesMap((prev) => {
@@ -72,7 +76,8 @@ const useServiceSelection = () => {
     isGroupIndeterminate,
     isGroupSelected,
     selectedRecords,
-    dispatch
+    dispatch,
+    unselectAll
   };
 };
 

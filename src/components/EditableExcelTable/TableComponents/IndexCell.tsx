@@ -5,7 +5,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useEditableTableStore } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
 import { createEmptyRowData } from 'src/components/EditableExcelTable/utils';
 import RippleButton from 'src/components/RippleButton';
-import { addItemAtIndex, cn, removeItemAtIndex, addItemAtExactIndex } from 'src/constants/helpers';
+import { addItemAtExactIndex, addItemAtIndex, cn } from 'src/constants/helpers';
 
 const LINE_HEIGHT = 2;
 
@@ -74,7 +74,7 @@ const IndexCell = React.memo(
             <span className="block flex-grow">{rowIndex + 1}</span>
           </div>
           {data.length - 1 === rowIndex && (
-            <>
+            <span className="absolute bottom-[1px] left-[-1px] size-[18px] overflow-hidden">
               <span
                 onMouseOver={(e) => handleMouseOver(e, containerRef.current, rowLineRef.current)}
                 onMouseOut={(e) => handleMouseOut(e, containerRef.current, rowLineRef.current)}
@@ -94,7 +94,7 @@ const IndexCell = React.memo(
                   <span className="hidden h-[16px] w-[16px] items-center justify-center group-hover/inner:flex ">+</span>
                 </RippleButton>
               </span>
-            </>
+            </span>
           )}
 
           <span className="absolute bottom-0 right-[-1px] top-0 z-10 h-full w-[1px] bg-[var(--common-border-color)]" />
@@ -129,7 +129,7 @@ const IndexCell = React.memo(
               <ListItemIcon>
                 <Delete fontSize="small" color="error" />
               </ListItemIcon>
-              <ListItemText>Clear</ListItemText>
+              <ListItemText>Delete</ListItemText>
             </MenuItem>
           </MenuList>
         </Menu>

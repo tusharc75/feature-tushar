@@ -75,7 +75,8 @@ const ManageRentalManagementDialog = ({
     try {
       let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.rentalManagement, [
         'quotation',
-        'assemblyOrder'
+        'assemblyOrder',
+        'workOrder'
       ]);
       if (rentalManagementId) {
         try {

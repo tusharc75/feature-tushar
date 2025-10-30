@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
-import { MOVE_SELECTED_CELL, TMoveCellEvent } from 'src/components/EditableExcelTable/TableComponents/CustomEvents';
+import { MOVE_SELECTED_CELL, SELECTED_RANGE, SelectedRange, TMoveCellEvent } from 'src/components/EditableExcelTable/CustomEvents';
 import { handlePaste, pasteListener } from 'src/components/EditableExcelTable/utils';
 import { useEffectEvent } from 'src/hooks/useEffectEvent';
 import createFastContext from 'src/StateProvider/createFastContext';
@@ -13,6 +13,8 @@ export type StoreState = {
   pasteKey: number;
   columnsMap: Map<string, TColType>;
   moveEventData: TMoveCellEvent | null;
+  rowErrors: Map<string, string>[];
+  touchedRows: Map<number, boolean>;
 };
 const initialState: StoreState = {
   dirtyRows: [],
@@ -21,7 +23,9 @@ const initialState: StoreState = {
   selectedRow: null,
   pasteKey: 0,
   columnsMap: new Map(),
-  moveEventData: null
+  moveEventData: null,
+  rowErrors: [],
+  touchedRows: new Map()
 };
 
 const EXCLUDED_COLUMNS = ['actions', 'action', 'index', 'selection', 'expander'];
@@ -39,6 +43,10 @@ const stableEmptyArray = [];
 const useEditableExcelTable = (data: any[], columns: TColType[], onChange: (data: any[]) => void) => {
   const [stableColumns, setStableColumns] = useState(() => columns.filter((d) => !EXCLUDED_COLUMNS.includes(d.id ?? d.accessor)));
   const sendUpdateTimeout = useRef<NodeJS.Timeout>(null);
+  const selectedRange = useRef<SelectedRange | null>(null);
+  const tableBodyRef = useRef<HTMLTableSectionElement>(null);
+  const [dirtyRows, setStore] = useEditableTableStore((prev) => prev.dirtyRows);
+  const [rowErrors] = useEditableTableStore((prev) => prev.rowErrors);
 
   useEffect(() => {
     const handleListen = (e: CustomEvent<TMoveCellEvent>) => {
@@ -48,10 +56,19 @@ const useEditableExcelTable = (data: any[], columns: TColType[], onChange: (data
     return () => {
       window.removeEventListener(MOVE_SELECTED_CELL, handleListen);
     };
-  }, []);
+  }, [setStore]);
 
-  const tableBodyRef = useRef<HTMLTableSectionElement>(null);
-  const [dirtyRows, setStore] = useEditableTableStore((prev) => prev.dirtyRows);
+  // listen for range change
+  useEffect(() => {
+    const handleRangeChange = (e: CustomEvent<SelectedRange>) => {
+      selectedRange.current = e.detail;
+    };
+
+    window.addEventListener(SELECTED_RANGE, handleRangeChange);
+    return () => {
+      window.removeEventListener(SELECTED_RANGE, handleRangeChange);
+    };
+  }, []);
 
   const columnsMap = useMemo(() => {
     const map = new Map<string, TColType>();
@@ -63,7 +80,7 @@ const useEditableExcelTable = (data: any[], columns: TColType[], onChange: (data
   }, [columns, setStore]);
 
   useEffect(() => {
-    const newData = data;
+    const newData = [...data];
     if (data.length < MIN_DATA) {
       for (let i = data.length; i < MIN_DATA; i++) {
         newData.push({});
@@ -87,7 +104,10 @@ const useEditableExcelTable = (data: any[], columns: TColType[], onChange: (data
 
     const pasteWrapper = (e: ClipboardEvent) => {
       // The cell where paste happened
-      pasteListener(e, (event, pastedData) => handlePaste({ event, columnsMap, setStore, pastedData }));
+
+      pasteListener(e, (event, pastedData) => {
+        handlePaste({ event, columnsMap, setStore, pastedData, selectedRange: selectedRange.current, tableBody: tableBodyRef.current });
+      });
     };
 
     tbody.addEventListener('paste', pasteWrapper);
@@ -97,10 +117,8 @@ const useEditableExcelTable = (data: any[], columns: TColType[], onChange: (data
   }, [columnsMap, setStore]);
 
   const sendUpdate = useEffectEvent((dirtyRows: any[]) => {
-    let newDirtyRows = dirtyRows;
-    newDirtyRows = dirtyRows.filter((d) => !!d);
+    const newDirtyRows = dirtyRows.filter((_dr, index) => !rowErrors[index]).filter((d) => !!d);
     if (newDirtyRows.length === 0) return;
-
     if (typeof onChange === 'function') {
       onChange?.(newDirtyRows);
       setStore({ dirtyRows: stableEmptyArray });

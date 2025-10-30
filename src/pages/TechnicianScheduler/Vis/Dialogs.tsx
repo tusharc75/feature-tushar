@@ -219,6 +219,7 @@ const Dialogs = ({
           warehouse={openTechnicianDialog.data?.warehouse}
           ids={[]}
           isSubmitting={isAssigning}
+          location={{ "latitude": openTechnicianDialog?.data?.shippingAddress?.latitude, "longitude": openTechnicianDialog?.data?.shippingAddress?.longitude }}
         />
       )}
       {unAssignTechnicianDialog.open && (

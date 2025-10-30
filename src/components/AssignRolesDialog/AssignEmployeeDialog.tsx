@@ -24,7 +24,7 @@ import RadiusFilterDialog from './RadiusFilterDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 
 const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, ids = [], defaultCompetencyType = [], extraStaticFilter = [], warehouse = null,
-  currentCompetencyType = '', currentCompetencies = [], location = null }) => {
+  currentCompetencyType = '', currentCompetencies = [], location }) => {
   const renderedFrom = `${sidebarResource.employeeMaster}`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -257,37 +257,9 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
             )}
           />
         }
-        <Autocomplete
-          fullWidth
-          className="max-w-[300px]"
-          options={warehouseOptions}
-          getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
-          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
-          value={
-            warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
-              ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
-              : ''
-          }
-          onChange={(e, val) => {
-            setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              margin="dense"
-              size="small"
-              name="plant"
-              placeholder={resources?.warehouse?.titleSingular}
-              label={resources?.warehouse?.titleSingular}
-              variant="outlined"
-              fullWidth
-              className="m-0"
-            />
-          )}
-        />
-        {location?.latitude && location?.longitude && (
+        {(location && location?.latitude && location?.longitude) && (
           <Badge
-            badgeContent={radiusFilter?.radius}
+            badgeContent={radiusFilter?.radius ? `${radiusFilter?.radius} Miles` : 0}
             color="primary"
             overlap="rectangular"
             anchorOrigin={{
@@ -298,7 +270,6 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
             <ThemeButton
               onClick={() => setShowRadiusFilter(true)}
               startIcon={<LocationOnIcon />}
-              tooltip='Radius Filter'
             >
               Radius Filter
             </ThemeButton>
@@ -307,6 +278,37 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
       </>
     );
   };
+
+  const rightSideContents = () => {
+    return <Autocomplete
+      fullWidth
+      className="max-w-[300px]"
+      options={warehouseOptions}
+      getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+      isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+      value={
+        warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+          ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+          : ''
+      }
+      onChange={(e, val) => {
+        setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
+      }}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          margin="dense"
+          size="small"
+          name="plant"
+          placeholder={resources?.warehouse?.titleSingular}
+          label={resources?.warehouse?.titleSingular}
+          variant="outlined"
+          fullWidth
+          className="m-0"
+        />
+      )}
+    />
+  }
 
   return (
     <>
@@ -320,7 +322,7 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
         aria-labelledby="assign-roles-dialog"
       >
         <CustomDialogHeader
-          title={`Assign ${resources?.employeeMaster?.titlePlural}` + " Panda"}
+          title={`Assign ${resources?.employeeMaster?.titlePlural}`}
           showManimizeMaximize={false}
           showRequiredLabel={false}
           onClose={handleClose}
@@ -334,6 +336,7 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
                 onSearch={handleSearch}
                 isActionButtonVisible={false}
                 leftSideContents={leftSideContents()}
+                leftSideContentsOfSearchFilter={rightSideContents()}
                 addButtonProps={{
                   iconsEnabled: false,
                   disabled: isSubmitting || disableSaveButton || selectedRecords?.length === 0,
@@ -377,6 +380,7 @@ const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, id
           currentFilter={radiusFilter}
           onMinimizeMaximize={() => { setFullScreen((prevState) => !prevState); }}
           fullScreen={fullScreen || isMobile || isTablet}
+          filtered={{ warehouse: selectedWarehouse, competencyType: selectedCompetencyType.map((c) => c.optionValue), competencies: selectedCompetencies.map((c) => c.optionValue) }}
         />
       )}
     </>

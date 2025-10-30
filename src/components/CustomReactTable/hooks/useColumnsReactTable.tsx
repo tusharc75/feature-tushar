@@ -13,7 +13,6 @@ import GroupSignatureCell from 'src/components/CustomReactTable/Cells/GroupSigna
 import LookupCell from 'src/components/CustomReactTable/Cells/LookupCell';
 import { MultiFileCell } from 'src/components/CustomReactTable/Cells/MultiFileCell';
 import { MultiImageCell } from 'src/components/CustomReactTable/Cells/MultiImageCell';
-import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
 import SignatureCell from 'src/components/CustomReactTable/Cells/SignatureCell';
 import SwitchCell from 'src/components/CustomReactTable/Cells/SwitchCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -36,6 +35,7 @@ import { headerName } from 'src/components/CustomReactTable/hooks/hookUtils';
 import RichTextEditorCell from 'src/components/CustomReactTable/Cells/RichTextEditorCell';
 import { NOT_ALLOW_INLINE_EDIT_FIELD_TYPE } from 'src/components/FormBuilder/helper';
 import ImageUploadCell from 'src/components/CustomReactTable/Cells/ImageUploadCell';
+import CounterCell from 'src/components/CustomReactTable/Cells/CounterCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -473,7 +473,7 @@ export function useColumns() {
             disableFilters: true,
             disableSortBy: true,
             cell: ({ row }) => {
-              return <NumberCell rowData={row.original} field={field} />;
+              return <CounterCell rowData={row.original} field={field} />;
             }
           });
         } else if (field.type === 'richTextEditor') {

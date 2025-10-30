@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
+import { dispatchSelectionEvent, PASTED_RANGE, PastedRange } from 'src/components/EditableExcelTable/CustomEvents';
 import { CellPosition } from 'src/components/EditableExcelTable/types';
 import { copyRangeToClipboard, getCellFormattedValue, getRange } from 'src/components/EditableExcelTable/utils';
+import { useEffectEvent } from 'src/hooks/useEffectEvent';
 
 const DASHED_BORDER = ['outline-1', 'outline-blue-500', 'outline-dashed', 'outline-offset-[-2px]'];
 
@@ -30,7 +32,7 @@ export const useTableRange = ({
   const startCellRef = useRef<CellPosition | null>(null);
   const endCellRef = useRef<CellPosition | null>(null);
 
-  const updateRangeBox = useCallback(() => {
+  const updateRangeBox = useEffectEvent(() => {
     if (!startCellRect.current || !endCellRect.current) return;
 
     const borderElement = rangeRef.current;
@@ -64,7 +66,26 @@ export const useTableRange = ({
     borderElement.style.left = `${left}px`;
     borderElement.style.height = `${bottom - top - 2}px`;
     borderElement.style.width = `${right - left - 2}px`;
-  }, [containerRef, rangeRef]);
+  });
+
+  useEffect(() => {
+    const showPastedRange = (e: CustomEvent<PastedRange>) => {
+      const { endCell, startCell } = e.detail;
+      startCellRect.current = tableBodyRef.current
+        ?.querySelector?.(`td[data-row="${startCell.row}"][data-col="${startCell.col}"]`)
+        ?.getBoundingClientRect?.();
+      endCellRect.current = tableBodyRef.current
+        ?.querySelector?.(`td[data-row="${endCell.row}"][data-col="${endCell.col}"]`)
+        ?.getBoundingClientRect?.();
+      if (startCellRect.current && endCellRect.current) {
+        updateRangeBox();
+      }
+    };
+    window.addEventListener(PASTED_RANGE, showPastedRange);
+    return () => {
+      window.removeEventListener(PASTED_RANGE, showPastedRange);
+    };
+  }, [tableBodyRef, updateRangeBox]);
 
   const onMouseOver = useCallback(
     (e: MouseEvent) => {
@@ -87,6 +108,12 @@ export const useTableRange = ({
     // document.body.style.overflow = '';
     if (startCellRef.current && endCellRef.current) {
       const { cells, map, twoDimentionalArray } = getRange(startCellRef.current, endCellRef.current);
+
+      dispatchSelectionEvent(tableBodyRef.current, {
+        endCell: endCellRef.current,
+        startCell: startCellRef.current,
+        selectedRange: cells
+      });
       setSelectedRange(cells);
       setSelectedRangeMap(map);
       selectedrange2dArray.current = twoDimentionalArray;
@@ -94,7 +121,7 @@ export const useTableRange = ({
 
     startCellRef.current = null;
     endCellRef.current = null;
-  }, [onMouseOver]);
+  }, [onMouseOver, tableBodyRef]);
 
   const onMouseDown = useCallback(
     (e: React.MouseEvent<HTMLTableDataCellElement, MouseEvent>) => {

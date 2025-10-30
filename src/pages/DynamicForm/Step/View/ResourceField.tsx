@@ -18,6 +18,8 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { Link } from 'react-router-dom';
 import EditableExcelTable from 'src/components/EditableExcelTable';
+import AiImport from 'src/components/AiImport';
+import ShowCounterField from 'src/pages/DynamicForm/Step/View/ShowCounterField';
 
 const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, referenceData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -39,6 +41,8 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
   const [allowedToEdit, setAllowedToEdit] = useState(permissions?.[camelCase(step?.linkResourceName)]?.isUpdate);
   const [allowedToDelete, setAllowedToDelete] = useState(permissions?.[camelCase(step?.linkResourceName)]?.isDelete);
   const [linkResourceFieldType, setLinkResourceFieldType] = useState(null);
+  const [counterField, setCounterField] = useState(null);
+  const [selectedRow, setSelectedRow] = useState(null);
 
   useEffect(() => {
     fetchColumn();
@@ -52,10 +56,11 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
         data: { data }
       } = await axiosInstance().get(`/field?resource=${step?.linkResourceName}`);
       setLinkResourceFieldType(data?.find((d) => d?.fieldData?.fieldName === step?.linkResourceField)?.fieldData?.type);
+      setCounterField(data?.find((d) => d?.fieldData?.type === 'counter'));
       const detailPagePath = `/${kebabCase(step?.linkResourceName)}/detail`;
       const newColumns = generateColumns(
         camelCase(step?.linkResourceName),
-        data?.filter((d) => d?.fieldData?.fieldName !== step?.linkResourceField),
+        data?.filter((d) => d?.fieldData?.fieldName !== step?.linkResourceField && d?.fieldData?.type !== 'counter'),
         detailPagePath,
         false
       );
@@ -74,7 +79,9 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
                 <Link
                   className="link text-truncate"
                   title={row?.original?.[primaryField?.fieldData?.fieldName]}
-                  to={`${detailPagePath}/${row?.original?._id}`}
+                  onClick={() => {
+                    window.open(`${detailPagePath}/${row?.original?._id}`);
+                  }}
                 >
                   {row?.original?.[primaryField?.fieldData?.fieldName]}
                 </Link>
@@ -88,50 +95,50 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
         ...(step?.readOnly
           ? []
           : [
-            {
-              accessor: 'action',
-              Header: 'Actions',
-              minWidth: 100,
-              width: 110,
-              sticky: 'right',
-              disableFilters: true,
-              disableSortBy: true,
-              canDrag: false,
-              Cell: ({ row }) => (
-                <>
-                  <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
-                    <span>
-                      <IconButton
-                        size="small"
-                        aria-label="Edit"
-                        disabled={allowedToEdit ? false : true}
-                        onClick={() => {
-                          setOpen({ open: true, id: row?.original?._id });
-                        }}
-                      >
-                        <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                  <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
-                    <span>
-                      <IconButton
-                        size="small"
-                        aria-label="Delete"
-                        disabled={allowedToDelete ? false : true}
-                        onClick={() => {
-                          setDeleteRecord(row?.original);
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                </>
-              )
-            }
-          ])
+              {
+                accessor: 'action',
+                Header: 'Actions',
+                minWidth: 100,
+                width: 110,
+                sticky: 'right',
+                disableFilters: true,
+                disableSortBy: true,
+                canDrag: false,
+                Cell: ({ row }) => (
+                  <>
+                    <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="Edit"
+                          disabled={allowedToEdit ? false : true}
+                          onClick={() => {
+                            setOpen({ open: true, id: row?.original?._id });
+                          }}
+                        >
+                          <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
+                    <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="Delete"
+                          disabled={allowedToDelete ? false : true}
+                          onClick={() => {
+                            setDeleteRecord(row?.original);
+                            setShowDeleteConfirmBox(true);
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
+                  </>
+                )
+              }
+            ])
       ]);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -159,7 +166,10 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
           finalObject['canDelete'] = permissions?.[camelCase(step?.linkResourceName)]?.isDelete;
           return finalObject;
         });
-        dispatch({ type: 'initialize', data: rows, count: count });
+        if (counterField) {
+          setSelectedRow(rows[0]);
+        }
+        dispatch({ type: 'initialize', data: rows.reverse(), count: count });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -246,23 +256,24 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
     }));
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-    .post(`/dynamic-form/bulk`, rows, {
-      headers: {
-        Resource: step?.linkResourceName
-      }
-    })
-    .then(({ data: { data, message } }) => {
-      fetchData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: message
+      .post(`/dynamic-form/bulk`, rows, {
+        headers: {
+          Resource: step?.linkResourceName
+        }
+      })
+      .then(({ data: { data, message } }) => {
+        fetchData();
+      })
+      .catch((error) => {
+        fetchData();
+        toastConfig.setToastConfig(error);
       });
-    })
-    .catch((error) => {
-      fetchData();
-      toastConfig.setToastConfig(error);
-    });
+  };
+
+  const onRowClick = (row) => {
+    if (!selectedRow || row._id !== selectedRow._id) {
+      setSelectedRow(row);
+    }
   };
 
   return (
@@ -284,29 +295,84 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
               Add
             </ThemeButton>
           }
+          rightSideContents={
+            <AiImport
+              referenceData={{
+                [step?.linkResourceField]: linkResourceFieldType === 'multiSelect' && !isArray(data?._id) ? [data?._id] : data?._id,
+                isResourceData: 'true'
+              }}
+              onSuccess={() => fetchData()}
+              resource={step?.linkResourceName}
+            />
+          }
         />
       )}
       <Box mt={1}>
+        {step?.excelLikeEntry && (
+          <Box className="mb-3 flex justify-end">
+            <AiImport
+              referenceData={{
+                [step?.linkResourceField]: linkResourceFieldType === 'multiSelect' && !isArray(data?._id) ? [data?._id] : data?._id,
+                isResourceData: 'true'
+              }}
+              onSuccess={() => fetchData()}
+              resource={step?.linkResourceName}
+            />
+          </Box>
+        )}
         {columns ? (
-          <>
-            {step?.excelLikeEntry ?
-              <EditableExcelTable
-                columns={columns}
-                data={state.dataRows}
-                onChange={(rows) => handleExcelChange(rows)}
-                onDelete={(row) => handleDelete(row)}
-              /> : <CustomReactTable
-                height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-                columns={columns}
-                state={state}
-                dispatch={dispatch}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchData}
-                resource={step?.linkResourceName}
-                hideSelection={step?.readOnly}
-                hideAction={step?.readOnly}
-              />}
-          </>
+          counterField ? (
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-[400px_1fr]">
+              <div className="container-with-border p-[10px]">
+                <CustomReactTable
+                  showOnlyMobileView={true}
+                  height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+                  columns={columns}
+                  state={state}
+                  dispatch={dispatch}
+                  renderedFrom={renderedFrom}
+                  refreshGrid={fetchData}
+                  resource={step?.linkResourceName}
+                  hideSelection={step?.readOnly}
+                  hideAction={step?.readOnly}
+                  setWholeRowsCellColor={(row) =>
+                    row._id === selectedRow?._id
+                      ? ' [box-shadow:inset_0px_0px_0px_3px_var(--new-theme-color)_!important] transition-bg duration-300'
+                      : ' transition-bg duration-300'
+                  }
+                  onRowClick={onRowClick}
+                />
+              </div>
+              <div className="container-with-border">
+                {selectedRow && (
+                  <ShowCounterField fields={counterField?.fieldData?.subFields} resource={step?.linkResourceName} selectedRow={selectedRow} />
+                )}
+              </div>
+            </div>
+          ) : (
+            <>
+              {step?.excelLikeEntry ? (
+                <EditableExcelTable
+                  columns={columns}
+                  data={state.dataRows}
+                  onChange={(rows) => handleExcelChange(rows)}
+                  onDelete={(row) => handleDelete(row)}
+                />
+              ) : (
+                <CustomReactTable
+                  height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+                  columns={columns}
+                  state={state}
+                  dispatch={dispatch}
+                  renderedFrom={renderedFrom}
+                  refreshGrid={fetchData}
+                  resource={step?.linkResourceName}
+                  hideSelection={step?.readOnly}
+                  hideAction={step?.readOnly}
+                />
+              )}
+            </>
+          )
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -339,7 +405,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
             setShowDeleteConfirmBox(false);
           }}
           okBtnLoading={isSubmitting}
-          onOk={handleDelete}
+          onOk={() => handleDelete()}
         />
       )}
     </>

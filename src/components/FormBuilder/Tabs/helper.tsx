@@ -323,6 +323,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'autoCreateWorkOrderOnQuotationApproval',
+        fieldLabel: 'Auto Create Work Order on Quotation Approval',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'loadingReceivingDefaultView',
         fieldLabel: 'Loading Receiving Default View',
         type: 'dropDown',
@@ -638,28 +644,7 @@ export const RESOURCE_ACTION_TYPE = {
 export const fieldColor = {
   fieldName: 'fieldColor',
   fieldLabel: 'Fields Color',
-  type: 'multipleFields',
-  fields: [
-    {
-      fieldName: 'fieldName',
-      fieldLabel: 'Field Name',
-      type: 'dropDown',
-      required: true
-    },
-    {
-      fieldName: 'value',
-      fieldLabel: 'Value',
-      type: 'multiSelect',
-      required: true
-    },
-    {
-      fieldName: 'colorCode',
-      fieldLabel: 'Color Code',
-      type: 'colorPicker',
-      required: true
-    }
-  ],
-  defaultValue: []
+  type: 'multipleFieldColor',
 }
 
 export const autoCreateWorkspaceAttachment = {

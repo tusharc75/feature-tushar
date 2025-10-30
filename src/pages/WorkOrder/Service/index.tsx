@@ -114,7 +114,7 @@ const Service = ({
   const [isSubmitting, setSubmitting] = useState(false);
   const [reviseQuotation, setReviseQuotation] = useState(false);
   const [openProperties, setOpenProperties] = useState(false);
-  const [workOrdersCompleteServicesDialog, setWorkOrdersCompleteServicesDialog] = useState({ open: false, workOrders: null })
+  const [workOrdersCompleteServicesDialog, setWorkOrdersCompleteServicesDialog] = useState({ open: false, workOrders: null });
 
   useEffect(() => {
     fetchServiceData();
@@ -133,18 +133,17 @@ const Service = ({
     const workOrderDetailResponce: any = await axiosInstance().get(`${workOrder.api}/${workOrderId}/detail`);
     const workOrderDetail = workOrderDetailResponce?.data?.data;
 
-    if (workOrderDetail.type === WORK_ORDER_TYPE.repairOrder && workOrderDetail?.repairOrder) {
-      if (workOrderDetail?.repairOrder?.addQuotationStep) {
+    if ((workOrderDetail.type === WORK_ORDER_TYPE.repairOrder && workOrderDetail?.repairOrder && workOrderDetail?.repairOrder?.addQuotationStep)
+      || workOrderDetail.type === WORK_ORDER_TYPE.job) {
+      if (workOrderDetail?.quotation?.version) {
         isQuotation = true;
-        if (workOrderDetail?.quotation?.version) {
-          quotation = {
-            _id: workOrderDetail?.quotation?._id,
-            versionId: workOrderDetail?.quotation?.version?._id,
-            quotationNumber: workOrderDetail?.quotation?.quotationNumber,
-            status: workOrderDetail?.quotation?.version?.status
-          };
-          setQuotationData(quotation);
-        }
+        quotation = {
+          _id: workOrderDetail?.quotation?._id,
+          versionId: workOrderDetail?.quotation?.version?._id,
+          quotationNumber: workOrderDetail?.quotation?.quotationNumber,
+          status: workOrderDetail?.quotation?.version?.status
+        };
+        setQuotationData(quotation);
       }
     }
 
@@ -355,7 +354,7 @@ const Service = ({
       .post(`${workOrder.api}/service/${workOrderId}`, data)
       .then(() => {
         setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null, parentId: null });
-        if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired]?.includes(quotationData?.status)) {
+        if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired]?.includes(quotationData?.status) && workOrderData?.type !== WORK_ORDER_TYPE.job) {
           setReviseQuotation(true);
         } else {
           fetchServiceData();
@@ -381,7 +380,7 @@ const Service = ({
           message: data?.message
         });
         prevOrder.current = serviceSteps?.findIndex((s) => s?.uniqueId === selectedService?.uniqueId) + 1;
-        if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired]?.includes(quotationData?.status)) {
+        if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.expired]?.includes(quotationData?.status) && workOrderData?.type !== WORK_ORDER_TYPE.job) {
           setReviseQuotation(true);
         } else {
           fetchServiceData();
@@ -596,10 +595,11 @@ const Service = ({
               <ModernBulkAction
                 bulkActionItems={
                   <ServicesBulkActionItems
+                    unselectAll={useServiceSelectionState.unselectAll}
                     selectedServices={useServiceSelectionState.selectedRecords}
                     workOrderData={workOrderData}
                     onClickCompleteServices={(services) => {
-                      setWorkOrdersCompleteServicesDialog({ open: true, workOrders: [{ workOrder: workOrderData?._id, services: services }] })
+                      setWorkOrdersCompleteServicesDialog({ open: true, workOrders: [{ workOrder: workOrderData?._id, services: services }] });
                     }}
                   />
                 }
@@ -1360,9 +1360,9 @@ const Service = ({
           workOrders={workOrdersCompleteServicesDialog.workOrders}
           onClose={() => setWorkOrdersCompleteServicesDialog({ open: false, workOrders: null })}
           onSuccess={() => {
-            setWorkOrdersCompleteServicesDialog({ open: false, workOrders: null })
-            fetchServiceData()
-            fetchWorkOrderData()
+            setWorkOrdersCompleteServicesDialog({ open: false, workOrders: null });
+            fetchServiceData();
+            fetchWorkOrderData();
           }}
         />
       )}

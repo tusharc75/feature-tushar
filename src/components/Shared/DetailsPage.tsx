@@ -26,7 +26,6 @@ import FollowUpsDialog from 'src/components/Activity/Task/FollowUpsDialog';
 import axios, { CancelTokenSource } from 'axios';
 import axiosInstance from 'src/axios/axiosInstance';
 import { FaUserPlus } from 'react-icons/fa6';
-import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
 import GroupSignatureCell from 'src/components/CustomReactTable/Cells/GroupSignatureCell';
 import CopyToClipboardButton from 'src/components/CopyToClipboardButton';
 import { isFieldVisible, isSectionVisible } from 'src/components/Helpers/FormTypes';
@@ -38,6 +37,7 @@ import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyl
 import RichTextEditorCell from 'src/components/CustomReactTable/Cells/RichTextEditorCell';
 import RenderFollowUP from 'src/components/Shared/FollowUp';
 import ShowModificationData from 'src/components/Shared/ShowModificationData';
+import CounterCell from 'src/components/CustomReactTable/Cells/CounterCell';
 
 const useStyles = makeStyles((theme: Theme) => ({
   fieldText: {
@@ -426,7 +426,7 @@ const Details = (props: DetailProps) => {
         );
       }
       if (fieldData.type === 'counter') {
-        return <NumberCell field={fieldData} rowData={val} enableDilaog={false} />;
+        return <CounterCell field={fieldData} rowData={val} enableDilaog={false} />;
       }
       if (fieldData.type === 'groupSignature') {
         return <GroupSignatureCell field={fieldData} original={val} enableDilaog={false} />;

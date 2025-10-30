@@ -1,7 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useEditableTableStore } from 'src/components/EditableExcelTable/hooks/useEditableExcelTable';
 import { CellProps } from 'src/components/EditableExcelTable/types';
-import { cleanDirtyRowData, getCellValue, renderCellText } from 'src/components/EditableExcelTable/utils';
+import { cleanDirtyRowData, getCellValue, renderCellText, setValidRows } from 'src/components/EditableExcelTable/utils';
 import { handleAutoCalculation } from 'src/constants/formulaUtility';
 import { cn } from 'src/constants/helpers';
 
@@ -36,8 +36,18 @@ const Input = ({
   const [, setStore] = useEditableTableStore((prev) => prev.pasteKey);
   const [columns] = useEditableTableStore((prev) => prev.columns);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [inputValue, setInputValue] = useState(getCellValue(column, data));
+  const [inputValue, setInputValue] = useState(getCellValue(column, data) as string | number);
   const timeoutRef = useRef<NodeJS.Timeout>(null);
+
+  useEffect(() => {
+    let errorMessage = '';
+    if (column.required && (!inputValue || !`${inputValue}`?.trim())) {
+      errorMessage = `${column.Header} is required`;
+    } else {
+      errorMessage = '';
+    }
+    setStore((prev) => setValidRows({ prev, accessor: column.id || column.accessor, rowIndex, errorMessage }));
+  }, [inputValue, column.id, column.accessor, column.required, setStore, rowIndex, column.Header]);
 
   const setValueToState = (newValue: string | number) => {
     const key = column.accessor || column.id;
@@ -54,10 +64,7 @@ const Input = ({
       dirtyRows[rowIndex] = { ...tableData[rowIndex], [key]: newValue };
       if (Object.keys(result).length > 0) {
         tableData[rowIndex] = { ...tableData[rowIndex], ...result };
-        dirtyRows[rowIndex] = cleanDirtyRowData(
-          { ...tableData[rowIndex], ...result },
-          columns.map((d) => d.id ?? d.accessor)
-        );
+        dirtyRows[rowIndex] = cleanDirtyRowData({ ...tableData[rowIndex], ...result }, columns);
       }
       return {
         dirtyRows,
