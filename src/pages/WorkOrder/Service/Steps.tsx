@@ -3,7 +3,7 @@ import { Box, Checkbox, Chip, IconButton, Menu, MenuItem, useMediaQuery } from '
 import Grid from '@mui/material/Grid2';
 import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
-import { isArray, isEqual } from 'lodash';
+import { isArray, isEmpty, isEqual } from 'lodash';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { AiOutlinePlus } from 'react-icons/ai';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -474,7 +474,7 @@ const Steps = ({
         let isDataAlreadyAdded = false;
         const fieldNames = step?.fields?.map((e) => e.fieldName);
         for (var key in tempServiceData) {
-          if (fieldNames?.includes(key)) {
+          if (fieldNames?.includes(key) && !isEmpty(tempServiceData[key])) {
             isDataAlreadyAdded = true;
           }
         }
