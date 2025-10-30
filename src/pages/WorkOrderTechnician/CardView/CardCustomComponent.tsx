@@ -1,9 +1,10 @@
 import { Checkbox } from '@mui/material';
-import React, { Fragment, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
+import { UseCardColTimeline } from 'src/components/CardColTimeline1';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import RippleButton from 'src/components/RippleButton';
-import useSelection from './useSelection';
 import { cn } from 'src/constants/helpers';
+import useSelection from './useSelection';
 
 type CustomContentProps = {
   row: any;
@@ -12,48 +13,44 @@ type CustomContentProps = {
   getPreRenderedCell: (col: TColType, data: any) => React.ReactNode;
   renderCellText: (col: TColType, data: any) => any;
   recalculateHeight: () => void;
-  isSelected: boolean;
-  handleSelect: (selected: boolean) => void;
+  state: UseCardColTimeline<any, any>;
+  column: string;
 };
 const getId = (d: any) => d['_id'];
 
 const CardCustomComponent = React.memo(
-  ({ row, columns, getPreRenderedCell, recalculateHeight, renderCellText, handleSelect: handleSelectParent, isSelected }: CustomContentProps) => {
-    const [visibleServices, setVisibleServices] = useState(() => [...row.services].slice(0, 2));
-    const { getIsAllSelected, handleSelect, handleSelectAll, selectedRows, selectedRowMap, handleUnselectAll } = useSelection(getId);
-
-    // const isAllRowSelected = getIsAllSelected(row.services);
-
-    useEffect(() => {
-      if (isSelected) {
-        handleSelectAll(row.services);
-      }
-    }, [isSelected]);
+  ({ row, columns, getPreRenderedCell, recalculateHeight, renderCellText, state, column }: CustomContentProps) => {
+    const { selectedSubItemsMap, setSelectedSubItemsMap, selectedRecordObj, expandedSubRows, setExpandedSubRows } = state;
+    const [visibleServices, setVisibleServices] = useState(() => (expandedSubRows.has(row._id) ? row.services : [...row.services].slice(0, 2)));
+    const { isAllSelected, handleSelect, handleSelectAll, selectedRowMap } = useSelection({
+      allData: row.services,
+      getId,
+      selectedSubItemsMap,
+      setSelectedSubItemsMap,
+      selectedRecordObj,
+      column,
+      rowId: row._id
+    });
 
     const isShowMoreVisible = row.services?.length > 2;
-    const isExpanded = visibleServices.length > 2;
+    const isExpanded = expandedSubRows.has(row._id);
 
-    const showMore = () => {
-      setVisibleServices(row.services);
-      queueMicrotask(() => {
-        recalculateHeight();
-      });
-    };
-
-    const showLess = () => {
-      setVisibleServices([...row.services].slice(0, 2));
-      queueMicrotask(() => {
-        recalculateHeight();
-      });
-    };
+    useEffect(() => {
+      recalculateHeight();
+    }, [isExpanded]);
 
     const toggleExpand = () => {
       if (!isShowMoreVisible) return;
+      const newData = new Set(expandedSubRows);
+
       if (isExpanded) {
-        showLess();
+        newData.delete(row._id);
+        setVisibleServices([...row.services].slice(0, 2));
       } else {
-        showMore();
+        newData.add(row._id);
+        setVisibleServices(row.services);
       }
+      setExpandedSubRows(newData);
     };
     const [firstCol, ...restCol] = columns;
 
@@ -67,7 +64,7 @@ const CardCustomComponent = React.memo(
               handleSelectAll(row.services);
             }}
           >
-            {getIsAllSelected(row.services) ? 'Unselect All' : 'Select All'}
+            {isAllSelected ? 'Unselect All' : 'Select All'}
           </RippleButton>
         </div>
         <ul className="list-none space-y-2 p-0">
@@ -88,7 +85,7 @@ const CardCustomComponent = React.memo(
                   size={'small'}
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleSelect(d, row.services, handleSelectParent);
+                    handleSelect(d);
                   }}
                   checked={selectedRowMap.has(getId(d))}
                 />

@@ -16,7 +16,9 @@ const getInitialState = <D, C extends readonly string[]>(): UseCardColState<D, C
     selectedView: null,
     selectedRecordObj: {},
     resetSelectionSignal: false,
-    resource: ''
+    resource: '',
+    selectedSubItemsMap: new Map(),
+    expandedSubRows: new Set()
   };
 };
 
@@ -34,6 +36,12 @@ const reducer = <D, C extends readonly string[]>(state: UseCardColState<D, C>, a
       return { ...state, visibleColumns: action.payload } as UseCardColState<D, C>;
     case 'setSelectedView':
       return { ...state, selectedView: action.payload };
+    case 'setSelectedSubItemsMap': {
+      return { ...state, selectedSubItemsMap: action.payload };
+    }
+    case 'setExpandedSubRows': {
+      return { ...state, expandedSubRows: action.payload };
+    }
     case 'setColumnDef': {
       const payload = {
         ...state,
@@ -95,6 +103,12 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
     const preparedColumnDef = prepareColumnDef(payload);
     setState({ type: 'setColumnDef', payload: preparedColumnDef });
   }, []);
+  const setSelectedSubItemsMap = useCallback((payload: UseCardColState<D, C>['selectedSubItemsMap']) => {
+    setState({ type: 'setSelectedSubItemsMap', payload });
+  }, []);
+  const setExpandedSubRows = useCallback((payload: UseCardColState<D, C>['expandedSubRows']) => {
+    setState({ type: 'setExpandedSubRows', payload });
+  }, []);
   const setFilterQuery = useCallback(
     (payload: UseCardColState<D, C>['filterQuery']) => {
       setState({
@@ -149,6 +163,8 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
     setOrderAndVisibility,
     setSelectedView,
     resetSelection,
+    setSelectedSubItemsMap,
+    setExpandedSubRows,
     selectedRecords
   };
 };

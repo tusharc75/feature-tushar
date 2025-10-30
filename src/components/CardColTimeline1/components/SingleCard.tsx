@@ -63,15 +63,6 @@ const SingleCard = <D, C extends readonly string[]>({
     setSize(index, rowRef.current?.getBoundingClientRect().height, true);
   }, [index, setSize]);
 
-  const setSelectedWrapper = useCallback(
-    (selected: boolean) => {
-      const isCardSelected = selectedRecordMap?.has(keyGetter(rowData)) || false;
-      if (selected === isCardSelected) return;
-      handleSelectSingle(rowData);
-    },
-    [handleSelectSingle, keyGetter, rowData, selectedRecordMap]
-  );
-
   if (!rowData) return null;
 
   return (
@@ -148,8 +139,8 @@ const SingleCard = <D, C extends readonly string[]>({
               row: rowData,
               renderCellText: renderCell,
               recalculateHeight,
-              isSelected: selectedRecordMap?.has(keyGetter(rowData)) || false,
-              handleSelect: setSelectedWrapper,
+              state,
+              column,
               getPreRenderedCell: (c, data) => {
                 const cell = renderCell(c, data);
                 return (

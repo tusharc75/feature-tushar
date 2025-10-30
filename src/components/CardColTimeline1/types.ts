@@ -29,6 +29,8 @@ export type UseCardColState<D, C extends readonly string[]> = {
   selectedView: SelectedView | null;
   selectedRecordObj: Partial<Record<C[number], D[]>>;
   resource: string;
+  selectedSubItemsMap: Map<string, Map<string, any>>;
+  expandedSubRows: Set<string>;
 };
 
 export type UseCardColActions<D, C extends readonly string[]> =
@@ -42,6 +44,8 @@ export type UseCardColActions<D, C extends readonly string[]> =
   | { type: 'setRefreshSignal'; payload: UseCardColState<D, C>['refreshSignal'] }
   | { type: 'setDefaultVisibleRows'; payload: UseCardColState<D, C>['defaultVisibleRows'] }
   | { type: 'setSelectedView'; payload: UseCardColState<D, C>['selectedView'] }
+  | { type: 'setSelectedSubItemsMap'; payload: Map<string, Map<string, any>> }
+  | { type: 'setExpandedSubRows'; payload: Set<string> }
   | { type: 'setLimit'; payload: UseCardColState<D, C>['limit'] };
 
 export type FetchSingleColumnReturnType<D> = {
@@ -88,6 +92,10 @@ export type UseCardColTimeline<D, C extends readonly string[]> = {
   setSelectedView: (payload: UseCardColState<D, C>['selectedView']) => void;
   resetSelection: () => void;
   selectedRecords: D[];
+  selectedSubItemsMap: Map<string, Map<string, any>>;
+  setSelectedSubItemsMap: (paylod: Map<string, Map<string, any>>) => void;
+  expandedSubRows: Set<string>;
+  setExpandedSubRows: (payload: Set<string>) => void;
 } & UseCardColState<D, C>;
 
 export type CardColTimelineProps<D, C extends readonly string[]> = {
@@ -98,8 +106,8 @@ export type CardColTimelineProps<D, C extends readonly string[]> = {
     getPreRenderedCell: (column: TColType, data: any) => React.ReactNode;
     renderCellText: (col: TColType, data: any) => any;
     recalculateHeight: () => void;
-    isSelected: boolean;
-    handleSelect: (selected: boolean) => void;
+    state: UseCardColTimeline<D, C>;
+    column: string;
   }) => React.ReactNode;
   getColColors: (col: C[number]) => ColumnColor;
   cardOnClick?: (data: D) => void;
