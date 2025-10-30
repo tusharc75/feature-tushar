@@ -109,7 +109,7 @@ const SingleCard = <D, C extends readonly string[]>({
             />
             {primaryField && (
               <div className="line-clamp-1 flex-grow ">
-                <h6 className="text-xs font-[300] leading-[1] text-gray-500 dark:text-gray-300">{primaryField.Header}</h6>
+                <h6 className="text-xs font-[300] leading-[1] text-gray-400 dark:text-gray-300">{primaryField.Header}</h6>
                 <h4 className="quote-name line-clamp-1 min-h-[25px] [&>*]:![font-weight:500] [&>div>*+*]:flex-shrink-0 [&>div]:!flex [&>div]:min-w-0 [&>div]:items-center [&_*:not(.flex)]:line-clamp-1 [&_*]:!text-sm [&_*]:[white-space:unset_!important]">
                   {renderCell(primaryField, rowData)}
                 </h4>
@@ -124,7 +124,7 @@ const SingleCard = <D, C extends readonly string[]>({
             return (
               <div className="mb-[2px] min-w-[calc(50%-8px)] flex-shrink flex-grow [&:has(.no-data-cell)]:hidden [&_*>*:has(.md\:sr-only)]:flex">
                 <h6
-                  className="line-clamp-1 max-w-[14ch] flex-shrink-0 text-xs font-[300] leading-[1.5] text-gray-500 dark:text-gray-300 "
+                  className="line-clamp-1 max-w-[14ch] flex-shrink-0 text-xs font-normal leading-[1.5] text-gray-400 dark:text-gray-400 "
                   title={d.Header}
                 >
                   {d.Header}
@@ -148,7 +148,7 @@ const SingleCard = <D, C extends readonly string[]>({
                 return (
                   <div className="mb-[2px] min-w-[calc(50%-8px)] flex-shrink flex-grow [&_*>*:has(.md\:sr-only)]:flex">
                     <h6
-                      className="line-clamp-1 max-w-[14ch] flex-shrink-0 text-xs font-[300] leading-[1.5] text-gray-500 dark:text-gray-300 "
+                      className="line-clamp-1 max-w-[14ch] flex-shrink-0 text-xs font-normal leading-[1.5] text-gray-500 dark:text-gray-400 "
                       title={c.Header}
                     >
                       {c.Header}
