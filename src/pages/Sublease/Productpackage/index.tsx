@@ -32,7 +32,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddStepEditProduct } from 'src/pages/Sublease/walkmeSteps';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getCostPriceConditions, getCostPriceValue, getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 import { useData } from 'src/StateProvider/Provider';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
@@ -301,10 +301,22 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       material.push(element);
     });
 
-    let priceData: any = await getPricingConditions(sidebarResource.sublease, subleaseData, material, PRICING_SETUP_TYPE.rent);
+    const pricingConditionField = allFields?.find(f => f?.fieldName === "pricingCondition")
+    let priceData: any = []
+
+    if (pricingConditionField && pricingConditionField?.lookupResource === sidebarResource.costBooks) {
+      priceData = await getCostPriceConditions(material, [material[0]?.type], subleaseData);
+    } else {
+      priceData = await getPricingConditions(sidebarResource.sublease, subleaseData, material, PRICING_SETUP_TYPE.rent);
+    }
     if (priceData) {
       material.forEach((element) => {
-        const calValues = getPricingValue(element, priceData, subleaseData?.currency, allFields);
+        let calValues: any = {}
+        if (pricingConditionField && pricingConditionField?.lookupResource === sidebarResource.costBooks) {
+          calValues = getCostPriceValue(element, priceData, subleaseData?.currency, allFields)
+        } else {
+          calValues = getPricingValue(element, priceData, subleaseData?.currency, allFields);
+        }
         Object.assign(element, calValues);
       });
     }
@@ -567,9 +579,9 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
 
 export default Productpackage;
 
-const BulkActionItems = ({ 
-  selectedRecords, 
-  setIsProductEdit, 
+const BulkActionItems = ({
+  selectedRecords,
+  setIsProductEdit,
   setDeleteData,
   allowedToEdit
 }) => {
@@ -589,7 +601,7 @@ const BulkActionItems = ({
       <BulkActionContainer.Button
         disabled={
           !allowedToEdit ||
-          selectedRecords?.length && selectedRecords.every((e) => e.canDelete) ? false : true
+            selectedRecords?.length && selectedRecords.every((e) => e.canDelete) ? false : true
         }
         onClick={() => {
           const dataToDelete =
