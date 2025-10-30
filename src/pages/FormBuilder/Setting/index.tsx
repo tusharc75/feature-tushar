@@ -154,7 +154,11 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
                 if (!field.fieldName || field.fieldName === '') {
                   fieldErrors.fieldName = 'Field Name is required';
                 }
-                if (!field.operator || field.operator === '') {
+
+                const selectedField = allFields?.find((f) => f?.fieldData?.fieldName === field.fieldName)?.fieldData;
+                const isDropdownField = selectedField?.type === 'dropDown';
+
+                if (!isDropdownField && (!field.operator || field.operator === '')) {
                   fieldErrors.operator = 'Operator is required';
                 }
                 if (!field.value || (Array.isArray(field.value) && field.value.length === 0) || field.value === '') {
