@@ -21,7 +21,6 @@ const Column = <D, C extends readonly string[]>({
   loading,
   page,
   handleSelectSingle,
-  selectedRecordMap,
   estimatedItemSize = DEFAULT_ITEM_SIZE,
   ...rest
 }: {
@@ -32,7 +31,6 @@ const Column = <D, C extends readonly string[]>({
   handleFetchSingleColumnWrapper: (page: number, pushData: boolean, cancelToken?: CancelToken) => void;
   loading: boolean;
   page: number;
-  selectedRecordMap: Map<string, boolean>;
   handleSelectSingle: (data: D) => void;
   estimatedItemSize?: number;
 } & CommonProps<D, C>) => {
@@ -105,7 +103,6 @@ const Column = <D, C extends readonly string[]>({
                   index={index}
                   setSize={setSize}
                   handleSelectSingle={handleSelectSingle}
-                  selectedRecordMap={selectedRecordMap}
                   key={index}
                   {...rest}
                   {...restOfVirutalProps}

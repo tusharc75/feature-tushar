@@ -40,18 +40,17 @@ const SingleCard = <D, C extends readonly string[]>({
   colors,
   column,
   handleSelectSingle,
-  selectedRecordMap,
   passFailStatus,
   actionField,
   defaultDisplay,
   primaryField,
-  customContent
+  customContent,
+  getChildId
 }: SingleCardProps<D, C> & {
-  selectedRecordMap: Map<string, boolean>;
   handleSelectSingle: (data: D) => void;
 }) => {
   const previousDefaultDisplay = usePrevious(defaultDisplay.length);
-  const { keyGetter } = state;
+  const { keyGetter, selectedRecordMap } = state;
   const rowRef = useRef<HTMLDivElement>(null);
   const rowData = data[index];
 
@@ -73,7 +72,7 @@ const SingleCard = <D, C extends readonly string[]>({
           typeof cardOnClick === 'function'
             ? 'cursor-pointer outline-0 outline-[--new-theme-color] focus-visible:shadow-lg focus-visible:outline-2'
             : '',
-          selectedRecordMap?.has(keyGetter(rowData)) ? `${colors.background} ${colors.color}` : '',
+          selectedRecordMap.get(column)?.has(keyGetter(rowData)) ? `${colors.background} ${colors.color}` : '',
           '[--px:16px] [--py:12px]'
         )}
         onClick={(e) => {
@@ -98,7 +97,7 @@ const SingleCard = <D, C extends readonly string[]>({
             <Checkbox
               sx={{ ml: '-8px' }}
               size="small"
-              checked={selectedRecordMap?.has(keyGetter(rowData)) || false}
+              checked={selectedRecordMap.get(column)?.has(keyGetter(rowData)) || false}
               onClick={(e) => {
                 e.stopPropagation();
                 handleSelectSingle(rowData);
@@ -141,6 +140,7 @@ const SingleCard = <D, C extends readonly string[]>({
               recalculateHeight,
               state,
               column,
+              getChildId,
               getPreRenderedCell: (c, data) => {
                 const cell = renderCell(c, data);
                 return (

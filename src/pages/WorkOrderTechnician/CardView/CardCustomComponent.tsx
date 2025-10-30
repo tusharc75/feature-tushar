@@ -15,21 +15,20 @@ type CustomContentProps = {
   recalculateHeight: () => void;
   state: UseCardColTimeline<any, any>;
   column: string;
+  getChildId: (child: any) => string;
 };
-const getId = (d: any) => d['_id'];
 
 const CardCustomComponent = React.memo(
-  ({ row, columns, getPreRenderedCell, recalculateHeight, renderCellText, state, column }: CustomContentProps) => {
-    const { selectedSubItemsMap, setSelectedSubItemsMap, selectedRecordObj, expandedSubRows, setExpandedSubRows } = state;
+  ({ row, columns, getPreRenderedCell, recalculateHeight, renderCellText, state, column, getChildId }: CustomContentProps) => {
+    const { expandedSubRows, setExpandedSubRows } = state;
     const [visibleServices, setVisibleServices] = useState(() => (expandedSubRows.has(row._id) ? row.services : [...row.services].slice(0, 2)));
     const { isAllSelected, handleSelect, handleSelectAll, selectedRowMap } = useSelection({
       allData: row.services,
-      getId,
-      selectedSubItemsMap,
-      setSelectedSubItemsMap,
-      selectedRecordObj,
+      getId: getChildId,
+      state,
       column,
-      rowId: row._id
+      rowId: row._id,
+      row
     });
 
     const isShowMoreVisible = row.services?.length > 2;
@@ -37,6 +36,7 @@ const CardCustomComponent = React.memo(
 
     useEffect(() => {
       recalculateHeight();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isExpanded]);
 
     const toggleExpand = () => {
@@ -61,7 +61,7 @@ const CardCustomComponent = React.memo(
           <RippleButton
             className="text-xs font-semibold text-blue-500"
             onClick={() => {
-              handleSelectAll(row.services);
+              handleSelectAll();
             }}
           >
             {isAllSelected ? 'Unselect All' : 'Select All'}
@@ -78,7 +78,7 @@ const CardCustomComponent = React.memo(
                   'data-[selected=true]:border-blue-600 data-[selected=true]:bg-blue-50',
                   'dark:data-[selected=true]:border-slate-600 dark:data-[selected=true]:bg-slate-950'
                 )}
-                data-selected={selectedRowMap.has(getId(d))}
+                data-selected={selectedRowMap.has(getChildId(d))}
               >
                 <Checkbox
                   sx={{ p: '3px' }}
@@ -87,7 +87,7 @@ const CardCustomComponent = React.memo(
                     e.stopPropagation();
                     handleSelect(d);
                   }}
-                  checked={selectedRowMap.has(getId(d))}
+                  checked={selectedRowMap.has(getChildId(d))}
                 />
                 <div className="space-y-[2px] ">
                   <div key={firstCol.Header} className="[&_*]:!text-sm [&_*]:!font-medium">

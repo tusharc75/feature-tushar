@@ -15,6 +15,7 @@ const CardColTimeline = <D, C extends readonly string[]>({
   headerSlot,
   renderedFrom,
   customContent,
+  getChildId = (data) => data._id,
   ...rest
 }: { headerSlot?: React.ReactElement; renderedFrom: string } & CardColTimelineProps<D, C>) => {
   const { columns, visibleColumns, columnDef, visible, order, setOrderAndVisibility, selectedView, setSelectedView } = state;
@@ -87,6 +88,7 @@ const CardColTimeline = <D, C extends readonly string[]>({
               primaryField={primaryField}
               actionField={actionField}
               defaultDisplay={defaultDisplay}
+              getChildId={getChildId}
               {...rest}
             />
           );

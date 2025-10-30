@@ -1,38 +1,64 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { UseCardColTimeline } from 'src/components/CardColTimeline1';
 import { useEffectEvent } from 'src/hooks/useEffectEvent';
 
 const emptyMapRef = new Map();
 const useSelection = <D,>({
   allData,
   getId = (d) => d['_id'],
-  setSelectedSubItemsMap,
-  selectedSubItemsMap,
-  selectedRecordObj,
   column,
-  rowId
+  state,
+  rowId,
+  row
 }: {
   allData: D[];
   getId: (data: D) => string;
-  setSelectedSubItemsMap: (paylod: Map<string, Map<string, any>>) => void;
-  selectedSubItemsMap: Map<string, Map<string, any>>;
-  selectedRecordObj: Partial<Record<any, any[]>>;
+  state: UseCardColTimeline<any, any>;
   column: string;
   rowId: string;
+  row: any;
 }) => {
-  if (column === 'Pending') console.log({ selectedSubItemsMap, selectedRecordObj, column });
+  const { selectedSubItemsMap, setSelectedSubItemsMap, selectedRecordMap, setSelectedRecordMap } = state;
+
+  // if (column === 'Pending') console.log({ column, selectedSubItemsMap, isParentSelected });
 
   const selectedRowMap = selectedSubItemsMap.get(rowId) || emptyMapRef;
 
-  const setSelectedRowMap = useEffectEvent((payload: ((prev: Map<string, D>) => Map<string, D>) | Map<string, D>) => {
-    let newVal: Map<string, D>;
-    if (typeof payload === 'function') {
-      newVal = payload(selectedRowMap);
+  const setSelectedRowMap = useEffectEvent((payload: ((prev: Map<string, D>) => Map<string, D>) | Map<string, D>, setAllSelected = true) => {
+    setSelectedSubItemsMap((prev) => {
+      const outerVal = new Map(prev);
+      let innerValue: Map<string, D>;
+      if (typeof payload === 'function') {
+        innerValue = payload(prev.get(rowId) || emptyMapRef);
+      } else {
+        innerValue = payload;
+      }
+      const allSelected = allData.every((d) => innerValue.has(getIdStable(d)));
+      if (allSelected && setAllSelected) {
+        setSelectedRecordMap((prev) => {
+          const outer = new Map(prev);
+          const inner = outer.get(column) || new Map();
+          inner.set(rowId, row);
+          outer.set(column, inner);
+          return outer;
+        });
+      }
+      outerVal.set(rowId, innerValue);
+      return outerVal;
+    });
+  });
+
+  const handleSelectAll = useEffectEvent(() => {
+    if (isAllSelected) {
+      setSelectedRowMap(new Map());
     } else {
-      newVal = payload;
+      const newData = new Map<string, D>();
+      for (const d of allData) {
+        const id = getIdStable(d);
+        newData.set(id, d);
+      }
+      setSelectedRowMap(newData);
     }
-    const tempVal = new Map(selectedSubItemsMap);
-    tempVal.set(rowId, newVal);
-    setSelectedSubItemsMap(tempVal);
   });
 
   const selectedRows = Array.from(selectedRowMap.values());
@@ -65,25 +91,9 @@ const useSelection = <D,>({
 
   const isAllSelected = allData.every((d) => selectedRowMap.get(getIdStable(d)));
 
-  const handleSelectAll = useCallback(
-    (allData: D[]) => {
-      if (isAllSelected) {
-        setSelectedRowMap(new Map());
-      } else {
-        const newData = new Map<string, D>();
-        for (const d of allData) {
-          const id = getIdStable(d);
-          newData.set(id, d);
-        }
-        setSelectedRowMap(newData);
-      }
-    },
-    [getIdStable, isAllSelected, setSelectedRowMap]
-  );
-
   const handleUnselectAll = useCallback(() => {
     setSelectedRowMap(new Map());
-  }, []);
+  }, [setSelectedRowMap]);
 
   return {
     selectedRows,

@@ -27,15 +27,12 @@ export type UseCardColState<D, C extends readonly string[]> = {
   order: string[] | null;
   visible: Record<string, boolean>;
   selectedView: SelectedView | null;
-  selectedRecordObj: Partial<Record<C[number], D[]>>;
   resource: string;
-  selectedSubItemsMap: Map<string, Map<string, any>>;
   expandedSubRows: Set<string>;
 };
 
 export type UseCardColActions<D, C extends readonly string[]> =
   | { type: 'resetSelection' }
-  | { type: 'setSelectedRecordObj'; payload: UseCardColState<D, C>['selectedRecordObj'] }
   | { type: 'setStateData'; payload: Partial<UseCardColState<D, C>> }
   | { type: 'setColumns'; payload: UseCardColState<D, C>['columns'] }
   | { type: 'setResource'; payload: UseCardColState<D, C>['resource'] }
@@ -44,7 +41,6 @@ export type UseCardColActions<D, C extends readonly string[]> =
   | { type: 'setRefreshSignal'; payload: UseCardColState<D, C>['refreshSignal'] }
   | { type: 'setDefaultVisibleRows'; payload: UseCardColState<D, C>['defaultVisibleRows'] }
   | { type: 'setSelectedView'; payload: UseCardColState<D, C>['selectedView'] }
-  | { type: 'setSelectedSubItemsMap'; payload: Map<string, Map<string, any>> }
   | { type: 'setExpandedSubRows'; payload: Set<string> }
   | { type: 'setLimit'; payload: UseCardColState<D, C>['limit'] };
 
@@ -93,9 +89,12 @@ export type UseCardColTimeline<D, C extends readonly string[]> = {
   resetSelection: () => void;
   selectedRecords: D[];
   selectedSubItemsMap: Map<string, Map<string, any>>;
-  setSelectedSubItemsMap: (paylod: Map<string, Map<string, any>>) => void;
+  setSelectedSubItemsMap: React.Dispatch<React.SetStateAction<Map<string, Map<string, any>>>>;
   expandedSubRows: Set<string>;
   setExpandedSubRows: (payload: Set<string>) => void;
+  setSelectedRecordMap: React.Dispatch<React.SetStateAction<Map<string, Map<string, D>>>>;
+  selectedRecordMap: Map<string, Map<string, D>>;
+  selectedSubRows: any[];
 } & UseCardColState<D, C>;
 
 export type CardColTimelineProps<D, C extends readonly string[]> = {
@@ -108,9 +107,12 @@ export type CardColTimelineProps<D, C extends readonly string[]> = {
     recalculateHeight: () => void;
     state: UseCardColTimeline<D, C>;
     column: string;
+    getChildId: (d: any) => string;
   }) => React.ReactNode;
   getColColors: (col: C[number]) => ColumnColor;
   cardOnClick?: (data: D) => void;
   passFailStatus?: boolean;
   passFailAccessor?: string;
+  subItemAccessor?: (data: D) => any[];
+  getChildId?: (child: any) => string;
 };
