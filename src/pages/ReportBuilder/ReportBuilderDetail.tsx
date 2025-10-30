@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useCallback } from 'react';
+import { useState, useContext, useEffect, useCallback, useMemo } from 'react';
 import Grid from '@mui/material/Grid2';
 import { TextField, Chip, Popper, Paper } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
@@ -34,7 +34,7 @@ import { BiFilterAlt } from 'react-icons/bi';
 import { FilterFieldSelectionDialog, FilterConfigurationDialog } from './Filters';
 import FieldSelectionPopper from './FieldSelectionPopper';
 
-const WithResourceFieldsPopper = ({ isEdit, item, lookupFields, updatePipelineItem }) => {
+const FieldsPopper = ({ isEdit, item, fields, updatePipelineItem, setItemCausingFieldChange }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const open = Boolean(anchorEl);
   const handleToggle = (e) => {
@@ -68,13 +68,14 @@ const WithResourceFieldsPopper = ({ isEdit, item, lookupFields, updatePipelineIt
                   <Checkbox
                     size="small"
                     checked={(() => {
-                      return item?.fields?.length === lookupFields.length && lookupFields.length > 0;
+                      return item?.fields?.length === fields.length && fields.length > 0;
                     })()}
                     indeterminate={(() => {
-                      return item?.fields?.length > 0 && item?.fields?.length < lookupFields.length;
+                      return item?.fields?.length > 0 && item?.fields?.length < fields.length;
                     })()}
                     onChange={(e) => {
-                      updatePipelineItem(item._id, { fields: e.target.checked ? lookupFields.map((f) => f.fieldName) : [] });
+                      updatePipelineItem(item._id, { fields: e.target.checked ? fields?.map((f) => f.fieldName) : [] });
+                      setItemCausingFieldChange(item._id);
                     }}
                     disabled={!isEdit}
                   />
@@ -85,7 +86,7 @@ const WithResourceFieldsPopper = ({ isEdit, item, lookupFields, updatePipelineIt
             </div>
 
             <div style={{ borderTop: '1px solid var(--common-border-color)' }} className="pt-2">
-              {lookupFields?.map((field) => {
+              {fields?.map((field) => {
                 const checked = item?.fields?.includes(field.fieldName);
                 return (
                   <div key={field.fieldName} className="mb-1">
@@ -97,6 +98,7 @@ const WithResourceFieldsPopper = ({ isEdit, item, lookupFields, updatePipelineIt
                           onChange={(e) => {
                             const next = e.target.checked ? [...item?.fields, field.fieldName] : item?.fields?.filter((f) => f !== field.fieldName);
                             updatePipelineItem(item._id, { fields: next });
+                            setItemCausingFieldChange(item._id);
                           }}
                           disabled={!isEdit}
                         />
@@ -106,7 +108,7 @@ const WithResourceFieldsPopper = ({ isEdit, item, lookupFields, updatePipelineIt
                   </div>
                 );
               })}
-              {lookupFields?.length === 0 && (
+              {fields?.length === 0 && (
                 <div className="py-4 text-center">
                   <span className="text-sm" style={{ color: 'var(--dark-secondary-text, #6c757d)' }}>
                     No fields available
@@ -131,22 +133,28 @@ const LookupComponent = ({
   updatePipelineItem,
   removePipelineItem,
   resourceOptions,
-  fetchResourceFields
+  fetchResourceFields,
+  itemCausingFieldChange,
+  setItemCausingFieldChange
 }) => {
   const lookupFields = [{ fieldName: '_id', fieldLabel: '_id' }, ...(resourceFieldMap?.[item?.withResource] || [])];
 
   const [availableFields, setAvailableFields] = useState<any[]>([]);
 
+  const upstreamPipeline = useMemo(() => {
+    const idx = pipeline?.findIndex((p) => p._id === item?._id);
+    return pipeline?.slice(0, idx) || [];
+  }, [pipeline, item?._id]);
+
   useEffect(() => {
     const fetchFields = async () => {
-      const currentItemIndex = pipeline.findIndex((p) => p._id === item?._id);
-      const pipelineBeforeCurrentItem = pipeline.slice(0, currentItemIndex);
-
-      const fields = await getAvailableFieldsForPipeline(pipelineBeforeCurrentItem, formValues?.resource, resourceFieldMap?.[formValues?.resource]);
+      const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, resourceFieldMap?.[formValues?.resource]);
       setAvailableFields(fields || []);
     };
-    fetchFields();
-  }, [pipeline, item?._id, formValues?.resource, resourceFieldMap?.[formValues?.resource]]);
+    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+      fetchFields();
+    }
+  }, [itemCausingFieldChange, formValues?.resource, resourceFieldMap?.[formValues?.resource]]);
 
   return (
     <Card key={item._id} sx={{ mb: 2, border: pipelineErrors[item._id]?.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
@@ -174,6 +182,7 @@ const LookupComponent = ({
           fetchResourceFields={fetchResourceFields}
           updatePipelineItem={updatePipelineItem}
           pipelineErrors={pipelineErrors}
+          setItemCausingFieldChange={setItemCausingFieldChange}
         />
 
         {item?.fieldToMatch?.length > 1 &&
@@ -196,6 +205,7 @@ const LookupComponent = ({
               fetchResourceFields={fetchResourceFields}
               updatePipelineItem={updatePipelineItem}
               pipelineErrors={pipelineErrors}
+              setItemCausingFieldChange={setItemCausingFieldChange}
             />
           ))}
       </CardContent>
@@ -216,7 +226,8 @@ const FieldMatchRow = ({
   fetchResourceFields,
   updatePipelineItem,
   pipelineErrors,
-  availableFields
+  availableFields,
+  setItemCausingFieldChange
 }: {
   item: LookupPipeline;
   matchIndex: number;
@@ -231,6 +242,7 @@ const FieldMatchRow = ({
   updatePipelineItem: (id: string, updates: Partial<PipelineItem>) => void;
   pipelineErrors: { [itemId: string]: string[] };
   availableFields: any[];
+  setItemCausingFieldChange: React.Dispatch<React.SetStateAction<any>>;
 }) => {
   const fromResourceName = resourceOptions?.find((r) => r.value === formValues?.resource)?.title || formValues?.resource;
   const withResourceName = resourceOptions?.find((r) => r.value === item.withResource)?.title || item.withResource;
@@ -292,6 +304,8 @@ const FieldMatchRow = ({
                           updatePipelineItem(item._id, { fields: allFieldNames });
                         });
                       }
+
+                      setItemCausingFieldChange(item._id);
                     }}
                     renderInput={(params) => (
                       <TextField
@@ -309,7 +323,13 @@ const FieldMatchRow = ({
                   />
                 </div>
                 {item?.withResource && (
-                  <WithResourceFieldsPopper isEdit={isEdit} item={item} lookupFields={lookupFields} updatePipelineItem={updatePipelineItem} />
+                  <FieldsPopper
+                    isEdit={isEdit}
+                    item={item}
+                    fields={lookupFields}
+                    updatePipelineItem={updatePipelineItem}
+                    setItemCausingFieldChange={setItemCausingFieldChange}
+                  />
                 )}
               </div>
             </Grid>
@@ -326,7 +346,7 @@ const FieldMatchRow = ({
               <FieldSelectionPopper
                 isEdit={isEdit && !!item.withResource}
                 availableFields={availableFields}
-                selectedField={availableFields?.find((f) => f?.fieldName === item?.fieldToMatch?.[matchIndex]?.localField)}
+                selectedFields={availableFields?.filter((f) => f?.fieldName === item?.fieldToMatch?.[matchIndex]?.localField)}
                 onFieldSelect={(field) => {
                   const updatedFieldToMatch = [...item.fieldToMatch];
                   updatedFieldToMatch[matchIndex] = { ...updatedFieldToMatch[matchIndex], localField: field?.fieldName || '' };
@@ -415,21 +435,23 @@ const FieldMatchRow = ({
 };
 
 const AccumulatorRow = ({
+  item,
   accumulator,
-  accIndex,
   resourceFields,
   onUpdate,
   onRemove,
   isEdit,
-  onAddOperation
+  onAddOperation,
+  setItemCausingFieldChange
 }: {
+  item: any;
   accumulator: any;
-  accIndex: number;
   resourceFields: any[];
   onUpdate: (updates: any) => void;
   onRemove?: () => void | undefined;
   isEdit: boolean;
   onAddOperation: () => void | undefined;
+  setItemCausingFieldChange: React.Dispatch<React.SetStateAction<any>>;
 }) => (
   <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
     <Grid size={{ xs: 12, sm: 3 }}>
@@ -440,6 +462,7 @@ const AccumulatorRow = ({
         getOptionLabel={(option) => option.label}
         onChange={(e, val) => {
           onUpdate({ operation: val?.value || 'count' });
+          setItemCausingFieldChange(item._id);
         }}
         renderInput={(params) => (
           <TextField {...params} size="small" label="Operation" variant="outlined" fullWidth required slotProps={{ inputLabel: { shrink: true } }} />
@@ -450,11 +473,12 @@ const AccumulatorRow = ({
       <Grid size={{ xs: 12, sm: 3 }}>
         <Autocomplete
           disabled={!isEdit}
-          value={resourceFields.find((f) => f.fieldName === accumulator.field) || null}
+          value={resourceFields?.find((f) => f?.fieldName === accumulator?.field) || null}
           options={resourceFields}
-          getOptionLabel={(option) => option.fieldLabel}
+          getOptionLabel={(option) => option?.fieldLabel}
           onChange={(e, val) => {
             onUpdate({ field: val?.fieldName || '' });
+            setItemCausingFieldChange(item._id);
           }}
           renderInput={(params) => (
             <TextField {...params} size="small" label="Field" variant="outlined" fullWidth required slotProps={{ inputLabel: { shrink: true } }} />
@@ -491,21 +515,35 @@ const AccumulatorRow = ({
   </Grid>
 );
 
-const SortComponent = ({ item, pipeline, pipelineErrors, removePipelineItem, isEdit, formValues, mainResourceFields, updatePipelineItem }) => {
+const SortComponent = ({
+  item,
+  pipeline,
+  pipelineErrors,
+  removePipelineItem,
+  isEdit,
+  formValues,
+  mainResourceFields,
+  updatePipelineItem,
+  itemCausingFieldChange
+}) => {
   const itemErrors = pipelineErrors[item._id] || [];
 
   const [availableFields, setAvailableFields] = useState<any[]>([]);
 
+  const upstreamPipeline = useMemo(() => {
+    const idx = pipeline?.findIndex((p) => p._id === item?._id);
+    return pipeline?.slice(0, idx) || [];
+  }, [pipeline, item?._id]);
+
   useEffect(() => {
     const fetchFields = async () => {
-      const currentItemIndex = pipeline.findIndex((p) => p._id === item?._id);
-      const pipelineBeforeCurrentItem = pipeline.slice(0, currentItemIndex);
-
-      const fields = await getAvailableFieldsForPipeline(pipelineBeforeCurrentItem, formValues?.resource, mainResourceFields);
+      const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, mainResourceFields);
       setAvailableFields(fields || []);
     };
-    fetchFields();
-  }, [pipeline, item?._id, formValues?.resource, mainResourceFields]);
+    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+      fetchFields();
+    }
+  }, [itemCausingFieldChange, formValues?.resource, mainResourceFields]);
 
   const update = (index: number, field: any) => {
     const updatedFields = [...(item.fields || [])];
@@ -542,7 +580,7 @@ const SortComponent = ({ item, pipeline, pipelineErrors, removePipelineItem, isE
                 <FieldSelectionPopper
                   isEdit={isEdit}
                   availableFields={availableFields}
-                  selectedField={availableFields?.find((f) => f?.fieldName === field.fieldName)}
+                  selectedFields={availableFields?.filter((f) => f?.fieldName === field.fieldName)}
                   onFieldSelect={(field) => {
                     update(index, { fieldName: field?.fieldName, resource: field?.resource });
                   }}
@@ -614,21 +652,25 @@ const SortComponent = ({ item, pipeline, pipelineErrors, removePipelineItem, isE
   );
 };
 
-const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, mainResourceFields, updatePipelineItem }) => {
+const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, mainResourceFields, updatePipelineItem, itemCausingFieldChange }) => {
   const itemErrors = pipelineErrors[item._id] || [];
 
   const [availableFields, setAvailableFields] = useState<any[]>([]);
 
+  const upstreamPipeline = useMemo(() => {
+    const idx = pipeline?.findIndex((p) => p._id === item?._id);
+    return pipeline?.slice(0, idx) || [];
+  }, [pipeline, item?._id]);
+
   useEffect(() => {
     const fetchFields = async () => {
-      const currentItemIndex = pipeline.findIndex((p) => p._id === item?._id);
-      const pipelineBeforeCurrentItem = pipeline.slice(0, currentItemIndex);
-
-      const fields = await getAvailableFieldsForPipeline(pipelineBeforeCurrentItem, formValues?.resource, mainResourceFields);
+      const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, mainResourceFields);
       setAvailableFields(fields || []);
     };
-    fetchFields();
-  }, [pipeline, item?._id, formValues?.resource, mainResourceFields]);
+    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+      fetchFields();
+    }
+  }, [itemCausingFieldChange, formValues?.resource, mainResourceFields]);
 
   return (
     <Card key={item._id} sx={{ mb: 2, border: itemErrors.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
@@ -686,7 +728,7 @@ const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, ma
                 <FieldSelectionPopper
                   isEdit={isEdit}
                   availableFields={availableFields}
-                  selectedField={availableFields?.find((f) => f?.fieldName === item.xAxis?.field)}
+                  selectedFields={availableFields?.filter((f) => f?.fieldName === item.xAxis?.field)}
                   onFieldSelect={(field) => {
                     updatePipelineItem(item._id, { xAxis: { ...item.xAxis, field: field.fieldName, resource: field.resource } });
                   }}
@@ -726,7 +768,7 @@ const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, ma
                 <FieldSelectionPopper
                   isEdit={isEdit}
                   availableFields={availableFields}
-                  selectedField={availableFields?.find((f) => f?.fieldName === item.yAxis?.field)}
+                  selectedFields={availableFields?.filter((f) => f?.fieldName === item.yAxis?.field)}
                   onFieldSelect={(field) => {
                     updatePipelineItem(item._id, { yAxis: { ...item.yAxis, field: field.fieldName, resource: field.resource } });
                   }}
@@ -771,7 +813,7 @@ const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, ma
                 <FieldSelectionPopper
                   isEdit={isEdit}
                   availableFields={availableFields}
-                  selectedField={availableFields?.find((f) => f?.fieldName === item.value?.field)}
+                  selectedFields={availableFields?.filter((f) => f?.fieldName === item.value?.field)}
                   onFieldSelect={(field) => {
                     updatePipelineItem(item._id, { value: { field: field.fieldName, resource: field.resource } });
                   }}
@@ -792,7 +834,7 @@ const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, ma
                 <FieldSelectionPopper
                   isEdit={isEdit}
                   availableFields={availableFields}
-                  selectedField={availableFields?.find((f) => f?.fieldName === item.label?.field)}
+                  selectedFields={availableFields?.filter((f) => f?.fieldName === item.label?.field)}
                   onFieldSelect={(field) => {
                     updatePipelineItem(item._id, { label: { field: field.fieldName, resource: field.resource } });
                   }}
@@ -826,20 +868,25 @@ const FilterComponent = ({
   updatePipelineItem,
   removePipelineItem,
   setFilterFieldSelect,
-  setFilterConfigurationDialog
+  setFilterConfigurationDialog,
+  itemCausingFieldChange
 }) => {
   const [availableFields, setAvailableFields] = useState<any[]>([]);
 
+  const upstreamPipeline = useMemo(() => {
+    const idx = pipeline?.findIndex((p) => p._id === item?._id);
+    return pipeline?.slice(0, idx) || [];
+  }, [pipeline, item?._id]);
+
   useEffect(() => {
     const fetchFields = async () => {
-      const currentItemIndex = pipeline.findIndex((p) => p._id === item?._id);
-      const pipelineBeforeCurrentItem = pipeline.slice(0, currentItemIndex);
-
-      const fields = await getAvailableFieldsForPipeline(pipelineBeforeCurrentItem, formValues?.resource, mainResourceFields);
+      const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, mainResourceFields);
       setAvailableFields(fields || []);
     };
-    fetchFields();
-  }, [pipeline, item?._id, formValues?.resource, mainResourceFields]);
+    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+      fetchFields();
+    }
+  }, [itemCausingFieldChange, formValues?.resource, mainResourceFields]);
 
   const handleRemoveFilter = (filterIndex: number) => {
     const updatedFields = item?.fields?.filter((_, index) => index !== filterIndex);
@@ -904,6 +951,121 @@ const FilterComponent = ({
   );
 };
 
+const GroupComponent = ({
+  item,
+  pipeline,
+  isEdit,
+  formValues,
+  mainResourceFields,
+  updatePipelineItem,
+  removePipelineItem,
+  pipelineErrors,
+  itemCausingFieldChange,
+  setItemCausingFieldChange
+}) => {
+  const itemErrors = pipelineErrors[item._id] || [];
+
+  const [availableFields, setAvailableFields] = useState<any[]>([]);
+
+  const upstreamPipeline = useMemo(() => {
+    const idx = pipeline?.findIndex((p) => p._id === item?._id);
+    return pipeline?.slice(0, idx) || [];
+  }, [pipeline, item?._id]);
+
+  useEffect(() => {
+    const fetchFields = async () => {
+      const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, mainResourceFields);
+      setAvailableFields(fields || []);
+    };
+    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+      fetchFields();
+    }
+  }, [itemCausingFieldChange, formValues?.resource, mainResourceFields]);
+
+  return (
+    <Card key={item._id} sx={{ mb: 2, border: itemErrors.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
+      <CardContent>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Functions color="primary" />
+            <span style={{ fontWeight: 500 }}>Summarize</span>
+          </Box>
+          <IconButton size="small" onClick={() => removePipelineItem(item._id)} disabled={!isEdit}>
+            <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
+          </IconButton>
+        </Box>
+
+        {item?.accumulator?.map((acc, index) => (
+          <AccumulatorRow
+            key={index}
+            item={item}
+            accumulator={acc}
+            resourceFields={mainResourceFields}
+            isEdit={isEdit}
+            onUpdate={(updates) => {
+              const updatedAccumulator = [...item.accumulator];
+              updatedAccumulator[index] = { ...updatedAccumulator[index], ...updates };
+              updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+            }}
+            onRemove={
+              item?.accumulator?.length > 1
+                ? () => {
+                    const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
+                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                  }
+                : undefined
+            }
+            onAddOperation={
+              index === item?.accumulator?.length - 1
+                ? () => {
+                    const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
+                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                  }
+                : undefined
+            }
+            setItemCausingFieldChange={setItemCausingFieldChange}
+          />
+        ))}
+
+        <Box>
+          <span>Group By</span>
+          <Box mt={2} />
+          <FieldSelectionPopper
+            multiple={true}
+            isEdit={isEdit}
+            availableFields={availableFields}
+            selectedFields={availableFields?.filter((f) =>
+              item?.fields?.some((field) => field.fieldName === f.fieldName && field.resource === f.resource)
+            )}
+            onFieldSelect={(fields) => {
+              updatePipelineItem(item._id, {
+                fields: fields?.map((f) => {
+                  return {
+                    fieldName: f.fieldName,
+                    resource: f.resource
+                  };
+                })
+              });
+              setItemCausingFieldChange(item._id);
+            }}
+            textFieldProps={{
+              size: 'small',
+              label: 'Select Fields',
+              variant: 'outlined',
+              fullWidth: true,
+              required: true,
+              error: pipelineErrors[item._id]?.includes('fields_required'),
+              helperText: pipelineErrors[item._id]?.includes('fields_required') ? 'Group by fields are required' : '',
+              slotProps: { inputLabel: { shrink: true } }
+            }}
+            popperProps={{ width: 400, maxHeight: 400 }}
+          />
+        </Box>
+      </CardContent>
+    </Card>
+  );
+};
+
 export default function ReportBuilderDetail() {
   const { id } = useParams();
   const history = useHistory();
@@ -926,6 +1088,7 @@ export default function ReportBuilderDetail() {
   const [showFieldsPanel, setShowFieldsPanel] = useState(false);
   const [filterFieldSelect, setFilterFieldSelect] = useState({ open: false, item: null });
   const [filterConfigurationDialog, setFilterConfigurationDialog] = useState({ open: false, field: null, editingFilter: null, editingIndex: null });
+  const [itemCausingFieldChange, setItemCausingFieldChange] = useState(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -1126,15 +1289,17 @@ export default function ReportBuilderDetail() {
       if (chartIndex !== -1) {
         const newPipeline = [...prev];
         newPipeline.splice(chartIndex, 0, newItem);
+        setItemCausingFieldChange(newPipeline?.[newPipeline.length - 2]?._id);
         return newPipeline;
       } else {
+        setItemCausingFieldChange(prev?.[prev.length - 1]?._id);
         return [...prev, newItem];
       }
     });
   };
 
   const updatePipelineItem = (id: string, updates: Partial<PipelineItem>) => {
-    setPipeline((prev) => prev.map((item) => (item._id === id ? { ...item, ...updates } : item)));
+    setPipeline((prev) => prev?.map((item) => (item?._id === id ? { ...item, ...updates } : item)));
   };
 
   const removePipelineItem = (id: string) => {
@@ -1197,90 +1362,6 @@ export default function ReportBuilderDetail() {
 
   const handleClose = (path?: string) => {
     history.push({ pathname: isBreakCrumbPath || path ? isBreakCrumbPath || path : routes.reportBuilder.path });
-  };
-
-  const renderGroupComponent = (item: GroupPipeline) => {
-    const resourceFields = resourceFieldMap?.[formValues?.resource] || [];
-    const fieldOptions = resourceFields?.map((field) => ({ optionValue: field.fieldName, optionLabel: field.fieldLabel }));
-    const itemErrors = pipelineErrors[item._id] || [];
-
-    return (
-      <Card key={item._id} sx={{ mb: 2, border: itemErrors.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
-        <CardContent>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Functions color="primary" />
-              <span style={{ fontWeight: 500 }}>Summarize</span>
-            </Box>
-            <IconButton size="small" onClick={() => removePipelineItem(item._id)} disabled={!isEdit}>
-              <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
-            </IconButton>
-          </Box>
-
-          {item?.accumulator?.map((acc, index) => (
-            <AccumulatorRow
-              key={index}
-              accumulator={acc}
-              accIndex={index}
-              resourceFields={resourceFields}
-              isEdit={isEdit}
-              onUpdate={(updates) => {
-                const updatedAccumulator = [...item.accumulator];
-                updatedAccumulator[index] = { ...updatedAccumulator[index], ...updates };
-                updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-              }}
-              onRemove={
-                item?.accumulator?.length > 1
-                  ? () => {
-                      const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
-                      updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                    }
-                  : undefined
-              }
-              onAddOperation={
-                index === item?.accumulator?.length - 1
-                  ? () => {
-                      const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
-                      updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                    }
-                  : undefined
-              }
-            />
-          ))}
-
-          <Box>
-            <span>Group By</span>
-            <Box mt={2} />
-            <Autocomplete
-              disabled={!isEdit}
-              multiple
-              limitTags={4}
-              disableCloseOnSelect
-              value={fieldOptions.filter((option) => item.fields.includes(option.optionValue))}
-              options={fieldOptions}
-              getOptionLabel={(option) => option.optionLabel}
-              isOptionEqualToValue={(option, val) => option.optionValue === val.optionValue}
-              onChange={(e, val) => {
-                updatePipelineItem(item._id, { fields: val.map((v) => v.optionValue) });
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  size="small"
-                  label="Select Fields"
-                  variant="outlined"
-                  fullWidth
-                  required
-                  error={pipelineErrors[item._id]?.includes('fields_required')}
-                  helperText={pipelineErrors[item._id]?.includes('fields_required') ? 'Group by fields are required' : ''}
-                  slotProps={{ inputLabel: { shrink: true } }}
-                />
-              )}
-            />
-          </Box>
-        </CardContent>
-      </Card>
-    );
   };
 
   const renderLimitComponent = (item: LimitPipeline) => {
@@ -1562,10 +1643,25 @@ export default function ReportBuilderDetail() {
                                     removePipelineItem={removePipelineItem}
                                     resourceOptions={resourceOptions}
                                     fetchResourceFields={fetchResourceFields}
+                                    itemCausingFieldChange={itemCausingFieldChange}
+                                    setItemCausingFieldChange={setItemCausingFieldChange}
                                   />
                                 );
                               case 'group':
-                                return renderGroupComponent(item as GroupPipeline);
+                                return (
+                                  <GroupComponent
+                                    item={item}
+                                    pipeline={pipeline}
+                                    isEdit={isEdit}
+                                    formValues={formValues}
+                                    mainResourceFields={resourceFieldMap?.[formValues?.resource]}
+                                    updatePipelineItem={updatePipelineItem}
+                                    removePipelineItem={removePipelineItem}
+                                    pipelineErrors={pipelineErrors}
+                                    itemCausingFieldChange={itemCausingFieldChange}
+                                    setItemCausingFieldChange={setItemCausingFieldChange}
+                                  />
+                                );
                               case 'filter':
                                 return (
                                   <FilterComponent
@@ -1578,6 +1674,7 @@ export default function ReportBuilderDetail() {
                                     removePipelineItem={removePipelineItem}
                                     setFilterFieldSelect={setFilterFieldSelect}
                                     setFilterConfigurationDialog={setFilterConfigurationDialog}
+                                    itemCausingFieldChange={itemCausingFieldChange}
                                   />
                                 );
                               case 'sort':
@@ -1591,6 +1688,7 @@ export default function ReportBuilderDetail() {
                                     formValues={formValues}
                                     mainResourceFields={resourceFieldMap?.[formValues?.resource]}
                                     updatePipelineItem={updatePipelineItem}
+                                    itemCausingFieldChange={itemCausingFieldChange}
                                   />
                                 );
                               case 'limit':
@@ -1605,6 +1703,7 @@ export default function ReportBuilderDetail() {
                                     formValues={formValues}
                                     mainResourceFields={resourceFieldMap?.[formValues?.resource]}
                                     updatePipelineItem={updatePipelineItem}
+                                    itemCausingFieldChange={itemCausingFieldChange}
                                   />
                                 );
                               default:
