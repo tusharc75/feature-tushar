@@ -53,7 +53,7 @@ const ServiceOrderSidebarImpl = forwardRef<ServiceOrderSidebarRef, ServiceOrderS
             obj.serviceName = ele?.service?.serviceName;
             obj.serviceId = ele?.service?._id;
             obj.competencyType = ele?.service?.competencyType?.optionLabel;
-            obj.competencies = ele?.service?.competencies?.map((e) => e?.optionLabel)?.toString();
+            obj.competencies = ele?.service?.competencies?.map((e) => e?.optionLabel)?.toString() || ele.customerAccount?.competencies || [];
             obj.service = ele?.service;
             obj.customerAccount = ele?.customerAccount?.optionLabel;
             obj.customerAccountId = ele?.customerAccount?.optionValue;
