@@ -1,8 +1,10 @@
 import { memo, useMemo } from 'react';
 import CellDialog from 'src/components/CustomReactTable/Cells/CellDialog';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import RenderCellTable, { GenericRowData, RenderCellTableColumnDef } from 'src/components/CustomReactTable/Cells/RenderCellTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { cn } from 'src/constants/helpers';
+import { cn, sidebarResourceObjectFromValues } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
 
 type NumberCellProps = {
   rowData: any[];
@@ -10,7 +12,13 @@ type NumberCellProps = {
   enableDilaog?: boolean;
 };
 
+const permissionForLinks = sidebarResourceObjectFromValues();
+
 const NumberCellImpl = ({ rowData, field, enableDilaog = true }: NumberCellProps) => {
+  const {
+    state: { permissions }
+  }: any = useData();
+
   const data = rowData[field.fieldName] as any & GenericRowData;
   const subFields = field.subFields;
   const isDataArray = useMemo(() => typeof Array.isArray(data), [data]);
@@ -22,11 +30,15 @@ const NumberCellImpl = ({ rowData, field, enableDilaog = true }: NumberCellProps
           head: d.fieldLabel,
           accessor: d.fieldName,
           cell: (row) => (
-            <p>
-              <span className={cn('p-0', enableDilaog ? 'line-clamp-2' : 'line-clamp-1')} title={row[d.fieldName]}>
-                {row[d.fieldName]}
-              </span>
-            </p>
+            d?.lookup ? (
+              <DropdownCell permissions={permissions} permissionForLinks={permissionForLinks} field={d} original={row} />
+            ) : (
+              <p>
+                <span className={cn('p-0', enableDilaog ? 'line-clamp-2' : 'line-clamp-1')} title={row[d.fieldName]}>
+                  {row[d.fieldName]}
+                </span>
+              </p>
+            )
           ),
           width: '150px'
         };
