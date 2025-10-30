@@ -216,16 +216,7 @@ const RadiusFilterDialog = ({ onClose, location, onApply, currentFilter, onMinim
                   position={center}
                 >
                   <div className="flex min-w-[150px] flex-col rounded bg-white px-3 py-2 text-black">
-                    <span className="text-[13px] font-semibold mb-1">Search Center</span>
-                    <span className="text-[11px] text-[#666]">
-                      Latitude: {parseFloat(location.latitude).toFixed(6)}
-                    </span>
-                    <span className="text-[11px] text-[#666]">
-                      Longitude: {parseFloat(location.longitude).toFixed(6)}
-                    </span>
-                    <span className="text-[11px] text-[#666] mt-1">
-                      Radius: {selectedRadius} Miles
-                    </span>
+                    <span className="text-[13px] font-semibold mb-1">{location?.optionLabel}</span>
                   </div>
                 </InfoWindow>
               )}
