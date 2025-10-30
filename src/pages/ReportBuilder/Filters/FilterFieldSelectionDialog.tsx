@@ -10,19 +10,36 @@ import { ThemeButton } from '../../../components/Helpers/Buttons';
 import { Search, ExpandMore, ExpandLess } from '@mui/icons-material';
 import { useData } from 'src/StateProvider/Provider';
 import { camelCase } from 'lodash';
+import { getAvailableFieldsForPipeline, PipelineItem } from 'src/pages/ReportBuilder/utils';
 
 interface FilterFieldSelectionDialogProps {
   open: boolean;
   onClose: () => void;
   onFieldSelect: (field: any) => void;
-  availableFields: any[];
+  pipeline: PipelineItem[];
+  item: PipelineItem;
+  mainResource: string;
+  mainResourceFields: any[];
 }
 
-const FilterFieldSelectionDialog = ({ open, onClose, onFieldSelect, availableFields }: FilterFieldSelectionDialogProps) => {
+const FilterFieldSelectionDialog = ({ open, onClose, onFieldSelect, pipeline, item, mainResource, mainResourceFields }: FilterFieldSelectionDialogProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [resourcesSet, setResourcesSet] = useState<Set<string>>(new Set());
   const [expandedResources, setExpandedResources] = useState<Set<string>>(new Set());
+
+  const [availableFields, setAvailableFields] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchFields = async () => {
+      const currentItemIndex = pipeline?.findIndex((p) => p._id === item?._id);
+      const pipelineBeforeCurrentItem = pipeline?.slice(0, currentItemIndex);
+
+      const fields = await getAvailableFieldsForPipeline(pipelineBeforeCurrentItem, mainResource, mainResourceFields);
+      setAvailableFields(fields || []);
+    };
+    fetchFields();
+  }, [pipeline, item?._id, mainResource, mainResourceFields]);
 
   const {
     state: { resources }
