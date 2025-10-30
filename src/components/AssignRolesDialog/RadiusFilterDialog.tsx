@@ -11,7 +11,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { displayDateTime } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const RadiusFilterDialog = ({ onClose, location, onApply, currentFilter, onMinimizeMaximize, fullScreen, technicians }) => {
+const RadiusFilterDialog = ({ onClose, location, onApply, currentFilter, onMinimizeMaximize, fullScreen, filtered }) => {
   const [selectedRadius, setSelectedRadius] = useState(currentFilter?.radius || 50);
   const [themeColor] = useAppTheme();
   const [loading, setLoading] = useState(false);
@@ -24,8 +24,8 @@ const RadiusFilterDialog = ({ onClose, location, onApply, currentFilter, onMinim
   const fetchData = async () => {
     setLoading(true);
     try {
-      const encodedEmails = encodeURIComponent(JSON.stringify(technicians.map(tech => tech.email)));
-      const response = await axiosInstance().get(`/rental-management/technician?emails=${encodedEmails}`);
+      const params = encodeURIComponent(JSON.stringify(filtered));
+      const response = await axiosInstance().get(`/rental-management/technician?filtered=${params}`);
       const data = response.data;
       setTechniciansLocationData(data.data || []);
       setLoading(false);
