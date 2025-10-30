@@ -1,11 +1,10 @@
-import { Autocomplete, TextField } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
-import AsyncDropDown from "src/components/Helpers/FormTypes/AsyncDropdown";
-import { sidebarResource } from "src/constants/helpers";
-import { useData } from "src/StateProvider/Provider";
+import { Autocomplete, TextField } from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
+import AsyncDropDown from 'src/components/Helpers/FormTypes/AsyncDropdown';
+import { sidebarResource } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
 
 const ResourceFilter = ({ selectedResource, setSelectedResource, filterByIds, setFilterByIds, handleApplyFilter }) => {
-
   const {
     state: { resources, permissions }
   }: any = useData();
@@ -15,55 +14,55 @@ const ResourceFilter = ({ selectedResource, setSelectedResource, filterByIds, se
       {
         key: 'assemblyOrder',
         resource: sidebarResource.assemblyOrder,
-        title: resources?.assemblyOrder?.titleSingular,
+        title: resources?.assemblyOrder?.titleSingular
       },
       {
         key: 'productionOrder',
         resource: sidebarResource.productionOrder,
-        title: resources?.productionOrder?.titleSingular,
+        title: resources?.productionOrder?.titleSingular
       },
       {
         key: 'repairOrder',
         resource: sidebarResource.repairOrder,
-        title: resources?.repairOrder?.titleSingular,
+        title: resources?.repairOrder?.titleSingular
       }
-    ]
+    ];
 
-    const options: any = []
+    const options: any = [];
     data?.forEach((item) => {
       if (permissions[item.key] && permissions[item.key]?.isRead) {
         options.push(item);
       }
     });
-    return options
-  }, [permissions, resources?.assemblyOrder?.titleSingular, resources?.repairOrder?.titleSingular, resources?.productionOrder?.titleSingular,])
+    return options;
+  }, [permissions, resources?.assemblyOrder?.titleSingular, resources?.repairOrder?.titleSingular, resources?.productionOrder?.titleSingular]);
 
-  const [selectedResourceData, setSelectedResourceData] = useState(null)
-  const [selectedWorkOrder, setSelectedWorkOrder] = useState(null)
+  const [selectedResourceData, setSelectedResourceData] = useState(null);
+  const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
 
   useEffect(() => {
-    let filterById = [...filterByIds]
-    filterById = filterById?.filter(e => !['assemblyOrder', 'productionOrder', 'repairOrder', '_id'].includes(e?.field))
+    let filterById = [...filterByIds];
+    filterById = filterById?.filter((e) => !['assemblyOrder', 'productionOrder', 'repairOrder', '_id'].includes(e?.field));
 
     if (selectedResourceData) {
-      filterById = [...filterById, { field: selectedResource?.key, term: [selectedResourceData] }]
+      filterById = [...filterById, { field: selectedResource?.key, term: [selectedResourceData] }];
     }
-    setFilterByIds(filterById)
-    handleApplyFilter(filterById)
-  }, [selectedResourceData])
+    setFilterByIds(filterById);
+    handleApplyFilter(filterById);
+  }, [selectedResourceData]);
 
   useEffect(() => {
     if (selectedWorkOrder) {
-      let filterById = [...filterByIds]
-      filterById = filterById?.filter(e => e?.field !== '_id')
+      let filterById = [...filterByIds];
+      filterById = filterById?.filter((e) => e?.field !== '_id');
 
       if (selectedWorkOrder) {
-        filterById = [...filterById, { field: '_id', term: [selectedWorkOrder] }]
+        filterById = [...filterById, { field: '_id', term: [selectedWorkOrder] }];
       }
-      setFilterByIds(filterById)
-      handleApplyFilter(filterById)
+      setFilterByIds(filterById);
+      handleApplyFilter(filterById);
     }
-  }, [selectedWorkOrder])
+  }, [selectedWorkOrder]);
 
   return (
     <>
@@ -76,11 +75,11 @@ const ResourceFilter = ({ selectedResource, setSelectedResource, filterByIds, se
         value={selectedResource}
         onChange={(event, newValue) => {
           setSelectedResource(newValue);
-          setSelectedResourceData(null)
-          setSelectedWorkOrder(null)
+          setSelectedResourceData(null);
+          setSelectedWorkOrder(null);
         }}
         size="small"
-        renderInput={(params) => <TextField {...params} margin="dense" label={`Select Resource`} variant="outlined" />}
+        renderInput={(params) => <TextField {...params} margin="none" label={`Select Resource`} variant="outlined" />}
       />
       {selectedResource && (
         <div style={{ width: '270px' }}>
@@ -92,8 +91,8 @@ const ResourceFilter = ({ selectedResource, setSelectedResource, filterByIds, se
             value={selectedResourceData}
             fieldLabel={`Select ${selectedResource?.title}`}
             onChange={(e, val) => {
-              setSelectedResourceData(val)
-              setSelectedWorkOrder(null)
+              setSelectedResourceData(val);
+              setSelectedWorkOrder(null);
             }}
             fieldName={''}
             required={false}
@@ -111,7 +110,7 @@ const ResourceFilter = ({ selectedResource, setSelectedResource, filterByIds, se
             value={selectedWorkOrder}
             fieldLabel={`Select ${resources?.workOrder?.titleSingular}`}
             onChange={(e, val) => {
-              setSelectedWorkOrder(val)
+              setSelectedWorkOrder(val);
             }}
             fieldName={''}
             required={false}
@@ -123,7 +122,7 @@ const ResourceFilter = ({ selectedResource, setSelectedResource, filterByIds, se
         </div>
       )}
     </>
-  )
-}
+  );
+};
 
 export default ResourceFilter;

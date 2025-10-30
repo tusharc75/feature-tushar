@@ -147,8 +147,6 @@ const GridView = React.forwardRef<GridViewRef, any>(
       }
     }));
 
-    console.log({ state, columns });
-
     return (
       <>
         <div className="[&_.table-container-v1>div]:mt-0">
@@ -159,7 +157,7 @@ const GridView = React.forwardRef<GridViewRef, any>(
               customContent={(props) => <GridCustomComponent {...props} renderedFrom={renderedFrom} columns={childColumns} />}
               expanderWithCustomContent={true}
               topLeftSlot={
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-grow flex-wrap items-center items-center gap-2">
                   <ButtonMenu
                     showChevron={true}
                     items={statusMenuItems}

@@ -616,50 +616,48 @@ const WorkOrderTechnician = () => {
               renderedFrom={renderedFrom}
               state={tableState}
               tableHead={
-                <div className="w-full">
-                  <DetailsPageHeader
-                    isAddButtonVisible={false}
-                    className="flex-grow"
-                    isActionButtonVisible={false}
-                    isNewActionButtonVisible={selectedRecords.length > 0}
-                    newActionButtonProps={newActionButtonProps}
-                    actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
-                    leftSideContents={
-                      <div className="flex w-full items-center gap-2">
-                        <ResourceFilter
-                          selectedResource={selectedResource}
-                          setSelectedResource={setSelectedResource}
-                          filterByIds={filterByIds}
-                          setFilterByIds={setFilterByIds}
-                          handleApplyFilter={handleApplyFilter}
-                        />
-                        <ThemeButton
-                          mobileTooltip="Apply Filters"
-                          startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
-                          iconForMobile={<BiFilterAlt />}
-                          onClick={() => {
-                            setShowFilter(true);
-                          }}
-                        >
-                          Show Filters
-                        </ThemeButton>
-                        <DisplayFilterChip
-                          filterTerm={filterTerm}
-                          resourceColumns={FIELD_TO_FILTER}
-                          deepFilters={[]}
-                          filterByIds={filterByIds?.filter((e) => e?.field === 'service')}
-                          fetchResourceData={(deepFilter, filterById) => {
-                            handleApplyFilter(filterById);
-                          }}
-                          setDeepFilters={null}
-                          setFilterByIds={setFilterByIds}
-                        />
-                      </div>
-                    }
-                    hasXpadding={false}
-                    hasYpadding={false}
-                  />
-                </div>
+                <DetailsPageHeader
+                  isAddButtonVisible={false}
+                  className="flex-grow"
+                  isActionButtonVisible={false}
+                  isNewActionButtonVisible={selectedRecords.length > 0}
+                  newActionButtonProps={newActionButtonProps}
+                  actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                  leftSideContents={
+                    <div className="flex w-full flex-wrap items-center gap-2">
+                      <ResourceFilter
+                        selectedResource={selectedResource}
+                        setSelectedResource={setSelectedResource}
+                        filterByIds={filterByIds}
+                        setFilterByIds={setFilterByIds}
+                        handleApplyFilter={handleApplyFilter}
+                      />
+                      <ThemeButton
+                        mobileTooltip="Apply Filters"
+                        startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
+                        iconForMobile={<BiFilterAlt />}
+                        onClick={() => {
+                          setShowFilter(true);
+                        }}
+                      >
+                        Show Filters
+                      </ThemeButton>
+                      <DisplayFilterChip
+                        filterTerm={filterTerm}
+                        resourceColumns={FIELD_TO_FILTER}
+                        deepFilters={[]}
+                        filterByIds={filterByIds?.filter((e) => e?.field === 'service')}
+                        fetchResourceData={(deepFilter, filterById) => {
+                          handleApplyFilter(filterById);
+                        }}
+                        setDeepFilters={null}
+                        setFilterByIds={setFilterByIds}
+                      />
+                    </div>
+                  }
+                  hasXpadding={false}
+                  hasYpadding={false}
+                />
               }
               ref={gridViewRef}
               dispatch={tableDispatch}
