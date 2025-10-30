@@ -427,6 +427,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             setTechnicianDialog(false);
           }}
           warehouse={fieldTicketData?.warehouse?.optionValue}
+          currentCompetencies={fieldTicketData?.customerAccount?.competencies}
           ids={dataRows?.map((d) => d?.technicianId)}
           location={{ "latitude": fieldTicketData?.shippingAddress?.latitude, "longitude": fieldTicketData?.shippingAddress?.longitude }}
         />

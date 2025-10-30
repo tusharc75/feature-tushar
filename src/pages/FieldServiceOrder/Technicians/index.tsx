@@ -659,6 +659,7 @@ const Technicians = ({
                   : []
               : []
           }
+          currentCompetencies={serviceOrderData?.customerAccount?.competencies}
           location={{ "latitude": serviceOrderData?.shippingAddress?.latitude, "longitude": serviceOrderData?.shippingAddress?.longitude }}
         />
       )}
