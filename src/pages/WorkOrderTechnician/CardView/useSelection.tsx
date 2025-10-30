@@ -18,9 +18,7 @@ const useSelection = <D,>({
   rowId: string;
   row: any;
 }) => {
-  const { selectedSubItemsMap, setSelectedSubItemsMap, selectedRecordMap, setSelectedRecordMap } = state;
-
-  // if (column === 'Pending') console.log({ column, selectedSubItemsMap, isParentSelected });
+  const { selectedSubItemsMap, setSelectedSubItemsMap, setSelectedRecordMap } = state;
 
   const selectedRowMap = selectedSubItemsMap.get(rowId) || emptyMapRef;
 

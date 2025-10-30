@@ -196,7 +196,7 @@ const WorkOrderTechnician = () => {
     cardState.setVisibleColumns(selectedServiceStatus);
   }, [selectedServiceStatus]);
 
-  const selectedRecords = useMemo(() => [...tableSelectedRecords, ...cardState.selectedRecords], [tableSelectedRecords, cardState.selectedRecords]);
+  const selectedRecords = useMemo(() => [...tableSelectedRecords, ...cardState.selectedSubRows], [tableSelectedRecords, cardState.selectedSubRows]);
 
   const fetchGridColumns = async (cancelToken: CancelToken) => {
     try {
@@ -556,47 +556,49 @@ const WorkOrderTechnician = () => {
               childColumns={childColumns}
               renderedFrom={renderedFrom}
               headerSlot={
-                <DetailsPageHeader
-                  isAddButtonVisible={false}
-                  isActionButtonVisible={false}
-                  isNewActionButtonVisible={selectedRecords.length > 0}
-                  newActionButtonProps={newActionButtonProps}
-                  actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
-                  leftSideContents={
-                    <div className="flex w-full items-center gap-2">
-                      <ResourceFilter
-                        selectedResource={selectedResource}
-                        setSelectedResource={setSelectedResource}
-                        filterByIds={filterByIds}
-                        setFilterByIds={setFilterByIds}
-                        handleApplyFilter={handleApplyFilter}
-                      />
-                      <ThemeButton
-                        mobileTooltip="Apply Filters"
-                        startIcon={<BiFilterAlt className="ml-1 mr-1 mt-[1px]" />}
-                        iconForMobile={<BiFilterAlt />}
-                        onClick={() => {
-                          setShowFilter(true);
-                        }}
-                      >
-                        Show Filters
-                      </ThemeButton>
-                      <DisplayFilterChip
-                        filterTerm={filterTerm}
-                        resourceColumns={FIELD_TO_FILTER}
-                        deepFilters={[]}
-                        filterByIds={filterByIds?.filter((e) => e?.field === 'service')}
-                        fetchResourceData={(deepFilter, filterById) => {
-                          handleApplyFilter(filterById);
-                        }}
-                        setDeepFilters={null}
-                        setFilterByIds={setFilterByIds}
-                      />
-                    </div>
-                  }
-                  hasXpadding={false}
-                  hasYpadding={false}
-                />
+                <>
+                  <DetailsPageHeader
+                    isAddButtonVisible={false}
+                    isActionButtonVisible={false}
+                    isNewActionButtonVisible={selectedRecords.length > 0}
+                    newActionButtonProps={newActionButtonProps}
+                    actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                    leftSideContents={
+                      <div className="flex w-full items-center gap-2">
+                        <ResourceFilter
+                          selectedResource={selectedResource}
+                          setSelectedResource={setSelectedResource}
+                          filterByIds={filterByIds}
+                          setFilterByIds={setFilterByIds}
+                          handleApplyFilter={handleApplyFilter}
+                        />
+                        <ThemeButton
+                          mobileTooltip="Apply Filters"
+                          startIcon={<BiFilterAlt className="ml-1 mr-1 mt-[1px]" />}
+                          iconForMobile={<BiFilterAlt />}
+                          onClick={() => {
+                            setShowFilter(true);
+                          }}
+                        >
+                          Show Filters
+                        </ThemeButton>
+                        <DisplayFilterChip
+                          filterTerm={filterTerm}
+                          resourceColumns={FIELD_TO_FILTER}
+                          deepFilters={[]}
+                          filterByIds={filterByIds?.filter((e) => e?.field === 'service')}
+                          fetchResourceData={(deepFilter, filterById) => {
+                            handleApplyFilter(filterById);
+                          }}
+                          setDeepFilters={null}
+                          setFilterByIds={setFilterByIds}
+                        />
+                      </div>
+                    }
+                    hasXpadding={false}
+                    hasYpadding={false}
+                  />
+                </>
               }
               state={cardState}
               setSelectedService={setSelectedService}
