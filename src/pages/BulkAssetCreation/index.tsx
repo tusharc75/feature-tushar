@@ -30,6 +30,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import axios, { CancelTokenSource } from 'axios';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const BulkAssetCreation = () => {
   let renderedFrom = camelCase(sidebarResource.bulkAssetCreation);
@@ -81,8 +82,9 @@ const BulkAssetCreation = () => {
   }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.bulkAssetCreation);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.bulkAssetCreation, permissions?.bulkAssetCreation?.isUpdate);
-    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.bulkAssetCreationDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.bulkAssetCreationDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
