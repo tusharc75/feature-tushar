@@ -1,3 +1,4 @@
+import axiosInstance from "src/axios/axiosInstance";
 import { displayDate } from "src/constants/helpers";
 
 export const OPERATIONS = [
@@ -37,7 +38,11 @@ export interface GroupPipeline extends PipelineItem {
 
 export interface SortPipeline extends PipelineItem {
   type: 'sort';
-  sortBy: { [fieldName: string]: 1 | -1 };
+  fields: Array<{
+    fieldName: string;
+    order: 1 | -1;
+    resource: string;
+  }>;
 }
 
 export interface LimitPipeline extends PipelineItem {
@@ -164,95 +169,106 @@ export const getChipLabel = (field: any, filter: any, operation: any) => {
   }
 };
 
-export const getAvailableFieldsForPipeline = (
+export const getAvailableFieldsForPipeline = async (
   pipeline: PipelineItem[],
-  currentItemIndex: number,
   mainResource: string,
-  resourceFieldMap: { [key: string]: any[] }
-): Array<any> => {
-  const pipelineBeforeFilter = pipeline.slice(0, currentItemIndex);
+  fields: any[]
+  
+): Promise<any[]> => {
 
-  const idField = {
-    'fieldName': '_id',
-    'fieldLabel': '_id',
-    'resource': mainResource,
-    'type': 'singleLine'
+  if (fields?.length > 0) {
+    const { data } = await axiosInstance().put(`/report-builder/pipeline-fields`, {
+      pipeline,
+      resource: mainResource,
+      fields: fields?.map((field) => field.fieldName)
+    });
+    return data?.data || [];
   }
 
-  const lastGroupIndex = pipelineBeforeFilter
-    .map((item, index) => (item.type === 'group' ? index : -1))
-    .filter((index) => index !== -1)
-    .pop();
+  return [];
+  // const pipelineBeforeFilter = pipeline.slice(0, currentItemIndex);
 
-  const mainResourceFields = resourceFieldMap[mainResource] || [];
-  const fields: Array<any> = [];
+  // const idField = {
+  //   'fieldName': '_id',
+  //   'fieldLabel': '_id',
+  //   'resource': mainResource,
+  //   'type': 'singleLine'
+  // }
 
-  if (lastGroupIndex !== undefined) {
-    const groupItem = pipelineBeforeFilter[lastGroupIndex] as GroupPipeline;
+  // const lastGroupIndex = pipelineBeforeFilter
+  //   .map((item, index) => (item.type === 'group' ? index : -1))
+  //   .filter((index) => index !== -1)
+  //   .pop();
 
-    groupItem.fields?.forEach((fieldName) => {
-      const field = mainResourceFields.find((f) => f.fieldName === fieldName);
-      if (field) {
-        fields.push({...field, resource: 'Summaries'});
-      }
-    });
+  // const mainResourceFields = resourceFieldMap[mainResource] || [];
+  // const fields: Array<any> = [];
 
-    groupItem.accumulator?.forEach((acc) => {
-      const field = mainResourceFields.find((f) => f.fieldName === acc.field);
-      if (acc.operation === 'count') {
-        fields.push({
-          fieldName: 'count',
-          fieldLabel: acc.outputField || OPERATIONS?.find((op) => op.value === acc.operation)?.label,
-          resource: 'Summaries'
-        });
-      } else {
-        fields.push({
-          ...field,
-          fieldLabel: acc.outputField || OPERATIONS?.find((op) => op.value === acc.operation)?.label,
-          resource: 'Summaries'
-        });
-      }
-    });
+  // if (lastGroupIndex !== undefined) {
+  //   const groupItem = pipelineBeforeFilter[lastGroupIndex] as GroupPipeline;
 
-    for (let idx = lastGroupIndex + 1; idx < pipelineBeforeFilter?.length; idx++) {
-      const item = pipelineBeforeFilter[idx];
-      if (item?.type === 'lookup') {
-        const lookupItem = item as LookupPipeline;
-        if (lookupItem?.withResource && lookupItem?.fields && lookupItem?.fields?.length > 0) {
-          const lookupResourceFields = resourceFieldMap[lookupItem.withResource] || [];
-          lookupItem?.fields?.forEach((fieldName) => {
-            const field = lookupResourceFields.find((f) => f.fieldName === fieldName);
-            if (field) {
-              fields.push(field);
-            }
-          });
-        }
-      }
-    }
+  //   groupItem.fields?.forEach((fieldName) => {
+  //     const field = mainResourceFields.find((f) => f.fieldName === fieldName);
+  //     if (field) {
+  //       fields.push({...field, resource: 'Summaries'});
+  //     }
+  //   });
 
-    return [{...idField, resource: 'Summaries'}, ...fields];
-  }
+  //   groupItem.accumulator?.forEach((acc) => {
+  //     const field = mainResourceFields.find((f) => f.fieldName === acc.field);
+  //     if (acc.operation === 'count') {
+  //       fields.push({
+  //         fieldName: 'count',
+  //         fieldLabel: acc.outputField || OPERATIONS?.find((op) => op.value === acc.operation)?.label,
+  //         resource: 'Summaries'
+  //       });
+  //     } else {
+  //       fields.push({
+  //         ...field,
+  //         fieldLabel: acc.outputField || OPERATIONS?.find((op) => op.value === acc.operation)?.label,
+  //         resource: 'Summaries'
+  //       });
+  //     }
+  //   });
 
-  mainResourceFields.forEach((field) => {
-    fields.push(field);
-  });
+  //   for (let idx = lastGroupIndex + 1; idx < pipelineBeforeFilter?.length; idx++) {
+  //     const item = pipelineBeforeFilter[idx];
+  //     if (item?.type === 'lookup') {
+  //       const lookupItem = item as LookupPipeline;
+  //       if (lookupItem?.withResource && lookupItem?.fields && lookupItem?.fields?.length > 0) {
+  //         const lookupResourceFields = resourceFieldMap[lookupItem.withResource] || [];
+  //         lookupItem?.fields?.forEach((fieldName) => {
+  //           const field = lookupResourceFields.find((f) => f.fieldName === fieldName);
+  //           if (field) {
+  //             fields.push(field);
+  //           }
+  //         });
+  //       }
+  //     }
+  //   }
 
-  pipelineBeforeFilter?.forEach((item) => {
-    if (item?.type === 'lookup') {
-      const lookupItem = item as LookupPipeline;
-      if (lookupItem?.withResource && lookupItem?.fields && lookupItem?.fields?.length > 0) {
-        const lookupResourceFields = resourceFieldMap[lookupItem.withResource] || [];
-        lookupItem?.fields?.forEach((fieldName) => {
-          const field = lookupResourceFields.find((f) => f.fieldName === fieldName);
-          if (field) {
-            fields.push(field);
-          }
-        });
-      }
-    }
-  });
+  //   return [{...idField, resource: 'Summaries'}, ...fields];
+  // }
 
-  return [idField, ...fields];
+  // mainResourceFields.forEach((field) => {
+  //   fields.push(field);
+  // });
+
+  // pipelineBeforeFilter?.forEach((item) => {
+  //   if (item?.type === 'lookup') {
+  //     const lookupItem = item as LookupPipeline;
+  //     if (lookupItem?.withResource && lookupItem?.fields && lookupItem?.fields?.length > 0) {
+  //       const lookupResourceFields = resourceFieldMap[lookupItem.withResource] || [];
+  //       lookupItem?.fields?.forEach((fieldName) => {
+  //         const field = lookupResourceFields.find((f) => f.fieldName === fieldName);
+  //         if (field) {
+  //           fields.push(field);
+  //         }
+  //       });
+  //     }
+  //   }
+  // });
+
+  // return [idField, ...fields];
 };
 
 export const validatePipeline = (pipeline: PipelineItem[]): { [itemId: string]: string[] } => {
@@ -297,9 +313,15 @@ export const validatePipeline = (pipeline: PipelineItem[]): { [itemId: string]: 
 
       case 'sort':
         const sortItem = item as SortPipeline;
-        if (!Object.keys(sortItem?.sortBy).length) {
-          itemErrors.push('sortBy_required');
-        }
+
+        sortItem?.fields?.forEach((field, index) => {
+          if (!field?.fieldName) {
+            itemErrors.push(`fieldName_${index}_required`);
+          }
+          if (!field?.order) {
+            itemErrors.push(`order_${index}_required`);
+          }
+        });
         break;
 
       case 'limit':

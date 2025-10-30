@@ -121,10 +121,91 @@ const WithResourceFieldsPopper = ({ isEdit, item, lookupFields, updatePipelineIt
   );
 };
 
+const LookupComponent = ({
+  item,
+  pipeline,
+  pipelineErrors,
+  isEdit,
+  formValues,
+  resourceFieldMap,
+  updatePipelineItem,
+  removePipelineItem,
+  resourceOptions,
+  fetchResourceFields
+}) => {
+  const lookupFields = [{ fieldName: '_id', fieldLabel: '_id' }, ...(resourceFieldMap?.[item?.withResource] || [])];
+
+  const [availableFields, setAvailableFields] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchFields = async () => {
+      const currentItemIndex = pipeline.findIndex((p) => p._id === item?._id);
+      const pipelineBeforeCurrentItem = pipeline.slice(0, currentItemIndex);
+
+      const fields = await getAvailableFieldsForPipeline(pipelineBeforeCurrentItem, formValues?.resource, resourceFieldMap?.[formValues?.resource]);
+      setAvailableFields(fields || []);
+    };
+    fetchFields();
+  }, [pipeline, item?._id, formValues?.resource, resourceFieldMap?.[formValues?.resource]]);
+
+  return (
+    <Card key={item._id} sx={{ mb: 2, border: pipelineErrors[item._id]?.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
+      <CardContent>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <JoinInner color="primary" />
+            <span style={{ fontWeight: 500 }}>Join data</span>
+          </Box>
+          <IconButton size="small" onClick={() => removePipelineItem(item._id)} disabled={!isEdit}>
+            <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
+          </IconButton>
+        </Box>
+
+        <FieldMatchRow
+          availableFields={availableFields}
+          item={item}
+          matchIndex={0}
+          lookupFields={lookupFields}
+          onUpdate={(updates) => updatePipelineItem(item._id, updates)}
+          totalMatches={item?.fieldToMatch?.length || 0}
+          resourceOptions={resourceOptions}
+          formValues={formValues}
+          isEdit={isEdit}
+          fetchResourceFields={fetchResourceFields}
+          updatePipelineItem={updatePipelineItem}
+          pipelineErrors={pipelineErrors}
+        />
+
+        {item?.fieldToMatch?.length > 1 &&
+          item?.fieldToMatch?.slice(1).map((_, index) => (
+            <FieldMatchRow
+              key={index + 1}
+              item={item}
+              matchIndex={index + 1}
+              availableFields={availableFields}
+              lookupFields={lookupFields}
+              onUpdate={(updates) => updatePipelineItem(item._id, updates)}
+              onRemove={() => {
+                const updatedFieldToMatch = item?.fieldToMatch?.filter((_, i) => i !== index + 1);
+                updatePipelineItem(item._id, { fieldToMatch: updatedFieldToMatch });
+              }}
+              totalMatches={item?.fieldToMatch?.length || 0}
+              resourceOptions={resourceOptions}
+              formValues={formValues}
+              isEdit={isEdit}
+              fetchResourceFields={fetchResourceFields}
+              updatePipelineItem={updatePipelineItem}
+              pipelineErrors={pipelineErrors}
+            />
+          ))}
+      </CardContent>
+    </Card>
+  );
+};
+
 const FieldMatchRow = ({
   item,
   matchIndex,
-  localFields,
   lookupFields,
   onUpdate,
   onRemove,
@@ -135,12 +216,10 @@ const FieldMatchRow = ({
   fetchResourceFields,
   updatePipelineItem,
   pipelineErrors,
-  pipeline,
-  resourceFieldMap
+  availableFields
 }: {
   item: LookupPipeline;
   matchIndex: number;
-  localFields: any[];
   lookupFields: any[];
   onUpdate: (updates: any) => void;
   onRemove?: () => void;
@@ -151,14 +230,10 @@ const FieldMatchRow = ({
   fetchResourceFields: (resource: string, onFieldsLoaded: (fields: any[]) => void) => void;
   updatePipelineItem: (id: string, updates: Partial<PipelineItem>) => void;
   pipelineErrors: { [itemId: string]: string[] };
-  pipeline: PipelineItem[];
-  resourceFieldMap: { [resource: string]: any[] };
+  availableFields: any[];
 }) => {
   const fromResourceName = resourceOptions?.find((r) => r.value === formValues?.resource)?.title || formValues?.resource;
   const withResourceName = resourceOptions?.find((r) => r.value === item.withResource)?.title || item.withResource;
-
-  const currentSortIndex = pipeline?.findIndex((p) => p?._id === item?._id);
-  const availableFields = getAvailableFieldsForPipeline(pipeline, currentSortIndex, formValues?.resource, resourceFieldMap);
 
   return (
     <>
@@ -416,6 +491,419 @@ const AccumulatorRow = ({
   </Grid>
 );
 
+const SortComponent = ({ item, pipeline, pipelineErrors, removePipelineItem, isEdit, formValues, mainResourceFields, updatePipelineItem }) => {
+  const itemErrors = pipelineErrors[item._id] || [];
+
+  const [availableFields, setAvailableFields] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchFields = async () => {
+      const currentItemIndex = pipeline.findIndex((p) => p._id === item?._id);
+      const pipelineBeforeCurrentItem = pipeline.slice(0, currentItemIndex);
+
+      const fields = await getAvailableFieldsForPipeline(pipelineBeforeCurrentItem, formValues?.resource, mainResourceFields);
+      setAvailableFields(fields || []);
+    };
+    fetchFields();
+  }, [pipeline, item?._id, formValues?.resource, mainResourceFields]);
+
+  const update = (index: number, field: any) => {
+    const updatedFields = [...(item.fields || [])];
+    updatedFields[index] = { ...updatedFields[index], ...field };
+    updatePipelineItem(item._id, { fields: updatedFields });
+  };
+
+  const remove = (index: number) => {
+    const updatedFields = (item?.fields || [])?.filter((_, i) => i !== index);
+    updatePipelineItem(item._id, { fields: updatedFields });
+  };
+
+  const add = () => {
+    const updatedFields = [...(item?.fields || []), { fieldName: '', order: 1, resource: '' }];
+    updatePipelineItem(item._id, { fields: updatedFields });
+  };
+
+  return (
+    <Card key={item?._id} sx={{ mb: 2, border: itemErrors.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
+      <CardContent>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Sort color="primary" />
+            <span style={{ fontWeight: 500 }}>Sort</span>
+          </Box>
+          <IconButton size="small" onClick={() => removePipelineItem(item?._id)} disabled={!isEdit}>
+            <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
+          </IconButton>
+        </Box>
+        {item?.fields?.map((field, index) => {
+          return (
+            <Grid container spacing={2} alignItems="center" key={index} mb={2}>
+              <Grid size={{ xs: 12, sm: 5.5 }}>
+                <FieldSelectionPopper
+                  isEdit={isEdit}
+                  availableFields={availableFields}
+                  selectedField={availableFields?.find((f) => f?.fieldName === field.fieldName)}
+                  onFieldSelect={(field) => {
+                    update(index, { fieldName: field?.fieldName, resource: field?.resource });
+                  }}
+                  textFieldProps={{
+                    size: 'small',
+                    label: 'Sort Field',
+                    variant: 'outlined',
+                    fullWidth: true,
+                    required: true,
+                    error: pipelineErrors[item._id]?.includes(`fieldName_${index}_required`),
+                    helperText: pipelineErrors[item._id]?.includes(`fieldName_${index}_required`) ? 'Sort Field is required' : '',
+                    slotProps: { inputLabel: { shrink: true } }
+                  }}
+                  popperProps={{ width: 400, maxHeight: 400 }}
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, sm: 5.5 }}>
+                <Autocomplete
+                  disabled={!isEdit}
+                  value={{ value: field.order, label: field.order === 1 ? 'Ascending' : 'Descending' }}
+                  disableClearable={true}
+                  options={[
+                    { value: 1, label: 'Ascending' },
+                    { value: -1, label: 'Descending' }
+                  ]}
+                  getOptionLabel={(option) => option.label}
+                  onChange={(e, val) => {
+                    update(index, { order: val?.value || 1 });
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      label="Sort Order"
+                      variant="outlined"
+                      fullWidth
+                      required
+                      slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 0.5 }}>
+                <IconButton
+                  onClick={() => {
+                    add();
+                  }}
+                  disabled={!isEdit}
+                  size="small"
+                  className="border"
+                  style={{ borderColor: 'var(--common-border-color)' }}
+                >
+                  <Add fontSize="small" />
+                </IconButton>
+              </Grid>
+              {index !== 0 && (
+                <Grid size={{ xs: 12, sm: 0.5 }}>
+                  <IconButton size="small" onClick={() => remove(index)} disabled={!isEdit}>
+                    <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
+                  </IconButton>
+                </Grid>
+              )}
+            </Grid>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+};
+
+const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, mainResourceFields, updatePipelineItem }) => {
+  const itemErrors = pipelineErrors[item._id] || [];
+
+  const [availableFields, setAvailableFields] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchFields = async () => {
+      const currentItemIndex = pipeline.findIndex((p) => p._id === item?._id);
+      const pipelineBeforeCurrentItem = pipeline.slice(0, currentItemIndex);
+
+      const fields = await getAvailableFieldsForPipeline(pipelineBeforeCurrentItem, formValues?.resource, mainResourceFields);
+      setAvailableFields(fields || []);
+    };
+    fetchFields();
+  }, [pipeline, item?._id, formValues?.resource, mainResourceFields]);
+
+  return (
+    <Card key={item._id} sx={{ mb: 2, border: itemErrors.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
+      <CardContent>
+        <Box display="flex" alignItems="center" gap={1} mb={2}>
+          <BarChart color="primary" />
+          <span style={{ fontWeight: 500 }}>Chart</span>
+        </Box>
+
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Autocomplete
+              disabled={!isEdit}
+              value={chartTypeOptions.find((option) => option.optionValue === item.chartType) || null}
+              options={chartTypeOptions}
+              getOptionLabel={(option) => option.optionLabel}
+              onChange={(e, val) => {
+                if (['bar', 'line'].includes(val?.optionValue)) {
+                  updatePipelineItem(item._id, {
+                    chartType: val?.optionValue,
+                    xAxis: { field: '', label: '', resource: '' },
+                    yAxis: { field: '', label: '', resource: '' },
+                    value: undefined,
+                    label: undefined
+                  });
+                } else if (val?.optionValue === 'pie') {
+                  updatePipelineItem(item._id, {
+                    chartType: 'pie',
+                    value: { field: '', resource: '' },
+                    label: { field: '', resource: '' },
+                    xAxis: undefined,
+                    yAxis: undefined
+                  });
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="small"
+                  label="Chart Type"
+                  variant="outlined"
+                  fullWidth
+                  required
+                  error={itemErrors.includes('chartType_required')}
+                  helperText={itemErrors.includes('chartType_required') ? 'Chart Type is required' : ''}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              )}
+            />
+          </Grid>
+
+          {['bar', 'line'].includes(item.chartType) && (
+            <>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <FieldSelectionPopper
+                  isEdit={isEdit}
+                  availableFields={availableFields}
+                  selectedField={availableFields?.find((f) => f?.fieldName === item.xAxis?.field)}
+                  onFieldSelect={(field) => {
+                    updatePipelineItem(item._id, { xAxis: { ...item.xAxis, field: field.fieldName, resource: field.resource } });
+                  }}
+                  textFieldProps={{
+                    size: 'small',
+                    label: 'X-Axis Field',
+                    variant: 'outlined',
+                    fullWidth: true,
+                    required: true,
+                    error: itemErrors.includes('xAxis_field_required'),
+                    helperText: itemErrors.includes('xAxis_field_required') ? 'X-Axis Field is required' : '',
+                    slotProps: { inputLabel: { shrink: true } }
+                  }}
+                  popperProps={{ width: 400, maxHeight: 400 }}
+                />
+              </Grid>
+              {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <TextField
+                  disabled={!isEdit}
+                  size="small"
+                  label="X-Axis Label"
+                  variant="outlined"
+                  fullWidth
+                  required
+                  value={item.xAxis?.label || ''}
+                  error={itemErrors.includes('xAxis_label_required')}
+                  helperText={itemErrors.includes('xAxis_label_required') ? 'X-Axis Label is required' : ''}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  onChange={(e) => {
+                    updatePipelineItem(item._id, {
+                      xAxis: { ...item.xAxis, label: e.target.value }
+                    });
+                  }}
+                />
+              </Grid> */}
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <FieldSelectionPopper
+                  isEdit={isEdit}
+                  availableFields={availableFields}
+                  selectedField={availableFields?.find((f) => f?.fieldName === item.yAxis?.field)}
+                  onFieldSelect={(field) => {
+                    updatePipelineItem(item._id, { yAxis: { ...item.yAxis, field: field.fieldName, resource: field.resource } });
+                  }}
+                  textFieldProps={{
+                    size: 'small',
+                    label: 'Y-Axis Field',
+                    variant: 'outlined',
+                    fullWidth: true,
+                    required: true,
+                    error: itemErrors.includes('yAxis_field_required'),
+                    helperText: itemErrors.includes('yAxis_field_required') ? 'Y-Axis Field is required' : '',
+                    slotProps: { inputLabel: { shrink: true } }
+                  }}
+                  popperProps={{ width: 400, maxHeight: 400 }}
+                />
+              </Grid>
+              {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <TextField
+                  disabled={!isEdit}
+                  size="small"
+                  label="Y-Axis Label"
+                  variant="outlined"
+                  fullWidth
+                  required
+                  value={item.yAxis?.label || ''}
+                  error={itemErrors.includes('yAxis_label_required')}
+                  helperText={itemErrors.includes('yAxis_label_required') ? 'Y-Axis Label is required' : ''}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                  onChange={(e) => {
+                    updatePipelineItem(item._id, {
+                      yAxis: { ...item.yAxis, label: e.target.value }
+                    });
+                  }}
+                />
+              </Grid> */}
+            </>
+          )}
+
+          {item.chartType === 'pie' && (
+            <>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <FieldSelectionPopper
+                  isEdit={isEdit}
+                  availableFields={availableFields}
+                  selectedField={availableFields?.find((f) => f?.fieldName === item.value?.field)}
+                  onFieldSelect={(field) => {
+                    updatePipelineItem(item._id, { value: { field: field.fieldName, resource: field.resource } });
+                  }}
+                  textFieldProps={{
+                    size: 'small',
+                    label: 'Value Field',
+                    variant: 'outlined',
+                    fullWidth: true,
+                    required: true,
+                    error: itemErrors.includes('value_required'),
+                    helperText: itemErrors.includes('value_required') ? 'Value Field is required' : '',
+                    slotProps: { inputLabel: { shrink: true } }
+                  }}
+                  popperProps={{ width: 400, maxHeight: 400 }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <FieldSelectionPopper
+                  isEdit={isEdit}
+                  availableFields={availableFields}
+                  selectedField={availableFields?.find((f) => f?.fieldName === item.label?.field)}
+                  onFieldSelect={(field) => {
+                    updatePipelineItem(item._id, { label: { field: field.fieldName, resource: field.resource } });
+                  }}
+                  textFieldProps={{
+                    size: 'small',
+                    label: 'Label Field',
+                    variant: 'outlined',
+                    fullWidth: true,
+                    required: true,
+                    error: itemErrors.includes('label_required'),
+                    helperText: itemErrors.includes('label_required') ? 'Label Field is required' : '',
+                    slotProps: { inputLabel: { shrink: true } }
+                  }}
+                  popperProps={{ width: 400, maxHeight: 400 }}
+                />
+              </Grid>
+            </>
+          )}
+        </Grid>
+      </CardContent>
+    </Card>
+  );
+};
+
+const FilterComponent = ({
+  item,
+  pipeline,
+  isEdit,
+  formValues,
+  mainResourceFields,
+  updatePipelineItem,
+  removePipelineItem,
+  setFilterFieldSelect,
+  setFilterConfigurationDialog
+}) => {
+  const [availableFields, setAvailableFields] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchFields = async () => {
+      const currentItemIndex = pipeline.findIndex((p) => p._id === item?._id);
+      const pipelineBeforeCurrentItem = pipeline.slice(0, currentItemIndex);
+
+      const fields = await getAvailableFieldsForPipeline(pipelineBeforeCurrentItem, formValues?.resource, mainResourceFields);
+      setAvailableFields(fields || []);
+    };
+    fetchFields();
+  }, [pipeline, item?._id, formValues?.resource, mainResourceFields]);
+
+  const handleRemoveFilter = (filterIndex: number) => {
+    const updatedFields = item?.fields?.filter((_, index) => index !== filterIndex);
+    updatePipelineItem(item._id, { fields: updatedFields });
+  };
+
+  return (
+    <Card key={item._id} sx={{ mb: 2 }}>
+      <CardContent>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <BiFilterAlt color="var(--theme-primary)" />
+            <span style={{ fontWeight: 500 }}>Filter</span>
+          </Box>
+          <IconButton size="small" onClick={() => removePipelineItem(item._id)} disabled={!isEdit}>
+            <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
+          </IconButton>
+        </Box>
+
+        <Box className="flex flex-wrap items-center gap-2">
+          {item?.fields?.map((filter, index) => {
+            const field = availableFields.find((f) => f.fieldName === filter.fieldName);
+            const operation = filterOperations.find((op) => op.optionValue === filter.operation);
+
+            const handleChipClick = () => {
+              if (!isEdit) return;
+
+              const fieldForEdit = availableFields.find((f) => f.fieldName === filter.fieldName);
+              setFilterFieldSelect({ open: false, item: item });
+              setFilterConfigurationDialog({
+                open: true,
+                field: fieldForEdit,
+                editingFilter: filter,
+                editingIndex: index
+              });
+            };
+
+            return (
+              <Chip
+                key={index}
+                label={getChipLabel(field, filter, operation)}
+                onDelete={isEdit ? () => handleRemoveFilter(index) : undefined}
+                onClick={handleChipClick}
+                className={`filter-chip ${isEdit ? 'cursor-pointer' : ''}`}
+                clickable={isEdit}
+              />
+            );
+          })}
+
+          {!item?.fields?.length ? (
+            <ThemeButton startIcon={<Add />} onClick={() => setFilterFieldSelect({ open: true, item: item })} disabled={!isEdit} buttonType="theme">
+              Add Filters
+            </ThemeButton>
+          ) : (
+            <IconButton onClick={() => setFilterFieldSelect({ open: true, item: item })} disabled={!isEdit}>
+              <Add fontSize="small" color={!isEdit ? 'disabled' : 'primary'} />
+            </IconButton>
+          )}
+        </Box>
+      </CardContent>
+    </Card>
+  );
+};
+
 export default function ReportBuilderDetail() {
   const { id } = useParams();
   const history = useHistory();
@@ -609,7 +1097,7 @@ export default function ReportBuilderDetail() {
         newItem = {
           _id,
           type: 'sort',
-          sortBy: {}
+          fields: [{ fieldName: '', order: 1, resource: '' }]
         } as SortPipeline;
         setHasSortItem(true);
         break;
@@ -711,69 +1199,6 @@ export default function ReportBuilderDetail() {
     history.push({ pathname: isBreakCrumbPath || path ? isBreakCrumbPath || path : routes.reportBuilder.path });
   };
 
-  const renderLookupComponent = (item: LookupPipeline) => {
-    const localFields = [{ fieldName: '_id', fieldLabel: '_id' }, ...(resourceFieldMap[formValues?.resource] || [])];
-    const lookupFields = [{ fieldName: '_id', fieldLabel: '_id' }, ...(resourceFieldMap[item?.withResource] || [])];
-
-    return (
-      <Card key={item._id} sx={{ mb: 2, border: pipelineErrors[item._id]?.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
-        <CardContent>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <JoinInner color="primary" />
-              <span style={{ fontWeight: 500 }}>Join data</span>
-            </Box>
-            <IconButton size="small" onClick={() => removePipelineItem(item._id)} disabled={!isEdit}>
-              <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
-            </IconButton>
-          </Box>
-
-          <FieldMatchRow
-            pipeline={pipeline}
-            item={item}
-            matchIndex={0}
-            localFields={localFields}
-            lookupFields={lookupFields}
-            onUpdate={(updates) => updatePipelineItem(item._id, updates)}
-            totalMatches={item?.fieldToMatch?.length || 0}
-            resourceOptions={resourceOptions}
-            formValues={formValues}
-            isEdit={isEdit}
-            fetchResourceFields={fetchResourceFields}
-            updatePipelineItem={updatePipelineItem}
-            pipelineErrors={pipelineErrors}
-            resourceFieldMap={resourceFieldMap}
-          />
-
-          {item?.fieldToMatch?.length > 1 &&
-            item?.fieldToMatch?.slice(1).map((_, index) => (
-              <FieldMatchRow
-                key={index + 1}
-                item={item}
-                matchIndex={index + 1}
-                localFields={localFields}
-                lookupFields={lookupFields}
-                onUpdate={(updates) => updatePipelineItem(item._id, updates)}
-                onRemove={() => {
-                  const updatedFieldToMatch = item?.fieldToMatch?.filter((_, i) => i !== index + 1);
-                  updatePipelineItem(item._id, { fieldToMatch: updatedFieldToMatch });
-                }}
-                totalMatches={item?.fieldToMatch?.length || 0}
-                resourceOptions={resourceOptions}
-                formValues={formValues}
-                isEdit={isEdit}
-                fetchResourceFields={fetchResourceFields}
-                updatePipelineItem={updatePipelineItem}
-                pipelineErrors={pipelineErrors}
-                pipeline={pipeline}
-                resourceFieldMap={resourceFieldMap}
-              />
-            ))}
-        </CardContent>
-      </Card>
-    );
-  };
-
   const renderGroupComponent = (item: GroupPipeline) => {
     const resourceFields = resourceFieldMap?.[formValues?.resource] || [];
     const fieldOptions = resourceFields?.map((field) => ({ optionValue: field.fieldName, optionLabel: field.fieldLabel }));
@@ -858,89 +1283,6 @@ export default function ReportBuilderDetail() {
     );
   };
 
-  const renderSortComponent = (item: SortPipeline) => {
-    const sortField = Object.keys(item.sortBy)[0] || '';
-    const sortOrder = item.sortBy[sortField] || 1;
-    const itemErrors = pipelineErrors[item._id] || [];
-
-    const currentSortIndex = pipeline?.findIndex((p) => p?._id === item?._id);
-    const availableFields = getAvailableFieldsForPipeline(pipeline, currentSortIndex, formValues?.resource, resourceFieldMap);
-    const selectedField = availableFields?.find((f) => f?.fieldName === sortField);
-
-    return (
-      <Card key={item?._id} sx={{ mb: 2, border: itemErrors.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
-        <CardContent>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Sort color="primary" />
-              <span style={{ fontWeight: 500 }}>Sort</span>
-            </Box>
-            <IconButton size="small" onClick={() => removePipelineItem(item?._id)} disabled={!isEdit}>
-              <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
-            </IconButton>
-          </Box>
-
-          <Grid container spacing={2} alignItems="center">
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <FieldSelectionPopper
-                isEdit={isEdit}
-                availableFields={availableFields}
-                selectedField={selectedField}
-                onFieldSelect={(field) => {
-                  const currentSortBy = Object.keys(item.sortBy)[0] ? Object.values(item.sortBy)[0] : 1;
-                  updatePipelineItem(item._id, {
-                    sortBy: { [field.fieldName]: currentSortBy }
-                  });
-                }}
-                textFieldProps={{
-                  size: 'small',
-                  label: 'Sort Field',
-                  variant: 'outlined',
-                  fullWidth: true,
-                  required: true,
-                  error: pipelineErrors[item._id]?.includes('sortBy_required'),
-                  helperText: pipelineErrors[item._id]?.includes('sortBy_required') ? 'Sort Field is required' : '',
-                  slotProps: { inputLabel: { shrink: true } }
-                }}
-                popperProps={{ width: 400, maxHeight: 400 }}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Autocomplete
-                disabled={!isEdit}
-                value={{ value: sortOrder, label: sortOrder === 1 ? 'Ascending' : 'Descending' }}
-                options={[
-                  { value: 1, label: 'Ascending' },
-                  { value: -1, label: 'Descending' }
-                ]}
-                getOptionLabel={(option) => option.label}
-                onChange={(e, val) => {
-                  if (sortField && val) {
-                    updatePipelineItem(item?._id, {
-                      sortBy: { [sortField]: val.value }
-                    });
-                  }
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    size="small"
-                    label="Sort Order"
-                    variant="outlined"
-                    fullWidth
-                    required
-                    slotProps={{ inputLabel: { shrink: true } }}
-                  />
-                )}
-              />
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-    );
-  };
-
   const renderLimitComponent = (item: LimitPipeline) => {
     const itemErrors = pipelineErrors[item._id] || [];
 
@@ -988,303 +1330,6 @@ export default function ReportBuilderDetail() {
     );
   };
 
-  const renderChartComponent = (item: ChartPipeline) => {
-    const itemErrors = pipelineErrors[item._id] || [];
-
-    return (
-      <Card key={item._id} sx={{ mb: 2, border: itemErrors.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
-        <CardContent>
-          <Box display="flex" alignItems="center" gap={1} mb={2}>
-            <BarChart color="primary" />
-            <span style={{ fontWeight: 500 }}>Chart</span>
-          </Box>
-
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <Autocomplete
-                disabled={!isEdit}
-                value={chartTypeOptions.find((option) => option.optionValue === item.chartType) || null}
-                options={chartTypeOptions}
-                getOptionLabel={(option) => option.optionLabel}
-                onChange={(e, val) => {
-                  if (['bar', 'line'].includes(val?.optionValue)) {
-                    updatePipelineItem(item._id, {
-                      chartType: val?.optionValue,
-                      xAxis: { field: '', label: '', resource: '' },
-                      yAxis: { field: '', label: '', resource: '' },
-                      value: undefined,
-                      label: undefined
-                    });
-                  } else if (val?.optionValue === 'pie') {
-                    updatePipelineItem(item._id, {
-                      chartType: 'pie',
-                      value: { field: '', resource: '' },
-                      label: { field: '', resource: '' },
-                      xAxis: undefined,
-                      yAxis: undefined
-                    });
-                  }
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    size="small"
-                    label="Chart Type"
-                    variant="outlined"
-                    fullWidth
-                    required
-                    error={itemErrors.includes('chartType_required')}
-                    helperText={itemErrors.includes('chartType_required') ? 'Chart Type is required' : ''}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                  />
-                )}
-              />
-            </Grid>
-
-            {['bar', 'line'].includes(item.chartType) && (
-              <>
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <FieldSelectionPopper
-                    isEdit={isEdit}
-                    availableFields={getAvailableFieldsForPipeline(
-                      pipeline,
-                      pipeline.findIndex((p) => p._id === item._id),
-                      formValues?.resource,
-                      resourceFieldMap
-                    )}
-                    selectedField={getAvailableFieldsForPipeline(
-                      pipeline,
-                      pipeline.findIndex((p) => p._id === item._id),
-                      formValues?.resource,
-                      resourceFieldMap
-                    )?.find((f) => f.fieldName === item.xAxis?.field)}
-                    onFieldSelect={(field) => {
-                      updatePipelineItem(item._id, { xAxis: { ...item.xAxis, field: field.fieldName, resource: field.resource } });
-                    }}
-                    textFieldProps={{
-                      size: 'small',
-                      label: 'X-Axis Field',
-                      variant: 'outlined',
-                      fullWidth: true,
-                      required: true,
-                      error: itemErrors.includes('xAxis_field_required'),
-                      helperText: itemErrors.includes('xAxis_field_required') ? 'X-Axis Field is required' : '',
-                      slotProps: { inputLabel: { shrink: true } }
-                    }}
-                    popperProps={{ width: 400, maxHeight: 400 }}
-                  />
-                </Grid>
-                {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField
-                    disabled={!isEdit}
-                    size="small"
-                    label="X-Axis Label"
-                    variant="outlined"
-                    fullWidth
-                    required
-                    value={item.xAxis?.label || ''}
-                    error={itemErrors.includes('xAxis_label_required')}
-                    helperText={itemErrors.includes('xAxis_label_required') ? 'X-Axis Label is required' : ''}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    onChange={(e) => {
-                      updatePipelineItem(item._id, {
-                        xAxis: { ...item.xAxis, label: e.target.value }
-                      });
-                    }}
-                  />
-                </Grid> */}
-                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <FieldSelectionPopper
-                    isEdit={isEdit}
-                    availableFields={getAvailableFieldsForPipeline(
-                      pipeline,
-                      pipeline.findIndex((p) => p._id === item._id),
-                      formValues?.resource,
-                      resourceFieldMap
-                    )}
-                    selectedField={getAvailableFieldsForPipeline(
-                      pipeline,
-                      pipeline.findIndex((p) => p._id === item._id),
-                      formValues?.resource,
-                      resourceFieldMap
-                    )?.find((f) => f.fieldName === item.yAxis?.field)}
-                    onFieldSelect={(field) => {
-                      updatePipelineItem(item._id, { yAxis: { ...item.yAxis, field: field.fieldName, resource: field.resource } });
-                    }}
-                    textFieldProps={{
-                      size: 'small',
-                      label: 'Y-Axis Field',
-                      variant: 'outlined',
-                      fullWidth: true,
-                      required: true,
-                      error: itemErrors.includes('yAxis_field_required'),
-                      helperText: itemErrors.includes('yAxis_field_required') ? 'Y-Axis Field is required' : '',
-                      slotProps: { inputLabel: { shrink: true } }
-                    }}
-                    popperProps={{ width: 400, maxHeight: 400 }}
-                  />
-                </Grid>
-                {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                  <TextField
-                    disabled={!isEdit}
-                    size="small"
-                    label="Y-Axis Label"
-                    variant="outlined"
-                    fullWidth
-                    required
-                    value={item.yAxis?.label || ''}
-                    error={itemErrors.includes('yAxis_label_required')}
-                    helperText={itemErrors.includes('yAxis_label_required') ? 'Y-Axis Label is required' : ''}
-                    slotProps={{ inputLabel: { shrink: true } }}
-                    onChange={(e) => {
-                      updatePipelineItem(item._id, {
-                        yAxis: { ...item.yAxis, label: e.target.value }
-                      });
-                    }}
-                  />
-                </Grid> */}
-              </>
-            )}
-
-            {item.chartType === 'pie' && (
-              <>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <FieldSelectionPopper
-                    isEdit={isEdit}
-                    availableFields={getAvailableFieldsForPipeline(
-                      pipeline,
-                      pipeline.findIndex((p) => p._id === item._id),
-                      formValues?.resource,
-                      resourceFieldMap
-                    )}
-                    selectedField={getAvailableFieldsForPipeline(
-                      pipeline,
-                      pipeline.findIndex((p) => p._id === item._id),
-                      formValues?.resource,
-                      resourceFieldMap
-                    )?.find((f) => f.fieldName === item.value?.field)}
-                    onFieldSelect={(field) => {
-                      updatePipelineItem(item._id, { value: { field: field.fieldName, resource: field.resource } });
-                    }}
-                    textFieldProps={{
-                      size: 'small',
-                      label: 'Value Field',
-                      variant: 'outlined',
-                      fullWidth: true,
-                      required: true,
-                      error: itemErrors.includes('value_required'),
-                      helperText: itemErrors.includes('value_required') ? 'Value Field is required' : '',
-                      slotProps: { inputLabel: { shrink: true } }
-                    }}
-                    popperProps={{ width: 400, maxHeight: 400 }}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                  <FieldSelectionPopper
-                    isEdit={isEdit}
-                    availableFields={getAvailableFieldsForPipeline(
-                      pipeline,
-                      pipeline.findIndex((p) => p._id === item._id),
-                      formValues?.resource,
-                      resourceFieldMap
-                    )}
-                    selectedField={getAvailableFieldsForPipeline(
-                      pipeline,
-                      pipeline.findIndex((p) => p._id === item._id),
-                      formValues?.resource,
-                      resourceFieldMap
-                    )?.find((f) => f.fieldName === item.label?.field)}
-                    onFieldSelect={(field) => {
-                      updatePipelineItem(item._id, { label: { field: field.fieldName, resource: field.resource } });
-                    }}
-                    textFieldProps={{
-                      size: 'small',
-                      label: 'Label Field',
-                      variant: 'outlined',
-                      fullWidth: true,
-                      required: true,
-                      error: itemErrors.includes('label_required'),
-                      helperText: itemErrors.includes('label_required') ? 'Label Field is required' : '',
-                      slotProps: { inputLabel: { shrink: true } }
-                    }}
-                    popperProps={{ width: 400, maxHeight: 400 }}
-                  />
-                </Grid>
-              </>
-            )}
-          </Grid>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const renderFilterComponent = (item: FilterPipeline) => {
-    const currentFilterIndex = pipeline?.findIndex((p) => p._id === item._id);
-    const availableFields = getAvailableFieldsForPipeline(pipeline, currentFilterIndex, formValues?.resource, resourceFieldMap);
-
-    const handleRemoveFilter = (filterIndex: number) => {
-      const updatedFields = item?.fields?.filter((_, index) => index !== filterIndex);
-      updatePipelineItem(item._id, { fields: updatedFields });
-    };
-
-    return (
-      <Card key={item._id} sx={{ mb: 2 }}>
-        <CardContent>
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <BiFilterAlt color="var(--theme-primary)" />
-              <span style={{ fontWeight: 500 }}>Filter</span>
-            </Box>
-            <IconButton size="small" onClick={() => removePipelineItem(item._id)} disabled={!isEdit}>
-              <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
-            </IconButton>
-          </Box>
-
-          <Box className="flex flex-wrap items-center gap-2">
-            {item?.fields?.map((filter, index) => {
-              const field = availableFields.find((f) => f.fieldName === filter.fieldName);
-              const operation = filterOperations.find((op) => op.optionValue === filter.operation);
-
-              const handleChipClick = () => {
-                if (!isEdit) return;
-
-                const fieldForEdit = availableFields.find((f) => f.fieldName === filter.fieldName);
-                setFilterFieldSelect({ open: false, item: item });
-                setFilterConfigurationDialog({
-                  open: true,
-                  field: fieldForEdit,
-                  editingFilter: filter,
-                  editingIndex: index
-                });
-              };
-
-              return (
-                <Chip
-                  key={index}
-                  label={getChipLabel(field, filter, operation)}
-                  onDelete={isEdit ? () => handleRemoveFilter(index) : undefined}
-                  onClick={handleChipClick}
-                  className={`filter-chip ${isEdit ? 'cursor-pointer' : ''}`}
-                  clickable={isEdit}
-                />
-              );
-            })}
-
-            {!item?.fields?.length ? (
-              <ThemeButton startIcon={<Add />} onClick={() => setFilterFieldSelect({ open: true, item: item })} disabled={!isEdit} buttonType="theme">
-                Add Filters
-              </ThemeButton>
-            ) : (
-              <IconButton onClick={() => setFilterFieldSelect({ open: true, item: item })} disabled={!isEdit}>
-                <Add fontSize="small" color={!isEdit ? 'disabled' : 'primary'} />
-              </IconButton>
-            )}
-          </Box>
-        </CardContent>
-      </Card>
-    );
-  };
-
   const handleAddFilterToPipeline = (filter: { fieldName: string; operation: string; value: any; type: string; resource: string }) => {
     const currentFilter = pipeline?.find((p) => p?._id === filterFieldSelect?.item?._id) as FilterPipeline;
     if (isEmpty(currentFilter)) return;
@@ -1298,12 +1343,6 @@ export default function ReportBuilderDetail() {
     updatePipelineItem(filterFieldSelect?.item._id, { fields: updatedFields });
     setFilterConfigurationDialog({ open: false, field: null, editingFilter: null, editingIndex: null });
     setFilterFieldSelect({ open: false, item: null });
-  };
-
-  const getCurrentAvailableFields = (item: PipelineItem) => {
-    if (!item?._id) return [];
-    const currentFilterIndex = pipeline?.findIndex((p) => p._id === item._id);
-    return getAvailableFieldsForPipeline(pipeline, currentFilterIndex, formValues?.resource, resourceFieldMap);
   };
 
   return initialValues ? (
@@ -1427,15 +1466,15 @@ export default function ReportBuilderDetail() {
                                               <Checkbox
                                                 size="small"
                                                 checked={(() => {
-                                                  const availableFields = resourceFieldMap[values?.resource] || [];
+                                                  const availableFields = resourceFieldMap?.[values?.resource] || [];
                                                   return values?.fields?.length === availableFields?.length && availableFields?.length > 0;
                                                 })()}
                                                 indeterminate={(() => {
-                                                  const availableFields = resourceFieldMap[values?.resource] || [];
+                                                  const availableFields = resourceFieldMap?.[values?.resource] || [];
                                                   return values?.fields?.length > 0 && values?.fields?.length < availableFields?.length;
                                                 })()}
                                                 onChange={(e) => {
-                                                  const availableFields = resourceFieldMap[values?.resource] || [];
+                                                  const availableFields = resourceFieldMap?.[values?.resource] || [];
                                                   if (e.target.checked) {
                                                     setFieldValue(
                                                       'fields',
@@ -1454,19 +1493,19 @@ export default function ReportBuilderDetail() {
                                         </div>
 
                                         <div className="pt-2" style={{ borderTop: '1px solid var(--common-border-color)' }}>
-                                          {(resourceFieldMap[values?.resource] || [])?.map((field) => (
+                                          {(resourceFieldMap?.[values?.resource] || [])?.map((field) => (
                                             <div key={field.fieldName} className="mb-1">
                                               <FormControlLabel
                                                 control={
                                                   <Checkbox
                                                     size="small"
                                                     checked={(() => {
-                                                      const availableFields = resourceFieldMap[values?.resource] || [];
+                                                      const availableFields = resourceFieldMap?.[values?.resource] || [];
                                                       const validFields = validateAndCleanFields(values?.fields, availableFields);
                                                       return validFields.includes(field.fieldName);
                                                     })()}
                                                     onChange={(e) => {
-                                                      const availableFields = resourceFieldMap[values?.resource] || [];
+                                                      const availableFields = resourceFieldMap?.[values?.resource] || [];
                                                       const validFields = validateAndCleanFields(values?.fields, availableFields);
                                                       let newFields;
                                                       if (e?.target?.checked) {
@@ -1511,17 +1550,63 @@ export default function ReportBuilderDetail() {
                           {pipeline?.map((item) => {
                             switch (item.type) {
                               case 'lookup':
-                                return renderLookupComponent(item as LookupPipeline);
+                                return (
+                                  <LookupComponent
+                                    item={item}
+                                    pipeline={pipeline}
+                                    pipelineErrors={pipelineErrors}
+                                    isEdit={isEdit}
+                                    formValues={formValues}
+                                    resourceFieldMap={resourceFieldMap}
+                                    updatePipelineItem={updatePipelineItem}
+                                    removePipelineItem={removePipelineItem}
+                                    resourceOptions={resourceOptions}
+                                    fetchResourceFields={fetchResourceFields}
+                                  />
+                                );
                               case 'group':
                                 return renderGroupComponent(item as GroupPipeline);
                               case 'filter':
-                                return renderFilterComponent(item as FilterPipeline);
+                                return (
+                                  <FilterComponent
+                                    item={item}
+                                    pipeline={pipeline}
+                                    isEdit={isEdit}
+                                    formValues={formValues}
+                                    mainResourceFields={resourceFieldMap?.[formValues?.resource]}
+                                    updatePipelineItem={updatePipelineItem}
+                                    removePipelineItem={removePipelineItem}
+                                    setFilterFieldSelect={setFilterFieldSelect}
+                                    setFilterConfigurationDialog={setFilterConfigurationDialog}
+                                  />
+                                );
                               case 'sort':
-                                return renderSortComponent(item as SortPipeline);
+                                return (
+                                  <SortComponent
+                                    item={item}
+                                    pipeline={pipeline}
+                                    pipelineErrors={pipelineErrors}
+                                    removePipelineItem={removePipelineItem}
+                                    isEdit={isEdit}
+                                    formValues={formValues}
+                                    mainResourceFields={resourceFieldMap?.[formValues?.resource]}
+                                    updatePipelineItem={updatePipelineItem}
+                                  />
+                                );
                               case 'limit':
                                 return renderLimitComponent(item as LimitPipeline);
                               case 'chart':
-                                return renderChartComponent(item as ChartPipeline);
+                                return (
+                                  <ChartComponent
+                                    item={item}
+                                    pipeline={pipeline}
+                                    pipelineErrors={pipelineErrors}
+                                    isEdit={isEdit}
+                                    formValues={formValues}
+                                    mainResourceFields={resourceFieldMap?.[formValues?.resource]}
+                                    updatePipelineItem={updatePipelineItem}
+                                  />
+                                );
                               default:
                                 return null;
                             }
@@ -1611,7 +1696,10 @@ export default function ReportBuilderDetail() {
           onFieldSelect={(field: any) => {
             setFilterConfigurationDialog({ open: true, field: field, editingFilter: null, editingIndex: null });
           }}
-          availableFields={getCurrentAvailableFields(filterFieldSelect?.item)}
+          pipeline={pipeline}
+          item={filterFieldSelect?.item}
+          mainResource={formValues?.resource}
+          mainResourceFields={resourceFieldMap?.[formValues?.resource]}
         />
       )}
 
