@@ -18,7 +18,7 @@ import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
-import { getPricingConditions } from 'src/components/PricingCondition';
+import { getCostPriceConditions, getPricingConditions } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 
@@ -116,7 +116,7 @@ const QtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, subleaseData,
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
       setPriceMethodListConst(pricingMethodOptions);
-      await getAllPricingCondition(rowData, pricingMethodOptions);
+      await getAllPricingCondition(rowData, pricingMethodOptions, data);
       data.forEach((element) => {
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
@@ -162,19 +162,25 @@ const QtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, subleaseData,
     setSubmitState({ open: true, values: values });
   };
 
-  async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
+  async function getAllPricingCondition(values: any, pricingMethodOptions: any, allFields: any = []) {
     if (rowData) {
-      let priceData: any = await getPricingConditions(sidebarResource.sublease,
-        subleaseData,
-        [
-          {
-            materialId: rowData.materialId,
-            type: rowData.type,
-            qty: 1
-          }
-        ],
-        PRICING_SETUP_TYPE.rent
-      );
+      let priceData: any = []
+      const pricingConditionField = allFields?.find(f => f?.fieldName === "pricingCondition")
+      if (pricingConditionField && pricingConditionField?.lookupResource === sidebarResource.costBooks) {
+        priceData = await getCostPriceConditions([rowData], [rowData?.type], subleaseData);
+      } else {
+        priceData = await getPricingConditions(sidebarResource.sublease,
+          subleaseData,
+          [
+            {
+              materialId: rowData.materialId,
+              type: rowData.type,
+              qty: 1
+            }
+          ],
+          PRICING_SETUP_TYPE.rent
+        );
+      }
       setPriceConditionListConst(priceData || []);
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }
@@ -390,7 +396,7 @@ const QtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, subleaseData,
                                             }
                                             let priceFieldName = 'price_' + subleaseData?.currency?.toLowerCase();
                                             const result = autoCalculateSpecificFields(
-                                              { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
+                                              { [priceFieldName]: priceValue?.mrp || priceValue?.price || 0, [field.fieldName]: value },
                                               values,
                                               initialData.fields
                                             );

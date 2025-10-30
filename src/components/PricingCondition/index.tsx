@@ -202,6 +202,7 @@ export const getCostPriceValue = (row: any, costPriceData: any, currency: any, f
     changeUnit = true;
   }
   if (rateList?.length) {
+    const priceFieldName = `price_${currency?.toLowerCase()}`;
     const obj: any = {};
 
     if (changeUnit) {
@@ -210,6 +211,7 @@ export const getCostPriceValue = (row: any, costPriceData: any, currency: any, f
       const calValues1 = autoCalculateSpecificFields({ pricingMethod: row['costingMethod'] }, { ...row, ...obj }, fields);
       Object.assign(row, calValues1);
     }
+    row[priceFieldName] = rateList[0].price;
 
     if (fields?.find(f => f?.fieldName === `costPrice`)) {
       obj[`costPrice_${currency?.toLowerCase()}`] = rateList[0]?.price || 0;
@@ -229,6 +231,8 @@ export const getCostPriceValue = (row: any, costPriceData: any, currency: any, f
     Object.assign(row, obj);
     const calValues = autoCalculateSpecificFields(obj, row, fields);
     Object.assign(row, calValues);
+    const calValues2 = autoCalculateSpecificFields({ [priceFieldName]: rateList[0].price }, row, fields);
+    Object.assign(row, calValues2);
   }
   return row;
 };
