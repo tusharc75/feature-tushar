@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import CardColTimeline from 'src/components/CardColTimeline1';
 import { workOrderColormap } from 'src/constants/helpers';
+import CardCustomComponent from 'src/pages/WorkOrderTechnician/CardView/CardCustomComponent';
 
-const CardView = ({ filterQuery, setSelectedService, setServiceOpen, state, headerSlot, renderedFrom }) => {
+const CardView = ({ filterQuery, setSelectedService, setServiceOpen, state, headerSlot, renderedFrom, childColumns }) => {
   const { setFilterQuery } = state;
 
   useEffect(() => {
@@ -27,6 +28,7 @@ const CardView = ({ filterQuery, setSelectedService, setServiceOpen, state, head
         state={state}
         passFailStatus={true}
         passFailAccessor="serviceStatus"
+        customContent={(props) => <CardCustomComponent {...props} renderedFrom={renderedFrom} columns={childColumns} />}
         cardOnClick={(data: any) => {
           let tempServiceData = {};
           tempServiceData['uniqueId'] = data?.uniqueId;

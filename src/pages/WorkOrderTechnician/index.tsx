@@ -44,6 +44,7 @@ import { handlePdfPreview } from 'src/pages/WorkOrderSupervisor/helper';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import ResourceFilter from 'src/pages/WorkOrderTechnician/ResourceFilter';
+import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 
 type Columns = typeof WORKORDER_TECHNICIAN_SERVICE_STATUS;
 
@@ -80,7 +81,7 @@ const WorkOrderTechnician = () => {
   const gridViewRef = useRef<GridViewRef>();
   const [serviceOpen, setServiceOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
-  const [columnsDef, setColumnsDef] = useState(null);
+  const [columnsDef, setColumnsDef] = useState<TColType[]>(null);
   const history = useHistory();
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
   const [selectedServiceStatus, setSelectedServiceStatus] = useState<any[]>([
@@ -95,7 +96,7 @@ const WorkOrderTechnician = () => {
   const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resourceData, setResourceData] = useState(null);
-  const [selectedResource, setSelectedResource] = useState(null)
+  const [selectedResource, setSelectedResource] = useState(null);
 
   const resetSelectedRecords = () => {
     cardState.resetSelection();
@@ -129,19 +130,33 @@ const WorkOrderTechnician = () => {
         } = response;
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
-          let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail, user);
+
+          let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail || {}, user);
           finalObject['serviceName'] = u?.service?.serviceName;
           finalObject['serviceId'] = u?.service?._id;
-          finalObject['customServiceStatus'] = u?.status;
           finalObject['workOrderId'] = u?.workOrderDetail?._id;
           finalObject['parentProductId'] = u?.parentProduct?._id;
           finalObject['parentProductName'] = u?.parentProduct?.productName;
           finalObject['parentProductDescription'] = u?.parentProduct?.productDescription;
+
+          finalObject['customServiceStatus'] = u?.status;
           finalObject['uniqueId'] = u?._id;
+          finalObject['services'] =
+            u.services?.map((d) => {
+              let newData = { ...d, ...d.service, serviceId: d.service._id };
+              delete newData['service'];
+              newData['_id'] = d._id;
+              return newData;
+            }) || [];
           delete workOrderDetailData?._id;
           delete workOrderDetailData?.id;
+
           return { ...finalObject, ...workOrderDetailData };
         });
+        if (column === 'Pending') {
+          console.log(rows);
+        }
+
         return { data: rows, count } as { data: any; count: number };
       } catch (error) {
         throw error;
@@ -163,8 +178,22 @@ const WorkOrderTechnician = () => {
   }, [columnsDef]);
 
   useEffect(() => {
-    cardState.setOrderAndVisibility({ order: tableState.columnOrder, visible: tableState.visibleColumns });
-  }, [tableState.columnOrder, tableState.visibleColumns]);
+    const payload = {
+      order: tableState.columnOrder,
+      visible: tableState.visibleColumns
+    };
+    if (payload.order.length === 0) {
+      payload.order = columnsDef?.map((d) => d.id || d.accessor) || [];
+    }
+    if (Object.keys(payload.visible).length === 0) {
+      payload.visible =
+        columnsDef?.reduce((acc, curr) => {
+          acc[curr.id || curr.accessor] = true;
+          return acc;
+        }, {}) || {};
+    }
+    cardState.setOrderAndVisibility(payload);
+  }, [tableState.columnOrder, tableState.visibleColumns, columnsDef]);
 
   useEffect(() => {
     cardState.setVisibleColumns(selectedServiceStatus);
@@ -178,70 +207,6 @@ const WorkOrderTechnician = () => {
       const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.workOrderDetail?.path);
       const columns = newColumns.filter((ele) => ele.accessor !== 'workOrderNumber');
       const extraColumns = [
-        {
-          accessor: 'service',
-          Header: 'Service',
-          disabled: true,
-          Cell: ({ row }) => (
-            <>
-              {row?.original?.serviceName ? (
-                <div>
-                  <h5
-                    className="link text-truncate"
-                    onClick={() => {
-                      setSelectedService({
-                        uniqueId: row?.original?._id,
-                        workOrderId: row?.original?.workOrderId,
-                        canPerform: row?.original?.canPerform
-                      });
-                      setServiceOpen(true);
-                    }}
-                  >
-                    {row.original.serviceName}
-                  </h5>
-                  {row?.original?.canPerformInfo ? (
-                    <Box ml={1}>
-                      <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
-                        <Info className="text-red-500 [font-size:20px_!important]" />
-                      </HtmlTooltip>
-                    </Box>
-                  ) : null}
-
-                  {resourceData?.policy?.showWorkOrderPdfPreviewInTile && (
-                    <Box ml={1}>
-                      <HtmlTooltip title="Preview PDF">
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePdfPreview(row?.original?.workOrderId, user, toastConfig);
-                          }}
-                        >
-                          <PictureAsPdfIcon fontSize={'small'} color="primary" />
-                        </IconButton>
-                      </HtmlTooltip>
-                    </Box>
-                  )}
-                  {row?.original?.priority && (
-                    <Box ml={1}>
-                      <HtmlTooltip title={`${row?.original?.priority} Priority`}>
-                        <span
-                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
-                            } `}
-                        >
-                          {row?.original?.priority}
-                        </span>
-                      </HtmlTooltip>
-                    </Box>
-                  )}
-                </div>
-              ) : (
-                <NoDataCell />
-              )}
-            </>
-          )
-        },
         {
           accessor: 'workOrderNumber',
           Header: 'Work Order Number',
@@ -264,61 +229,15 @@ const WorkOrderTechnician = () => {
               )}
             </div>
           )
-        },
-        {
-          accessor: 'parentProductName',
-          Header: `Parent ${resources?.product?.titleSingular}`,
-          defaultVisible: true,
-          Cell: ({ row }) => (
-            row.original['parentProductName'] ? (
-              <div className="flex items-center">
-                <p title={row?.original?.parentProductName}>{row?.original?.parentProductName}</p>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-          )
-        },
-        {
-          accessor: 'parentProductDescription',
-          Header: `Parent ${resources?.product?.titleSingular} Description`,
-          defaultVisible: true,
-          Cell: ({ row }) => (
-            row.original['parentProductDescription'] ? (
-              <div className="flex items-center gap-2">
-                <p title={row?.original?.parentProductDescription}>{row?.original?.parentProductDescription}</p>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-          )
-        },
-        {
-          accessor: 'assignedWorkStations',
-          Header: 'Work Stations',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) =>
-            row.original['assignedWorkStations'] ? (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'assignedWorkStations',
-                  lookupResource: sidebarResource.workStations
-                }}
-                original={row?.original}
-              />
-            ) : (
-              <NoDataCell />
-            )
-        },
-
+        }
       ];
       const finalColumns = [...extraColumns.slice(0, 4), ...columns, ...extraColumns.slice(4), ActionsRenderer].map((c) => {
         const id = c.id || c.accessor;
         if (defaultVisibleRows.includes(id)) {
-          return { ...c, defaultVisible: true };
+          c['defaultVisible'] = true;
+        }
+        if (id === 'workOrderNumber') {
+          c['primaryField'] = true;
         }
         return c;
       });
@@ -356,6 +275,123 @@ const WorkOrderTechnician = () => {
       </>
     )
   };
+
+  const childColumns = useMemo(
+    () => [
+      {
+        accessor: 'service',
+        Header: 'Service',
+        disabled: true,
+        Cell: ({ row }) => (
+          <>
+            {row?.original?.serviceName ? (
+              <div className="flex items-center">
+                <h5
+                  className="link text-truncate min-w-0 flex-shrink"
+                  onClick={() => {
+                    setSelectedService({
+                      uniqueId: row?.original?._id,
+                      workOrderId: row?.original?.workOrderId,
+                      canPerform: row?.original?.canPerform
+                    });
+                    setServiceOpen(true);
+                  }}
+                >
+                  {row.original.serviceName}
+                </h5>
+                {row?.original?.canPerformInfo ? (
+                  <Box ml={1} className={'no-inherit flex-shrink-0'}>
+                    <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
+                      <Info className="no-inherit !fill-red-500 [font-size:20px_!important]" />
+                    </HtmlTooltip>
+                  </Box>
+                ) : null}
+
+                {resourceData?.policy?.showWorkOrderPdfPreviewInTile && (
+                  <Box ml={1}>
+                    <HtmlTooltip title="Preview PDF">
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePdfPreview(row?.original?.workOrderId, user, toastConfig);
+                        }}
+                      >
+                        <PictureAsPdfIcon fontSize={'small'} color="primary" />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </Box>
+                )}
+                {row?.original?.priority && (
+                  <Box ml={1}>
+                    <HtmlTooltip title={`${row?.original?.priority} Priority`}>
+                      <span
+                        className={`no-inherit inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${
+                          row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
+                        } `}
+                      >
+                        {row?.original?.priority}
+                      </span>
+                    </HtmlTooltip>
+                  </Box>
+                )}
+              </div>
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        )
+      },
+      {
+        accessor: 'parentProductName',
+        Header: `Parent ${resources?.product?.titleSingular}`,
+        defaultVisible: true,
+        Cell: ({ row }) =>
+          row.original['parentProductName'] ? (
+            <div className="flex items-center">
+              <p title={row?.original?.parentProductName}>{row?.original?.parentProductName}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'parentProductDescription',
+        Header: `Parent ${resources?.product?.titleSingular} Description`,
+        defaultVisible: true,
+        Cell: ({ row }) =>
+          row.original['parentProductDescription'] ? (
+            <div className="flex items-center gap-2">
+              <p title={row?.original?.parentProductDescription}>{row?.original?.parentProductDescription}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'assignedWorkStations',
+        Header: 'Work Stations',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) =>
+          row.original['assignedWorkStations'] ? (
+            <DropdownCell
+              permissions={permissions}
+              permissionForLinks={{}}
+              field={{
+                fieldName: 'assignedWorkStations',
+                lookupResource: sidebarResource.workStations
+              }}
+              original={row?.original}
+            />
+          ) : (
+            <NoDataCell />
+          )
+      }
+    ],
+    [permissions, resourceData?.policy?.showWorkOrderPdfPreviewInTile, resources?.product?.titleSingular, user]
+  );
 
   const FIELD_TO_FILTER = [
     {
@@ -425,9 +461,9 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-              selectedRecords?.filter(
-                (s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.status !== WORK_ORDER_STATUS.onHold && s?.canPerform
-              )?.length === selectedRecords?.length
+            selectedRecords?.filter(
+              (s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.status !== WORK_ORDER_STATUS.onHold && s?.canPerform
+            )?.length === selectedRecords?.length
               ? false
               : true,
           label: `Complete Service(s)`,
@@ -476,9 +512,9 @@ const WorkOrderTechnician = () => {
 
   useEffect(() => {
     if (viewType === 'card-view') {
-      cardState.setResource(selectedResource?.resource || '')
+      cardState.setResource(selectedResource?.resource || '');
     }
-  }, [selectedResource, viewType])
+  }, [selectedResource, viewType]);
 
   return (
     <Box className="main-container-v1">
@@ -520,6 +556,7 @@ const WorkOrderTechnician = () => {
         {viewType === 'card-view' && (
           <>
             <CardView
+              childColumns={childColumns}
               renderedFrom={renderedFrom}
               headerSlot={
                 <DetailsPageHeader
@@ -529,8 +566,14 @@ const WorkOrderTechnician = () => {
                   newActionButtonProps={newActionButtonProps}
                   actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
                   leftSideContents={
-                    <div className="w-full flex items-center gap-2">
-                      <ResourceFilter selectedResource={selectedResource} setSelectedResource={setSelectedResource} filterByIds={filterByIds} setFilterByIds={setFilterByIds} handleApplyFilter={handleApplyFilter} />
+                    <div className="flex w-full items-center gap-2">
+                      <ResourceFilter
+                        selectedResource={selectedResource}
+                        setSelectedResource={setSelectedResource}
+                        filterByIds={filterByIds}
+                        setFilterByIds={setFilterByIds}
+                        handleApplyFilter={handleApplyFilter}
+                      />
                       <ThemeButton
                         mobileTooltip="Apply Filters"
                         startIcon={<BiFilterAlt className="ml-1 mr-1 mt-[1px]" />}
@@ -545,7 +588,7 @@ const WorkOrderTechnician = () => {
                         filterTerm={filterTerm}
                         resourceColumns={FIELD_TO_FILTER}
                         deepFilters={[]}
-                        filterByIds={filterByIds?.filter(e => e?.field === 'service')}
+                        filterByIds={filterByIds?.filter((e) => e?.field === 'service')}
                         fetchResourceData={(deepFilter, filterById) => {
                           handleApplyFilter(filterById);
                         }}
@@ -568,6 +611,7 @@ const WorkOrderTechnician = () => {
         {viewType === 'table-view' && (
           <div className="">
             <GridView
+              childColumns={childColumns}
               columns={columnsDef}
               renderedFrom={renderedFrom}
               state={tableState}
@@ -581,8 +625,14 @@ const WorkOrderTechnician = () => {
                     newActionButtonProps={newActionButtonProps}
                     actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
                     leftSideContents={
-                      <div className="w-full flex items-center gap-2">
-                        <ResourceFilter selectedResource={selectedResource} setSelectedResource={setSelectedResource} filterByIds={filterByIds} setFilterByIds={setFilterByIds} handleApplyFilter={handleApplyFilter} />
+                      <div className="flex w-full items-center gap-2">
+                        <ResourceFilter
+                          selectedResource={selectedResource}
+                          setSelectedResource={setSelectedResource}
+                          filterByIds={filterByIds}
+                          setFilterByIds={setFilterByIds}
+                          handleApplyFilter={handleApplyFilter}
+                        />
                         <ThemeButton
                           mobileTooltip="Apply Filters"
                           startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
@@ -597,7 +647,7 @@ const WorkOrderTechnician = () => {
                           filterTerm={filterTerm}
                           resourceColumns={FIELD_TO_FILTER}
                           deepFilters={[]}
-                          filterByIds={filterByIds?.filter(e => e?.field === 'service')}
+                          filterByIds={filterByIds?.filter((e) => e?.field === 'service')}
                           fetchResourceData={(deepFilter, filterById) => {
                             handleApplyFilter(filterById);
                           }}

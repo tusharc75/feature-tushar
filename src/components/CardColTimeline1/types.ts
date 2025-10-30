@@ -5,15 +5,15 @@ import { TColType } from 'src/components/CustomReactTable/TableComponents/TableH
 export type SelectedView =
   | GridViewSavedData
   | {
-    _id: string;
-    hide: string[];
-    order: string[];
-    sizes: {
-      [key: string]: number;
+      _id: string;
+      hide: string[];
+      order: string[];
+      sizes: {
+        [key: string]: number;
+      };
+      name?: string;
+      id?: string;
     };
-    name?: string;
-    id?: string;
-  };
 
 export type UseCardColState<D, C extends readonly string[]> = {
   columns: C;
@@ -92,7 +92,14 @@ export type UseCardColTimeline<D, C extends readonly string[]> = {
 
 export type CardColTimelineProps<D, C extends readonly string[]> = {
   state: UseCardColTimeline<D, C>;
-
+  estimatedItemSize?: number;
+  customContent?: (props: {
+    row: any;
+    height: number;
+    getPreRenderedCell: (column: TColType, data: any) => React.ReactNode;
+    renderCellText: (col: TColType, data: any) => any;
+    recalculateHeight: () => void;
+  }) => React.ReactNode;
   getColColors: (col: C[number]) => ColumnColor;
   cardOnClick?: (data: D) => void;
   passFailStatus?: boolean;
