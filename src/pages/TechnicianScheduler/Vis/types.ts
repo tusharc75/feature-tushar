@@ -146,7 +146,7 @@ export type TService = {
   resourceId?: string;
   serviceName?: string;
   serviceId?: string;
-  competencies?: string;
+  competencies?: string[];
   resourceNumber?: string;
 };
 export type TJob = {
@@ -172,6 +172,7 @@ export type TJob = {
   resourceId?: string;
   resourceNumber?: string;
   service?: SService;
+  competencies?: string[];
 };
 
 export type SService = {
