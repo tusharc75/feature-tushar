@@ -754,23 +754,25 @@ export const getCellColorCode = (fieldColor, values) => {
   if (!fieldColor || (Array.isArray(fieldColor) && fieldColor?.length === 0)) return ''
   let colorCode = ''
   for (const ele of fieldColor) {
-    let meetsAllConditions = true;
-    for (const checkField of ele?.fields) {
-      if (checkField?.value && isArray(checkField?.value)) {
-        if (!checkField?.value?.includes(values[checkField?.fieldName])) {
-          meetsAllConditions = false;
+    if (isArray(ele?.fields) && ele?.fields?.length) {
+      let meetsAllConditions = true;
+      for (const checkField of ele?.fields) {
+        if (checkField?.value && isArray(checkField?.value)) {
+          if (!checkField?.value?.includes(values[checkField?.fieldName])) {
+            meetsAllConditions = false;
+          }
+        }
+        else {
+          const comparisonFn = operatorOperations[checkField?.operator];
+          if (!comparisonFn(parseFloat(values[checkField?.fieldName]), parseFloat(checkField?.value))) {
+            meetsAllConditions = false;
+          }
         }
       }
-      else {
-        const comparisonFn = operatorOperations[checkField?.operator];
-        if (!comparisonFn(parseFloat(values[checkField?.fieldName]), parseFloat(checkField?.value))) {
-          meetsAllConditions = false;
-        }
+      if (meetsAllConditions) {
+        colorCode = ele?.colorCode;
+        break;
       }
-    }
-    if (meetsAllConditions) {
-      colorCode = ele?.colorCode;
-      break;
     }
   }
   return colorCode;
