@@ -9,7 +9,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getCellColorCode, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -22,6 +22,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageUnit from './ManageUnit';
 import axios, { CancelTokenSource } from 'axios';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const getWarningList = (row?: any) => {
   const icon = <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />;
@@ -60,7 +61,7 @@ const Units = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { permissions, selectedEntity, resources }
+    state: { permissions, selectedEntity, resources, user }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -92,6 +93,7 @@ const Units = () => {
   }, []);
 
   const fetchColumns = async () => {
+    let resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.units);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.units, permissions?.units?.isUpdate);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.unitDetail.path, true);
     newColumns?.forEach((o) => {
@@ -101,7 +103,10 @@ const Units = () => {
           return (
             <div
               style={{
-                backgroundColor: warnings.length > 0 ? COLOUR_MASTER.lostAssets.background : ''
+                backgroundColor:
+                  warnings.length > 0
+                    ? COLOUR_MASTER.lostAssets.background
+                    : getCellColorCode(resourcePolicy?.policy?.fieldColor, row?.original) || ''
               }}
             >
               <Link className="link text-truncate" title={row?.original?.unitNumber} to={`${routes.unitDetail.path}/${row?.original?._id}`}>
