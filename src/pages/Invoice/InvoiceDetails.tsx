@@ -187,44 +187,18 @@ const InvoiceDetails = () => {
       {
         accessor: 'index',
         Header: 'Index',
-        width: 70,
-        sticky: 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
-        Footer: () => {
-          return <>Total</>;
-        }
       },
       {
         accessor: 'type',
         Header: 'Type',
-        Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{`${startCase(row.original?.type)} `}</p>
-          </div>
-        )
       },
       {
         accessor: 'detail',
         Header: 'Detail',
-        disabled: true,
-        minWidth: 300,
-        width: 300,
-        Cell: ({ row }) =>
-          row?.original?.type ? (
-            <div className="flex items-center gap-2">
-              {row?.original?.detail ? <p className="text-truncate">{row.original.detail}</p> : <NoDataCell />}
-            </div>
-          ) : (
-            <NoDataCell />
-          )
       },
       {
         accessor: 'description',
         Header: 'Description',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
-        }
       }
     ];
     coloum = [...coloum, ...newColumns];
