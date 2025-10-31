@@ -478,7 +478,7 @@ const AccumulatorRow = ({
           options={resourceFields}
           getOptionLabel={(option) => option?.fieldLabel}
           onChange={(e, val) => {
-            onUpdate({ field: val?.fieldName || '' });
+            onUpdate({ field: val?.fieldName || '', reportFieldName: val?.reportFieldName, resource: val?.resource });
             setItemCausingFieldChange(item._id);
           }}
           renderInput={(params) => (
@@ -583,7 +583,7 @@ const SortComponent = ({
                   availableFields={availableFields}
                   selectedFields={availableFields?.filter((f) => f?.fieldName === field.fieldName)}
                   onFieldSelect={(field) => {
-                    update(index, { fieldName: field?.fieldName, resource: field?.resource });
+                    update(index, { fieldName: field?.fieldName, resource: field?.resource, reportFieldName: field?.reportFieldName });
                   }}
                   textFieldProps={{
                     size: 'small',
@@ -731,7 +731,7 @@ const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, ma
                   availableFields={availableFields}
                   selectedFields={availableFields?.filter((f) => f?.fieldName === item.xAxis?.field)}
                   onFieldSelect={(field) => {
-                    updatePipelineItem(item._id, { xAxis: { ...item.xAxis, field: field.fieldName, resource: field.resource } });
+                    updatePipelineItem(item._id, { xAxis: { ...item.xAxis, field: field.fieldName, resource: field.resource, reportFieldName: field.reportFieldName } });
                   }}
                   textFieldProps={{
                     size: 'small',
@@ -816,7 +816,7 @@ const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, ma
                   availableFields={availableFields}
                   selectedFields={availableFields?.filter((f) => f?.fieldName === item.value?.field)}
                   onFieldSelect={(field) => {
-                    updatePipelineItem(item._id, { value: { field: field.fieldName, resource: field.resource } });
+                    updatePipelineItem(item._id, { value: { field: field.fieldName, resource: field.resource, reportFieldName: field.reportFieldName } });
                   }}
                   textFieldProps={{
                     size: 'small',
@@ -837,7 +837,7 @@ const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, ma
                   availableFields={availableFields}
                   selectedFields={availableFields?.filter((f) => f?.fieldName === item.label?.field)}
                   onFieldSelect={(field) => {
-                    updatePipelineItem(item._id, { label: { field: field.fieldName, resource: field.resource } });
+                    updatePipelineItem(item._id, { label: { field: field.fieldName, resource: field.resource, reportFieldName: field.reportFieldName } });
                   }}
                   textFieldProps={{
                     size: 'small',
@@ -1001,7 +1001,7 @@ const GroupComponent = ({
             key={index}
             item={item}
             accumulator={acc}
-            resourceFields={mainResourceFields}
+            resourceFields={availableFields}
             isEdit={isEdit}
             onUpdate={(updates) => {
               const updatedAccumulator = [...item.accumulator];
@@ -1011,17 +1011,17 @@ const GroupComponent = ({
             onRemove={
               item?.accumulator?.length > 1
                 ? () => {
-                    const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
-                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                  }
+                  const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
+                  updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                }
                 : undefined
             }
             onAddOperation={
               index === item?.accumulator?.length - 1
                 ? () => {
-                    const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
-                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                  }
+                  const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
+                  updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                }
                 : undefined
             }
             setItemCausingFieldChange={setItemCausingFieldChange}
@@ -1043,7 +1043,8 @@ const GroupComponent = ({
                 fields: fields?.map((f) => {
                   return {
                     fieldName: f.fieldName,
-                    resource: f.resource
+                    resource: f.resource,
+                    reportFieldName: f.reportFieldName
                   };
                 })
               });
@@ -1649,7 +1650,7 @@ export default function ReportBuilderDetail() {
                                           : null
                                       }
                                       options={resourceOptions}
-                                      onChange={(e, val: any) => {}}
+                                      onChange={(e, val: any) => { }}
                                       renderInput={(params) => (
                                         <TextField
                                           {...params}
