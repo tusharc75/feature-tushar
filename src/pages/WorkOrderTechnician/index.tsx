@@ -170,9 +170,9 @@ const WorkOrderTechnician = () => {
     keyGetter
   });
 
-  useEffect(() => {
-    cardState.setColumnDef(columnsDef);
-  }, [columnsDef]);
+  // useEffect(() => {
+
+  // }, [columnsDef]);
 
   useEffect(() => {
     const payload = {
@@ -239,6 +239,7 @@ const WorkOrderTechnician = () => {
         return c;
       });
       setColumnsDef(finalColumns);
+      cardState.setColumnDef(finalColumns);
     } catch (error) {
       console.error(error);
     }

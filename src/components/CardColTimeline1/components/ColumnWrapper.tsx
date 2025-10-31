@@ -48,15 +48,33 @@ const ColumnWrapper = <D, C extends readonly string[]>({ state, getColColors, co
 
   useEffect(() => {
     const cancelToken = axios.CancelToken.source();
+    let isMounted = true;
     const fetchInitialData = async () => {
       setInitialLoading(true);
-      await handleFetchSingleColumnWrapper(0, false, cancelToken.token, resource);
-      setInitialLoading(false);
+      try {
+        await handleFetchSingleColumnWrapper(0, false, cancelToken.token, resource);
+        if (isMounted) {
+          setTimeout(() => {
+            if (isMounted) {
+              setInitialLoading(false);
+            }
+          }, 500);
+        }
+      } catch (error) {
+        if (axios.isCancel(error)) {
+        } else {
+          console.error(error);
+          if (isMounted) setInitialLoading(false);
+        }
+      }
     };
+
     fetchInitialData();
 
     return () => {
-      cancelToken.cancel();
+      isMounted = false;
+      setInitialLoading(true);
+      cancelToken.cancel('Component unmounted');
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshSignal, filterQuery, resource]);
