@@ -1,7 +1,7 @@
 import { homeLink, homepageData } from 'src/pages/UserManual/constants';
 import { TManualData } from 'src/pages/UserManual/type';
 
-const homeLinkNew = '/user-manual-new';
+const homeLinkNew = '/user-manual';
 
 function getLastPart(url: string): string | null {
   const pos = url.indexOf(homeLinkNew);
