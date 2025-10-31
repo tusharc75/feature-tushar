@@ -130,9 +130,9 @@ const SubStatusLog = ({ onClose, assets, title, rentalId, rentalAssetStatus }) =
     axiosInstance()
       .get(`${rentalManagement.api}/${rentalId}/inventory/logs?assets=${JSON.stringify(assets)}`)
       .then(({ data: { data } }) => {
-        if (![RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return]?.includes(rentalAssetStatus) && data?.length) {
-          data[0].endDate = ''
-        }
+        // if (![RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return]?.includes(rentalAssetStatus) && data?.length) {
+        //   data[0].endDate = ''
+        // }
         dispatch({ type: 'initialize', data: data, count: data?.length });
         dispatch({ type: 'loading', loading: false });
       })
