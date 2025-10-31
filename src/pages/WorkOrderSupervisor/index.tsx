@@ -235,24 +235,31 @@ const WorkOrderSupervisor = () => {
             status: WORKORDER_SERVICE_STATUS.planned
           }));
         } else {
-          rows = data.map((u) => {
+          rows = data?.map((u) => {
             let finalObject: any = prepareDataForGrid(u, user);
-            let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail, user);
-            finalObject['serviceName'] = u?.service?.optionLabel;
-            finalObject['serviceId'] = u?.service?.optionValue;
-            finalObject['customServiceStatus'] = u?.status;
-            finalObject['workOrderId'] = u?.workOrderDetail?._id;
-            finalObject['uniqueId'] = u?._id;
-            finalObject['customerAccountName'] = u?.[camelCase(u?.workOrderDetail?.type)]?.customerAccount?.optionLabel;
-            finalObject['customerAccountId'] = u?.[camelCase(u?.workOrderDetail?.type)]?.customerAccount?.optionValue;
-            finalObject['oriAssignedUsers'] = u?.assignedUsers;
-            finalObject['oriAssignedWorkStations'] = u?.assignedWorkStations;
-            finalObject['parentProductId'] = u?.parentProduct?._id;
-            finalObject['parentProductName'] = u?.parentProduct?.productName;
-            finalObject['parentProductDescription'] = u?.parentProduct?.productDescription;
-            delete workOrderDetailData?._id;
-            delete workOrderDetailData?.id;
-            return { ...finalObject, ...workOrderDetailData };
+            finalObject['workOrderId'] = u?._id;
+            finalObject['customerAccountName'] = u?.[camelCase(u?.type)]?.customerAccount?.optionLabel;
+            finalObject['customerAccountId'] = u?.[camelCase(u?.type)]?.customerAccount?.optionValue;
+            finalObject['services'] =
+              u?.services?.map((d) => {
+                let newData = {
+                  ...d,
+                  ...d?.service,
+                  serviceId: d?.service?._id
+                };
+                delete newData['service'];
+                newData['customServiceStatus'] = d?.status;
+                newData['oriAssignedUsers'] = d?.assignedUsers;
+                newData['oriAssignedWorkStations'] = d?.assignedWorkStations;
+                newData['parentProductId'] = d?.parentProduct?._id;
+                newData['parentProductName'] = d?.parentProduct?.productName;
+                newData['parentProductDescription'] = d?.parentProduct?.productDescription;
+                newData['_id'] = d?._id;
+                newData['uniqueId'] = d?._id;
+                newData['workOrderId'] = u?._id;
+                return newData;
+              }) || [];
+            return { ...finalObject };
           });
         }
         return { data: rows, count };
@@ -275,63 +282,6 @@ const WorkOrderSupervisor = () => {
       const columns = newColumns.filter((ele) => ele.accessor !== 'workOrderNumber');
 
       const extraColumns = [
-        {
-          accessor: 'serviceName',
-          Header: 'Service',
-          disabled: true,
-          Cell: ({ row }) =>
-            row?.original?.serviceName ? (
-              <div className="flex flex-grow justify-between">
-                <h5
-                  className="link text-truncate"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setOnClickData({ workOrderId: row?.original?.workOrderId });
-                    setOpen(true);
-                  }}
-                >
-                  {row?.original?.serviceName}
-                </h5>
-                {row?.original?.priority && (
-                  <Box ml={1}>
-                    <HtmlTooltip title={`${row?.original?.priority} Priority`}>
-                      <span
-                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
-                          }`}
-                      >
-                        {row?.original?.priority}
-                      </span>
-                    </HtmlTooltip>
-                  </Box>
-                )}
-                <div className="ml-auto flex items-center gap-1">
-                  {row?.original?.status !== WORKORDER_SERVICE_STATUS.planned && (
-                    <HtmlTooltip title="Preview PDF">
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePdfPreview(row?.original?.workOrderId, user, toastConfig);
-                        }}
-                      >
-                        <PictureAsPdfIcon fontSize="small" color="primary" />
-                      </IconButton>
-                    </HtmlTooltip>
-                  )}
-                  <RenderAssignOptions
-                    openAssignHandler={openAssignHandler}
-                    data={row?.original}
-                    permissions={permissions}
-                    resources={resources}
-                    isCreateRepairOrderDisabled={isCreateRepairOrderDisabled}
-                  />
-                </div>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-        },
         {
           accessor: 'workOrderNumber',
           Header: 'Work Order Number',
@@ -379,74 +329,6 @@ const WorkOrderSupervisor = () => {
             );
           }
         },
-        {
-          accessor: 'parentProductName',
-          Header: `Parent ${resources?.product?.titleSingular}`,
-          defaultVisible: true,
-          Cell: ({ row }) => (
-            row.original['parentProductName'] ? (
-              <div className="flex items-center">
-                <p title={row?.original?.parentProductName}>{row?.original?.parentProductName}</p>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-          )
-        },
-        {
-          accessor: 'parentProductDescription',
-          Header: `Parent ${resources?.product?.titleSingular} Description`,
-          defaultVisible: true,
-          Cell: ({ row }) => (
-            row.original['parentProductDescription'] ? (
-              <div className="flex items-center">
-                <p title={row?.original?.parentProductDescription}>{row?.original?.parentProductDescription}</p>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-          )
-        },
-        {
-          accessor: 'assignedUsers',
-          Header: 'Technician',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) =>
-            row.original['assignedUsers'] ? (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'assignedUsers',
-                  lookupResource: sidebarResource.user
-                }}
-                original={row?.original}
-              />
-            ) : (
-              <NoDataCell />
-            )
-        },
-        {
-          accessor: 'assignedWorkStations',
-          Header: 'Work Stations',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) =>
-            row.original['assignedWorkStations'] ? (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'assignedWorkStations',
-                  lookupResource: sidebarResource.workStations
-                }}
-                original={row?.original}
-              />
-            ) : (
-              <NoDataCell />
-            )
-        }
       ];
 
       const finalColumns = [...extraColumns.slice(0, 5), ...columns, ...extraColumns.slice(5)].map((c) => {
@@ -484,6 +366,135 @@ const WorkOrderSupervisor = () => {
   const selectedRecordsS: any = useMemo(() => [...selectedRecords?.filter((r) => r?.status != WORKORDER_SERVICE_STATUS.planned)], [selectedRecords]);
 
   const ref: any = useRef();
+
+  const childColumns = useMemo(
+    () => [
+      {
+        accessor: 'serviceName',
+        Header: 'Service',
+        disabled: true,
+        Cell: ({ row }) =>
+          row?.original?.serviceName ? (
+            <div className="flex flex-grow justify-between">
+              <h5
+                className="link text-truncate"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOnClickData({ workOrderId: row?.original?.workOrderId });
+                  setOpen(true);
+                }}
+              >
+                {row?.original?.serviceName}
+              </h5>
+              {row?.original?.priority && (
+                <Box ml={1}>
+                  <HtmlTooltip title={`${row?.original?.priority} Priority`}>
+                    <span
+                      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
+                        }`}
+                    >
+                      {row?.original?.priority}
+                    </span>
+                  </HtmlTooltip>
+                </Box>
+              )}
+              <div className="ml-auto flex items-center gap-1">
+                {row?.original?.status !== WORKORDER_SERVICE_STATUS.planned && (
+                  <HtmlTooltip title="Preview PDF">
+                    <IconButton
+                      size="small"
+                      color="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePdfPreview(row?.original?.workOrderId, user, toastConfig);
+                      }}
+                    >
+                      <PictureAsPdfIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
+                <RenderAssignOptions
+                  openAssignHandler={openAssignHandler}
+                  data={row?.original}
+                  permissions={permissions}
+                  resources={resources}
+                  isCreateRepairOrderDisabled={isCreateRepairOrderDisabled}
+                />
+              </div>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'parentProductName',
+        Header: `Parent ${resources?.product?.titleSingular}`,
+        defaultVisible: true,
+        Cell: ({ row }) =>
+          row.original['parentProductName'] ? (
+            <div className="flex items-center">
+              <p title={row?.original?.parentProductName}>{row?.original?.parentProductName}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'parentProductDescription',
+        Header: `Parent ${resources?.product?.titleSingular} Description`,
+        defaultVisible: true,
+        Cell: ({ row }) =>
+          row.original['parentProductDescription'] ? (
+            <div className="flex items-center">
+              <p title={row?.original?.parentProductDescription}>{row?.original?.parentProductDescription}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'assignedUsers',
+        Header: 'Technician',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) =>
+          row.original['assignedUsers'] ? (
+            <DropdownCell
+              permissions={permissions}
+              permissionForLinks={{}}
+              field={{
+                fieldName: 'assignedUsers',
+                lookupResource: sidebarResource.user
+              }}
+              original={row?.original}
+            />
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'assignedWorkStations',
+        Header: 'Work Stations',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) =>
+          row.original['assignedWorkStations'] ? (
+            <DropdownCell
+              permissions={permissions}
+              permissionForLinks={{}}
+              field={{
+                fieldName: 'assignedWorkStations',
+                lookupResource: sidebarResource.workStations
+              }}
+              original={row?.original}
+            />
+          ) : (
+            <NoDataCell />
+          )
+      }
+    ],
+    [permissions, resources?.product?.titleSingular, user]
+  );
 
   const FIELD_TO_FILTER = useMemo(
     () => [
@@ -1121,6 +1132,7 @@ const WorkOrderSupervisor = () => {
         {viewType === 'card-view' && (
           <div className="pt-2">
             <CardView
+              childColumns={childColumns}
               renderedFrom={renderedFrom}
               headerSlot={
                 <div className="min-h-[32px]">
@@ -1170,19 +1182,13 @@ const WorkOrderSupervisor = () => {
         )}
         {viewType === 'calendar-view' && (
           <div className="pt-2">
-            <CalendarView
-              filterQuery={filterQuery}
-              reference={resourceType?.value}
-              ref={ref}
-              setOpen={setOpen}
-              setOnClickData={setOnClickData}
-
-            />
+            <CalendarView filterQuery={filterQuery} reference={resourceType?.value} ref={ref} setOpen={setOpen} setOnClickData={setOnClickData} />
           </div>
         )}
         {viewType === 'table-view' && (
           <div className="pt-4">
             <GridView
+              childColumns={childColumns}
               columns={columnsDef}
               renderedFrom={renderedFrom}
               state={tableState}

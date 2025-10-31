@@ -1,11 +1,10 @@
-import { Info } from '@mui/icons-material';
 import { Box, IconButton } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase, isEqual, uniqBy } from 'lodash';
 import React, { Dispatch, useCallback, useContext, useEffect, useImperativeHandle, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { TActios, TInitialState } from 'src/components/CustomReactTable';
+import CustomReactTable, { gridFilterParser, TActios, TInitialState } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -22,6 +21,7 @@ import AssignTechniciansDialog from 'src/pages/WorkOrder/Service/AssignTechnicia
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
 import { queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
 import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
+import GridCustomComponent from 'src/pages/WorkOrderTechnician/GridView/GridCustomComponent';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -38,6 +38,7 @@ type Props = {
   setRepairOrderDialog: (value: boolean) => void;
   tableHead?: React.ReactNode;
   columns: any[];
+  childColumns: any[];
 };
 
 export type GridViewRef = {
@@ -63,6 +64,7 @@ const GridView = React.forwardRef<GridViewRef, Props>(
       setRepairOrderDialog,
       tableHead = null,
       columns = [],
+      childColumns
     },
     ref
   ) => {
@@ -86,7 +88,23 @@ const GridView = React.forwardRef<GridViewRef, Props>(
       return () => cancelToken.cancel();
     }, [page, limit, sorting, status, filterQuery, filters, selectedResource]);
 
-    const fetchData = useCallback(async ({
+    const getQueryString = () => {
+      let deepFilter = `?page=${page}&limit=${limit}&status=${status}&resource=${selectedResource}${filterQuery}`;
+      const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+      if (filterByIds?.length) {
+        deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+      }
+      if (deepFilters?.length) {
+        deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+      }
+      if (filterByIds?.length || deepFilters?.length) {
+        deepFilter = `${deepFilter}&filterType=and`;
+      }
+      return deepFilter;
+    };
+
+    const fetchData = async ({
       status,
       page = 0,
       filterQuery = '',
@@ -97,11 +115,12 @@ const GridView = React.forwardRef<GridViewRef, Props>(
       page?: number;
       filterQuery?: string;
       limit: number;
-      cancelToken?: CancelTokenSource
+      cancelToken?: CancelTokenSource;
     }) => {
       dispatch({ type: 'selection', selectedRecords: [] });
       dispatch({ type: 'loading', loading: true });
-      let api = `${workOrderSupervisor.api}/work-order-service?page=${page}&status=${status}&limit=${limit}&resource=${selectedResource}${filterQuery}`;
+      const queryString = getQueryString();
+      let api = `${workOrderSupervisor.api}/work-order-service${queryString}`;
 
       if (status === WORKORDER_SERVICE_STATUS.planned) {
         const filterByIds = queryStringPlanned(filterQuery);
@@ -113,13 +132,12 @@ const GridView = React.forwardRef<GridViewRef, Props>(
         }
       }
       try {
-
         const response = await axiosInstance().get(api, { cancelToken: cancelToken?.token });
         if (response.status !== 200) {
           throw new Error('Failed to fetch data');
         }
         let { data, count } = response.data;
-        let rows = []
+        let rows = [];
         if (status === WORKORDER_SERVICE_STATUS.planned) {
           const { data: dataD, count: plannedCount } = data;
           count = plannedCount;
@@ -138,24 +156,31 @@ const GridView = React.forwardRef<GridViewRef, Props>(
             status: WORKORDER_SERVICE_STATUS.planned
           }));
         } else {
-          rows = data.map((u) => {
+          rows = data?.map((u) => {
             let finalObject: any = prepareDataForGrid(u, user);
-            let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail, user);
-            finalObject['serviceName'] = u?.service?.optionLabel;
-            finalObject['serviceId'] = u?.service?.optionValue;
-            finalObject['customServiceStatus'] = u?.status;
-            finalObject['workOrderId'] = u?.workOrderDetail?._id;
-            finalObject['customerAccountName'] = u?.[camelCase(u?.workOrderDetail?.type)]?.customerAccount?.optionLabel;
-            finalObject['customerAccountId'] = u?.[camelCase(u?.workOrderDetail?.type)]?.customerAccount?.optionValue;
-            finalObject['oriAssignedUsers'] = u?.assignedUsers;
-            finalObject['oriAssignedWorkStations'] = u?.assignedWorkStations;
-            finalObject['parentProductId'] = u?.parentProduct?._id;
-            finalObject['parentProductName'] = u?.parentProduct?.productName;
-            finalObject['parentProductDescription'] = u?.parentProduct?.productDescription;
-            finalObject['uniqueId'] = u?._id;
-            delete workOrderDetailData?._id;
-            delete workOrderDetailData?.id;
-            return { ...finalObject, ...workOrderDetailData };
+            finalObject['workOrderId'] = u?._id;
+            finalObject['customerAccountName'] = u?.[camelCase(u?.type)]?.customerAccount?.optionLabel;
+            finalObject['customerAccountId'] = u?.[camelCase(u?.type)]?.customerAccount?.optionValue;
+            finalObject['services'] =
+              u.services?.map((d) => {
+                let newData = {
+                  ...d,
+                  ...d?.service,
+                  serviceId: d?.service?._id
+                };
+                delete newData['service'];
+                newData['customServiceStatus'] = d?.status;
+                newData['parentProductId'] = d?.parentProduct?._id;
+                newData['parentProductName'] = d?.parentProduct?.productName;
+                newData['parentProductDescription'] = d?.parentProduct?.productDescription;
+                newData['oriAssignedUsers'] = d?.assignedUsers;
+                newData['oriAssignedWorkStations'] = d?.assignedWorkStations;
+                newData['_id'] = d?._id;
+                newData['uniqueId'] = d?._id;
+                newData['workOrderId'] = u?._id;
+                return newData;
+              }) || [];
+            return { ...finalObject };
           });
         }
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -167,9 +192,8 @@ const GridView = React.forwardRef<GridViewRef, Props>(
           toastConfig.setToastConfig(err);
         }
         dispatch({ type: 'loading', loading: false });
-
       }
-    }, [user, selectedResource]);
+    };
 
     const handleAddConsumables = (rows, records = []) => {
       setSubmitting(true);
@@ -276,8 +300,7 @@ const GridView = React.forwardRef<GridViewRef, Props>(
           Header: 'Due Date',
           disableFilters: true,
           disableSortBy: true,
-          Cell: ({ row }) =>
-            row.original['dueDate'] ? <h5 className="text-truncate">{displayDate(row.original.dueDate)}</h5> : <NoDataCell />
+          Cell: ({ row }) => (row.original['dueDate'] ? <h5 className="text-truncate">{displayDate(row.original.dueDate)}</h5> : <NoDataCell />)
         });
 
         return newColumn;
@@ -322,13 +345,9 @@ const GridView = React.forwardRef<GridViewRef, Props>(
       if (selectedResource === sidebarResource.repairOrder) {
         filteredCols = filteredCols?.filter((c) => !['productionOrder', 'assemblyOrder'].includes(c?.accessor));
       } else if (selectedResource === sidebarResource.productionOrder) {
-        filteredCols = filteredCols?.filter((c) =>
-          !['repairOrder', 'assemblyOrder', 'serializedAsset', 'rentalJob'].includes(c?.accessor)
-        );
+        filteredCols = filteredCols?.filter((c) => !['repairOrder', 'assemblyOrder', 'serializedAsset', 'rentalJob'].includes(c?.accessor));
       } else if (selectedResource === sidebarResource.assemblyOrder) {
-        filteredCols = filteredCols?.filter((c) =>
-          !['productionOrder', 'repairOrder', 'serializedAsset', 'rentalJob'].includes(c?.accessor)
-        );
+        filteredCols = filteredCols?.filter((c) => !['productionOrder', 'repairOrder', 'serializedAsset', 'rentalJob'].includes(c?.accessor));
       }
 
       return [...filteredCols];
@@ -339,6 +358,8 @@ const GridView = React.forwardRef<GridViewRef, Props>(
         <div className="[&_.table-container-v1>div]:mt-0">
           {columns ? (
             <CustomReactTable
+              customContent={(props) => <GridCustomComponent {...props} renderedFrom={renderedFrom} columns={childColumns} />}
+              expanderWithCustomContent={status === WORKORDER_SERVICE_STATUS.planned ? false : true}
               topLeftSlot={tableHead}
               height={'calc(100vh - 280px)'}
               columns={getColumns(columns)}
@@ -386,7 +407,7 @@ const GridView = React.forwardRef<GridViewRef, Props>(
             workOrderData={selectedRecords?.map((r) => ({ uniqueId: r?.uniqueId, workOrderId: r?.workOrderId }))}
             workStations={
               selectedRecords?.length === 1 ||
-                selectedRecords?.every((val) => isEqual(val?.oriAssignedWorkStations, selectedRecords[0]?.oriAssignedWorkStations))
+              selectedRecords?.every((val) => isEqual(val?.oriAssignedWorkStations, selectedRecords[0]?.oriAssignedWorkStations))
                 ? selectedRecords[0]?.oriAssignedWorkStations
                 : []
             }
