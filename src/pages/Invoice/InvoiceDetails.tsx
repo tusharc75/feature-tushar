@@ -99,6 +99,7 @@ const InvoiceDetails = () => {
   useEffect(() => {
     fetchPolicy();
     fetchFields();
+    invoiceColumns();
   }, []);
 
   useEffect(() => {
@@ -170,7 +171,7 @@ const InvoiceDetails = () => {
           setDOAData(doaResponse?.data?.data);
         }
       }
-      await invoiceColumns();
+
       setLoading(false);
     } catch (error) {
       setLoading(false);
