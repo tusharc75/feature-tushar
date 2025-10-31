@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid2';
 import { ExpandMore } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import { Skeleton } from '@mui/material';
-import { camelCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { VscVersions } from 'react-icons/vsc';
@@ -49,6 +49,7 @@ import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import { useColumns } from 'src/components/CustomReactTable';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -169,17 +170,66 @@ const InvoiceDetails = () => {
           setDOAData(doaResponse?.data?.data);
         }
       }
-
-      const columnData = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
-      const newColumns = generateColumns(renderedFrom, columnData, null, false, invoiceData?.currency);
-      setColumns(newColumns);
-
+      await invoiceColumns();
       setLoading(false);
     } catch (error) {
       setLoading(false);
       toastConfig.setToastConfig(error);
     }
   };
+
+  const invoiceColumns = async () => {
+
+    const columnData = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
+    const newColumns = generateColumns(renderedFrom, columnData, null, false, invoiceData?.currency);
+
+    let coloum: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        sticky: 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p>{`${startCase(row.original?.type)} `}</p>
+          </div>
+        )
+      },
+      {
+        accessor: 'detail',
+        Header: 'Detail',
+        disabled: true,
+        minWidth: 300,
+        width: 300,
+        Cell: ({ row }) =>
+          row?.original?.type ? (
+            <div className="flex items-center gap-2">
+              {row?.original?.detail ? <p className="text-truncate">{row.original.detail}</p> : <NoDataCell />}
+            </div>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+        }
+      }
+    ];
+    coloum = [...coloum, ...newColumns];
+    setColumns(coloum);
+  }
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);

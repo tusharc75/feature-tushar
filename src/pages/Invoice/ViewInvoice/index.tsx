@@ -24,7 +24,6 @@ import {
   MATERIAL_TYPE,
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
-  getEmailsFromContacts,
   invoice,
   sidebarResource
 } from 'src/constants/helpers';
@@ -292,32 +291,6 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       });
   };
 
-  const previewDownloadProps = {
-    fileName: `${resources?.invoice?.titleSingular} - ${invoiceData?.invoiceNumber}`,
-    subject: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
-    resource: sidebarResource.invoice,
-    referenceId: invoiceData?._id,
-    columns: columns,
-    hideDetailButton: resource === sidebarResource.fieldTicket ? (dataRows?.find((e) => e?.subRows?.length) ? false : true) : false,
-    isSendEmail: true,
-    toEmails: getEmailsFromContacts(invoiceData),
-    defaultColumns: [
-      'type',
-      'detail',
-      'fieldTicket',
-      'qty',
-      'unit',
-      'pricingMethod',
-      'actualStartDate',
-      'actualEndDate',
-      `price_${invoiceData?.currency?.toLowerCase()}`,
-      `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
-      `taxPercentage`,
-      `tax_${invoiceData?.currency?.toLowerCase()}`,
-      `finalPrice_${invoiceData?.currency?.toLowerCase()}`
-    ]
-  };
-
   const leftSideContents = () => {
     return (
       <>
@@ -389,7 +362,6 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
         <CustomDialogContent>
           <Fragment>
             <DetailsPageHeader
-              previewDownloadProps={previewDownloadProps}
               isActionButtonVisible={false}
               isAddButtonVisible={false}
               leftSideContents={leftSideContents()}
