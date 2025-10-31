@@ -12,7 +12,7 @@ import { useData } from '../../StateProvider/Provider';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEmpty, isEqual } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { Add, Delete, Sort, FormatListNumbered, JoinInner, Functions, BarChart, ExpandMore, ExpandLess } from '@mui/icons-material';
+import { Add, Delete, Sort, FormatListNumbered, JoinInner, Functions, BarChart, ExpandMore, ExpandLess, TableChart } from '@mui/icons-material';
 import {
   PipelineItem,
   LookupPipeline,
@@ -27,7 +27,8 @@ import {
   chartTypeOptions,
   filterOperations,
   getAvailableFieldsForPipeline,
-  getChipLabel
+  getChipLabel,
+  MatrixPipeline
 } from './utils';
 import { sidebarResource, UnCamelCase } from 'src/constants/helpers';
 import { BiFilterAlt } from 'react-icons/bi';
@@ -1066,6 +1067,131 @@ const GroupComponent = ({
   );
 };
 
+const MatrixComponent = ({
+  item,
+  pipeline,
+  isEdit,
+  formValues,
+  mainResourceFields,
+  updatePipelineItem,
+  removePipelineItem,
+  pipelineErrors,
+  itemCausingFieldChange,
+}) => {
+  const itemErrors = pipelineErrors[item._id] || [];
+
+  const [availableFields, setAvailableFields] = useState<any[]>([]);
+
+  const upstreamPipeline = useMemo(() => {
+    const idx = pipeline?.findIndex((p) => p._id === item?._id);
+    return pipeline?.slice(0, idx) || [];
+  }, [pipeline, item?._id]);
+
+  useEffect(() => {
+    const fetchFields = async () => {
+      const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, mainResourceFields);
+      setAvailableFields(fields || []);
+    };
+    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+      fetchFields();
+    }
+  }, [itemCausingFieldChange, formValues?.resource, mainResourceFields]);
+
+  return (
+    <Card key={item._id} sx={{ mb: 2, border: itemErrors.length > 0 ? '1px solid' : 'none', borderColor: 'error.main' }}>
+      <CardContent>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <TableChart color="primary" />
+            <span style={{ fontWeight: 500 }}>Matrix</span>
+          </Box>
+          <IconButton size="small" onClick={() => removePipelineItem(item._id)} disabled={!isEdit}>
+            <Delete fontSize="small" color={!isEdit ? 'disabled' : 'error'} />
+          </IconButton>
+        </Box>
+        <Grid container spacing={1} alignItems="center">
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <FieldSelectionPopper
+              isEdit={isEdit}
+              availableFields={availableFields}
+              selectedFields={availableFields?.filter((f) =>
+                item?.rows?.some((field) => field.fieldName === f.fieldName && field.resource === f.resource)
+              )}
+              onFieldSelect={(field) => {
+                updatePipelineItem(item._id, {
+                  rows: [{ fieldName: field?.fieldName || '', resource: field?.resource || '' }]
+                });
+              }}
+              textFieldProps={{
+                size: 'small',
+                label: 'Select Row',
+                variant: 'outlined',
+                fullWidth: true,
+                required: true,
+                error: pipelineErrors[item._id]?.includes(`rows_required`),
+                helperText: pipelineErrors[item._id]?.includes(`rows_required`) ? 'Rows are required' : '',
+                slotProps: { inputLabel: { shrink: true } }
+              }}
+              popperProps={{ width: 400, maxHeight: 400 }}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <FieldSelectionPopper
+              isEdit={isEdit}
+              availableFields={availableFields}
+              selectedFields={availableFields?.filter((f) =>
+                item?.columns?.some((field) => field.fieldName === f.fieldName && field.resource === f.resource)
+              )}
+              onFieldSelect={(field) => {
+                updatePipelineItem(item._id, {
+                  columns: [{ fieldName: field?.fieldName || '', resource: field?.resource || '' }]
+                });
+              }}
+              textFieldProps={{
+                size: 'small',
+                label: 'Select Column',
+                variant: 'outlined',
+                fullWidth: true,
+                required: true,
+                error: pipelineErrors[item._id]?.includes(`columns_required`),
+                helperText: pipelineErrors[item._id]?.includes(`columns_required`) ? 'Columns are required' : '',
+                slotProps: { inputLabel: { shrink: true } }
+              }}
+              popperProps={{ width: 400, maxHeight: 400 }}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <FieldSelectionPopper
+              multiple={true}
+              isEdit={isEdit}
+              availableFields={availableFields}
+              selectedFields={availableFields?.filter((f) =>
+                item?.values?.some((field) => field.fieldName === f.fieldName && field.resource === f.resource)
+              )}
+              onFieldSelect={(fields) => {
+                updatePipelineItem(item._id, {
+                  values: fields?.map((f) => ({ fieldName: f?.fieldName || '', resource: f?.resource || '' }))
+                });
+              }}
+              textFieldProps={{
+                size: 'small',
+                label: 'Select Values',
+                variant: 'outlined',
+                fullWidth: true,
+                required: true,
+                error: pipelineErrors[item._id]?.includes(`values_required`),
+                helperText: pipelineErrors[item._id]?.includes(`values_required`) ? 'Values are required' : '',
+                slotProps: { inputLabel: { shrink: true } }
+              }}
+              popperProps={{ width: 400, maxHeight: 400 }}
+            />
+          </Grid>
+        </Grid>
+      </CardContent>
+    </Card>
+  );
+};
+
 export default function ReportBuilderDetail() {
   const { id } = useParams();
   const history = useHistory();
@@ -1084,6 +1210,7 @@ export default function ReportBuilderDetail() {
   const [pipeline, setPipeline] = useState<PipelineItem[]>([]);
   const [hasSortItem, setHasSortItem] = useState(false);
   const [hasLimitItem, setHasLimitItem] = useState(false);
+  const [hasMatrixItem, setHasMatrixItem] = useState(false);
   const [pipelineErrors, setPipelineErrors] = useState<{ [itemId: string]: string[] }>({});
   const [showFieldsPanel, setShowFieldsPanel] = useState(false);
   const [filterFieldSelect, setFilterFieldSelect] = useState({ open: false, item: null });
@@ -1234,7 +1361,7 @@ export default function ReportBuilderDetail() {
 
   const generateId = (type: string) => `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-  const addPipelineItem = (type: 'lookup' | 'group' | 'sort' | 'limit' | 'filter') => {
+  const addPipelineItem = (type: 'lookup' | 'group' | 'sort' | 'limit' | 'filter' | 'matrix') => {
     const _id = generateId(type);
     let newItem: PipelineItem;
 
@@ -1279,22 +1406,38 @@ export default function ReportBuilderDetail() {
           fields: []
         } as FilterPipeline;
         break;
+      case 'matrix':
+        newItem = {
+          _id,
+          type: 'matrix',
+          rows: [],
+          columns: [],
+          values: []
+        } as MatrixPipeline;
+        setHasMatrixItem(true);
+        break;
       default:
         return;
     }
 
     setPipeline((prev) => {
       const chartIndex = prev.findIndex((item) => item.type === 'chart');
+      let newPipeline = [...prev];
 
       if (chartIndex !== -1) {
-        const newPipeline = [...prev];
         newPipeline.splice(chartIndex, 0, newItem);
-        setItemCausingFieldChange(newPipeline?.[newPipeline.length - 2]?._id);
-        return newPipeline;
       } else {
-        setItemCausingFieldChange(prev?.[prev.length - 1]?._id);
-        return [...prev, newItem];
+        newPipeline.push(newItem);
       }
+
+      const matrixItem = newPipeline?.find((i) => i?.type === 'matrix');
+      if (matrixItem) {
+        newPipeline = newPipeline?.filter((i) => i?.type !== 'matrix');
+        newPipeline?.push(matrixItem);
+      }
+
+      setItemCausingFieldChange(newPipeline?.[newPipeline?.length - 2]?._id);
+      return newPipeline;
     });
   };
 
@@ -1313,7 +1456,9 @@ export default function ReportBuilderDetail() {
       if (removedItem?.type === 'limit') {
         setHasLimitItem(false);
       }
-
+      if (removedItem?.type === 'matrix') {
+        setHasMatrixItem(false);
+      }
       return filtered;
     });
   };
@@ -1706,6 +1851,20 @@ export default function ReportBuilderDetail() {
                                     itemCausingFieldChange={itemCausingFieldChange}
                                   />
                                 );
+                              case 'matrix':
+                                return (
+                                  <MatrixComponent
+                                    item={item}
+                                    pipeline={pipeline}
+                                    pipelineErrors={pipelineErrors}
+                                    isEdit={isEdit}
+                                    formValues={formValues}
+                                    mainResourceFields={resourceFieldMap?.[formValues?.resource]}
+                                    updatePipelineItem={updatePipelineItem}
+                                    removePipelineItem={removePipelineItem}
+                                    itemCausingFieldChange={itemCausingFieldChange}
+                                  />
+                                );
                               default:
                                 return null;
                             }
@@ -1747,6 +1906,17 @@ export default function ReportBuilderDetail() {
                           >
                             Filters
                           </ThemeButton>
+
+                          {values?.type === 'report' && (
+                            <ThemeButton
+                              startIcon={<TableChart />}
+                              onClick={() => addPipelineItem('matrix')}
+                              disabled={!isEdit || !values?.resource || hasMatrixItem}
+                              buttonType="theme"
+                            >
+                              Matrix
+                            </ThemeButton>
+                          )}
 
                           <ThemeButton
                             startIcon={<Sort />}
