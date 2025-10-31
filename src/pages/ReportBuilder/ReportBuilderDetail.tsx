@@ -493,7 +493,7 @@ const AccumulatorRow = ({
             (f) => accumulator?.field?.fieldName === f?.fieldName && accumulator?.field?.resource === f?.resource
           )}
           onFieldSelect={(fields) => {
-            onUpdate({ field: { fieldName: fields?.fieldName || '', resource: fields?.resource || '' } });
+            onUpdate({ field: { fieldName: fields?.fieldName || '', resource: fields?.resource || '', reportFieldName: fields?.reportFieldName } });
             setItemCausingFieldChange(item._id);
           }}
           textFieldProps={{
@@ -1041,17 +1041,17 @@ const GroupComponent = ({
             onRemove={
               item?.accumulator?.length > 1
                 ? () => {
-                    const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
-                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                  }
+                  const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
+                  updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                }
                 : undefined
             }
             onAddOperation={
               index === item?.accumulator?.length - 1
                 ? () => {
-                    const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
-                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                  }
+                  const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
+                  updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                }
                 : undefined
             }
             setItemCausingFieldChange={setItemCausingFieldChange}
@@ -1151,7 +1151,7 @@ const MatrixComponent = ({
               )}
               onFieldSelect={(field) => {
                 updatePipelineItem(item._id, {
-                  rows: [{ fieldName: field?.fieldName || '', resource: field?.resource || '' }]
+                  rows: [{ fieldName: field?.fieldName || '', resource: field?.resource || '', reportFieldName: field?.reportFieldName }]
                 });
               }}
               textFieldProps={{
@@ -1176,7 +1176,7 @@ const MatrixComponent = ({
               )}
               onFieldSelect={(field) => {
                 updatePipelineItem(item._id, {
-                  columns: [{ fieldName: field?.fieldName || '', resource: field?.resource || '' }]
+                  columns: [{ fieldName: field?.fieldName || '', resource: field?.resource || '', reportFieldName: field?.reportFieldName }]
                 });
               }}
               textFieldProps={{
@@ -1202,7 +1202,7 @@ const MatrixComponent = ({
               )}
               onFieldSelect={(fields) => {
                 updatePipelineItem(item._id, {
-                  values: fields?.map((f) => ({ fieldName: f?.fieldName || '', resource: f?.resource || '' }))
+                  values: fields?.map((f) => ({ fieldName: f?.fieldName || '', resource: f?.resource || '', reportFieldName: f?.reportFieldName }))
                 });
               }}
               textFieldProps={{
@@ -1681,7 +1681,7 @@ export default function ReportBuilderDetail() {
                                           : null
                                       }
                                       options={resourceOptions}
-                                      onChange={(e, val: any) => {}}
+                                      onChange={(e, val: any) => { }}
                                       renderInput={(params) => (
                                         <TextField
                                           {...params}

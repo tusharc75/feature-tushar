@@ -416,6 +416,12 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
         cancelToken: cancelTokenSource?.token
       })
       .then(({ data: { data, count, columns } }) => {
+
+        if (selectedReport.dynamic && columns) {
+          const newColumns = generateColumns(renderedFrom, columns)
+          setColumns(newColumns)
+        }
+
         if (resourceCamelCase === 'userSession') {
           setColumns([]);
           setIsColumnsLoading(true);
@@ -469,7 +475,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           return finalObject;
         });
 
-        if ([`dailyVolumeReport`, 'volumeReport', 'monthlyRevenueReport', 'rentalVolumeReport']?.includes(resourceCamelCase)) {
+        if (reportConfig?.isFooterTotal) {
           data = data.filter((d) => {
             if (d?.isFooter) {
               setFooterData(d);
@@ -522,13 +528,14 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
 
     let { query: filterQuery } = getQueryString(true);
 
-    var api = '';
+
+    var api = selectedReport.dynamic ? selectedReport.resource : `/report/${selectedReport.resource}`;
     if (exportType === 'pdf') {
-      api = `/report/${selectedReport.resource}/pdf`;
+      api += `/pdf`;
     } else if (exportType === 'html') {
-      api = `/report/${selectedReport.resource}/pdf`;
+      api += `/pdf`;
     } else {
-      api = `/report/${selectedReport.resource}/export`;
+      api += `/export`;
     }
     const extension = exportType === 'excel' ? 'xlsx' : 'pdf';
     const contentType = exportType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -608,7 +615,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       }
       return tempColumn;
     }
-    if (resourceCamelCase === 'jobProfitability') {
+    if (resourceCamelCase === 'jobProfitability' || resourceCamelCase === 'dailyJobProfitability') {
       const materialWiseFilter = deepFilters?.find((e) => e.field === 'materialWise');
       if (!materialWiseFilter || (materialWiseFilter && materialWiseFilter?.term === 'No')) {
         tempColumn = tempColumn?.filter((e) => !['materialDetail', 'type']?.includes(e.accessor));
@@ -629,7 +636,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   }, [emailAttachments, htmlContent]);
 
   useEffect(() => {
-    if ([`dailyVolumeReport`, 'volumeReport', 'monthlyRevenueReport', 'rentalVolumeReport']?.includes(resourceCamelCase) && footerData) {
+    if (reportConfig?.isFooterTotal && footerData) {
       const dataKeys = Object.keys(footerData);
       const newColumns = columns?.map((col: any, index) => {
         if (index === 0) {
@@ -759,12 +766,8 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
             refreshGrid={fetchResourceData}
             hideSelection={true}
             hideExportTable={true}
-            pagination={
-              [`dailyVolumeReport`, 'volumeReport', 'monthlyRevenueReport', 'rentalVolumeReport']?.includes(resourceCamelCase) ? false : true
-            }
-            isClientSideGrid={
-              [`dailyVolumeReport`, 'volumeReport', 'monthlyRevenueReport', 'rentalVolumeReport']?.includes(resourceCamelCase) ? true : false
-            }
+            pagination={reportConfig?.pagination === false ? false : true}
+            isClientSideGrid={reportConfig?.pagination === false ? true : false}
           />
         </>
       ) : (
