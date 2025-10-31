@@ -21,6 +21,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 import { editDisable } from 'src/constants/messageHelpers';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const renderedFrom = camelCase(sidebarResource?.packages);
 
@@ -57,11 +58,12 @@ const PackageList = () => {
 
   const fetchGridColumns = async () => {
     let data;
+    let resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.packages);
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.packages}&entity=${selectedEntity}&view=true`);
     data = response?.data?.data;
     setAllFields(JSON.parse(JSON.stringify(data)));
     setWalkmeData([createResourceFlow(sidebarResource.packages, data)]);
-    const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

@@ -18,6 +18,7 @@ import CustomContainer from 'src/components/CustomContainer';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import ManageOnboarding from './ManageOnboarding';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const Onboarding = () => {
   const renderedFrom = camelCase(sidebarResource.onboarding);
@@ -41,6 +42,7 @@ const Onboarding = () => {
   }, []);
 
   const fetchGridColumns = async () => {
+    let resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.onboarding);
     const { fieldsDataForRead } = await fetch_resource_view_fields(
       sidebarResource?.onboarding,
       permissions?.onboarding?.isUpdate
@@ -49,7 +51,9 @@ const Onboarding = () => {
       renderedFrom,
       fieldsDataForRead,
       routes.onboardingDetail.path,
-      true
+      true,
+      null,
+      resourcePolicy?.policy?.fieldColor
     );
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };

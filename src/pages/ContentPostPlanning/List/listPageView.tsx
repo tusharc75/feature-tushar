@@ -24,6 +24,7 @@ import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHead
 import { HourglassEmpty, CheckCircle, Schedule } from '@mui/icons-material';
 import PublishedWithChangesIcon from '@mui/icons-material/PublishedWithChanges';
 import ViewListIcon from '@mui/icons-material/ViewList';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const ListView = ({ topRightSlot }) => {
   const renderedFrom = camelCase(sidebarResource?.contentPostPlanning);
@@ -63,9 +64,10 @@ const ListView = ({ topRightSlot }) => {
 
   const fetchGridColumns = async () => {
     try {
+      let resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.contentPostPlanning);
       const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.contentPostPlanning, permissions.contentPostPlanning?.isUpdate);
       const data = fieldsDataForRead;
-      let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.contentPostPlanningDetail.path, true);
+      let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.contentPostPlanningDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
       let staticFields = getStaticFields(true);
       staticFields.forEach((field) => {
         if (field.id !== 'lastActivityBy') {
