@@ -1,5 +1,5 @@
-import axiosInstance from "src/axios/axiosInstance";
-import { displayDate } from "src/constants/helpers";
+import axiosInstance from 'src/axios/axiosInstance';
+import { displayDate } from 'src/constants/helpers';
 
 export const OPERATIONS = [
   { value: 'sum', label: 'Sum' },
@@ -12,7 +12,7 @@ export const OPERATIONS = [
 
 export interface PipelineItem {
   _id: string;
-  type: 'lookup' | 'group' | 'sort' | 'limit' | 'chart' | 'filter';
+  type: 'lookup' | 'group' | 'sort' | 'limit' | 'chart' | 'filter' | 'matrix';
   [key: string]: any;
 }
 
@@ -87,6 +87,22 @@ export interface FilterPipeline extends PipelineItem {
   }>;
 }
 
+export interface MatrixPipeline extends PipelineItem {
+  type: 'matrix';
+  rows: Array<{
+    fieldName: string;
+    resource: string;
+  }>;
+  columns: Array<{
+    fieldName: string;
+    resource: string;
+  }>;
+  values: Array<{
+    fieldName: string;
+    resource: string;
+  }>;
+}
+
 export const reportBuilderTypeOptions = [
   { optionLabel: 'Report', optionValue: 'report' },
   { optionLabel: 'KPI', optionValue: 'kpi' }
@@ -125,10 +141,10 @@ export const durationLabelMap = {
   'current-year': 'Current Year',
   'current-month': 'Current Month',
   'current-week': 'Current Week',
-  'yesterday': 'Yesterday',
-  'today': 'Today',
-  'custom': 'Custom'
-}
+  yesterday: 'Yesterday',
+  today: 'Today',
+  custom: 'Custom'
+};
 
 export const getUniqueResources = (pipeline: PipelineItem[], mainResource?: string): string[] => {
   const resources = new Set<string>();
@@ -172,13 +188,7 @@ export const getChipLabel = (field: any, filter: any, operation: any) => {
   }
 };
 
-export const getAvailableFieldsForPipeline = async (
-  pipeline: PipelineItem[],
-  mainResource: string,
-  fields: any[]
-  
-): Promise<any[]> => {
-
+export const getAvailableFieldsForPipeline = async (pipeline: PipelineItem[], mainResource: string, fields: any[]): Promise<any[]> => {
   if (fields?.length > 0) {
     const { data } = await axiosInstance().put(`/report-builder/pipeline-fields`, {
       pipeline,
@@ -360,6 +370,19 @@ export const validatePipeline = (pipeline: PipelineItem[]): { [itemId: string]: 
           if (!chartItem?.label) {
             itemErrors.push('label_required');
           }
+        }
+        break;
+      case 'matrix':
+        const matrixItem = item as MatrixPipeline;
+
+        if (!matrixItem?.rows?.length) {
+          itemErrors.push('rows_required');
+        }
+        if (!matrixItem?.columns?.length) {
+          itemErrors.push('columns_required');
+        }
+        if (!matrixItem?.values?.length) {
+          itemErrors.push('values_required');
         }
         break;
     }
