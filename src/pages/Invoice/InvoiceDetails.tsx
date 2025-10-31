@@ -28,6 +28,8 @@ import {
   INVOICE_STATUS,
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
+  getCustomInvoiceFileName,
+  getEmailsFromContacts,
   invoice,
   invoiceProcessSteps,
   sidebarResource
@@ -44,6 +46,9 @@ import { DownloadIcon } from 'src/assets/svg/svgIcons';
 import Doa from 'src/pages/Invoice/Doa';
 import ShowDoa from 'src/pages/DoaSetupNew/ShowDoa';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { useColumns } from 'src/components/CustomReactTable';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -82,6 +87,8 @@ const InvoiceDetails = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const [DOAData, setDOAData] = useState(null);
+  const [columns, setColumns] = useState([]);
+  const { generateColumns } = useColumns();
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -162,6 +169,10 @@ const InvoiceDetails = () => {
           setDOAData(doaResponse?.data?.data);
         }
       }
+
+      const columnData = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
+      const newColumns = generateColumns(renderedFrom, columnData, null, false, invoiceData?.currency);
+      setColumns(newColumns);
 
       setLoading(false);
     } catch (error) {
@@ -271,6 +282,34 @@ const InvoiceDetails = () => {
     return statusOptions[currIdx + 1]?.optionValue !== status;
   };
 
+  const previewDownloadProps = {
+    fileName: resourcePolicyData?.policy?.customDownloadFileName ? getCustomInvoiceFileName(resourcePolicyData?.policy?.customDownloadFileName, invoiceData)
+      : `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
+    subject: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
+    resource: sidebarResource.invoice,
+    referenceId: invoiceData?._id,
+    columns: columns,
+    isSendEmail: true,
+    toEmails: getEmailsFromContacts(invoiceData),
+    defaultColumns: [
+      'type',
+      'detail',
+      'fieldTicket',
+      'qty',
+      'unit',
+      'pricingMethod',
+      'actualStartDate',
+      'actualEndDate',
+      `price_${invoiceData?.currency?.toLowerCase()}`,
+      `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
+      `taxPercentage`,
+      `tax_${invoiceData?.currency?.toLowerCase()}`,
+      `finalPrice_${invoiceData?.currency?.toLowerCase()}`
+    ],
+    onlyfileNameAsDownload: resourcePolicyData?.policy?.customDownloadFileName ? true : false
+  };
+
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -377,6 +416,9 @@ const InvoiceDetails = () => {
                       {'Edit'}
                     </ThemeButton>
                   )}
+
+                <PreviewDownload {...previewDownloadProps} />
+
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
             ) : (
