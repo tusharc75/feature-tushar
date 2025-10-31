@@ -469,7 +469,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           return finalObject;
         });
 
-        if ([`dailyVolumeReport`, 'volumeReport', 'monthlyRevenueReport', 'rentalVolumeReport']?.includes(resourceCamelCase)) {
+        if (reportConfig?.isFooterTotal) {
           data = data.filter((d) => {
             if (d?.isFooter) {
               setFooterData(d);
@@ -608,7 +608,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
       }
       return tempColumn;
     }
-    if (resourceCamelCase === 'jobProfitability') {
+    if (resourceCamelCase === 'jobProfitability' || resourceCamelCase === 'dailyJobProfitability') {
       const materialWiseFilter = deepFilters?.find((e) => e.field === 'materialWise');
       if (!materialWiseFilter || (materialWiseFilter && materialWiseFilter?.term === 'No')) {
         tempColumn = tempColumn?.filter((e) => !['materialDetail', 'type']?.includes(e.accessor));
@@ -629,7 +629,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
   }, [emailAttachments, htmlContent]);
 
   useEffect(() => {
-    if ([`dailyVolumeReport`, 'volumeReport', 'monthlyRevenueReport', 'rentalVolumeReport']?.includes(resourceCamelCase) && footerData) {
+    if (reportConfig?.isFooterTotal && footerData) {
       const dataKeys = Object.keys(footerData);
       const newColumns = columns?.map((col: any, index) => {
         if (index === 0) {
@@ -759,12 +759,8 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
             refreshGrid={fetchResourceData}
             hideSelection={true}
             hideExportTable={true}
-            pagination={
-              [`dailyVolumeReport`, 'volumeReport', 'monthlyRevenueReport', 'rentalVolumeReport']?.includes(resourceCamelCase) ? false : true
-            }
-            isClientSideGrid={
-              [`dailyVolumeReport`, 'volumeReport', 'monthlyRevenueReport', 'rentalVolumeReport']?.includes(resourceCamelCase) ? true : false
-            }
+            pagination={reportConfig?.pagination === false ? false : true}
+            isClientSideGrid={reportConfig?.pagination === false ? true : false}
           />
         </>
       ) : (
