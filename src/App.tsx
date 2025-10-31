@@ -279,8 +279,8 @@ import User from './pages/User';
 import UserDetailsPage from './pages/User/UserDetailsPage';
 import UserAttendance from './pages/UserAttendance';
 import UserDownloadRequest from './pages/UserDownloadRequest';
-import UserManual from './pages/UserManual';
-import UserManualNew from './pages/UserManualNew';
+import UserManualOld from './pages/UserManual';
+import UserManual from './pages/UserManualNew';
 import Warehouse from './pages/Warehouse';
 import WarehouseDetailsPage from './pages/Warehouse/WarehouseDetailsPage';
 import WellMaster from './pages/WellMaster';
@@ -591,10 +591,10 @@ function App() {
             <PrivateRoute exact path="/user">
               <User />
             </PrivateRoute>
-            <PrivateRoute exact path="/user-manual-new*" userManualNew={true}>
-              <UserManualNew />
+            <PrivateRoute exact path="/user-manual-old*" userManual={true}>
+              <UserManualOld />
             </PrivateRoute>
-            <PrivateRoute exact path="/user-manual*" userManual={true}>
+            <PrivateRoute exact path="/user-manual*" userManualNew={true}>
               <UserManual />
             </PrivateRoute>
             <PrivateRoute exact path="/profile">
