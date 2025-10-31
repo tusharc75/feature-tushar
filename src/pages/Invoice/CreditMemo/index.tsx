@@ -4,7 +4,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { checkIsAllowedToDelete, INVOICE_STATUS, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { checkIsAllowedToDelete, CHILD_RESOURCE, INVOICE_STATUS, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Add, Delete, ExpandMore } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -14,6 +14,9 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import ManageCreditMemo from 'src/pages/CreditMemo/ManageCreditMemo';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { isMobile, isTablet } from 'react-device-detect';
 import MaterialDialog from './MaterialDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -28,6 +31,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
   const [columns, setColumns] = useState(null);
   const [creditMemoDialog, setCreditMemoDialog] = useState({ open: false, id: null });
   const [creditMemoMaterialDialog, setCreditMemoMaterialDialog] = useState({ open: false, _id: null });
+  const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, ids: [] });
   const [isDeleting, setIsDeleting] = useState(false);
@@ -35,6 +39,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+  const [invoiceColumns, setInvoiceColumns] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -44,8 +49,66 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
 
   useEffect(() => {
     fetchFields();
+    fetchInvoiceFields();
     fetchData();
   }, [invoiceData]);
+
+  const fetchInvoiceFields = async () => {
+    try {
+      let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
+      const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData?.currency);
+      let coloum: any = [
+        {
+          accessor: 'index',
+          Header: 'Index',
+          width: 70,
+          sticky: 'left',
+          Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+          Footer: () => {
+            return <>Total</>;
+          }
+        },
+        {
+          accessor: 'type',
+          Header: 'Type',
+          sticky: isMobile || isTablet ? 'none' : 'left',
+          Cell: ({ row }) => (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <p>{startCase(row.original?.type)}</p>
+            </div>
+          )
+        },
+        {
+          accessor: 'detail',
+          Header: 'Detail',
+          disabled: true,
+          minWidth: 300,
+          sticky: isMobile || isTablet ? 'none' : 'left',
+          width: 300,
+          Cell: ({ row }) =>
+            row?.original?.type ? (
+              <div className="flex items-center gap-2">
+                {row?.original?.detail ? <p className="text-truncate">{row.original.detail}</p> : <NoDataCell />}
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
+          accessor: 'description',
+          Header: 'Description',
+          width: 200,
+          Cell: ({ row }) => {
+            return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+          }
+        }
+      ];
+      coloum = [...coloum, ...newColumns];
+      setInvoiceColumns(coloum);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const fetchFields = async () => {
     try {
@@ -200,6 +263,31 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
     }
   };
 
+  const previewDownloadProps = {
+    fileName: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
+    subject: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
+    resource: sidebarResource.invoice,
+    referenceId: invoiceData?._id,
+    columns: invoiceColumns,
+    isSendEmail: true,
+    extraQueryParams: { isCreditMemo: true },
+    defaultColumns: [
+      'type',
+      'detail',
+      'fieldTicket',
+      'qty',
+      'unit',
+      'pricingMethod',
+      'actualStartDate',
+      'actualEndDate',
+      `price_${invoiceData?.currency?.toLowerCase()}`,
+      `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
+      `taxPercentage`,
+      `tax_${invoiceData?.currency?.toLowerCase()}`,
+      `finalPrice_${invoiceData?.currency?.toLowerCase()}`
+    ]
+  };
+
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -245,6 +333,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
           </ThemeButton>
         )}
         <div className="flex items-center gap-2">
+          {invoiceColumns && dataRows?.length > 0 && <PreviewDownload {...previewDownloadProps} />}
           {(permissions?.creditMemo?.isUpdate && allowedToEdit && statusOptions?.length > 0 && dataRows?.length > 0) &&
             <ThemeButton
               onClick={openActions}
