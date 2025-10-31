@@ -29,6 +29,8 @@ const CardView = ({ filterQuery, setSelectedService, setServiceOpen, state, head
         passFailStatus={true}
         passFailAccessor="serviceStatus"
         customContent={(props) => <CardCustomComponent {...props} renderedFrom={renderedFrom} columns={childColumns} />}
+        subItemAccessor={(data) => data.services}
+        getChildId={(child) => child._id}
         cardOnClick={(data: any) => {
           let tempServiceData = {};
           tempServiceData['uniqueId'] = data?.uniqueId;
