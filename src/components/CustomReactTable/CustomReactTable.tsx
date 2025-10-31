@@ -96,7 +96,9 @@ const CustomReactTable = ({
   showTableHead = true,
   arrangeRowField = null,
   rememberClientFilters = false,
-  bulkActionItems = null
+  bulkActionItems = null,
+  getChildId = (data) => data['_id'],
+  subItemAccessor = null
 }) => {
   const {
     dataRows: data,
