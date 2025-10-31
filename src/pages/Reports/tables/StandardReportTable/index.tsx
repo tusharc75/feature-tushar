@@ -416,6 +416,12 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
         cancelToken: cancelTokenSource?.token
       })
       .then(({ data: { data, count, columns } }) => {
+
+        if (selectedReport.dynamic && columns) {
+          const newColumns = generateColumns(renderedFrom, columns)
+          setColumns(newColumns)
+        }
+
         if (resourceCamelCase === 'userSession') {
           setColumns([]);
           setIsColumnsLoading(true);
@@ -522,13 +528,14 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
 
     let { query: filterQuery } = getQueryString(true);
 
-    var api = '';
+
+    var api = selectedReport.dynamic ? selectedReport.resource : `/report/${selectedReport.resource}`;
     if (exportType === 'pdf') {
-      api = `/report/${selectedReport.resource}/pdf`;
+      api += `/pdf`;
     } else if (exportType === 'html') {
-      api = `/report/${selectedReport.resource}/pdf`;
+      api += `/pdf`;
     } else {
-      api = `/report/${selectedReport.resource}/export`;
+      api += `/export`;
     }
     const extension = exportType === 'excel' ? 'xlsx' : 'pdf';
     const contentType = exportType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
