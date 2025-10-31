@@ -104,7 +104,7 @@ const CardCustomComponent = React.memo(
           })}
         </ul>
         {isShowMoreVisible && (
-          <RippleButton onClick={toggleExpand} className="w-full font-semibold text-blue-500">
+          <RippleButton onClick={toggleExpand} className="mt-[--py] w-full text-xs font-semibold text-blue-500">
             {isExpanded ? 'Show Less' : 'Show More'}
           </RippleButton>
         )}
