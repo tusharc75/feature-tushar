@@ -1120,7 +1120,7 @@ const MatrixComponent = ({
               )}
               onFieldSelect={(field) => {
                 updatePipelineItem(item._id, {
-                  rows: [{ fieldName: field?.fieldName || '', resource: field?.resource || '' }]
+                  rows: [{ fieldName: field?.fieldName || '', resource: field?.resource || '', reportFieldName: field?.reportFieldName }]
                 });
               }}
               textFieldProps={{
@@ -1145,7 +1145,7 @@ const MatrixComponent = ({
               )}
               onFieldSelect={(field) => {
                 updatePipelineItem(item._id, {
-                  columns: [{ fieldName: field?.fieldName || '', resource: field?.resource || '' }]
+                  columns: [{ fieldName: field?.fieldName || '', resource: field?.resource || '', reportFieldName: field?.reportFieldName }]
                 });
               }}
               textFieldProps={{
@@ -1171,7 +1171,7 @@ const MatrixComponent = ({
               )}
               onFieldSelect={(fields) => {
                 updatePipelineItem(item._id, {
-                  values: fields?.map((f) => ({ fieldName: f?.fieldName || '', resource: f?.resource || '' }))
+                  values: fields?.map((f) => ({ fieldName: f?.fieldName || '', resource: f?.resource || '', reportFieldName: f?.reportFieldName }))
                 });
               }}
               textFieldProps={{

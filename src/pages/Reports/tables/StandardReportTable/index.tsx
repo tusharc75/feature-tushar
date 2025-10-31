@@ -416,6 +416,12 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
         cancelToken: cancelTokenSource?.token
       })
       .then(({ data: { data, count, columns } }) => {
+
+        if (resourceCamelCase.includes("reportBuilder") && columns) {
+          const newColumns = generateColumns(renderedFrom, columns)
+          setColumns(newColumns)
+        }
+
         if (resourceCamelCase === 'userSession') {
           setColumns([]);
           setIsColumnsLoading(true);
