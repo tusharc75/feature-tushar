@@ -358,7 +358,7 @@ const GridView = React.forwardRef<GridViewRef, Props>(
         <div className="[&_.table-container-v1>div]:mt-0">
           {columns ? (
             <CustomReactTable
-              customContent={(props) => <GridCustomComponent {...props} renderedFrom={renderedFrom} columns={childColumns} />}
+              customContent={status === WORKORDER_SERVICE_STATUS.planned ? null : (props) => <GridCustomComponent {...props} renderedFrom={renderedFrom} columns={childColumns} />}
               expanderWithCustomContent={status === WORKORDER_SERVICE_STATUS.planned ? false : true}
               topLeftSlot={tableHead}
               height={'calc(100vh - 280px)'}
