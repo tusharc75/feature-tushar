@@ -3883,23 +3883,25 @@ const BulkActionItems = ({
           {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
             (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
               <>
-                <BulkActionContainer.Button
-                  tooltip={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}
-                  id={'create-receiving-ticket-chargaeble-menu-item'}
-                  onClick={() => {
-                    if (validateAction(rentalManagementActions.createReceivingTicket)) {
-                      if (getFilterSelectedRecords()?.every((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
-                        handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
-                      } else {
-                        setShowQtyDialog({ open: true, data: null });
-                        handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant, false);
+                {rentalPolicyData?.hideReturnTicketChargeable && (
+                  <BulkActionContainer.Button
+                    tooltip={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}
+                    id={'create-receiving-ticket-chargaeble-menu-item'}
+                    onClick={() => {
+                      if (validateAction(rentalManagementActions.createReceivingTicket)) {
+                        if (getFilterSelectedRecords()?.every((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
+                          handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
+                        } else {
+                          setShowQtyDialog({ open: true, data: null });
+                          handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant, false);
+                        }
                       }
-                    }
-                  }}
-                  disabled={!permissions?.deliveryTicket?.isCreate || getFilterSelectedRecords()?.length === 0}
-                >
-                  {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
-                </BulkActionContainer.Button>
+                    }}
+                    disabled={!permissions?.deliveryTicket?.isCreate || getFilterSelectedRecords()?.length === 0}
+                  >
+                    {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
+                  </BulkActionContainer.Button>
+                )}
                 {getFilterSelectedRecords().length > 0 &&
                   getFilterSelectedRecords()?.filter(
                     (f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new
