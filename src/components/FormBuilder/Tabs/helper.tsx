@@ -635,6 +635,23 @@ export const resourcePolicy = [
       },
     ]
   },
+  {
+    resource: sidebarResource.quotation,
+    policy: [
+      {
+        fieldName: 'createFieldTicketWithoutFieldJob',
+        fieldLabel: 'Create Field Ticket Without Field Job',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'createInvoiceFromQuotation',
+        fieldLabel: 'Create Invoice From Quotation',
+        type: 'checkBox',
+        defaultValue: false
+      }
+    ]
+  }
 ];
 
 export const DATE_VALUE = {
