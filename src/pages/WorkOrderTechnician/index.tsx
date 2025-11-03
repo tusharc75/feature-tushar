@@ -203,13 +203,10 @@ const WorkOrderTechnician = () => {
     try {
       const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.workOrder, permissions?.workOrder?.isUpdate);
       const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.workOrderDetail?.path);
-      const columns = newColumns.filter((ele) => ele.accessor !== 'workOrderNumber');
-      const extraColumns = [
-        {
-          accessor: 'workOrderNumber',
-          Header: 'Work Order Number',
-          defaultVisible: true,
-          Cell: ({ row }) => (
+      newColumns?.forEach((ele) => {
+        if (ele.accessor === 'workOrderNumber') {
+          ele.defaultVisible = true;
+          ele.Cell = ({ row }) => (
             <div className="flex items-center gap-1">
               <p title={row?.original?.workOrderNumber}>{row?.original?.workOrderNumber}</p>
               {row.original['workOrderNumber'] ? (
@@ -228,9 +225,9 @@ const WorkOrderTechnician = () => {
             </div>
           )
         }
-      ];
-      const finalColumns = [...extraColumns.slice(0, 4), ...columns, ...extraColumns.slice(4), ActionsRenderer].map((c) => {
-        const id = c.id || c.accessor;
+      });
+      const finalColumns = [...newColumns, ActionsRenderer]?.map((c) => {
+        const id = c?.id || c?.accessor;
         if (defaultVisibleRows.includes(id)) {
           c['defaultVisible'] = true;
         }
@@ -432,7 +429,7 @@ const WorkOrderTechnician = () => {
 
   const newActionButtonProps: NewActionButtonProps<string, any> = useMemo(() => {
     const items = {
-      disabled: selectedRecords?.length === 0,
+      disabled: !selectedRecords?.length,
       items: [
         {
           disabled:
@@ -564,7 +561,7 @@ const WorkOrderTechnician = () => {
                     isActionButtonVisible={false}
                     isNewActionButtonVisible={selectedRecords.length > 0}
                     newActionButtonProps={newActionButtonProps}
-                    actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                    actionButtonProps={{ disabled: !selectedRecords?.length }}
                     leftSideContents={
                       <div className="flex w-full items-center gap-2">
                         <ResourceFilter

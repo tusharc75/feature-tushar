@@ -141,7 +141,7 @@ const GridView = React.forwardRef<GridViewRef, Props>(
         if (status === WORKORDER_SERVICE_STATUS.planned) {
           const { data: dataD, count: plannedCount } = data;
           count = plannedCount;
-          rows = dataD.map((item) => ({
+          rows = dataD?.map((item) => ({
             ...item,
             serializedAsset: item?.asset?.assetNumber,
             serializedAssetId: item?.asset?._id,
