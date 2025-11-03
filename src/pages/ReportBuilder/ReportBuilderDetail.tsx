@@ -76,7 +76,7 @@ const FieldsPopper = ({ isEdit, item, fields, updatePipelineItem, setItemCausing
                     })()}
                     onChange={(e) => {
                       updatePipelineItem(item._id, { fields: e.target.checked ? fields?.map((f) => f.fieldName) : [] });
-                      setItemCausingFieldChange(item._id);
+                      setItemCausingFieldChange({_id: item._id, ts: Date.now()});
                     }}
                     disabled={!isEdit}
                   />
@@ -99,7 +99,7 @@ const FieldsPopper = ({ isEdit, item, fields, updatePipelineItem, setItemCausing
                           onChange={(e) => {
                             const next = e.target.checked ? [...item?.fields, field.fieldName] : item?.fields?.filter((f) => f !== field.fieldName);
                             updatePipelineItem(item._id, { fields: next });
-                            setItemCausingFieldChange(item._id);
+                            setItemCausingFieldChange({_id: item._id, ts: Date.now()});
                           }}
                           disabled={!isEdit}
                         />
@@ -152,7 +152,7 @@ const LookupComponent = ({
       const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, resourceFieldMap?.[formValues?.resource]);
       setAvailableFields(fields || []);
     };
-    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+    if (!upstreamPipeline?.length || !itemCausingFieldChange?._id || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange?._id)) {
       fetchFields();
     }
   }, [itemCausingFieldChange, formValues?.resource, resourceFieldMap?.[formValues?.resource]]);
@@ -306,7 +306,7 @@ const FieldMatchRow = ({
                         });
                       }
 
-                      setItemCausingFieldChange(item._id);
+                      setItemCausingFieldChange({_id: item._id, ts: Date.now()});
                     }}
                     renderInput={(params) => (
                       <TextField
@@ -467,7 +467,7 @@ const AccumulatorRow = ({
         getOptionLabel={(option) => option.label}
         onChange={(e, val) => {
           onUpdate({ operation: val?.value || 'count' });
-          setItemCausingFieldChange(item._id);
+          setItemCausingFieldChange({_id: item._id, ts: Date.now()});
         }}
         renderInput={(params) => (
           <TextField
@@ -494,7 +494,7 @@ const AccumulatorRow = ({
           )}
           onFieldSelect={(fields) => {
             onUpdate({ field: { fieldName: fields?.fieldName || '', resource: fields?.resource || '', reportFieldName: fields?.reportFieldName } });
-            setItemCausingFieldChange(item._id);
+            setItemCausingFieldChange({_id: item._id, ts: Date.now()});
           }}
           textFieldProps={{
             size: 'small',
@@ -564,7 +564,7 @@ const SortComponent = ({
       const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, mainResourceFields);
       setAvailableFields(fields || []);
     };
-    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+    if (!upstreamPipeline?.length || !itemCausingFieldChange?._id || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange?._id)) {
       fetchFields();
     }
   }, [itemCausingFieldChange, formValues?.resource, mainResourceFields]);
@@ -691,7 +691,7 @@ const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, ma
       const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, mainResourceFields);
       setAvailableFields(fields || []);
     };
-    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+    if (!upstreamPipeline?.length || !itemCausingFieldChange?._id || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange?._id)) {
       fetchFields();
     }
   }, [itemCausingFieldChange, formValues?.resource, mainResourceFields]);
@@ -913,7 +913,7 @@ const FilterComponent = ({
       const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, mainResourceFields);
       setAvailableFields(fields || []);
     };
-    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+    if (!upstreamPipeline?.length || !itemCausingFieldChange?._id || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange?._id)) {
       fetchFields();
     }
   }, [itemCausingFieldChange, formValues?.resource, mainResourceFields]);
@@ -1007,7 +1007,7 @@ const GroupComponent = ({
       const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, mainResourceFields);
       setAvailableFields(fields || []);
     };
-    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+    if (!upstreamPipeline?.length || !itemCausingFieldChange?._id || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange?._id)) {
       fetchFields();
     }
   }, [itemCausingFieldChange, formValues?.resource, mainResourceFields]);
@@ -1079,7 +1079,7 @@ const GroupComponent = ({
                   };
                 })
               });
-              setItemCausingFieldChange(item._id);
+              setItemCausingFieldChange({_id: item._id, ts: Date.now()});
             }}
             textFieldProps={{
               size: 'small',
@@ -1124,7 +1124,7 @@ const MatrixComponent = ({
       const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, mainResourceFields);
       setAvailableFields(fields || []);
     };
-    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+    if (!upstreamPipeline?.length || !itemCausingFieldChange?._id || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange?._id)) {
       fetchFields();
     }
   }, [itemCausingFieldChange, formValues?.resource, mainResourceFields]);
@@ -1247,7 +1247,7 @@ export default function ReportBuilderDetail() {
   const [showFieldsPanel, setShowFieldsPanel] = useState(false);
   const [filterFieldSelect, setFilterFieldSelect] = useState({ open: false, item: null });
   const [filterConfigurationDialog, setFilterConfigurationDialog] = useState({ open: false, field: null, editingFilter: null, editingIndex: null });
-  const [itemCausingFieldChange, setItemCausingFieldChange] = useState(null);
+  const [itemCausingFieldChange, setItemCausingFieldChange] = useState({_id: null, ts: null});
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -1468,7 +1468,7 @@ export default function ReportBuilderDetail() {
         newPipeline?.push(matrixItem);
       }
 
-      setItemCausingFieldChange(newPipeline?.[newPipeline?.length - 2]?._id);
+      setItemCausingFieldChange({_id: newPipeline?.[newPipeline?.length - 2]?._id, ts: Date.now()});
       return newPipeline;
     });
   };
