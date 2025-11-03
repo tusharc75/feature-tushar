@@ -20,6 +20,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import axios, { CancelTokenSource } from 'axios';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const SalesOrder = () => {
   const renderedFrom = camelCase(sidebarResource.salesOrder);
@@ -66,8 +67,9 @@ const SalesOrder = () => {
   }, []);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.salesOrder);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.salesOrder, permissions?.salesOrder?.isUpdate);
-    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.salesOrderDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.salesOrderDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     let staticFields = getStaticFields(true);
     staticFields.forEach((field) => {
       newColumns.push(checkStaticField(sidebarResource.projectSales, field));

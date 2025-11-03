@@ -22,7 +22,7 @@ type TableViewStatus =
   | typeof WORKORDER_SERVICE_STATUS.inProgressByOther;
 
 const GridView = React.forwardRef<GridViewRef, any>(
-  ({ renderedFrom, state, dispatch, filterQuery, permissions, tableHead = null, columns, resource = '', childColumns }, ref) => {
+  ({ renderedFrom, state, dispatch, filterQuery, permissions, tableHead = null, columns, resource = '', childColumns, bulkActionItems }, ref) => {
     const toastConfig = useContext(CustomToastContext);
     const [tableViewStatus, setTableViewStatus] = useState<TableViewStatus>('Pending');
 
@@ -107,22 +107,23 @@ const GridView = React.forwardRef<GridViewRef, any>(
           let rows = data.map((u) => {
             let finalObject: any = prepareDataForGrid(u, user);
             finalObject['workOrderId'] = u?._id;
-            finalObject['services'] = u.services?.map((d) => {
-              let newData = {
-                ...d,
-                ...d.service,
-                serviceId: d.service._id
-              };
-              delete newData['service'];
-              newData['customServiceStatus'] = d?.status;
-              newData['parentProductId'] = d?.parentProduct?._id;
-              newData['parentProductName'] = d?.parentProduct?.productName;
-              newData['parentProductDescription'] = d?.parentProduct?.productDescription;
-              newData['_id'] = d._id;
-              newData['uniqueId'] = d._id;
-              newData['workOrderId'] = u?._id;
-              return newData;
-            }) || [];
+            finalObject['services'] =
+              u.services?.map((d) => {
+                let newData = {
+                  ...d,
+                  ...d.service,
+                  serviceId: d.service._id
+                };
+                delete newData['service'];
+                newData['customServiceStatus'] = d?.status;
+                newData['parentProductId'] = d?.parentProduct?._id;
+                newData['parentProductName'] = d?.parentProduct?.productName;
+                newData['parentProductDescription'] = d?.parentProduct?.productDescription;
+                newData['_id'] = d._id;
+                newData['uniqueId'] = d._id;
+                newData['workOrderId'] = u?._id;
+                return newData;
+              }) || [];
             return { ...finalObject };
           });
           dispatch({ type: 'initialize', data: rows, count: count });
@@ -153,8 +154,10 @@ const GridView = React.forwardRef<GridViewRef, any>(
               columns={columns}
               customContent={(props) => <GridCustomComponent {...props} renderedFrom={renderedFrom} columns={childColumns} />}
               expanderWithCustomContent={true}
+              getChildId={(child) => child._id}
+              subItemAccessor={(child) => child.services}
               topLeftSlot={
-                <div className="flex flex-grow flex-wrap items-center items-center gap-2">
+                <div className="flex flex-grow flex-wrap items-center gap-2">
                   <ButtonMenu
                     showChevron={true}
                     items={statusMenuItems}
@@ -170,6 +173,7 @@ const GridView = React.forwardRef<GridViewRef, any>(
                   {tableHead}
                 </div>
               }
+              bulkActionItems={bulkActionItems}
               state={state}
               dispatch={dispatch}
               renderedFrom={renderedFrom}

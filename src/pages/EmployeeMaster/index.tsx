@@ -20,6 +20,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { useHistory } from 'react-router-dom';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const EmployeeMaster = () => {
   const renderedFrom = camelCase(sidebarResource?.employeeMaster);
@@ -52,8 +53,9 @@ const EmployeeMaster = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource?.employeeMaster);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.employeeMaster, permissions?.employeeMaster?.isUpdate);
-    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.employeeMasterDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.employeeMasterDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

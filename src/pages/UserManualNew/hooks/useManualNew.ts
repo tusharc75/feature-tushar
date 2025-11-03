@@ -68,7 +68,7 @@ const useManualNew = () => {
   const fetchData = useCallback(() => {
     setState({ type: 'setLoading', payload: true });
     axiosInstance()
-      .get('/user-manual-master-new/get-all')
+      .get('/user-manual-master/get-all')
       .then(({ data: { data } }) => {
         const searchData: SearchData[] = [];
         const sectionNames = uniq(data?.resources?.map((e) => e?.sectionName)).filter((d) => !!d);

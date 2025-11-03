@@ -33,7 +33,10 @@ export interface GroupPipeline extends PipelineItem {
     resource: string;
   }>;
   accumulator: Array<{
-    field: string;
+    field: {
+      fieldName: string;
+      resource: string;
+    };
     operation: string;
     outputField: string;
   }>;
@@ -317,7 +320,7 @@ export const validatePipeline = (pipeline: PipelineItem[]): { [itemId: string]: 
             if (!acc?.operation) {
               itemErrors.push(`operation_${index}_required`);
             }
-            if (acc?.operation !== 'count' && !acc?.field) {
+            if (acc?.operation !== 'count' && !acc?.field?.fieldName) {
               itemErrors.push(`field_${index}_required`);
             }
           });

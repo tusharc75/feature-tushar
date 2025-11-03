@@ -116,6 +116,7 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
 
   const resetSelection = () => {
     setSelectedRecordMap(new Map());
+    setSelectedSubItemsMap(new Map());
     setState({ type: 'resetSelection' });
   };
 

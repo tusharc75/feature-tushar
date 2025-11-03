@@ -11,7 +11,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CHILD_RESOURCE, INVOICE_STATUS, MATERIAL_TYPE, getCustomInvoiceFileName, getEmailsFromContacts, invoice, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
@@ -192,36 +192,9 @@ const Invoice = ({ invoiceData, invoiceFields, setPrevStep, handleChangeStatus, 
     return subRows;
   };
 
-  const previewDownloadProps = {
-    fileName: resourcePolicyData?.policy?.customDownloadFileName ? getCustomInvoiceFileName(resourcePolicyData?.policy?.customDownloadFileName, invoiceData)
-      : `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
-    subject: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
-    resource: sidebarResource.invoice,
-    referenceId: invoiceData?._id,
-    columns: columns,
-    isSendEmail: true,
-    toEmails: getEmailsFromContacts(invoiceData),
-    defaultColumns: [
-      'type',
-      'detail',
-      'fieldTicket',
-      'qty',
-      'unit',
-      'pricingMethod',
-      'actualStartDate',
-      'actualEndDate',
-      `price_${invoiceData?.currency?.toLowerCase()}`,
-      `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
-      `taxPercentage`,
-      `tax_${invoiceData?.currency?.toLowerCase()}`,
-      `finalPrice_${invoiceData?.currency?.toLowerCase()}`
-    ],
-    onlyfileNameAsDownload: resourcePolicyData?.policy?.customDownloadFileName ? true : false
-  };
-
   return (
     <Fragment>
-      <DetailsPageHeader isAddButtonVisible={false} isActionButtonVisible={false} previewDownloadProps={previewDownloadProps} hasXpadding />
+      <DetailsPageHeader isAddButtonVisible={false} isActionButtonVisible={false} hasXpadding />
       <Grid size={{ xs: 12, md: 12, sm: 12 }}>
         {columns ? (
           <Box zIndex={5}>

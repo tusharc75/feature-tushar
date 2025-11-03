@@ -35,6 +35,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const ignoreField = ['qty', 'priceTemplate'];
 
@@ -109,6 +110,7 @@ const Product = () => {
   }, [page, limit, filters, sorting, search, selectedEntity, productCategory, productTemplate, productType, showFilteredRecordsOnly, productColumns]);
 
   const fetchGridColumns = async () => {
+    let resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.product);
     const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, permissions?.product?.isUpdate);
     setAllFields(JSON.parse(JSON.stringify(fieldsDataAll)));
     setWalkmeData([createResourceFlow(sidebarResource.product, fieldsDataForRead)]);
@@ -130,7 +132,9 @@ const Product = () => {
       renderedFrom,
       fieldsDataForRead?.filter((d) => !ignoreField.includes(d?.fieldData.fieldName)),
       routes.productDetail.path,
-      true
+      true,
+      null,
+      resourcePolicy?.policy?.fieldColor
     );
     setProductColumns([...newColumns]);
   };

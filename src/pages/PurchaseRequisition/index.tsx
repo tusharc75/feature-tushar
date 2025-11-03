@@ -20,6 +20,7 @@ import ManagePurchaseRequisition from './ManagePurchaseRequisition';
 import axios, { CancelTokenSource } from 'axios';
 import { useHistory } from 'react-router-dom';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const PurchaseRequisition = () => {
   const {
@@ -69,8 +70,9 @@ const PurchaseRequisition = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.purchaseRequisition);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.purchaseRequisition, permissions?.purchaseRequisition?.isUpdate);
-    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.purchaseRequisitionDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.purchaseRequisitionDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

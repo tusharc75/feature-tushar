@@ -1,4 +1,4 @@
-import { Row, Table } from '@tanstack/react-table';
+import { Row, RowSelectionState, Table } from '@tanstack/react-table';
 import React, { Dispatch, ForwardedRef, forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
 import { NormalTable } from 'src/components/CustomReactTable/TableComponents/NormalTable';
 import { VirtualTable } from 'src/components/CustomReactTable/TableComponents/VirtualTable';
@@ -32,6 +32,9 @@ type TTableProps = {
   customContent: ({ row }: { row: any }) => React.ReactNode;
   renderedFrom: string;
   sortedColumns: TColType[];
+  rowSelection: Record<string, Row<any>>;
+  getChildId: (data: any) => string;
+  subItemAccessor: (data: any) => any[];
 };
 
 const TableComponent = forwardRef(function (
@@ -58,7 +61,10 @@ const TableComponent = forwardRef(function (
     customContentHeight,
     customContent,
     renderedFrom,
-    sortedColumns
+    sortedColumns,
+    rowSelection,
+    getChildId,
+    subItemAccessor
   }: TTableProps,
   ref: ForwardedRef<HTMLTableElement>
 ) {
@@ -181,6 +187,9 @@ const TableComponent = forwardRef(function (
             customContentHeight={customContentHeight}
             customContent={customContent}
             renderedFrom={renderedFrom}
+            rowSelection={rowSelection}
+            getChildId={getChildId}
+            subItemAccessor={subItemAccessor}
           />
         </>
       )}

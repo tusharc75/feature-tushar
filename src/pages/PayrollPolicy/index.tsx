@@ -19,6 +19,7 @@ import ManagePayrollPolicy from './ManagePayrollPolicy';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const PayrollPolicy = () => {
   const renderedFrom = camelCase(sidebarResource.payrollPolicy);
@@ -43,8 +44,9 @@ const PayrollPolicy = () => {
   }, []);
 
   const fetchGridColumns = async () => {
+    let resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.payrollPolicy);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.payrollPolicy, permissions?.payrollPolicy?.isUpdate);
-    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.payrollPolicyDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.payrollPolicyDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

@@ -76,7 +76,7 @@ const FieldsPopper = ({ isEdit, item, fields, updatePipelineItem, setItemCausing
                     })()}
                     onChange={(e) => {
                       updatePipelineItem(item._id, { fields: e.target.checked ? fields?.map((f) => f.fieldName) : [] });
-                      setItemCausingFieldChange(item._id);
+                      setItemCausingFieldChange({_id: item._id, ts: Date.now()});
                     }}
                     disabled={!isEdit}
                   />
@@ -99,7 +99,7 @@ const FieldsPopper = ({ isEdit, item, fields, updatePipelineItem, setItemCausing
                           onChange={(e) => {
                             const next = e.target.checked ? [...item?.fields, field.fieldName] : item?.fields?.filter((f) => f !== field.fieldName);
                             updatePipelineItem(item._id, { fields: next });
-                            setItemCausingFieldChange(item._id);
+                            setItemCausingFieldChange({_id: item._id, ts: Date.now()});
                           }}
                           disabled={!isEdit}
                         />
@@ -152,7 +152,7 @@ const LookupComponent = ({
       const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, resourceFieldMap?.[formValues?.resource]);
       setAvailableFields(fields || []);
     };
-    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+    if (!upstreamPipeline?.length || !itemCausingFieldChange?._id || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange?._id)) {
       fetchFields();
     }
   }, [itemCausingFieldChange, formValues?.resource, resourceFieldMap?.[formValues?.resource]]);
@@ -306,7 +306,7 @@ const FieldMatchRow = ({
                         });
                       }
 
-                      setItemCausingFieldChange(item._id);
+                      setItemCausingFieldChange({_id: item._id, ts: Date.now()});
                     }}
                     renderInput={(params) => (
                       <TextField
@@ -436,23 +436,27 @@ const FieldMatchRow = ({
 };
 
 const AccumulatorRow = ({
+  index,
   item,
   accumulator,
-  resourceFields,
+  availableFields,
   onUpdate,
   onRemove,
   isEdit,
   onAddOperation,
-  setItemCausingFieldChange
+  setItemCausingFieldChange,
+  pipelineErrors
 }: {
+  index: number;
   item: any;
   accumulator: any;
-  resourceFields: any[];
+  availableFields: any[];
   onUpdate: (updates: any) => void;
   onRemove?: () => void | undefined;
   isEdit: boolean;
   onAddOperation: () => void | undefined;
   setItemCausingFieldChange: React.Dispatch<React.SetStateAction<any>>;
+  pipelineErrors: any;
 }) => (
   <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
     <Grid size={{ xs: 12, sm: 3 }}>
@@ -463,27 +467,46 @@ const AccumulatorRow = ({
         getOptionLabel={(option) => option.label}
         onChange={(e, val) => {
           onUpdate({ operation: val?.value || 'count' });
-          setItemCausingFieldChange(item._id);
+          setItemCausingFieldChange({_id: item._id, ts: Date.now()});
         }}
         renderInput={(params) => (
-          <TextField {...params} size="small" label="Operation" variant="outlined" fullWidth required slotProps={{ inputLabel: { shrink: true } }} />
+          <TextField
+            {...params}
+            size="small"
+            label="Operation"
+            variant="outlined"
+            fullWidth
+            required
+            error={pipelineErrors[item._id]?.includes(`operation_${index}_required`)}
+            helperText={pipelineErrors[item._id]?.includes(`operation_${index}_required`) ? 'Operation is required' : ''}
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
         )}
       />
     </Grid>
     {accumulator?.operation !== 'count' && (
       <Grid size={{ xs: 12, sm: 3 }}>
-        <Autocomplete
-          disabled={!isEdit}
-          value={resourceFields?.find((f) => f?.fieldName === accumulator?.field) || null}
-          options={resourceFields}
-          getOptionLabel={(option) => option?.fieldLabel}
-          onChange={(e, val) => {
-            onUpdate({ field: val?.fieldName || '' });
-            setItemCausingFieldChange(item._id);
-          }}
-          renderInput={(params) => (
-            <TextField {...params} size="small" label="Field" variant="outlined" fullWidth required slotProps={{ inputLabel: { shrink: true } }} />
+        <FieldSelectionPopper
+          isEdit={isEdit}
+          availableFields={availableFields}
+          selectedFields={availableFields?.filter(
+            (f) => accumulator?.field?.fieldName === f?.fieldName && accumulator?.field?.resource === f?.resource
           )}
+          onFieldSelect={(fields) => {
+            onUpdate({ field: { fieldName: fields?.fieldName || '', resource: fields?.resource || '', reportFieldName: fields?.reportFieldName } });
+            setItemCausingFieldChange({_id: item._id, ts: Date.now()});
+          }}
+          textFieldProps={{
+            size: 'small',
+            label: 'Field',
+            variant: 'outlined',
+            fullWidth: true,
+            required: true,
+            error: pipelineErrors[item._id]?.includes(`field_${index}_required`),
+            helperText: pipelineErrors[item._id]?.includes(`field_${index}_required`) ? 'Field is required' : '',
+            slotProps: { inputLabel: { shrink: true } }
+          }}
+          popperProps={{ width: 400, maxHeight: 400 }}
         />
       </Grid>
     )}
@@ -541,7 +564,7 @@ const SortComponent = ({
       const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, mainResourceFields);
       setAvailableFields(fields || []);
     };
-    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+    if (!upstreamPipeline?.length || !itemCausingFieldChange?._id || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange?._id)) {
       fetchFields();
     }
   }, [itemCausingFieldChange, formValues?.resource, mainResourceFields]);
@@ -583,7 +606,7 @@ const SortComponent = ({
                   availableFields={availableFields}
                   selectedFields={availableFields?.filter((f) => f?.fieldName === field.fieldName)}
                   onFieldSelect={(field) => {
-                    update(index, { fieldName: field?.fieldName, resource: field?.resource });
+                    update(index, { fieldName: field?.fieldName, resource: field?.resource, reportFieldName: field?.reportFieldName });
                   }}
                   textFieldProps={{
                     size: 'small',
@@ -668,7 +691,7 @@ const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, ma
       const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, mainResourceFields);
       setAvailableFields(fields || []);
     };
-    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+    if (!upstreamPipeline?.length || !itemCausingFieldChange?._id || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange?._id)) {
       fetchFields();
     }
   }, [itemCausingFieldChange, formValues?.resource, mainResourceFields]);
@@ -731,7 +754,9 @@ const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, ma
                   availableFields={availableFields}
                   selectedFields={availableFields?.filter((f) => f?.fieldName === item.xAxis?.field)}
                   onFieldSelect={(field) => {
-                    updatePipelineItem(item._id, { xAxis: { ...item.xAxis, field: field.fieldName, resource: field.resource } });
+                    updatePipelineItem(item._id, {
+                      xAxis: { ...item.xAxis, field: field.fieldName, resource: field.resource, reportFieldName: field.reportFieldName }
+                    });
                   }}
                   textFieldProps={{
                     size: 'small',
@@ -816,7 +841,9 @@ const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, ma
                   availableFields={availableFields}
                   selectedFields={availableFields?.filter((f) => f?.fieldName === item.value?.field)}
                   onFieldSelect={(field) => {
-                    updatePipelineItem(item._id, { value: { field: field.fieldName, resource: field.resource } });
+                    updatePipelineItem(item._id, {
+                      value: { field: field.fieldName, resource: field.resource, reportFieldName: field.reportFieldName }
+                    });
                   }}
                   textFieldProps={{
                     size: 'small',
@@ -837,7 +864,9 @@ const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, ma
                   availableFields={availableFields}
                   selectedFields={availableFields?.filter((f) => f?.fieldName === item.label?.field)}
                   onFieldSelect={(field) => {
-                    updatePipelineItem(item._id, { label: { field: field.fieldName, resource: field.resource } });
+                    updatePipelineItem(item._id, {
+                      label: { field: field.fieldName, resource: field.resource, reportFieldName: field.reportFieldName }
+                    });
                   }}
                   textFieldProps={{
                     size: 'small',
@@ -884,7 +913,7 @@ const FilterComponent = ({
       const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, mainResourceFields);
       setAvailableFields(fields || []);
     };
-    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+    if (!upstreamPipeline?.length || !itemCausingFieldChange?._id || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange?._id)) {
       fetchFields();
     }
   }, [itemCausingFieldChange, formValues?.resource, mainResourceFields]);
@@ -978,7 +1007,7 @@ const GroupComponent = ({
       const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, mainResourceFields);
       setAvailableFields(fields || []);
     };
-    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+    if (!upstreamPipeline?.length || !itemCausingFieldChange?._id || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange?._id)) {
       fetchFields();
     }
   }, [itemCausingFieldChange, formValues?.resource, mainResourceFields]);
@@ -998,10 +1027,11 @@ const GroupComponent = ({
 
         {item?.accumulator?.map((acc, index) => (
           <AccumulatorRow
+            index={index}
             key={index}
             item={item}
             accumulator={acc}
-            resourceFields={mainResourceFields}
+            availableFields={availableFields}
             isEdit={isEdit}
             onUpdate={(updates) => {
               const updatedAccumulator = [...item.accumulator];
@@ -1011,20 +1041,21 @@ const GroupComponent = ({
             onRemove={
               item?.accumulator?.length > 1
                 ? () => {
-                    const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
-                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                  }
+                  const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
+                  updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                }
                 : undefined
             }
             onAddOperation={
               index === item?.accumulator?.length - 1
                 ? () => {
-                    const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
-                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                  }
+                  const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
+                  updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                }
                 : undefined
             }
             setItemCausingFieldChange={setItemCausingFieldChange}
+            pipelineErrors={pipelineErrors}
           />
         ))}
 
@@ -1043,11 +1074,12 @@ const GroupComponent = ({
                 fields: fields?.map((f) => {
                   return {
                     fieldName: f.fieldName,
-                    resource: f.resource
+                    resource: f.resource,
+                    reportFieldName: f.reportFieldName
                   };
                 })
               });
-              setItemCausingFieldChange(item._id);
+              setItemCausingFieldChange({_id: item._id, ts: Date.now()});
             }}
             textFieldProps={{
               size: 'small',
@@ -1076,7 +1108,7 @@ const MatrixComponent = ({
   updatePipelineItem,
   removePipelineItem,
   pipelineErrors,
-  itemCausingFieldChange,
+  itemCausingFieldChange
 }) => {
   const itemErrors = pipelineErrors[item._id] || [];
 
@@ -1092,7 +1124,7 @@ const MatrixComponent = ({
       const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, mainResourceFields);
       setAvailableFields(fields || []);
     };
-    if (!upstreamPipeline?.length || !itemCausingFieldChange || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange)) {
+    if (!upstreamPipeline?.length || !itemCausingFieldChange?._id || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange?._id)) {
       fetchFields();
     }
   }, [itemCausingFieldChange, formValues?.resource, mainResourceFields]);
@@ -1119,7 +1151,7 @@ const MatrixComponent = ({
               )}
               onFieldSelect={(field) => {
                 updatePipelineItem(item._id, {
-                  rows: [{ fieldName: field?.fieldName || '', resource: field?.resource || '' }]
+                  rows: [{ fieldName: field?.fieldName || '', resource: field?.resource || '', reportFieldName: field?.reportFieldName }]
                 });
               }}
               textFieldProps={{
@@ -1144,7 +1176,7 @@ const MatrixComponent = ({
               )}
               onFieldSelect={(field) => {
                 updatePipelineItem(item._id, {
-                  columns: [{ fieldName: field?.fieldName || '', resource: field?.resource || '' }]
+                  columns: [{ fieldName: field?.fieldName || '', resource: field?.resource || '', reportFieldName: field?.reportFieldName }]
                 });
               }}
               textFieldProps={{
@@ -1170,7 +1202,7 @@ const MatrixComponent = ({
               )}
               onFieldSelect={(fields) => {
                 updatePipelineItem(item._id, {
-                  values: fields?.map((f) => ({ fieldName: f?.fieldName || '', resource: f?.resource || '' }))
+                  values: fields?.map((f) => ({ fieldName: f?.fieldName || '', resource: f?.resource || '', reportFieldName: f?.reportFieldName }))
                 });
               }}
               textFieldProps={{
@@ -1215,7 +1247,7 @@ export default function ReportBuilderDetail() {
   const [showFieldsPanel, setShowFieldsPanel] = useState(false);
   const [filterFieldSelect, setFilterFieldSelect] = useState({ open: false, item: null });
   const [filterConfigurationDialog, setFilterConfigurationDialog] = useState({ open: false, field: null, editingFilter: null, editingIndex: null });
-  const [itemCausingFieldChange, setItemCausingFieldChange] = useState(null);
+  const [itemCausingFieldChange, setItemCausingFieldChange] = useState({_id: null, ts: null});
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -1380,7 +1412,7 @@ export default function ReportBuilderDetail() {
           _id,
           type: 'group',
           fields: [],
-          accumulator: [{ field: '', operation: '', outputField: '' }]
+          accumulator: [{ field: { fieldName: '', resource: '' }, operation: '', outputField: '' }]
         } as GroupPipeline;
         break;
       case 'sort':
@@ -1436,7 +1468,7 @@ export default function ReportBuilderDetail() {
         newPipeline?.push(matrixItem);
       }
 
-      setItemCausingFieldChange(newPipeline?.[newPipeline?.length - 2]?._id);
+      setItemCausingFieldChange({_id: newPipeline?.[newPipeline?.length - 2]?._id, ts: Date.now()});
       return newPipeline;
     });
   };
@@ -1649,7 +1681,7 @@ export default function ReportBuilderDetail() {
                                           : null
                                       }
                                       options={resourceOptions}
-                                      onChange={(e, val: any) => {}}
+                                      onChange={(e, val: any) => { }}
                                       renderInput={(params) => (
                                         <TextField
                                           {...params}

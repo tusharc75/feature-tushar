@@ -3,7 +3,7 @@ import DonutLargeIcon from '@mui/icons-material/DonutLarge';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { Box, Checkbox, FormControlLabel, FormGroup, IconButton, Popover } from '@mui/material';
 import axios, { CancelToken } from 'axios';
-import { camelCase } from 'lodash';
+import { camelCase, groupBy } from 'lodash';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { FiExternalLink } from 'react-icons/fi';
@@ -20,7 +20,6 @@ import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import Filter from 'src/components/Filter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import IconButtonTabs from 'src/components/IconButtonTabs';
@@ -28,6 +27,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 import {
   ATTACHMENT_TYPE,
+  MATERIAL_TYPE,
   WORKORDER_SERVICE_STATUS,
   WORKORDER_TECHNICIAN_SERVICE_STATUS,
   WORK_ORDER_STATUS,
@@ -45,6 +45,8 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import ResourceFilter from 'src/pages/WorkOrderTechnician/ResourceFilter';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
+import WorkOrdersCompleteStepDialog from 'src/pages/WorkOrder/WorkOrdersCompleteStepDialog';
+import BulkActionItems from './BulkActionItems';
 
 type Columns = typeof WORKORDER_TECHNICIAN_SERVICE_STATUS;
 
@@ -77,7 +79,7 @@ const WorkOrderTechnician = () => {
   const { generateColumns } = useColumns();
   const toastConfig = useContext(CustomToastContext);
   const { state: tableState, dispatch: tableDispatch } = useTableReducer({ renderedFrom });
-  const { selectedRecords: tableSelectedRecords } = tableState;
+  const { selectedCustomSubRows: tableSelectedRecords } = tableState;
   const gridViewRef = useRef<GridViewRef>();
   const [serviceOpen, setServiceOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
@@ -93,10 +95,9 @@ const WorkOrderTechnician = () => {
   const [filterByIds, setFilterByIds] = useState([]);
   const [filterTerm, setFilterTerm] = useState({});
   const [filterQuery, setFilterQuery] = useState([]);
-  const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [resourceData, setResourceData] = useState(null);
   const [selectedResource, setSelectedResource] = useState(null);
+  const [workOrdersCompleteServicesDialog, setWorkOrdersCompleteServicesDialog] = useState({ open: false, workOrders: null });
 
   const resetSelectedRecords = () => {
     cardState.resetSelection();
@@ -170,9 +171,9 @@ const WorkOrderTechnician = () => {
     keyGetter
   });
 
-  useEffect(() => {
-    cardState.setColumnDef(columnsDef);
-  }, [columnsDef]);
+  // useEffect(() => {
+
+  // }, [columnsDef]);
 
   useEffect(() => {
     const payload = {
@@ -239,6 +240,7 @@ const WorkOrderTechnician = () => {
         return c;
       });
       setColumnsDef(finalColumns);
+      cardState.setColumnDef(finalColumns);
     } catch (error) {
       console.error(error);
     }
@@ -428,29 +430,6 @@ const WorkOrderTechnician = () => {
     }
   };
 
-  const handleCompleteService = () => {
-    setIsSubmitting(true);
-    const data = selectedRecords
-      ?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)
-      ?.map((_s) => ({
-        workOrder: _s?.workOrderId,
-        service: _s?.materialId,
-        uniqueId: _s?.uniqueId,
-        status: WORKORDER_SERVICE_STATUS.completed
-      }));
-    axiosInstance()
-      .put(`${workOrder.api}/service/work-orders-services-status`, data)
-      .then(({ data }) => {
-        setIsSubmitting(false);
-        setShowServiceCompleteConfirmBox(false);
-        resetSelectedRecords();
-        onClickRefreshIcon();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const newActionButtonProps: NewActionButtonProps<string, any> = useMemo(() => {
     const items = {
       disabled: selectedRecords?.length === 0,
@@ -464,7 +443,22 @@ const WorkOrderTechnician = () => {
               ? false
               : true,
           label: `Complete Service(s)`,
-          onClick: () => setShowServiceCompleteConfirmBox(true)
+          onClick: () => {
+            const groupedWorkOrder = groupBy(
+              selectedRecords?.filter((e) => !!e?.workOrderId),
+              'workOrderId'
+            );
+            const data: any = [];
+            for (const workOrderId in groupedWorkOrder) {
+              data.push({
+                workOrder: workOrderId,
+                services: groupedWorkOrder[workOrderId]
+                  ?.filter((e) => e?.type === MATERIAL_TYPE.service)
+                  ?.map((e) => ({ service: e?.serviceId, uniqueId: e?.uniqueId }))
+              });
+            }
+            setWorkOrdersCompleteServicesDialog({ open: true, workOrders: data });
+          }
         }
       ]
     };
@@ -494,7 +488,12 @@ const WorkOrderTechnician = () => {
   const handleApplyFilter = (filterByIdsP = filterByIds) => {
     setShowFilter(false);
     const queryString = getQueryString(filterByIdsP);
-    setFilterQuery(queryString);
+    setFilterQuery((prev) => {
+      if (JSON.stringify(prev) === JSON.stringify(queryString)) {
+        return prev;
+      }
+      return queryString;
+    });
   };
 
   useEffect(() => {
@@ -555,6 +554,9 @@ const WorkOrderTechnician = () => {
             <CardView
               childColumns={childColumns}
               renderedFrom={renderedFrom}
+              bulkActionItems={
+                <BulkActionItems selectedRecords={selectedRecords} setWorkOrdersCompleteServicesDialog={setWorkOrdersCompleteServicesDialog} />
+              }
               headerSlot={
                 <>
                   <DetailsPageHeader
@@ -614,14 +616,17 @@ const WorkOrderTechnician = () => {
               columns={columnsDef}
               renderedFrom={renderedFrom}
               state={tableState}
+              bulkActionItems={
+                <BulkActionItems selectedRecords={selectedRecords} setWorkOrdersCompleteServicesDialog={setWorkOrdersCompleteServicesDialog} />
+              }
               tableHead={
                 <DetailsPageHeader
                   isAddButtonVisible={false}
                   className="flex-grow"
                   isActionButtonVisible={false}
-                  isNewActionButtonVisible={selectedRecords.length > 0}
-                  newActionButtonProps={newActionButtonProps}
-                  actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                  // isNewActionButtonVisible={selectedRecords.length > 0}
+                  // newActionButtonProps={newActionButtonProps}
+                  // actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
                   leftSideContents={
                     <div className="flex w-full flex-wrap items-center gap-2">
                       <ResourceFilter
@@ -667,17 +672,6 @@ const WorkOrderTechnician = () => {
           </div>
         )}
       </Box>
-      {showServiceCompleteConfirmBox && (
-        <ConfirmationDialog
-          okBtnLoading={isSubmitting}
-          open={showServiceCompleteConfirmBox}
-          message={`Are you sure you want to Complete this Service(s)`}
-          onClose={() => {
-            setShowServiceCompleteConfirmBox(false);
-          }}
-          onOk={handleCompleteService}
-        />
-      )}
       {showFilter && (
         <Filter
           onClose={() => {
@@ -721,6 +715,17 @@ const WorkOrderTechnician = () => {
           workOrderId={selectedService?.workOrderId}
           uniqueId={selectedService?.uniqueId}
           canPerform={selectedService?.canPerform}
+        />
+      )}
+
+      {workOrdersCompleteServicesDialog.open && (
+        <WorkOrdersCompleteStepDialog
+          workOrders={workOrdersCompleteServicesDialog.workOrders}
+          onClose={() => setWorkOrdersCompleteServicesDialog({ open: false, workOrders: null })}
+          onSuccess={() => {
+            setWorkOrdersCompleteServicesDialog({ open: false, workOrders: null });
+            onClickRefreshIcon();
+          }}
         />
       )}
     </Box>

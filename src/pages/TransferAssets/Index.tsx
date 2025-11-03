@@ -30,6 +30,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageTransferAsset from './ManageTransferAsset';
 import axios, { CancelTokenSource } from 'axios';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const TransferAsset = () => {
   let renderedFrom = camelCase(sidebarResource.transferAsset);
@@ -81,8 +82,9 @@ const TransferAsset = () => {
   }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.transferAsset);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.transferAsset, permissions?.transferAsset?.isUpdate);
-    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.transferAssetDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.transferAssetDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

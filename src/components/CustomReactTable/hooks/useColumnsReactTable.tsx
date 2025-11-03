@@ -78,8 +78,6 @@ export function useColumns() {
         currency = user?.user?.brandCurrency || 'USD';
       }
 
-      console.log(fieldColor)
-
       let updatedTitle = camelCase(renderedFrom);
       const column = [];
       const _fields = fields?.map((e) => e?.fieldData || e);

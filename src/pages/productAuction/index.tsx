@@ -20,6 +20,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageProductAuction from './ManageProductAuction';
 import axios, { CancelTokenSource } from 'axios';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const ProductAuction = () => {
   const renderedFrom = camelCase(sidebarResource.productAuction);
@@ -52,8 +53,9 @@ const ProductAuction = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
+    let resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.productAuction);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.productAuction, permissions?.productAuction?.isUpdate);
-    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.productAuctionDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.productAuctionDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

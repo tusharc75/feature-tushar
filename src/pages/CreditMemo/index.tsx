@@ -28,6 +28,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { Delete } from '@mui/icons-material';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const CreditMemo = () => {
   const {
@@ -87,6 +88,7 @@ const CreditMemo = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.creditMemo);
     const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.creditMemo, permissions?.creditMemo?.isUpdate);
     setAllFields(JSON.parse(JSON.stringify(fieldsDataAll)));
     fieldsDataForRead?.forEach((d) => {
@@ -95,7 +97,7 @@ const CreditMemo = () => {
         setStatusOptions(statusOps);
       }
     });
-    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.creditMemoDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.creditMemoDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

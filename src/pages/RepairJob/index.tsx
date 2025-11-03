@@ -35,6 +35,7 @@ import { createRepairJobFlow } from './walkmeSteps';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 let repairJobTimeout;
 
@@ -95,6 +96,7 @@ const RepairJob = () => {
 
   const fetchGridColumns = async () => {
     let data;
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.repairJob);
     if (isOffline) {
       data = await findOne(objectStore.resource, sidebarResource.repairJob);
     } else {
@@ -106,7 +108,7 @@ const RepairJob = () => {
         console.error(`Repair Job: Error while storing data for Offline context. Error: ${ex.message}`);
       }
     }
-    let newColumns = generateColumns(pageTitle, data, routes.repairJobDetail.path, true);
+    let newColumns = generateColumns(pageTitle, data, routes.repairJobDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     if (isOffline) {
       newColumns?.forEach((o) => {
         o['filter'] = false;

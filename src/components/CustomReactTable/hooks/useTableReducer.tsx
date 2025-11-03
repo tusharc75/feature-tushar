@@ -1,4 +1,5 @@
-import { useReducer } from 'react';
+import { Table } from '@tanstack/react-table';
+import { useCallback, useMemo, useReducer, useRef, useState } from 'react';
 import { gridPageSizes } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -151,6 +152,14 @@ export type TInitialState = {
   customExpanderRowData: { [key: string]: boolean } | null | 'all';
 };
 
+export type ExtendedTInitialState = {
+  setSelectedSubItemsMap: React.Dispatch<React.SetStateAction<Map<string, Map<string, any>>>>;
+  selectedSubItemsMap: Map<string, Map<string, any>>;
+  selectedCustomSubRows: any[];
+  getTable: () => Table<any>;
+  setTable: (table: Table<any>) => void;
+} & TInitialState;
+
 export type TActios =
   | { type: 'loading'; loading: boolean }
   | { type: 'initialize'; data: any[]; count: number }
@@ -180,6 +189,8 @@ export const useTableReducer = (props?: UseTableReducerProps) => {
     state: { user }
   }: any = useData();
   const { renderedFrom } = props || {};
+  const [selectedSubItemsMap, setSelectedSubItemsMap] = useState<Map<string, Map<string, any>>>(new Map());
+  const tableRef = useRef<Table<any>>(null);
 
   const rowsPerPage = renderedFrom
     ? user?.gridRowsPerPage?.find((d) => d.resource === renderedFrom)?.rowsPerPage || gridPageSizes[0]
@@ -190,7 +201,22 @@ export const useTableReducer = (props?: UseTableReducerProps) => {
     limit: rowsPerPage
   };
 
-  const [state, dispatch] = useReducer(reducer, newInitialState);
+  const selectedCustomSubRows = useMemo(() => {
+    const data = Array.from(selectedSubItemsMap.values())
+      .flatMap((innerMap) => Array.from(innerMap.values()))
+      .flat() as any[];
+    return data;
+  }, [selectedSubItemsMap]);
 
-  return { state, dispatch };
+  const getTable = useCallback(() => {
+    return tableRef.current;
+  }, []);
+
+  const setTable = useCallback((table: Table<any>) => {
+    tableRef.current = table;
+  }, []);
+
+  const [state, dispatch] = useReducer(reducer, newInitialState as any);
+
+  return { state: { ...state, getTable, setTable, selectedSubItemsMap, setSelectedSubItemsMap, selectedCustomSubRows }, dispatch };
 };

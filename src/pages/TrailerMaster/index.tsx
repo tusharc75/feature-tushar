@@ -22,6 +22,7 @@ import ManageTrailerMaster from './ManageTrailerMaster';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const renderedFrom = camelCase(sidebarResource.trailerMaster);
 
@@ -55,8 +56,9 @@ const TrailerMaster = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.trailerMaster);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.trailerMaster, permissions?.trailerMaster?.isUpdate);
-    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.trailerMasterDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.trailerMasterDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

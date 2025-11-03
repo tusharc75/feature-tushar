@@ -3,7 +3,7 @@ import CardColTimeline from 'src/components/CardColTimeline1';
 import { workOrderColormap } from 'src/constants/helpers';
 import CardCustomComponent from 'src/pages/WorkOrderTechnician/CardView/CardCustomComponent';
 
-const CardView = ({ filterQuery, setSelectedService, setServiceOpen, state, headerSlot, renderedFrom, childColumns }) => {
+const CardView = ({ filterQuery, setSelectedService, setServiceOpen, state, headerSlot, renderedFrom, childColumns, bulkActionItems }) => {
   const { setFilterQuery } = state;
 
   useEffect(() => {
@@ -31,6 +31,7 @@ const CardView = ({ filterQuery, setSelectedService, setServiceOpen, state, head
         customContent={(props) => <CardCustomComponent {...props} renderedFrom={renderedFrom} columns={childColumns} />}
         subItemAccessor={(data) => data.services}
         getChildId={(child) => child._id}
+        bulkActionItems={bulkActionItems}
         cardOnClick={(data: any) => {
           let tempServiceData = {};
           tempServiceData['uniqueId'] = data?.uniqueId;

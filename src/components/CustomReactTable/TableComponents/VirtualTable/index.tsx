@@ -1,7 +1,7 @@
 import { Error } from '@mui/icons-material';
 import { Box, CircularProgress } from '@mui/material';
 import MaUTable from '@mui/material/Table';
-import { Column, flexRender } from '@tanstack/react-table';
+import { Column, flexRender, Row, RowSelectionState } from '@tanstack/react-table';
 import { defaultRangeExtractor, Range, useVirtualizer } from '@tanstack/react-virtual';
 import React, { ForwardedRef, forwardRef, Fragment, useEffect, useState } from 'react';
 import { RnderTableProps } from 'src/components/CustomReactTable/TableComponents/Table';
@@ -43,7 +43,10 @@ const VirtualTableImpl = forwardRef(function (
     expanderWithCustomContent = false,
     customContentHeight = 300,
     customContent = () => null,
-    renderedFrom = ''
+    renderedFrom = '',
+    rowSelection,
+    getChildId,
+    subItemAccessor
   }: RnderTableProps & {
     columns: Column<any, unknown>[];
     sizes: number[];
@@ -51,6 +54,9 @@ const VirtualTableImpl = forwardRef(function (
     expanderWithCustomContent: boolean;
     customContentHeight: number;
     customContent: ({ row }: { row: any }) => React.ReactNode;
+    rowSelection: Record<string, Row<any>>;
+    getChildId: (data: any) => string;
+    subItemAccessor: (data: any) => any[];
   },
   ref: ForwardedRef<HTMLTableElement>
 ) {
@@ -153,6 +159,9 @@ const VirtualTableImpl = forwardRef(function (
             expanderWithCustomContent={expanderWithCustomContent}
             customContentHeight={customContentHeight}
             customContent={customContent}
+            rowSelection={rowSelection}
+            getChildId={getChildId}
+            subItemAccessor={subItemAccessor}
           />
           {isFooterVisible && (
             <>

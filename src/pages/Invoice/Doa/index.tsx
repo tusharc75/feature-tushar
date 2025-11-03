@@ -8,7 +8,7 @@ import { fetch_child_resource_fields } from "src/components/ChildResourceField";
 import CustomReactTable, { useColumns, useTableReducer } from "src/components/CustomReactTable";
 import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
-import { CHILD_RESOURCE, DOA_STATUS, getEmailsFromContacts, invoice, MATERIAL_TYPE, sidebarResource } from "src/constants/helpers";
+import { CHILD_RESOURCE, DOA_STATUS, invoice, MATERIAL_TYPE, sidebarResource } from "src/constants/helpers";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "src/StateProvider/Provider";
 import Box from '@mui/material/Box/Box';
@@ -16,8 +16,6 @@ import Grid from '@mui/material/Grid2';
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import FinalPriceBox from "src/components/FinalPriceBox";
 import { DetailsPageHeader } from "src/components/PageHeaders";
-import { ThemeButton } from "src/components/Helpers/Buttons";
-import SendIcon from '@mui/icons-material/Send';
 import RequestButton from "src/pages/DoaSetupNew/RequestButton";
 
 const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fetchInvoiceData, stepFullScreen }) => {
@@ -199,31 +197,6 @@ const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fe
     return subRows;
   };
 
-  const previewDownloadProps = {
-    fileName: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
-    subject: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
-    resource: sidebarResource.invoice,
-    referenceId: invoiceData?._id,
-    columns: columns,
-    isSendEmail: true,
-    toEmails: getEmailsFromContacts(invoiceData),
-    defaultColumns: [
-      'type',
-      'detail',
-      'fieldTicket',
-      'qty',
-      'unit',
-      'pricingMethod',
-      'actualStartDate',
-      'actualEndDate',
-      `price_${invoiceData?.currency?.toLowerCase()}`,
-      `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
-      `taxPercentage`,
-      `tax_${invoiceData?.currency?.toLowerCase()}`,
-      `finalPrice_${invoiceData?.currency?.toLowerCase()}`
-    ]
-  };
-
   const rightSideContents = () => {
     return (
       <>
@@ -241,7 +214,7 @@ const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fe
 
   return (
     <>
-      <DetailsPageHeader isAddButtonVisible={false} isActionButtonVisible={false} previewDownloadProps={previewDownloadProps} rightSideContents={rightSideContents()} hasXpadding />
+      <DetailsPageHeader isAddButtonVisible={false} isActionButtonVisible={false} rightSideContents={rightSideContents()} hasXpadding />
       <Grid size={{ xs: 12, md: 12, sm: 12 }}>
         {columns ? (
           <Box zIndex={5}>

@@ -3,7 +3,7 @@ import Grid from '@mui/material/Grid2';
 import { ExpandMore } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import { Skeleton } from '@mui/material';
-import { camelCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { VscVersions } from 'react-icons/vsc';
@@ -28,6 +28,8 @@ import {
   INVOICE_STATUS,
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
+  getCustomInvoiceFileName,
+  getEmailsFromContacts,
   invoice,
   invoiceProcessSteps,
   sidebarResource
@@ -44,6 +46,10 @@ import { DownloadIcon } from 'src/assets/svg/svgIcons';
 import Doa from 'src/pages/Invoice/Doa';
 import ShowDoa from 'src/pages/DoaSetupNew/ShowDoa';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { useColumns } from 'src/components/CustomReactTable';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -82,6 +88,8 @@ const InvoiceDetails = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const [DOAData, setDOAData] = useState(null);
+  const [columns, setColumns] = useState([]);
+  const { generateColumns } = useColumns();
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -91,6 +99,7 @@ const InvoiceDetails = () => {
   useEffect(() => {
     fetchPolicy();
     fetchFields();
+    invoiceColumns();
   }, []);
 
   useEffect(() => {
@@ -169,6 +178,33 @@ const InvoiceDetails = () => {
       toastConfig.setToastConfig(error);
     }
   };
+
+  const invoiceColumns = async () => {
+
+    const columnData = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
+    const newColumns = generateColumns(renderedFrom, columnData, null, false, invoiceData?.currency);
+
+    let coloum: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+      },
+      {
+        accessor: 'detail',
+        Header: 'Detail',
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+      }
+    ];
+    coloum = [...coloum, ...newColumns];
+    setColumns(coloum);
+  }
 
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
@@ -270,6 +306,34 @@ const InvoiceDetails = () => {
     const currIdx = statusOptions.findIndex((status) => status.optionValue === statusCheck);
     return statusOptions[currIdx + 1]?.optionValue !== status;
   };
+
+  const previewDownloadProps = {
+    fileName: resourcePolicyData?.policy?.customDownloadFileName ? getCustomInvoiceFileName(resourcePolicyData?.policy?.customDownloadFileName, invoiceData)
+      : `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
+    subject: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
+    resource: sidebarResource.invoice,
+    referenceId: invoiceData?._id,
+    columns: columns,
+    isSendEmail: true,
+    toEmails: getEmailsFromContacts(invoiceData),
+    defaultColumns: [
+      'type',
+      'detail',
+      'fieldTicket',
+      'qty',
+      'unit',
+      'pricingMethod',
+      'actualStartDate',
+      'actualEndDate',
+      `price_${invoiceData?.currency?.toLowerCase()}`,
+      `totalPrice_${invoiceData?.currency?.toLowerCase()}`,
+      `taxPercentage`,
+      `tax_${invoiceData?.currency?.toLowerCase()}`,
+      `finalPrice_${invoiceData?.currency?.toLowerCase()}`
+    ],
+    onlyfileNameAsDownload: resourcePolicyData?.policy?.customDownloadFileName ? true : false
+  };
+
 
   return (
     <Box className="main-container-v1">
@@ -377,6 +441,9 @@ const InvoiceDetails = () => {
                       {'Edit'}
                     </ThemeButton>
                   )}
+
+                <PreviewDownload {...previewDownloadProps} />
+
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
             ) : (

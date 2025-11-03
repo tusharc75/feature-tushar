@@ -8,7 +8,7 @@ import ArrangeView from '../ArrangeView';
 import GridFilter from '../GridFilter';
 import ShowFilteredRecordsOnly from '../ShowFilteredRecordsOnly';
 import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
-import { TInitialState } from '../hooks/useTableReducer';
+import { ExtendedTInitialState, TInitialState } from '../hooks/useTableReducer';
 import { Table } from '@tanstack/react-table';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ExportIcon } from 'src/assets/svg/svgIcons';
@@ -67,7 +67,7 @@ const GridHeader = ({
   bulkActionItems
 }: GridHeaderProps) => {
   const toastConfig = useContext(CustomToastContext);
-  const { selectedRecords, loading, filters: customFilters, dataRows }: TInitialState = state;
+  const { selectedRecords, loading, filters: customFilters, dataRows, selectedCustomSubRows }: ExtendedTInitialState = state;
   const { getTempFilter, setTempFilter } = useUserTempFilters();
 
   const isMobileView = useMediaQuery('(max-width:768px)');
@@ -146,9 +146,14 @@ const GridHeader = ({
 
   return (
     <div className={`my-2 flex flex-wrap items-center justify-between gap-[8px] transition-all duration-300`}>
-      {selectedRecords.length > 0 && bulkActionItems ? (
+      {(selectedRecords.length > 0 || selectedCustomSubRows.length > 0) && bulkActionItems ? (
         <>
-          <ModernBulkAction state={state} dispatch={dispatch} bulkActionItems={bulkActionItems} />
+          <ModernBulkAction
+            state={state}
+            dispatch={dispatch}
+            bulkActionItems={bulkActionItems}
+            onClose={() => state?.setSelectedSubItemsMap?.(new Map())}
+          />
         </>
       ) : (
         <>

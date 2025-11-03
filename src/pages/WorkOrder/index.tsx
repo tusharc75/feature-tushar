@@ -33,6 +33,7 @@ import { useHistory } from 'react-router-dom';
 import ButtonMenu from 'src/components/ButtonMenu';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import BulkEditWorkOrder from './BulkEditWorkOrder';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const WorkOrder = () => {
   let renderedFrom = camelCase(sidebarResource?.workOrder);
@@ -107,8 +108,9 @@ const WorkOrder = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly, selectedResource]);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.workOrder);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.workOrder, permissions?.workOrder?.isUpdate);
-    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.workOrderDetail?.path, true);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.workOrderDetail?.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

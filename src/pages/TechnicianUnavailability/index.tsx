@@ -334,12 +334,12 @@ const TechnicianUnavailability = ({ id }: { id?: string | null }) => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
-              bulkActionItems={
+              bulkActionItems={id && (
                 <BulkActionItems
                   permissions={permissions}
                   setShowDeleteConfirmBox={setShowDeleteConfirmBox}
                 />
-              }
+              )}
             />
           </Box>
         ) : (
