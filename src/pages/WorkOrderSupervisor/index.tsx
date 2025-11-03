@@ -88,7 +88,7 @@ const defaultVisibleRows = [
 
 const WorkOrderSupervisor = () => {
   const { state: tableState, dispatch: tableDispatch } = useTableReducer({ renderedFrom });
-  const { selectedRecords: tableSelectedRecords } = tableState;
+  const { selectedCustomSubRows: tableSelectedRecords } = tableState;
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -297,6 +297,22 @@ const WorkOrderSupervisor = () => {
               ) : (
                 <NoDataCell />
               )}
+              <div className="ml-auto">
+                {row?.original?.status !== WORKORDER_SERVICE_STATUS.planned && (
+                  <HtmlTooltip title="Preview PDF">
+                    <IconButton
+                      size="small"
+                      color="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePdfPreview(row?.original?.workOrderId, user, toastConfig);
+                      }}
+                    >
+                      <PictureAsPdfIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
+              </div>
             </div>
           );
           ele.defaultVisible = true;
@@ -360,9 +376,9 @@ const WorkOrderSupervisor = () => {
     cardState.setVisibleColumns(selectedServiceStatus);
   }, [selectedServiceStatus]);
 
-  const selectedRecords = useMemo(() => [...tableSelectedRecords, ...cardState.selectedRecords], [tableSelectedRecords, cardState.selectedRecords]);
+  const selectedRecords = useMemo(() => [...tableSelectedRecords, ...cardState.selectedSubRows], [tableSelectedRecords, cardState.selectedSubRows]);
   const selectedRecordsP = useMemo(() => [...selectedRecords?.filter((r) => r?.status === WORKORDER_SERVICE_STATUS.planned)], [selectedRecords]);
-  const selectedRecordsS: any = useMemo(() => [...selectedRecords?.filter((r) => r?.status != WORKORDER_SERVICE_STATUS.planned)], [selectedRecords]);
+  const selectedRecordsS: any = useMemo(() => [...selectedRecords?.filter((r) => r?.status !== WORKORDER_SERVICE_STATUS.planned)], [selectedRecords]);
 
   const ref: any = useRef();
 
@@ -398,20 +414,6 @@ const WorkOrderSupervisor = () => {
                 </Box>
               )}
               <div className="ml-auto flex items-center gap-1">
-                {row?.original?.status !== WORKORDER_SERVICE_STATUS.planned && (
-                  <HtmlTooltip title="Preview PDF">
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePdfPreview(row?.original?.workOrderId, user, toastConfig);
-                      }}
-                    >
-                      <PictureAsPdfIcon fontSize="small" color="primary" />
-                    </IconButton>
-                  </HtmlTooltip>
-                )}
                 <RenderAssignOptions
                   openAssignHandler={openAssignHandler}
                   data={row?.original}
@@ -782,7 +784,7 @@ const WorkOrderSupervisor = () => {
     label: 'Assign Technicians',
     disabled:
       selectedRecordsS?.some((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status)) ||
-      selectedRecordsS?.length === 0,
+      !selectedRecordsS?.length,
     onClick: () => {
       if (viewType === 'table-view') {
         workOrderListRef.current?.setAssignTechnicianDialog(true);
@@ -854,8 +856,7 @@ const WorkOrderSupervisor = () => {
   const newActionButtonProps: NewActionButtonProps<string, any> = useMemo(() => {
     const canShowWorkStationButton = permissions?.workStations?.isRead;
     const data: NewActionButtonProps<string, any> = {
-      disabled: selectedRecords?.length === 0,
-      horizontal: 'right',
+      disabled: !selectedRecords?.length,
       items:
         viewType === 'table-view'
           ? tableViewStatus === WORKORDER_SERVICE_STATUS.planned
@@ -1140,7 +1141,7 @@ const WorkOrderSupervisor = () => {
                     isActionButtonVisible={false}
                     isNewActionButtonVisible={selectedRecords.length > 0}
                     newActionButtonProps={newActionButtonProps}
-                    actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                    actionButtonProps={{ disabled: !selectedRecords?.length }}
                     leftSideContents={
                       <div className="flex items-center gap-2">
                         <ThemeButton
@@ -1204,9 +1205,9 @@ const WorkOrderSupervisor = () => {
                 <DetailsPageHeader
                   isAddButtonVisible={false}
                   isActionButtonVisible={false}
-                  isNewActionButtonVisible={selectedRecords.length > 0}
+                  isNewActionButtonVisible={selectedRecords?.length > 0}
                   newActionButtonProps={newActionButtonProps}
-                  actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                  actionButtonProps={{ disabled: !selectedRecords?.length }}
                   leftSideContents={
                     <div className="flex items-center gap-2">
                       <ThemeButton

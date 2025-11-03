@@ -40,6 +40,12 @@ const ResourceFilter = ({ selectedResource, setSelectedResource, filterByIds, se
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
 
   useEffect(() => {
+    if (RESOURCE_LIST?.length === 1 && !selectedResource) {
+      setSelectedResource(RESOURCE_LIST[0]);
+    }
+  }, [RESOURCE_LIST, selectedResource, setSelectedResource]);
+
+  useEffect(() => {
     let filterById = [...filterByIds];
     filterById = filterById?.filter((e) => !['assemblyOrder', 'productionOrder', 'repairOrder', '_id'].includes(e?.field));
     if (selectedResourceData) {
@@ -64,21 +70,23 @@ const ResourceFilter = ({ selectedResource, setSelectedResource, filterByIds, se
 
   return (
     <>
-      <Autocomplete
-        options={RESOURCE_LIST}
-        getOptionLabel={(option: any) => option?.title || ''}
-        isOptionEqualToValue={(option: any, value: any) => option?.title === value?.title}
-        fullWidth
-        style={{ maxWidth: '270px' }}
-        value={selectedResource}
-        onChange={(event, newValue) => {
-          setSelectedResource(newValue);
-          setSelectedResourceData(null);
-          setSelectedWorkOrder(null);
-        }}
-        size="small"
-        renderInput={(params) => <TextField {...params} margin="none" label={`Resource`} variant="outlined" />}
-      />
+      {RESOURCE_LIST?.length > 1 && (
+        <Autocomplete
+          options={RESOURCE_LIST}
+          getOptionLabel={(option: any) => option?.title || ''}
+          isOptionEqualToValue={(option: any, value: any) => option?.title === value?.title}
+          fullWidth
+          style={{ maxWidth: '270px' }}
+          value={selectedResource}
+          onChange={(event, newValue) => {
+            setSelectedResource(newValue);
+            setSelectedResourceData(null);
+            setSelectedWorkOrder(null);
+          }}
+          size="small"
+          renderInput={(params) => <TextField {...params} margin="none" label={`Resource`} variant="outlined" />}
+        />
+      )}
       {selectedResource && (
         <div style={{ width: '270px' }}>
           <AsyncDropDown
