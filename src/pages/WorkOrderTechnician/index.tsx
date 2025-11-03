@@ -488,7 +488,12 @@ const WorkOrderTechnician = () => {
   const handleApplyFilter = (filterByIdsP = filterByIds) => {
     setShowFilter(false);
     const queryString = getQueryString(filterByIdsP);
-    setFilterQuery(queryString);
+    setFilterQuery((prev) => {
+      if (JSON.stringify(prev) === JSON.stringify(queryString)) {
+        return prev;
+      }
+      return queryString;
+    });
   };
 
   useEffect(() => {
