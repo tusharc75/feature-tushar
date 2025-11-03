@@ -139,8 +139,9 @@ const RenderService = ({
                   if (!visible) return null;
                   return (
                     <span
-                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
-                        }`}
+                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${
+                        isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
+                      }`}
                       style={{ top: isMobileSlideOpen ? `-${(index + 1) * 32 + (index + 1) * 8}px` : '-24px', transition: `top 0.${index + 2}s` }}
                     >
                       <ThemeButton key={id} {...rest} className={`${isColapsed ? 'hidden' : ''} round`}>
@@ -193,7 +194,10 @@ const RenderService = ({
                     checked={isGroupSelected(allServices)}
                     indeterminate={isGroupIndeterminate(allServices)}
                     onChange={(e) => {
-                      handleSelectMultiple(e.target.checked, allServices?.filter((e) => e?.type !== 'quotation'));
+                      handleSelectMultiple(
+                        e.target.checked,
+                        allServices?.filter((e) => e?.type !== 'quotation')
+                      );
                     }}
                     checkedIcon={<CheckCircle />}
                     indeterminateIcon={<CheckCircleOutline />}
@@ -205,6 +209,11 @@ const RenderService = ({
                   </label>
                 </div>
               )}
+              <span className="flex-grow text-right">
+                <IconButton size={'small'} onClick={handleColapse}>
+                  <ArrowForwardIos fontSize="small" className={cn('transition-all', isColapsed ? '' : '[transform:rotate(180deg)]')} />
+                </IconButton>
+              </span>
               {policy && policy.enableServicesOnConsumables ? null : (
                 <div className="mb-2 mt-2 flex items-center justify-end gap-2">
                   {servicesButtons.map(({ id, children, visible, ...rest }) => {
@@ -217,11 +226,8 @@ const RenderService = ({
                   })}
                 </div>
               )}
-              <IconButton size={'small'} onClick={handleColapse}>
-                <ArrowForwardIos fontSize="small" className={cn('transition-all', isColapsed ? '' : '[transform:rotate(180deg)]')} />
-              </IconButton>
             </div>
-            <div className={`max-h-[calc(100vh-300px)] overflow-y-auto overflow-x-hidden p-[20px]`}>
+            <div className={`max-h-[calc(100vh-300px)] overflow-y-auto overflow-x-hidden px-[20px] pb-[20px] pt-2`}>
               {policy && policy.enableServicesOnConsumables && user?.brandPolicy?.servicePrePost && serviceSteps?.find((e) => e?.preWork) && (
                 <div className="mb-4">
                   <RenderServiceGroup
