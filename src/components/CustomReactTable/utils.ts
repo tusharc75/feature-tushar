@@ -764,7 +764,7 @@ export const getCellColorCode = (fieldColor, values) => {
         }
         else {
           const comparisonFn = operatorOperations[checkField?.operator];
-          if (!comparisonFn(parseFloat(values[checkField?.fieldName]), parseFloat(checkField?.value))) {
+          if (!comparisonFn(parseFloat(values[checkField?.fieldName] || 0), parseFloat(checkField?.value) || 0)) {
             meetsAllConditions = false;
           }
         }

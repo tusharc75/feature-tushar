@@ -53,7 +53,6 @@ import ShowAssignInventory from 'src/pages/RentalManagement/SerializedAsset/Show
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 import { TabPanel } from 'src/components/CustomTabs';
 import Technicians from 'src/pages/RentalManagement/SerializedAsset/Technicians';
-import Competencies from 'src/pages/Competencies';
 import { BulkActionContainer } from 'src/components/CustomReactTable/GridHeader';
 
 const SerializedAsset = ({
@@ -70,7 +69,6 @@ const SerializedAsset = ({
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = 'rental_management_serialized_asset';
 
-  const [technicianHeader, setTechnicianHeader] = useState<React.ReactNode>(null);
   const [deleting, setDeleting] = useState(false);
   const [isAdding, setAdding] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);

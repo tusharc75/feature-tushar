@@ -31,6 +31,8 @@ import { Link } from 'react-router-dom';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, referenceData = null }) => {
   const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}`;
@@ -68,47 +70,33 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
 
   useEffect(() => {
     fetchGridColumns();
-    fetchPolicy();
   }, []);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}&view=true`)
-      .then(({ data: { data } }) => {
-        setCheckMTRValidation(data?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
-        let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
-        const inUseColoumns: any = [
-          {
-            accessor: 'rentalJob',
-            Header: 'Rental Job',
-            minWidth: 180,
-            width: 180,
-            Cell: ({ row }) => (
-              <Link
-                className="link text-truncate"
-                target="_blank"
-                to={`${routes.rentalManagementDetail.path}/${row?.original?.rentalJob?.optionValue}`}
-              >
-                {row?.original?.rentalJob?.optionLabel}
-              </Link>
-            )
-          }
-        ];
-        setColumns([...inUseColoumns, ...newColumns, ...getStaticFields()]);
-      });
-  };
+  const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.serializedAsset);
+    setAssetPolicyData(resourcePolicy);
 
-  const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
-      if (data) {
-        setAssetPolicyData(data);
+    const { fieldsDataForRead, fieldsDataAll } = await fetch_resource_view_fields(sidebarResource.serializedAsset, false);
+    setCheckMTRValidation(fieldsDataAll?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serializedAssetDetail.path, false, null, resourcePolicy?.policy?.fieldColor);
+    const inUseColoumns: any = [
+      {
+        accessor: 'rentalJob',
+        Header: 'Rental Job',
+        minWidth: 180,
+        width: 180,
+        Cell: ({ row }) => (
+          <Link
+            className="link text-truncate"
+            target="_blank"
+            to={`${routes.rentalManagementDetail.path}/${row?.original?.rentalJob?.optionValue}`}
+          >
+            {row?.original?.rentalJob?.optionLabel}
+          </Link>
+        )
       }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    ];
+    setColumns([...inUseColoumns, ...newColumns, ...getStaticFields()]);
   };
 
   useEffect(() => {
