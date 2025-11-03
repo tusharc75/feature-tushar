@@ -455,6 +455,12 @@ const Productpackage = ({
         element.taxCode = taxCodeData?.optionValue;
         element.taxPercentage = taxCodeData?.taxRate || 0;
       }
+      if (allFields?.find((e) => e.fieldName === 'sectionName') && d?.sectionName) {
+        element.sectionName = d?.sectionName;
+        if (allFields?.find((e) => e.fieldName === 'sectionName')) {
+          element.sectionSubTotal = true;
+        }
+      }
       material.push(element);
     });
 
