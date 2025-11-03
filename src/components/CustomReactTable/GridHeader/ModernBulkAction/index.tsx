@@ -46,7 +46,7 @@ const ModernBulkAction = ({ state, bulkActionItems, dispatch, onClose }: ModernB
             className="flex items-center rounded-full border bg-[var(--dark-primary,white)] px-2 py-1 text-sm font-medium text-red-500 hover:bg-gray-50 dark:hover:bg-gray-600"
           >
             <p className="flex items-center gap-1 pl-1 pr-2 text-[13px] text-gray-500 dark:text-gray-300">
-              <span>{selectedRecords.length || selectedCustomSubRows.length}</span>
+              <span>{selectedCustomSubRows?.length || selectedRecords.length}</span>
               Selected
             </p>
             <span className="max-md:sr-only">Esc</span>
