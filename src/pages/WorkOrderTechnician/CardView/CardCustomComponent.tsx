@@ -21,9 +21,9 @@ type CustomContentProps = {
 const CardCustomComponent = React.memo(
   ({ row, columns, getPreRenderedCell, recalculateHeight, renderCellText, state, column, getChildId }: CustomContentProps) => {
     const { expandedSubRows, setExpandedSubRows } = state;
-    const [visibleServices, setVisibleServices] = useState(() => (expandedSubRows.has(row._id) ? row.services : [...row.services].slice(0, 2)));
+    const [visibleServices, setVisibleServices] = useState(() => (expandedSubRows.has(row._id) ? row?.services : [...row?.services].slice(0, 2)));
     const { isAllSelected, handleSelect, handleSelectAll, selectedRowMap } = useSelection({
-      allData: row.services,
+      allData: row?.services,
       getId: getChildId,
       state,
       column,
@@ -31,7 +31,7 @@ const CardCustomComponent = React.memo(
       row
     });
 
-    const isShowMoreVisible = row.services?.length > 2;
+    const isShowMoreVisible = row?.services?.length > 2;
     const isExpanded = expandedSubRows.has(row._id);
 
     useEffect(() => {
@@ -57,7 +57,7 @@ const CardCustomComponent = React.memo(
     return (
       <div className="border-t px-[--px,12px] pb-[--pb,12px] pt-[--py,12px]">
         <div className="mb-3 flex justify-between gap-2">
-          <p className="text-xs font-normal">Services ({row.services.length})</p>
+          <p className="text-xs font-normal">Services ({row?.services?.length})</p>
           <RippleButton
             className="text-xs font-semibold text-blue-500"
             onClick={() => {
