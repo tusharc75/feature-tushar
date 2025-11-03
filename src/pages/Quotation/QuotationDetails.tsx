@@ -630,7 +630,6 @@ const QuotationDetails = () => {
                   renderedFrom={`${renderedFrom}_grid-3`}
                   setReserveAssetWarning={setReserveAssetWarning}
                   resourcePolicyData={resourcePolicyData?.policy}
-                  quotationFields={quotationFields}
                 />
               )}
               {stepNames[currentStep] === 'DOA' && quotationData && (
@@ -649,7 +648,6 @@ const QuotationDetails = () => {
                   DOAData={DOAData}
                   setReserveAssetWarning={setReserveAssetWarning}
                   resourcePolicyData={resourcePolicyData?.policy}
-                  quotationFields={quotationFields}
                 />
               )}
               {stepNames[currentStep] === 'Quote Approval' && quotationData && (
@@ -667,7 +665,6 @@ const QuotationDetails = () => {
                   renderedFrom={`${renderedFrom}_grid-3`}
                   setReserveAssetWarning={setReserveAssetWarning}
                   resourcePolicyData={resourcePolicyData?.policy}
-                  quotationFields={quotationFields}
                 />
               )}
               {stepNames[currentStep] === 'End' && quotationData && (
@@ -684,7 +681,6 @@ const QuotationDetails = () => {
                   renderedFrom={`${renderedFrom}_grid-3`}
                   setReserveAssetWarning={setReserveAssetWarning}
                   resourcePolicyData={resourcePolicyData?.policy}
-                  quotationFields={quotationFields}
                 />
               )}
             </div>

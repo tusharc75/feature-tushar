@@ -49,7 +49,6 @@ const QuoteBuilder = ({
   DOAData = [],
   setReserveAssetWarning,
   resourcePolicyData,
-  quotationFields,
 }) => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const toastConfig = useContext(CustomToastContext);
@@ -67,6 +66,7 @@ const QuoteBuilder = ({
   const [fieldTicketDialog, setFieldTicketDialog] = useState({ open: false, data: null });
   const [invoiceDialog, setInvoiceDialog] = useState(false);
   const [invoiceFields, setInvoiceFields] = useState([]);
+  const [quotationFields, setQuotationFields] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -366,6 +366,8 @@ const QuoteBuilder = ({
 
   const fetchInvoiceFields = async () => {
     try {
+      const { fieldsDataAll: quotationFieldsData } = await fetch_resource_fields(sidebarResource.quotation);
+      setQuotationFields(quotationFieldsData);
       const { fieldsDataAll: invoiceFieldsData } = await fetch_resource_fields(sidebarResource.invoice);
       setInvoiceFields(invoiceFieldsData);
     } catch (error) {
@@ -382,7 +384,7 @@ const QuoteBuilder = ({
     );
 
     const resourceField = invoiceFields?.find((f) => f?.fieldData?.lookupResource === sidebarResource.quotation);
-    referenceData[resourceField.fieldData.fieldName] = quotationData?._id;
+    referenceData[resourceField?.fieldData?.fieldName] = quotationData?._id;
     return referenceData;
   };
 
@@ -544,8 +546,8 @@ const QuoteBuilder = ({
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             renderedFrom={renderedFrom}
             hideSelection={
-              showCreateFieldTicketButton || quotationData?.type === QUOTATION_TYPE.fieldJob && quotationData.status === QUOTATION_STATUS.converted && quotationData?.fieldJob
-                ? !user?.user?.brandPolicy?.createFieldTicketFromQuotation
+              showCreateFieldTicketButton || resourcePolicyData?.createInvoiceFromQuotation || quotationData?.type === QUOTATION_TYPE.fieldJob && quotationData.status === QUOTATION_STATUS.converted && quotationData?.fieldJob
+                ? user?.user?.brandPolicy?.createFieldTicketFromQuotation
                 : true
             }
             hideAction={true}
