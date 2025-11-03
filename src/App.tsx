@@ -316,6 +316,7 @@ import ReportBuilderDetail from 'src/pages/ReportBuilder/ReportBuilderDetail';
 import ReportBuilder from 'src/pages/ReportBuilder';
 import CostBooks from 'src/pages/CostBooks';
 import CostBooksDetail from 'src/pages/CostBooks/CostBooksDetail';
+import UserManualUpdated from 'src/pages/UserManualUpdated';
 
 var notificationInterval: any = null;
 
@@ -595,7 +596,7 @@ function App() {
               <UserManualOld />
             </PrivateRoute>
             <PrivateRoute exact path="/user-manual*" userManualNew={true}>
-              <UserManual />
+              <UserManualUpdated />
             </PrivateRoute>
             <PrivateRoute exact path="/profile">
               <UserProfilePage profileBreadCrumbs={routes.profilePage} />
