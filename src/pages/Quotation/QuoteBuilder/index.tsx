@@ -463,7 +463,7 @@ const QuoteBuilder = ({
 
   const fetchFieldServiceOrderData = () => {
     const fieldServiceOrderId = quotationData?.fieldJob?.optionValue || quotationData?.fieldJob;
-    if (resourcePolicyData?.createFieldTicketWithoutFieldJob) {
+    if (resourcePolicyData?.createFieldTicketWithoutFieldJob && !fieldServiceOrderId) {
       setFieldTicketDialog({ open: true, data: quotationData });
       return;
     }
@@ -545,7 +545,7 @@ const QuoteBuilder = ({
             renderedFrom={renderedFrom}
             hideSelection={
               showCreateFieldTicketButton || quotationData?.type === QUOTATION_TYPE.fieldJob && quotationData.status === QUOTATION_STATUS.converted && quotationData?.fieldJob
-                ? user?.user?.brandPolicy?.createFieldTicketFromQuotation
+                ? !user?.user?.brandPolicy?.createFieldTicketFromQuotation
                 : true
             }
             hideAction={true}
