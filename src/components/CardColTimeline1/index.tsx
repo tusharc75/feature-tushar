@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import ArrangeView from 'src/components/CustomReactTable/ArrangeView';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import ColumnWrapper from './components/ColumnWrapper';
 import { CardColTimelineProps } from './types';
+import ModernBulkAction from 'src/components/CustomReactTable/GridHeader/ModernBulkAction';
 export * from './types';
 export * from './useCardColTimeline';
 
@@ -16,6 +17,7 @@ const CardColTimeline = <D, C extends readonly string[]>({
   renderedFrom,
   customContent,
   getChildId = (data) => data._id,
+  bulkActionItems,
   ...rest
 }: { headerSlot?: React.ReactElement; renderedFrom: string } & CardColTimelineProps<D, C>) => {
   const { columns, visibleColumns, columnDef, visible, order, setOrderAndVisibility, selectedView, setSelectedView } = state;
@@ -59,19 +61,47 @@ const CardColTimeline = <D, C extends readonly string[]>({
     }
   }, [otherFields, selectedView]);
 
+  const isBulkVisible = state.selectedRecords.length > 0 || state.selectedSubRows.length > 0;
+
+  const stateAdapter = {
+    selectedRecords: state.selectedRecords,
+    selectedCustomSubRows: state.selectedSubRows
+  } as any;
+
+  const dispatchAdapter = useCallback(
+    (payload: { type: 'selection'; selectedRecords: any[] }) => {
+      state.setSelectedSubItemsMap(new Map());
+      state.setSelectedRecordMap(new Map());
+    },
+    [state]
+  );
+
   return (
     <>
       <div className="mb-2 flex items-center justify-between gap-2">
-        <div className="flex-grow">{headerSlot}</div>
-        {columnDef && (
-          <ArrangeView
-            columns={columnDef}
-            expander={false}
-            hideSelection={true}
-            renderedFrom={renderedFrom}
-            setOrderAndVisibility={setOrderAndVisibility}
-            setCardSelectedView={setSelectedView}
-          />
+        {isBulkVisible ? (
+          <>
+            <ModernBulkAction
+              state={stateAdapter}
+              dispatch={dispatchAdapter}
+              bulkActionItems={bulkActionItems}
+              onClose={() => state?.setSelectedSubItemsMap?.(new Map())}
+            />
+          </>
+        ) : (
+          <>
+            <div className="flex-grow">{headerSlot}</div>
+            {columnDef && (
+              <ArrangeView
+                columns={columnDef}
+                expander={false}
+                hideSelection={true}
+                renderedFrom={renderedFrom}
+                setOrderAndVisibility={setOrderAndVisibility}
+                setCardSelectedView={setSelectedView}
+              />
+            )}
+          </>
         )}
       </div>
       <div className="flex snap-x snap-mandatory gap-[10px] overflow-auto pb-4 md:scroll-px-[24px] [&_.show-in-export]:!hidden">

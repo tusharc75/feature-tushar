@@ -46,6 +46,7 @@ import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import ResourceFilter from 'src/pages/WorkOrderTechnician/ResourceFilter';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import WorkOrdersCompleteStepDialog from 'src/pages/WorkOrder/WorkOrdersCompleteStepDialog';
+import BulkActionItems from './BulkActionItems';
 
 type Columns = typeof WORKORDER_TECHNICIAN_SERVICE_STATUS;
 
@@ -78,7 +79,7 @@ const WorkOrderTechnician = () => {
   const { generateColumns } = useColumns();
   const toastConfig = useContext(CustomToastContext);
   const { state: tableState, dispatch: tableDispatch } = useTableReducer({ renderedFrom });
-  const { selectedRecords: tableSelectedRecords } = tableState;
+  const { selectedCustomSubRows: tableSelectedRecords } = tableState;
   const gridViewRef = useRef<GridViewRef>();
   const [serviceOpen, setServiceOpen] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
@@ -325,8 +326,9 @@ const WorkOrderTechnician = () => {
                   <Box ml={1}>
                     <HtmlTooltip title={`${row?.original?.priority} Priority`}>
                       <span
-                        className={`no-inherit inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
-                          } `}
+                        className={`no-inherit inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${
+                          row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
+                        } `}
                       >
                         {row?.original?.priority}
                       </span>
@@ -435,19 +437,27 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-              selectedRecords?.filter(
-                (s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.status !== WORK_ORDER_STATUS.onHold && s?.canPerform
-              )?.length === selectedRecords?.length
+            selectedRecords?.filter(
+              (s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.status !== WORK_ORDER_STATUS.onHold && s?.canPerform
+            )?.length === selectedRecords?.length
               ? false
               : true,
           label: `Complete Service(s)`,
           onClick: () => {
-            const groupedWorkOrder = groupBy(selectedRecords?.filter(e => !!e?.workOrderId), 'workOrderId');
-            const data: any = []
+            const groupedWorkOrder = groupBy(
+              selectedRecords?.filter((e) => !!e?.workOrderId),
+              'workOrderId'
+            );
+            const data: any = [];
             for (const workOrderId in groupedWorkOrder) {
-              data.push({ workOrder: workOrderId, services: groupedWorkOrder[workOrderId]?.filter(e => e?.type === MATERIAL_TYPE.service)?.map(e => ({ service: e?.serviceId, uniqueId: e?.uniqueId })) })
+              data.push({
+                workOrder: workOrderId,
+                services: groupedWorkOrder[workOrderId]
+                  ?.filter((e) => e?.type === MATERIAL_TYPE.service)
+                  ?.map((e) => ({ service: e?.serviceId, uniqueId: e?.uniqueId }))
+              });
             }
-            setWorkOrdersCompleteServicesDialog({ open: true, workOrders: data })
+            setWorkOrdersCompleteServicesDialog({ open: true, workOrders: data });
           }
         }
       ]
@@ -539,6 +549,9 @@ const WorkOrderTechnician = () => {
             <CardView
               childColumns={childColumns}
               renderedFrom={renderedFrom}
+              bulkActionItems={
+                <BulkActionItems selectedRecords={selectedRecords} setWorkOrdersCompleteServicesDialog={setWorkOrdersCompleteServicesDialog} />
+              }
               headerSlot={
                 <>
                   <DetailsPageHeader
@@ -598,14 +611,17 @@ const WorkOrderTechnician = () => {
               columns={columnsDef}
               renderedFrom={renderedFrom}
               state={tableState}
+              bulkActionItems={
+                <BulkActionItems selectedRecords={selectedRecords} setWorkOrdersCompleteServicesDialog={setWorkOrdersCompleteServicesDialog} />
+              }
               tableHead={
                 <DetailsPageHeader
                   isAddButtonVisible={false}
                   className="flex-grow"
                   isActionButtonVisible={false}
-                  isNewActionButtonVisible={selectedRecords.length > 0}
-                  newActionButtonProps={newActionButtonProps}
-                  actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                  // isNewActionButtonVisible={selectedRecords.length > 0}
+                  // newActionButtonProps={newActionButtonProps}
+                  // actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
                   leftSideContents={
                     <div className="flex w-full flex-wrap items-center gap-2">
                       <ResourceFilter
@@ -702,8 +718,8 @@ const WorkOrderTechnician = () => {
           workOrders={workOrdersCompleteServicesDialog.workOrders}
           onClose={() => setWorkOrdersCompleteServicesDialog({ open: false, workOrders: null })}
           onSuccess={() => {
-            setWorkOrdersCompleteServicesDialog({ open: false, workOrders: null })
-            onClickRefreshIcon()
+            setWorkOrdersCompleteServicesDialog({ open: false, workOrders: null });
+            onClickRefreshIcon();
           }}
         />
       )}

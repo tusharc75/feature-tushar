@@ -2,6 +2,7 @@ import { Collapse } from '@mui/material';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Fragment, memo, useEffect, useState } from 'react';
 import { CellRenderer } from '../TableHelperComponents';
+import useCustomContentSelection from 'src/components/CustomReactTable/TableComponents/VirtualTable/useCustomContentSelection';
 
 export const VirtualTableBody = memo(
   ({
@@ -24,9 +25,13 @@ export const VirtualTableBody = memo(
     customContent: CustomContent = null,
     isClientSideGrid,
     parentRef,
-    footerRowFound
+    footerRowFound,
+    rowSelection,
+    getChildId,
+    subItemAccessor
   }: any) => {
     const { customExpanderRowData } = state;
+    useCustomContentSelection({ table, getChildId, rowSelection, state, subItemAccessor });
 
     const rowVirtualizer = useVirtualizer({
       count: rows.length,
@@ -92,7 +97,7 @@ export const VirtualTableBody = memo(
                     className="custom-content relative max-w-full overflow-auto  overscroll-contain border-b bg-gray-100 dark:bg-gray-700"
                   >
                     <div style={{ height: customContentHeight, maxWidth: parentRef.clientWidth }} className=" sticky left-0 py-4 pl-[70px] pr-4">
-                      {isExpanded && <CustomContent row={row.original} height={customContentHeight - 32} />}
+                      {isExpanded && <CustomContent row={row.original} height={customContentHeight - 32} state={state} rowId={row.id} />}
                     </div>
                   </Collapse>
                 ) : null}

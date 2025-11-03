@@ -6,6 +6,7 @@ import {
   ExpandedState,
   OnChangeFn,
   Row,
+  RowSelectionState,
   SortingState,
   getCoreRowModel,
   getExpandedRowModel,
@@ -61,6 +62,8 @@ const handleApplySavedSize = (columns, columnSavedSizes) => {
 
 let exportTimeout;
 
+const empytStableObj = {};
+
 const CustomReactTable = ({
   columns,
   onSelect = null,
@@ -98,7 +101,8 @@ const CustomReactTable = ({
   rememberClientFilters = false,
   bulkActionItems = null,
   getChildId = (data) => data['_id'],
-  subItemAccessor = null
+  subItemAccessor = null,
+  onRowSelectionChange = null
 }) => {
   const {
     dataRows: data,
@@ -137,7 +141,7 @@ const CustomReactTable = ({
   const [searchQuery] = useStore((store) => store[SEARCH]);
   const [cellValue, setCellValue] = React.useState('');
   const [baseColumns, setBaseColumns] = React.useState(() => newColumns);
-  const [rowSelection, setRowSelection] = React.useState({});
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
   const [sortedColumns, setSortedColumns] = useState([]);
@@ -247,6 +251,7 @@ const CustomReactTable = ({
     // flags
     ...(rememberClientFilters && isClientSideGrid && renderedFrom ? { onColumnFiltersChange: setColumnFilters } : {}),
     autoResetAll: false,
+    onRowSelectionChange: setRowSelection,
     enableExpanding: expander,
     enableRowSelection: (row: Row<any>) => !hideSelection && row.original.hideSelection !== true,
     enableHiding: true,
@@ -261,7 +266,6 @@ const CustomReactTable = ({
 
     // state setter
     onExpandedChange: setExpanded,
-    onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
 
@@ -279,6 +283,12 @@ const CustomReactTable = ({
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues()
   });
+
+  useEffect(() => {
+    if (table) {
+      state.setTable(table);
+    }
+  }, [table]);
 
   useLayoutEffect(() => {
     if (tableContainerRef.current) {
@@ -530,6 +540,9 @@ const CustomReactTable = ({
             customContent={customContent}
             renderedFrom={renderedFrom}
             sortedColumns={sortedColumns}
+            rowSelection={rowSelection}
+            getChildId={getChildId}
+            subItemAccessor={subItemAccessor}
           />
         </div>
       )}
@@ -581,9 +594,12 @@ const CustomReactTable = ({
                 hideSelection={hideSelection}
                 expanderWithCustomContent={expanderWithCustomContent}
                 customContentHeight={customContentHeight}
-                customContent={customContent}
                 renderedFrom={renderedFrom}
                 sortedColumns={sortedColumns}
+                customContent={customContent}
+                rowSelection={rowSelection}
+                getChildId={getChildId}
+                subItemAccessor={subItemAccessor}
               />
             </div>
           )}

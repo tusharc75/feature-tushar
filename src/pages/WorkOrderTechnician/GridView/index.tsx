@@ -22,7 +22,7 @@ type TableViewStatus =
   | typeof WORKORDER_SERVICE_STATUS.inProgressByOther;
 
 const GridView = React.forwardRef<GridViewRef, any>(
-  ({ renderedFrom, state, dispatch, filterQuery, permissions, tableHead = null, columns, resource = '', childColumns }, ref) => {
+  ({ renderedFrom, state, dispatch, filterQuery, permissions, tableHead = null, columns, resource = '', childColumns, bulkActionItems }, ref) => {
     const toastConfig = useContext(CustomToastContext);
     const [tableViewStatus, setTableViewStatus] = useState<TableViewStatus>('Pending');
 
@@ -155,9 +155,9 @@ const GridView = React.forwardRef<GridViewRef, any>(
               customContent={(props) => <GridCustomComponent {...props} renderedFrom={renderedFrom} columns={childColumns} />}
               expanderWithCustomContent={true}
               getChildId={(child) => child._id}
-              subItemAccessor={(data) => data.services}
+              subItemAccessor={(child) => child.services}
               topLeftSlot={
-                <div className="flex flex-grow flex-wrap items-center items-center gap-2">
+                <div className="flex flex-grow flex-wrap items-center gap-2">
                   <ButtonMenu
                     showChevron={true}
                     items={statusMenuItems}
@@ -173,6 +173,7 @@ const GridView = React.forwardRef<GridViewRef, any>(
                   {tableHead}
                 </div>
               }
+              bulkActionItems={bulkActionItems}
               state={state}
               dispatch={dispatch}
               renderedFrom={renderedFrom}

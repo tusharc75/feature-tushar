@@ -1,4 +1,5 @@
 import { CancelToken } from 'axios';
+import React from 'react';
 import { GridViewSavedData } from 'src/components/CustomReactTable/ArrangeView';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 
@@ -115,4 +116,5 @@ export type CardColTimelineProps<D, C extends readonly string[]> = {
   passFailAccessor?: string;
   subItemAccessor?: (data: D) => any[];
   getChildId?: (child: any) => string;
+  bulkActionItems?: React.ReactChild;
 };
