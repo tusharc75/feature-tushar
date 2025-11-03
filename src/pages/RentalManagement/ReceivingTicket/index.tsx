@@ -3883,7 +3883,7 @@ const BulkActionItems = ({
           {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
             (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
               <>
-                {rentalPolicyData?.hideReturnTicketChargeable && (
+                {!rentalPolicyData?.hideReturnTicketChargeable && (
                   <BulkActionContainer.Button
                     tooltip={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}
                     id={'create-receiving-ticket-chargaeble-menu-item'}
