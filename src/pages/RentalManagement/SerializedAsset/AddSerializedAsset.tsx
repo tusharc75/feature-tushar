@@ -40,6 +40,8 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Add } from '@mui/icons-material';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import ReplaceAssetReason from 'src/components/RentalManagment/ReplaceAssetReason';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const AddSerializedAsset = ({
   isAdding,
@@ -113,32 +115,28 @@ const AddSerializedAsset = ({
       });
   }, []);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
-      .then(({ data: { data } }) => {
-        setCheckMTRValidation(data?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
-        let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
-        const inUseColoumns: any = [
-          {
-            accessor: 'rentalJob',
-            Header: 'Rental Job',
-            minWidth: 180,
-            width: 180,
-            Cell: ({ row }) => (
-              <Link
-                className="link text-truncate"
-                target="_blank"
-                to={`${routes.rentalManagementDetail.path}/${row?.original?.rentalJob?.optionValue}`}
-              >
-                {row?.original?.rentalJob?.optionLabel}
-              </Link>
-            )
-          }
-        ];
-
-        setColumns([...inUseColoumns, ...newColumns, ...getStaticFields()]);
-      });
+  const fetchGridColumns = async () => {
+    const { fieldsDataForRead, fieldsDataAll } = await fetch_resource_view_fields(sidebarResource.serializedAsset, false);
+    setCheckMTRValidation(fieldsDataAll?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serializedAssetDetail.path, false, null, assetPolicyData?.policy?.fieldColor);
+    const inUseColoumns: any = [
+      {
+        accessor: 'rentalJob',
+        Header: 'Rental Job',
+        minWidth: 180,
+        width: 180,
+        Cell: ({ row }) => (
+          <Link
+            className="link text-truncate"
+            target="_blank"
+            to={`${routes.rentalManagementDetail.path}/${row?.original?.rentalJob?.optionValue}`}
+          >
+            {row?.original?.rentalJob?.optionLabel}
+          </Link>
+        )
+      }
+    ];
+    setColumns([...inUseColoumns, ...newColumns, ...getStaticFields()]);
   };
 
   useEffect(() => {
