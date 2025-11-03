@@ -70,7 +70,7 @@ const QuoteBuilder = ({
 
   useEffect(() => {
     fetchFields();
-    fetchQuotationFields();
+    fetchInvoiceFields();
   }, []);
 
   useEffect(() => {
@@ -364,7 +364,7 @@ const QuoteBuilder = ({
       });
   };
 
-  const fetchQuotationFields = async () => {
+  const fetchInvoiceFields = async () => {
     try {
       const { fieldsDataAll: invoiceFieldsData } = await fetch_resource_fields(sidebarResource.invoice);
       setInvoiceFields(invoiceFieldsData);
@@ -428,18 +428,6 @@ const QuoteBuilder = ({
               Send to Customer
             </ThemeButton>
           </>
-        )}
-        {resourcePolicyData?.createInvoiceFromQuotation && allowedToEdit && (
-          <ThemeButton
-            iconForMobile={false}
-            disabled={!quotationFields?.length || !invoiceFields?.length}
-            onClick={() => {
-              setInvoiceDialog(true);
-            }}
-            mobileTooltip="Create Invoice"
-          >
-            Create Invoice
-          </ThemeButton>
         )}
         {allowedToEdit && currentStep === 'DOA' && DOAData?.length === 0 && (
           <ThemeButton startIcon={<SendIcon />} onClick={handleSendForDOA}>
