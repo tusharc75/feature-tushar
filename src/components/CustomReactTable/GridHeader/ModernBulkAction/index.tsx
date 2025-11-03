@@ -1,6 +1,6 @@
 import { Close } from '@mui/icons-material';
 import React, { useEffect } from 'react';
-import { ExtendedTInitialState, TActios, TInitialState } from 'src/components/CustomReactTable/hooks/useTableReducer';
+import { ExtendedTInitialState, TActios } from 'src/components/CustomReactTable/hooks/useTableReducer';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RippleButton from 'src/components/RippleButton';
 import { cn } from 'src/constants/helpers';
