@@ -132,7 +132,8 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
       ) : (
         <div className="mx-auto flex w-full flex-grow flex-wrap p-2">
           {isImageLoading && <CircularProgress className="fixed" size={16} />}
-          <div className="basis-full px-4 max-lg:order-2 lg:basis-3/4">
+          {/* <div className="basis-full px-4 max-lg:order-2 lg:basis-3/4"> */}
+          <div className="w-full px-4 lg:w-3/4 lg:order-1 order-2">
             {pageData?.map((e, i) => (
               <div key={e._id}>
                 <div
@@ -184,7 +185,8 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
               </div>
             ))}
           </div>
-          <div className="basis-full px-4 lg:basis-1/4">
+          {/* <div className="basis-full px-4 lg:basis-1/4"> */}
+          <div className="w-full px-4 lg:w-1/4 lg:order-2 order-1">
             {isMobile ? (
               <Accordion elevation={0} className="!rounded-lg dark:bg-[#242526]">
                 <AccordionSummary expandIcon={<ExpandMore />} className="[&.Mui-expanded]:![border-bottom:1px_solid_var(--common-border-color)]">

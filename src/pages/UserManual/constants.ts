@@ -2,7 +2,7 @@ import { Section } from 'src/pages/UserManual/type';
 
 export const pageTitle = 'Equipt - User Manual';
 
-export const homeLink = '/user-manual';
+export const homeLink = '/user-manual-old';
 export const homepageData: Section[] = [
   { _id: 'home-page', content: 'Welcome to the Equipt Portal User Manual', sectionName: 'Equipt Portal User Manual' }
 ];
