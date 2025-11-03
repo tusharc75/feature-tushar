@@ -230,8 +230,7 @@ const WorkOrderSupervisor = () => {
             assetStatus: item?.asset?.status,
             currentOwnerType: item?.asset?.currentOwnerType,
             ownerType: item?.asset?.ownerType,
-            serviceName: item?.service?.optionLabel,
-            serviceId: item?.service?.optionValue,
+            services: [{ ...item?.service, serviceName: item?.service?.optionLabel, serviceId: item?.service?.optionValue }],
             status: WORKORDER_SERVICE_STATUS.planned
           }));
         } else {
@@ -279,14 +278,10 @@ const WorkOrderSupervisor = () => {
     try {
       const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.workOrder, permissions?.workOrder?.isUpdate);
       const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.workOrderDetail?.path);
-      const columns = newColumns.filter((ele) => ele.accessor !== 'workOrderNumber');
 
-      const extraColumns = [
-        {
-          accessor: 'workOrderNumber',
-          Header: 'Work Order Number',
-          defaultVisible: true,
-          Cell: ({ row }) => (
+      newColumns?.forEach((ele) => {
+        if (ele.accessor === 'workOrderNumber') {
+          ele.Cell = ({ row }) => (
             <div className="flex items-center gap-1">
               <p title={row?.original?.workOrderNumber}>{row?.original?.workOrderNumber}</p>
               {row.original['workOrderNumber'] ? (
@@ -303,8 +298,12 @@ const WorkOrderSupervisor = () => {
                 <NoDataCell />
               )}
             </div>
-          )
-        },
+          );
+          ele.defaultVisible = true;
+        }
+      });
+
+      const extraColumns = [
         {
           accessor: 'customerAccountName',
           Header: resources?.customerAccount?.titleSingular || 'Customer',
@@ -328,11 +327,11 @@ const WorkOrderSupervisor = () => {
               <NoDataCell />
             );
           }
-        },
+        }
       ];
 
-      const finalColumns = [...extraColumns.slice(0, 5), ...columns, ...extraColumns.slice(5)].map((c) => {
-        const id = c.id || c.accessor;
+      const finalColumns = [...newColumns, ...extraColumns]?.map((c) => {
+        const id = c?.id || c?.accessor;
         if (defaultVisibleRows.includes(id)) {
           return { ...c, defaultVisible: true };
         }
