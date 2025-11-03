@@ -4,7 +4,7 @@ import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getCellColorCode, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
@@ -34,6 +34,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import dayjs from 'dayjs';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const Quotation = () => {
   const renderedFrom = camelCase(sidebarResource?.quotation);
@@ -83,6 +84,7 @@ const Quotation = () => {
   }, []);
 
   const fetchGridColumns = async () => {
+    let resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.quotation);
     const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.quotation, permissions?.quotation?.isUpdate);
     setAllFields(JSON.parse(JSON.stringify(fieldsDataAll)));
     let columns = [];
@@ -91,7 +93,7 @@ const Quotation = () => {
     columns?.forEach((column) => {
       if (column?.primaryField) {
         column.cell = ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', backgroundColor: (() => { return getCellColorCode(resourcePolicy?.policy?.fieldColor, row?.original) })() }}>
             <Link className="link text-truncate" title={row.original[column.accessor]} to={`${routes.quotation.path}/detail/${row.original._id}`}>
               {row.original[column.accessor]}
             </Link>

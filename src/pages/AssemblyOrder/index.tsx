@@ -21,6 +21,7 @@ import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import { useHistory } from 'react-router-dom';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const AssemblyOrder = () => {
   const renderedFrom = camelCase(sidebarResource.assemblyOrder);
@@ -68,8 +69,9 @@ const AssemblyOrder = () => {
   }, []);
 
   const fetchColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.assemblyOrder);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.assemblyOrder, permissions?.assemblyOrder?.isUpdate);
-    let columns = generateColumns(renderedFrom, fieldsDataForRead, routes.assemblyOrderDetail.path, true);
+    let columns = generateColumns(renderedFrom, fieldsDataForRead, routes.assemblyOrderDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     columns = [...columns, ...getStaticFields(true), ActionsRenderer];
     setColumns(columns);
   };

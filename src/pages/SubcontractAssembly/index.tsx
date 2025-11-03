@@ -22,6 +22,7 @@ import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubco
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { useHistory } from 'react-router-dom';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const SubcontractAssembly = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -75,8 +76,9 @@ const SubcontractAssembly = () => {
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedType]);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.subcontractAssembly);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.subcontractAssembly, permissions?.subcontractAssembly?.isUpdate);
-    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.subcontractAssemblyDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.subcontractAssemblyDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setWalkmeData([
       createAddItemStepdata({ title: resources?.subcontractAssembly?.titleSingular, path: routes.subcontractAssembly.path }, fieldsDataForRead)
     ]);

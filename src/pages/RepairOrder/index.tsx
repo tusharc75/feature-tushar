@@ -31,6 +31,7 @@ import { createRepairOrderFlow } from 'src/pages/RepairOrder/walkmeSteps';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRepairOrder from './ManageRepairOrder';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const RepairOrder = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -87,12 +88,13 @@ const RepairOrder = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.repairOrder);
     const { fieldsDataForRead } = await fetch_resource_view_fields(
       sidebarResource.repairOrder,
       permissions?.repairOrder?.isUpdate
     );
     setWalkmeData([createRepairOrderFlow(fieldsDataForRead)]);
-    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.repairOrderDetail?.path, true);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.repairOrderDetail?.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(true, true), ActionsRenderer]);
   };
 

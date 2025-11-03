@@ -29,6 +29,7 @@ import ManageProductionOrder from './ManageProductionOrder';
 import axios, { CancelTokenSource } from 'axios';
 import { useHistory } from 'react-router-dom';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const ProductionOrder = () => {
   const renderedFrom = camelCase(sidebarResource?.productionOrder);
@@ -83,8 +84,9 @@ const ProductionOrder = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
+    let resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.productionOrder);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.productionOrder, permissions?.productionOrder?.isUpdate);
-    let columns = generateColumns(renderedFrom, fieldsDataForRead, routes?.productionOrderDetail?.path, true);
+    let columns = generateColumns(renderedFrom, fieldsDataForRead, routes?.productionOrderDetail?.path, true, null, resourcePolicy?.policy?.fieldColor);
     columns = [...columns, ...getStaticFields(true), ActionsRenderer];
     setColumns(columns);
   };

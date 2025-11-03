@@ -19,6 +19,7 @@ import { deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 let expenseReportTimeout;
 
@@ -46,8 +47,9 @@ const ExpenseReport = () => {
   }, []);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.expenseReport);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenseReport, permissions?.expenseReport?.isUpdate);
-    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.expenseReportDetail?.path, true);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.expenseReportDetail?.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

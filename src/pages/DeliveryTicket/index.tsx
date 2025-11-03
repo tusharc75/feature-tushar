@@ -4,7 +4,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getCellColorCode, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -29,6 +29,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageDeliveryTicket from './ManageDeliveryTicket';
 import axios, { CancelTokenSource } from 'axios';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 let deliveryTicketTimeout;
 
@@ -84,6 +85,7 @@ const DeliveryTicket = () => {
 
   const fetchGridColumns = async () => {
     let data;
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.deliveryTicket);
     if (isOffline) {
       data = await findOne(objectStore.resource, sidebarResource.deliveryTicket);
     } else {
@@ -95,7 +97,7 @@ const DeliveryTicket = () => {
     data = data.filter(
       (e) => !['warehouse', 'customerAccount', 'supplierAccount', 'pickupFromType', 'deliveryToType'].includes(e?.fieldData?.fieldName)
     );
-    const newColumns = generateColumns(renderedFrom, data, `${routes.deliveryTicket.path}/detail`, true);
+    const newColumns = generateColumns(renderedFrom, data, `${routes.deliveryTicket.path}/detail`, true, null, resourcePolicy?.policy?.fieldColor);
     const columns = [...newColumns, ...getStaticFields(true), ActionsRenderer];
     columns.forEach((column) => {
       if (column.accessor === 'pickupFrom') {

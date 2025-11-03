@@ -20,6 +20,7 @@ import axios, { CancelTokenSource } from 'axios';
 import ManageSerializedPackages from 'src/pages/SerializedPackages/ManageSerializedPackages';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const SerializedPackages = ({ resourceRendered = '' }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -70,6 +71,7 @@ const SerializedPackages = ({ resourceRendered = '' }) => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, selectedLookupResource]);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.serializedPackages);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serializedPackages, permissions?.serializedPackages?.isUpdate);
     let newColumns = generateColumns(
       renderedFrom,
@@ -77,7 +79,9 @@ const SerializedPackages = ({ resourceRendered = '' }) => {
       resourceRendered === sidebarResource.serializedPackagesInspection
         ? routes.serializedPackagesInspectionDetail.path
         : routes.serializedPackagesDetail.path,
-      true
+      true,
+      null,
+      resourcePolicy?.policy?.fieldColor,
     );
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };

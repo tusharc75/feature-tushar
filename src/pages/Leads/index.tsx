@@ -36,6 +36,7 @@ import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import axios, { CancelTokenSource } from 'axios';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import KanbanView, { FetchCanbanDataPayload, getPivotColoum, KanbanViewRef, PivotColumnSelector, RenderViewTabs, useCanbanStore } from 'src/components/KanbanView';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const renderedFrom = camelCase(sidebarResource.lead);
 
@@ -132,10 +133,11 @@ const Leads = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
+    let resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.lead);
     const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.lead, permissions?.lead?.isUpdate);
     setAllFields(JSON.parse(JSON.stringify(fieldsDataAll)));
     setState('setResourceColumns', fieldsDataAll);
-    let newColumns = generateColumns(lead.leadResource, fieldsDataForRead, routes.leadDetail.path, true);
+    let newColumns = generateColumns(lead.leadResource, fieldsDataForRead, routes.leadDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     newColumns = [
       ...newColumns,
       {

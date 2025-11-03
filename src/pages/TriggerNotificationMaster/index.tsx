@@ -19,6 +19,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageTriggerNotificationMaster from './ManageTriggerNotificationMaster';
 import axios, { CancelTokenSource } from 'axios';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const renderedFrom = camelCase(sidebarResource?.triggerNotificationMaster);
 
@@ -44,8 +45,9 @@ const TriggerNotificationMaster = () => {
   }, []);
 
   const fetchGridColumns = async () => {
+    let resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.triggerNotificationMaster);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.triggerNotificationMaster, permissions?.triggerNotificationMaster?.isUpdate);
-    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.triggerNotificationMasterDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.triggerNotificationMasterDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

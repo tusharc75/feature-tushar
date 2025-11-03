@@ -20,6 +20,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageTaxMaster from './ManageTaxMaster';
 import axios, { CancelTokenSource } from 'axios';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const renderedFrom = camelCase(sidebarResource.taxMaster);
 
@@ -52,8 +53,9 @@ const TaxMaster = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.taxMaster);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.taxMaster, permissions?.taxMaster?.isUpdate);
-    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.taxMasterDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.taxMasterDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
   const ActionsRenderer = {

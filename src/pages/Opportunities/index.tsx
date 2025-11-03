@@ -34,6 +34,7 @@ import ManageOpportunityDialog from './ManageOpportunityDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import KanbanView, { FetchCanbanDataPayload, KanbanViewRef, PivotColumnSelector, RenderViewTabs, useCanbanStore } from 'src/components/KanbanView';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const renderedFrom = camelCase(sidebarResource.opportunity);
 
@@ -121,11 +122,12 @@ const Opportunities = () => {
   }, []);
 
   const fetchGridColumns = async () => {
+    let resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.opportunity);
     const response = await axiosInstance().get(`/field?resource=Opportunity&entity=${selectedEntity}&view=true`);
     let data = response?.data?.data;
     setState('setResourceColumns', data);
     setAllFields(JSON.parse(JSON.stringify(data)));
-    const newColumns = generateColumns(sidebarResource.opportunity, data, routes.opportunityDetail.path, true);
+    const newColumns = generateColumns(sidebarResource.opportunity, data, routes.opportunityDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     newColumns?.forEach((o) => {
       if (o.accessor === 'firstName') {
         o.disabled = true;

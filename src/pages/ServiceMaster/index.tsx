@@ -30,6 +30,7 @@ import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 import { editDisable } from 'src/constants/messageHelpers';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const renderedFrom = camelCase(sidebarResource?.serviceMaster);
 
@@ -63,13 +64,14 @@ const ServiceMaster = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource?.serviceMaster);
     const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(
       sidebarResource?.serviceMaster,
       permissions?.serviceMaster?.isUpdate
     );
     setAllFields(JSON.parse(JSON.stringify(fieldsDataAll)));
     setWalkmeData([createResourceFlow(sidebarResource?.serviceMaster, fieldsDataForRead, false, false)]);
-    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.serviceMasterDetail?.path, true);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.serviceMasterDetail?.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

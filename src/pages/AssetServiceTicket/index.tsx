@@ -33,6 +33,7 @@ import ManageAssetServiceTicket from 'src/pages/AssetServiceTicket/ManageAssetSe
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 let assetServiceTicketsTimeout;
 
@@ -66,8 +67,9 @@ const AssetServiceTickets = ({ assetId = null, refresh = null, isTabMode = false
   }, [refresh]);
 
   const fetchColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.assetServiceTickets);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.assetServiceTickets, permissions?.assetServiceTickets?.isUpdate);
-    let columns = generateColumns(renderedFrom, fieldsDataForRead, routes.assetServiceTicketsDetail.path, !isTabMode);
+    let columns = generateColumns(renderedFrom, fieldsDataForRead, routes.assetServiceTicketsDetail.path, !isTabMode, null, resourcePolicy?.policy?.fieldColor);
     columns = [...columns, ...getStaticFields(true), ActionsRenderer];
     setColumns(columns);
   };

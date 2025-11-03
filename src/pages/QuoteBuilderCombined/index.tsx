@@ -5,7 +5,7 @@ import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getCellColorCode, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -38,6 +38,7 @@ import ManageQuoteDialog from './ManageQuote/ManageQuoteDialog';
 import axios, { CancelTokenSource } from 'axios';
 import './style.scss';
 import dayjs from 'dayjs';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const QuoteBuilders = () => {
   const renderedFrom = camelCase(sidebarResource?.quoteBuilder);
@@ -100,6 +101,7 @@ const QuoteBuilders = () => {
   }, []);
 
   const fetchGridColumns = async () => {
+    let resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.quoteBuilder);
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.quoteBuilder}&entity=${selectedEntity}&view=true`);
 
     let data = response?.data?.data;
@@ -109,7 +111,7 @@ const QuoteBuilders = () => {
     newColumns?.forEach((o) => {
       if (o.accessor === 'quoteName') {
         o.cell = ({ row }) => (
-          <div>
+          <div style={{ backgroundColor: (() => { return getCellColorCode(resourcePolicy?.policy?.fieldColor, row?.original) })() }}>
             <Link className="text-truncate link" title={row.original.quoteName} to={`${routes.quoteBuilder.path}/detail/${row.original._id}`}>
               {row.original.quoteName}
             </Link>

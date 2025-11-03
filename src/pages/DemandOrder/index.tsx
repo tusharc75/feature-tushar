@@ -28,6 +28,7 @@ import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import axios, { CancelTokenSource } from 'axios';
 import { useHistory } from 'react-router-dom';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const DemandOrder = () => {
   const renderedFrom = camelCase(sidebarResource?.demandOrder);
@@ -80,8 +81,9 @@ const DemandOrder = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.demandOrder);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.demandOrder, permissions?.demandOrder?.isUpdate);
-    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.demandOrderDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.demandOrderDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

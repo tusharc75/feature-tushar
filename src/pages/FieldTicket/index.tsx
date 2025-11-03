@@ -26,6 +26,7 @@ import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createFieldTicketFlow } from 'src/pages/FieldTicket/walkmeSteps';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const FieldTicket = () => {
   const {
@@ -83,6 +84,7 @@ const FieldTicket = () => {
 
   const fetchGridColumns = async () => {
     let data;
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.fieldTicket);
     if (isOffline) {
       data = await findOne(objectStore.resource, sidebarResource?.fieldTicket);
     } else {
@@ -94,7 +96,7 @@ const FieldTicket = () => {
         console.error(`Field Ticket: : ${e.message}`);
       }
     }
-    const newColumns = generateColumns(renderedFrom, data, routes.fieldTicketDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, data, routes.fieldTicketDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     const extraColumns = [];
     extraColumns.push({
       accessor: 'totalAmount',

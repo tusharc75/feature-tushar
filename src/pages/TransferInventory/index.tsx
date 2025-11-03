@@ -32,6 +32,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createTransferInventoryFlow } from 'src/pages/TransferInventory/walkmeSteps';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const TransferInventory = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -83,9 +84,10 @@ const TransferInventory = () => {
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedType]);
 
   const fetchGridColumns = async () => {
+    const resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.transferInventory);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.transferInventory, permissions?.transferInventory?.isUpdate);
     setWalkmeData([createTransferInventoryFlow(fieldsDataForRead, resources?.transferInventory?.titleSingular)]);
-    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.transferInventoryDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.transferInventoryDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

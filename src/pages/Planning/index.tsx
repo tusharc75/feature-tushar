@@ -30,6 +30,7 @@ import routes from './../../components/Helpers/Routes';
 import ManagePlanning from './ManagePlanning';
 import axios, { CancelTokenSource } from 'axios';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const Planning = () => {
   const renderedFrom = camelCase(sidebarResource.planning);
@@ -83,8 +84,9 @@ const Planning = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
+    let resourcePolicy = await getResourcePolicy(user, permissions, sidebarResource.planning);
     const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.planning, permissions?.planning?.isUpdate);
-    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.planningDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.planningDetail.path, true, null, resourcePolicy?.policy?.fieldColor);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
