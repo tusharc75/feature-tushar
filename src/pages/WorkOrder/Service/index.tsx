@@ -984,7 +984,13 @@ const Service = ({
                   : true
               }
               onClick={() => {
-                handleUpdateService(selectedService?._id, selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
+                setWorkOrdersCompleteServicesDialog({
+                  open: true,
+                  workOrders: [{
+                    workOrder: workOrderData?._id,
+                    services: [{ service: selectedService?._id, uniqueId: selectedService?.uniqueId }]
+                  }]
+                });
                 setAnchorEl(null);
               }}
               searchKey="Complete Service"
