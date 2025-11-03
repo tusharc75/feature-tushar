@@ -280,7 +280,6 @@ import UserDetailsPage from './pages/User/UserDetailsPage';
 import UserAttendance from './pages/UserAttendance';
 import UserDownloadRequest from './pages/UserDownloadRequest';
 import UserManualOld from './pages/UserManual';
-import UserManual from './pages/UserManualNew';
 import Warehouse from './pages/Warehouse';
 import WarehouseDetailsPage from './pages/Warehouse/WarehouseDetailsPage';
 import WellMaster from './pages/WellMaster';
