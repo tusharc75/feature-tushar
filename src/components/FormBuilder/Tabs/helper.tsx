@@ -329,6 +329,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'hideReturnTicketChargeable',
+        fieldLabel: 'Hide Return Ticket Chargeable',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'loadingReceivingDefaultView',
         fieldLabel: 'Loading Receiving Default View',
         type: 'dropDown',
