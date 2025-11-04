@@ -72,6 +72,7 @@ export type FetchSingleColumnProps<D, C extends readonly string[]> = {
   limit: number;
   cancelToken?: CancelToken;
   resource?: string;
+  extraParams?: Record<string, any>;
 };
 
 export type UseCardColTimeline<D, C extends readonly string[]> = {
@@ -117,4 +118,19 @@ export type CardColTimelineProps<D, C extends readonly string[]> = {
   subItemAccessor?: (data: D) => any[];
   getChildId?: (child: any) => string;
   bulkActionItems?: React.ReactChild;
+
+  groupByApiKey?: string; // this key will be sent to the api params when calling the column data api
+  fetchGroupData?: (group: string) => Promise<Group[]>;
+  groupByButtonItems?: { optionValue: string; optionLabel: string }[];
+};
+
+export type Group = {
+  optionValue?: string;
+  optionLabel?: string;
+  count?: Count;
+};
+
+export type Count = {
+  total?: number;
+  completed?: number;
 };

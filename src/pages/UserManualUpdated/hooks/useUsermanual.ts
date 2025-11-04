@@ -6,7 +6,7 @@ import { uniq } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useMediaQuery } from '@mui/material';
 import { useHistory, useLocation } from 'react-router-dom';
-import { BASE_ROUTE, makeSafeId } from '../utils';
+import { BASE_ROUTE, HOME_RESOURCE_KEY, makeSafeId } from '../utils';
 
 const initialState: UseManualState = {
   manualData: new Map(),
@@ -66,7 +66,6 @@ export const useUsermanual = () => {
             ?.map((resource) => {
               const label = resource.resourceLabel || resource.resource;
               const path = `/${resource.sectionName}/${label}`;
-
               if (resource.content) {
                 const sectionData = {
                   content: resource.content,
@@ -75,7 +74,6 @@ export const useUsermanual = () => {
                 searchData.push(handleCreateData(sectionData, path, resource.sectionName));
               }
               innerMap.set(label, resource);
-
               return {
                 ...resource,
                 resourceLabel: label,
@@ -87,11 +85,10 @@ export const useUsermanual = () => {
                 ]
               };
             });
-
           outerMap.set(ele, innerMap);
-          result.push(obj);
+          if (ele !== HOME_RESOURCE_KEY) result.push(obj);
         });
-        setStore({ searchData: searchData, leftSidebarData: result, manualData: outerMap });
+        setStore({ searchData: searchData.filter((d) => d.sectionName !== HOME_RESOURCE_KEY), leftSidebarData: result, manualData: outerMap });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -117,6 +114,13 @@ export const useUsermanual = () => {
       history.push({
         pathname: `${BASE_ROUTE}${cleanedUrl}`,
         hash
+      });
+    }
+    if (!hash) {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'instant'
       });
     }
   }, []);

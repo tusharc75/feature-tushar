@@ -31,7 +31,12 @@ const NavBar = ({ state }: { state: UseUsermanual }) => {
             <RiMenu2Fill />
           </IconButton>
         )}
-        <div onClick={() => navigate({ route: '/' })} className="flex cursor-pointer items-center gap-2 hover:text-[--new-theme-color]">
+        <div
+          onClick={() => {
+            navigate({ route: '/' });
+          }}
+          className="flex cursor-pointer items-center gap-2 hover:text-[--new-theme-color]"
+        >
           <img src={Logo} alt="logo" className="max-h-[32px] " />
           <span className="font-semibold transition-colors">User Manual</span>
         </div>

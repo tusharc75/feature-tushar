@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { UseCardColActions, UseCardColState, UseCardColTimelineProps } from 'src/components/CardColTimeline1/types';
+import { Group, UseCardColActions, UseCardColState, UseCardColTimelineProps } from 'src/components/CardColTimeline1/types';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 
 const getInitialState = <D, C extends readonly string[]>(): UseCardColState<D, C> => {
