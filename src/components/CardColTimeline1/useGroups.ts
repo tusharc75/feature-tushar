@@ -18,11 +18,12 @@ const useGroups = ({
   refreshSignal: boolean;
 }) => {
   const [groups, setGroups] = useState<Group[]>(null);
+  const key = groupByButtonItems?.map((d) => d.optionValue[0]).join('-');
   const isGrouppingEnabled = useMemo(() => {
     return groupByButtonItems && groupByButtonItems.length && fetchGroupData && typeof fetchGroupData === 'function';
   }, [fetchGroupData, groupByButtonItems]);
   const [isGroupDataFetching, setIsGroupDataFetching] = useState(true);
-  const [groupSelectorValue, setGroupSelectorValue] = useLocalStorage(`${renderedFrom}-${localStorageKey}`, defaultValue);
+  const [groupSelectorValue, setGroupSelectorValue] = useLocalStorage(`${key}-${renderedFrom}-${localStorageKey}`, defaultValue);
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
   useEffect(() => {
