@@ -369,8 +369,8 @@ const GridView = React.forwardRef<GridViewRef, Props>(
               dispatch={dispatch}
               renderedFrom={renderedFrom}
               bulkActionItems={bulkActionItems}
-              getChildId={(child) => child._id}
-              subItemAccessor={(child) => child.services}
+              getChildId={(child) => child?._id}
+              subItemAccessor={(child) => child?.services}
             />
           ) : (
             <Box p={2} height={500}>

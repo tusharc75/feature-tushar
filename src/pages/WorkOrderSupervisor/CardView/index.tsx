@@ -25,8 +25,8 @@ const CardView = ({ filterQuery, setOnClickData, setOpen, state, headerSlot, ren
         state={state}
         passFailStatus={true}
         passFailAccessor="serviceStatus"
-        subItemAccessor={(data) => data.services}
-        getChildId={(child) => child._id}
+        subItemAccessor={(data) => data?.services}
+        getChildId={(child) => child?._id}
         cardOnClick={(data: any) => {
           if (data?.status !== WORKORDER_SERVICE_STATUS.planned) {
             setOnClickData({ workOrderId: data?.workOrderId });
