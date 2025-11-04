@@ -334,20 +334,6 @@ const Productpackage = ({
             ) : (
               <NoDataCell />
             )
-        },
-        {
-          accessor: 'serializedPackageStatus',
-          Header: `${resources?.serializedPackages?.titleSingular} Status`,
-          Cell: ({ row }) =>
-            row?.original?.serializedPackageStatus ? (
-              <div className="flex items-center gap-2">
-                <h5 className="text-truncate" title={row?.original?.serializedPackageStatus}>
-                  {row?.original?.serializedPackageStatus}
-                </h5>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
         }
       );
     }
@@ -518,7 +504,6 @@ const Productpackage = ({
       parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
 
       parent.serializedPackageId = parent?.serializedPackage?.optionValue;
-      parent.serializedPackageStatus = parent?.serializedPackage?.status;
       parent.serializedPackage = parent?.serializedPackage?.optionLabel;
 
       parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : !isPriceRequired;
@@ -630,7 +615,6 @@ const Productpackage = ({
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
 
       _subRow.serializedPackageId = _subRow?.serializedPackage?.optionValue;
-      _subRow.serializedPackageStatus = _subRow?.serializedPackage?.status;
       _subRow.serializedPackage = _subRow?.serializedPackage?.optionLabel;
 
       _subRow.isValid = _subRow[`price_${currency}`] || _subRow[`finalPrice_${currency}`] ? true : !isPriceRequired;
