@@ -29,7 +29,9 @@ import InputField from 'src/components/Helpers/InputField';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
 import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
-const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, onSuccess, referenceData = null, handleCreate = null, isLoading = false }) => {
+const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, onSuccess, referenceData = null, handleCreate = null, isLoading = false,
+  isRedirectTodetailPage = true,
+}) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -144,7 +146,10 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
             message: message
           });
           setShowConfirmCloneDetailsDialog(false);
-          history.push(`${routes.invoiceDetail.path}/${data?._id}`);
+          if (isRedirectTodetailPage) {
+            history.push(`${routes.invoiceDetail.path}/${data?._id}`);
+          }
+          onSuccess(data)
           setLoading(false);
         })
         .catch((error) => {

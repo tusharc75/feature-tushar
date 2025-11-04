@@ -441,7 +441,7 @@ const QuoteBuilder = ({
 
   const fetchFieldServiceOrderData = () => {
     const fieldServiceOrderId = quotationData?.fieldJob?.optionValue || quotationData?.fieldJob;
-    if (resourcePolicyData?.createFieldTicketWithoutFieldJob && !fieldServiceOrderId) {
+    if (resourcePolicyData?.enableFieldTicketCreationWithoutFieldJob && !fieldServiceOrderId) {
       setFieldTicketDialog({ open: true, data: quotationData });
       return;
     }
@@ -457,8 +457,8 @@ const QuoteBuilder = ({
 
   const addFieldTicketMaterial = async (data) => {
     try {
-      let materialIds = [],
-        costIds = [];
+      let materialIds = [];
+      let costIds = [];
       if (selectedRecords?.filter((e) => [MATERIAL_TYPE.product, MATERIAL_TYPE.service])?.length) {
         var fieldTicketMaterialField = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, data?.currency, true);
         const material = [];
@@ -487,10 +487,12 @@ const QuoteBuilder = ({
           });
         await axiosInstance().post(`${fieldTicket.api}/${data?._id}/cost`, manualEntry);
       }
-      if ((materialIds.length || costIds.length) && !resourcePolicyData?.createFieldTicketWithoutFieldJob)
+      if ((materialIds.length || costIds.length) && resourcePolicyData?.allowOnlyOneFieldTicketPerLineItem) {
         await axiosInstance().post(`${quotation.api}/set-field-ticket-created/${versionData?._id}`, { material: materialIds, cost: costIds });
+      }
       setFieldTicketDialog({ open: false, data: null });
       fetchData();
+      window.open(`${routes.fieldTicketDetail.path}/${data?._id}`)
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -520,7 +522,10 @@ const QuoteBuilder = ({
     return referenceData;
   };
 
-  const showCreateFieldTicketButton = quotationData?.type === QUOTATION_TYPE.fieldJob && [QUOTATION_STATUS.converted, QUOTATION_STATUS.acceptByCustomer].includes(quotationData.status) && (resourcePolicyData?.createFieldTicketWithoutFieldJob || quotationData?.fieldJob) && user?.user?.brandPolicy?.createFieldTicketFromQuotation;
+  const showCreateFieldTicketButton = quotationData?.type === QUOTATION_TYPE.fieldJob &&
+    [QUOTATION_STATUS.converted, QUOTATION_STATUS.acceptByCustomer].includes(quotationData.status)
+    && resourcePolicyData?.allowFieldTicketCreation
+    && (resourcePolicyData?.enableFieldTicketCreationWithoutFieldJob || quotationData?.fieldJob);
 
   return (
     <Fragment>
@@ -529,11 +534,7 @@ const QuoteBuilder = ({
         previewDownloadProps={previewDownloadProps}
         rightSideContents={rightSideContents()}
         hasXpadding
-        isActionButtonVisible={
-          quotationData?.type === QUOTATION_TYPE.fieldJob && quotationData.status === QUOTATION_STATUS.converted && quotationData?.fieldJob
-            ? user?.user?.brandPolicy?.createFieldTicketFromQuotation || false
-            : false
-        }
+        isActionButtonVisible={false}
       />
       {columns ? (
         <Box zIndex={5}>
@@ -545,9 +546,7 @@ const QuoteBuilder = ({
             refreshGrid={fetchData}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             renderedFrom={renderedFrom}
-            hideSelection={
-              (showCreateFieldTicketButton || resourcePolicyData?.createInvoiceFromQuotation) ? false : true
-            }
+            hideSelection={(showCreateFieldTicketButton || resourcePolicyData?.createInvoiceFromQuotation) ? false : true}
             hideAction={true}
             isClientSideGrid={true}
             expander={true}
@@ -604,6 +603,7 @@ const QuoteBuilder = ({
             setInvoiceDialog(false);
             fetchQuotationData(version, false);
           }}
+          isRedirectTodetailPage={false}
         />
       )}
     </Fragment>
