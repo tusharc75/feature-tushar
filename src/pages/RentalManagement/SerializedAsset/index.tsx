@@ -763,7 +763,6 @@ const SerializedAsset = ({
         transferData: transferData,
         isSubleaseAsset: _inventory.inventory?.subleaseAsset,
         canRemove: canRemove
-
       });
     });
 
