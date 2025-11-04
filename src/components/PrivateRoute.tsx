@@ -67,7 +67,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'custom-report',
         'user-download-request',
         'trigger-notification-history',
-        'reports-new'
+        'reports-new',
+        'scada-unit'
       ].indexOf(pathnames[0]) >= 0
     ) {
       setAccess(true);
