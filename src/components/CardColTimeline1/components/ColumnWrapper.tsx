@@ -9,7 +9,16 @@ import { cn } from 'src/constants/helpers';
 import Column from './Column';
 import { CommonProps } from './types';
 
-const ColumnWrapper = <D, C extends readonly string[]>({ state, getColColors, column, subItemAccessor, getChildId, ...rest }: CommonProps<D, C>) => {
+const ColumnWrapper = <D, C extends readonly string[]>({
+  state,
+  getColColors,
+  column,
+  subItemAccessor,
+  getChildId,
+  groupByApiKey,
+  group,
+  ...rest
+}: CommonProps<D, C>) => {
   const [data, setData] = useState<D[] | null>(null);
   const [count, setCount] = useState(0);
   const [page, setPage] = useState(0);
@@ -28,7 +37,18 @@ const ColumnWrapper = <D, C extends readonly string[]>({ state, getColColors, co
     async (page = 0, pushData = false, cancelToken?: CancelToken, resource?: string) => {
       try {
         setLoading(true);
-        const { count, data } = await fetchSingleColumn({ column, filterQuery, limit, page, resource, cancelToken });
+        const extraParams = {
+          [groupByApiKey]: group?.optionValue
+        };
+        const { count, data } = await fetchSingleColumn({
+          column,
+          filterQuery,
+          limit,
+          page,
+          resource,
+          cancelToken,
+          extraParams: group ? extraParams : undefined
+        });
         if (pushData) {
           setData((prev) => [...prev, ...data]);
         } else {
@@ -42,7 +62,7 @@ const ColumnWrapper = <D, C extends readonly string[]>({ state, getColColors, co
         setLoading(false);
       }
     },
-    [column, fetchSingleColumn, filterQuery, limit]
+    [column, fetchSingleColumn, filterQuery, limit, groupByApiKey, group]
   );
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
 

@@ -97,8 +97,6 @@ export type UseCardColTimeline<D, C extends readonly string[]> = {
   setSelectedRecordMap: React.Dispatch<React.SetStateAction<Map<string, Map<string, D>>>>;
   selectedRecordMap: Map<string, Map<string, D>>;
   selectedSubRows: any[];
-  setGroups: React.Dispatch<React.SetStateAction<Group[]>>;
-  groups: Group[] | null;
 } & UseCardColState<D, C>;
 
 export type CardColTimelineProps<D, C extends readonly string[]> = {

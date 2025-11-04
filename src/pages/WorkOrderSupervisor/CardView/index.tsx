@@ -1,12 +1,13 @@
+import { camelCase } from 'lodash';
 import { useCallback, useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CardColTimeline from 'src/components/CardColTimeline1';
 import { WORKORDER_SERVICE_STATUS, workOrderColormap, workOrderSupervisor } from 'src/constants/helpers';
 import CardCustomComponent from 'src/pages/WorkOrderTechnician/CardView/CardCustomComponent';
 
-const groupByButtonItems = [{ optionLabel: 'Assembly Order', optionValue: 'Assembly Orders' }];
+const groupByButtonItems = [{ optionLabel: 'Assembly Orders', optionValue: 'Assembly Order' }];
 
-const CardView = ({ filterQuery, setOnClickData, setOpen, state, headerSlot, renderedFrom, childColumns, bulkActionItems }) => {
+const CardView = ({ filterQuery, setOnClickData, setOpen, state, headerSlot, renderedFrom, childColumns, bulkActionItems, selectedResource }) => {
   const { setFilterQuery } = state;
 
   useEffect(() => {
@@ -24,7 +25,7 @@ const CardView = ({ filterQuery, setOnClickData, setOpen, state, headerSlot, ren
           resource
         }
       });
-      return data.data.data;
+      return data.data.data.map((d) => ({ optionLabel: d.optionLabel, optionValue: d.optionValue, count: d['workOrderCount'] }));
     } catch (error) {
       console.error(error);
     }
@@ -49,8 +50,8 @@ const CardView = ({ filterQuery, setOnClickData, setOpen, state, headerSlot, ren
             setOpen(true);
           }
         }}
-        groupByApiKey="resource"
-        groupByButtonItems={groupByButtonItems}
+        groupByApiKey="groupId"
+        groupByButtonItems={[selectedResource].map((d) => ({ optionLabel: d.label, optionValue: d.value }))}
         fetchGroupData={fetchGroupData}
       />
     </>

@@ -1,4 +1,4 @@
-import { CardColTimelineProps } from 'src/components/CardColTimeline1/types';
+import { CardColTimelineProps, Group } from 'src/components/CardColTimeline1/types';
 
 export type CommonProps<D, C extends readonly string[]> = {
   primaryField: any;
@@ -6,4 +6,5 @@ export type CommonProps<D, C extends readonly string[]> = {
   defaultDisplay: any[];
   column: C[number];
   estimatedItemSize?: number;
+  group?: Group;
 } & CardColTimelineProps<D, C>;

@@ -210,6 +210,10 @@ const WorkOrderSupervisor = () => {
           api += `&filterById=${JSON.stringify(filterByIds)}&filterType=and`;
         }
       }
+      if (extraParams) {
+        extraParams = { ...extraParams, [camelCase(selectedResource.value)]: extraParams['groupId'] };
+        delete extraParams['groupId'];
+      }
       try {
         const response = await axiosInstance().get(api, { cancelToken, params: extraParams });
         if (response.status !== 200) {
@@ -1048,6 +1052,7 @@ const WorkOrderSupervisor = () => {
             <CardView
               childColumns={childColumns}
               renderedFrom={renderedFrom}
+              selectedResource={selectedResource}
               bulkActionItems={
                 <BulkActionItems
                   selectedRecords={selectedRecords}

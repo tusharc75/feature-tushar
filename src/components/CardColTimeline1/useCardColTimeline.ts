@@ -66,7 +66,6 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
   const [selectedRecordMap, setSelectedRecordMap] = useState<Map<string, Map<string, D>>>(new Map());
   const initialState = useMemo(() => getInitialState<D, C>(), []);
   const [state, setState] = useReducer(reducer, initialState);
-  const [groups, setGroups] = useState<Group[]>(null);
 
   const setColumns = useCallback((payload: UseCardColState<D, C>['columns']) => {
     setState({ type: 'setColumns', payload: payload });
@@ -175,9 +174,7 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
     selectedSubItemsMap,
     setSelectedSubItemsMap,
     setExpandedSubRows,
-    selectedRecords,
-    groups,
-    setGroups
+    selectedRecords
   };
 };
 const prepareColumnDef = (columnDef: TColType[]) => {
