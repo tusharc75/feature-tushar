@@ -645,8 +645,20 @@ export const resourcePolicy = [
     resource: sidebarResource.quotation,
     policy: [
       {
-        fieldName: 'createFieldTicketWithoutFieldJob',
-        fieldLabel: 'Create Field Ticket Without Field Job',
+        fieldName: 'allowFieldTicketCreation',
+        fieldLabel: 'Allow Field Ticket Creation',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'allowOnlyOneFieldTicketPerLineItem',
+        fieldLabel: 'Allow Only One Field Ticket Per Line Item',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'enableFieldTicketCreationWithoutFieldJob',
+        fieldLabel: 'Enable Field Ticket Creation without Field Job',
         type: 'checkBox',
         defaultValue: false
       },
