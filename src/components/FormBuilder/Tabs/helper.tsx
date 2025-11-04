@@ -380,6 +380,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'mergeFieldTicketLineItems',
+        fieldLabel: 'Merge Field Ticket Line Items',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'customDownloadFileName',
         fieldLabel: 'Custom Download File Name',
         type: 'singleLine',

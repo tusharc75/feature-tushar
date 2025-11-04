@@ -25,6 +25,7 @@ import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';
 import FinalPriceBox from 'src/components/FinalPriceBox';
 import ManageInvoiceDialog from 'src/pages/Invoice/ManageInvoiceDialog';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
 const renderedFrom = `${camelCase(sidebarResource.generateInvoice)}_create`;
 
@@ -130,27 +131,23 @@ const CreateInvoiceDialog = ({
       },
       ...(resource === sidebarResource.fieldTicket
         ? [
-            {
-              accessor: 'fieldTicketNumber',
-              Header: 'Field Ticket',
-              disabled: true,
-              Cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                  <p className="text-truncate">{row.original.fieldTicketNumber}</p>
-                  {permissions?.fieldTicket?.isRead && (
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  )}
-                </div>
-              )
-            }
-          ]
+          {
+            accessor: 'fieldTickets',
+            Header: 'Field Ticket',
+            disabled: true,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'fieldTickets',
+                  lookupResource: sidebarResource.fieldTicket
+                }}
+                original={row?.original}
+              />
+            )
+          }
+        ]
         : []),
       {
         accessor: 'detail',
