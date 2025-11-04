@@ -63,7 +63,8 @@ const defaultVisibleRows = [
   'package',
   'repairOrder',
   'assemblyOrder',
-  'productionOrder'
+  'productionOrder',
+  'rentalJob'
 ];
 
 const keyGetter = (d: any) => d?.['_id'] as string;
@@ -170,10 +171,6 @@ const WorkOrderTechnician = () => {
     columnDef: columnsDef,
     keyGetter
   });
-
-  // useEffect(() => {
-
-  // }, [columnsDef]);
 
   useEffect(() => {
     const payload = {
@@ -323,9 +320,8 @@ const WorkOrderTechnician = () => {
                   <Box ml={1}>
                     <HtmlTooltip title={`${row?.original?.priority} Priority`}>
                       <span
-                        className={`no-inherit inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${
-                          row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
-                        } `}
+                        className={`no-inherit inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
+                          } `}
                       >
                         {row?.original?.priority}
                       </span>
@@ -434,9 +430,9 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-            selectedRecords?.filter(
-              (s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.status !== WORK_ORDER_STATUS.onHold && s?.canPerform
-            )?.length === selectedRecords?.length
+              selectedRecords?.filter(
+                (s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.status !== WORK_ORDER_STATUS.onHold && s?.canPerform
+              )?.length === selectedRecords?.length
               ? false
               : true,
           label: `Complete Service(s)`,
