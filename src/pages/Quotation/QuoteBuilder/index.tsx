@@ -520,7 +520,7 @@ const QuoteBuilder = ({
     }
   };
 
-  const showCreateFieldTicketButton = quotationData?.type === QUOTATION_TYPE.fieldJob && [QUOTATION_STATUS.converted, QUOTATION_STATUS.acceptByCustomer].includes(quotationData.status) && resourcePolicyData?.createFieldTicketWithoutFieldJob;
+  const showCreateFieldTicketButton = quotationData?.type === QUOTATION_TYPE.fieldJob && [QUOTATION_STATUS.converted, QUOTATION_STATUS.acceptByCustomer].includes(quotationData.status) && (resourcePolicyData?.createFieldTicketWithoutFieldJob || quotationData?.fieldJob) && user?.user?.brandPolicy?.createFieldTicketFromQuotation;
 
   return (
     <Fragment>
@@ -546,9 +546,7 @@ const QuoteBuilder = ({
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             renderedFrom={renderedFrom}
             hideSelection={
-              showCreateFieldTicketButton || resourcePolicyData?.createInvoiceFromQuotation || quotationData?.type === QUOTATION_TYPE.fieldJob && quotationData.status === QUOTATION_STATUS.converted && quotationData?.fieldJob
-                ? user?.user?.brandPolicy?.createFieldTicketFromQuotation
-                : true
+              (showCreateFieldTicketButton || resourcePolicyData?.createInvoiceFromQuotation) ? false : true
             }
             hideAction={true}
             isClientSideGrid={true}
@@ -561,6 +559,7 @@ const QuoteBuilder = ({
                 resources={resources}
                 resourcePolicyData={resourcePolicyData}
                 setInvoiceDialog={setInvoiceDialog}
+                showCreateFieldTicketButton={showCreateFieldTicketButton}
               />
             }
           />
@@ -619,16 +618,20 @@ const BulkActionItems = ({
   resources,
   resourcePolicyData,
   setInvoiceDialog,
+  showCreateFieldTicketButton
 }) => {
   return (
     <BulkActionContainer>
-      <BulkActionContainer.Button
-        onClick={() => {
-          fetchFieldServiceOrderData();
-        }}
-      >
-        {`Create ${resources?.fieldTicket?.titleSingular}`}
-      </BulkActionContainer.Button>
+      {showCreateFieldTicketButton && (
+        <BulkActionContainer.Button
+          onClick={() => {
+            fetchFieldServiceOrderData();
+          }}
+        >
+          {`Create ${resources?.fieldTicket?.titleSingular}`}
+        </BulkActionContainer.Button>
+      )}
+
       {resourcePolicyData?.createInvoiceFromQuotation && (
         <BulkActionContainer.Button
           onClick={() => {
