@@ -70,7 +70,7 @@ const QuoteBuilder = ({
 
   useEffect(() => {
     fetchFields();
-    fetchInvoiceFields();
+    fetchResourceFields();
   }, []);
 
   useEffect(() => {
@@ -364,30 +364,6 @@ const QuoteBuilder = ({
       });
   };
 
-  const fetchInvoiceFields = async () => {
-    try {
-      const { fieldsDataAll: quotationFieldsData } = await fetch_resource_fields(sidebarResource.quotation);
-      setQuotationFields(quotationFieldsData);
-      const { fieldsDataAll: invoiceFieldsData } = await fetch_resource_fields(sidebarResource.invoice);
-      setInvoiceFields(invoiceFieldsData);
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  };
-
-  const getInvoiceReferenceData = () => {
-    const referenceData: any = cloneResourceData(
-      quotationFields,
-      invoiceFields,
-      quotationData,
-      user.user?.brandCurrency
-    );
-
-    const resourceField = invoiceFields?.find((f) => f?.fieldData?.lookupResource === sidebarResource.quotation);
-    referenceData[resourceField?.fieldData?.fieldName] = quotationData?._id;
-    return referenceData;
-  };
-
   const rightSideContents = () => {
     return (
       <>
@@ -518,6 +494,30 @@ const QuoteBuilder = ({
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
+  };
+
+  const fetchResourceFields = async () => {
+    try {
+      const { fieldsDataAll: quotationFieldsData } = await fetch_resource_fields(sidebarResource.quotation);
+      setQuotationFields(quotationFieldsData);
+      const { fieldsDataAll: invoiceFieldsData } = await fetch_resource_fields(sidebarResource.invoice);
+      setInvoiceFields(invoiceFieldsData);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const getInvoiceReferenceData = () => {
+    const referenceData: any = cloneResourceData(
+      quotationFields,
+      invoiceFields,
+      quotationData,
+      user.user?.brandCurrency
+    );
+
+    const resourceField = invoiceFields?.find((f) => f?.fieldData?.lookupResource === sidebarResource.quotation);
+    referenceData[resourceField?.fieldData?.fieldName] = quotationData?._id;
+    return referenceData;
   };
 
   const showCreateFieldTicketButton = quotationData?.type === QUOTATION_TYPE.fieldJob && [QUOTATION_STATUS.converted, QUOTATION_STATUS.acceptByCustomer].includes(quotationData.status) && (resourcePolicyData?.createFieldTicketWithoutFieldJob || quotationData?.fieldJob) && user?.user?.brandPolicy?.createFieldTicketFromQuotation;
