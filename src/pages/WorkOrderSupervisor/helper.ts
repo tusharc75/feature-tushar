@@ -1,6 +1,7 @@
 import axiosInstance from "src/axios/axiosInstance";
 import { columns } from '../WorkOrder/WorkOrderDetailContent';
-import { sidebarResource } from "src/constants/helpers";
+import { ASSET_STATUS, INVENTORY_OWNER_TYPE, sidebarResource } from "src/constants/helpers";
+import { map, uniq } from "lodash";
 
 export const queryStringPlanned = (queryString) => {
   const queryParams = queryString.startsWith('&') ? queryString.slice(1).split('&') : queryString.split('&');
@@ -70,4 +71,36 @@ export const handlePdfPreview = async (workOrderId, user, toastConfig) => {
     }).catch((err) => {
       toastConfig.setToastConfig(err);
     });
+};
+
+export const checkUniqWarehouse = (selectedRecords) => {
+  if (selectedRecords.length === 0) {
+    return false;
+  } else if (uniq(map(selectedRecords, 'warehouseId')).length === 1) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+
+export const isCreateRepairOrderDisabled = (selectedRecords) => {
+  return (
+    selectedRecords?.length === 0 ||
+    selectedRecords.some((r) => r?.repairOrderId) ||
+    selectedRecords?.some(
+      (r) =>
+        ![
+          ASSET_STATUS.new,
+          ASSET_STATUS.available,
+          ASSET_STATUS.scrap,
+          ASSET_STATUS.underReview,
+          ASSET_STATUS.needRepair,
+          ASSET_STATUS.needRecert,
+          ASSET_STATUS.customerPossession
+        ].includes(r?.assetStatus)
+    ) ||
+    selectedRecords.some((r) => r?.currentOwnerType !== INVENTORY_OWNER_TYPE.brand) ||
+    !checkUniqWarehouse(selectedRecords)
+  );
 };
