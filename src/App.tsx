@@ -316,6 +316,7 @@ import ReportBuilder from 'src/pages/ReportBuilder';
 import CostBooks from 'src/pages/CostBooks';
 import CostBooksDetail from 'src/pages/CostBooks/CostBooksDetail';
 import UserManualUpdated from 'src/pages/UserManualUpdated';
+import ScadaOverview from 'src/pages/ScadaOverview';
 
 var notificationInterval: any = null;
 
@@ -1367,6 +1368,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.costBooksDetail.path}/:id`}>
               <CostBooksDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path="/scada-unit">
+              <ScadaOverview />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
