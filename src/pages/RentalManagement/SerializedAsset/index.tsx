@@ -753,16 +753,17 @@ const SerializedAsset = ({
         manualStatus: _inventory.inventory?.manualStatus,
         warehouse: _inventory.inventory?.warehouse?.optionLabel,
         warehouseId: _inventory.inventory?.warehouse?.optionValue,
+        serializedPackageId: _inventory.inventory?.serializedPackage?.optionValue,
+        serializedPackageStatus: _inventory.inventory?.serializedPackage?.status,
+        serializedPackage: _inventory.inventory?.serializedPackage?.optionLabel,
         _id: _inventory.inventory?._id,
         uniqueId: _inventory._id,
         isValid: _inventory.inventory?.manualStatus === ASSET_STATUS.reserved ? false : true,
         isTransferAsset: isTransferAsset,
         transferData: transferData,
         isSubleaseAsset: _inventory.inventory?.subleaseAsset,
-        canRemove: canRemove,
-        serializedPackageId: _inventory.inventory?.serializedPackage?.optionValue,
-        serializedPackageStatus: _inventory.inventory?.serializedPackage?.status,
-        serializedPackage: _inventory.inventory?.serializedPackage?.optionLabel
+        canRemove: canRemove
+
       });
     });
 
