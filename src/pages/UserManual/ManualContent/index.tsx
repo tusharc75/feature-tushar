@@ -123,6 +123,7 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
     navigator.clipboard.writeText(url);
   };
 
+  console.log({ content: pageData.map((d) => d.content), pageData });
   return (
     <main ref={mainContainerRef} className="relative flex min-h-screen flex-grow scroll-m-24 bg-[white] dark:bg-[#1b1b1d]">
       {loading ? (
@@ -133,7 +134,7 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
         <div className="mx-auto flex w-full flex-grow flex-wrap p-2">
           {isImageLoading && <CircularProgress className="fixed" size={16} />}
           {/* <div className="basis-full px-4 max-lg:order-2 lg:basis-3/4"> */}
-          <div className="w-full px-4 lg:w-3/4 lg:order-1 order-2">
+          <div className="order-2 w-full px-4 lg:order-1 lg:w-3/4">
             {pageData?.map((e, i) => (
               <div key={e._id}>
                 <div
@@ -186,7 +187,7 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
             ))}
           </div>
           {/* <div className="basis-full px-4 lg:basis-1/4"> */}
-          <div className="w-full px-4 lg:w-1/4 lg:order-2 order-1">
+          <div className="order-1 w-full px-4 lg:order-2 lg:w-1/4">
             {isMobile ? (
               <Accordion elevation={0} className="!rounded-lg dark:bg-[#242526]">
                 <AccordionSummary expandIcon={<ExpandMore />} className="[&.Mui-expanded]:![border-bottom:1px_solid_var(--common-border-color)]">

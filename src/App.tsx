@@ -280,7 +280,6 @@ import UserDetailsPage from './pages/User/UserDetailsPage';
 import UserAttendance from './pages/UserAttendance';
 import UserDownloadRequest from './pages/UserDownloadRequest';
 import UserManualOld from './pages/UserManual';
-import UserManual from './pages/UserManualNew';
 import Warehouse from './pages/Warehouse';
 import WarehouseDetailsPage from './pages/Warehouse/WarehouseDetailsPage';
 import WellMaster from './pages/WellMaster';
@@ -316,6 +315,7 @@ import ReportBuilderDetail from 'src/pages/ReportBuilder/ReportBuilderDetail';
 import ReportBuilder from 'src/pages/ReportBuilder';
 import CostBooks from 'src/pages/CostBooks';
 import CostBooksDetail from 'src/pages/CostBooks/CostBooksDetail';
+import UserManualUpdated from 'src/pages/UserManualUpdated';
 
 var notificationInterval: any = null;
 
@@ -595,7 +595,7 @@ function App() {
               <UserManualOld />
             </PrivateRoute>
             <PrivateRoute exact path="/user-manual*" userManualNew={true}>
-              <UserManual />
+              <UserManualUpdated />
             </PrivateRoute>
             <PrivateRoute exact path="/profile">
               <UserProfilePage profileBreadCrumbs={routes.profilePage} />

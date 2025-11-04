@@ -6,7 +6,7 @@ import Unauthorized from '../pages/Unauthorized';
 import Layout from './Layout';
 import NotFound from 'src/pages/NotFound';
 import UserManual from '../pages/UserManual';
-import UserManualNew from 'src/pages/UserManualNew';
+import UserManualUpdated from 'src/pages/UserManualUpdated';
 
 const ProtectedRoute = ({ children, ...rest }) => {
   const {
@@ -93,9 +93,8 @@ const ProtectedRoute = ({ children, ...rest }) => {
             </div>
           ) : access && rest?.userManual ? (
             <UserManual />
-          ) 
-          : access && rest?.userManualNew ? (
-            <UserManualNew /> 
+          ) : access && rest?.userManualNew ? (
+            <UserManualUpdated />
           ) : access ? (
             <Layout>{children}</Layout>
           ) : error ? (
