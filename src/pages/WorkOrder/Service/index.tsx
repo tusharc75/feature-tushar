@@ -240,14 +240,15 @@ const Service = ({
               }
             });
           }
-        } else {
-          for (const s of services) {
-            if (s?.requireAllPriorServicestoPass && !services?.filter(e => s?.order > e?.order)?.every(e => e?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed)) {
-              s.clickable = false;
-              services?.filter(e => s?.order < e?.order).forEach(e => {
-                e.clickable = false
-              });
-              break;
+          else {
+            for (const s of services) {
+              if (s?.requireAllPriorServicesToPass && !services?.filter(e => s?.order > e?.order)?.every(e => e?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed)) {
+                s.clickable = false;
+                services?.filter(e => s?.order < e?.order).forEach(e => {
+                  e.clickable = false
+                });
+                break;
+              }
             }
           }
         }
