@@ -25,29 +25,33 @@ const ResourceFilter = ({ selectedResource, setSelectedResource, filterByIds, se
       {
         key: 'assemblyOrder',
         resource: sidebarResource.assemblyOrder,
-        title: resources?.assemblyOrder?.titleSingular
+        title: resources?.assemblyOrder?.titleSingular,
+        permissionKey: 'assemblyOrder'
       },
       {
         key: 'productionOrder',
         resource: sidebarResource.productionOrder,
-        title: resources?.productionOrder?.titleSingular
+        title: resources?.productionOrder?.titleSingular,
+        permissionKey: 'productionOrder'
       },
       {
         key: 'repairOrder',
         resource: sidebarResource.repairOrder,
-        title: resources?.repairOrder?.titleSingular
+        title: resources?.repairOrder?.titleSingular,
+        permissionKey: 'repairOrder'
       },
       ...(resourcePolicyData?.policy?.autoCreateWorkOrderOnQuotationApproval ? [
         {
           key: 'rentalJob',
           resource: sidebarResource.rentalManagement,
-          title: resources?.rentalManagement?.titleSingular
+          title: resources?.rentalManagement?.titleSingular,
+          permissionKey: 'rentalManagement'
         },
       ] : [])
     ];
     const options: any = [];
     data?.forEach((item) => {
-      if (permissions[item.key === 'rentalJob' ? 'rentalManagement' : item.key]) {
+      if (permissions[item.permissionKey]) {
         options.push(item);
       }
     });
