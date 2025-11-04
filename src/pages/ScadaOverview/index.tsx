@@ -147,13 +147,6 @@ const ScadaOverview = () => {
             width="100%"
             height="500"
             viewBox="0 0 1100 500"
-            style={{
-              background: isDark
-                ? 'linear-gradient(135deg, #1a1a2e 0%, #0e0e23 100%)'
-                : 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)',
-              borderRadius: '8px',
-              border: `1px solid ${colors.borderColor}`,
-            }}
           >
             <defs>
               {/* Gradients for pipes */}
