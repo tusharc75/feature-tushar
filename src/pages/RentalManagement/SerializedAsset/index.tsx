@@ -294,6 +294,48 @@ const SerializedAsset = ({
         Cell: ({ row }) => getAssetAssignedValues(row)
       }
     ];
+
+    if (permissions?.serializedPackages?.isRead) {
+      column.push(
+        {
+          accessor: 'serializedPackage',
+          Header: resources?.serializedPackages?.titleSingular,
+          cell: ({ row }) =>
+            row?.original?.serializedPackage ? (
+              <div className="flex items-center gap-2">
+                <h5 className="text-truncate" title={row?.original?.serializedPackage}>
+                  {row?.original?.serializedPackage}
+                </h5>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.serializedPackagesDetail.path}/${row?.original?.serializedPackageId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
+          accessor: 'serializedPackageStatus',
+          Header: `${resources?.serializedPackages?.titleSingular} Status`,
+          cell: ({ row }) =>
+            row?.original?.serializedPackageStatus ? (
+              <div className="flex items-center gap-2">
+                <h5 className="text-truncate" title={row?.original?.serializedPackageStatus}>
+                  {row?.original?.serializedPackageStatus}
+                </h5>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        }
+      );
+    }
+
     column.push({
       accessor: 'warehouse',
       Header: resources?.warehouse?.titleSingular,
@@ -532,6 +574,11 @@ const SerializedAsset = ({
                 ? parent?.packageDetail?.packageDescription || ''
                 : '';
         parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.serializedProduct : false;
+
+        parent.serializedPackageId = parent?.serializedPackage?.optionValue;
+        parent.serializedPackageStatus = parent?.serializedPackage?.status;
+        parent.serializedPackage = parent?.serializedPackage?.optionLabel;
+
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct
           ? assets?.filter((e) => e._id === parent._id).length + data?.productSerialNumbers?.filter((e) => e._id === parent._id)?.length
@@ -712,7 +759,10 @@ const SerializedAsset = ({
         isTransferAsset: isTransferAsset,
         transferData: transferData,
         isSubleaseAsset: _inventory.inventory?.subleaseAsset,
-        canRemove: canRemove
+        canRemove: canRemove,
+        serializedPackageId: _inventory.inventory?.serializedPackage?.optionValue,
+        serializedPackageStatus: _inventory.inventory?.serializedPackage?.status,
+        serializedPackage: _inventory.inventory?.serializedPackage?.optionLabel
       });
     });
 
@@ -756,6 +806,11 @@ const SerializedAsset = ({
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.serializedProduct = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.serializedProduct : false;
+
+      _subRow.serializedPackageId = _subRow?.serializedPackage?.optionValue;
+      _subRow.serializedPackageStatus = _subRow?.serializedPackage?.status;
+      _subRow.serializedPackage = _subRow?.serializedPackage?.optionLabel;
+
       _subRow.assetQty =
         _subRow.type === MATERIAL_TYPE.product || _subRow.type === MATERIAL_TYPE.package
           ? parent.type === MATERIAL_TYPE.product || parent.type === MATERIAL_TYPE.package
