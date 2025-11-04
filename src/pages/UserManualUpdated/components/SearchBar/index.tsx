@@ -7,6 +7,7 @@ import { useUserManualStore } from '../../hooks/useUsermanual';
 import { makeSafeId } from 'src/pages/UserManualUpdated/utils';
 
 function findElementByText(textToSearch: string, htmlString: string): { element: HTMLElement; tagName: string } | null {
+  if (!textToSearch || !htmlString) return null;
   // Parse the HTML string into a DOM
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlString, 'text/html');
@@ -41,7 +42,7 @@ export const SearchBar = ({ state }: { state: UseUsermanual }) => {
   const [inputValue, setInputValue] = useState('');
 
   const handleSelectItem = (item: SearchData) => {
-    const { element, tagName } = findElementByText(inputValue, item.content);
+    const { element, tagName } = findElementByText(inputValue, item.content) || {};
     const hash = tagName && validHeads.has(tagName) ? makeSafeId(element.innerText) : makeSafeId(item.scrollKey, false);
     navigate({ route: item.path, hash });
     setOptionValue(null);

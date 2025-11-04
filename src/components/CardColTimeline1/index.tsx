@@ -18,6 +18,8 @@ const CardColTimeline = <D, C extends readonly string[]>({
   customContent,
   getChildId = (data) => data._id,
   bulkActionItems,
+  groupByButtonItems,
+  fetchGroupData,
   ...rest
 }: { headerSlot?: React.ReactElement; renderedFrom: string } & CardColTimelineProps<D, C>) => {
   const { columns, visibleColumns, columnDef, visible, order, setOrderAndVisibility, selectedView, setSelectedView } = state;

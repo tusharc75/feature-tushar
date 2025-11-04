@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { UseCardColActions, UseCardColState, UseCardColTimelineProps } from 'src/components/CardColTimeline1/types';
+import { Group, UseCardColActions, UseCardColState, UseCardColTimelineProps } from 'src/components/CardColTimeline1/types';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 
 const getInitialState = <D, C extends readonly string[]>(): UseCardColState<D, C> => {
@@ -66,6 +66,7 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
   const [selectedRecordMap, setSelectedRecordMap] = useState<Map<string, Map<string, D>>>(new Map());
   const initialState = useMemo(() => getInitialState<D, C>(), []);
   const [state, setState] = useReducer(reducer, initialState);
+  const [groups, setGroups] = useState<Group[]>(null);
 
   const setColumns = useCallback((payload: UseCardColState<D, C>['columns']) => {
     setState({ type: 'setColumns', payload: payload });
@@ -174,7 +175,9 @@ export const useCardColTimeline = <D, C extends readonly string[]>({
     selectedSubItemsMap,
     setSelectedSubItemsMap,
     setExpandedSubRows,
-    selectedRecords
+    selectedRecords,
+    groups,
+    setGroups
   };
 };
 const prepareColumnDef = (columnDef: TColType[]) => {

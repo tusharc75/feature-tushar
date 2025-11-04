@@ -2,6 +2,7 @@ import { HeadingNode, MenualData, Resource } from './types';
 
 export const BASE_ROUTE = '/user-manual';
 export const pageTitle = 'Equipt - User Manual';
+export const HOME_RESOURCE_KEY = 'User Manual Home';
 
 const emptyStableList = [];
 
@@ -24,7 +25,13 @@ export const getSectionFromLocation = (location: Location): string[] => {
 
 export const getPageDataByUrl = (data: MenualData, location: Location, setPageTitle: boolean = false) => {
   const sections = getSectionFromLocation(location);
-  if (sections.length === 0) return homepageData;
+  if (sections.length === 0) {
+    if (data.has(HOME_RESOURCE_KEY)) {
+      console.log(data.get(HOME_RESOURCE_KEY)?.get(HOME_RESOURCE_KEY) || homepageData);
+      return data.get(HOME_RESOURCE_KEY)?.get(HOME_RESOURCE_KEY) || homepageData;
+    }
+    return homepageData;
+  }
 
   if (sections.length === 2) {
     const [sectionName, resourceLabel] = sections.map(decodeURIComponent);
@@ -37,7 +44,7 @@ export const getPageDataByUrl = (data: MenualData, location: Location, setPageTi
   return null;
 };
 
-export function makeSafeId(text: string, addPrefix = true): string {
+export function makeSafeId(text: string, addPrefix = true, prefix = 'section-head-'): string {
   if (!text) {
     return text;
   }
@@ -46,7 +53,7 @@ export function makeSafeId(text: string, addPrefix = true): string {
     .trim()
     .replace(/[^a-z0-9]+/g, '-') // replace non-alphanumerics with dashes
     .replace(/^-+|-+$/g, '')}`; // trim leading/trailing dashes
-  return `${addPrefix ? 'section-head-' : ''}${newText}`;
+  return `${addPrefix ? prefix : ''}${newText}`;
 }
 
 export function createHeadingHierarchy(html: string): HeadingNode[] {

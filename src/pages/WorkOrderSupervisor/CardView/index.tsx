@@ -1,7 +1,10 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
 import CardColTimeline from 'src/components/CardColTimeline1';
-import { WORKORDER_SERVICE_STATUS, workOrderColormap } from 'src/constants/helpers';
+import { WORKORDER_SERVICE_STATUS, workOrderColormap, workOrderSupervisor } from 'src/constants/helpers';
 import CardCustomComponent from 'src/pages/WorkOrderTechnician/CardView/CardCustomComponent';
+
+const groupByButtonItems = [{ optionLabel: 'Assembly Order', optionValue: 'Assembly Orders' }];
 
 const CardView = ({ filterQuery, setOnClickData, setOpen, state, headerSlot, renderedFrom, childColumns, bulkActionItems }) => {
   const { setFilterQuery } = state;
@@ -13,6 +16,19 @@ const CardView = ({ filterQuery, setOnClickData, setOpen, state, headerSlot, ren
       setFilterQuery('');
     }
   }, [filterQuery]);
+
+  const fetchGroupData = useCallback(async (resource: string) => {
+    try {
+      const data = await axiosInstance().get(`${workOrderSupervisor.api}/resource-wise-count`, {
+        params: {
+          resource
+        }
+      });
+      return data.data.data;
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
 
   return (
     <>
@@ -33,6 +49,9 @@ const CardView = ({ filterQuery, setOnClickData, setOpen, state, headerSlot, ren
             setOpen(true);
           }
         }}
+        groupByApiKey="resource"
+        groupByButtonItems={groupByButtonItems}
+        fetchGroupData={fetchGroupData}
       />
     </>
   );

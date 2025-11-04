@@ -8,15 +8,15 @@ type SidebarProps = {
   onClickItem?: (id: string) => void; // optional callback if you want custom scroll
 };
 
-const InSvg = ({ className, ...props }: React.SVGProps<SVGElement>) => (
+const InSvg = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={cn('size-4 rtl:-scale-x-100', className)} {...props} viewBox="0 0 16 16">
-    <path d="m0 0 10 12" className="stroke-gray-200 dark:stroke-gray-700"></path>
+    <path d="m0 0 10 12" className="stroke-gray-200 transition-all duration-300 dark:stroke-gray-700"></path>
   </svg>
 );
 
-const OutSvg = ({ className, ...props }: React.SVGProps<SVGElement>) => (
+const OutSvg = ({ className, ...props }: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" className={cn(' size-4 rtl:-scale-x-100', className)} {...props} viewBox="0 0 16 16">
-    <path d="M10 0 0 12" className="stroke-gray-200 dark:stroke-gray-700"></path>
+    <path d="M10 0 0 12" className="stroke-gray-200 transition-all duration-300 dark:stroke-gray-700"></path>
   </svg>
 );
 
@@ -69,7 +69,7 @@ const SidebarList = ({
             {node.text}
             <span
               className={cn(
-                'absolute -left-2 bottom-0 w-[1px] ',
+                'absolute -left-2 bottom-0 w-[1px] transition-colors duration-300',
                 hash.substring(1) === node.id ? 'bg-theme' : 'bg-gray-200 dark:bg-gray-700',
                 i === 0 && isChild ? 'h-[calc(100%-12px)]' : 'h-full'
                 // i === nodes.length - 1 && isChild ? 'bottom-[12px] h-[calc(100%-12px)]' : ''
