@@ -447,6 +447,7 @@ const Quotation = ({
             fetchQuotationData(currentVersion);
           }}
           setCustomerAcceptable={setCustomerAcceptable}
+          resourceId={rentalManagementData?._id}
         />
       )}
       {showQuotationSummaryDialog && (

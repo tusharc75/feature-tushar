@@ -9,7 +9,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
-const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCurrentStep, updateStatus, setCustomerAcceptable }) => {
+const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCurrentStep, updateStatus, setCustomerAcceptable, resourceId = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const [selectedOption, setSelectedOption] = useState(null);
   const options = { Accept: QUOTATION_STATUS.acceptByCustomer, Reject: QUOTATION_STATUS.rejectByCustomer };
@@ -40,6 +40,9 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
         status: options[selectedOption],
         comment: comment || ''
       };
+      if (resourceId) {
+        dataObj.resourceId = resourceId;
+      }
       axiosInstance()
         .put(`${quotation.api}/status/${quotationId}/${versionId}`, dataObj)
         .then(() => {
