@@ -27,10 +27,12 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
-import { getObjKeysWithValues } from '../../../constants/helpers';
+import { getObjKeysWithValues, cloneResourceData } from '../../../constants/helpers';
 import { fetch_child_resource_fields, fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import SendIcon from '@mui/icons-material/Send';
+import ManageInvoiceDialog from 'src/pages/Invoice/ManageInvoiceDialog';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const QuoteBuilder = ({
   quotationData,
@@ -45,7 +47,8 @@ const QuoteBuilder = ({
   allowedToEdit,
   renderedFrom,
   DOAData = [],
-  setReserveAssetWarning
+  setReserveAssetWarning,
+  resourcePolicyData,
 }) => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const toastConfig = useContext(CustomToastContext);
@@ -61,9 +64,13 @@ const QuoteBuilder = ({
   const [columns, setColumns] = useState(null);
   const { selectedRecords } = state;
   const [fieldTicketDialog, setFieldTicketDialog] = useState({ open: false, data: null });
+  const [invoiceDialog, setInvoiceDialog] = useState(false);
+  const [invoiceFields, setInvoiceFields] = useState([]);
+  const [quotationFields, setQuotationFields] = useState([]);
 
   useEffect(() => {
     fetchFields();
+    fetchResourceFields();
   }, []);
 
   useEffect(() => {
@@ -149,16 +156,15 @@ const QuoteBuilder = ({
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${
-                      row.original.type === MATERIAL_TYPE.serializedAsset
-                        ? routes.serializedAssetDetail.path
-                        : row.original.type === MATERIAL_TYPE.product
-                          ? routes.productDetail.path
-                          : row.original.type === MATERIAL_TYPE.package
-                            ? routes.packagesDetail.path
-                            : row.original.type === MATERIAL_TYPE.service
-                              ? routes.serviceMasterDetail.path
-                              : routes.competenciesDetail.path
+                    `${row.original.type === MATERIAL_TYPE.serializedAsset
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === MATERIAL_TYPE.product
+                        ? routes.productDetail.path
+                        : row.original.type === MATERIAL_TYPE.package
+                          ? routes.packagesDetail.path
+                          : row.original.type === MATERIAL_TYPE.service
+                            ? routes.serviceMasterDetail.path
+                            : routes.competenciesDetail.path
                     }/${row.original.materialId}`
                   );
                 }}
@@ -171,19 +177,19 @@ const QuoteBuilder = ({
       },
       ...(user?.user?.brandPolicy?.leadTime
         ? [
-            {
-              accessor: 'leadTime',
-              Header: 'Lead Time (Days)',
-              Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
-              Footer: (info) => {
-                let rows = info.table.getExpandedRowModel().rows;
-                const total = rows
-                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-                return <>{total}</>;
-              }
+          {
+            accessor: 'leadTime',
+            Header: 'Lead Time (Days)',
+            Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+            Footer: (info) => {
+              let rows = info.table.getExpandedRowModel().rows;
+              const total = rows
+                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+              return <>{total}</>;
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'description',
@@ -211,19 +217,18 @@ const QuoteBuilder = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.service
-              ? parent.serviceDetail?.serviceName
-              : parent?.type === MATERIAL_TYPE.manualEntry
-                ? parent?.detail
-                : parent.type === MATERIAL_TYPE.package
-                  ? parent.packageDetail?.packageName
-                  : parent.competencyDetail?.competencyName
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
+            ? parent.serviceDetail?.serviceName
+            : parent?.type === MATERIAL_TYPE.manualEntry
+              ? parent?.detail
+              : parent.type === MATERIAL_TYPE.package
+                ? parent.packageDetail?.packageName
+                : parent.competencyDetail?.competencyName
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -436,6 +441,10 @@ const QuoteBuilder = ({
 
   const fetchFieldServiceOrderData = () => {
     const fieldServiceOrderId = quotationData?.fieldJob?.optionValue || quotationData?.fieldJob;
+    if (resourcePolicyData?.createFieldTicketWithoutFieldJob && !fieldServiceOrderId) {
+      setFieldTicketDialog({ open: true, data: quotationData });
+      return;
+    }
     axiosInstance()
       .get(`${fieldServiceOrder.api}/${fieldServiceOrderId}`)
       .then(({ data: { data } }) => {
@@ -478,7 +487,7 @@ const QuoteBuilder = ({
           });
         await axiosInstance().post(`${fieldTicket.api}/${data?._id}/cost`, manualEntry);
       }
-      if (materialIds.length || costIds.length)
+      if ((materialIds.length || costIds.length) && !resourcePolicyData?.createFieldTicketWithoutFieldJob)
         await axiosInstance().post(`${quotation.api}/set-field-ticket-created/${versionData?._id}`, { material: materialIds, cost: costIds });
       setFieldTicketDialog({ open: false, data: null });
       fetchData();
@@ -486,6 +495,32 @@ const QuoteBuilder = ({
       toastConfig.setToastConfig(error);
     }
   };
+
+  const fetchResourceFields = async () => {
+    try {
+      const { fieldsDataAll: quotationFieldsData } = await fetch_resource_fields(sidebarResource.quotation);
+      setQuotationFields(quotationFieldsData);
+      const { fieldsDataAll: invoiceFieldsData } = await fetch_resource_fields(sidebarResource.invoice);
+      setInvoiceFields(invoiceFieldsData);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const getInvoiceReferenceData = () => {
+    const referenceData: any = cloneResourceData(
+      quotationFields,
+      invoiceFields,
+      quotationData,
+      user.user?.brandCurrency
+    );
+
+    const resourceField = invoiceFields?.find((f) => f?.fieldData?.lookupResource === sidebarResource.quotation);
+    referenceData[resourceField?.fieldData?.fieldName] = quotationData?._id;
+    return referenceData;
+  };
+
+  const showCreateFieldTicketButton = quotationData?.type === QUOTATION_TYPE.fieldJob && [QUOTATION_STATUS.converted, QUOTATION_STATUS.acceptByCustomer].includes(quotationData.status) && (resourcePolicyData?.createFieldTicketWithoutFieldJob || quotationData?.fieldJob) && user?.user?.brandPolicy?.createFieldTicketFromQuotation;
 
   return (
     <Fragment>
@@ -511,16 +546,21 @@ const QuoteBuilder = ({
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             renderedFrom={renderedFrom}
             hideSelection={
-              quotationData?.type === QUOTATION_TYPE.fieldJob && quotationData.status === QUOTATION_STATUS.converted && quotationData?.fieldJob
-                ? !user?.user?.brandPolicy?.createFieldTicketFromQuotation
-                : true
+              (showCreateFieldTicketButton || resourcePolicyData?.createInvoiceFromQuotation) ? false : true
             }
             hideAction={true}
             isClientSideGrid={true}
             expander={true}
             hideExportTable={true}
             bulkActionItems={
-              <BulkActionItems selectedRecords={selectedRecords} fetchFieldServiceOrderData={fetchFieldServiceOrderData} resources={resources} />
+              <BulkActionItems
+                selectedRecords={selectedRecords}
+                fetchFieldServiceOrderData={fetchFieldServiceOrderData}
+                resources={resources}
+                resourcePolicyData={resourcePolicyData}
+                setInvoiceDialog={setInvoiceDialog}
+                showCreateFieldTicketButton={showCreateFieldTicketButton}
+              />
             }
           />
         </Box>
@@ -554,22 +594,53 @@ const QuoteBuilder = ({
           isRedirectTodetailPage={false}
         />
       )}
+      {invoiceDialog && (
+        <ManageInvoiceDialog
+          isClone={false}
+          invoiceId={null}
+          onClose={() => setInvoiceDialog(false)}
+          referenceData={getInvoiceReferenceData()}
+          onSuccess={() => {
+            setInvoiceDialog(false);
+            fetchQuotationData(version, false);
+          }}
+        />
+      )}
     </Fragment>
   );
 };
 
 export default QuoteBuilder;
 
-const BulkActionItems = ({ selectedRecords, fetchFieldServiceOrderData, resources }) => {
+const BulkActionItems = ({
+  selectedRecords,
+  fetchFieldServiceOrderData,
+  resources,
+  resourcePolicyData,
+  setInvoiceDialog,
+  showCreateFieldTicketButton
+}) => {
   return (
     <BulkActionContainer>
-      <BulkActionContainer.Button
-        onClick={() => {
-          fetchFieldServiceOrderData();
-        }}
-      >
-        {`Create ${resources?.fieldTicket?.titleSingular}`}
-      </BulkActionContainer.Button>
+      {showCreateFieldTicketButton && (
+        <BulkActionContainer.Button
+          onClick={() => {
+            fetchFieldServiceOrderData();
+          }}
+        >
+          {`Create ${resources?.fieldTicket?.titleSingular}`}
+        </BulkActionContainer.Button>
+      )}
+
+      {resourcePolicyData?.createInvoiceFromQuotation && (
+        <BulkActionContainer.Button
+          onClick={() => {
+            setInvoiceDialog(true);
+          }}
+        >
+          Create Invoice
+        </BulkActionContainer.Button>
+      )}
     </BulkActionContainer>
   );
 };

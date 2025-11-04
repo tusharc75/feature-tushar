@@ -629,6 +629,7 @@ const QuotationDetails = () => {
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
                   setReserveAssetWarning={setReserveAssetWarning}
+                  resourcePolicyData={resourcePolicyData?.policy}
                 />
               )}
               {stepNames[currentStep] === 'DOA' && quotationData && (
@@ -646,6 +647,7 @@ const QuotationDetails = () => {
                   sentToCustomer={sentToCustomer}
                   DOAData={DOAData}
                   setReserveAssetWarning={setReserveAssetWarning}
+                  resourcePolicyData={resourcePolicyData?.policy}
                 />
               )}
               {stepNames[currentStep] === 'Quote Approval' && quotationData && (
@@ -662,6 +664,7 @@ const QuotationDetails = () => {
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
                   setReserveAssetWarning={setReserveAssetWarning}
+                  resourcePolicyData={resourcePolicyData?.policy}
                 />
               )}
               {stepNames[currentStep] === 'End' && quotationData && (
@@ -677,6 +680,7 @@ const QuotationDetails = () => {
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
                   setReserveAssetWarning={setReserveAssetWarning}
+                  resourcePolicyData={resourcePolicyData?.policy}
                 />
               )}
             </div>
