@@ -1104,10 +1104,10 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
         obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
       }
     } else if (key.type === 'counter') {
-      const value: any = []
+      const value: any = [];
       if (dataObj[key.fieldName] && dataObj[key.fieldName]?.length > 0) {
-        dataObj[key.fieldName]?.forEach(ele => {
-          value.push({ ...getObjKeysWithValues(ele, key.subFields), ...(isClone ? {} : { _id: ele?._id }) })
+        dataObj[key.fieldName]?.forEach((ele) => {
+          value.push({ ...getObjKeysWithValues(ele, key.subFields), ...(isClone ? {} : { _id: ele?._id }) });
         });
       }
       obj[key.fieldName] = value;
@@ -1292,7 +1292,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length;) {
+        for (let i = 0; i < validationFields?.length; ) {
           const field = validationFields[i];
           const condition =
             field?.type === 'section'
@@ -1699,7 +1699,7 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
         });
       }
       return { permissions, resources };
-    } catch (e) { }
+    } catch (e) {}
   }
 };
 
@@ -2180,7 +2180,7 @@ export const SYSTEM_ASSET_STATUS = [
 
 export const ASSET_SUB_STATUS = {
   operational: 'Operational',
-  inUse: 'In-Use',
+  inUse: 'In-Use'
 };
 
 export const ASSET_NUMBER_TYPE = {
@@ -3792,8 +3792,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
-  if (typeof callBack !== 'function') callBack = (text) => { };
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
+  if (typeof callBack !== 'function') callBack = (text) => {};
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
@@ -3806,6 +3806,43 @@ export function copyTextToClipboard(text: string, callBack: (text: string) => vo
       console.error('Async: Could not copy text: ', err);
     }
   );
+}
+
+export async function asyncCopyText(text: string): Promise<boolean> {
+  // Modern API (Chrome, Edge, Firefox, Safari)
+  if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (err) {
+      throw new Error('Clipboard API failed, falling back:', err);
+    }
+  }
+
+  // Fallback for IE / older browsers
+  try {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+
+    // Avoid scrolling to bottom
+    textarea.style.position = 'fixed';
+    textarea.style.top = '0';
+    textarea.style.left = '0';
+    textarea.style.width = '1px';
+    textarea.style.height = '1px';
+    textarea.style.opacity = '0';
+
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textarea);
+
+    return successful;
+  } catch (err) {
+    throw new Error('Fallback copy failed:', err);
+  }
 }
 
 export const HIDDEN_FIELD_TYPE = ['description'];
