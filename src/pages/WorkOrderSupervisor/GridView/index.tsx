@@ -39,6 +39,7 @@ type Props = {
   tableHead?: React.ReactNode;
   columns: any[];
   childColumns: any[];
+  bulkActionItems: React.ReactNode;
 };
 
 export type GridViewRef = {
@@ -64,7 +65,8 @@ const GridView = React.forwardRef<GridViewRef, Props>(
       setRepairOrderDialog,
       tableHead = null,
       columns = [],
-      childColumns
+      childColumns,
+      bulkActionItems
     },
     ref
   ) => {
@@ -366,6 +368,9 @@ const GridView = React.forwardRef<GridViewRef, Props>(
               state={state}
               dispatch={dispatch}
               renderedFrom={renderedFrom}
+              bulkActionItems={bulkActionItems}
+              getChildId={(child) => child._id}
+              subItemAccessor={(child) => child.services}
             />
           ) : (
             <Box p={2} height={500}>

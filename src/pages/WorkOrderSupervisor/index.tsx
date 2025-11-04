@@ -5,7 +5,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import axios, { CancelToken } from 'axios';
 import dayjs from 'dayjs';
-import { camelCase, isEqual, map, uniq, uniqBy } from 'lodash';
+import { camelCase, isEqual, uniqBy } from 'lodash';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import { FaRegCalendar } from 'react-icons/fa';
@@ -29,8 +29,6 @@ import IconButtonTabs from 'src/components/IconButtonTabs';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 import {
-  ASSET_STATUS,
-  INVENTORY_OWNER_TYPE,
   MATERIAL_SUB_TYPE,
   REPAIR_ORDER_TYPE,
   WORKORDER_SERVICE_STATUS,
@@ -44,17 +42,18 @@ import {
 } from 'src/constants/helpers';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
-import CardView from 'src/pages/WorkOrderSupervisor//CardView';
-import CalendarView from 'src/pages/WorkOrderSupervisor/CalendarView';
-import GridView, { GridViewRef } from 'src/pages/WorkOrderSupervisor/GridView';
-import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
-import WorkOrderSchedulerDialog from 'src/pages/WorkOrderSupervisor/WorkOrderSchedulerDialog';
-import { handlePdfPreview, queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
+import CardView from './CardView';
+import CalendarView from './CalendarView';
+import GridView, { GridViewRef } from './GridView';
+import WorkOrderDetailDialog from './WorkOrderDetailDialog';
+import WorkOrderSchedulerDialog from './WorkOrderSchedulerDialog';
+import { handlePdfPreview, isCreateRepairOrderDisabled, queryStringPlanned } from './helper';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
 import AssignTechniciansDialog from '../WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import BulkActionItems from './BulkActionItems';
 
 type ViewType = 'card-view' | 'table-view' | 'calendar-view';
 
@@ -780,105 +779,6 @@ const WorkOrderSupervisor = () => {
       });
   };
 
-  const assignTechnicianButton = {
-    label: 'Assign Technicians',
-    disabled:
-      selectedRecordsS?.some((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status)) ||
-      !selectedRecordsS?.length,
-    onClick: () => {
-      if (viewType === 'table-view') {
-        workOrderListRef.current?.setAssignTechnicianDialog(true);
-      } else {
-        setAssignTechnicianDialog({ open: true, multiple: true });
-      }
-    }
-  };
-
-  const assignWorkStationButton = {
-    label: `Assign ${resources?.workStations?.titlePlural}`,
-    disabled:
-      selectedRecordsS?.some((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status)) ||
-      selectedRecordsS?.length === 0,
-    onClick: () => {
-      if (viewType === 'table-view') {
-        workOrderListRef.current?.setWorkStationAssignDialog(true);
-      } else {
-        setWorkStationAssignDialog({ open: true, multiple: true });
-      }
-    }
-  };
-
-  const addProductConsumablesButton = {
-    disabled: selectedRecordsS?.length === 0,
-    label: 'Add Products/Consumables',
-    onClick: () => setConsumablesDialog({ open: true, multiple: true })
-  };
-
-  const checkUniqWarehouse = (selectedRecords) => {
-    if (selectedRecords.length === 0) {
-      return false;
-    } else if (uniq(map(selectedRecords, 'warehouseId')).length === 1) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  const isCreateRepairOrderDisabled = (selectedRecords) => {
-    return (
-      selectedRecords?.length === 0 ||
-      selectedRecords.some((r) => r?.repairOrderId) ||
-      selectedRecords?.some(
-        (r) =>
-          ![
-            ASSET_STATUS.new,
-            ASSET_STATUS.available,
-            ASSET_STATUS.scrap,
-            ASSET_STATUS.underReview,
-            ASSET_STATUS.needRepair,
-            ASSET_STATUS.needRecert,
-            ASSET_STATUS.customerPossession
-          ].includes(r?.assetStatus)
-      ) ||
-      selectedRecords.some((r) => r?.currentOwnerType != INVENTORY_OWNER_TYPE.brand) ||
-      !checkUniqWarehouse(selectedRecords)
-    );
-  };
-
-  const createRepairOrderButton = {
-    disabled: viewType === 'table-view' ? isCreateRepairOrderDisabled(selectedRecords) : isCreateRepairOrderDisabled(selectedRecordsP),
-    label: `Create ${resources?.repairOrder?.titleSingular}`,
-    onClick: () => {
-      setRepairOrderDialog(true);
-    }
-  };
-
-  const newActionButtonProps: NewActionButtonProps<string, any> = useMemo(() => {
-    const canShowWorkStationButton = permissions?.workStations?.isRead;
-    const data: NewActionButtonProps<string, any> = {
-      disabled: !selectedRecords?.length,
-      items:
-        viewType === 'table-view'
-          ? tableViewStatus === WORKORDER_SERVICE_STATUS.planned
-            ? [createRepairOrderButton]
-            : [assignTechnicianButton, ...(canShowWorkStationButton ? [assignWorkStationButton] : []), addProductConsumablesButton]
-          : selectedRecords?.every((r) => r?.status === WORKORDER_SERVICE_STATUS.planned)
-            ? [...(viewType === 'card-view' ? [createRepairOrderButton] : [])]
-            : selectedRecords?.every((r) => r?.status !== WORKORDER_SERVICE_STATUS.planned)
-              ? [
-                assignTechnicianButton,
-                ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
-                ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])
-              ]
-              : [
-                assignTechnicianButton,
-                ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
-                ...(viewType === 'card-view' ? [addProductConsumablesButton, createRepairOrderButton] : [])
-              ]
-    };
-    return data;
-  }, [resources?.workStations?.titlePlural, selectedRecords, selectedRecordsS, selectedRecordsP, viewType, tableViewStatus]);
-
   const statusMenuItems = useMemo(() => {
     return [
       ...(permissions?.workOrderPlanning?.isRead && selectedResource?.value === sidebarResource.repairOrder
@@ -1134,13 +1034,25 @@ const WorkOrderSupervisor = () => {
             <CardView
               childColumns={childColumns}
               renderedFrom={renderedFrom}
+              bulkActionItems={
+                <BulkActionItems
+                  selectedRecords={selectedRecords}
+                  selectedRecordsP={selectedRecordsP}
+                  selectedRecordsS={selectedRecordsS}
+                  setRepairOrderDialog={setRepairOrderDialog}
+                  workOrderListRef={workOrderListRef}
+                  setWorkStationAssignDialog={setWorkStationAssignDialog}
+                  viewType={viewType}
+                  tableViewStatus={tableViewStatus}
+                  setAssignTechnicianDialog={setAssignTechnicianDialog}
+                  setConsumablesDialog={setConsumablesDialog}
+                />
+              }
               headerSlot={
                 <div className="min-h-[32px]">
                   <DetailsPageHeader
                     isAddButtonVisible={false}
                     isActionButtonVisible={false}
-                    isNewActionButtonVisible={selectedRecords.length > 0}
-                    newActionButtonProps={newActionButtonProps}
                     actionButtonProps={{ disabled: !selectedRecords?.length }}
                     leftSideContents={
                       <div className="flex items-center gap-2">
@@ -1201,12 +1113,24 @@ const WorkOrderSupervisor = () => {
               setConsumablesDialog={setConsumablesDialog}
               repairOrderDialog={repairOrderDialog}
               setRepairOrderDialog={setRepairOrderDialog}
+              bulkActionItems={
+                <BulkActionItems
+                  selectedRecords={selectedRecords}
+                  selectedRecordsP={selectedRecordsP}
+                  selectedRecordsS={selectedRecordsS}
+                  setRepairOrderDialog={setRepairOrderDialog}
+                  workOrderListRef={workOrderListRef}
+                  setWorkStationAssignDialog={setWorkStationAssignDialog}
+                  viewType={viewType}
+                  tableViewStatus={tableViewStatus}
+                  setAssignTechnicianDialog={setAssignTechnicianDialog}
+                  setConsumablesDialog={setConsumablesDialog}
+                />
+              }
               tableHead={
                 <DetailsPageHeader
                   isAddButtonVisible={false}
                   isActionButtonVisible={false}
-                  isNewActionButtonVisible={selectedRecords?.length > 0}
-                  newActionButtonProps={newActionButtonProps}
                   actionButtonProps={{ disabled: !selectedRecords?.length }}
                   leftSideContents={
                     <div className="flex items-center gap-2">
