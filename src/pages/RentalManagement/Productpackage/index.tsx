@@ -3,7 +3,7 @@ import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { startCase } from 'lodash';
-import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -307,37 +307,35 @@ const Productpackage = ({
         Cell: ({ row }) => {
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
-      }
+      },
+      ...(permissions?.serializedPackages?.isRead
+        ? [
+          {
+            accessor: 'serializedPackage',
+            Header: resources?.serializedPackages?.titleSingular,
+            cell: ({ row }) =>
+              row?.original?.serializedPackage ? (
+                <div className="flex items-center gap-2">
+                  <h5 className="text-truncate" title={row?.original?.serializedPackage}>
+                    {row?.original?.serializedPackage}
+                  </h5>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.serializedPackagesDetail.path}/${row?.original?.serializedPackageId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
+        : []),
     ];
     column = [...column, ...newColumns];
-
-    if (permissions?.serializedPackages?.isRead) {
-      column.push(
-        {
-          accessor: 'serializedPackage',
-          Header: resources?.serializedPackages?.titleSingular,
-          Cell: ({ row }) =>
-            row?.original?.serializedPackage ? (
-              <div className="flex items-center gap-2">
-                <h5 className="text-truncate" title={row?.original?.serializedPackage}>
-                  {row?.original?.serializedPackage}
-                </h5>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.serializedPackagesDetail.path}/${row?.original?.serializedPackageId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-        }
-      );
-    }
-
     column.push({
       accessor: 'action',
       Header: 'Actions',
@@ -505,7 +503,6 @@ const Productpackage = ({
 
       parent.serializedPackageId = parent?.serializedPackage?.optionValue;
       parent.serializedPackage = parent?.serializedPackage?.optionLabel;
-
       parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : !isPriceRequired;
       if (
         parent?.type == MATERIAL_TYPE.manualEntry &&
