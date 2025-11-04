@@ -232,12 +232,24 @@ const Service = ({
         }
 
         const productServices = services?.filter((s) => s?.parentId);
-        if (productServices?.length && !productServices?.every((s) => s?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed)) {
-          services?.forEach((s) => {
-            if (!s?.parentId && !s?.preWork) {
+        if (productServices?.length) {
+          if (!productServices?.every((s) => s?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed)) {
+            services?.forEach((s) => {
+              if (!s?.parentId && !s?.preWork) {
+                s.clickable = false;
+              }
+            });
+          }
+        } else {
+          for (const s of services) {
+            if (s?.requireAllPriorServicestoPass && !services?.filter(e => s?.order > e?.order)?.every(e => e?.serviceStatus === WORKORDER_SERVICE_STEP_STATUS.passed)) {
               s.clickable = false;
+              services?.filter(e => s?.order < e?.order).forEach(e => {
+                e.clickable = false
+              });
+              break;
             }
-          });
+          }
         }
 
         if (selectedService) {
