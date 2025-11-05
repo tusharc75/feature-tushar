@@ -61,10 +61,10 @@ const ShowCounterField = ({ fields, resource, selectedRow }) => {
       });
   };
 
-  const handleUpdate = (row) => {
+  const handleUpdate = (rows) => {
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-      .put(`/dynamic-form/counter/${selectedRow?._id}`, row, {
+      .put(`/dynamic-form/counter/${selectedRow?._id}`, rows, {
         headers: {
           Resource: resource
         }
@@ -106,7 +106,7 @@ const ShowCounterField = ({ fields, resource, selectedRow }) => {
           <EditableExcelTable
             columns={columns}
             data={state.dataRows}
-            onChange={(rows) => handleUpdate(rows[0])}
+            onChange={(rows) => handleUpdate(rows)}
             onDelete={(row) => handleDelete(row)}
           />
         </div>
