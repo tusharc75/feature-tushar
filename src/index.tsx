@@ -10,7 +10,6 @@ import TimezoneLocalizationProvider from 'src/StateProvider/TimeLocalizationProv
 import { version } from '../package.json';
 import App from './App';
 import AzureInstance from './AzureInstance';
-import './components/Chatter/style.scss';
 import { NewAddressOptionListProvider } from './StateProvider/AddressProvider';
 import { CustomChatNotificationCountProvider } from './StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { CustomNotificationCountProvider } from './StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';

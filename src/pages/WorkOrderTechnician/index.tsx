@@ -13,7 +13,7 @@ import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import { FetchSingleColumnProps, useCardColTimeline } from 'src/components/CardColTimeline1';
+import { FetchSingleColumnProps, useCardColTimeline } from 'src/components/CardColTimeline';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
@@ -220,7 +220,7 @@ const WorkOrderTechnician = () => {
                 <NoDataCell />
               )}
             </div>
-          )
+          );
         }
       });
       const finalColumns = [...newColumns, ActionsRenderer]?.map((c) => {
@@ -320,8 +320,9 @@ const WorkOrderTechnician = () => {
                   <Box ml={1}>
                     <HtmlTooltip title={`${row?.original?.priority} Priority`}>
                       <span
-                        className={`no-inherit inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
-                          } `}
+                        className={`no-inherit inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${
+                          row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
+                        } `}
                       >
                         {row?.original?.priority}
                       </span>
@@ -430,9 +431,9 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-              selectedRecords?.filter(
-                (s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.status !== WORK_ORDER_STATUS.onHold && s?.canPerform
-              )?.length === selectedRecords?.length
+            selectedRecords?.filter(
+              (s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.status !== WORK_ORDER_STATUS.onHold && s?.canPerform
+            )?.length === selectedRecords?.length
               ? false
               : true,
           label: `Complete Service(s)`,

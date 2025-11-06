@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import CardColTimeline from 'src/components/CardColTimeline1';
+import CardColTimeline from 'src/components/CardColTimeline';
 import { workOrderColormap } from 'src/constants/helpers';
 import CardCustomComponent from 'src/pages/WorkOrderTechnician/CardView/CardCustomComponent';
 
