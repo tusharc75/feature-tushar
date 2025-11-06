@@ -10,7 +10,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete, Box, Card, CardContent, IconButton, Checkbox, FormControlLabel, Typography, ClickAwayListener } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty, isEqual, camelCase, sortBy } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Add, Delete, Sort, FormatListNumbered, JoinInner, Functions, BarChart, ExpandMore, ExpandLess, TableChart } from '@mui/icons-material';
 import {
@@ -33,7 +33,6 @@ import {
 import { sidebarResource, UnCamelCase } from 'src/constants/helpers';
 import { BiFilterAlt } from 'react-icons/bi';
 import { FilterFieldSelectionDialog, FilterConfigurationDialog } from './Filters';
-import FieldSelectionPopper from './FieldSelectionPopper';
 
 const FieldsPopper = ({ isEdit, item, fields, updatePipelineItem, setItemCausingFieldChange }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -152,7 +151,12 @@ const LookupComponent = ({
       const fields = await getAvailableFieldsForPipeline(upstreamPipeline, formValues?.resource, resourceFieldMap?.[formValues?.resource]);
       setAvailableFields(fields || []);
     };
-    if (!upstreamPipeline?.length || !itemCausingFieldChange?._id || upstreamPipeline?.some((p) => p._id === itemCausingFieldChange?._id) || item?._id === itemCausingFieldChange?._id) {
+    if (
+      !upstreamPipeline?.length ||
+      !itemCausingFieldChange?._id ||
+      upstreamPipeline?.some((p) => p._id === itemCausingFieldChange?._id) ||
+      item?._id === itemCausingFieldChange?._id
+    ) {
       fetchFields();
     }
   }, [itemCausingFieldChange, formValues?.resource, resourceFieldMap?.[formValues?.resource]]);
@@ -245,6 +249,10 @@ const FieldMatchRow = ({
   availableFields: any[];
   setItemCausingFieldChange: React.Dispatch<React.SetStateAction<any>>;
 }) => {
+  const {
+    state: { resources }
+  }: any = useData();
+
   const fromResourceName = resourceOptions?.find((r) => r.value === formValues?.resource)?.title || formValues?.resource;
   const withResourceName = resourceOptions?.find((r) => r.value === item.withResource)?.title || item.withResource;
 
@@ -344,26 +352,40 @@ const FieldMatchRow = ({
         <Grid size={{ xs: 12, sm: matchIndex > 0 ? 2.5 : 2.5 }}>
           <Box display="flex" alignItems="center" gap={1}>
             <Box flex={1}>
-              <FieldSelectionPopper
-                isEdit={isEdit && !!item.withResource}
-                availableFields={availableFields}
-                selectedFields={availableFields?.filter((f) => f?.fieldName === item?.fieldToMatch?.[matchIndex]?.localField)}
-                onFieldSelect={(field) => {
+              <Autocomplete
+                disabled={!isEdit || !item.withResource}
+                value={availableFields?.find((f) => f?.fieldName === item?.fieldToMatch?.[matchIndex]?.localField) || null}
+                options={sortBy(availableFields, 'resource')}
+                groupBy={(option) => option.resource}
+                getOptionLabel={(option) => option.fieldLabel}
+                renderGroup={(params) => (
+                  <li key={params.key}>
+                    <Typography variant="subtitle2" className="px-3 py-2 font-semibold" style={{ color: 'var(--theme-primary)' }}>
+                      {resources?.[camelCase(params?.group)]?.titlePlural || params?.group}
+                    </Typography>
+                    <ul className="p-0">{params.children}</ul>
+                  </li>
+                )}
+                onChange={(e, val) => {
                   const updatedFieldToMatch = [...item.fieldToMatch];
-                  updatedFieldToMatch[matchIndex] = { ...updatedFieldToMatch[matchIndex], localField: field?.fieldName || '' };
+                  updatedFieldToMatch[matchIndex] = { ...updatedFieldToMatch[matchIndex], localField: val?.fieldName || '' };
                   onUpdate({ fieldToMatch: updatedFieldToMatch });
                 }}
-                textFieldProps={{
-                  size: 'small',
-                  label: fromResourceName,
-                  variant: 'outlined',
-                  fullWidth: true,
-                  required: true,
-                  error: pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`),
-                  helperText: pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`) ? `${fromResourceName} field is required` : '',
-                  slotProps: { inputLabel: { shrink: true } }
-                }}
-                popperProps={{ width: 350, maxHeight: 300 }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    label={fromResourceName}
+                    variant="outlined"
+                    fullWidth
+                    required
+                    error={pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`)}
+                    helperText={
+                      pipelineErrors[item._id]?.includes(`localField_${matchIndex}_required`) ? `${fromResourceName} field is required` : ''
+                    }
+                    slotProps={{ inputLabel: { shrink: true } }}
+                  />
+                )}
               />
             </Box>
             <span className="text-lg font-medium" style={{ color: 'var(--primary-text)' }}>
@@ -445,7 +467,8 @@ const AccumulatorRow = ({
   isEdit,
   onAddOperation,
   setItemCausingFieldChange,
-  pipelineErrors
+  pipelineErrors,
+  resources
 }: {
   index: number;
   item: any;
@@ -457,6 +480,7 @@ const AccumulatorRow = ({
   onAddOperation: () => void | undefined;
   setItemCausingFieldChange: React.Dispatch<React.SetStateAction<any>>;
   pipelineErrors: any;
+  resources: any;
 }) => (
   <Grid container spacing={2} alignItems="center" sx={{ mb: 2 }}>
     <Grid size={{ xs: 12, sm: 3 }}>
@@ -486,27 +510,37 @@ const AccumulatorRow = ({
     </Grid>
     {accumulator?.operation !== 'count' && (
       <Grid size={{ xs: 12, sm: 3 }}>
-        <FieldSelectionPopper
-          isEdit={isEdit}
-          availableFields={availableFields}
-          selectedFields={availableFields?.filter(
-            (f) => accumulator?.field?.fieldName === f?.fieldName && accumulator?.field?.resource === f?.resource
+        <Autocomplete
+          disabled={!isEdit}
+          value={availableFields?.find((f) => accumulator?.field?.fieldName === f?.fieldName && accumulator?.field?.resource === f?.resource) || null}
+          options={sortBy(availableFields, 'resource')}
+          groupBy={(option) => option.resource}
+          getOptionLabel={(option) => option.fieldLabel}
+          renderGroup={(params) => (
+            <li key={params.key}>
+              <Typography variant="subtitle2" className="px-3 py-2 font-semibold" style={{ color: 'var(--theme-primary)' }}>
+                {resources?.[camelCase(params?.group)]?.titlePlural || params?.group}
+              </Typography>
+              <ul className="p-0">{params.children}</ul>
+            </li>
           )}
-          onFieldSelect={(fields) => {
-            onUpdate({ field: { fieldName: fields?.fieldName || '', resource: fields?.resource || '', reportFieldName: fields?.reportFieldName } });
+          onChange={(e, val) => {
+            onUpdate({ field: { fieldName: val?.fieldName || '', resource: val?.resource || '', reportFieldName: val?.reportFieldName } });
             setItemCausingFieldChange({ _id: item._id, ts: Date.now() });
           }}
-          textFieldProps={{
-            size: 'small',
-            label: 'Field',
-            variant: 'outlined',
-            fullWidth: true,
-            required: true,
-            error: pipelineErrors[item._id]?.includes(`field_${index}_required`),
-            helperText: pipelineErrors[item._id]?.includes(`field_${index}_required`) ? 'Field is required' : '',
-            slotProps: { inputLabel: { shrink: true } }
-          }}
-          popperProps={{ width: 400, maxHeight: 400 }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              size="small"
+              label="Field"
+              variant="outlined"
+              fullWidth
+              required
+              error={pipelineErrors[item._id]?.includes(`field_${index}_required`)}
+              helperText={pipelineErrors[item._id]?.includes(`field_${index}_required`) ? 'Field is required' : ''}
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+          )}
         />
       </Grid>
     )}
@@ -550,6 +584,10 @@ const SortComponent = ({
   updatePipelineItem,
   itemCausingFieldChange
 }) => {
+  const {
+    state: { resources }
+  }: any = useData();
+
   const itemErrors = pipelineErrors[item._id] || [];
 
   const [availableFields, setAvailableFields] = useState<any[]>([]);
@@ -601,24 +639,36 @@ const SortComponent = ({
           return (
             <Grid container spacing={2} alignItems="center" key={index} mb={2}>
               <Grid size={{ xs: 12, sm: 5.5 }}>
-                <FieldSelectionPopper
-                  isEdit={isEdit}
-                  availableFields={availableFields}
-                  selectedFields={availableFields?.filter((f) => f?.fieldName === field.fieldName)}
-                  onFieldSelect={(field) => {
-                    update(index, { fieldName: field?.fieldName, resource: field?.resource, reportFieldName: field?.reportFieldName });
+                <Autocomplete
+                  disabled={!isEdit}
+                  value={availableFields?.find((f) => f?.fieldName === field.fieldName && f?.resource === field.resource) || null}
+                  options={sortBy(availableFields, 'resource')}
+                  groupBy={(option) => option.resource}
+                  getOptionLabel={(option) => option.fieldLabel}
+                  renderGroup={(params) => (
+                    <li key={params.key}>
+                      <Typography variant="subtitle2" className="px-3 py-2 font-semibold" style={{ color: 'var(--theme-primary)' }}>
+                        {resources?.[camelCase(params?.group)]?.titlePlural || params?.group}
+                      </Typography>
+                      <ul className="p-0">{params.children}</ul>
+                    </li>
+                  )}
+                  onChange={(e, val) => {
+                    update(index, { fieldName: val?.fieldName, resource: val?.resource, reportFieldName: val?.reportFieldName });
                   }}
-                  textFieldProps={{
-                    size: 'small',
-                    label: 'Sort Field',
-                    variant: 'outlined',
-                    fullWidth: true,
-                    required: true,
-                    error: pipelineErrors[item._id]?.includes(`fieldName_${index}_required`),
-                    helperText: pipelineErrors[item._id]?.includes(`fieldName_${index}_required`) ? 'Sort Field is required' : '',
-                    slotProps: { inputLabel: { shrink: true } }
-                  }}
-                  popperProps={{ width: 400, maxHeight: 400 }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      label="Sort Field"
+                      variant="outlined"
+                      fullWidth
+                      required
+                      error={pipelineErrors[item._id]?.includes(`fieldName_${index}_required`)}
+                      helperText={pipelineErrors[item._id]?.includes(`fieldName_${index}_required`) ? 'Sort Field is required' : ''}
+                      slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                  )}
                 />
               </Grid>
 
@@ -676,7 +726,20 @@ const SortComponent = ({
   );
 };
 
-const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, mainResourceFields, updatePipelineItem, itemCausingFieldChange }) => {
+const ChartComponent = ({
+  item,
+  pipeline,
+  pipelineErrors,
+  isEdit,
+  formValues,
+  mainResourceFields,
+  updatePipelineItem,
+  itemCausingFieldChange
+}) => {
+  const {
+    state: { resources }
+  }: any = useData();
+
   const itemErrors = pipelineErrors[item._id] || [];
 
   const [availableFields, setAvailableFields] = useState<any[]>([]);
@@ -749,26 +812,38 @@ const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, ma
           {['bar', 'line'].includes(item.chartType) && (
             <>
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <FieldSelectionPopper
-                  isEdit={isEdit}
-                  availableFields={availableFields}
-                  selectedFields={availableFields?.filter((f) => f?.fieldName === item.xAxis?.field)}
-                  onFieldSelect={(field) => {
+                <Autocomplete
+                  disabled={!isEdit}
+                  value={availableFields?.find((f) => f?.fieldName === item.xAxis?.field && f?.resource === item.xAxis?.resource) || null}
+                  options={sortBy(availableFields, 'resource')}
+                  groupBy={(option) => option.resource}
+                  getOptionLabel={(option) => option.fieldLabel}
+                  renderGroup={(params) => (
+                    <li key={params.key}>
+                      <Typography variant="subtitle2" className="px-3 py-2 font-semibold" style={{ color: 'var(--theme-primary)' }}>
+                        {resources?.[camelCase(params?.group)]?.titlePlural || params?.group}
+                      </Typography>
+                      <ul className="p-0">{params.children}</ul>
+                    </li>
+                  )}
+                  onChange={(e, val) => {
                     updatePipelineItem(item._id, {
-                      xAxis: { ...item.xAxis, field: field.fieldName, resource: field.resource, reportFieldName: field.reportFieldName }
+                      xAxis: { ...item.xAxis, field: val?.fieldName, resource: val?.resource, reportFieldName: val?.reportFieldName }
                     });
                   }}
-                  textFieldProps={{
-                    size: 'small',
-                    label: 'X-Axis Field',
-                    variant: 'outlined',
-                    fullWidth: true,
-                    required: true,
-                    error: itemErrors.includes('xAxis_field_required'),
-                    helperText: itemErrors.includes('xAxis_field_required') ? 'X-Axis Field is required' : '',
-                    slotProps: { inputLabel: { shrink: true } }
-                  }}
-                  popperProps={{ width: 400, maxHeight: 400 }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      label="X-Axis Field"
+                      variant="outlined"
+                      fullWidth
+                      required
+                      error={itemErrors.includes('xAxis_field_required')}
+                      helperText={itemErrors.includes('xAxis_field_required') ? 'X-Axis Field is required' : ''}
+                      slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                  )}
                 />
               </Grid>
               {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -791,24 +866,38 @@ const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, ma
                 />
               </Grid> */}
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <FieldSelectionPopper
-                  isEdit={isEdit}
-                  availableFields={availableFields}
-                  selectedFields={availableFields?.filter((f) => f?.fieldName === item.yAxis?.field)}
-                  onFieldSelect={(field) => {
-                    updatePipelineItem(item._id, { yAxis: { ...item.yAxis, field: field.fieldName, resource: field.resource, reportFieldName: field.reportFieldName } });
+                <Autocomplete
+                  disabled={!isEdit}
+                  value={availableFields?.find((f) => f?.fieldName === item.yAxis?.field && f?.resource === item.yAxis?.resource) || null}
+                  options={sortBy(availableFields, 'resource')}
+                  groupBy={(option) => option.resource}
+                  getOptionLabel={(option) => option.fieldLabel}
+                  renderGroup={(params) => (
+                    <li key={params.key}>
+                      <Typography variant="subtitle2" className="px-3 py-2 font-semibold" style={{ color: 'var(--theme-primary)' }}>
+                        {resources?.[camelCase(params?.group)]?.titlePlural || params?.group}
+                      </Typography>
+                      <ul className="p-0">{params.children}</ul>
+                    </li>
+                  )}
+                  onChange={(e, val) => {
+                    updatePipelineItem(item._id, {
+                      yAxis: { ...item.yAxis, field: val?.fieldName, resource: val?.resource, reportFieldName: val?.reportFieldName }
+                    });
                   }}
-                  textFieldProps={{
-                    size: 'small',
-                    label: 'Y-Axis Field',
-                    variant: 'outlined',
-                    fullWidth: true,
-                    required: true,
-                    error: itemErrors.includes('yAxis_field_required'),
-                    helperText: itemErrors.includes('yAxis_field_required') ? 'Y-Axis Field is required' : '',
-                    slotProps: { inputLabel: { shrink: true } }
-                  }}
-                  popperProps={{ width: 400, maxHeight: 400 }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      label="Y-Axis Field"
+                      variant="outlined"
+                      fullWidth
+                      required
+                      error={itemErrors.includes('yAxis_field_required')}
+                      helperText={itemErrors.includes('yAxis_field_required') ? 'Y-Axis Field is required' : ''}
+                      slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                  )}
                 />
               </Grid>
               {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -836,49 +925,73 @@ const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, ma
           {item.chartType === 'pie' && (
             <>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <FieldSelectionPopper
-                  isEdit={isEdit}
-                  availableFields={availableFields}
-                  selectedFields={availableFields?.filter((f) => f?.fieldName === item.value?.field)}
-                  onFieldSelect={(field) => {
+                <Autocomplete
+                  disabled={!isEdit}
+                  value={availableFields?.find((f) => f?.fieldName === item.value?.field) || null}
+                  options={sortBy(availableFields, 'resource')}
+                  groupBy={(option) => option.resource}
+                  getOptionLabel={(option) => option.fieldLabel}
+                  renderGroup={(params) => (
+                    <li key={params.key}>
+                      <Typography variant="subtitle2" className="px-3 py-2 font-semibold" style={{ color: 'var(--theme-primary)' }}>
+                        {resources?.[camelCase(params?.group)]?.titlePlural || params?.group}
+                      </Typography>
+                      <ul className="p-0">{params.children}</ul>
+                    </li>
+                  )}
+                  onChange={(e, val) => {
                     updatePipelineItem(item._id, {
-                      value: { field: field.fieldName, resource: field.resource, reportFieldName: field.reportFieldName }
+                      value: { field: val?.fieldName, resource: val?.resource, reportFieldName: val?.reportFieldName }
                     });
                   }}
-                  textFieldProps={{
-                    size: 'small',
-                    label: 'Value Field',
-                    variant: 'outlined',
-                    fullWidth: true,
-                    required: true,
-                    error: itemErrors.includes('value_required'),
-                    helperText: itemErrors.includes('value_required') ? 'Value Field is required' : '',
-                    slotProps: { inputLabel: { shrink: true } }
-                  }}
-                  popperProps={{ width: 400, maxHeight: 400 }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      label="Value Field"
+                      variant="outlined"
+                      fullWidth
+                      required
+                      error={itemErrors.includes('value_required')}
+                      helperText={itemErrors.includes('value_required') ? 'Value Field is required' : ''}
+                      slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                  )}
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <FieldSelectionPopper
-                  isEdit={isEdit}
-                  availableFields={availableFields}
-                  selectedFields={availableFields?.filter((f) => f?.fieldName === item.label?.field)}
-                  onFieldSelect={(field) => {
+                <Autocomplete
+                  disabled={!isEdit}
+                  value={availableFields?.find((f) => f?.fieldName === item.label?.field) || null}
+                  options={sortBy(availableFields, 'resource')}
+                  groupBy={(option) => option.resource}
+                  getOptionLabel={(option) => option.fieldLabel}
+                  renderGroup={(params) => (
+                    <li key={params.key}>
+                      <Typography variant="subtitle2" className="px-3 py-2 font-semibold" style={{ color: 'var(--theme-primary)' }}>
+                        {resources?.[camelCase(params?.group)]?.titlePlural || params?.group}
+                      </Typography>
+                      <ul className="p-0">{params.children}</ul>
+                    </li>
+                  )}
+                  onChange={(e, val) => {
                     updatePipelineItem(item._id, {
-                      label: { field: field.fieldName, resource: field.resource, reportFieldName: field.reportFieldName }
+                      label: { field: val?.fieldName, resource: val?.resource, reportFieldName: val?.reportFieldName }
                     });
                   }}
-                  textFieldProps={{
-                    size: 'small',
-                    label: 'Label Field',
-                    variant: 'outlined',
-                    fullWidth: true,
-                    required: true,
-                    error: itemErrors.includes('label_required'),
-                    helperText: itemErrors.includes('label_required') ? 'Label Field is required' : '',
-                    slotProps: { inputLabel: { shrink: true } }
-                  }}
-                  popperProps={{ width: 400, maxHeight: 400 }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      size="small"
+                      label="Label Field"
+                      variant="outlined"
+                      fullWidth
+                      required
+                      error={itemErrors.includes('label_required')}
+                      helperText={itemErrors.includes('label_required') ? 'Label Field is required' : ''}
+                      slotProps={{ inputLabel: { shrink: true } }}
+                    />
+                  )}
                 />
               </Grid>
             </>
@@ -993,6 +1106,10 @@ const GroupComponent = ({
   itemCausingFieldChange,
   setItemCausingFieldChange
 }) => {
+  const {
+    state: { resources }
+  }: any = useData();
+
   const itemErrors = pipelineErrors[item._id] || [];
 
   const [availableFields, setAvailableFields] = useState<any[]>([]);
@@ -1041,37 +1158,48 @@ const GroupComponent = ({
             onRemove={
               item?.accumulator?.length > 1
                 ? () => {
-                  const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
-                  updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                }
+                    const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
+                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                  }
                 : undefined
             }
             onAddOperation={
               index === item?.accumulator?.length - 1
                 ? () => {
-                  const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
-                  updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                }
+                    const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
+                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                  }
                 : undefined
             }
             setItemCausingFieldChange={setItemCausingFieldChange}
             pipelineErrors={pipelineErrors}
+            resources={resources}
           />
         ))}
 
         <Box>
           <span>Group By</span>
           <Box mt={2} />
-          <FieldSelectionPopper
-            multiple={true}
-            isEdit={isEdit}
-            availableFields={availableFields}
-            selectedFields={availableFields?.filter((f) =>
-              item?.fields?.some((field) => field.fieldName === f.fieldName && field.resource === f.resource)
+          <Autocomplete
+            multiple
+            disabled={!isEdit}
+            value={
+              availableFields?.filter((f) => item?.fields?.some((field) => field.fieldName === f.fieldName && field.resource === f.resource)) || []
+            }
+            options={sortBy(availableFields, 'resource')}
+            groupBy={(option) => option.resource}
+            getOptionLabel={(option) => option.fieldLabel}
+            renderGroup={(params) => (
+              <li key={params.key}>
+                <Typography variant="subtitle2" className="px-3 py-2 font-semibold" style={{ color: 'var(--theme-primary)' }}>
+                  {resources?.[camelCase(params?.group)]?.titlePlural || params?.group}
+                </Typography>
+                <ul className="p-0">{params.children}</ul>
+              </li>
             )}
-            onFieldSelect={(fields) => {
+            onChange={(e, val) => {
               updatePipelineItem(item._id, {
-                fields: fields?.map((f) => {
+                fields: val?.map((f) => {
                   return {
                     fieldName: f.fieldName,
                     resource: f.resource,
@@ -1081,17 +1209,19 @@ const GroupComponent = ({
               });
               setItemCausingFieldChange({ _id: item._id, ts: Date.now() });
             }}
-            textFieldProps={{
-              size: 'small',
-              label: 'Select Fields',
-              variant: 'outlined',
-              fullWidth: true,
-              required: true,
-              error: pipelineErrors[item._id]?.includes('fields_required'),
-              helperText: pipelineErrors[item._id]?.includes('fields_required') ? 'Group by fields are required' : '',
-              slotProps: { inputLabel: { shrink: true } }
-            }}
-            popperProps={{ width: 400, maxHeight: 400 }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                size="small"
+                label="Select Fields"
+                variant="outlined"
+                fullWidth
+                required
+                error={pipelineErrors[item._id]?.includes('fields_required')}
+                helperText={pipelineErrors[item._id]?.includes('fields_required') ? 'Group by fields are required' : ''}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            )}
           />
         </Box>
       </CardContent>
@@ -1110,6 +1240,11 @@ const MatrixComponent = ({
   pipelineErrors,
   itemCausingFieldChange
 }) => {
+
+  const {
+    state: { resources }
+  }: any = useData();
+
   const itemErrors = pipelineErrors[item._id] || [];
 
   const [availableFields, setAvailableFields] = useState<any[]>([]);
@@ -1143,79 +1278,115 @@ const MatrixComponent = ({
         </Box>
         <Grid container spacing={1} alignItems="center">
           <Grid size={{ xs: 12, sm: 4 }}>
-            <FieldSelectionPopper
-              isEdit={isEdit}
-              availableFields={availableFields}
-              selectedFields={availableFields?.filter((f) =>
-                item?.rows?.some((field) => field.fieldName === f.fieldName && field.resource === f.resource)
+            <Autocomplete
+              disabled={!isEdit}
+              value={
+                availableFields?.find((f) => item?.rows?.some((field) => field.fieldName === f.fieldName && field.resource === f.resource)) || null
+              }
+              options={sortBy(availableFields, 'resource')}
+              groupBy={(option) => option.resource}
+              getOptionLabel={(option) => option.fieldLabel}
+              renderGroup={(params) => (
+                <li key={params.key}>
+                  <Typography variant="subtitle2" className="px-3 py-2 font-semibold" style={{ color: 'var(--theme-primary)' }}>
+                    {resources?.[camelCase(params?.group)]?.titlePlural || params?.group}
+                  </Typography>
+                  <ul className="p-0">{params.children}</ul>
+                </li>
               )}
-              onFieldSelect={(field) => {
+              onChange={(e, val) => {
                 updatePipelineItem(item._id, {
-                  rows: [{ fieldName: field?.fieldName || '', resource: field?.resource || '', reportFieldName: field?.reportFieldName }]
+                  rows: [{ fieldName: val?.fieldName || '', resource: val?.resource || '', reportFieldName: val?.reportFieldName }]
                 });
               }}
-              textFieldProps={{
-                size: 'small',
-                label: 'Select Row',
-                variant: 'outlined',
-                fullWidth: true,
-                required: true,
-                error: pipelineErrors[item._id]?.includes(`rows_required`),
-                helperText: pipelineErrors[item._id]?.includes(`rows_required`) ? 'Rows are required' : '',
-                slotProps: { inputLabel: { shrink: true } }
-              }}
-              popperProps={{ width: 400, maxHeight: 400 }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="small"
+                  label="Select Row"
+                  variant="outlined"
+                  fullWidth
+                  required
+                  error={pipelineErrors[item._id]?.includes(`rows_required`)}
+                  helperText={pipelineErrors[item._id]?.includes(`rows_required`) ? 'Rows are required' : ''}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              )}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <FieldSelectionPopper
-              isEdit={isEdit}
-              availableFields={availableFields}
-              selectedFields={availableFields?.filter((f) =>
-                item?.columns?.some((field) => field.fieldName === f.fieldName && field.resource === f.resource)
+            <Autocomplete
+              disabled={!isEdit}
+              value={
+                availableFields?.find((f) => item?.columns?.some((field) => field.fieldName === f.fieldName && field.resource === f.resource)) || null
+              }
+              options={sortBy(availableFields, 'resource')}
+              groupBy={(option) => option.resource}
+              getOptionLabel={(option) => option.fieldLabel}
+              renderGroup={(params) => (
+                <li key={params.key}>
+                  <Typography variant="subtitle2" className="px-3 py-2 font-semibold" style={{ color: 'var(--theme-primary)' }}>
+                    {resources?.[camelCase(params?.group)]?.titlePlural || params?.group}
+                  </Typography>
+                  <ul className="p-0">{params.children}</ul>
+                </li>
               )}
-              onFieldSelect={(field) => {
+              onChange={(e, val) => {
                 updatePipelineItem(item._id, {
-                  columns: [{ fieldName: field?.fieldName || '', resource: field?.resource || '', reportFieldName: field?.reportFieldName }]
+                  columns: [{ fieldName: val?.fieldName || '', resource: val?.resource || '', reportFieldName: val?.reportFieldName }]
                 });
               }}
-              textFieldProps={{
-                size: 'small',
-                label: 'Select Column',
-                variant: 'outlined',
-                fullWidth: true,
-                required: true,
-                error: pipelineErrors[item._id]?.includes(`columns_required`),
-                helperText: pipelineErrors[item._id]?.includes(`columns_required`) ? 'Columns are required' : '',
-                slotProps: { inputLabel: { shrink: true } }
-              }}
-              popperProps={{ width: 400, maxHeight: 400 }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="small"
+                  label="Select Column"
+                  variant="outlined"
+                  fullWidth
+                  required
+                  error={pipelineErrors[item._id]?.includes(`columns_required`)}
+                  helperText={pipelineErrors[item._id]?.includes(`columns_required`) ? 'Columns are required' : ''}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              )}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <FieldSelectionPopper
-              multiple={true}
-              isEdit={isEdit}
-              availableFields={availableFields}
-              selectedFields={availableFields?.filter((f) =>
-                item?.values?.some((field) => field.fieldName === f.fieldName && field.resource === f.resource)
+            <Autocomplete
+              multiple
+              disabled={!isEdit}
+              value={
+                availableFields?.filter((f) => item?.values?.some((field) => field.fieldName === f.fieldName && field.resource === f.resource)) || []
+              }
+              options={sortBy(availableFields, 'resource')}
+              groupBy={(option) => option.resource}
+              getOptionLabel={(option) => option.fieldLabel}
+              renderGroup={(params) => (
+                <li key={params.key}>
+                  <Typography variant="subtitle2" className="px-3 py-2 font-semibold" style={{ color: 'var(--theme-primary)' }}>
+                    {resources?.[camelCase(params?.group)]?.titlePlural || params?.group}
+                  </Typography>
+                  <ul className="p-0">{params.children}</ul>
+                </li>
               )}
-              onFieldSelect={(fields) => {
+              onChange={(e, val) => {
                 updatePipelineItem(item._id, {
-                  values: fields?.map((f) => ({ fieldName: f?.fieldName || '', resource: f?.resource || '', reportFieldName: f?.reportFieldName }))
+                  values: val?.map((f) => ({ fieldName: f?.fieldName || '', resource: f?.resource || '', reportFieldName: f?.reportFieldName }))
                 });
               }}
-              textFieldProps={{
-                size: 'small',
-                label: 'Select Values',
-                variant: 'outlined',
-                fullWidth: true,
-                required: true,
-                error: pipelineErrors[item._id]?.includes(`values_required`),
-                helperText: pipelineErrors[item._id]?.includes(`values_required`) ? 'Values are required' : '',
-                slotProps: { inputLabel: { shrink: true } }
-              }}
-              popperProps={{ width: 400, maxHeight: 400 }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  size="small"
+                  label="Select Values"
+                  variant="outlined"
+                  fullWidth
+                  required
+                  error={pipelineErrors[item._id]?.includes(`values_required`)}
+                  helperText={pipelineErrors[item._id]?.includes(`values_required`) ? 'Values are required' : ''}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              )}
             />
           </Grid>
         </Grid>
