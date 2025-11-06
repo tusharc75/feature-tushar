@@ -124,7 +124,6 @@ const RenderContent = ({
     };
   }, [tree]);
 
-  if (!tree || tree.length === 0) return null;
   return (
     <>
       <div
