@@ -42,7 +42,7 @@ const Content = ({ state }: { state: UseUsermanual }) => {
               <>
                 <Accordion elevation={0} className="!rounded-lg dark:bg-[#242526]">
                   <AccordionSummary expandIcon={<ExpandMore />} className="[&.Mui-expanded]:![border-bottom:1px_solid_var(--common-border-color)]">
-                    On This Page
+                    On this page
                   </AccordionSummary>
                   <AccordionDetails>
                     <NavSidebar tree={tree} />
@@ -88,6 +88,7 @@ const RenderContent = ({
   isScrolling: boolean;
 }) => {
   const observerRef = useRef<IntersectionObserver | null>(null);
+
   useEffect(() => {
     setTimeout(() => {
       const headings = mainContainerRef?.current.querySelectorAll<HTMLElement>('h1[id], h2[id], h3[id], h4[id]');
@@ -116,7 +117,7 @@ const RenderContent = ({
         }
       );
       headings.forEach((h) => observerRef.current?.observe(h));
-    }, 300);
+    }, 400);
 
     return () => {
       observerRef.current?.disconnect();

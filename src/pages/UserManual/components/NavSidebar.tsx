@@ -45,7 +45,7 @@ const SidebarList = ({
   onClickItem?: (id: string) => void;
   hash: string;
   setHash: React.Dispatch<any>;
-  isChild: boolean;
+  isChild?: boolean;
 }) => {
   if (!nodes || nodes.length === 0) return null;
 
@@ -108,7 +108,7 @@ export const NavSidebar: React.FC<SidebarProps> = ({ tree, onClickItem }) => {
   }, []);
   return (
     <nav className="sidebar sticky top-[--manual-head-height] max-h-[calc(100vh-var(--manual-head-height))] overflow-y-auto border-l p-4">
-      <h2 className="sticky top-[-18px] z-10 mb-2 bg-[white] font-bold dark:bg-[rgb(27,27,29)]">Contents</h2>
+      <h3 className="sticky top-[-18px] z-10 bg-[white] py-2 text-sm font-medium dark:bg-[rgb(27,27,29)]">On this page</h3>
       <SidebarList nodes={tree} onClickItem={onClickItem} hash={hash} setHash={setHash} />
     </nav>
   );
