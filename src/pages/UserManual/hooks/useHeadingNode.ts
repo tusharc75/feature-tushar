@@ -7,6 +7,7 @@ const useHeadingNode = (data: Resource) => {
 
   useEffect(() => {
     const tree = createHeadingHierarchy(data?.content!);
+    console.log({ tree, content: data?.content, nodes: new DOMParser().parseFromString(data?.content, 'text/html') });
     setTreeData(tree);
   }, [data]);
 

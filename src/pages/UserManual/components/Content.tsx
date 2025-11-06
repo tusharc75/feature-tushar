@@ -126,17 +126,19 @@ const RenderContent = ({
         const HeadingTag = `${node.element}` as keyof JSX.IntrinsicElements;
         return (
           <div key={node.id}>
-            <HeadingTag id={node.id} className="group flex max-w-fit  scroll-m-[calc(var(--manual-head-height)+20px)] items-center gap-2">
-              <a
-                href={`#${node.id}`}
-                id={node.id}
-                className="not-prose flex  scroll-m-[calc(var(--manual-head-height)+20px)] items-center  no-underline"
-              >
-                {node.text}
-              </a>
+            {HeadingTag && (
+              <HeadingTag id={node.id} className="group flex max-w-fit  scroll-m-[calc(var(--manual-head-height)+20px)] items-center gap-2">
+                <a
+                  href={`#${node.id}`}
+                  id={node.id}
+                  className="not-prose flex  scroll-m-[calc(var(--manual-head-height)+20px)] items-center  no-underline"
+                >
+                  {node.text}
+                </a>
 
-              <CopyButton title={node.text} />
-            </HeadingTag>
+                <CopyButton title={node.text} />
+              </HeadingTag>
+            )}
 
             {node.contentHtml && node.children.length === 0 && <div className="content" dangerouslySetInnerHTML={{ __html: node.contentHtml }} />}
             {node.children && node.children.length > 0 && (

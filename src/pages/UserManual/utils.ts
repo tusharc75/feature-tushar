@@ -27,7 +27,6 @@ export const getPageDataByUrl = (data: MenualData, location: Location, setPageTi
   const sections = getSectionFromLocation(location);
   if (sections.length === 0) {
     if (data.has(HOME_RESOURCE_KEY)) {
-      console.log(data.get(HOME_RESOURCE_KEY)?.get(HOME_RESOURCE_KEY) || homepageData);
       return data.get(HOME_RESOURCE_KEY)?.get(HOME_RESOURCE_KEY) || homepageData;
     }
     return homepageData;
@@ -111,6 +110,19 @@ export function createHeadingHierarchy(html: string): HeadingNode[] {
     }
 
     stack.push(node);
+  }
+
+  if (root.length === 0 && doc && html) {
+    return [
+      {
+        level: 0,
+        text: '',
+        id: '',
+        children: [],
+        contentHtml: html,
+        element: ''
+      }
+    ];
   }
 
   return root;
