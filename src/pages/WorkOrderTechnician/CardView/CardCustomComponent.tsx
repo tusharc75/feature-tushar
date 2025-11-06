@@ -1,6 +1,6 @@
 import { Checkbox } from '@mui/material';
 import React, { Fragment, useEffect, useState } from 'react';
-import { UseCardColTimeline } from 'src/components/CardColTimeline1';
+import { UseCardColTimeline } from 'src/components/CardColTimeline';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import RippleButton from 'src/components/RippleButton';
 import { cn } from 'src/constants/helpers';

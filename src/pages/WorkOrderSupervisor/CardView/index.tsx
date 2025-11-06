@@ -1,7 +1,7 @@
 import { camelCase } from 'lodash';
 import { useCallback, useEffect } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import CardColTimeline from 'src/components/CardColTimeline1';
+import CardColTimeline from 'src/components/CardColTimeline';
 import { WORKORDER_SERVICE_STATUS, workOrderColormap, workOrderSupervisor } from 'src/constants/helpers';
 import CardCustomComponent from 'src/pages/WorkOrderTechnician/CardView/CardCustomComponent';
 

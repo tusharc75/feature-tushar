@@ -8,7 +8,7 @@ import FileCopyIcon from '@mui/icons-material/FileCopy';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { camelCase, map, sortBy, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import CustomEditableGrid, { useTableReducer as useEditableTableReducer } from 'src/components/CustomEditableGridNew';
+import CustomEditableGrid, { useTableReducer as useEditableTableReducer } from 'src/components/CustomEditableGrid';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';

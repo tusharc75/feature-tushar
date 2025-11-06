@@ -16,7 +16,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import ButtonMenu from 'src/components/ButtonMenu';
-import { useCardColTimeline } from 'src/components/CardColTimeline1';
+import { useCardColTimeline } from 'src/components/CardColTimeline';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';

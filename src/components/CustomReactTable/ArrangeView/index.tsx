@@ -18,7 +18,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
-import { SelectedView } from 'src/components/CardColTimeline1';
+import { SelectedView } from 'src/components/CardColTimeline';
 
 export type GridViewSavedData = {
   _id: string;

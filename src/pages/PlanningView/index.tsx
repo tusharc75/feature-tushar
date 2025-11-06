@@ -35,10 +35,8 @@ function PlanningView() {
   }: any = useData();
 
   const history = useHistory();
-  const { dispatch } = useCardReducer();
   const { dispatch: tableDispatch } = useTableReducer();
   const resetSelectedRecords = () => {
-    dispatch({ type: 'selection', selectedRecords: [] });
     tableDispatch({ type: 'selection', selectedRecords: [] });
   };
   const resourceList = usePlanningResource();
@@ -109,8 +107,8 @@ function PlanningView() {
               permissions={permissions?.planningView}
               module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
-              afterImportCompleted={() => { }}
-              onExportToExcelSuccess={() => { }}
+              afterImportCompleted={() => {}}
+              onExportToExcelSuccess={() => {}}
               additionalParams={queryString}
               onlyExport={true}
             />
@@ -277,7 +275,7 @@ function PlanningView() {
           isClone={false}
           projectSalesId={false}
           close={() => setCreateDialog(false)}
-          fetchData={() => { }}
+          fetchData={() => {}}
           onSuccess={() => {
             onClickRefreshIcon();
           }}

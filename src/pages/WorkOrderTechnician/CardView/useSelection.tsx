@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { UseCardColTimeline } from 'src/components/CardColTimeline1';
+import { UseCardColTimeline } from 'src/components/CardColTimeline';
 import { useEffectEvent } from 'src/hooks/useEffectEvent';
 
 const emptyMapRef = new Map();
