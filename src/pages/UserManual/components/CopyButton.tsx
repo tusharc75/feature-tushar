@@ -28,6 +28,7 @@ const CopyButton = ({ title }: { title: string }) => {
     <IconButton
       onClick={() => handleCopy(`${pathName}#${hash}`)}
       size="small"
+      sx={{ flexShrink: 0, minWidth: '32px' }}
       className="!p-1 !text-gray-400 opacity-0 transition-opacity hover:!text-gray-600 group-hover:opacity-100"
       title="Copy link"
     >

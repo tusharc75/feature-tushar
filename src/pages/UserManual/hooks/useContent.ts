@@ -58,7 +58,7 @@ const useContent = () => {
       const cleanupClass = () => {
         img.classList.remove(...imageClasses);
       };
-      img.classList.add('w-full', 'h-auto', 'bg-gray-100', ...imageClasses);
+      img.classList.add('max-w-full', 'h-auto', 'bg-gray-100', ...imageClasses);
 
       if (img.complete) {
         // already loaded

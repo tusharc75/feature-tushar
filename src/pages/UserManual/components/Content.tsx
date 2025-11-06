@@ -1,14 +1,15 @@
 import { Close, ExpandMore } from '@mui/icons-material';
 import { Accordion, AccordionDetails, AccordionSummary, CircularProgress, IconButton } from '@mui/material';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ImageZoomPan from 'src/components/ImageZoomPan';
 import { cn } from 'src/constants/helpers';
 import useContent from '../hooks/useContent';
 import useHeadingNode from '../hooks/useHeadingNode';
-import { HeadingNode, UseUsermanual } from '../types';
+import { HeadingNode, Resource, UseUsermanual } from '../types';
 import CopyButton from './CopyButton';
 import { dispatchHashChangeEvent, NavSidebar } from './NavSidebar';
 import { makeSafeId } from '../utils';
+import { createPortal } from 'react-dom';
 
 const Content = ({ state }: { state: UseUsermanual }) => {
   const { data, handleClick, zoomedImage, loading, isMobile, mainContainerRef, setZoomedImage, isScrolling } = useContent();
@@ -26,12 +27,12 @@ const Content = ({ state }: { state: UseUsermanual }) => {
           <div className="order-2 w-full px-4 lg:order-1 lg:w-3/4">
             <div key={data?._id}>
               <div id={makeSafeId(data?.sectionName)} className={cn('manual-content-section scroll-m-[calc(var(--manual-head-height)+20px)]')}>
-                <div className="group flex items-center gap-2">
+                {/* <div className="group flex items-center gap-2">
                   <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{data?.sectionName}</h2>
                   <CopyButton title={data?.sectionName} />
-                </div>
-                <div onClick={handleClick} id="prose-content" ref={mainContainerRef}>
-                  <RenderContent tree={tree} mainContainerRef={mainContainerRef} isScrolling={isScrolling} />
+                </div> */}
+                <div onClick={handleClick} id="prose-content">
+                  <RenderContent data={data} tree={tree} mainContainerRef={mainContainerRef} isScrolling={isScrolling} />
                 </div>
               </div>
             </div>
@@ -76,77 +77,100 @@ const Content = ({ state }: { state: UseUsermanual }) => {
 export default Content;
 
 const RenderContent = ({
-  tree,
+  data,
   mainContainerRef,
-  isScrolling
+  isScrolling,
+  tree
 }: {
+  data: Resource;
   tree: HeadingNode[];
   mainContainerRef: React.MutableRefObject<HTMLDivElement>;
   isScrolling: boolean;
 }) => {
   const observerRef = useRef<IntersectionObserver | null>(null);
-
   useEffect(() => {
-    const headings = mainContainerRef?.current.querySelectorAll<HTMLElement>('h1[id], h2[id], h3[id], h4[id]');
-    if (!headings)
-      return () => {
-        observerRef.current?.disconnect();
-      };
+    setTimeout(() => {
+      const headings = mainContainerRef?.current.querySelectorAll<HTMLElement>('h1[id], h2[id], h3[id], h4[id]');
+      if (!headings)
+        return () => {
+          observerRef.current?.disconnect();
+        };
 
-    // Create observer
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        // Find the first visible heading
-        const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+      // Create observer
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          // Find the first visible heading
+          const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
 
-        if (visible?.target) {
-          const id = visible.target.getAttribute('id');
-          if (id && !isScrolling) {
-            dispatchHashChangeEvent({ hash: `#${id}` });
-            window.history.replaceState(null, '', `#${id}`);
+          if (visible?.target) {
+            const id = visible.target.getAttribute('id');
+            if (id && !isScrolling) {
+              dispatchHashChangeEvent({ hash: `#${id}` });
+              window.history.replaceState(null, '', `#${id}`);
+            }
           }
+        },
+        {
+          rootMargin: '0px 0px -70% 0px', // trigger when heading is near top
+          threshold: [0, 1.0]
         }
-      },
-      {
-        rootMargin: '0px 0px -70% 0px', // trigger when heading is near top
-        threshold: [0, 1.0]
-      }
-    );
-    headings.forEach((h) => observerRef.current?.observe(h));
+      );
+      headings.forEach((h) => observerRef.current?.observe(h));
+    }, 300);
+
     return () => {
       observerRef.current?.disconnect();
     };
   }, [tree]);
 
   if (!tree || tree.length === 0) return null;
-
   return (
-    <div className="prose mt-4 max-w-full dark:prose-invert [&_img]:block [&_img]:max-w-full [&_img]:cursor-pointer">
-      {tree.map((node) => {
-        const HeadingTag = `${node.element}` as keyof JSX.IntrinsicElements;
-        return (
-          <div key={node.id}>
-            {HeadingTag && (
-              <HeadingTag id={node.id} className="group flex max-w-fit  scroll-m-[calc(var(--manual-head-height)+20px)] items-center gap-2">
-                <a
-                  href={`#${node.id}`}
-                  id={node.id}
-                  className="not-prose flex  scroll-m-[calc(var(--manual-head-height)+20px)] items-center  no-underline"
-                >
-                  {node.text}
-                </a>
-
-                <CopyButton title={node.text} />
-              </HeadingTag>
-            )}
-
-            {node.contentHtml && node.children.length === 0 && <div className="content" dangerouslySetInnerHTML={{ __html: node.contentHtml }} />}
-            {node.children && node.children.length > 0 && (
-              <RenderContent tree={node.children} mainContainerRef={mainContainerRef} isScrolling={true} />
-            )}
-          </div>
-        );
-      })}
-    </div>
+    <>
+      <div
+        ref={mainContainerRef}
+        className="prose mt-4 max-w-full dark:prose-invert [&_img]:block [&_img]:max-w-full [&_img]:cursor-pointer"
+        dangerouslySetInnerHTML={{ __html: data.content }}
+      />
+      {tree.map((node) => (
+        <HydrateHeadTags key={node.id} node={node} containerRef={mainContainerRef} />
+      ))}
+    </>
   );
 };
+
+function HydrateHeadTags({ node, containerRef }: { node: HeadingNode; containerRef: React.MutableRefObject<HTMLDivElement> }) {
+  const [target, setTarget] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!containerRef.current) return;
+    // find heading by tag name and text if id is missing
+    let el = containerRef.current.querySelector(`#${node.id}`) as HTMLElement;
+    if (!el) {
+      // fallback: find by tag name and innerText
+      const candidates = containerRef.current.querySelectorAll(node.element as any);
+      el = Array.from(candidates).find((c) => c.textContent?.trim() === node.text) as HTMLElement | undefined;
+      if (el) el.id = node.id;
+    }
+    if (el) {
+      el.classList.add('flex', 'group', 'gap-2', 'items-center', 'scroll-m-[calc(var(--manual-head-height)+20px)]');
+    }
+    setTarget(el ?? null);
+  }, [containerRef, node]);
+
+  if (!target) return null;
+
+  target.id = node.id;
+
+  return createPortal(
+    <>
+      <CopyButton title={node.text} />
+      {node.children.length > 0 && (
+        <div className="ml-4">
+          {node.children.map((child) => (
+            <HydrateHeadTags key={child.id} node={child} containerRef={containerRef} />
+          ))}
+        </div>
+      )}
+    </>,
+    target
+  );
+}

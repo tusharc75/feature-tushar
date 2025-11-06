@@ -68,6 +68,5 @@ export type HeadingNode = {
   text: string;
   id: string;
   children: HeadingNode[];
-  contentHtml: string;
   element: String;
 };
