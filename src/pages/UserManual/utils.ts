@@ -56,50 +56,38 @@ export function makeSafeId(text: string, addPrefix = true, prefix = 'section-hea
 }
 
 export function createHeadingHierarchy(html: string): HeadingNode[] {
-  if (!html) return [];
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
 
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  const headings = Array.from(doc.body.querySelectorAll('h1, h2, h3, h4')) as HTMLHeadingElement[];
-
-  const toLevel = (el: HTMLHeadingElement): number => Number(el.tagName.substring(1));
-
-  const collectContentUntilNextHeading = (start: HTMLHeadingElement): string => {
-    const parts: string[] = [];
-    let node: Node | null = start.nextSibling;
-
-    while (node) {
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const el = node as Element;
-        const tag = el.tagName.toLowerCase();
-        if (tag === 'h1' || tag === 'h2' || tag === 'h3' || tag === 'h4') break;
-      }
-      parts.push(node instanceof Element ? node.outerHTML : (node.textContent ?? ''));
-      node = node.nextSibling;
-    }
-
-    return parts.join('');
-  };
+  const headings = Array.from(doc.querySelectorAll('h1, h2, h3, h4, h5, h6'));
 
   const root: HeadingNode[] = [];
   const stack: HeadingNode[] = [];
+  const idCount: Record<string, number> = {};
 
-  for (const h of headings) {
-    const level = toLevel(h);
-    const safeId = makeSafeId(h.textContent?.trim() ?? '');
+  for (const el of headings) {
+    const level = parseInt(el.tagName.substring(1), 10);
+    let baseId = el.id || makeSafeId(el.textContent || '');
+    let uniqueId = baseId;
 
-    // Ensure the element has an id
-    if (!h.id) h.id = safeId;
+    // Deduplicate IDs
+    if (idCount[baseId] !== undefined) {
+      idCount[baseId]++;
+      uniqueId = `${baseId}-${idCount[baseId]}`;
+    } else {
+      idCount[baseId] = 0;
+    }
 
     const node: HeadingNode = {
       level,
-      text: h.textContent?.trim() ?? '',
-      id: h.id,
+      text: el.textContent?.trim() || '',
+      id: uniqueId,
       children: [],
-      contentHtml: collectContentUntilNextHeading(h),
-      element: h.tagName.toLowerCase()
+      element: el.tagName.toLowerCase()
     };
 
-    while (stack.length && stack[stack.length - 1].level >= level) {
+    // Attach node in hierarchy
+    while (stack.length > 0 && stack[stack.length - 1].level >= level) {
       stack.pop();
     }
 
@@ -110,19 +98,6 @@ export function createHeadingHierarchy(html: string): HeadingNode[] {
     }
 
     stack.push(node);
-  }
-
-  if (root.length === 0 && doc && html) {
-    return [
-      {
-        level: 0,
-        text: '',
-        id: '',
-        children: [],
-        contentHtml: html,
-        element: ''
-      }
-    ];
   }
 
   return root;
