@@ -726,16 +726,7 @@ const SortComponent = ({
   );
 };
 
-const ChartComponent = ({
-  item,
-  pipeline,
-  pipelineErrors,
-  isEdit,
-  formValues,
-  mainResourceFields,
-  updatePipelineItem,
-  itemCausingFieldChange
-}) => {
+const ChartComponent = ({ item, pipeline, pipelineErrors, isEdit, formValues, mainResourceFields, updatePipelineItem, itemCausingFieldChange }) => {
   const {
     state: { resources }
   }: any = useData();
@@ -1158,17 +1149,17 @@ const GroupComponent = ({
             onRemove={
               item?.accumulator?.length > 1
                 ? () => {
-                    const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
-                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                  }
+                  const updatedAccumulator = item?.accumulator?.filter((_, i) => i !== index);
+                  updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                }
                 : undefined
             }
             onAddOperation={
               index === item?.accumulator?.length - 1
                 ? () => {
-                    const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
-                    updatePipelineItem(item._id, { accumulator: updatedAccumulator });
-                  }
+                  const updatedAccumulator = [...item.accumulator, { field: '', operation: '', outputField: '' }];
+                  updatePipelineItem(item._id, { accumulator: updatedAccumulator });
+                }
                 : undefined
             }
             setItemCausingFieldChange={setItemCausingFieldChange}
@@ -1240,7 +1231,6 @@ const MatrixComponent = ({
   pipelineErrors,
   itemCausingFieldChange
 }) => {
-
   const {
     state: { resources }
   }: any = useData();
@@ -1481,6 +1471,7 @@ export default function ReportBuilderDetail() {
       name: '',
       resource: '',
       fields: [],
+      filterFields: [],
       pipeline: [],
       type: 'report'
     };
@@ -1492,6 +1483,7 @@ export default function ReportBuilderDetail() {
       } = res;
       initialValues.resource = data?.resource;
       initialValues.fields = data?.fields || [];
+      initialValues.filterFields = data?.filterFields || [];
       initialValues.pipeline = data?.pipeline || [];
       initialValues.name = data?.name;
       initialValues.type = data?.type;
@@ -1683,7 +1675,8 @@ export default function ReportBuilderDetail() {
     const submitData: any = {
       _id: id,
       pipeline: pipeline,
-      fields: values?.fields
+      fields: values?.fields,
+      filterFields: values?.filterFields
     };
 
     axiosInstance()
@@ -1835,144 +1828,200 @@ export default function ReportBuilderDetail() {
                 <div className={`main-container`}>
                   <div className="mt-4">
                     <Grid container spacing={2} direction={'column'}>
-                      <Grid>
-                        <Grid container spacing={2}>
-                          <Grid size={{ xs: 12, sm: 4, md: 4, lg: 4 }}>
-                            <Card sx={{ overflow: 'visible' }}>
-                              <CardContent sx={{ overflow: 'visible', position: 'relative' }}>
-                                <div className="fields-panel-container relative flex items-center gap-2">
-                                  <div className="flex-1">
-                                    <Autocomplete
-                                      disabled={true}
-                                      getOptionLabel={(option) => option.title}
-                                      isOptionEqualToValue={(option, value) => option.value === value.value}
-                                      value={
-                                        resourceOptions?.find((data) => data.value === values['resource'])
-                                          ? resourceOptions?.find((data) => data.value === values['resource'])
-                                          : null
-                                      }
-                                      options={resourceOptions}
-                                      onChange={(e, val: any) => { }}
-                                      renderInput={(params) => (
-                                        <TextField
-                                          {...params}
-                                          required={true}
-                                          margin="none"
-                                          size="small"
-                                          name="resource"
-                                          label="Resource"
-                                          variant="outlined"
-                                          error={touched['resource'] && Boolean(errors['resource'])}
-                                          helperText={touched['resource'] && errors['resource']}
-                                          fullWidth
-                                          slotProps={{ inputLabel: { shrink: true } }}
-                                        />
-                                      )}
-                                    />
-                                  </div>
-                                  <IconButton
-                                    onClick={() => setShowFieldsPanel(!showFieldsPanel)}
-                                    disabled={!values?.resource}
-                                    size="small"
-                                    className="border"
-                                    style={{ borderColor: 'var(--common-border-color)' }}
+                      <Card sx={{ overflow: 'visible' }}>
+                        <CardContent sx={{ overflow: 'visible', position: 'relative' }}>
+                          <Grid container spacing={2}>
+                            <Grid size={{ xs: 12, sm: 4, md: 4, lg: 4 }}>
+                              <div className="fields-panel-container relative flex items-center gap-2">
+                                <div className="flex-1">
+                                  <Autocomplete
+                                    disabled={true}
+                                    getOptionLabel={(option) => option.title}
+                                    isOptionEqualToValue={(option, value) => option.value === value.value}
+                                    value={
+                                      resourceOptions?.find((data) => data.value === values['resource'])
+                                        ? resourceOptions?.find((data) => data.value === values['resource'])
+                                        : null
+                                    }
+                                    options={resourceOptions}
+                                    onChange={(e, val: any) => { }}
+                                    renderInput={(params) => (
+                                      <TextField
+                                        {...params}
+                                        required={true}
+                                        margin="none"
+                                        size="small"
+                                        name="resource"
+                                        label="Resource"
+                                        variant="outlined"
+                                        error={touched['resource'] && Boolean(errors['resource'])}
+                                        helperText={touched['resource'] && errors['resource']}
+                                        fullWidth
+                                        slotProps={{ inputLabel: { shrink: true } }}
+                                      />
+                                    )}
+                                  />
+                                </div>
+                                <IconButton
+                                  onClick={() => setShowFieldsPanel(!showFieldsPanel)}
+                                  disabled={!values?.resource}
+                                  size="small"
+                                  className="border"
+                                  style={{ borderColor: 'var(--common-border-color)' }}
+                                >
+                                  {showFieldsPanel ? <ExpandLess /> : <ExpandMore />}
+                                </IconButton>
+
+                                {showFieldsPanel && values?.resource && (
+                                  <div
+                                    className="absolute left-0 top-full z-50 mt-1 max-h-96 w-80 overflow-auto rounded border shadow-lg"
+                                    style={{
+                                      backgroundColor: 'var(--card-bg)',
+                                      borderColor: 'var(--common-border-color)'
+                                    }}
                                   >
-                                    {showFieldsPanel ? <ExpandLess /> : <ExpandMore />}
-                                  </IconButton>
-
-                                  {showFieldsPanel && values?.resource && (
-                                    <div
-                                      className="absolute left-0 top-full z-50 mt-1 max-h-96 w-80 overflow-auto rounded border shadow-lg"
-                                      style={{
-                                        backgroundColor: 'var(--card-bg)',
-                                        borderColor: 'var(--common-border-color)'
-                                      }}
-                                    >
-                                      <div className="p-3">
-                                        <div className="mb-3">
-                                          <FormControlLabel
-                                            control={
-                                              <Checkbox
-                                                size="small"
-                                                checked={(() => {
-                                                  const availableFields = resourceFieldMap?.[values?.resource] || [];
-                                                  return values?.fields?.length === availableFields?.length && availableFields?.length > 0;
-                                                })()}
-                                                indeterminate={(() => {
-                                                  const availableFields = resourceFieldMap?.[values?.resource] || [];
-                                                  return values?.fields?.length > 0 && values?.fields?.length < availableFields?.length;
-                                                })()}
-                                                onChange={(e) => {
-                                                  const availableFields = resourceFieldMap?.[values?.resource] || [];
-                                                  if (e.target.checked) {
-                                                    setFieldValue(
-                                                      'fields',
-                                                      availableFields?.map((f) => f.fieldName)
-                                                    );
-                                                  } else {
-                                                    setFieldValue('fields', []);
-                                                  }
-                                                }}
-                                                disabled={!isEdit}
-                                              />
-                                            }
-                                            label="Select all"
-                                            className="text-sm font-medium"
-                                          />
-                                        </div>
-
-                                        <div className="pt-2" style={{ borderTop: '1px solid var(--common-border-color)' }}>
-                                          {(resourceFieldMap?.[values?.resource] || [])?.map((field) => (
-                                            <div key={field.fieldName} className="mb-1">
-                                              <FormControlLabel
-                                                control={
-                                                  <Checkbox
-                                                    size="small"
-                                                    checked={(() => {
-                                                      const availableFields = resourceFieldMap?.[values?.resource] || [];
-                                                      const validFields = validateAndCleanFields(values?.fields, availableFields);
-                                                      return validFields.includes(field.fieldName);
-                                                    })()}
-                                                    onChange={(e) => {
-                                                      const availableFields = resourceFieldMap?.[values?.resource] || [];
-                                                      const validFields = validateAndCleanFields(values?.fields, availableFields);
-                                                      let newFields;
-                                                      if (e?.target?.checked) {
-                                                        newFields = [...validFields, field.fieldName];
-                                                      } else {
-                                                        newFields = validFields?.filter((f) => f !== field.fieldName);
-                                                      }
-                                                      setFieldValue('fields', newFields);
-                                                    }}
-                                                    disabled={!isEdit}
-                                                  />
+                                    <div className="p-3">
+                                      <div className="mb-3">
+                                        <FormControlLabel
+                                          control={
+                                            <Checkbox
+                                              size="small"
+                                              checked={(() => {
+                                                const availableFields = resourceFieldMap?.[values?.resource] || [];
+                                                return values?.fields?.length === availableFields?.length && availableFields?.length > 0;
+                                              })()}
+                                              indeterminate={(() => {
+                                                const availableFields = resourceFieldMap?.[values?.resource] || [];
+                                                return values?.fields?.length > 0 && values?.fields?.length < availableFields?.length;
+                                              })()}
+                                              onChange={(e) => {
+                                                const availableFields = resourceFieldMap?.[values?.resource] || [];
+                                                if (e.target.checked) {
+                                                  setFieldValue(
+                                                    'fields',
+                                                    availableFields?.map((f) => f.fieldName)
+                                                  );
+                                                } else {
+                                                  setFieldValue('fields', []);
                                                 }
-                                                label={
-                                                  <div className="flex items-center gap-2">
-                                                    <span className="text-sm">{field.fieldLabel}</span>
-                                                  </div>
-                                                }
-                                              />
-                                            </div>
-                                          ))}
+                                              }}
+                                              disabled={!isEdit}
+                                            />
+                                          }
+                                          label="Select all"
+                                          className="text-sm font-medium"
+                                        />
+                                      </div>
 
-                                          {!(resourceFieldMap?.[values?.resource] || [])?.length && (
-                                            <div className="py-4 text-center">
-                                              <span className="text-sm" style={{ color: 'var(--dark-secondary-text, #6c757d)' }}>
-                                                No fields available
-                                              </span>
-                                            </div>
-                                          )}
-                                        </div>
+                                      <div className="pt-2" style={{ borderTop: '1px solid var(--common-border-color)' }}>
+                                        {(resourceFieldMap?.[values?.resource] || [])?.map((field) => (
+                                          <div key={field.fieldName} className="mb-1">
+                                            <FormControlLabel
+                                              control={
+                                                <Checkbox
+                                                  size="small"
+                                                  checked={(() => {
+                                                    const availableFields = resourceFieldMap?.[values?.resource] || [];
+                                                    const validFields = validateAndCleanFields(values?.fields, availableFields);
+                                                    return validFields.includes(field.fieldName);
+                                                  })()}
+                                                  onChange={(e) => {
+                                                    const availableFields = resourceFieldMap?.[values?.resource] || [];
+                                                    const validFields = validateAndCleanFields(values?.fields, availableFields);
+                                                    let newFields;
+                                                    if (e?.target?.checked) {
+                                                      newFields = [...validFields, field.fieldName];
+                                                    } else {
+                                                      newFields = validFields?.filter((f) => f !== field.fieldName);
+                                                    }
+                                                    setFieldValue('fields', newFields);
+                                                  }}
+                                                  disabled={!isEdit}
+                                                />
+                                              }
+                                              label={
+                                                <div className="flex items-center gap-2">
+                                                  <span className="text-sm">{field.fieldLabel}</span>
+                                                </div>
+                                              }
+                                            />
+                                          </div>
+                                        ))}
+
+                                        {!(resourceFieldMap?.[values?.resource] || [])?.length && (
+                                          <div className="py-4 text-center">
+                                            <span className="text-sm" style={{ color: 'var(--dark-secondary-text, #6c757d)' }}>
+                                              No fields available
+                                            </span>
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
-                                  )}
-                                </div>
-                              </CardContent>
-                            </Card>
+                                  </div>
+                                )}
+                              </div>
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 4, md: 4, lg: 4 }}>
+                              <Autocomplete
+                                multiple
+                                disableCloseOnSelect
+                                limitTags={2}
+                                size="small"
+                                disabled={!isEdit}
+                                options={resourceFieldMap?.[values?.resource] || []}
+                                getOptionLabel={(option) => option?.fieldLabel}
+                                isOptionEqualToValue={(option, value) => option?.fieldName === value?.fieldName}
+                                value={resourceFieldMap?.[values?.resource]?.filter((field) =>
+                                  values?.filterFields?.some((f) => f?.fieldName === field?.fieldName)
+                                )}
+                                onChange={(e, newVal) => {
+                                  const updatedFields = newVal?.map((field) => {
+                                    const existing = values?.filterFields?.find((f) => f?.fieldName === field?.fieldName);
+                                    return {
+                                      fieldName: field?.fieldName,
+                                      resource: values?.resource,
+                                      required: existing?.required || false
+                                    };
+                                  });
+                                  setFieldValue('filterFields', updatedFields);
+                                }}
+                                renderInput={(params) => <TextField {...params} label="Filter Fields" placeholder="Select fields" fullWidth />}
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 4, md: 4, lg: 4 }}>
+                              <Autocomplete
+                                multiple
+                                disableCloseOnSelect
+                                limitTags={2}
+                                size="small"
+                                disabled={!isEdit || !values?.filterFields?.length}
+                                options={
+                                  resourceFieldMap?.[values?.resource]?.filter((field) =>
+                                    values?.filterFields?.some((f) => f?.fieldName === field?.fieldName)
+                                  ) || []
+                                }
+                                getOptionLabel={(option) => option?.fieldLabel}
+                                isOptionEqualToValue={(option, value) => option?.fieldName === value?.fieldName}
+                                value={
+                                  resourceFieldMap?.[values?.resource]?.filter((field) =>
+                                    values?.filterFields?.some((f) => f?.fieldName === field?.fieldName && f?.required === true)
+                                  ) || []
+                                }
+                                onChange={(e, newVal) => {
+                                  const updatedFields = values?.filterFields?.map((f) => ({
+                                    ...f,
+                                    required: newVal?.some((field) => field?.fieldName === f?.fieldName)
+                                  }));
+                                  setFieldValue('filterFields', updatedFields);
+                                }}
+                                renderInput={(params) => (
+                                  <TextField {...params} label="Required Filter Fields" placeholder="Select required fields" fullWidth />
+                                )}
+                              />
+                            </Grid>
                           </Grid>
-                        </Grid>
-                      </Grid>
+                        </CardContent>
+                      </Card>
 
                       <Grid>
                         <Box>
