@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { HeadingNode } from '../types';
 import { useLocation } from 'react-router-dom';
 import { cn } from 'src/constants/helpers';
+import { LuText } from 'react-icons/lu';
 
 type SidebarProps = {
   tree: HeadingNode[];
@@ -108,7 +109,10 @@ export const NavSidebar: React.FC<SidebarProps> = ({ tree, onClickItem }) => {
   }, []);
   return (
     <nav className="sidebar sticky top-[--manual-head-height] max-h-[calc(100vh-var(--manual-head-height))] overflow-y-auto border-l p-4">
-      <h3 className="sticky top-[-18px] z-10 bg-[white] py-2 text-sm font-medium dark:bg-[rgb(27,27,29)]">On this page</h3>
+      <h3 className="sticky top-[-18px] z-10 flex items-center gap-2 bg-[white] py-2 text-sm font-medium dark:bg-[rgb(27,27,29)]">
+        <LuText />
+        On this page
+      </h3>
       <SidebarList nodes={tree} onClickItem={onClickItem} hash={hash} setHash={setHash} />
     </nav>
   );
