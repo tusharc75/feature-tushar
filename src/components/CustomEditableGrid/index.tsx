@@ -1,312 +1,326 @@
-import { Box, Dialog, TableBody, TableCell, TableFooter, TableHead, TableRow } from '@mui/material';
-import MaUTable from '@mui/material/Table';
-import { isEmpty } from 'lodash';
-import { useEffect, useMemo, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { FaAngleDown, FaAngleRight } from 'react-icons/fa';
-import {
-  useColumnOrder,
-  useExpanded,
-  useFilters,
-  useFlexLayout,
-  useResizeColumns,
-  useRowSelect,
-  useRowState,
-  useSortBy,
-  useTable
-} from 'react-table';
-import { useSticky } from 'react-table-sticky';
+import InfoIcon from '@mui/icons-material/Info';
+import { Box, Dialog, IconButton, MenuItem } from '@mui/material';
+import { isEmpty, orderBy, sortBy, uniqBy } from 'lodash';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { flattenArray } from 'src/constants/columns';
-import { CustomDialogTransition, getObjKeysWithValues } from 'src/constants/helpers';
-import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
+import CustomTable from 'src/components/CustomEditableGrid/CustomTable';
+import { generateColumn, generateRows, yupSchemaForBulkEdit } from 'src/components/CustomEditableGrid/helper';
+import { TActios, TInitialState } from 'src/components/CustomEditableGrid/hooks/tableReducer';
+import { useGridMetaData } from 'src/components/CustomReactTable';
+import ArrangeView from 'src/components/CustomReactTable/ArrangeView';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { AddField } from 'src/components/FormBuilder/AddField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { calculateRowsField } from '../RentalManagment/helper';
-import FormTypes from './FormTypes';
-import { yupSchemaForBulkEdit } from './helper';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import IconWithPulse from 'src/components/IconWithPulse';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import AddExistingProduct from 'src/components/productBuilder/AddExistingProduct';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSave }) => {
-  const [fullScreen, setFullScreen] = useState(true);
-  const [displayRows, setDisplayRows] = useState([]);
+export * from 'src/components/CustomEditableGrid/hooks/tableReducer';
+
+var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
+
+type CustomEditableGridProps = {
+  state: TInitialState;
+  dispatch: React.Dispatch<TActios>;
+  onClose: () => void;
+  fields?: any[];
+  data: any[];
+  extraDisabledFields: any;
+  handleSave: (data: any[]) => void;
+  isSubmitting: boolean;
+  referenceId: string | null;
+  restData: any[];
+  renderedFrom;
+};
+
+const CustomEditableGrid = ({
+  state,
+  dispatch,
+  onClose,
+  fields = [],
+  data,
+  extraDisabledFields,
+  handleSave,
+  isSubmitting,
+  referenceId = null,
+  restData = [],
+  renderedFrom = ''
+}: CustomEditableGridProps) => {
+  const { columnOrder, loading, visibleColumns } = state;
+
+  const toastConfig = useContext(CustomToastContext);
+  const { gridMetaData } = useGridMetaData();
+  const tableData = gridMetaData[renderedFrom] || { order: [], hide: [] };
+
+  const [columns, setColumns] = useState<any[]>(null);
+  const [allFields, setAllFields] = useState([]);
+  const [flatRows, setFlatRows] = useState(null);
   const [constColummns, setConstColummns] = useState([]);
-  const [flatRows, setFlatRows] = useState(data);
-  const [touched, setTouched] = useState<any>({});
   const [error, setError] = useState<any>({});
+  const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
+  const [isAddField, setIsAddField] = useState(false);
+  const [addedField, setAddedField] = useState([]);
+  const [scrollToHeader, setScrollToHeader] = useState('');
 
   useEffect(() => {
-    generateColumnField();
+    if (referenceId) {
+      fetchColumns();
+    } else {
+      setAllFields(JSON.parse(JSON.stringify(fields)));
+      const { newColumns, constColumns } = generateColumn(fields);
+      setColumns(newColumns);
+      setConstColummns(constColumns);
+    }
   }, []);
 
+  const fetchColumns = () => {
+    const productId = data[0]?._id;
+    axiosInstance()
+      .get(`/productbuilder/getoneproduct/${referenceId}/${productId}`)
+      .then(({ data: { data } }) => {
+        setAllFields(data.productData.fields);
+        var _fields = data.productData.fields;
+        _fields = orderBy(_fields, 'order', 'asc');
+        _fields = sortBy(_fields, function (item) {
+          return levalOrderBy.indexOf(item.leval);
+        });
+        setAllFields(JSON.parse(JSON.stringify(_fields)));
+        const { newColumns, constColumns } = generateColumn(_fields);
+        setColumns(newColumns);
+        setConstColummns(constColumns);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   useEffect(() => {
-    generateRows();
-    setError(yupSchemaForBulkEdit(constColummns, flatRows));
+    const rows = generateRows(JSON.parse(JSON.stringify(data)), allFields);
+    setFlatRows(rows);
+  }, [data, allFields]);
+
+  useEffect(() => {
+    if (flatRows) {
+      setError(
+        yupSchemaForBulkEdit(
+          constColummns?.filter((c) => visibleColumns[c?.fieldName]),
+          flatRows
+        )
+      );
+    }
   }, [flatRows]);
 
-  const generateColumnField = () => {
-    let column = [];
-    let _fields = JSON.parse(JSON.stringify(fields));
-    _fields.forEach((ele) => {
-      if (ele.type === 'currencyAmount') {
-        ele.fieldLabel = ele.fieldLabel + ' ' + currency;
-        ele.fieldName = ele.fieldName + '_' + currency?.toLowerCase();
-        column.push(ele);
-      } else {
-        column.push(ele);
-      }
-    });
-    setConstColummns(column);
-  };
-
-  const newColumns = useMemo(
-    () => [
-      {
-        id: 'expander',
-        fieldName: 'expander',
-        Header: ({ isAllRowsExpanded }) => (
-          <span
-            style={{
-              paddingLeft: '0.3rem',
-              color: 'black'
-            }}
-          >
-            {isAllRowsExpanded ? (
-              <FaAngleDown
-                className="cursor-pointer"
-                onClick={() => {
-                  toggleAllRowsExpanded(false);
-                }}
-              />
-            ) : (
-              <FaAngleRight
-                className="cursor-pointer"
-                onClick={() => {
-                  toggleAllRowsExpanded(true);
-                }}
-              />
-            )}
-          </span>
-        ),
-        sticky: 'left',
-        width: isMobile && !isTablet ? 40 : 70,
-        minWidth: isMobile && !isTablet ? 40 : 70,
-        canDrag: false,
-        Cell: ({ row }) =>
-          row.canExpand ? (
-            <span
-              {...row.getToggleRowExpandedProps({
-                style: {
-                  paddingLeft: `${row.depth * 2}rem`
-                }
-              })}
-            >
-              {row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
-            </span>
-          ) : null
-      },
-      ...columns.map((m) => {
-        return m.canFilter ? { ...m } : { ...m, filter: 'filterRowsWithSubrows' };
-      })
-    ],
-    []
-  );
-
-  const { getTableProps, rows, headerGroups, footerGroups, prepareRow, toggleRowExpanded, toggleAllRowsExpanded } = useTable(
-    {
-      columns: newColumns,
-      data: displayRows,
-      initialState: {
-        autoResetExpanded: false,
-        expanded: true
-      },
-      getSubRows: (row: any) => row.subRows
-    },
-    useFlexLayout,
-    useColumnOrder,
-    useResizeColumns,
-    useFilters,
-    useSortBy,
-    useExpanded, // Use the useExpanded plugin hook
-    // usePagination,
-    useRowSelect,
-    useSticky,
-    useRowState
-  );
-
-  const generateRows = () => {
-    const tempRows = flatRows.map((d) => {
-      let tempFieldData = getObjKeysWithValues(d, fields);
-      return { ...d, ...tempFieldData };
-    });
-    let rows = tempRows.filter((e) => e.parentId === null);
-
-    rows.forEach((parent, i) => {
-      parent.subRows = generateNestedData(tempRows, parent);
-    });
-    setDisplayRows(rows);
-  };
-
-  const generateNestedData = (material, parent) => {
-    const subRows: any = material.filter((e) => e.parentId === parent._id);
-    subRows.forEach((_subRow, j) => {
-      _subRow.subRows = generateNestedData(material, _subRow);
-    });
-    return subRows;
-  };
-
-  const updateData = async (row, inputField, value) => {
+  const updateData = async (row, value, inputField = '') => {
     let temflatRows = flatRows;
     let tempIndex = temflatRows.findIndex((obj) => obj._id === row._id);
-    flatRows[tempIndex][inputField] = value;
-    const values = { [inputField]: value };
-    const calValues = await calculateRowsField(flattenArray(temflatRows), values, fields, temflatRows[tempIndex], currency);
-    temflatRows = flatRows.map((d) => {
-      let calculateTempIndex = calValues.findIndex((obj) => obj._id === d._id);
-      if (calculateTempIndex > -1) {
-        return calValues[calculateTempIndex];
-      } else return d;
+    let obj: any = {};
+    if (!inputField) {
+      obj = value;
+    } else {
+      obj[inputField] = value;
+    }
+    temflatRows = flatRows.map((d, i) => {
+      if (i === tempIndex && row?._id === d?._id) {
+        return { ...d, ...obj };
+      } else {
+        return d;
+      }
     });
     setFlatRows(temflatRows);
+  };
+
+  const addButtonMenuItems = () => {
+    return (
+      <>
+        <HtmlTooltip title="Add Existing Products">
+          <MenuItem
+            onClick={() => {
+              setIsAddExistingProduct(true);
+            }}
+          >
+            Add Existing Products
+          </MenuItem>
+        </HtmlTooltip>
+      </>
+    );
+  };
+
+  const handleAdd = (rows) => {
+    setFlatRows([...flatRows, ...rows?.map((r, i) => ({ ...r, index: flatRows?.length + i + 1, id: r?._id }))]);
+  };
+
+  const finalColumns = useMemo(() => {
+    return columns
+      ?.filter((c) => visibleColumns[c.id])
+      .sort((a, b) => columnOrder.findIndex((c) => c === a.id) - columnOrder.findIndex((c) => c === b.id));
+  }, [columnOrder, columns, visibleColumns]);
+
+  const rightSideContents = () => {
+    return (
+      <>
+        {columns?.filter((c) => c?.required && !visibleColumns[c?.id])?.length > 0 && (
+          <IconWithPulse>
+            <IconButton
+              size="small"
+              title={`Required Hidden Columns :- ${columns
+                ?.filter((c) => c?.required && !visibleColumns[c?.id])
+                ?.map((c) => c?.id || '')
+                ?.join(', ')}`}
+            >
+              <InfoIcon fontSize="small" color={'primary'} />{' '}
+            </IconButton>
+          </IconWithPulse>
+        )}
+        <ArrangeView
+          table={null}
+          columns={columns}
+          hideSelection={true}
+          renderedFrom={renderedFrom}
+          dispatchTable={dispatch}
+          state={state}
+          expander={false}
+          appliedView={tableData}
+        />
+        <ThemeButton
+          buttonType="transparent"
+          onClick={() => {
+            setIsAddField(true);
+          }}
+        >
+          Add Field
+        </ThemeButton>
+      </>
+    );
+  };
+
+  const handleAddField = (_field) => {
+    _field.leval = 'price-builder-custom';
+    if (allFields?.filter((_f) => _f.sectionName === _field?.sectionName).length) {
+      if (allFields?.filter((_f) => _f.sectionName === _field?.sectionName)[0].leval !== 'price-template') {
+        _field.leval = 'product-builder-custom';
+      }
+    }
+
+    setAddedField([...addedField, { ..._field }]);
+    setAllFields(JSON.parse(JSON.stringify([...allFields, { ..._field }])));
+    const { newColumns, constColumns } = generateColumn([...allFields, { ..._field }]);
+    setColumns(newColumns);
+    setConstColummns(constColumns);
+
+    let dataRows = [...flatRows];
+
+    if (_field?.type === 'formula' || _field?.isFormula) {
+      dataRows = dataRows?.map((_data) => {
+        var extraCalculatedValue: any = {};
+        var inputValues = {};
+        _field?.inputFields &&
+          _field?.inputFields.forEach((_f) => {
+            inputValues[_f] = _data[_f] ? _data[_f] : 0;
+          });
+        extraCalculatedValue = autoCalculateSpecificFields(inputValues, _data, [...allFields, { ..._field }]);
+        return {
+          ..._data,
+          ...extraCalculatedValue
+        };
+      });
+    }
+
+    setFlatRows(dataRows);
+    setIsAddField(false);
   };
 
   return (
     <Dialog
       maxWidth="md"
-      fullScreen={fullScreen || isMobile || isTablet}
+      fullWidth
+      fullScreen={true}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       open={true}
-      fullWidth
     >
-      <CustomDialogHeader
-        isMinimized={!fullScreen}
-        onMinimizeMaximize={() => {
-          setFullScreen((prevState) => !prevState);
-        }}
-        showManimizeMaximize={false}
-        showRequiredLabel={false}
-        title={`Bulk Edit `}
-        onClose={onClose}
-      />
-      {rows && rows.length ? (
-        <>
-          <CustomDialogContent>
-            <div
-              style={{
-                display: 'block',
-                overflow: 'auto',
-                height: '100%'
-              }}
-              className="custom-react-table editable-table-v1 border"
-            >
-              <MaUTable {...getTableProps()} size="small" className="tableWrap sticky table">
-                <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
-                  {headerGroups.map((headerGroup, index) => (
-                    <>
-                      <TableRow {...headerGroup.getHeaderGroupProps()} key={index} className="tr">
-                        {headerGroup.headers.map((column, index) => (
-                          <TableCell
-                            key={`${index}-${column?.Header}`}
-                            {...column.getHeaderProps()}
-                            className="th text-truncate table-header overflow-initial"
-                          >
-                            <div className="d-flex align-items-center justify-content-space-between pos-rel">
-                              <div className="d-flex align-items-center gap-2" {...column.getSortByToggleProps({ title: undefined })}>
-                                <span>{column.render('Header')}</span>
-                              </div>
-                            </div>
-                            <div {...column.getResizerProps()} className="resizer" />
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </>
-                  ))}
-                </TableHead>
-                <TableBody
-                  style={{
-                    overflowY: 'scroll',
-                    overflowX: 'hidden'
-                  }}
-                  className="body"
-                >
-                  {rows.map((row, index) => {
-                    prepareRow(row);
-                    return (
-                      <TableRow {...row.getRowProps()} className="tr">
-                        {row.cells.map((cell) => {
-                          return (
-                            <TableCell
-                              {...cell.getCellProps()}
-                              className={`td ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}`}
-                            >
-                              {['expander', 'detail', 'type', 'index']?.includes(cell.column.id) ? (
-                                <div className="full-height-cell">{cell.render('Cell')}</div>
-                              ) : (
-                                <FormTypes
-                                  fieldData={constColummns.find((d) => d.fieldName === cell.column.id || cell.column.id.includes(d.fieldName))}
-                                  values={row.original}
-                                  currency={currency}
-                                  errors={error}
-                                  touched={touched}
-                                  style={{ marginTop: '4px' }}
-                                  onChange={(inputField, val) => {
-                                    updateData(row.original, inputField, val);
-                                    setTouched((prevState) => {
-                                      prevState[`${row.original._id}_${inputField}`] = true;
-                                      return prevState;
-                                    });
-                                  }}
-                                  size="small"
-                                />
-                              )}
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-                {rows?.length > 0 && (
-                  <TableFooter style={{ overflowY: 'auto', overflowX: 'hidden' }} className="footer ">
-                    {footerGroups.map((group) => (
-                      <TableRow {...group.getFooterGroupProps()} className="tr">
-                        {group.headers.map((column) => (
-                          <TableCell {...column.getHeaderProps()} className="th text-truncate font-weight-bold text-black">
-                            {column.render('Footer')}
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))}
-                  </TableFooter>
-                )}
-              </MaUTable>
-            </div>
-          </CustomDialogContent>
+      <>
+        <CustomDialogHeader isMinimized={false} showManimizeMaximize={false} showRequiredLabel={false} title={`Edit `} onClose={onClose} />
+        {columns ? (
+          <>
+            <CustomDialogContent>
+              <Box>
+                <DetailsPageHeader
+                  isAddButtonVisible={true}
+                  addButtonMenuItems={addButtonMenuItems()}
+                  isActionButtonVisible={false}
+                  rightSideContents={rightSideContents()}
+                  hasXpadding={false}
+                />
 
-          <CustomDialogFooter>
-            <ThemeButton buttonType="transparent" onClick={onClose}>
-              {'Close'}
-            </ThemeButton>
-            <ThemeButton
-              isLoading={false}
-              buttonType="theme"
-              onClick={() => {
-                if (isEmpty(error)) {
-                  handleSave(flatRows);
-                }
-              }}
-            >
-              {' '}
-              Save
-            </ThemeButton>
-          </CustomDialogFooter>
-        </>
-      ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
+                <CustomTable
+                  columns={finalColumns}
+                  flatRows={flatRows}
+                  setFlatRows={setFlatRows}
+                  constColummns={constColummns}
+                  fields={allFields}
+                  extraDisabledFields={extraDisabledFields}
+                  error={error}
+                  updateData={updateData}
+                  scrollToHeader={scrollToHeader}
+                />
+              </Box>
+            </CustomDialogContent>
+            <CustomDialogFooter>
+              <ThemeButton buttonType="transparent" onClick={onClose}>
+                Close
+              </ThemeButton>
+              <ThemeButton
+                isLoading={isSubmitting}
+                disabled={isSubmitting}
+                buttonType="theme"
+                onClick={() => {
+                  if (isEmpty(error)) {
+                    handleSave([...flatRows?.map((f) => ({ ...f, fields: [...(f?.fields || []), ...addedField] })), ...restData]);
+                  } else {
+                    const err = Object.keys(error);
+                    if (err?.length) {
+                      setScrollToHeader(err[0]);
+                    }
+                  }
+                }}
+              >
+                Save
+              </ThemeButton>
+            </CustomDialogFooter>
+          </>
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+        {isAddExistingProduct && (
+          <AddExistingProduct
+            addProductInBuilder={handleAdd}
+            handleClose={() => setIsAddExistingProduct(false)}
+            referenceData={{ productCategory: data[0]?.productCategoryId, productTemplate: data[0]?.productTemplateId }}
+          />
+        )}
+
+        {isAddField && (
+          <AddField
+            refrence="formAddInlineEdit"
+            fieldData={null}
+            handleClose={() => {
+              setIsAddField(false);
+            }}
+            handleAddField={handleAddField}
+            fields={allFields}
+            section={uniqBy(allFields, 'sectionName')?.map((_section) => _section?.sectionName)}
+          />
+        )}
+      </>
     </Dialog>
   );
 };

@@ -315,7 +315,7 @@ import ReportBuilderDetail from 'src/pages/ReportBuilder/ReportBuilderDetail';
 import ReportBuilder from 'src/pages/ReportBuilder';
 import CostBooks from 'src/pages/CostBooks';
 import CostBooksDetail from 'src/pages/CostBooks/CostBooksDetail';
-import UserManualUpdated from 'src/pages/UserManualUpdated';
+import UserManual from 'src/pages/UserManual';
 import ScadaOverview from 'src/pages/ScadaOverview';
 
 var notificationInterval: any = null;
@@ -592,11 +592,9 @@ function App() {
             <PrivateRoute exact path="/user">
               <User />
             </PrivateRoute>
-            <PrivateRoute exact path="/user-manual-old*" userManual={true}>
-              <UserManualOld />
-            </PrivateRoute>
-            <PrivateRoute exact path="/user-manual*" userManualNew={true}>
-              <UserManualUpdated />
+
+            <PrivateRoute exact path="/user-manual*" userManual={true}>
+              <UserManual />
             </PrivateRoute>
             <PrivateRoute exact path="/profile">
               <UserProfilePage profileBreadCrumbs={routes.profilePage} />

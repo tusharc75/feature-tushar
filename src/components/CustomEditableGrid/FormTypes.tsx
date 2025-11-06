@@ -1,195 +1,425 @@
-import { Box, Checkbox, FormControlLabel, InputAdornment, TextField } from '@mui/material';
-import { arrayToDropwdownOption, getUniqueCurrencies } from 'src/constants/helpers';
+import { IconButton, InputAdornment, TextField, Typography } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import { useEffect, useState } from 'react';
-import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
-import CustomDatePicker from 'src/components/CustomDatePicker';
+import { copyTextToClipboard, getUniqueCurrencies } from 'src/constants/helpers';
+import { handleAutoCalculation } from 'src/constants/formulaUtility';
+import { find, result } from 'lodash';
+import { ClipboardEvent } from 'react';
+import CopyToClipboardButton from 'src/components/CopyToClipboardButton';
 import MultiLine from '../Helpers/FormTypes/MultiLine';
 
 const FormTypes = (props) => {
-  const tempProps = { ...props, id: props.id ? props.id : props.fieldData ? props.fieldData.split(' ').join('-') : 'field' };
-  const { values, onChange, fieldData, currency, touched, errors, ...others } = tempProps;
+  const {
+    values,
+    onChange,
+    fieldData,
+    name,
+    required,
+    options,
+    currency,
+    unit,
+    errors,
+    disabled,
+    fields,
+    setValues,
+    setFieldValue,
+    enableCopy = false,
+    ...rest
+  } = props;
 
-  const [options, setOptions] = useState([]);
-
-  useEffect(() => {
-    if (fieldData?.fieldName === 'unit') {
-      setOptions(arrayToDropwdownOption(values?.[`${values.type}Detail`].unit));
-    } else if (fieldData?.fieldName === 'pricingMethod') {
-      setOptions(arrayToDropwdownOption(values?.[`${values.type}Detail`].pricingMethod));
+  const handleChange = (name, value) => {
+    const result = handleAutoCalculation(fieldData, fields, values, name, '', '', value);
+    if (setValues && Object.keys(result).length > 1) {
+      setValues({ ...values, ...result });
     } else {
-      setOptions(fieldData?.option);
+      for (var x in result) {
+        setFieldValue(x, result[x]);
+      }
     }
-  }, [fieldData?.fieldName]);
+  };
+
+  const handleCurrencyChange = (name, _currency, value) => {
+    const result = handleAutoCalculation(fieldData, fields, values, name, _currency, '', value);
+    if (setValues && Object.keys(result).length > 1) {
+      setValues({ ...values, ...result });
+    } else {
+      for (var x in result) {
+        setFieldValue([x], result[x]);
+      }
+    }
+  };
+
+  const handleConverterChange = (name, _unit, value) => {
+    const result = handleAutoCalculation(fieldData, fields, values, name, '', _unit, value);
+    if (setValues && Object.keys(result).length > 1) {
+      setValues({ ...values, ...result });
+    } else {
+      for (var x in result) {
+        setFieldValue([x], result[x]);
+      }
+    }
+  };
+
+  const handleCurrencyChangeWithConverterChange = (name, _currency, _unit, value) => {
+    const result = handleAutoCalculation(fieldData, fields, values, name, _currency, _unit, value);
+    if (setValues && Object.keys(result).length > 1) {
+      setValues({ ...values, ...result });
+    } else {
+      for (var x in result) {
+        setFieldValue([x], result[x]);
+      }
+    }
+  };
 
   return fieldData?.type === 'singleLine' ? (
     <TextField
-      style={{ paddingRight: 1 }}
-      disabled={fieldData?.isUneditable}
-      variant="outlined"
-      type="text"
-      label={fieldData?.fieldLabel}
-      required={fieldData?.required}
-      name={`${fieldData?.fieldName}`}
-      value={values[fieldData?.fieldName]}
-      error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
-      helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
+      {...rest}
       margin="dense"
       size="small"
-      onChange={(e) => onChange(fieldData?.fieldName, e.target.value.trimStart())}
-      {...others}
+      disabled={disabled}
+      variant="outlined"
+      type={'text'}
+      autoComplete="off"
+      required={required}
+      name={name}
+      value={values[name]}
+      error={Boolean(errors[`${values._id}_${name}`])}
+      helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
+      onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
     />
   ) : fieldData?.type === 'multiLine' ? (
     <MultiLine
-      label={fieldData?.label}
-      name={`${fieldData?.fieldName}`}
-      onChange={(value) => onChange(fieldData?.fieldName,value)}
-      value={values[fieldData?.fieldName]}
-      error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
-      touched={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
-      required={fieldData?.required}
-      {...others}
-    />
-  ) : fieldData?.type === 'percent' ? (
-    <TextField
-      style={{ paddingRight: 1 }}
-      type="number"
-      variant="outlined"
-      label={fieldData?.label}
-      required={fieldData?.required}
-      name={`${fieldData?.fieldName}`}
-      value={values[fieldData?.fieldName]}
-      slotProps={{
-        input: {
-          endAdornment: '% ',
-          inputProps: { min: 0 },
-          readOnly: fieldData && fieldData?.isUneditable ? true : false
-        }
-      }}
-      margin="dense"
-      size="small"
-      error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
-      helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
-      onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
-      {...others}
-    />
-  ) : fieldData?.type === 'currencyAmount' ? (
-    <TextField
-      style={{ paddingRight: 1 }}
-      type="number"
-      variant="outlined"
-      label={fieldData?.label}
-      required={fieldData?.required}
-      name={`${fieldData?.fieldName}`}
-      value={values[fieldData?.fieldName]}
-      slotProps={{
-        input: {
-          startAdornment: (
-            <InputAdornment position="start">{getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative}</InputAdornment>
-          )
-        }
-      }}
-      margin="dense"
-      size="small"
-      error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
-      helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
-      onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
-      {...others}
+      {...rest}
+      label={name}
+      required={required}
+      disabled={disabled}
+      name={name}
+      onChange={onChange ? onChange : (value) => handleChange(name,value)}
+      value={values[name]}
+      error={Boolean(errors[`${values._id}_${name}`])}
+      touched={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
     />
   ) : fieldData?.type === 'dropDown' ? (
     <Autocomplete
       size="small"
       fullWidth
       options={options}
-      value={
-        options.find((data) => data.optionValue === values[fieldData?.fieldName])
-          ? options.find((data) => data.optionValue === values[fieldData?.fieldName])
-          : ''
-      }
+      disabled={disabled}
+      value={options.find((data) => data.optionValue === values[name]) ? options.find((data) => data.optionValue === values[name]) : ''}
       getOptionLabel={(option: any) => option?.optionLabel || ''}
       isOptionEqualToValue={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
-      onChange={(e, val) => onChange(fieldData?.fieldName, val?.optionValue)}
+      onChange={
+        onChange
+          ? onChange
+          : (e, val) => {
+            handleChange(name, val?.optionValue);
+          }
+      }
       renderInput={(params) => (
         <TextField
-          style={{ paddingRight: 1 }}
           {...params}
-          error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
-          helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
+          {...rest}
+          error={Boolean(errors[`${values._id}_${name}`])}
+          helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
           margin="dense"
           size="small"
-          label={fieldData?.label}
           variant="outlined"
-          {...others}
         />
       )}
     />
-  ) : fieldData?.type === 'decimal' ? (
+  ) : fieldData?.type === 'multiSelect' ? (
+    <MultiSelect {...{ options, disabled, values, name, onChange, handleChange, rest, errors, enableCopy, ...rest }} />
+  ) : fieldData?.type === 'currencyAmount' ? (
     <TextField
-      style={{ paddingRight: 1 }}
+      {...rest}
       variant="outlined"
-      type="number"
-      label={fieldData?.label}
-      required={fieldData?.required}
-      name={`${fieldData?.fieldName}`}
-      value={values[fieldData?.fieldName]}
       margin="dense"
       size="small"
-      error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
-      helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
-      onChange={(e) => onChange(fieldData?.fieldName, parseFloat(e.target.value))}
+      name={name}
+      required={required}
+      disabled={disabled}
+      value={values[name] ? values[name].toLocaleString(undefined, { maximumFractionDigits: fieldData?.decimalPlaces }) : values[name]}
+      error={Boolean(errors[`${values._id}_${name}`])}
+      helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
+      onChange={
+        onChange
+          ? onChange
+          : (e) => {
+            if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+              if (fieldData?.isConverter) {
+                handleCurrencyChangeWithConverterChange(
+                  name,
+                  currency,
+                  unit,
+                  e.target.value === ''
+                    ? 0
+                    : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
+                      ? e.target.value.replace(/,/g, '')
+                      : parseFloat(e.target.value.replace(/,/g, ''))
+                );
+              } else if (fieldData.displayCurrency.length > 1) {
+                handleCurrencyChange(name, currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+              } else {
+                handleChange(name, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+              }
+            }
+          }
+      }
+      autoComplete="off"
+      onBlur={(e) => {
+        if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+          if (fieldData?.isConverter) {
+            handleCurrencyChangeWithConverterChange(
+              name,
+              currency,
+              unit,
+              e.target.value === ''
+                ? 0
+                : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
+                  ? e.target.value.replace(/,/g, '')
+                  : parseFloat(e.target.value.replace(/,/g, ''))
+            );
+          } else if (fieldData.displayCurrency.length > 1) {
+            handleCurrencyChange(name, currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+          } else {
+            handleChange(name, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+          }
+        }
+      }}
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              {result(
+                find(getUniqueCurrencies(), function (obj) {
+                  return obj.currencyCode === currency;
+                }),
+                'symbolNative'
+              )}
+            </InputAdornment>
+          ),
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData.isUneditable ? true : false
+        },
+      }}
+    />
+  ) : fieldData?.type === 'converter' ? (
+    <TextField
+      {...rest}
+      variant="outlined"
+      type="number"
+      margin="dense"
+      size="small"
+      name={name}
+      required={required}
+      autoComplete="off"
+      disabled={disabled}
+      value={values[name]}
+      error={Boolean(errors[`${values._id}_${name}`])}
+      helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
+      onChange={
+        onChange
+          ? onChange
+          : (e) => handleConverterChange(name, unit, e.target.value === '' ? '' : parseFloat(e.target.value.replace(/[^0-9\.]/g, '')))
+      }
       slotProps={{
         input: {
           inputProps: { min: 0 },
-          readOnly: fieldData && fieldData?.isUneditable ? true : false
-        }
+          readOnly: fieldData && fieldData.isUneditable ? true : false
+        },
       }}
-      {...others}
     />
-  ) : fieldData?.type === 'checkBox' ? (
-    <FormControlLabel
-      control={
-        <Checkbox
-          required={fieldData?.required}
-          name={`${fieldData?.fieldName}`}
-          checked={values[fieldData?.fieldName]}
-          onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
-          className="!text-[--new-theme-color] "
-        />
+  ) : fieldData?.type === 'decimal' ? (
+    <TextField
+      {...rest}
+      variant="outlined"
+      margin="dense"
+      size="small"
+      type="number"
+      disabled={disabled}
+      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+      required={required}
+      name={name}
+      value={values[name]}
+      error={Boolean(errors[`${values._id}_${name}`])}
+      helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
+      onChange={
+        onChange
+          ? onChange
+          : (e) => {
+            handleChange(name, e.target.value === '' ? '' : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
+          }
       }
-      label={fieldData?.label}
-      {...others}
+      slotProps={{
+        input: {
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData.isUneditable ? true : false
+        },
+      }}
     />
-  ) : fieldData?.type === 'date' ? (
-    <Box className="pr-1">
-      <CustomDatePicker
-        disabled={fieldData?.isUneditable}
-        required={fieldData?.required}
-        value={values[fieldData?.fieldName]}
-        name={`${fieldData?.fieldName}`}
-        label={fieldData?.label}
-        onChange={(date) => onChange(fieldData?.fieldName, date)}
-        margin="dense"
-        error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
-        helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
-        {...others}
-      />
-    </Box>
-  ) : fieldData?.type === 'dateTime' ? (
-    <Box className="pr-1">
-      <CustomDateTimePicker
-        required={fieldData?.required}
-        value={values[fieldData?.fieldName]}
-        name={`${fieldData?.fieldName}`}
-        label={fieldData?.label}
-        onChange={(date) => onChange(fieldData?.fieldName, date)}
-        onError={console.error}
-        margin="dense"
-        error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
-        helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
-        {...others}
-      />
-    </Box>
+  ) : fieldData?.type === 'percent' ? (
+    <TextField
+      {...rest}
+      type="number"
+      variant="outlined"
+      margin="dense"
+      size="small"
+      autoComplete="off"
+      disabled={disabled}
+      required={required}
+      name={name}
+      value={values[name]}
+      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+      error={Boolean(errors[`${values._id}_${name}`])}
+      helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
+      slotProps={{
+        input: {
+          endAdornment: '%',
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData.isUneditable ? true : false
+        },
+      }}
+      onChange={
+        onChange
+          ? onChange
+          : (e) => {
+            handleChange(
+              name,
+              e.target.value === ''
+                ? 0
+                : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))
+            );
+          }
+      }
+    />
+  ) : fieldData?.type === 'vlookupDropdown' ? (
+    <TextField
+      {...rest}
+      variant="outlined"
+      type={'text'}
+      margin="dense"
+      size="small"
+      autoComplete="off"
+      disabled={disabled}
+      required={required}
+      name={name}
+      value={values[name]}
+      error={Boolean(errors[`${values._id}_${name}`])}
+      helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
+      onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
+    />
+  ) : fieldData?.type === 'formula' ? (
+    <TextField
+      {...rest}
+      disabled={disabled}
+      variant="outlined"
+      margin="dense"
+      size="small"
+      type={fieldData?.returnType === 'decimal' ? 'number' : 'text'}
+      name={name}
+      autoComplete="off"
+      required={required}
+      value={values[name]}
+      error={Boolean(errors[`${values._id}_${name}`])}
+      helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
+      onChange={
+        onChange
+          ? onChange
+          : (e) => {
+            if (fieldData?.returnType === 'decimal') {
+              handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+            } else {
+              handleChange(name, e.target.value);
+            }
+          }
+      }
+      slotProps={{
+        input: {
+          inputProps: { min: 0 },
+          readOnly: fieldData && fieldData.isUneditable ? true : false
+        },
+      }}
+    />
   ) : null;
 };
 
 export default FormTypes;
+
+const MultiSelect = ({ options, disabled, values, name, onChange, handleChange, errors, enableCopy, ...rest }) => {
+  const handlePaste = (e: ClipboardEvent<HTMLDivElement>): any[] => {
+    const serializedData = e.clipboardData.getData('text');
+    if (!serializedData) return;
+    let value: { name: string; value: any[] } | string = serializedData;
+    try {
+      value = JSON.parse(serializedData) as { name: string; value: any[] };
+    } catch (error) { }
+
+    if (typeof value === 'string' || !value) {
+      // Allow pasting of normal text.
+      return;
+    } else {
+      // else prevent any content from being pasted into the textbox.
+      e.preventDefault();
+    }
+
+    // Prevent pasting if the field name does not match.
+    if (value?.name !== name) {
+      return;
+    }
+    if (!Array.isArray(value?.value) || value?.value?.length === 0 || !value?.value[0]?.optionLabel) {
+      return [];
+    }
+    e.preventDefault();
+    return value.value;
+  };
+
+  const value =
+    options.filter((data) => values[name]?.includes(data.optionValue))?.length > 0
+      ? options.filter((data) => values[name]?.includes(data.optionValue))
+      : [];
+
+  const dataToCopy = { name, value };
+
+  return (
+    <div className="flex items-center gap-2">
+      <Autocomplete
+        size="small"
+        fullWidth
+        multiple
+        options={options}
+        disabled={disabled}
+        limitTags={1}
+        value={value}
+        getOptionLabel={(option: any) => option?.optionLabel || ''}
+        isOptionEqualToValue={(option: any, val) => (option ? option?.optionValue === val?.optionValue : false)}
+        onChange={
+          onChange
+            ? onChange
+            : (e, val) => {
+              handleChange(name, val ? val : []);
+            }
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            {...rest}
+            error={Boolean(errors[`${values._id}_${name}`])}
+            helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
+            margin="dense"
+            size="small"
+            variant="outlined"
+            onPaste={(e) => {
+              const data = handlePaste(e);
+              if (!data) return;
+              handleChange(name, data);
+            }}
+          />
+        )}
+      />
+      {enableCopy && (
+        <span className="">
+          <CopyToClipboardButton text={JSON.stringify(dataToCopy)} size="small" />
+        </span>
+      )}
+    </div>
+  );
+};

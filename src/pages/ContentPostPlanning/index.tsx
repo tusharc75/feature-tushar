@@ -4,7 +4,6 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import IconButtonTabs from 'src/components/IconButtonTabs';
 import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
 import { FaRegCalendar } from 'react-icons/fa';
-import { useCardReducer } from 'src/components/CardColTimeline';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
@@ -15,15 +14,12 @@ import { sidebarResource } from 'src/constants/helpers';
 type ViewType = 'calendar' | 'list';
 
 const ContentPostPlanning = () => {
-
   const renderedFrom = camelCase(sidebarResource?.contentPostPlanning);
   const {
     state: { resources }
   }: any = useData();
-  const { dispatch } = useCardReducer();
   const { dispatch: tableDispatch } = useTableReducer();
   const resetSelectedRecords = () => {
-    dispatch({ type: 'selection', selectedRecords: [] });
     tableDispatch({ type: 'selection', selectedRecords: [] });
   };
 
@@ -41,9 +37,7 @@ const ContentPostPlanning = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ ...routes.contentPostPlanning, title: resources?.contentPostPlanning?.titlePlural }]} />
       </div>
-      {view === 'calendar' ?
-        <CalenderView topRightSlot={topRightSlot} />
-        : <ListView topRightSlot={topRightSlot} />}
+      {view === 'calendar' ? <CalenderView topRightSlot={topRightSlot} /> : <ListView topRightSlot={topRightSlot} />}
     </Box>
   );
 };

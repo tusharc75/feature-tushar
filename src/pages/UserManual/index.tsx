@@ -1,18 +1,22 @@
-import useManual from 'src/pages/UserManual/hooks/useManual';
-import ManualFooter from 'src/pages/UserManual/ManualFooter';
-import ManualLayout from 'src/pages/UserManual/ManualLayout';
-import ManualNav from 'src/pages/UserManual/ManualNav';
+import React from 'react';
+import { UsermanualProvider } from 'src/pages/UserManual/hooks/useUsermanual';
+import { useUsermanual } from './hooks/useUsermanual';
+import NavBar from './components/Navbar';
+import Layout from './components/Layout';
 
-const LayoutDocs = () => {
-  const state = useManual();
-
+const UserManualImpl = () => {
+  const state = useUsermanual();
   return (
-    <div className="w-full  [--manual-head-height:60px] [--manual-sidebar-width:300px]">
-      <ManualNav state={state} />
-      <ManualLayout state={state} />
-      <ManualFooter />
+    <div className="flex min-h-screen w-full flex-col [--manual-head-height:60px] [--manual-sidebar-width:300px] dark:bg-[black]">
+      <NavBar state={state} />
+      <Layout state={state} />
     </div>
   );
 };
 
-export default LayoutDocs;
+const UserManual = () => (
+  <UsermanualProvider>
+    <UserManualImpl />
+  </UsermanualProvider>
+);
+export default UserManual;
