@@ -593,7 +593,7 @@ function App() {
               <User />
             </PrivateRoute>
 
-            <PrivateRoute exact path="/user-manual*" userManualNew={true}>
+            <PrivateRoute exact path="/user-manual*" userManual={true}>
               <UserManual />
             </PrivateRoute>
             <PrivateRoute exact path="/profile">
