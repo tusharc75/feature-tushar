@@ -129,7 +129,7 @@ const RenderContent = ({
     <>
       <div
         ref={mainContainerRef}
-        className="prose mt-4 max-w-full dark:prose-invert [&_img]:block [&_img]:max-w-full [&_img]:cursor-pointer"
+        className="prose mt-4 max-w-full dark:prose-invert prose-table:border-collapse prose-table:border prose-th:border prose-td:border [&_img]:block [&_img]:max-w-full [&_img]:cursor-pointer"
         dangerouslySetInnerHTML={{ __html: data.content }}
       />
       {tree.map((node) => (
