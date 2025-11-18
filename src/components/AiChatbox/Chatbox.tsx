@@ -58,8 +58,8 @@ const Chatbox = (props: ChatboxProps) => {
     async (question: string) => {
       setState({ type: 'initUserMessage', payload: question });
       try {
-        if(socket.current){
-          socket.current.emit('message', {question});
+        if (socket.current) {
+          socket.current.emit('message', { question });
           return;
         }
         socket.current = io(`${backendApi?.replace('/api', '')}/ai/chat`, {
@@ -258,7 +258,6 @@ const Chatbox = (props: ChatboxProps) => {
                 {loading && <RenderSingleChat loading={true} chatId={chatId} align="left" />}
                 {messages[messages.length - 1]?.fields && (
                   <RenderFields
-                    state={state}
                     fields={messages[messages.length - 1].fields}
                     disabled={false}
                     setState={setState}

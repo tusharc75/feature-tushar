@@ -28,3 +28,35 @@ export const FIREBASE_CONFIG = {
   vapid: import.meta.env?.VITE_APP_FIREBASE_VAPID
 };
 
+// export const azureConfig = {
+//   clientId: import.meta.env?.VITE_APP_AZURE_CLIENT_ID,
+//   redirectUri: import.meta.env?.VITE_APP_AZURE_REDIRECT_URL,
+//   authority: `https://login.microsoftonline.com/common`,
+//   cache: 'localStorage'
+// };
+
+// export const TRACKING_ID = 'UA-196035023-2';
+
+// // Force correct backend for local environment
+// export const backendApi =
+//   import.meta.env?.VITE_APP_ENV === 'local'
+//     ? 'http://localhost:8000/api'
+//     : (localStorage.getItem('backendApi') ||
+//         import.meta.env?.VITE_APP_API_URL ||
+//         'https://master.oms-backend.vebholic.com');
+
+// export const AI_AGENT = ['local', 'master', 'development']?.includes(import.meta.env?.VITE_APP_ENV);
+
+// export const VITE_APP_ENV = import.meta.env?.VITE_APP_ENV;
+// export const VITE_APP_DMS_URL = import.meta.env?.VITE_APP_DMS_URL;
+
+// export const FIREBASE_CONFIG = {
+//   apiKey: import.meta.env?.VITE_APP_FIREBASE_API_KEY,
+//   authDomain: import.meta.env?.VITE_APP_FIREBASE_AUTH_DOMAIN,
+//   projectId: import.meta.env?.VITE_APP_FIREBASE_PROJECT_ID,
+//   storageBucket: import.meta.env?.VITE_APP_FIREBASE_STORAGE_BUCKET,
+//   messagingSenderId: import.meta.env?.VITE_APP_FIREBASE_MESSAGING_SENDER_ID,
+//   appId: import.meta.env?.VITE_APP_FIREBASE_APP_ID,
+//   measurementId: import.meta.env?.VITE_APP_FIREBASE_MEASUREMENT_ID,
+//   vapid: import.meta.env?.VITE_APP_FIREBASE_VAPID
+// };

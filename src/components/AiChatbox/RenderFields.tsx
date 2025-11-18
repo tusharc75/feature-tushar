@@ -17,10 +17,9 @@ type RenderFieldsProps = {
   handleSubmit: (values: any) => void;
   disabled?: boolean;
   setState?: Dispatch<TChatboxActions>;
-  state: TInitialChatboxState;
+  state?: TInitialChatboxState;
   isDefaultMode: boolean;
 };
-
 
 const RenderConform = ({data, onSubmit, onCancel}) => {
   return (
@@ -42,7 +41,7 @@ const RenderConform = ({data, onSubmit, onCancel}) => {
 };
 
 const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state, isDefaultMode }: RenderFieldsProps) => {
-  const { fullScreen } = state;
+  const { fullScreen } = state || { fullScreen: false };
   const extractData = useRef({});
   const [shouldUpdateFields, setShouldUpdateFields] = useState(true);
   const [updatedFields, setUpdatedFields] = useState<Field[]>([]);
@@ -81,7 +80,6 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state,
     setShouldUpdateFields(false);
   }, [fields, shouldUpdateFields]);
 
-
   const onCancel = useCallback(() => {
     fields.forEach((field) => {
       if (field.field) {
@@ -90,7 +88,6 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state,
     });
     setShouldUpdateFields(true);
   }, [fields]);
-
 
   const [fieldTypes, setFieldType] = useState({});
 
@@ -110,7 +107,9 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state,
     }
     handleSubmit(formattedData);
   };
+  
   if (!updatedFields?.length && isEmpty(extractData.current)) return null;
+  
   return (
     !updatedFields?.length ? <RenderConform data={extractData.current} onSubmit={handleSubmitWithFormattedData} onCancel={onCancel} /> :
     <div
@@ -128,7 +127,7 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state,
             <Form autoComplete="off" autoCorrect="off" noValidate>
               <div className={cn('grid gap-3', fullScreen || isDefaultMode ? 'grid-cols-1 md:grid-cols-2 md:gap-4' : 'grid-cols-1')}>
                 {updatedFields.map((field) => (
-                  <div>
+                  <div key={field.field}>
                     <FormTypes
                       {...field}
                       fieldData={field}

@@ -50,91 +50,65 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
     setResponses((prev) => [...prev, { prompt: currentPrompt, content: '', isLoading: true }]);
 
     try {
-      const headers: any = {
-        'Content-Type': 'application/json'
-      };
+      const headers: any = { 'Content-Type': 'application/json' };
       const token = localStorage.getItem('token');
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+      if (token) headers['Authorization'] = `Bearer ${token}`;
       const entityId = localStorage.getItem('selectedEntity');
-      if (entityId) {
-        headers['entity'] = entityId;
-      }
+      if (entityId) headers['entity'] = entityId;
+
       const response = await fetch(`${backendApi}/generative-ai/assistant/ask`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ prompt: currentPrompt })
       });
-      if (!response.ok || !response.body) {
-        throw new Error('Network response was not ok.');
-      }
+
+      if (!response.ok || !response.body) throw new Error('Network response was not ok.');
+
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let fullResponse = '';
       let buffer = '';
       let isStreaming = false;
-      const processBuffer = () => {
-        if (buffer.length === 0) {
-          isStreaming = false;
-          return;
-        }
 
+      const processBuffer = () => {
+        if (buffer.length === 0) return (isStreaming = false);
         const charsToAdd = Math.min(5, buffer.length);
         const newChars = buffer.substring(0, charsToAdd);
         buffer = buffer.slice(charsToAdd);
         fullResponse += newChars;
         setResponses((prev) => {
           const updated = [...prev];
-          updated[updated.length - 1] = {
-            prompt: currentPrompt,
-            content: fullResponse,
-            isLoading: false
-          };
+          updated[updated.length - 1] = { prompt: currentPrompt, content: fullResponse, isLoading: false };
           return updated;
         });
-        if (buffer.length > 0) {
-          setTimeout(processBuffer, 5);
-        } else {
-          isStreaming = false;
-        }
+        if (buffer.length > 0) setTimeout(processBuffer, 5);
       };
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split('\n').filter((line) => line.trim().startsWith('data:'));
-
         for (const line of lines) {
           const jsonString = line.replace(/^data:\s*/, '');
-
           try {
             const parsedChunk = JSON.parse(jsonString);
             const newContent = parsedChunk.content || '';
-
             if (newContent.length > fullResponse.length) {
               const newText = newContent.slice(fullResponse.length);
               buffer = newText;
-
               if (!isStreaming) {
                 isStreaming = true;
                 processBuffer();
               }
             }
-          } catch (e) {
-            console.warn('Failed to parse SSE chunk:', e);
-          }
+          } catch (e) {}
         }
       }
     } catch (error) {
       setResponses((prev) => {
         const updated = [...prev];
-        updated[updated.length - 1] = {
-          prompt: 'Error',
-          content: 'Please try again.',
-          isLoading: false
-        };
+        updated[updated.length - 1] = { prompt: 'Error', content: 'Please try again.', isLoading: false };
         return updated;
       });
     } finally {
@@ -144,9 +118,7 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
+  const copyToClipboard = (text: string) => navigator.clipboard.writeText(text);
 
   const fetchChatHistory = async () => {
     try {
@@ -159,38 +131,25 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
     }
   };
 
-  const handleRetry = (retryPrompt: string) => {
-    handleSubmit(retryPrompt);
-  };
+  const handleRetry = (retryPrompt: string) => handleSubmit(retryPrompt);
 
   const getContentSuggestions = async (content?: string) => {
     setIsReviewLoading(true);
     setReviewResponse('');
     try {
-      const headers: any = {
-        'Content-Type': 'application/json'
-      };
+      const headers: any = { 'Content-Type': 'application/json' };
       const token = localStorage.getItem('token');
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+      if (token) headers['Authorization'] = `Bearer ${token}`;
       const entityId = localStorage.getItem('selectedEntity');
-      if (entityId) {
-        headers['entity'] = entityId;
-      }
+      if (entityId) headers['entity'] = entityId;
 
       const response = await fetch(`${backendApi}/generative-ai/assistant/ask`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          prompt: content,
-          type: 'grammerCorrection'
-        })
+        body: JSON.stringify({ prompt: content, type: 'grammerCorrection' })
       });
 
-      if (!response.ok || !response.body) {
-        throw new Error('Network response was not ok.');
-      }
+      if (!response.ok || !response.body) throw new Error('Network response was not ok.');
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
@@ -199,56 +158,40 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
       let isStreaming = false;
 
       const processBuffer = () => {
-        if (buffer.length === 0) {
-          isStreaming = false;
-          return;
-        }
-
+        if (buffer.length === 0) return (isStreaming = false);
         const charsToAdd = Math.min(5, buffer.length);
         const newChars = buffer.substring(0, charsToAdd);
         buffer = buffer.slice(charsToAdd);
         fullResponse += newChars;
         setReviewResponse(fullResponse);
-        if (buffer.length > 0) {
-          setTimeout(processBuffer, 5);
-        } else {
-          isStreaming = false;
-        }
+        if (buffer.length > 0) setTimeout(processBuffer, 5);
       };
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split('\n').filter((line) => line.trim().startsWith('data:'));
-
         for (const line of lines) {
           const jsonString = line.replace(/^data:\s*/, '');
-
           try {
             const parsedChunk = JSON.parse(jsonString);
             const newContent = parsedChunk.content || '';
-
             if (newContent.length > fullResponse.length) {
               const newText = newContent.slice(fullResponse.length);
               buffer = newText;
-
               if (!isStreaming) {
                 isStreaming = true;
                 processBuffer();
               }
             }
-          } catch (e) {
-            console.warn('Failed to parse SSE chunk:', e);
-          }
+          } catch (e) {}
         }
       }
     } catch (error) {
       console.error('Error fetching suggestions:', error);
     } finally {
       setIsReviewLoading(false);
-      setReviewResponse('');
     }
   };
 
@@ -257,9 +200,7 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
     setHasExistingContent(false);
   };
 
-  const dismissSuggestions = () => {
-    setHasExistingContent(false);
-  };
+  const dismissSuggestions = () => setHasExistingContent(false);
 
   const showSubmitButton = isInputFocused || prompt.trim().length > 0;
 
@@ -282,31 +223,25 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
         open={true}
         anchorEl={anchorEl}
         onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'center',
-          horizontal: 'center'
-        }}
-        transformOrigin={{
-          vertical: 'center',
-          horizontal: 'center'
-        }}
       >
+        {/*  Inject bullet-removal CSS FIX */}
+        <style>{`
+          .ai-response ul,
+          .ai-response ol {
+            list-style: none !important;
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+          }
+          .ai-response li::marker {
+            content: "" !important;
+          }
+        `}</style>
+
         <div id="draggable-paper" className="flex w-full cursor-move items-center justify-between border-b p-2">
-          <div className="text-left">
-            <Avatar src={genieImage} sx={{ width: 30, height: 30 }} />
-          </div>
-          <div className="text-right">
+          <Avatar src={genieImage} sx={{ width: 30, height: 30 }} />
+          <div>
             <HtmlTooltip title={showHistory ? 'Hide History' : 'Show History'}>
-              <IconButton
-                onClick={() => {
-                  if (!showHistory) {
-                    fetchChatHistory();
-                  } else {
-                    setShowHistory(false);
-                  }
-                }}
-                sx={{ mr: 1 }}
-              >
+              <IconButton onClick={() => (!showHistory ? fetchChatHistory() : setShowHistory(false))} sx={{ mr: 1 }}>
                 <HistoryIcon fontSize="small" color={'primary'} />
               </IconButton>
             </HtmlTooltip>
@@ -317,83 +252,62 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
             </HtmlTooltip>
           </div>
         </div>
-        <Box
-          sx={{
-            p: 2,
-            overflow: 'auto',
-            display: 'flex',
-            flexDirection: 'column'
-          }}
-        >
+
+        <Box sx={{ p: 2, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+
           {showHistory ? (
             <Box>
-              <Typography variant="subtitle2" sx={{ mb: 2, color: theme.palette.text.primary }}>
-                Chat History
-              </Typography>
+              <Typography variant="subtitle2" sx={{ mb: 2 }}>Chat History</Typography>
               {chatHistory.length > 0 ? (
-                chatHistory?.map((item: any, index: number) => (
+                chatHistory.map((item: any, index: number) => (
                   <div key={index} className="ml-3 pb-2">
                     <p className="text-gray-500">{item?.prompt}</p>
+
                     <div className="ai-response pt-1">
                       <Markdown remarkPlugins={[remarkGfm]}>{item?.response}</Markdown>
                     </div>
+
                     <div className="flex w-full items-center justify-between border-b pb-2 pt-2">
-                      <div className="text-left">
-                        <ThemeButton buttonType="themeBorder" onClick={() => handleInsert(item?.response)}>
-                          Insert
-                        </ThemeButton>
-                      </div>
-                      <div className="text-right">
-                        <HtmlTooltip title="Copy">
-                          <IconButton onClick={() => copyToClipboard(item?.response)} size="small">
-                            <CopyIcon fontSize="small" color="primary" />
-                          </IconButton>
-                        </HtmlTooltip>
-                      </div>
+                      <ThemeButton buttonType="themeBorder" onClick={() => handleInsert(item?.response)}>Insert</ThemeButton>
+                      <HtmlTooltip title="Copy">
+                        <IconButton onClick={() => copyToClipboard(item?.response)} size="small">
+                          <CopyIcon fontSize="small" color="primary" />
+                        </IconButton>
+                      </HtmlTooltip>
                     </div>
                   </div>
                 ))
               ) : (
-                <Typography variant="body2" color="textSecondary">
-                  No chat history available
-                </Typography>
+                <Typography>No chat history available</Typography>
               )}
             </Box>
           ) : hasExistingContent ? (
             <Box>
-              <Typography variant="subtitle1" sx={{ mb: 2, color: theme.palette.text.primary }}>
-                Review Suggestions
-              </Typography>
+              <Typography variant="subtitle1" sx={{ mb: 2 }}>Review Suggestions</Typography>
               {isReviewLoading ? (
                 <Box sx={{ textAlign: 'center', py: 4 }}>
                   <CircularProgress size={20} />
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    Generating suggestions...
-                  </Typography>
+                  <Typography sx={{ mt: 1 }}>Generating suggestions...</Typography>
                 </Box>
               ) : (
-                <Box sx={{ mb: 2 }}>
+                <>
                   <Box sx={{ p: 1, border: '1px solid #eee', borderRadius: 1, mb: 2 }}>
                     <div className="ai-response pt-1">
                       <Markdown remarkPlugins={[remarkGfm]}>{reviewResponse}</Markdown>
                     </div>
                   </Box>
-                  <Box sx={{ display: 'flex-start', justifyContent: 'space-between', mt: 2 }}>
-                    <ThemeButton buttonType="theme" onClick={acceptSuggestions}>
-                      Accept
-                    </ThemeButton>
-                    <ThemeButton buttonType="transparent" onClick={dismissSuggestions}>
-                      Dismiss
-                    </ThemeButton>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <ThemeButton buttonType="theme" onClick={acceptSuggestions}>Accept</ThemeButton>
+                    <ThemeButton buttonType="transparent" onClick={dismissSuggestions}>Dismiss</ThemeButton>
                   </Box>
-                </Box>
+                </>
               )}
             </Box>
           ) : (
             <Box>
-              {responses?.length === 0 ? (
+              {responses.length === 0 ? (
                 <div className="flex h-[350px] items-center justify-center text-center">
-                  <img src={genieImage} alt="" className="mr-1 inline size-[24px]" />
+                  <img src={genieImage} className="mr-1 inline size-[24px]" />
                   <span>Ask anything to EGenie</span>
                 </div>
               ) : (
@@ -401,34 +315,27 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
                   {responses.map((item, index) => (
                     <div key={index} className="pb-2">
                       <p className="text-gray-500">{item?.prompt}</p>
+
                       <div className="ai-response pt-1">
                         <Markdown remarkPlugins={[remarkGfm]}>{item?.content}</Markdown>
                       </div>
-                      {item?.isLoading && (
+
+                      {item?.isLoading ? (
                         <div className="pt-2">
                           <CircularProgress size="12px" />
                           <span className="pl-2 text-sm text-gray-500">Working on it...</span>
                         </div>
-                      )}
-                      {!item?.isLoading && (
+                      ) : (
                         <div className="flex w-full items-center justify-between border-b pb-2 pt-2">
-                          <div className="text-left">
-                            <div className="flex space-x-2">
-                              <ThemeButton buttonType="themeBorder" onClick={() => handleInsert(item?.content)}>
-                                Insert
-                              </ThemeButton>
-                              <ThemeButton buttonType="themeBorder" disabled={isLoading} onClick={() => handleRetry(item?.prompt)}>
-                                Retry
-                              </ThemeButton>
-                            </div>
+                          <div className="flex space-x-2">
+                            <ThemeButton buttonType="themeBorder" onClick={() => handleInsert(item?.content)}>Insert</ThemeButton>
+                            <ThemeButton buttonType="themeBorder" disabled={isLoading} onClick={() => handleRetry(item?.prompt)}>Retry</ThemeButton>
                           </div>
-                          <div className="text-right">
-                            <HtmlTooltip title="Copy">
-                              <IconButton onClick={() => copyToClipboard(item?.content)} size="small">
-                                <CopyIcon fontSize="small" color="primary" />
-                              </IconButton>
-                            </HtmlTooltip>
-                          </div>
+                          <HtmlTooltip title="Copy">
+                            <IconButton onClick={() => copyToClipboard(item?.content)} size="small">
+                              <CopyIcon fontSize="small" color="primary" />
+                            </IconButton>
+                          </HtmlTooltip>
                         </div>
                       )}
                     </div>
@@ -436,21 +343,12 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
                   <div ref={messagesEndRef} />
                 </div>
               )}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  bottom: 10,
-                  left: 10,
-                  right: 10
-                }}
-              >
-                <div
-                  className={cn(
-                    'rounded-md [border-width:--border-w] [&_fieldset]:hidden ',
-                    '![--animation-duration:8s] ![--border-w:2px] ![--glow-intensity:0.25] ![--spread:4px]',
-                    isInputFocused ? '' : `ai-ring border-transparent`
-                  )}
-                >
+
+              <Box sx={{ position: 'absolute', bottom: 10, left: 10, right: 10 }}>
+                <div className={cn(
+                  'rounded-md [border-width:--border-w] [&_fieldset]:hidden',
+                  isInputFocused ? '' : `ai-ring border-transparent`
+                )}>
                   <TextField
                     inputRef={textFieldRef}
                     fullWidth
@@ -469,12 +367,6 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
                         handleSubmit();
                       }
                     }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        border: '0px',
-                        borderRadius: '6px'
-                      }
-                    }}
                     InputProps={{
                       endAdornment: showSubmitButton && (
                         <IconButton
@@ -484,13 +376,7 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
                             position: 'absolute',
                             right: 8,
                             bottom: 8,
-                            color: theme.palette.primary.main,
-                            '&:hover': {
-                              backgroundColor: 'transparent'
-                            },
-                            '&:disabled': {
-                              color: theme.palette.action.disabled
-                            }
+                            color: theme.palette.primary.main
                           }}
                         >
                           {isLoading ? <CircularProgress size={20} /> : <SendIcon fontSize="small" color="primary" />}

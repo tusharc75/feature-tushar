@@ -16,21 +16,51 @@ const intialState = {
 
 function reducer(state: TInitialChatboxState, action: TChatboxActions): TInitialChatboxState {
   let newState = { ...state };
+
   switch (action.type) {
+    /**  Load chat history */
     case 'setMessageFromHistory': {
       const { history, _id } = action.payload;
       const messages = [];
+
       for (let i = 0; i < history.length; i++) {
         const msg = history[i];
-        messages.push({ _id: `${Date.now()}`, content: msg.message, role: 'user' });
-        messages.push({ _id: `${Date.now() + i}`, content: msg.content, role: 'assistant', fields: msg.fields });
+
+        // Clean raw markdown (Option B)
+        const userMessage = (msg.message || "")
+          .replace(/^[-*]\s+/gm, "")   // remove - / *
+          .replace(/#+\s+/gm, "")      // remove markdown headings
+          .trim();
+
+        const assistantMessage = (msg.content || "")
+          .replace(/^[-*]\s+/gm, "")   // remove - / *
+          .replace(/#+\s+/gm, "")      // remove markdown headings
+          .replace(/(\r?\n){2,}/g, "\n") // remove extra newlines
+          .trim();
+
+        messages.push({
+          _id: `${Date.now()}`,
+          content: userMessage,
+          role: 'user'
+        });
+
+        messages.push({
+          _id: `${Date.now() + i}`,
+          content: assistantMessage,
+          role: 'assistant',
+          fields: msg.fields
+        });
       }
+
       newState = { ...newState, chatId: _id, messages, chats: action.payload.history };
       break;
     }
+
     case 'setError':
       newState = { ...newState, error: action.error };
       break;
+
+    /** User sends new message */
     case 'initUserMessage': {
       newState = {
         ...newState,
@@ -40,6 +70,8 @@ function reducer(state: TInitialChatboxState, action: TChatboxActions): TInitial
       };
       break;
     }
+
+    /** Server sends final AI reply */
     case 'setNewAssistantMessage': {
       newState = {
         ...newState,
@@ -62,8 +94,10 @@ function reducer(state: TInitialChatboxState, action: TChatboxActions): TInitial
       break;
     }
 
+    /** Streaming AI reply */
     case 'setMessage': {
       const lastMessage = state.messages[state.messages.length - 1];
+
       if (lastMessage?.role === 'assistant') {
         Object.assign(lastMessage, {
           _id: `${Date.now()}`,
@@ -93,35 +127,36 @@ function reducer(state: TInitialChatboxState, action: TChatboxActions): TInitial
       };
       break;
     }
-    case 'setGlobalLoading': {
+
+    case 'setGlobalLoading':
       newState = { ...newState, globalLoading: action.payload };
       break;
-    }
-    case 'disableSendButton': {
+
+    case 'disableSendButton':
       newState = { ...newState, isSendButtonDisabled: action.payload };
       break;
-    }
-    case 'setFullScreen': {
+
+    case 'setFullScreen':
       document.body.style.overflow = action.payload ? 'hidden' : '';
       newState = { ...newState, fullScreen: action.payload };
       break;
-    }
-    case 'setTopics': {
+
+    case 'setTopics':
       newState = { ...newState, topics: action.payload };
       break;
-    }
-    case 'setChats': {
+
+    case 'setChats':
       newState = { ...newState, chats: action.payload };
       break;
-    }
-    case 'setSelectedTopics': {
+
+    case 'setSelectedTopics':
       newState = { ...newState, selectedTopics: action.payload };
       break;
-    }
-    case 'reset': {
+
+    case 'reset':
       newState = { ...intialState, topics: state.topics };
       break;
-    }
+
     default:
       break;
   }
